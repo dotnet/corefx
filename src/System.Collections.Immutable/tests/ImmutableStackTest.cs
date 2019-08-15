@@ -68,7 +68,7 @@ namespace System.Collections.Immutable.Tests
                 var nextStack = currentStack.Pop();
                 Assert.Equal(expectedCount, currentStack.Count());
                 Assert.NotSame(currentStack, nextStack);
-                AssertAreSame(currentStack.Pop(), currentStack.Pop(), "Popping the stack 2X should yield the same shorter stack.");
+                AssertAreSame(currentStack.Pop(), currentStack.Pop());
                 currentStack = nextStack;
             }
         }
@@ -86,7 +86,7 @@ namespace System.Collections.Immutable.Tests
                 current.Pop(out element);
                 AssertAreSame(current.Peek(), element);
                 var next = current.Pop();
-                AssertAreSame(values[i], current.Peek(), "Pop mutated the stack instance.");
+                AssertAreSame(values[i], current.Peek());
                 current = next;
             }
         }
@@ -255,7 +255,6 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttributesValid()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableStack.Create<int>());
@@ -267,7 +266,6 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public static void TestDebuggerAttributes_Null()
         {
             Type proxyType = DebuggerAttributes.GetProxyType(ImmutableStack.Create<string>("1", "2", "3"));

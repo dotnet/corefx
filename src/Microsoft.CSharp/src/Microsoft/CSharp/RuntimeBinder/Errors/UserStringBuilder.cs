@@ -17,7 +17,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         private void BeginString()
         {
             Debug.Assert(_strBuilder == null || _strBuilder.Length == 0);
-            if(_strBuilder == null)
+            if (_strBuilder == null)
             {
                 _strBuilder = new StringBuilder();
             }
@@ -61,7 +61,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     id = MessageID.SK_TYVAR;
                     break;
                 default:
-                    Debug.Assert(false, "impossible sk");
+                    Debug.Fail("impossible sk");
                     id = MessageID.SK_UNKNOWN;
                     break;
             }
@@ -387,7 +387,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
                 default:
                     // Shouldn't happen.
-                    Debug.Assert(false, $"Bad symbol kind: {sym.getKind()}");
+                    Debug.Fail($"Bad symbol kind: {sym.getKind()}");
                     break;
             }
         }
@@ -533,7 +533,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
                 default:
                     // Shouldn't happen.
-                    Debug.Assert(false, "Bad type kind");
+                    Debug.Fail("Bad type kind");
                     break;
             }
         }

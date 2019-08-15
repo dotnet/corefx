@@ -7,7 +7,6 @@ using System.Reflection;
 using System.Resources;
 using System.Runtime.CompilerServices;
 
-#if !FEATURE_SERIALIZATION_UAPAOT
 namespace System.Xml.Serialization
 {
     using System;
@@ -35,9 +34,8 @@ namespace System.Xml.Serialization
         internal static MethodAttributes PublicOverrideMethodAttributes = MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig;
         internal static MethodAttributes ProtectedOverrideMethodAttributes = MethodAttributes.Family | MethodAttributes.Virtual | MethodAttributes.HideBySig;
         internal static MethodAttributes PrivateMethodAttributes = MethodAttributes.Private | MethodAttributes.HideBySig;
-        internal static Type[] EmptyTypeArray = new Type[] { };
 
-        private TypeBuilder _typeBuilder;
+        private readonly TypeBuilder _typeBuilder;
         private MethodBuilder _methodBuilder;
         private ILGenerator _ilGen;
         private Dictionary<string, ArgBuilder> _argList;
@@ -68,7 +66,7 @@ namespace System.Xml.Serialization
                 if (iFace == iType)
                     return;
             }
-            Debug.Assert(false);
+            Debug.Fail("Interface not found");
 #endif
         }
 
@@ -98,7 +96,7 @@ namespace System.Xml.Serialization
             _currentScope = new LocalScope();
             _freeLocals = new Dictionary<Tuple<Type, string>, Queue<LocalBuilder>>();
             _argList = new Dictionary<string, ArgBuilder>();
-            // this ptr is arg 0 for non static, assuming ref type (not value type) 
+            // this ptr is arg 0 for non static, assuming ref type (not value type)
             if (!isStatic)
                 _argList.Add("this", new ArgBuilder("this", 0, _typeBuilder.BaseType));
             for (int i = 0; i < argTypes.Length; i++)
@@ -160,7 +158,7 @@ namespace System.Xml.Serialization
             get { return retLabel; }
         }
 
-        private Dictionary<Type, LocalBuilder> _tmpLocals = new Dictionary<Type, LocalBuilder>();
+        private readonly Dictionary<Type, LocalBuilder> _tmpLocals = new Dictionary<Type, LocalBuilder>();
         internal LocalBuilder GetTempLocal(Type type)
         {
             LocalBuilder localTmp;
@@ -187,7 +185,7 @@ namespace System.Xml.Serialization
             object var;
             if (TryGetVariable(name, out var))
                 return var;
-            System.Diagnostics.Debug.Assert(false);
+            System.Diagnostics.Debug.Fail("Variable not found");
             return null;
         }
 
@@ -206,7 +204,7 @@ namespace System.Xml.Serialization
                 return true;
             }
             int val;
-            if (Int32.TryParse(name, out val))
+            if (int.TryParse(name, out val))
             {
                 variable = val;
                 return true;
@@ -315,7 +313,7 @@ namespace System.Xml.Serialization
                     MethodInfo ICollection_get_Count = typeof(ICollection).GetMethod(
                           "get_Count",
                           CodeGenerator.InstanceBindingFlags,
-                          CodeGenerator.EmptyTypeArray
+                          Array.Empty<Type>()
                           );
                     Call(ICollection_get_Count);
                 }
@@ -335,7 +333,7 @@ namespace System.Xml.Serialization
             InternalIf(true);
         }
 
-        private static OpCode[] s_branchCodes = new OpCode[] {
+        private static readonly OpCode[] s_branchCodes = new OpCode[] {
             OpCodes.Bge,
             OpCodes.Bne_Un,
             OpCodes.Bgt,
@@ -383,7 +381,7 @@ namespace System.Xml.Serialization
             MarkLabel(ifState.EndIf);
         }
 
-        private Stack _leaveLabels = new Stack();
+        private readonly Stack _leaveLabels = new Stack();
         internal void BeginExceptionBlock()
         {
             _leaveLabels.Push(DefineLabel());
@@ -689,7 +687,7 @@ namespace System.Xml.Serialization
             _ilGen.Emit(OpCodes.Unbox, type);
         }
 
-        private static OpCode[] s_ldindOpCodes = new OpCode[] {
+        private static readonly OpCode[] s_ldindOpCodes = new OpCode[] {
             OpCodes.Nop,//Empty = 0,
             OpCodes.Nop,//Object = 1,
             OpCodes.Nop,//DBNull = 2,
@@ -787,7 +785,7 @@ namespace System.Xml.Serialization
                         Ldc((bool)o);
                         break;
                     case TypeCode.Char:
-                        Debug.Assert(false, "Char is not a valid schema primitive and should be treated as int in DataContract");
+                        Debug.Fail("Char is not a valid schema primitive and should be treated as int in DataContract");
                         throw new NotSupportedException(SR.XmlInvalidCharSchemaPrimitive);
                     case TypeCode.SByte:
                     case TypeCode.Byte:
@@ -817,22 +815,22 @@ namespace System.Xml.Serialization
                         Ldstr((string)o);
                         break;
                     case TypeCode.Decimal:
-                        ConstructorInfo Decimal_ctor = typeof(Decimal).GetConstructor(
+                        ConstructorInfo Decimal_ctor = typeof(decimal).GetConstructor(
                              CodeGenerator.InstanceBindingFlags,
-                             new Type[] { typeof(Int32), typeof(Int32), typeof(Int32), typeof(Boolean), typeof(Byte) }
+                             new Type[] { typeof(int), typeof(int), typeof(int), typeof(bool), typeof(byte) }
                              );
-                        int[] bits = Decimal.GetBits((decimal)o);
+                        int[] bits = decimal.GetBits((decimal)o);
                         Ldc(bits[0]); // digit
                         Ldc(bits[1]); // digit
                         Ldc(bits[2]); // digit
                         Ldc((bits[3] & 0x80000000) == 0x80000000); // sign
-                        Ldc((Byte)((bits[3] >> 16) & 0xFF)); // decimal location
+                        Ldc((byte)((bits[3] >> 16) & 0xFF)); // decimal location
                         New(Decimal_ctor);
                         break;
                     case TypeCode.DateTime:
                         ConstructorInfo DateTime_ctor = typeof(DateTime).GetConstructor(
                             CodeGenerator.InstanceBindingFlags,
-                            new Type[] { typeof(Int64) }
+                            new Type[] { typeof(long) }
                             );
                         Ldc(((DateTime)o).Ticks); // ticks
                         New(DateTime_ctor);
@@ -846,7 +844,7 @@ namespace System.Xml.Serialization
                             ConstructorInfo TimeSpan_ctor = typeof(TimeSpan).GetConstructor(
                             CodeGenerator.InstanceBindingFlags,
                             null,
-                            new Type[] { typeof(Int64) },
+                            new Type[] { typeof(long) },
                             null
                             );
                             Ldc(((TimeSpan)o).Ticks); // ticks
@@ -1047,7 +1045,7 @@ namespace System.Xml.Serialization
             _ilGen.Emit(OpCodes.Conv_I4);
         }
 
-        private static OpCode[] s_ldelemOpCodes = new OpCode[] {
+        private static readonly OpCode[] s_ldelemOpCodes = new OpCode[] {
             OpCodes.Nop,//Empty = 0,
             OpCodes.Ldelem_Ref,//Object = 1,
             OpCodes.Ldelem_Ref,//DBNull = 2,
@@ -1095,7 +1093,7 @@ namespace System.Xml.Serialization
             _ilGen.Emit(opCode, arrayElementType);
         }
 
-        private static OpCode[] s_stelemOpCodes = new OpCode[] {
+        private static readonly OpCode[] s_stelemOpCodes = new OpCode[] {
             OpCodes.Nop,//Empty = 0,
             OpCodes.Stelem_Ref,//Object = 1,
             OpCodes.Stelem_Ref,//DBNull = 2,
@@ -1207,7 +1205,7 @@ namespace System.Xml.Serialization
             _blockStack.Push(ifState);
         }
 
-        private static OpCode[] s_convOpCodes = new OpCode[] {
+        private static readonly OpCode[] s_convOpCodes = new OpCode[] {
             OpCodes.Nop,//Empty = 0,
             OpCodes.Nop,//Object = 1,
             OpCodes.Nop,//DBNull = 2,
@@ -1470,10 +1468,10 @@ namespace System.Xml.Serialization
 
     internal class ForState
     {
-        private LocalBuilder _indexVar;
-        private Label _beginLabel;
-        private Label _testLabel;
-        private object _end;
+        private readonly LocalBuilder _indexVar;
+        private readonly Label _beginLabel;
+        private readonly Label _testLabel;
+        private readonly object _end;
 
         internal ForState(LocalBuilder indexVar, Label beginLabel, Label testLabel, object end)
         {
@@ -1616,7 +1614,7 @@ namespace System.Xml.Serialization
                 Queue<LocalBuilder> freeLocalQueue;
                 if (freeLocals.TryGetValue(key, out freeLocalQueue))
                 {
-                    // Add to end of the queue so that it will be re-used in 
+                    // Add to end of the queue so that it will be re-used in
                     // FIFO manner
                     freeLocalQueue.Enqueue(item.Value);
                 }
@@ -1656,10 +1654,10 @@ namespace System.Xml.Serialization
 
     internal class CodeGeneratorConversionException : Exception
     {
-        private Type _sourceType;
-        private Type _targetType;
-        private bool _isAddress;
-        private string _reason;
+        private readonly Type _sourceType;
+        private readonly Type _targetType;
+        private readonly bool _isAddress;
+        private readonly string _reason;
 
         public CodeGeneratorConversionException(Type sourceType, Type targetType, bool isAddress, string reason)
             : base()
@@ -1671,4 +1669,3 @@ namespace System.Xml.Serialization
         }
     }
 }
-#endif

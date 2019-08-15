@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -12,7 +12,7 @@ namespace System.Net
 {
     internal class ServiceNameStore
     {
-        private List<string> _serviceNames;
+        private readonly List<string> _serviceNames;
         private ServiceNameCollection _serviceNameCollection;
 
         public ServiceNameCollection ServiceNames
@@ -81,12 +81,12 @@ namespace System.Net
                 if (colonIndex >= 0)
                 {
                     // host:port
-                    host = hostAndPort.Substring(0, colonIndex); // Excludes colon 
-                    port = hostAndPort.Substring(colonIndex + 1); // Excludes colon 
+                    host = hostAndPort.Substring(0, colonIndex); // Excludes colon
+                    port = hostAndPort.Substring(colonIndex + 1); // Excludes colon
 
                     // Loosely validate the port just to make sure it was a port and not something else
-                    UInt16 portValue;
-                    if (!UInt16.TryParse(port, NumberStyles.Integer, CultureInfo.InvariantCulture, out portValue))
+                    ushort portValue;
+                    if (!ushort.TryParse(port, NumberStyles.Integer, CultureInfo.InvariantCulture, out portValue))
                     {
                         return inputServiceName;
                     }
@@ -103,7 +103,7 @@ namespace System.Net
                 // UriHostNameType.IPv4, UriHostNameType.IPv6: Do not normalize IPv4/6 hosts.
                 // UriHostNameType.Basic: This is never returned by CheckHostName today
                 // UriHostNameType.Unknown: Nothing recognizable to normalize
-                // default Some new UriHostNameType?                       
+                // default Some new UriHostNameType?
                 return inputServiceName;
             }
 
@@ -147,7 +147,7 @@ namespace System.Net
 
         public bool Add(string uriPrefix)
         {
-            Debug.Assert(!String.IsNullOrEmpty(uriPrefix));
+            Debug.Assert(!string.IsNullOrEmpty(uriPrefix));
 
             string[] newServiceNames = BuildServiceNames(uriPrefix);
 
@@ -237,7 +237,7 @@ namespace System.Net
             }
             else if (allowInvalidUriStrings)
             {
-                int i = uriPrefix.IndexOf("://") + 3;
+                int i = uriPrefix.IndexOf("://", StringComparison.Ordinal) + 3;
                 int j = i;
 
                 bool inSquareBrackets = false;
@@ -292,7 +292,7 @@ namespace System.Net
                 // or the query fails for some reason, don't add an SPN.
                 try
                 {
-                    string machineName = Dns.GetHostEntry(String.Empty).HostName;
+                    string machineName = Dns.GetHostEntry(string.Empty).HostName;
                     return new string[] { "HTTP/" + machineName };
                 }
                 catch (System.Net.Sockets.SocketException)
@@ -304,7 +304,7 @@ namespace System.Net
                     return Array.Empty<string>();
                 }
             }
-            else if (!hostname.Contains("."))
+            else if (!hostname.Contains('.'))
             {
                 // for a dotless name, try to resolve the FQDN.  If the caller doesn't have DNS permission
                 // or the query fails for some reason, add only the dotless name.

@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Xunit;
+using Xunit.Sdk;
 
 namespace System.IO.Tests
 {
@@ -22,8 +23,10 @@ namespace System.IO.Tests
         public const int LongWaitTimeout = 50000;                   // ms to wait for an event that takes a longer time than the average operation
         public const int SubsequentExpectedWait = 10;               // ms to wait for checks that occur after the first.
         public const int WaitForExpectedEventTimeout_NoRetry = 3000;// ms to wait for an event that isn't surrounded by a retry.
+        public const int WaitForUnexpectedEventTimeout = 150;       // ms to wait for a non-expected event.
         public const int DefaultAttemptsForExpectedEvent = 3;       // Number of times an expected event should be retried if failing.
         public const int DefaultAttemptsForUnExpectedEvent = 2;     // Number of times an unexpected event should be retried if failing.
+        public const int RetryDelayMilliseconds = 500;              // ms to wait when retrying after failure
 
         /// <summary>
         /// Watches the Changed WatcherChangeType and unblocks the returned AutoResetEvent when a
@@ -117,7 +120,7 @@ namespace System.IO.Tests
         /// </summary>
         public static void ExpectEvent(WaitHandle eventOccurred, string eventName_NoRetry)
         {
-            string message = String.Format("Didn't observe a {0} event within {1}ms", eventName_NoRetry, WaitForExpectedEventTimeout_NoRetry);
+            string message = string.Format("Didn't observe a {0} event within {1}ms", eventName_NoRetry, WaitForExpectedEventTimeout_NoRetry);
             Assert.True(eventOccurred.WaitOne(WaitForExpectedEventTimeout_NoRetry), message);
         }
 
@@ -173,13 +176,32 @@ namespace System.IO.Tests
                     // Most intermittent failures in FSW are caused by either a shortage of resources (e.g. inotify instances)
                     // or by insufficient time to execute (e.g. CI gets bogged down). Immediately re-running a failed test
                     // won't resolve the first issue, so we wait a little while hoping that things clear up for the next run.
-                    Thread.Sleep(500);
+                    Thread.Sleep(RetryDelayMilliseconds);
                 }
 
                 result = ExecuteAndVerifyEvents(newWatcher, expectedEvents, action, attemptsCompleted == attempts, expectedPaths, timeout);
 
                 if (cleanup != null)
                     cleanup();
+            }
+        }
+
+        /// <summary>Invokes the specified test action with retry on failure (other than assertion failure).</summary>
+        /// <param name="action">The test action.</param>
+        /// <param name="maxAttempts">The maximum number of times to attempt to run the test.</param>
+        public static void ExecuteWithRetry(Action action, int maxAttempts = DefaultAttemptsForExpectedEvent)
+        {
+            for (int retry = 0; retry < maxAttempts; retry++)
+            {
+                try
+                {
+                    action();
+                    return;
+                }
+                catch (Exception e) when (!(e is XunitException) && retry < maxAttempts - 1)
+                {
+                    Thread.Sleep(RetryDelayMilliseconds);
+                }
             }
         }
 
@@ -202,7 +224,7 @@ namespace System.IO.Tests
         }
 
         /// <summary>
-        /// Helper for the ExpectEvent function. 
+        /// Helper for the ExpectEvent function.
         /// </summary>
         /// <param name="watcher">The FileSystemWatcher to test</param>
         /// <param name="expectedEvents">All of the events that are expected to be raised by this action</param>
@@ -448,5 +470,23 @@ namespace System.IO.Tests
                                                         NotifyFilters.LastAccess |
                                                         NotifyFilters.LastWrite |
                                                         NotifyFilters.Size;
+
+        private static FileSystemWatcher RecreateWatcher(FileSystemWatcher watcher)
+        {
+            FileSystemWatcher newWatcher = new FileSystemWatcher()
+            {
+                IncludeSubdirectories = watcher.IncludeSubdirectories,
+                NotifyFilter = watcher.NotifyFilter,
+                Path = watcher.Path,
+                InternalBufferSize = watcher.InternalBufferSize
+            };
+
+            foreach (string filter in watcher.Filters)
+            {
+                newWatcher.Filters.Add(filter);
+            }
+
+            return newWatcher;
+        }
     }
 }

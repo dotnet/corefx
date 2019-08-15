@@ -10,41 +10,40 @@ using System.Runtime.Versioning;
 
 namespace System.Xml.Schema
 {
-    /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet"]/*' />
-    /// <devdoc>
-    ///    <para>The XmlSchemaSet contains a set of namespace URI's.
-    ///       Each namespace also have an associated private data cache
-    ///       corresponding to the XML-Data Schema or W3C XML Schema.
-    ///       The XmlSchemaSet will able to load only XSD schemas,
-    ///       and compile them into an internal "cooked schema representation".
-    ///       The Validate method then uses this internal representation for
-    ///       efficient runtime validation of any given subtree.</para>
-    /// </devdoc>
+    /// <summary>
+    /// The XmlSchemaSet contains a set of namespace URI's.
+    /// Each namespace also have an associated private data cache
+    /// corresponding to the XML-Data Schema or W3C XML Schema.
+    /// The XmlSchemaSet will able to load only XSD schemas,
+    /// and compile them into an internal "cooked schema representation".
+    /// The Validate method then uses this internal representation for
+    /// efficient runtime validation of any given subtree.
+    /// </summary>
     public class XmlSchemaSet
     {
-        private XmlNameTable _nameTable;
+        private readonly XmlNameTable _nameTable;
         private SchemaNames _schemaNames;
-        private SortedList _schemas;              // List of source schemas 
+        private readonly SortedList _schemas;              // List of source schemas
 
         //Event handling
-        private ValidationEventHandler _internalEventHandler;
+        private readonly ValidationEventHandler _internalEventHandler;
         private ValidationEventHandler _eventHandler;
 
         private bool _isCompiled = false;
 
         //Dictionary<Uri, XmlSchema> schemaLocations;
         //Dictionary<ChameleonKey, XmlSchema> chameleonSchemas;
-        private Hashtable _schemaLocations;
-        private Hashtable _chameleonSchemas;
+        private readonly Hashtable _schemaLocations;
+        private readonly Hashtable _chameleonSchemas;
 
-        private Hashtable _targetNamespaces;
+        private readonly Hashtable _targetNamespaces;
         private bool _compileAll;
 
         //Cached Compiled Info
         private SchemaInfo _cachedCompiledInfo;
 
         //Reader settings to parse schema
-        private XmlReaderSettings _readerSettings;
+        private readonly XmlReaderSettings _readerSettings;
         private XmlSchema _schemaForSchema;  //Only one schema for schema per set
 
         //Schema compilation settings
@@ -57,15 +56,15 @@ namespace System.Xml.Schema
         private XmlSchemaObjectTable _typeExtensions;
 
         //Thread safety
-        private Object _internalSyncObject;
-        internal Object InternalSyncObject
+        private object _internalSyncObject;
+        internal object InternalSyncObject
         {
             get
             {
                 if (_internalSyncObject == null)
                 {
-                    Object o = new Object();
-                    Interlocked.CompareExchange<Object>(ref _internalSyncObject, o, null);
+                    object o = new object();
+                    Interlocked.CompareExchange<object>(ref _internalSyncObject, o, null);
                 }
                 return _internalSyncObject;
             }
@@ -73,19 +72,17 @@ namespace System.Xml.Schema
 
         //Constructors
 
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.XmlSchemaSet"]/*' />
-        /// <devdoc>
-        ///    <para>Construct a new empty schema schemas.</para>
-        /// </devdoc>
+        /// <summary>
+        /// Construct a new empty schema schemas.
+        /// </summary>
         public XmlSchemaSet() : this(new NameTable())
         {
         }
 
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.XmlSchemaSet1"]/*' />
-        /// <devdoc>
-        ///    <para>Construct a new empty schema schemas with associated XmlNameTable.
-        ///       The XmlNameTable is used when loading schemas</para>
-        /// </devdoc>
+        /// <summary>
+        /// Construct a new empty schema schemas with associated XmlNameTable.
+        /// The XmlNameTable is used when loading schemas.
+        /// </summary>
         public XmlSchemaSet(XmlNameTable nameTable)
         {
             if (nameTable == null)
@@ -123,17 +120,15 @@ namespace System.Xml.Schema
         }
 
 
-        //Public Properties       
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.NameTable"]/*' />
-        /// <devdoc>
-        ///    <para>The default XmlNameTable used by the XmlSchemaSet when loading new schemas.</para>
-        /// </devdoc>
+        //Public Properties
+        /// <summary>
+        /// The default XmlNameTable used by the XmlSchemaSet when loading new schemas.
+        /// </summary>
         public XmlNameTable NameTable
         {
             get { return _nameTable; }
         }
 
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.ValidationEventHandler"]/*' />
         public event ValidationEventHandler ValidationEventHandler
         {
             add
@@ -155,10 +150,9 @@ namespace System.Xml.Schema
             }
         }
 
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.IsCompiled"]/*' />
-        /// <devdoc>
-        ///    <para>IsCompiled is true when the schema set is in compiled state</para>
-        /// </devdoc>
+        /// <summary>
+        /// IsCompiled is true when the schema set is in compiled state.
+        /// </summary>
         public bool IsCompiled
         {
             get
@@ -167,10 +161,6 @@ namespace System.Xml.Schema
             }
         }
 
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.XmlResolver"]/*' />
-        /// <devdoc>
-        ///    <para></para>
-        /// </devdoc>
         public XmlResolver XmlResolver
         {
             set
@@ -179,10 +169,6 @@ namespace System.Xml.Schema
             }
         }
 
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.CompilationSettings"]/*' />
-        /// <devdoc>
-        ///    <para></para>
-        /// </devdoc>
         public XmlSchemaCompilationSettings CompilationSettings
         {
             get
@@ -195,10 +181,9 @@ namespace System.Xml.Schema
             }
         }
 
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.Count"]/*' />
-        /// <devdoc>
-        ///    <para>Returns the count of schemas in the set</para>
-        /// </devdoc>
+        /// <summary>
+        /// Returns the count of schemas in the set.
+        /// </summary>
         public int Count
         {
             get
@@ -206,10 +191,7 @@ namespace System.Xml.Schema
                 return _schemas.Count;
             }
         }
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.GlobalElements"]/*' />
-        /// <devdoc>
-        ///    <para></para>
-        /// </devdoc>
+
         public XmlSchemaObjectTable GlobalElements
         {
             get
@@ -222,10 +204,6 @@ namespace System.Xml.Schema
             }
         }
 
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.GlobalAttributes"]/*' />
-        /// <devdoc>
-        ///    <para></para>
-        /// </devdoc>
         public XmlSchemaObjectTable GlobalAttributes
         {
             get
@@ -238,10 +216,6 @@ namespace System.Xml.Schema
             }
         }
 
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.GlobalTypes"]/*' />
-        /// <devdoc>
-        ///    <para></para>
-        /// </devdoc>
         public XmlSchemaObjectTable GlobalTypes
         {
             get
@@ -254,10 +228,6 @@ namespace System.Xml.Schema
             }
         }
 
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.SubstitutionGroups"]/*' />
-        /// <devdoc>
-        ///    <para></para>
-        /// </devdoc>
         internal XmlSchemaObjectTable SubstitutionGroups
         {
             get
@@ -297,13 +267,12 @@ namespace System.Xml.Schema
         }
         //Public Methods
 
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.Add1"]/*' />
-        /// <devdoc>
-        ///    <para>Add the schema located by the given URL into the schema schemas.
-        ///       If the given schema references other namespaces, the schemas for those other
-        ///       namespaces are NOT automatically loaded.</para>
-        /// </devdoc>
-        public XmlSchema Add(String targetNamespace, String schemaUri)
+        /// <summary>
+        /// Add the schema located by the given URL into the schema schemas.
+        /// If the given schema references other namespaces, the schemas for those other
+        /// namespaces are NOT automatically loaded.
+        /// </summary>
+        public XmlSchema Add(string targetNamespace, string schemaUri)
         {
             if (schemaUri == null || schemaUri.Length == 0)
             {
@@ -334,7 +303,7 @@ namespace System.Xml.Schema
                     try
                     {
                         schema = Add(targetNamespace, ParseSchema(targetNamespace, reader));
-                        while (reader.Read()) ;// wellformness check; 
+                        while (reader.Read()) ;// wellformness check;
                     }
                     finally
                     {
@@ -346,13 +315,12 @@ namespace System.Xml.Schema
         }
 
 
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.Add4"]/*' />
-        /// <devdoc>
-        ///    <para>Add the given schema into the schema schemas.
-        ///       If the given schema references other namespaces, the schemas for those
-        ///       other namespaces are NOT automatically loaded.</para>
-        /// </devdoc>
-        public XmlSchema Add(String targetNamespace, XmlReader schemaDocument)
+        /// <summary>
+        /// Add the given schema into the schema schemas.
+        /// If the given schema references other namespaces, the schemas for those
+        /// other namespaces are NOT automatically loaded.
+        /// </summary>
+        public XmlSchema Add(string targetNamespace, XmlReader schemaDocument)
         {
             if (schemaDocument == null)
             {
@@ -382,11 +350,10 @@ namespace System.Xml.Schema
         }
 
 
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.Add5"]/*' />
-        /// <devdoc>
-        ///    <para>Adds all the namespaces defined in the given schemas
-        ///       (including their associated schemas) to this schemas.</para>
-        /// </devdoc>
+        /// <summary>
+        /// Adds all the namespaces defined in the given schemas
+        /// (including their associated schemas) to this schemas.
+        /// </summary>
         public void Add(XmlSchemaSet schemas)
         {
             if (schemas == null)
@@ -473,7 +440,6 @@ namespace System.Xml.Schema
             }
         }
 
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.Add6"]/*' />
         public XmlSchema Add(XmlSchema schema)
         {
             if (schema == null)
@@ -490,13 +456,11 @@ namespace System.Xml.Schema
             }
         }
 
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.Remove"]/*' />
         public XmlSchema Remove(XmlSchema schema)
         {
             return Remove(schema, true);
         }
 
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.RemoveRecursive"]/*' />
         public bool RemoveRecursive(XmlSchema schemaToRemove)
         {
             if (schemaToRemove == null)
@@ -570,8 +534,7 @@ namespace System.Xml.Schema
             return false;
         }
 
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.Contains1"]/*' />
-        public bool Contains(String targetNamespace)
+        public bool Contains(string targetNamespace)
         {
             if (targetNamespace == null)
             {
@@ -580,7 +543,6 @@ namespace System.Xml.Schema
             return _targetNamespaces[targetNamespace] != null;
         }
 
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.Contains2"]/*' />
         public bool Contains(XmlSchema schema)
         {
             if (schema == null)
@@ -590,10 +552,6 @@ namespace System.Xml.Schema
             return _schemas.ContainsValue(schema);
         }
 
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.Compile"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public void Compile()
         {
             if (_isCompiled)
@@ -620,7 +578,7 @@ namespace System.Xml.Schema
                         compiler.ImportAllCompiledSchemas(this);
                     }
                     try
-                    { //First thing to do in the try block is to acquire locks since finally will try to release them. 
+                    { //First thing to do in the try block is to acquire locks since finally will try to release them.
                         //If we don't acquire the locks first, and an exception occurs in the code before the locking code, then Threading.SynchronizationLockException will be thrown
                         //when attempting to release it in the finally block
                         XmlSchema currentSchema;
@@ -688,16 +646,12 @@ namespace System.Xml.Schema
             return;
         }
 
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.Reprocess"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public XmlSchema Reprocess(XmlSchema schema)
         {
             // Due to bug 644477 - this method is tightly coupled (THE CODE IS BASICALLY COPIED) to Remove, Add and AddSchemaToSet
             // methods. If you change anything here *make sure* to update Remove/Add/AddSchemaToSet method(s) accordingly.
             // The only difference is that we don't touch .schemas collection here to not break a code like this:
-            // foreach(XmlSchema s in schemaset.schemas) { schemaset.Reprocess(s); }
+            // foreach (XmlSchema s in schemaset.schemas) { schemaset.Reprocess(s); }
             // This is by purpose.
             if (schema == null)
             {
@@ -711,7 +665,7 @@ namespace System.Xml.Schema
             lock (InternalSyncObject)
             { //Lock set so that set cannot be compiled in another thread
                 // This code is copied from method:
-                // Remove(XmlSchema schema, bool forceCompile) 
+                // Remove(XmlSchema schema, bool forceCompile)
                 // If you changed anything here go and change the same in Remove(XmlSchema schema, bool forceCompile) method
                 #region Copied from Remove(XmlSchema schema, bool forceCompile)
 
@@ -783,10 +737,6 @@ namespace System.Xml.Schema
             }
         }
 
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.CopyTo"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public void CopyTo(XmlSchema[] schemas, int index)
         {
             if (schemas == null)
@@ -796,20 +746,12 @@ namespace System.Xml.Schema
             _schemas.Values.CopyTo(schemas, index);
         }
 
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.Schemas1"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public ICollection Schemas()
         {
             return _schemas.Values;
         }
 
-        /// <include file='doc\XmlSchemaSet.uex' path='docs/doc[@for="XmlSchemaSet.Schemas1"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
-        public ICollection Schemas(String targetNamespace)
+        public ICollection Schemas(string targetNamespace)
         {
             ArrayList tnsSchemas = new ArrayList();
             XmlSchema currentSchema;
@@ -832,7 +774,7 @@ namespace System.Xml.Schema
 
         private XmlSchema Add(string targetNamespace, XmlSchema schema)
         {
-            // Due to bug 644477 - this method is tightly coupled (THE CODE IS BASICALLY COPIED) to Reprocess 
+            // Due to bug 644477 - this method is tightly coupled (THE CODE IS BASICALLY COPIED) to Reprocess
             // method. If you change anything here *make sure* to update Reprocess method accordingly.
 
             if (schema == null || schema.ErrorCount != 0)
@@ -841,7 +783,7 @@ namespace System.Xml.Schema
             }
 
             // This code is copied to method:
-            // Reprocess(XmlSchema schema) 
+            // Reprocess(XmlSchema schema)
             // If you changed anything here go and change the same in Reprocess(XmlSchema schema) method
             if (PreprocessSchema(ref schema, targetNamespace))
             { //No perf opt for already compiled schemas
@@ -887,7 +829,7 @@ namespace System.Xml.Schema
             }
 
             foreach (XmlSchemaElement element in schema.Elements.Values) {
-                if(!AddToTable(elements, element.QualifiedName, element)) {
+                if (!AddToTable(elements, element.QualifiedName, element)) {
                     RemoveSchemaFromGlobalTables(schema);
                     return false;
                 }
@@ -921,13 +863,13 @@ namespace System.Xml.Schema
                 }
             }
             schema.AddCompiledInfo(newCompiledInfo);
-            
+
             return true;
         }
 #endif
 
         //For use by the validator when loading schemaLocations in the instance
-        internal void Add(String targetNamespace, XmlReader reader, Hashtable validatedNamespaces)
+        internal void Add(string targetNamespace, XmlReader reader, Hashtable validatedNamespaces)
         {
             if (reader == null)
             {
@@ -1051,14 +993,14 @@ namespace System.Xml.Schema
 
         private void AddSchemaToSet(XmlSchema schema)
         {
-            // Due to bug 644477 - this method is tightly coupled (THE CODE IS BASICALLY COPIED) to Reprocess 
+            // Due to bug 644477 - this method is tightly coupled (THE CODE IS BASICALLY COPIED) to Reprocess
             // method. If you change anything here *make sure* to update Reprocess method accordingly.
 
             _schemas.Add(schema.SchemaId, schema);
             //Add to targetNamespaces table
 
             // This code is copied to method:
-            // Reprocess(XmlSchema schema) 
+            // Reprocess(XmlSchema schema)
             // If you changed anything here go and change the same in Reprocess(XmlSchema schema) method
             #region This code is copied to Reprocess(XmlSchema schema) method
 
@@ -1101,7 +1043,7 @@ namespace System.Xml.Schema
                     ResolveSubstitutionGroup(substGroup, substitutionGroupsTable);
                 }
 
-                //Add or Merge new substitutionGroups with those that already exist in the set 
+                //Add or Merge new substitutionGroups with those that already exist in the set
                 XmlQualifiedName head = substGroup.Examplar;
                 XmlSchemaSubstitutionGroup oldSubstGroup = (XmlSchemaSubstitutionGroup)substitutionGroups[head];
                 if (oldSubstGroup != null)
@@ -1164,7 +1106,7 @@ namespace System.Xml.Schema
 
         internal XmlSchema Remove(XmlSchema schema, bool forceCompile)
         {
-            // Due to bug 644477 - this method is tightly coupled (THE CODE IS BASICALLY COPIED) to Reprocess 
+            // Due to bug 644477 - this method is tightly coupled (THE CODE IS BASICALLY COPIED) to Reprocess
             // method. If you change anything here *make sure* to update Reprocess method accordingly.
             if (schema == null)
             {
@@ -1175,7 +1117,7 @@ namespace System.Xml.Schema
                 if (_schemas.ContainsKey(schema.SchemaId))
                 {
                     // This code is copied to method:
-                    // Reprocess(XmlSchema schema) 
+                    // Reprocess(XmlSchema schema)
                     // If you changed anything here go and change the same in Reprocess(XmlSchema schema) method
                     #region This code is copied to Reprocess(XmlSchema schema) method
 

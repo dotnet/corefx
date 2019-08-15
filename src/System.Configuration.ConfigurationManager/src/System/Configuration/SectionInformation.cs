@@ -94,7 +94,7 @@ namespace System.Configuration
                 // so long as it doesn't conflict with a type already defined
                 FactoryRecord factoryRecord = FindParentFactoryRecord(false);
                 if ((factoryRecord != null) && (factoryRecord.AllowDefinition != value))
-                    throw new ConfigurationErrorsException(string.Format(SR.Config_tag_name_already_defined, ConfigKey));
+                    throw new ConfigurationErrorsException(SR.Format(SR.Config_tag_name_already_defined, ConfigKey));
 
                 _allowDefinition = value;
                 _modifiedFlags[FlagAllowDefinitionModified] = true;
@@ -115,7 +115,7 @@ namespace System.Configuration
                 // so long as it doesn't conflict with a type already defined
                 FactoryRecord factoryRecord = FindParentFactoryRecord(false);
                 if ((factoryRecord != null) && (factoryRecord.AllowExeDefinition != value))
-                    throw new ConfigurationErrorsException(string.Format(SR.Config_tag_name_already_defined, ConfigKey));
+                    throw new ConfigurationErrorsException(SR.Format(SR.Config_tag_name_already_defined, ConfigKey));
 
                 _allowExeDefinition = value;
                 _modifiedFlags[FlagAllowExeDefinitionModified] = true;
@@ -136,7 +136,7 @@ namespace System.Configuration
                 // so long as it doesn't conflict with a type already defined
                 FactoryRecord factoryRecord = FindParentFactoryRecord(false);
                 if ((factoryRecord != null) && (factoryRecord.OverrideModeDefault.OverrideMode != value))
-                    throw new ConfigurationErrorsException(string.Format(SR.Config_tag_name_already_defined, ConfigKey));
+                    throw new ConfigurationErrorsException(SR.Format(SR.Config_tag_name_already_defined, ConfigKey));
 
                 // Threat "Inherit" as "Allow" as "Inherit" does not make sense as a default
                 if (value == OverrideMode.Inherit) value = OverrideMode.Allow;
@@ -162,7 +162,7 @@ namespace System.Configuration
                 // so long as it doesn't conflict with a type already defined
                 FactoryRecord factoryRecord = FindParentFactoryRecord(false);
                 if ((factoryRecord != null) && (factoryRecord.AllowLocation != value))
-                    throw new ConfigurationErrorsException(string.Format(SR.Config_tag_name_already_defined, ConfigKey));
+                    throw new ConfigurationErrorsException(SR.Format(SR.Config_tag_name_already_defined, ConfigKey));
 
                 _flags[FlagAllowLocation] = value;
                 _modifiedFlags[FlagAllowLocation] = true;
@@ -208,7 +208,7 @@ namespace System.Configuration
                         _flags[FlagChildrenLocked] = true;
                         break;
                     default:
-                        Debug.Assert(false, "Unexpected value for OverrideMode");
+                        Debug.Fail("Unexpected value for OverrideMode");
                         break;
                 }
             }
@@ -288,7 +288,7 @@ namespace System.Configuration
         }
 
         // Is the Definition Allowed at this point.  This is all depending
-        // on the Definition that is allowed, and what context we are 
+        // on the Definition that is allowed, and what context we are
         // writing the file
         private bool IsDefinitionAllowed
             => (_configRecord == null) || _configRecord.IsDefinitionAllowed(_allowDefinition, _allowExeDefinition);
@@ -326,7 +326,7 @@ namespace System.Configuration
                 // so long as it doesn't conflict with a type already defined
                 FactoryRecord factoryRecord = FindParentFactoryRecord(false);
                 if ((factoryRecord != null) && (factoryRecord.RestartOnExternalChanges != value))
-                    throw new ConfigurationErrorsException(string.Format(SR.Config_tag_name_already_defined, ConfigKey));
+                    throw new ConfigurationErrorsException(SR.Format(SR.Config_tag_name_already_defined, ConfigKey));
 
                 _flags[FlagRestartOnExternalChanges] = value;
                 _modifiedFlags[FlagRestartOnExternalChanges] = true;
@@ -347,7 +347,7 @@ namespace System.Configuration
                 // so long as it doesn't conflict with a type already defined
                 FactoryRecord factoryRecord = FindParentFactoryRecord(false);
                 if ((factoryRecord != null) && (factoryRecord.RequirePermission != value))
-                    throw new ConfigurationErrorsException(string.Format(SR.Config_tag_name_already_defined, ConfigKey));
+                    throw new ConfigurationErrorsException(SR.Format(SR.Config_tag_name_already_defined, ConfigKey));
 
                 _flags[FlagRequirePermission] = value;
                 _modifiedFlags[FlagRequirePermission] = true;
@@ -377,7 +377,7 @@ namespace System.Configuration
 
                     if (!factoryRecord.IsEquivalentType(host, value))
                     {
-                        throw new ConfigurationErrorsException(string.Format(SR.Config_tag_name_already_defined,
+                        throw new ConfigurationErrorsException(SR.Format(SR.Config_tag_name_already_defined,
                             ConfigKey));
                     }
                 }
@@ -388,7 +388,7 @@ namespace System.Configuration
 
         internal string RawXml { get; set; }
 
-        // True if the section will be serialized to the current hierarchy level, regardless of 
+        // True if the section will be serialized to the current hierarchy level, regardless of
         // ConfigurationSaveMode.
         public bool ForceSave
         {
@@ -496,9 +496,9 @@ namespace System.Configuration
                 throw new InvalidOperationException(SR.Config_cannot_edit_configurationsection_when_not_attached);
         }
 
-        // VerifyIsEditable 
+        // VerifyIsEditable
         //
-        // Verify the section is Editable.  
+        // Verify the section is Editable.
         // It may not be editable for the following reasons:
         //   - We are in Runtime mode, not Design time
         //   - The section is not attached to a _configRecord.

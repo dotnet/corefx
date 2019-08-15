@@ -116,15 +116,15 @@ namespace System.Text
         }
 
         // Private object for locking instead of locking on a public type for SQL reliability work.
-        private static Object s_InternalSyncObject;
-        private static Object InternalSyncObject
+        private static object s_InternalSyncObject;
+        private static object InternalSyncObject
         {
             get
             {
                 if (s_InternalSyncObject == null)
                 {
-                    Object o = new Object();
-                    Interlocked.CompareExchange<Object>(ref s_InternalSyncObject, o, null);
+                    object o = new object();
+                    Interlocked.CompareExchange<object>(ref s_InternalSyncObject, o, null);
                 }
                 return s_InternalSyncObject;
             }
@@ -165,9 +165,7 @@ namespace System.Text
                         ushort byteTemp;
                         while ((byteTemp = *((ushort*)pData)) != 0)
                         {
-                            Debug.Assert(arrayTemp[byteTemp] == UNKNOWN_CHAR, String.Format(CultureInfo.InvariantCulture,
-                                "[SBCSCodePageEncoding::ReadBestFitTable] Expected unallocated byte (not 0x{2:X2}) for best fit byte at 0x{0:X2} for code page {1}",
-                                byteTemp, CodePage, (int)arrayTemp[byteTemp]));
+                            Debug.Assert(arrayTemp[byteTemp] == UNKNOWN_CHAR, $"[SBCSCodePageEncoding::ReadBestFitTable] Expected unallocated byte (not 0x{(int)arrayTemp[byteTemp]:X2}) for best fit byte at 0x{byteTemp:X2} for code page {CodePage}");
                             pData += 2;
 
                             arrayTemp[byteTemp] = *((char*)pData);
@@ -267,9 +265,7 @@ namespace System.Text
 
                                     // This won't work if it won't round trip.
                                     Debug.Assert(arrayTemp[iBestFitCount - 1] != (char)0,
-                                        String.Format(CultureInfo.InvariantCulture,
-                                        "[SBCSCodePageEncoding.ReadBestFitTable] No valid Unicode value {0:X4} for round trip bytes {1:X4}, encoding {2}",
-                                        (int)_mapBytesToUnicode[input], (int)input, CodePage));
+                                        $"[SBCSCodePageEncoding.ReadBestFitTable] No valid Unicode value {(int)_mapBytesToUnicode[input]:X4} for round trip bytes {(int)input:X4}, encoding {CodePage}");
                                 }
                                 unicodePosition++;
                             }
@@ -304,7 +300,7 @@ namespace System.Text
             if (encoder != null)
             {
                 charLeftOver = encoder.charLeftOver;
-                Debug.Assert(charLeftOver == 0 || Char.IsHighSurrogate(charLeftOver),
+                Debug.Assert(charLeftOver == 0 || char.IsHighSurrogate(charLeftOver),
                     "[SBCSCodePageEncoding.GetByteCount]leftover character should be high surrogate");
                 fallback = encoder.Fallback as EncoderReplacementFallback;
 
@@ -431,7 +427,7 @@ namespace System.Text
             if (encoder != null)
             {
                 charLeftOver = encoder.charLeftOver;
-                Debug.Assert(charLeftOver == 0 || Char.IsHighSurrogate(charLeftOver),
+                Debug.Assert(charLeftOver == 0 || char.IsHighSurrogate(charLeftOver),
                     "[SBCSCodePageEncoding.GetBytes]leftover character should be high surrogate");
                 fallback = encoder.Fallback as EncoderReplacementFallback;
 
@@ -821,8 +817,7 @@ namespace System.Text
             byte[] byteBuffer = new byte[1];
             char* charEnd = chars + charCount;
 
-            DecoderFallbackBufferHelper fallbackHelper = new DecoderFallbackBufferHelper(
-                decoder != null ? decoder.FallbackBuffer : DecoderFallback.CreateFallbackBuffer());
+            DecoderFallbackBufferHelper fallbackHelper = new DecoderFallbackBufferHelper(null);
 
             // Not quite so fast loop
             while (bytes < byteEnd)

@@ -19,7 +19,6 @@ namespace System.Security.Cryptography
 
         private IncrementalHash(HashAlgorithmName name, HashProvider hash)
         {
-            Debug.Assert(name != null);
             Debug.Assert(!string.IsNullOrEmpty(name.Name));
             Debug.Assert(hash != null);
 
@@ -29,14 +28,13 @@ namespace System.Security.Cryptography
 
         private IncrementalHash(HashAlgorithmName name, HMACCommon hmac)
         {
-            Debug.Assert(name != null);
             Debug.Assert(!string.IsNullOrEmpty(name.Name));
             Debug.Assert(hmac != null);
 
             _algorithmName = new HashAlgorithmName("HMAC" + name.Name);
             _hmac = hmac;
         }
-        
+
         /// <summary>
         /// Get the name of the algorithm being performed.
         /// </summary>

@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.Text.Tests
 {
-    public class ASCIIEncodingDecode
+    public partial class ASCIIEncodingDecode
     {
         public static IEnumerable<object[]> Decode_TestData()
         {
@@ -20,7 +20,7 @@ namespace System.Text.Tests
                 yield return new object[] { new byte[] { 96, b, 98 }, 2, 1 };
                 yield return new object[] { new byte[] { 97, b, 97 }, 0, 3 };
             }
-            
+
             // Empty strings
             yield return new object[] { new byte[0], 0, 0 };
             yield return new object[] { new byte[10], 5, 0 };

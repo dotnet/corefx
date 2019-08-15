@@ -12,37 +12,24 @@ namespace System.Xml.Serialization
     using System.Globalization;
     using System.Reflection;
 
-    /// <include file='doc\XmlSchemaExporter.uex' path='docs/doc[@for="XmlSchemaExporter"]/*' />
-    ///<internalonly/>
-    /// <devdoc>
-    ///    <para>[To be supplied.]</para>
-    /// </devdoc>
     public class XmlSchemaExporter
     {
         internal const XmlSchemaForm elementFormDefault = XmlSchemaForm.Qualified;
         internal const XmlSchemaForm attributeFormDefault = XmlSchemaForm.Unqualified;
 
-        private XmlSchemas _schemas;
-        private Hashtable _elements = new Hashtable();   // ElementAccessor -> XmlSchemaElement
-        private Hashtable _attributes = new Hashtable();   // AttributeAccessor -> XmlSchemaElement
-        private Hashtable _types = new Hashtable();      // StructMapping/EnumMapping -> XmlSchemaComplexType/XmlSchemaSimpleType
-        private Hashtable _references = new Hashtable();   // TypeMappings to keep track of circular references via anonymous types
+        private readonly XmlSchemas _schemas;
+        private readonly Hashtable _elements = new Hashtable();   // ElementAccessor -> XmlSchemaElement
+        private readonly Hashtable _attributes = new Hashtable();   // AttributeAccessor -> XmlSchemaElement
+        private readonly Hashtable _types = new Hashtable();      // StructMapping/EnumMapping -> XmlSchemaComplexType/XmlSchemaSimpleType
+        private readonly Hashtable _references = new Hashtable();   // TypeMappings to keep track of circular references via anonymous types
         private bool _needToExportRoot;
         private TypeScope _scope;
 
-        /// <include file='doc\XmlSchemaExporter.uex' path='docs/doc[@for="XmlSchemaExporter.XmlSchemaExporter"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public XmlSchemaExporter(XmlSchemas schemas)
         {
             _schemas = schemas;
         }
 
-        /// <include file='doc\XmlSchemaExporter.uex' path='docs/doc[@for="XmlSchemaExporter.ExportTypeMapping"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public void ExportTypeMapping(XmlTypeMapping xmlTypeMapping)
         {
             xmlTypeMapping.CheckShallow();
@@ -51,7 +38,6 @@ namespace System.Xml.Serialization
             ExportRootIfNecessary(xmlTypeMapping.Scope);
         }
 
-        /// <include file='doc\XmlSchemaExporter.uex' path='docs/doc[@for="XmlSchemaExporter.ExportTypeMapping1"]/*' />
         public XmlQualifiedName ExportTypeMapping(XmlMembersMapping xmlMembersMapping)
         {
             xmlMembersMapping.CheckShallow();
@@ -72,19 +58,11 @@ namespace System.Xml.Serialization
             return null;
         }
 
-        /// <include file='doc\XmlSchemaExporter.uex' path='docs/doc[@for="XmlSchemaExporter.ExportMembersMapping"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public void ExportMembersMapping(XmlMembersMapping xmlMembersMapping)
         {
             ExportMembersMapping(xmlMembersMapping, true);
         }
 
-        /// <include file='doc\XmlSchemaExporter.uex' path='docs/doc[@for="XmlSchemaExporter.ExportMembersMapping1"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public void ExportMembersMapping(XmlMembersMapping xmlMembersMapping, bool exportEnclosingType)
         {
             xmlMembersMapping.CheckShallow();
@@ -155,7 +133,6 @@ namespace System.Xml.Serialization
             return false;
         }
 
-        /// <include file='doc\XmlSchemaExporter.uex' path='docs/doc[@for="XmlSchemaExporter.ExportAnyType"]/*' />
         public string ExportAnyType(string ns)
         {
             string name = "any";
@@ -188,7 +165,6 @@ namespace System.Xml.Serialization
             return name;
         }
 
-        /// <include file='doc\XmlSchemaExporter.uex' path='docs/doc[@for="XmlSchemaExporter.ExportAnyType1"]/*' />
         public string ExportAnyType(XmlMembersMapping members)
         {
             if (members.Count == 1 && members[0].Any && members[0].ElementName.Length == 0)
@@ -202,7 +178,7 @@ namespace System.Xml.Serialization
                     // special case of the single top-level XmlNode --> map it to node array to match the "mixed" any type for backward compatibility
                     isUnbounded = true;
 
-                // generate type name, make sure that it is backward compatible 
+                // generate type name, make sure that it is backward compatible
                 string baseName = isMixed ? "any" : isUnbounded ? "anyElements" : "anyElement";
                 string name = baseName;
                 int i = 0;
@@ -915,7 +891,7 @@ namespace System.Xml.Serialization
 
 #if DEBUG
                 // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
-                if (value.GetType() != typeof(string)) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, SR.Format(SR.XmlInvalidDefaultValue, value.ToString(), value.GetType().FullName)));
+                if (value.GetType() != typeof(string)) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, SR.Format(SR.XmlInvalidDefaultValue, value, value.GetType().FullName)));
 #endif
 
                 // check the validity of the value
@@ -965,16 +941,16 @@ namespace System.Xml.Serialization
                 Type formatter = typeof(XmlConvert);
                 System.Reflection.MethodInfo format = formatter.GetMethod("ToString", new Type[] { pm.TypeDesc.Type });
                 if (format != null)
-                    return (string)format.Invoke(formatter, new Object[] { value });
+                    return (string)format.Invoke(formatter, new object[] { value });
             }
             else
             {
                 string defaultValue = XmlCustomFormatter.FromDefaultValue(value, pm.TypeDesc.FormatterName);
                 if (defaultValue == null)
-                    throw new InvalidOperationException(SR.Format(SR.XmlInvalidDefaultValue, value.ToString(), pm.TypeDesc.Name));
+                    throw new InvalidOperationException(SR.Format(SR.XmlInvalidDefaultValue, value, pm.TypeDesc.Name));
                 return defaultValue;
             }
-            throw new InvalidOperationException(SR.Format(SR.XmlInvalidDefaultValue, value.ToString(), pm.TypeDesc.Name));
+            throw new InvalidOperationException(SR.Format(SR.XmlInvalidDefaultValue, value, pm.TypeDesc.Name));
         }
 
         private void ExportRootIfNecessary(TypeScope typeScope)

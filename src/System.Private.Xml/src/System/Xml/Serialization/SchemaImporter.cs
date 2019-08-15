@@ -16,16 +16,11 @@ namespace System.Xml.Serialization
     using System.Diagnostics;
 #endif
 
-    /// <include file='doc\SchemaImporter.uex' path='docs/doc[@for="SchemaImporter"]/*' />
-    ///<internalonly/>
-    /// <devdoc>
-    ///    <para>[To be supplied.]</para>
-    /// </devdoc>
     public abstract class SchemaImporter
     {
         private XmlSchemas _schemas;
         private StructMapping _root;
-        private CodeGenerationOptions _options;
+        private readonly CodeGenerationOptions _options;
         private TypeScope _scope;
         private ImportContext _context;
         private bool _rootImported;

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -41,11 +41,13 @@ namespace System.Data.Common
 
         private readonly KeyRestrictionBehavior _behavior;
 
-#pragma warning disable 169
+#pragma warning disable CS0169
+#pragma warning disable CA1823
         // this field is no longer used, hence the warning was disabled
         // however, it can not be removed or it will break serialization with V1.1
         private readonly string _encryptedActualConnectionString;
-#pragma warning restore 169
+#pragma warning restore CA1823
+#pragma warning restore CS0169
 
         internal DBConnectionString(string value, string restrictions, KeyRestrictionBehavior behavior, Dictionary<string, string> synonyms, bool useOdbcRules)
             : this(new DbConnectionOptions(value, synonyms, useOdbcRules), restrictions, behavior, synonyms, false)
@@ -172,7 +174,7 @@ namespace System.Data.Common
 #if DEBUG
                             else
                             {
-                                Debug.Assert(false, "empty restriction");
+                                Debug.Fail("empty restriction");
                             }
 #endif
                         }
@@ -314,7 +316,7 @@ namespace System.Data.Common
                     }
                     else
                     {
-                        Debug.Assert(false, string.Format("Unknown behavior for combined set: {0}", combinedSet._behavior));
+                        Debug.Fail($"Unknown behavior for combined set: {combinedSet._behavior}");
                     }
                 }
                 else if (componentSet._behavior == KeyRestrictionBehavior.PreventUsage)
@@ -335,12 +337,12 @@ namespace System.Data.Common
                     }
                     else
                     {
-                        Debug.Assert(false, string.Format("Unknown behavior for combined set: {0}", combinedSet._behavior));
+                        Debug.Fail($"Unknown behavior for combined set: {combinedSet._behavior}");
                     }
                 }
                 else
                 {
-                    Debug.Assert(false, string.Format("Unknown behavior for component set: {0}", componentSet._behavior));
+                    Debug.Fail($"Unknown behavior for component set: {componentSet._behavior}");
                 }
             }
         }
@@ -383,7 +385,7 @@ namespace System.Data.Common
                     }
                     break;
                 default:
-                    Debug.Assert(false, "invalid KeyRestrictionBehavior");
+                    Debug.Fail("invalid KeyRestrictionBehavior");
                     throw ADP.InvalidKeyRestrictionBehavior(_behavior);
             }
             return true;
@@ -510,7 +512,7 @@ namespace System.Data.Common
                 }
                 if (count != restrictions.Length)
                 {
-                    string[] tmp = new String[count];
+                    string[] tmp = new string[count];
                     count = 0;
                     for (int i = 0; i < restrictions.Length; ++i)
                     {

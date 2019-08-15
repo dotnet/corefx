@@ -10,7 +10,7 @@ namespace System.Numerics.Tests
     {
         private static int s_samples = 10;
         private static Random s_random = new Random(100);
-        
+
         [Fact]
         public static void RunDivideTwoLargeBI()
         {
@@ -72,7 +72,7 @@ namespace System.Numerics.Tests
                 tempByteArray1 = GetRandomByteArray(s_random);
                 tempByteArray2 = new byte[] { 0 };
                 VerifyDivideString(Print(tempByteArray1) + Print(tempByteArray2) + "bDivide");
-                
+
                 Assert.Throws<DivideByZeroException>(() =>
                 {
                     VerifyDivideString(Print(tempByteArray2) + Print(tempByteArray1) + "bDivide");
@@ -107,12 +107,12 @@ namespace System.Numerics.Tests
             byte[] tempByteArray2 = new byte[0];
 
             // Axiom: X/1 = X
-            VerifyIdentityString(BigInteger.One + " " + Int32.MaxValue + " bDivide", Int32.MaxValue.ToString());
-            VerifyIdentityString(BigInteger.One + " " + Int64.MaxValue + " bDivide", Int64.MaxValue.ToString());
+            VerifyIdentityString(BigInteger.One + " " + int.MaxValue + " bDivide", Int32.MaxValue.ToString());
+            VerifyIdentityString(BigInteger.One + " " + long.MaxValue + " bDivide", Int64.MaxValue.ToString());
 
             for (int i = 0; i < s_samples; i++)
             {
-                String randBigInt = Print(GetRandomByteArray(s_random));
+                string randBigInt = Print(GetRandomByteArray(s_random));
                 VerifyIdentityString(BigInteger.One + " " + randBigInt + "bDivide", randBigInt.Substring(0, randBigInt.Length - 1));
             }
         }
@@ -125,12 +125,12 @@ namespace System.Numerics.Tests
             byte[] tempByteArray2 = new byte[0];
 
             // Axiom: 0/X = 0
-            VerifyIdentityString(Int32.MaxValue + " " + BigInteger.Zero + " bDivide", BigInteger.Zero.ToString());
-            VerifyIdentityString(Int64.MaxValue + " " + BigInteger.Zero + " bDivide", BigInteger.Zero.ToString());
+            VerifyIdentityString(int.MaxValue + " " + BigInteger.Zero + " bDivide", BigInteger.Zero.ToString());
+            VerifyIdentityString(long.MaxValue + " " + BigInteger.Zero + " bDivide", BigInteger.Zero.ToString());
 
             for (int i = 0; i < s_samples; i++)
             {
-                String randBigInt = Print(GetRandomByteArray(s_random));
+                string randBigInt = Print(GetRandomByteArray(s_random));
                 VerifyIdentityString(randBigInt + BigInteger.Zero + " bDivide", BigInteger.Zero.ToString());
             }
         }
@@ -175,14 +175,14 @@ namespace System.Numerics.Tests
         {
             StackCalc sc1 = new StackCalc(opstring1);
             while (sc1.DoNextOperation())
-            {	
+            {
                 //Run the full calculation
                 sc1.DoNextOperation();
             }
 
             StackCalc sc2 = new StackCalc(opstring2);
             while (sc2.DoNextOperation())
-            {	
+            {
                 //Run the full calculation
                 sc2.DoNextOperation();
             }
@@ -199,8 +199,8 @@ namespace System.Numerics.Tests
         {
             return MyBigIntImp.GetNonZeroRandomByteArray(random, size);
         }
-        
-        private static String Print(byte[] bytes)
+
+        private static string Print(byte[] bytes)
         {
             return MyBigIntImp.Print(bytes);
         }

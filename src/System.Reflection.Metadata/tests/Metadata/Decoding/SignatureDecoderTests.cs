@@ -15,12 +15,15 @@ namespace System.Reflection.Metadata.Decoding.Tests
 {
     public partial class SignatureDecoderTests
     {
+        private static readonly string RuntimeAssemblyName = PlatformDetection.IsFullFramework ? "mscorlib" : "System.Runtime";
+        private static readonly string CollectionsAssemblyName = PlatformDetection.IsFullFramework ? "mscorlib" : "System.Collections";
+
         [Fact]
         public unsafe void VerifyMultipleOptionalModifiers()
         {
             // Type 1: int32 modopt([mscorlib]System.Runtime.CompilerServices.IsLong) modopt([mscorlib]System.Runtime.CompilerServices.CallConvCdecl)
-            // Type 2: char* 
-            // Type 3: uint32 
+            // Type 2: char*
+            // Type 3: uint32
             // Type 4: char modopt([mscorlib]System.Runtime.CompilerServices.IsConst)*
             var testSignature = new byte[] { 0x20, 0x45, 0x20, 0x69, 0x08, 0x0F, 0x03, 0x09, 0x0F, 0x20, 0x55, 0x03 };
             var types = new string[]
@@ -136,7 +139,6 @@ namespace System.Reflection.Metadata.Decoding.Tests
             using (FileStream stream = File.OpenRead(typeof(SignaturesToDecode<>).GetTypeInfo().Assembly.Location))
             using (var peReader = new PEReader(stream))
             {
-
                 MetadataReader reader = peReader.GetMetadataReader();
                 var provider = new DisassemblingTypeProvider();
                 TypeDefinitionHandle typeHandle = TestMetadataResolver.FindTestType(reader, typeof(SignaturesToDecode<>));
@@ -207,7 +209,7 @@ namespace System.Reflection.Metadata.Decoding.Tests
                     Assert.Equal(expected, provider.GetTypeFromHandle(reader, genericTypeContext, @event.Type));
                 }
 
-                Assert.Equal("[System.Collections]System.Collections.Generic.List`1<!T>", provider.GetTypeFromHandle(reader, genericTypeContext, handle: type.BaseType));
+                Assert.Equal($"[{CollectionsAssemblyName}]System.Collections.Generic.List`1<!T>", provider.GetTypeFromHandle(reader, genericTypeContext, handle: type.BaseType));
             }
         }
 
@@ -322,12 +324,12 @@ namespace System.Reflection.Metadata.Decoding.Tests
                 { "UIntPtr", "native uint" },
                 { "Boolean", "bool" },
                 { "Char", "char" },
-                { "ModifiedType", "int32 modreq([System.Runtime]System.Runtime.CompilerServices.IsVolatile)" },
+                { "ModifiedType", $"int32 modreq([{RuntimeAssemblyName}]System.Runtime.CompilerServices.IsVolatile)" },
                 { "Pointer", "int32*"  },
                 { "SZArray", "int32[]" },
                 { "Array", "int32[0...,0...]" },
                 { "GenericTypeParameter", "!T" },
-                { "GenericInstantiation", "[System.Collections]System.Collections.Generic.List`1<int32>" },
+                { "GenericInstantiation", $"[{CollectionsAssemblyName}]System.Collections.Generic.List`1<int32>" },
             };
         }
 
@@ -340,8 +342,8 @@ namespace System.Reflection.Metadata.Decoding.Tests
                 { "GenericMethodParameter", "method !!U *()" },
                 { ".ctor", "method void *()" },
                 { "get_Property", "method System.Reflection.Metadata.Decoding.Tests.SignatureDecoderTests/SignaturesToDecode`1/Nested<!T> *()"  },
-                { "add_Event",  "method void *([System.Runtime]System.EventHandler`1<[System.Runtime]System.EventArgs>)" },
-                { "remove_Event", "method void *([System.Runtime]System.EventHandler`1<[System.Runtime]System.EventArgs>)" },
+                { "add_Event",  $"method void *([{RuntimeAssemblyName}]System.EventHandler`1<[{RuntimeAssemblyName}]System.EventArgs>)" },
+                { "remove_Event", $"method void *([{RuntimeAssemblyName}]System.EventHandler`1<[{RuntimeAssemblyName}]System.EventArgs>)" },
             };
         }
 
@@ -359,7 +361,7 @@ namespace System.Reflection.Metadata.Decoding.Tests
             // event name -> signature
             return new Dictionary<string, string>()
             {
-                { "Event", "[System.Runtime]System.EventHandler`1<[System.Runtime]System.EventArgs>" },
+                { "Event", $"[{RuntimeAssemblyName}]System.EventHandler`1<[{RuntimeAssemblyName}]System.EventArgs>" },
             };
         }
 

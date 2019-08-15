@@ -30,8 +30,7 @@ namespace System.Collections.ObjectModel.Tests
         [Fact]
         public static void Ctor_Tests_Negative()
         {
-            ReadOnlyObservableCollection<string> collection;
-            Assert.Throws<ArgumentNullException>(() => collection = new ReadOnlyObservableCollection<string>(null));
+            AssertExtensions.Throws<ArgumentNullException>("list", () => new ReadOnlyObservableCollection<string>(null));
         }
 
         [Fact]
@@ -123,21 +122,21 @@ namespace System.Collections.ObjectModel.Tests
             string[] anArray = new string[] { "one", "two", "three", "four" };
             ReadOnlyObservableCollection<string> readOnlyCol =
                 new ReadOnlyObservableCollection<string>(new ObservableCollection<string>(anArray));
-            int[] iArrInvalidValues = new Int32[] { -1, -2, -100, -1000, -10000, -100000, -1000000, -10000000, -100000000, -1000000000, Int32.MinValue };
+            int[] iArrInvalidValues = new int[] { -1, -2, -100, -1000, -10000, -100000, -1000000, -10000000, -100000000, -1000000000, int.MinValue };
             foreach (var index in iArrInvalidValues)
             {
                 string[] aCopy = new string[anArray.Length];
-                Assert.Throws<ArgumentOutOfRangeException>(() => readOnlyCol.CopyTo(aCopy, index));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("destinationIndex", "dstIndex", () => readOnlyCol.CopyTo(aCopy, index));
             }
 
-            int[] iArrLargeValues = new Int32[] { anArray.Length, Int32.MaxValue, Int32.MaxValue / 2, Int32.MaxValue / 10 };
+            int[] iArrLargeValues = new int[] { anArray.Length, int.MaxValue, int.MaxValue / 2, int.MaxValue / 10 };
             foreach (var index in iArrLargeValues)
             {
                 string[] aCopy = new string[anArray.Length];
                 AssertExtensions.Throws<ArgumentException>("destinationArray", null, () => readOnlyCol.CopyTo(aCopy, index));
             }
 
-            Assert.Throws<ArgumentNullException>(() => readOnlyCol.CopyTo(null, 1));
+            AssertExtensions.Throws<ArgumentNullException>("destinationArray", "dest", () => readOnlyCol.CopyTo(null, 1));
 
             string[] copy = new string[anArray.Length - 1];
             AssertExtensions.Throws<ArgumentException>("destinationArray", "", () => readOnlyCol.CopyTo(copy, 0));
@@ -168,7 +167,7 @@ namespace System.Collections.ObjectModel.Tests
             for (int i = 0; i < 4; ++i)
                 intCol.Add(i % 2);
             ReadOnlyObservableCollection<int> intReadOnlyCol = new ReadOnlyObservableCollection<int>(intCol);
-           
+
             Assert.Equal(0, intReadOnlyCol.IndexOf(0));
             Assert.Equal(1, intReadOnlyCol.IndexOf(1));
 
@@ -177,7 +176,7 @@ namespace System.Collections.ObjectModel.Tests
             Assert.Equal(-1, index);
         }
 
-        /// <summary> 
+        /// <summary>
         /// Tests that a ReadOnlyDictionary cannot be modified. That is, that
         /// Add, Remove, Clear does not work.
         /// </summary>
@@ -199,9 +198,6 @@ namespace System.Collections.ObjectModel.Tests
         }
 
         [Fact]
-        // skip the test on desktop as "new ObservableCollection<int>()" returns 0 length collection
-        // skip the test on UapAot as the requires Reflection on internal framework types.
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.UapAot)]
         public static void DebuggerAttribute_Tests()
         {
             ReadOnlyObservableCollection<int> col = new ReadOnlyObservableCollection<int>(new ObservableCollection<int>(new[] {1, 2, 3, 4}));
@@ -213,7 +209,6 @@ namespace System.Collections.ObjectModel.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public static void DebuggerAttribute_NullCollection_ThrowsArgumentNullException()
         {
             TargetInvocationException ex = Assert.Throws<TargetInvocationException>(() => DebuggerAttributes.ValidateDebuggerTypeProxyProperties(typeof(ReadOnlyObservableCollection<int>), null));
@@ -268,31 +263,31 @@ namespace System.Collections.ObjectModel.Tests
         public void Item_get_Tests_Negative()
         {
             // Verify get_Item with index=Int32.MinValue
-            Assert.Throws<ArgumentOutOfRangeException>(() => { T item = _collection[Int32.MinValue]; });
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => _collection[int.MinValue]);
 
-            // Verify that the collection was not mutated 
+            // Verify that the collection was not mutated
             VerifyReadOnlyCollection(_collection, _expectedItems);
 
             // Verify get_Item with index=-1
-            Assert.Throws<ArgumentOutOfRangeException>(() => { T item = _collection[-1]; });
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => _collection[-1]);
 
-            // Verify that the collection was not mutated 
+            // Verify that the collection was not mutated
             VerifyReadOnlyCollection(_collection, _expectedItems);
 
             if (_expectedItems.Length == 0)
             {
                 // Verify get_Item with index=0 on Empty collection
-                Assert.Throws<ArgumentOutOfRangeException>(() => { T item = _collection[0]; });
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => _collection[0]);
 
-                // Verify that the collection was not mutated 
+                // Verify that the collection was not mutated
                 VerifyReadOnlyCollection(_collection, _expectedItems);
             }
             else
             {
                 // Verify get_Item with index=Count on Empty collection
-                Assert.Throws<ArgumentOutOfRangeException>(() => { T item = _collection[_expectedItems.Length]; });
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => _collection[_expectedItems.Length]);
 
-                // Verify that the collection was not mutated 
+                // Verify that the collection was not mutated
                 VerifyReadOnlyCollection(_collection, _expectedItems);
             }
         }
@@ -331,7 +326,7 @@ namespace System.Collections.ObjectModel.Tests
             IEnumerator<T> enumerator = collection.GetEnumerator();
             int iterations = 0;
             int expectedCount = expectedItems.Length;
-            
+
             // There is a sequential order to the collection, so we're testing for that.
             while ((iterations < expectedCount) && enumerator.MoveNext())
             {
@@ -373,7 +368,7 @@ namespace System.Collections.ObjectModel.Tests
             IEnumerator enumerator = collection.GetEnumerator();
             int iterations = 0;
             int expectedCount = expectedItems.Length;
-            
+
             // There is no sequential order to the collection, so we're testing that all the items
             // in the readonlydictionary exist in the array.
             bool[] itemsVisited = new bool[expectedCount];
@@ -383,7 +378,7 @@ namespace System.Collections.ObjectModel.Tests
                 object currentItem = enumerator.Current;
                 object tempItem;
 
-                // Verify we have not gotten more items then we expected                
+                // Verify we have not gotten more items then we expected
                 Assert.True(iterations < expectedCount,
                     "Err_9844awpa More items have been returned from the enumerator(" + iterations + " items) then are in the expectedElements(" + expectedCount + " items)");
 

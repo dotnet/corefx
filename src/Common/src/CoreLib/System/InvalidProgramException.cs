@@ -25,18 +25,18 @@ namespace System
             HResult = HResults.COR_E_INVALIDPROGRAM;
         }
 
-        public InvalidProgramException(String message)
+        public InvalidProgramException(string? message)
             : base(message)
         {
             HResult = HResults.COR_E_INVALIDPROGRAM;
         }
 
-        public InvalidProgramException(String message, Exception inner)
+        public InvalidProgramException(string? message, Exception? inner)
             : base(message, inner)
         {
             HResult = HResults.COR_E_INVALIDPROGRAM;
         }
 
-        internal InvalidProgramException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        private InvalidProgramException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 }

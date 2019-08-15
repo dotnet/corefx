@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -9,7 +9,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 {
     public static class AdjustPrecScaleForBulkCopy
     {
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void RunTest()
         {
             SqlDecimal value = BulkCopySqlDecimalToTable(new SqlDecimal(0), 1, 0, 2, 2);
@@ -57,7 +57,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 }
 
                 DataTable resultTable = DataTestUtility.RunQuery(connectionString, $"select * from {tableName}");
-                resultValue = new SqlDecimal((Decimal)resultTable.Rows[0][0]);
+                resultValue = new SqlDecimal((decimal)resultTable.Rows[0][0]);
             }
             finally
             {

@@ -8,24 +8,25 @@ In a variety of situations, it's useful to run some code in another process.  So
 - Being able to verify that things don't depend on state that's been configured previously, e.g. that some code you're calling doesn't require that some previous related code ran (e.g. that you can deserialize some state without it having previously been serialized in the same process)
 - Being able to test cross-process support for various things, e.g. cross-process synchronization, cross-process memory-mapped files, that file locking works correctly cross-process, cross-process communication via stdin/stdout/stderr, etc.
 
-To achieve, this we use `RemoteInvoke` which is defined in `RemoteExecutorTestBase.cs`. It passes information about a static method to be executed and the arguments to be passed to it out to a spawned process that invokes the method.  Lambdas / anonymous methods may be used, but they must not close over any state (including `this`); accidentally closing over state will likely result in strange errors. For additional information see https://github.com/dotnet/corefx/blob/master/src/CoreFx.Private.TestUtilities/src/System/Diagnostics/RemoteExecutorTestBase.cs and https://xunit.github.io/docs/running-tests-in-parallel.html
+To achieve, this we use `RemoteExecutor.Invoke` which is defined in `Microsoft.DotNet.RemoteExecutor`. It passes information about a static method to be executed and the arguments to be passed to it out to a spawned process that invokes the method.  Lambdas / anonymous methods may be used, but they must not close over any state (including `this`); accidentally closing over state will likely result in strange errors. For additional information see https://github.com/dotnet/arcade/tree/master/src/Microsoft.DotNet.RemoteExecutor/ and https://xunit.github.io/docs/running-tests-in-parallel.html
 
 Example (skipping additional usings):
 ```cs
 using System.Diagnostics;
+using Microsoft.DotNet.RemoteExecutor;
 
-public class HttpWebRequestTest : RemoteExecutorTestBase
+public class HttpWebRequestTest
 {
     [Fact]
     public void DefaultMaximumResponseHeadersLength_SetAndGetLength_ValuesMatch()
     {
-        RemoteInvoke(() =>
+        RemoteExecutor.Invoke(() =>
         {
             const int NewDefaultMaximumResponseHeadersLength = 255;
             HttpWebRequest.DefaultMaximumResponseHeadersLength = NewDefaultMaximumResponseHeadersLength;
             Assert.Equal(NewDefaultMaximumResponseHeadersLength, HttpWebRequest.DefaultMaximumResponseHeadersLength);
 
-            return SuccessExitCode;
+            return RemoteExecutor.SuccessExitCode;
         }).Dispose();
     }
 }
@@ -54,13 +55,13 @@ public async Task Headers_SetAfterRequestSubmitted_ThrowsInvalidOperationExcepti
 }
 ```
 
-# Outerloop
-This one is fairly simple but often used incorrectly. When running tests which depend on outside influences like e.g. Hardware (Internet, SerialPort, ...) and you can't mitigate these dependencies, you might consider using the `[Outerloop]` attribute for your test. 
+# OuterLoop
+This one is fairly simple but often used incorrectly. When running tests which depend on outside influences like e.g. Hardware (Internet, SerialPort, ...) and you can't mitigate these dependencies, you might consider using the `[OuterLoop]` attribute for your test. 
 With this attribute, tests are executed in a dedicated CI loop and won't break the default CI loops which get created when you submit a PR.
-To run Outerloop tests locally you need to set the msbuild property "Outerloop" to true: `/p:Outerloop=true`.
-To run Outerloop tests in CI you need to mention dotnet-bot and tell him which tests you want to run. See `@dotnet-bot help` for the exact loop names.
+To run OuterLoop tests locally you need to set the msbuild property "OuterLoop" to true: `/p:OuterLoop=true`.
+To run OuterLoop tests in CI you need to mention dotnet-bot and tell him which tests you want to run. See `@dotnet-bot help` for the exact loop names.
 
-This doesn't mean that you should mark every test which executes against a remote endpoint as Outerloop. See below.
+This doesn't mean that you should mark every test which executes against a remote endpoint as OuterLoop. See below.
 
 # Relay Server
 For network related tests which needs to contact a remote endpoint instead of a LoopbackServer, you can use our Relay Servers. We invest in Infrastructure to provide these "safe" remote endpoints.

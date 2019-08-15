@@ -48,10 +48,10 @@ namespace System.DirectoryServices.ActiveDirectory
         internal bool existing = false;
         private bool _subnetRetrieved = false;
         private bool _isADAMServer = false;
-        private bool _checkADAM = false;
+        private readonly bool _checkADAM = false;
         private bool _topologyTouched = false;
         private bool _adjacentSitesRetrieved = false;
-        private string _siteDN = null;
+        private readonly string _siteDN = null;
         private bool _domainsRetrieved = false;
         private bool _serversRetrieved = false;
         private bool _belongLinksRetrieved = false;
@@ -59,7 +59,7 @@ namespace System.DirectoryServices.ActiveDirectory
         private bool _SMTPBridgeRetrieved = false;
         private bool _RPCBridgeRetrieved = false;
 
-        private static int s_ERROR_NO_SITENAME = 1919;
+        private const int ERROR_NO_SITENAME = 1919;
 
         public static ActiveDirectorySite FindByName(DirectoryContext context, string siteName)
         {
@@ -202,7 +202,7 @@ namespace System.DirectoryServices.ActiveDirectory
             if (result != 0)
             {
                 // computer is not in a site
-                if (result == s_ERROR_NO_SITENAME)
+                if (result == ERROR_NO_SITENAME)
                     throw new ActiveDirectoryObjectNotFoundException(SR.NoCurrentSite, typeof(ActiveDirectorySite), null);
                 else
                     throw ExceptionHelper.GetExceptionFromErrorCode(result);
@@ -414,7 +414,7 @@ namespace System.DirectoryServices.ActiveDirectory
                     throw new ObjectDisposedException(GetType().Name);
 
                 if (value == null)
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
 
                 if (existing)
                 {
@@ -720,7 +720,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
             try
             {
-                // commit changes           
+                // commit changes
                 cachedEntry.CommitChanges();
 
                 foreach (DictionaryEntry e in _subnets.changeList)
@@ -737,11 +737,11 @@ namespace System.DirectoryServices.ActiveDirectory
                     }
                 }
 
-                // reset status variables            
+                // reset status variables
                 _subnets.changeList.Clear();
                 _subnetRetrieved = false;
 
-                // need to throw better exception for ADAM since its SMTP transport is not available            
+                // need to throw better exception for ADAM since its SMTP transport is not available
                 foreach (DictionaryEntry e in _SMTPBridgeheadServers.changeList)
                 {
                     try
@@ -820,7 +820,7 @@ namespace System.DirectoryServices.ActiveDirectory
                         }
 
                         tmpEntry.CommitChanges();
-                        // cached the entry                 
+                        // cached the entry
                         _ntdsEntry = tmpEntry;
 
                         // create servers contain object
@@ -899,7 +899,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
                 try
                 {
-                    // go through connection objects and find out its fromServer property. 
+                    // go through connection objects and find out its fromServer property.
                     ADSearcher adSearcher = new ADSearcher(de,
                                                           "(|(objectCategory=server)(objectCategory=NTDSConnection))",
                                                           new string[] { "fromServer", "distinguishedName", "dNSHostName", "objectCategory" },
@@ -935,7 +935,7 @@ namespace System.DirectoryServices.ActiveDirectory
                             {
                                 string fromServer = (string)PropertyManager.GetSearchResultPropertyValue(r, PropertyManager.FromServer);
 
-                                // escaping manipulation                                
+                                // escaping manipulation
                                 string fromSite = Utils.GetPartialDN(fromServer, 3);
                                 pathCracker.Set(fromSite, NativeComInterfaces.ADS_SETTYPE_DN);
                                 fromSite = pathCracker.Retrieve(NativeComInterfaces.ADS_FORMAT_LEAF);
@@ -1092,7 +1092,7 @@ namespace System.DirectoryServices.ActiveDirectory
         {
             if (disposing)
             {
-                // free other state (managed objects)                
+                // free other state (managed objects)
                 if (cachedEntry != null)
                     cachedEntry.Dispose();
 
@@ -1100,7 +1100,7 @@ namespace System.DirectoryServices.ActiveDirectory
                     _ntdsEntry.Dispose();
             }
 
-            // free your own state (unmanaged objects)   
+            // free your own state (unmanaged objects)
 
             _disposed = true;
         }
@@ -1109,31 +1109,31 @@ namespace System.DirectoryServices.ActiveDirectory
         {
             // basic validation first
             if (context == null)
-                throw new ArgumentNullException("context");
+                throw new ArgumentNullException(nameof(context));
 
             // if target is not specified, then we determin the target from the logon credential, so if it is a local user context, it should fail
             if ((context.Name == null) && (!context.isRootDomain()))
             {
-                throw new ArgumentException(SR.ContextNotAssociatedWithDomain, "context");
+                throw new ArgumentException(SR.ContextNotAssociatedWithDomain, nameof(context));
             }
 
             // more validation for the context, if the target is not null, then it should be either forest name or server name
             if (context.Name != null)
             {
                 if (!(context.isRootDomain() || context.isServer() || context.isADAMConfigSet()))
-                    throw new ArgumentException(SR.NotADOrADAM, "context");
+                    throw new ArgumentException(SR.NotADOrADAM, nameof(context));
             }
 
             if (siteName == null)
-                throw new ArgumentNullException("siteName");
+                throw new ArgumentNullException(nameof(siteName));
 
             if (siteName.Length == 0)
-                throw new ArgumentException(SR.EmptyStringParameter, "siteName");
+                throw new ArgumentException(SR.EmptyStringParameter, nameof(siteName));
         }
 
         private void GetSubnets()
         {
-            // performs a search to find out the subnets that belong to this site     
+            // performs a search to find out the subnets that belong to this site
             DirectoryEntry de = DirectoryEntryManager.GetDirectoryEntry(context, WellKnownDN.RootDSE);
             string config = (string)PropertyManager.GetPropertyValue(context, de, PropertyManager.ConfigurationNamingContext);
             string subnetContainer = "CN=Subnets,CN=Sites," + config;
@@ -1208,9 +1208,9 @@ namespace System.DirectoryServices.ActiveDirectory
                     string linkName = (string)PropertyManager.GetSearchResultPropertyValue(result, PropertyManager.Cn);
                     string transportName = (string)Utils.GetDNComponents(dn)[1].Value;
                     ActiveDirectoryTransportType transportType;
-                    if (String.Compare(transportName, "IP", StringComparison.OrdinalIgnoreCase) == 0)
+                    if (string.Equals(transportName, "IP", StringComparison.OrdinalIgnoreCase))
                         transportType = ActiveDirectoryTransportType.Rpc;
-                    else if (String.Compare(transportName, "SMTP", StringComparison.OrdinalIgnoreCase) == 0)
+                    else if (string.Equals(transportName, "SMTP", StringComparison.OrdinalIgnoreCase))
                         transportType = ActiveDirectoryTransportType.Smtp;
                     else
                     {
@@ -1224,7 +1224,7 @@ namespace System.DirectoryServices.ActiveDirectory
                         link = new ActiveDirectorySiteLink(context, linkName, transportType, true, result.GetDirectoryEntry());
                         foreach (ActiveDirectorySite tmpSite in link.Sites)
                         {
-                            // don't add itself                            
+                            // don't add itself
                             if (Utils.Compare(tmpSite.Name, Name) == 0)
                                 continue;
 
@@ -1275,9 +1275,9 @@ namespace System.DirectoryServices.ActiveDirectory
                     string cn = (string)PropertyManager.GetSearchResultPropertyValue(result, PropertyManager.Cn);
                     string transport = Utils.GetDNComponents((string)PropertyManager.GetSearchResultPropertyValue(result, PropertyManager.DistinguishedName))[1].Value;
                     ActiveDirectorySiteLink link = null;
-                    if (String.Compare(transport, "IP", StringComparison.OrdinalIgnoreCase) == 0)
+                    if (string.Equals(transport, "IP", StringComparison.OrdinalIgnoreCase))
                         link = new ActiveDirectorySiteLink(context, cn, ActiveDirectoryTransportType.Rpc, true, connectionEntry);
-                    else if (String.Compare(transport, "SMTP", StringComparison.OrdinalIgnoreCase) == 0)
+                    else if (string.Equals(transport, "SMTP", StringComparison.OrdinalIgnoreCase))
                         link = new ActiveDirectorySiteLink(context, cn, ActiveDirectoryTransportType.Smtp, true, connectionEntry);
                     else
                     {

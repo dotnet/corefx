@@ -22,9 +22,20 @@ namespace System.Security.Cryptography
         {
             private SafeNCryptKeyHandle _keyHandle;
             private int _lastKeySize;
+            private bool _disposed;
+
+            private void ThrowIfDisposed()
+            {
+                if (_disposed)
+                {
+                    throw new ObjectDisposedException(nameof(RSA));
+                }
+            }
 
             private SafeNCryptKeyHandle GetDuplicatedKeyHandle()
             {
+                ThrowIfDisposed();
+
                 int keySize = KeySize;
 
                 if (_lastKeySize != keySize)
@@ -55,14 +66,53 @@ namespace System.Security.Cryptography
                 }
             }
 
+            private byte[] ExportEncryptedPkcs8(ReadOnlySpan<char> pkcs8Password, int kdfCount)
+            {
+                using (SafeNCryptKeyHandle keyHandle = GetDuplicatedKeyHandle())
+                {
+                    return CngKeyLite.ExportPkcs8KeyBlob(keyHandle, pkcs8Password, kdfCount);
+                }
+            }
+
+            private bool TryExportEncryptedPkcs8(
+                ReadOnlySpan<char> pkcs8Password,
+                int kdfCount,
+                Span<byte> destination,
+                out int bytesWritten)
+            {
+                using (SafeNCryptKeyHandle keyHandle = GetDuplicatedKeyHandle())
+                {
+                    return CngKeyLite.TryExportPkcs8KeyBlob(
+                        keyHandle,
+                        pkcs8Password,
+                        kdfCount,
+                        destination,
+                        out bytesWritten);
+                }
+            }
+
             private void ImportKeyBlob(byte[] rsaBlob, bool includePrivate)
             {
-                string blobType = includePrivate ?
-                    Interop.BCrypt.KeyBlobType.BCRYPT_RSAPRIVATE_BLOB :
-                    Interop.BCrypt.KeyBlobType.BCRYPT_RSAPUBLIC_KEY_BLOB;
+                ThrowIfDisposed();
+
+                string blobType = includePrivate
+                    ? Interop.BCrypt.KeyBlobType.BCRYPT_RSAPRIVATE_BLOB
+                    : Interop.BCrypt.KeyBlobType.BCRYPT_RSAPUBLIC_KEY_BLOB;
 
                 SafeNCryptKeyHandle keyHandle = CngKeyLite.ImportKeyBlob(blobType, rsaBlob);
+                SetKeyHandle(keyHandle);
+            }
 
+            private void AcceptImport(CngPkcs8.Pkcs8Response response)
+            {
+                ThrowIfDisposed();
+
+                SafeNCryptKeyHandle keyHandle = response.KeyHandle;
+                SetKeyHandle(keyHandle);
+            }
+
+            private void SetKeyHandle(SafeNCryptKeyHandle keyHandle)
+            {
                 Debug.Assert(!keyHandle.IsInvalid);
 
                 _keyHandle = keyHandle;
@@ -85,6 +135,19 @@ namespace System.Security.Cryptography
                 // alignment requirement. (In both cases Windows loads it just fine)
                 ForceSetKeySize(newKeySize);
                 _lastKeySize = newKeySize;
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                if (disposing)
+                {
+                    _keyHandle?.Dispose();
+                    _keyHandle = null;
+                    _disposed = true;
+                }
+
+
+                base.Dispose(disposing);
             }
         }
     }

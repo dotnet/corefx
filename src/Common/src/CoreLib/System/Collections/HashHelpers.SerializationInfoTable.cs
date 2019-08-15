@@ -12,8 +12,8 @@ using System.Runtime.Serialization;
 namespace System.Collections
 {
     internal static partial class HashHelpers
-    {        
-        private static ConditionalWeakTable<object, SerializationInfo> s_serializationInfoTable;
+    {
+        private static ConditionalWeakTable<object, SerializationInfo>? s_serializationInfoTable;
 
         public static ConditionalWeakTable<object, SerializationInfo> SerializationInfoTable
         {

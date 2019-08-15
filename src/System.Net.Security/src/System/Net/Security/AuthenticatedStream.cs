@@ -3,14 +3,15 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
+using System.Threading.Tasks;
 
 namespace System.Net.Security
 {
     // A public contract for a base abstract authenticated stream.
     public abstract class AuthenticatedStream : Stream
     {
-        private Stream _innerStream;
-        private bool _leaveStreamOpen;
+        private readonly Stream _innerStream;
+        private readonly bool _leaveStreamOpen;
 
         protected AuthenticatedStream(Stream innerStream, bool leaveInnerStreamOpen)
         {
@@ -73,6 +74,22 @@ namespace System.Net.Security
 #endif
         }
 
+        public override ValueTask DisposeAsync()
+        {
+            try
+            {
+                ValueTask vt = _leaveStreamOpen ?
+                    new ValueTask(_innerStream.FlushAsync()) :
+                    _innerStream.DisposeAsync();
+                GC.SuppressFinalize(this);
+                return vt;
+            }
+            catch (Exception exc)
+            {
+                return new ValueTask(Task.FromException(exc));
+            }
+        }
+
         public abstract bool IsAuthenticated { get; }
         public abstract bool IsMutuallyAuthenticated { get; }
         public abstract bool IsEncrypted { get; }
@@ -80,6 +97,3 @@ namespace System.Net.Security
         public abstract bool IsServer { get; }
     }
 }
-
-
-

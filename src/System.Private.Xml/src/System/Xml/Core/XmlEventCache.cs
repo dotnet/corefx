@@ -18,9 +18,9 @@ namespace System.Xml
         private List<XmlEvent[]> _pages;     // All event pages
         private XmlEvent[] _pageCurr;        // Page that is currently being built
         private int _pageSize;               // Number of events in pageCurr
-        private bool _hasRootNode;           // True if the cached document has a root node, false if it's a fragment
+        private readonly bool _hasRootNode;           // True if the cached document has a root node, false if it's a fragment
         private StringConcat _singleText;    // If document consists of a single text node, cache it here rather than creating pages
-        private string _baseUri;             // Base Uri of document
+        private readonly string _baseUri;             // Base Uri of document
 
         private enum XmlEventType
         {
@@ -243,13 +243,13 @@ namespace System.Xml
                             break;
 
                         default:
-                            Debug.Assert(false, "Unknown event: " + page[idxEvent].EventType);
+                            Debug.Fail("Unknown event: " + page[idxEvent].EventType);
                             break;
                     }
                 }
             }
 
-            Debug.Assert(false, "Unknown event should be added to end of event sequence.");
+            Debug.Fail("Unknown event should be added to end of event sequence.");
         }
 
         /// <summary>
@@ -306,7 +306,7 @@ namespace System.Xml
                 }
             }
 
-            Debug.Assert(false, "Unknown event should be added to end of event sequence.");
+            Debug.Fail("Unknown event should be added to end of event sequence.");
             return string.Empty;
         }
 

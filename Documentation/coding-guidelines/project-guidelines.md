@@ -15,14 +15,13 @@ once before you can iterate and work on a given library project.
 - Build product
  - Build src\src.builds which builds all the source library projects. For source library project information see [src](#src).
 - Sign product
- - Build src\sign.builds
-//**CONSIDER**: We should make this as part of the src.builds file instead of a separate .builds file.
+ - Build src\sign.proj
+//**CONSIDER**: We should make this as part of the src.builds file instead of a separate project file.
 
 ## Behind the scenes with build-test.cmd/sh
 - build-test.cmd cannot be ran successfully until build.cmd has been ran at least once for a `BuildConfiguration`.
 - Build src\tests.builds which builds all applicable test projects. For test project information see [tests](#tests).
 - The build pass will happen twice. Once for the specific `$(BuildConfiguration)` and once for netstandard. That way we run both sets of applicable tests against for the given `$(BuildConfiguration)`.
-- TODO: Currently as part of src/post.builds we call CloudBuild.targets which sets up our test runs. This needs to be moved to be part of build-test.cmd now.
 
 ## Behind the scenes with build-packages.cmd/sh
 - build-packages.cmd cannot be run successfully until build.cmd has been ran at least once for a BuildConfiguration.
@@ -32,7 +31,7 @@ once before you can iterate and work on a given library project.
 Below is a list of all the various options we pivot the project builds on:
 
 - **Target Frameworks:** NetFx (aka Desktop), netstandard (aka dotnet/Portable), NETCoreApp (aka .NET Core), UAP (aka UWP/Store/netcore50)
-- **Platform Runtimes:** NetFx (aka CLR/Desktop), CoreCLR, CoreRT (aka NetNative/AOT/MRT)
+- **Platform Runtimes:** NetFx (aka CLR/Desktop), CoreCLR, Mono
 - **OS:** Windows_NT, Linux, OSX, FreeBSD, AnyOS
 - **Flavor:** Debug, Release
 - **Architecture:** x86, x64, arm, arm64, AnyCPU
@@ -40,12 +39,12 @@ Below is a list of all the various options we pivot the project builds on:
 ## Individual build properties
 The following are the properties associated with each build pivot
 
-- `$(TargetGroup) -> netstandard | netcoreapp | netcoreappcorert | netfx | uap | uapaot`
+- `$(TargetGroup) -> netstandard | netcoreapp | netfx | uap`
 //**CONSIDER**: naming netcoreappcorert something shorter maybe just corert.
 - `$(OSGroup) -> Windows | Linux | OSX | FreeBSD | [defaults to running OS when empty]`
 - `$(ConfigurationGroup) -> Release | [defaults to Debug when empty]`
 - `$(ArchGroup) - x86 | x64 | arm | arm64 | [defaults to x64 when empty]`
-- `$(RuntimeOS) - win7 | osx10.10 | ubuntu.14.04 | [any other RID OS+version] | [defaults to runnning OS when empty]` See [RIDs](https://github.com/dotnet/corefx/tree/master/pkg/Microsoft.NETCore.Platforms) for more info.
+- `$(RuntimeOS) - win7 | osx10.10 | ubuntu.14.04 | [any other RID OS+version] | [defaults to running OS when empty]` See [RIDs](https://github.com/dotnet/corefx/tree/master/pkg/Microsoft.NETCore.Platforms) for more info.
 
 For more information on various targets see also [.NET Standard](https://github.com/dotnet/standard/blob/master/docs/versions.md)
 
@@ -118,46 +117,32 @@ On top of the `BuildConfiguration` we also have `RuntimeOS` which can be passed 
 Any of the mentioned properties can be set via `/p:<Property>=<Value>` at the command line. When building using our run tool or any of the wrapper scripts around it (i.e. build.cmd) a number of these properties have aliases which make them easier to pass (run build.cmd/sh -? for the aliases).
 
 ## Selecting the correct build configuration
-When building an individual project the `BuildConfiguation` will be used to select the closest matching configuration listed in the projects `BuildConfigurations` property. The rules used to select the configuration will consider compatible target frameworks and OS fallbacks.
+When building an individual project the `BuildConfiguration` will be used to select the closest matching configuration listed in the projects `BuildConfigurations` property. The rules used to select the configuration will consider compatible target frameworks and OS fallbacks.
 
 TODO: Link to the target framework and OS fallbacks when they are available.
 Temporary versions are at https://github.com/dotnet/corefx/blob/dev/eng/src/Tools/GenerateProps/osgroups.props and https://github.com/dotnet/corefx/blob/dev/eng/src/Tools/GenerateProps/targetgroups.props
 
 ## Supported full build configurations
 - .NET Core latest on current OS (default) -> `netcoreapp-[RunningOS]`
-- .NET Core CoreRT -> `netcoreappcorert-[RunningOS]`
 - .NET Framework latest -> `netfx-Windows_NT`
-- UWP -> `uapaot-Windows_NT`
 - UAP F5 -> `uap-Windows_NT`
 
 ## Project configurations for VS
-For each unique configuration needed for a given library project a configuration property group should be added to the project so it can be selected and built in VS and also clearly identify the various configurations.<BR/>
+For each unique configuration needed for a given library project a configuration entry separated by a ';' should be added to the project so it can be selected and built in VS and also clearly identify the various configurations.<BR/>
 
-`<PropertyGroup Condition="'$(Configuration)|$(Platform)' == '$(OSGroup)-$(TargetGroup)-$(ConfigurationGroup)|$(Platform)'">`
-
+`$(TargetGroup)-$(OSGroup)-$(ConfigurationGroup)|$(Platform`
 - Note that the majority of managed projects, currently all in corefx, $(Platform) is overridden to be AnyCPU.
 
+`<Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>`
+
 ####*Examples*
-Project configurations for a pure IL library project which targets the defaults.
-```xml
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
-```
 Project configurations with a unique implementation on Unix and Windows
 ```xml
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_NT-Release|AnyCPU'" />
+<Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release</Configurations>
 ```
 Project configurations that are unique for a few different target frameworks and runtimes
 ```xml
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap101aot-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap101aot-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap101-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap101-Release|AnyCPU'" />
+<Configurations>netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
 ```
 
 ## Updating Configurations
@@ -165,10 +150,10 @@ Project configurations that are unique for a few different target frameworks and
 We have a build task that you can run to automatically update all the projects with the above boilerplate as well as updating all the solution files for the libraries. Whenever you change the list of configurations for a project you can regenerate all these for the entire repo by running:
 
 ```
-msbuild build.proj /t:UpdateVSConfigurations
+dotnet msbuild build.proj /t:UpdateVSConfigurations
 ```
 
-If you want to scope the geneneration you can either undo changes that you don't need or you can temporally limit the set of projects or directories by updating the item set in the UpdateVSConfigurations target in https://github.com/dotnet/corefx/blob/master/build.proj
+If you want to scope the generation you can either undo changes that you don't need or you can temporally limit the set of projects or directories by updating the item set in the UpdateVSConfigurations target in https://github.com/dotnet/corefx/blob/master/build.proj
 
 # Library project guidelines
 Library projects should use the following directory layout.
@@ -238,7 +223,7 @@ All test outputs should be under
 ## Facades
 Facade are unique in that they don't have any code and instead are generated by finding a contract reference assembly with the matching identity and generating type forwards for all the types to where they live in the implementation assemblies (aka facade seeds). There are also partial facades which contain some type forwards as well as some code definitions. All the various build configurations should be contained in the one csproj file per library.
 
-TODO: Fill in more information about the required properties for creatng a facade project.
+TODO: Fill in more information about the required properties for creating a facade project.
 
 # Conventions for forked code
 While our goal is to have the exact code for every configuration there is always reasons why that is not realistic so we need to have a set of conventions for dealing with places where we fork code. In order of preference, here are the strategies we employ:
@@ -259,7 +244,6 @@ Each source file should use the following guidelines
 - Classes that are forked based on a feature set should have file names `<class>.<feature>.cs`.
  - Where `<feature>` is the name of something that causes a fork in code that isn't a single configuration. Examples:
   - `.CoreCLR.cs` - implementation specific to CoreCLR runtime
-  - `.CoreRT.cs` - implementation specific to CoreRT runtime
   - `.Win32.cs` - implementation based on [Win32](https://en.wikipedia.org/wiki/Windows_API)
   - `.WinRT.cs` - implementation based on [WinRT](https://en.wikipedia.org/wiki/Windows_Runtime)
   - `.Uap.cs` - implementation specific to UAP, also known as [UWP](https://en.wikipedia.org/wiki/Universal_Windows_Platform)

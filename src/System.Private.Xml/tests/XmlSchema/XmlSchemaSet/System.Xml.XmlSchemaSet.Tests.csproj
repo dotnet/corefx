@@ -1,11 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{9EDAADA8-B658-430F-97EE-CCA494883D86}</ProjectGuid>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="CError.cs" />
     <Compile Include="TC_SchemaSet.cs" />
@@ -41,10 +38,11 @@
     <Compile Include="$(CommonTestPath)\System\IO\TempDirectory.cs">
       <Link>Common\System\IO\TempDirectory.cs</Link>
     </Compile>
-    <SupplementalTestData Include="..\TestFiles\**\*.*">
-      <Link>TestFiles\%(RecursiveDir)%(Filename)%(Extension)</Link>
-      <DestinationDir>TestFiles\%(RecursiveDir)</DestinationDir>
-    </SupplementalTestData>
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <ItemGroup>
+    <None Include="..\TestFiles\**\*"
+          Link="TestFiles\%(RecursiveDir)%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+  </ItemGroup>
 </Project>

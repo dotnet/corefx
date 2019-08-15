@@ -112,7 +112,7 @@ namespace System.Collections.Specialized.Tests
             AssertExtensions.Throws<ArgumentNullException>("c", () => new NameValueCollection((NameValueCollection)null));
             AssertExtensions.Throws<ArgumentNullException>("col", () => new NameValueCollection(0, (NameValueCollection)null));
         }
-        
+
         public static IEnumerable<object[]> Ctor_Int_NameValueCollection_TestData()
         {
             yield return new object[] { 0, new NameValueCollection() };
@@ -177,15 +177,15 @@ namespace System.Collections.Specialized.Tests
             NameValueCollection nameValueCollection = new NameValueCollection(equalityComparer);
             VerifyCtor_IEqualityComparer(nameValueCollection, equalityComparer, 10);
         }
-        
-        public void VerifyCtor_IEqualityComparer(NameValueCollection nameValueCollection, IEqualityComparer equalityComparer, int newCount)
+
+        private static void VerifyCtor_IEqualityComparer(NameValueCollection nameValueCollection, IEqualityComparer equalityComparer, int newCount)
         {
             Assert.Equal(0, nameValueCollection.Count);
             Assert.Equal(0, nameValueCollection.Keys.Count);
             Assert.Equal(0, nameValueCollection.AllKeys.Length);
 
             Assert.False(((ICollection)nameValueCollection).IsSynchronized);
-            
+
             string[] values = new string[newCount];
             for (int i = 0; i < newCount; i++)
             {

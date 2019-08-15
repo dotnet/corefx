@@ -1,30 +1,17 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}</ProjectGuid>
+    <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
+    <Configurations>netcoreapp-OSX-Debug;netcoreapp-OSX-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-OSX-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-OSX-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-OSX-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-OSX-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="NotifyReadVirtualNetworkStream.cs" />
     <Compile Include="DummyTcpServer.cs" />
     <Compile Include="TestConfiguration.cs" />
     <!-- SslStream Tests -->
-    <Compile Include="CertificateChainValidation.cs" />
     <Compile Include="CertificateValidationClientServer.cs" />
     <Compile Include="CertificateValidationRemoteServer.cs" />
     <Compile Include="ClientAsyncAuthenticateTest.cs" />
@@ -38,6 +25,7 @@
     <Compile Include="SslStreamNetworkStreamTest.cs" />
     <Compile Include="TransportContextTest.cs" />
     <!-- NegotiateStream Tests -->
+    <Compile Include="NegotiateStreamInvalidOperationTest.cs" />
     <Compile Include="NegotiateStreamStreamToStreamTest.cs" />
     <Compile Include="ServiceNameCollectionTest.cs" />
     <Compile Include="NegotiateStreamKerberosTest.cs" />
@@ -59,6 +47,9 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Configuration.Certificates.cs">
       <Link>Common\System\Net\Configuration.Certificates.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Configuration.Http.cs">
+      <Link>Common\System\Net\Configuration.Http.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\HttpsTestClient.cs">
       <Link>Common\System\Net\HttpsTestClient.cs</Link>
@@ -92,7 +83,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp'">
-    <!-- TODO #13070: Add net463 to the condition after the TFM gets updated to the actual .Net 4.7-->
     <Compile Include="..\..\src\System\Net\Security\SniHelper.cs">
       <Link>src\SniHelper.cs</Link>
     </Compile>
@@ -101,11 +91,14 @@
     <Compile Include="SslStreamAlertsTest.cs" />
     <Compile Include="SslStreamAllowRenegotiationTests.cs" />
     <Compile Include="SslStreamAlpnTests.cs" />
+    <Compile Include="SslStreamDisposeTest.cs" />
     <Compile Include="SslStreamSniTest.cs" />
     <Compile Include="SslStreamEKUTest.cs" />
+    <Compile Include="SslStreamNegotiatedCipherSuiteTest.cs" />
     <Compile Include="SslStreamSchSendAuxRecordTest.cs" />
     <Compile Include="SslStreamCredentialCacheTest.cs" />
     <Compile Include="SslStreamSystemDefaultsTest.cs" />
+    <Compile Include="SslStreamStreamToStreamTest.netcoreapp.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="LoggingTest.cs" />
@@ -115,9 +108,21 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
     <Compile Include="IdentityValidator.Windows.cs" />
+    <Compile Include="$(CommonTestPath)\System\Net\Capability.Security.Windows.cs">
+      <Link>Common\System\Net\Capability.Security.Windows.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <Compile Include="IdentityValidator.Unix.cs" />
+    <Compile Include="$(CommonTestPath)\System\Net\Capability.Security.Unix.cs">
+      <Link>Common\System\Net\Capability.Security.Unix.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Security.Native\Interop.NetSecurityNative.IsNtlmInstalled.cs">
+      <Link>Common\Interop\Unix\System.Net.Security.Native\Interop.NetSecurityNative.IsNtlmInstalled.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
+      <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsLinux)' == 'true' ">
     <None Include="..\Scripts\Unix\setup-kdc.sh">
@@ -138,9 +143,6 @@
     <Compile Include="NegotiateStreamTest.Linux.cs" />
     <Compile Include="UnixGssFakeNegotiateStream.cs" />
     <Compile Include="UnixGssFakeStreamFramer.cs" />
-    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
-      <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Security.Native\Interop.GssApiException.cs">
       <Link>Common\Interop\Unix\System.Net.Security.Native\Interop.GssApiException.cs</Link>
     </Compile>
@@ -155,16 +157,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <SupplementalTestData Include="$(PackagesDir)system.net.testdata\1.0.0-prerelease\content\**\*.*" />
+    <PackageReference Include="System.Net.TestData" Version="$(SystemNetTestDataPackageVersion)" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
-      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
-      <Name>RemoteExecutorConsoleApp</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

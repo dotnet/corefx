@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Internal.Runtime.Augments;
 using System.Diagnostics;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.Serialization;
@@ -37,9 +36,9 @@ namespace System.Threading
 
         private static long s_mostRecentLockID;
 
-        private ManualResetEventSlim _readerEvent;
-        private AutoResetEvent _writerEvent;
-        private long _lockID;
+        private ManualResetEventSlim? _readerEvent;
+        private AutoResetEvent? _writerEvent;
+        private readonly long _lockID;
         private volatile int _state;
         private int _writerID = InvalidThreadID;
         private int _writerSeqNum = 1;
@@ -54,7 +53,7 @@ namespace System.Threading
         {
             get
             {
-                ThreadLocalLockEntry threadLocalLockEntry = ThreadLocalLockEntry.GetCurrent(_lockID);
+                ThreadLocalLockEntry? threadLocalLockEntry = ThreadLocalLockEntry.GetCurrent(_lockID);
                 if (threadLocalLockEntry != null)
                 {
                     return threadLocalLockEntry._readerLevel > 0;
@@ -155,7 +154,7 @@ namespace System.Threading
                         {
                             sleepDurationMilliseconds = 1000;
                         }
-                        RuntimeThread.Sleep(sleepDurationMilliseconds);
+                        Thread.Sleep(sleepDurationMilliseconds);
                         spinCount = 0;
                         currentState = _state;
                         continue;
@@ -171,7 +170,7 @@ namespace System.Threading
                     {
                         if (spinCount > DefaultSpinCount)
                         {
-                            RuntimeThread.Sleep(1);
+                            Thread.Sleep(1);
                             spinCount = 0;
                         }
                         currentState = _state;
@@ -193,7 +192,7 @@ namespace System.Threading
                     }
 
                     int modifyState = -LockStates.WaitingReader;
-                    ManualResetEventSlim readerEvent = null;
+                    ManualResetEventSlim? readerEvent = null;
                     bool waitSucceeded = false;
                     try
                     {
@@ -263,7 +262,7 @@ namespace System.Threading
                     if ((knownState & LockStates.WaitingReadersMask) == LockStates.WaitingReader)
                     {
                         // Reset the event and the reader signaled flag
-                        readerEvent.Reset();
+                        readerEvent!.Reset();
                         Interlocked.Add(ref _state, -LockStates.ReaderSignaled);
                     }
 
@@ -327,7 +326,7 @@ namespace System.Threading
                     // Check for too many waiting writers
                     if ((knownState & LockStates.WaitingWritersMask) == LockStates.WaitingWritersMask)
                     {
-                        RuntimeThread.Sleep(1000);
+                        Thread.Sleep(1000);
                         spinCount = 0;
                         currentState = _state;
                         continue;
@@ -343,7 +342,7 @@ namespace System.Threading
                     {
                         if (spinCount > DefaultSpinCount)
                         {
-                            RuntimeThread.Sleep(1);
+                            Thread.Sleep(1);
                             spinCount = 0;
                         }
                         currentState = _state;
@@ -365,7 +364,7 @@ namespace System.Threading
                     }
 
                     int modifyState = -LockStates.WaitingWriter;
-                    AutoResetEvent writerEvent = null;
+                    AutoResetEvent? writerEvent = null;
                     bool waitSucceeded = false;
                     try
                     {
@@ -454,7 +453,7 @@ namespace System.Threading
                 return;
             }
 
-            ThreadLocalLockEntry threadLocalLockEntry = ThreadLocalLockEntry.GetCurrent(_lockID);
+            ThreadLocalLockEntry? threadLocalLockEntry = ThreadLocalLockEntry.GetCurrent(_lockID);
             if (threadLocalLockEntry == null)
             {
                 throw GetNotOwnerException();
@@ -473,8 +472,8 @@ namespace System.Threading
             // Not a reader any more
             bool isLastReader;
             bool cacheEvents;
-            AutoResetEvent writerEvent = null;
-            ManualResetEventSlim readerEvent = null;
+            AutoResetEvent? writerEvent = null;
+            ManualResetEventSlim? readerEvent = null;
             int currentState = _state;
             int knownState;
             do
@@ -493,7 +492,7 @@ namespace System.Threading
                         if (writerEvent == null)
                         {
                             // Similar to below, wait for some time and try again
-                            RuntimeThread.Sleep(100);
+                            Thread.Sleep(100);
                             currentState = _state;
                             knownState = 0;
                             Debug.Assert(currentState != knownState);
@@ -518,7 +517,7 @@ namespace System.Threading
                             // Instead, we let the threads that set the WaitingReader bit throw, and here, just wait and try
                             // again. In a low-resource situation, eventually, all such new waiting readers would throw, and the
                             // WaitingReaders bits would not be set anymore, breaking the loop and releasing this thread.
-                            RuntimeThread.Sleep(100);
+                            Thread.Sleep(100);
                             currentState = _state;
                             knownState = 0;
                             Debug.Assert(currentState != knownState);
@@ -586,8 +585,8 @@ namespace System.Threading
             // Not a writer any more
             _writerID = InvalidThreadID;
             bool cacheEvents;
-            ManualResetEventSlim readerEvent = null;
-            AutoResetEvent writerEvent = null;
+            ManualResetEventSlim? readerEvent = null;
+            AutoResetEvent? writerEvent = null;
             int currentState = _state;
             int knownState;
             do
@@ -613,7 +612,7 @@ namespace System.Threading
                         // Instead, we let the threads that set the WaitingReader bit throw, and here, just wait and try
                         // again. In a low-resource situation, eventually, all such new waiting readers would throw, and the
                         // WaitingReaders bits would not be set anymore, breaking the loop and releasing this thread.
-                        RuntimeThread.Sleep(100);
+                        Thread.Sleep(100);
                         currentState = _state;
                         knownState = 0;
                         Debug.Assert(currentState != knownState);
@@ -627,7 +626,7 @@ namespace System.Threading
                     if (writerEvent == null)
                     {
                         // Similar to above, wait for some time and try again
-                        RuntimeThread.Sleep(100);
+                        Thread.Sleep(100);
                         currentState = _state;
                         knownState = 0;
                         Debug.Assert(currentState != knownState);
@@ -690,7 +689,7 @@ namespace System.Threading
                 return lockCookie;
             }
 
-            ThreadLocalLockEntry threadLocalLockEntry = ThreadLocalLockEntry.GetCurrent(_lockID);
+            ThreadLocalLockEntry? threadLocalLockEntry = ThreadLocalLockEntry.GetCurrent(_lockID);
             if (threadLocalLockEntry == null)
             {
                 lockCookie._flags = LockCookieFlags.Upgrade | LockCookieFlags.OwnedNone;
@@ -780,7 +779,7 @@ namespace System.Threading
                 // Downgrade to a reader
                 _writerID = InvalidThreadID;
                 _writerLevel = 0;
-                ManualResetEventSlim readerEvent = null;
+                ManualResetEventSlim? readerEvent = null;
                 int currentState = _state;
                 int knownState;
                 do
@@ -804,7 +803,7 @@ namespace System.Threading
                             // Instead, we let the threads that set the WaitingReader bit throw, and here, just wait and try
                             // again. In a low-resource situation, eventually, all such new waiting readers would throw, and the
                             // WaitingReaders bits would not be set anymore, breaking the loop and releasing this thread.
-                            RuntimeThread.Sleep(100);
+                            Thread.Sleep(100);
                             currentState = _state;
                             knownState = 0;
                             Debug.Assert(currentState != knownState);
@@ -893,7 +892,7 @@ namespace System.Threading
                 return lockCookie;
             }
 
-            ThreadLocalLockEntry threadLocalLockEntry = ThreadLocalLockEntry.GetCurrent(_lockID);
+            ThreadLocalLockEntry? threadLocalLockEntry = ThreadLocalLockEntry.GetCurrent(_lockID);
             if (threadLocalLockEntry == null)
             {
                 lockCookie._flags = LockCookieFlags.Release | LockCookieFlags.OwnedNone;
@@ -995,7 +994,7 @@ namespace System.Threading
             else if ((flags & LockCookieFlags.OwnedReader) != 0)
             {
                 AcquireReaderLock(Timeout.Infinite);
-                ThreadLocalLockEntry threadLocalLockEntry = ThreadLocalLockEntry.GetCurrent(_lockID);
+                ThreadLocalLockEntry? threadLocalLockEntry = ThreadLocalLockEntry.GetCurrent(_lockID);
                 Debug.Assert(threadLocalLockEntry != null);
                 threadLocalLockEntry._readerLevel = lockCookie._readerLevel;
             }
@@ -1013,21 +1012,21 @@ namespace System.Threading
             // Indicate to the processor that we are spinning. The return value facilitates usage in do-while spin loops that
             // use 'continue' statements for readability, like:
             //   do { ... } while (YieldProcessor());
-            RuntimeThread.SpinWait(1);
+            Thread.SpinWait(1);
             return true;
         }
 
         /// <exception cref="OutOfMemoryException">Failed to allocate the event object</exception>
         private ManualResetEventSlim GetOrCreateReaderEvent()
         {
-            ManualResetEventSlim currentEvent = _readerEvent;
+            ManualResetEventSlim? currentEvent = _readerEvent;
             if (currentEvent != null)
             {
                 return currentEvent;
             }
 
             currentEvent = new ManualResetEventSlim(false, 0);
-            ManualResetEventSlim previousEvent = Interlocked.CompareExchange(ref _readerEvent, currentEvent, null);
+            ManualResetEventSlim? previousEvent = Interlocked.CompareExchange(ref _readerEvent, currentEvent, null);
             if (previousEvent == null)
             {
                 return currentEvent;
@@ -1041,14 +1040,14 @@ namespace System.Threading
         /// <exception cref="SystemException">Failed to create the system event due to some system error</exception>
         private AutoResetEvent GetOrCreateWriterEvent()
         {
-            AutoResetEvent currentEvent = _writerEvent;
+            AutoResetEvent? currentEvent = _writerEvent;
             if (currentEvent != null)
             {
                 return currentEvent;
             }
 
             currentEvent = new AutoResetEvent(false);
-            AutoResetEvent previousEvent = Interlocked.CompareExchange(ref _writerEvent, currentEvent, null);
+            AutoResetEvent? previousEvent = Interlocked.CompareExchange(ref _writerEvent, currentEvent, null);
             if (previousEvent == null)
             {
                 return currentEvent;
@@ -1058,7 +1057,7 @@ namespace System.Threading
             return previousEvent;
         }
 
-        private ManualResetEventSlim TryGetOrCreateReaderEvent()
+        private ManualResetEventSlim? TryGetOrCreateReaderEvent()
         {
             // The intention is to catch all exceptions, so that the caller can try again. Typically, only OutOfMemoryException
             // would be thrown, but the idea is that any exception that may be thrown will propagate to the user on a different
@@ -1073,7 +1072,7 @@ namespace System.Threading
             }
         }
 
-        private AutoResetEvent TryGetOrCreateWriterEvent()
+        private AutoResetEvent? TryGetOrCreateWriterEvent()
         {
             // The intention is to catch all exceptions, so that the caller can try again. Typically, only OutOfMemoryException
             // or any SystemException would be thrown. For instance, the EventWaitHandle constructor may throw IOException if
@@ -1094,9 +1093,9 @@ namespace System.Threading
             Debug.Assert((_state & LockStates.CachingEvents) == LockStates.CachingEvents);
 
             // Save events
-            AutoResetEvent writerEvent = _writerEvent;
+            AutoResetEvent? writerEvent = _writerEvent;
             _writerEvent = null;
-            ManualResetEventSlim readerEvent = _readerEvent;
+            ManualResetEventSlim? readerEvent = _readerEvent;
             _readerEvent = null;
 
             // Allow readers and writers to continue
@@ -1127,19 +1126,25 @@ namespace System.Threading
         /// The original code used to throw <see cref="ApplicationException"/> for almost all exception cases, even for
         /// out-of-memory scenarios. <see cref="Exception.HResult"/> property was set to a specific value to indicate the actual
         /// error that occurred, and this was not documented.
-        /// 
+        ///
         /// In this C# rewrite, out-of-memory and low-resource cases throw <see cref="OutOfMemoryException"/> or whatever the
         /// original type of exception was (for example, <see cref="IO.IOException"/> may be thrown if the system is unable to
         /// create an <see cref="AutoResetEvent"/>). For all other exceptions, a
         /// <see cref="ReaderWriterLockApplicationException"/> is thrown with the same <see cref="Exception.HResult"/> as
         /// before.
         /// </summary>
+        [Serializable]
         private sealed class ReaderWriterLockApplicationException : ApplicationException
         {
             public ReaderWriterLockApplicationException(int errorHResult, string message)
                 : base(SR.Format(message, SR.Format(SR.ExceptionFromHResult, errorHResult)))
             {
                 HResult = errorHResult;
+            }
+
+            public ReaderWriterLockApplicationException(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
             }
         }
 
@@ -1198,19 +1203,19 @@ namespace System.Threading
         /// <summary>
         /// Stores thread-local lock info and manages the association of this info with each <see cref="ReaderWriterLock"/>
         /// owned by a thread.
-        /// 
+        ///
         /// The original code maintained lists of thread-local lock entries on the CLR's thread objects, and manually released
-        /// lock entries, which involved walking through all threads. While this is possible with ThreadLocal<T>, this
+        /// lock entries, which involved walking through all threads. While this is possible with ThreadLocal{T}, this
         /// implementation prefers to use a similar design to that from ReaderWriterLockSlim, and allow reusing free entries
         /// without removing entries, since it is unlikely that the list length for any thread would get unreasonably long.
         /// </summary>
         private sealed class ThreadLocalLockEntry
         {
             [ThreadStatic]
-            private static ThreadLocalLockEntry t_lockEntryHead;
+            private static ThreadLocalLockEntry? t_lockEntryHead;
 
             private long _lockID;
-            private ThreadLocalLockEntry _next;
+            private ThreadLocalLockEntry? _next;
             public ushort _readerLevel;
 
             private ThreadLocalLockEntry(long lockID)
@@ -1227,7 +1232,7 @@ namespace System.Threading
                 Debug.Assert(lockID != 0);
                 Debug.Assert(afterEntry != null);
 
-                for (ThreadLocalLockEntry currentEntry = afterEntry._next;
+                for (ThreadLocalLockEntry? currentEntry = afterEntry._next;
                     currentEntry != null;
                     currentEntry = currentEntry._next)
                 {
@@ -1235,12 +1240,12 @@ namespace System.Threading
                 }
             }
 
-            public static ThreadLocalLockEntry GetCurrent(long lockID)
+            public static ThreadLocalLockEntry? GetCurrent(long lockID)
             {
                 Debug.Assert(lockID != 0);
 
-                ThreadLocalLockEntry headEntry = t_lockEntryHead;
-                for (ThreadLocalLockEntry currentEntry = headEntry; currentEntry != null; currentEntry = currentEntry._next)
+                ThreadLocalLockEntry? headEntry = t_lockEntryHead;
+                for (ThreadLocalLockEntry? currentEntry = headEntry; currentEntry != null; currentEntry = currentEntry._next)
                 {
                     if (currentEntry._lockID == lockID)
                     {
@@ -1258,7 +1263,7 @@ namespace System.Threading
             {
                 Debug.Assert(lockID != 0);
 
-                ThreadLocalLockEntry headEntry = t_lockEntryHead;
+                ThreadLocalLockEntry? headEntry = t_lockEntryHead;
                 if (headEntry != null)
                 {
                     if (headEntry._lockID == lockID)
@@ -1278,15 +1283,15 @@ namespace System.Threading
                 return GetOrCreateCurrentSlow(lockID, headEntry);
             }
 
-            private static ThreadLocalLockEntry GetOrCreateCurrentSlow(long lockID, ThreadLocalLockEntry headEntry)
+            private static ThreadLocalLockEntry GetOrCreateCurrentSlow(long lockID, ThreadLocalLockEntry? headEntry)
             {
                 Debug.Assert(lockID != 0);
                 Debug.Assert(headEntry == t_lockEntryHead);
                 Debug.Assert(headEntry == null || headEntry._lockID != lockID);
 
-                ThreadLocalLockEntry entry = null;
-                ThreadLocalLockEntry emptyEntryPrevious = null;
-                ThreadLocalLockEntry emptyEntry = null;
+                ThreadLocalLockEntry? entry = null;
+                ThreadLocalLockEntry? emptyEntryPrevious = null;
+                ThreadLocalLockEntry? emptyEntry = null;
 
                 if (headEntry != null)
                 {
@@ -1295,7 +1300,7 @@ namespace System.Threading
                         emptyEntry = headEntry;
                     }
 
-                    for (ThreadLocalLockEntry previousEntry = headEntry, currentEntry = headEntry._next;
+                    for (ThreadLocalLockEntry? previousEntry = headEntry, currentEntry = headEntry._next;
                         currentEntry != null;
                         previousEntry = currentEntry, currentEntry = currentEntry._next)
                     {

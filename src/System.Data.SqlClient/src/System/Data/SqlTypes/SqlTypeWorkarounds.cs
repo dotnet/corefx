@@ -37,6 +37,17 @@ namespace System.Data.SqlTypes
 
             return XmlReader.Create(stream, settingsToUse);
         }
+
+        internal static XmlReader SqlXmlCreateSqlXmlReader(TextReader textReader, bool closeInput = false, bool async = false)
+        {
+            Debug.Assert(closeInput || !async, "Currently we do not have pre-created settings for !closeInput+async");
+
+            XmlReaderSettings settingsToUse = closeInput ?
+                (async ? s_defaultXmlReaderSettingsAsyncCloseInput : s_defaultXmlReaderSettingsCloseInput) :
+                s_defaultXmlReaderSettings;
+
+            return XmlReader.Create(textReader, settingsToUse);
+        }
         #endregion
 
         #region Work around inability to access SqlDateTime.ToDateTime
@@ -75,7 +86,7 @@ namespace System.Data.SqlTypes
         internal static SqlMoney SqlMoneyCtor(long value, int ignored)
         {
             var c = default(SqlMoneyCaster);
-            
+
             // Same behavior as the internal SqlMoney.ctor(long, bool) overload
             c.Fake._fNotNull = true;
             c.Fake._value = value;

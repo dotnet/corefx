@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Internal.Runtime.Augments;
 using System.Diagnostics; // for TraceInformation
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace System.Threading
@@ -20,7 +20,7 @@ namespace System.Threading
     // These are reused wherever possible, so that a given thread will only
     // allocate N of these, where N is the maximum number of locks held simultaneously
     // by that thread.
-    // 
+    //
     internal class ReaderWriterCount
     {
         // Which lock does this object belong to?  This is a numeric ID for two reasons:
@@ -35,21 +35,21 @@ namespace System.Threading
         public int readercount;
 
         // Ditto for writer/upgrader counts.  These are only used if the lock allows recursion.
-        // But we have to have the fields on every ReaderWriterCount instance, because 
+        // But we have to have the fields on every ReaderWriterCount instance, because
         // we reuse it for different locks.
         public int writercount;
         public int upgradecount;
 
         // Next RWC in this thread's list.
-        public ReaderWriterCount next;
+        public ReaderWriterCount? next;
     }
 
     /// <summary>
     /// A reader-writer lock implementation that is intended to be simple, yet very
-    /// efficient.  In particular only 1 interlocked operation is taken for any lock 
+    /// efficient.  In particular only 1 interlocked operation is taken for any lock
     /// operation (we use spin locks to achieve this).  The spin lock is never held
     /// for more than a few instructions (in particular, we never call event APIs
-    /// or in fact any non-trivial API while holding the spin lock).   
+    /// or in fact any non-trivial API while holding the spin lock).
     /// </summary>
     public class ReaderWriterLockSlim : IDisposable
     {
@@ -59,14 +59,14 @@ namespace System.Threading
         private readonly bool _fIsReentrant;
 
         // Lock specification for _spinLock:  This lock protects exactly the local fields associated with this
-        // instance of ReaderWriterLockSlim.  It does NOT protect the memory associated with 
+        // instance of ReaderWriterLockSlim.  It does NOT protect the memory associated with
         // the events that hang off this lock (eg writeEvent, readEvent upgradeEvent).
-        SpinLock _spinLock;
+        private SpinLock _spinLock;
 
-        // These variables allow use to avoid Setting events (which is expensive) if we don't have to. 
-        private uint _numWriteWaiters;        // maximum number of threads that can be doing a WaitOne on the writeEvent 
+        // These variables allow use to avoid Setting events (which is expensive) if we don't have to.
+        private uint _numWriteWaiters;        // maximum number of threads that can be doing a WaitOne on the writeEvent
         private uint _numReadWaiters;         // maximum number of threads that can be doing a WaitOne on the readEvent
-        private uint _numWriteUpgradeWaiters;      // maximum number of threads that can be doing a WaitOne on the upgradeEvent (at most 1). 
+        private uint _numWriteUpgradeWaiters;      // maximum number of threads that can be doing a WaitOne on the upgradeEvent (at most 1).
         private uint _numUpgradeWaiters;
 
         private WaiterStates _waiterStates;
@@ -74,26 +74,26 @@ namespace System.Threading
         private int _upgradeLockOwnerId;
         private int _writeLockOwnerId;
 
-        // conditions we wait on. 
-        private EventWaitHandle _writeEvent;    // threads waiting to acquire a write lock go here.
-        private EventWaitHandle _readEvent;     // threads waiting to acquire a read lock go here (will be released in bulk)
-        private EventWaitHandle _upgradeEvent;  // thread waiting to acquire the upgrade lock
-        private EventWaitHandle _waitUpgradeEvent;  // thread waiting to upgrade from the upgrade lock to a write lock go here (at most one)
+        // conditions we wait on.
+        private EventWaitHandle? _writeEvent;    // threads waiting to acquire a write lock go here.
+        private EventWaitHandle? _readEvent;     // threads waiting to acquire a read lock go here (will be released in bulk)
+        private EventWaitHandle? _upgradeEvent;  // thread waiting to acquire the upgrade lock
+        private EventWaitHandle? _waitUpgradeEvent;  // thread waiting to upgrade from the upgrade lock to a write lock go here (at most one)
 
         // Every lock instance has a unique ID, which is used by ReaderWriterCount to associate itself with the lock
         // without holding a reference to it.
         private static long s_nextLockID;
-        private long _lockID;
+        private readonly long _lockID;
 
         // See comments on ReaderWriterCount.
         [ThreadStatic]
-        private static ReaderWriterCount t_rwc;
+        private static ReaderWriterCount? t_rwc;
 
         private bool _fUpgradeThreadHoldingRead;
 
         private const int MaxSpinCount = 20;
 
-        //The uint, that contains info like if the writer lock is held, num of 
+        //The uint, that contains info like if the writer lock is held, num of
         //readers etc.
         private uint _owners;
 
@@ -104,10 +104,10 @@ namespace System.Threading
         //Writer-Owned  Waiting-Writers   Waiting Upgraders     Num-Readers
         //    31          30                 29                 28.......0
         //
-        //Dividing the uint, allows to vastly simplify logic for checking if a 
+        //Dividing the uint, allows to vastly simplify logic for checking if a
         //reader should go in etc. Setting the writer bit will automatically
-        //make the value of the uint much larger than the max num of readers 
-        //allowed, thus causing the check for max_readers to fail. 
+        //make the value of the uint much larger than the max num of readers
+        //allowed, thus causing the check for max_readers to fail.
 
         private const uint WRITER_HELD = 0x80000000;
         private const uint WAITING_WRITERS = 0x40000000;
@@ -189,17 +189,17 @@ namespace System.Threading
 
         /// <summary>
         /// This routine retrieves/sets the per-thread counts needed to enforce the
-        /// various rules related to acquiring the lock. 
-        /// 
+        /// various rules related to acquiring the lock.
+        ///
         /// DontAllocate is set to true if the caller just wants to get an existing
         /// entry for this thread, but doesn't want to add one if an existing one
         /// could not be found.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ReaderWriterCount GetThreadRWCount(bool dontAllocate)
+        private ReaderWriterCount? GetThreadRWCount(bool dontAllocate)
         {
-            ReaderWriterCount rwc = t_rwc;
-            ReaderWriterCount empty = null;
+            ReaderWriterCount? rwc = t_rwc;
+            ReaderWriterCount? empty = null;
             while (rwc != null)
             {
                 if (rwc.lockID == _lockID)
@@ -235,13 +235,13 @@ namespace System.Threading
         //
         private struct TimeoutTracker
         {
-            private int _total;
-            private int _start;
+            private readonly int _total;
+            private readonly int _start;
 
             public TimeoutTracker(TimeSpan timeout)
             {
                 long ltm = (long)timeout.TotalMilliseconds;
-                if (ltm < -1 || ltm > (long)Int32.MaxValue)
+                if (ltm < -1 || ltm > (long)int.MaxValue)
                     throw new ArgumentOutOfRangeException(nameof(timeout));
                 _total = (int)ltm;
                 if (_total != -1 && _total != 0)
@@ -306,7 +306,7 @@ namespace System.Threading
             if (_fDisposed)
                 throw new ObjectDisposedException(null);
 
-            ReaderWriterCount lrwc = null;
+            ReaderWriterCount lrwc;
             int id = Environment.CurrentManagedThreadId;
 
             if (!_fIsReentrant)
@@ -319,10 +319,10 @@ namespace System.Threading
 
                 _spinLock.Enter(EnterSpinLockReason.EnterAnyRead);
 
-                lrwc = GetThreadRWCount(false);
+                lrwc = GetThreadRWCount(dontAllocate: false)!;
 
                 //Check if the reader lock is already acquired. Note, we could
-                //check the presence of a reader by not allocating rwc (But that 
+                //check the presence of a reader by not allocating rwc (But that
                 //would lead to two lookups in the common case. It's better to keep
                 //a count in the structure).
                 if (lrwc.readercount > 0)
@@ -344,7 +344,7 @@ namespace System.Threading
             else
             {
                 _spinLock.Enter(EnterSpinLockReason.EnterAnyRead);
-                lrwc = GetThreadRWCount(false);
+                lrwc = GetThreadRWCount(dontAllocate: false)!;
                 if (lrwc.readercount > 0)
                 {
                     lrwc.readercount++;
@@ -378,7 +378,7 @@ namespace System.Threading
             for (; ;)
             {
                 // We can enter a read lock if there are only read-locks have been given out
-                // and a writer is not trying to get in.  
+                // and a writer is not trying to get in.
 
                 if (_owners < MAX_READER)
                 {
@@ -402,17 +402,17 @@ namespace System.Threading
                     _spinLock.Enter(EnterSpinLockReason.EnterAnyRead);
                     //The per-thread structure may have been recycled as the lock is acquired (due to message pumping), load again.
                     if (IsRwHashEntryChanged(lrwc))
-                        lrwc = GetThreadRWCount(false);
+                        lrwc = GetThreadRWCount(dontAllocate: false)!;
                     continue;
                 }
 
-                // Drat, we need to wait.  Mark that we have waiters and wait.  
-                if (_readEvent == null)      // Create the needed event 
+                // Drat, we need to wait.  Mark that we have waiters and wait.
+                if (_readEvent == null)      // Create the needed event
                 {
                     LazyCreateEvent(ref _readEvent, EnterLockType.Read);
                     if (IsRwHashEntryChanged(lrwc))
-                        lrwc = GetThreadRWCount(false);
-                    continue;   // since we left the lock, start over. 
+                        lrwc = GetThreadRWCount(dontAllocate: false)!;
+                    continue;   // since we left the lock, start over.
                 }
 
                 retVal = WaitOnEvent(_readEvent, ref _numReadWaiters, timeout, EnterLockType.Read);
@@ -421,7 +421,7 @@ namespace System.Threading
                     return false;
                 }
                 if (IsRwHashEntryChanged(lrwc))
-                    lrwc = GetThreadRWCount(false);
+                    lrwc = GetThreadRWCount(dontAllocate: false)!;
             }
 
             _spinLock.Exit();
@@ -454,7 +454,7 @@ namespace System.Threading
                 throw new ObjectDisposedException(null);
 
             int id = Environment.CurrentManagedThreadId;
-            ReaderWriterCount lrwc;
+            ReaderWriterCount? lrwc;
             bool upgradingToWrite = false;
 
             if (!_fIsReentrant)
@@ -477,9 +477,9 @@ namespace System.Threading
                 }
                 _spinLock.Enter(enterMyLockReason);
 
-                lrwc = GetThreadRWCount(true);
+                lrwc = GetThreadRWCount(dontAllocate: true);
 
-                //Can't acquire write lock with reader lock held. 
+                //Can't acquire write lock with reader lock held.
                 if (lrwc != null && lrwc.readercount > 0)
                 {
                     _spinLock.Exit();
@@ -503,7 +503,7 @@ namespace System.Threading
                 }
                 _spinLock.Enter(enterMyLockReason);
 
-                lrwc = GetThreadRWCount(false);
+                lrwc = GetThreadRWCount(dontAllocate: false)!;
 
                 if (id == _writeLockOwnerId)
                 {
@@ -537,8 +537,8 @@ namespace System.Threading
                 }
 
                 //Check if there is just one upgrader, and no readers.
-                //Assumption: Only one thread can have the upgrade lock, so the 
-                //following check will fail for all other threads that may sneak in 
+                //Assumption: Only one thread can have the upgrade lock, so the
+                //following check will fail for all other threads that may sneak in
                 //when the upgrading thread is waiting.
 
                 if (upgradingToWrite)
@@ -556,7 +556,7 @@ namespace System.Threading
                         if (lrwc != null)
                         {
                             if (IsRwHashEntryChanged(lrwc))
-                                lrwc = GetThreadRWCount(false);
+                                lrwc = GetThreadRWCount(dontAllocate: false)!;
 
                             if (lrwc.readercount > 0)
                             {
@@ -592,7 +592,7 @@ namespace System.Threading
                     if (_waitUpgradeEvent == null)   // Create the needed event
                     {
                         LazyCreateEvent(ref _waitUpgradeEvent, EnterLockType.UpgradeToWrite);
-                        continue;   // since we left the lock, start over. 
+                        continue;   // since we left the lock, start over.
                     }
 
                     Debug.Assert(_numWriteUpgradeWaiters == 0, "There can be at most one thread with the upgrade lock held.");
@@ -609,7 +609,7 @@ namespace System.Threading
                     if (_writeEvent == null)     // create the needed event.
                     {
                         LazyCreateEvent(ref _writeEvent, EnterLockType.Write);
-                        continue;   // since we left the lock, start over. 
+                        continue;   // since we left the lock, start over.
                     }
 
                     retVal = WaitOnEvent(_writeEvent, ref _numWriteWaiters, timeout, EnterLockType.Write);
@@ -623,8 +623,9 @@ namespace System.Threading
 
             if (_fIsReentrant)
             {
+                Debug.Assert(lrwc != null, "Initialized based on _fIsReentrant earlier in the method");
                 if (IsRwHashEntryChanged(lrwc))
-                    lrwc = GetThreadRWCount(false);
+                    lrwc = GetThreadRWCount(dontAllocate: false)!;
                 lrwc.writercount++;
             }
 
@@ -661,7 +662,7 @@ namespace System.Threading
                 throw new ObjectDisposedException(null);
 
             int id = Environment.CurrentManagedThreadId;
-            ReaderWriterCount lrwc;
+            ReaderWriterCount? lrwc;
 
             if (!_fIsReentrant)
             {
@@ -677,8 +678,8 @@ namespace System.Threading
                 }
 
                 _spinLock.Enter(EnterSpinLockReason.EnterAnyRead);
-                lrwc = GetThreadRWCount(true);
-                //Can't acquire upgrade lock with reader lock held. 
+                lrwc = GetThreadRWCount(dontAllocate: true);
+                //Can't acquire upgrade lock with reader lock held.
                 if (lrwc != null && lrwc.readercount > 0)
                 {
                     _spinLock.Exit();
@@ -688,7 +689,7 @@ namespace System.Threading
             else
             {
                 _spinLock.Enter(EnterSpinLockReason.EnterAnyRead);
-                lrwc = GetThreadRWCount(false);
+                lrwc = GetThreadRWCount(dontAllocate: false)!;
 
                 if (id == _upgradeLockOwnerId)
                 {
@@ -698,7 +699,7 @@ namespace System.Threading
                 }
                 else if (id == _writeLockOwnerId)
                 {
-                    //Write lock is already held, Just update the global state 
+                    //Write lock is already held, Just update the global state
                     //to show presence of upgrader.
                     Debug.Assert((_owners & WRITER_HELD) > 0);
                     _owners++;
@@ -712,7 +713,7 @@ namespace System.Threading
                 else if (lrwc.readercount > 0)
                 {
                     //Upgrade locks may not be acquired if only read locks have been
-                    //acquired.                
+                    //acquired.
                     _spinLock.Exit();
                     throw new LockRecursionException(SR.LockRecursionException_UpgradeAfterReadNotAllowed);
                 }
@@ -724,7 +725,7 @@ namespace System.Threading
             for (; ;)
             {
                 //Once an upgrade lock is taken, it's like having a reader lock held
-                //until upgrade or downgrade operations are performed.              
+                //until upgrade or downgrade operations are performed.
 
                 if ((_upgradeLockOwnerId == -1) && (_owners < MAX_READER))
                 {
@@ -748,11 +749,11 @@ namespace System.Threading
                     continue;
                 }
 
-                // Drat, we need to wait.  Mark that we have waiters and wait. 
+                // Drat, we need to wait.  Mark that we have waiters and wait.
                 if (_upgradeEvent == null)   // Create the needed event
                 {
                     LazyCreateEvent(ref _upgradeEvent, EnterLockType.UpgradeableRead);
-                    continue;   // since we left the lock, start over. 
+                    continue;   // since we left the lock, start over.
                 }
 
                 //Only one thread with the upgrade lock held can proceed.
@@ -765,8 +766,9 @@ namespace System.Threading
             {
                 //The lock may have been dropped getting here, so make a quick check to see whether some other
                 //thread did not grab the entry.
+                Debug.Assert(lrwc != null, "Initialized based on _fIsReentrant earlier in the method");
                 if (IsRwHashEntryChanged(lrwc))
-                    lrwc = GetThreadRWCount(false);
+                    lrwc = GetThreadRWCount(dontAllocate: false)!;
                 lrwc.upgradecount++;
             }
 
@@ -777,11 +779,9 @@ namespace System.Threading
 
         public void ExitReadLock()
         {
-            ReaderWriterCount lrwc = null;
-
             _spinLock.Enter(EnterSpinLockReason.ExitAnyRead);
 
-            lrwc = GetThreadRWCount(true);
+            ReaderWriterCount? lrwc = GetThreadRWCount(dontAllocate: true);
 
             if (lrwc == null || lrwc.readercount < 1)
             {
@@ -830,7 +830,7 @@ namespace System.Threading
             else
             {
                 _spinLock.Enter(EnterSpinLockReason.ExitAnyWrite);
-                lrwc = GetThreadRWCount(false);
+                lrwc = GetThreadRWCount(dontAllocate: false)!;
 
                 if (lrwc == null)
                 {
@@ -864,7 +864,7 @@ namespace System.Threading
 
         public void ExitUpgradeableReadLock()
         {
-            ReaderWriterCount lrwc;
+            ReaderWriterCount? lrwc;
             if (!_fIsReentrant)
             {
                 if (Environment.CurrentManagedThreadId != _upgradeLockOwnerId)
@@ -877,7 +877,7 @@ namespace System.Threading
             else
             {
                 _spinLock.Enter(EnterSpinLockReason.ExitAnyRead);
-                lrwc = GetThreadRWCount(true);
+                lrwc = GetThreadRWCount(dontAllocate: true);
 
                 if (lrwc == null)
                 {
@@ -912,9 +912,9 @@ namespace System.Threading
         /// A routine for lazily creating a event outside the lock (so if errors
         /// happen they are outside the lock and that we don't do much work
         /// while holding a spin lock).  If all goes well, reenter the lock and
-        /// set 'waitEvent' 
+        /// set 'waitEvent'
         /// </summary>
-        private void LazyCreateEvent(ref EventWaitHandle waitEvent, EnterLockType enterLockType)
+        private void LazyCreateEvent([NotNull] ref EventWaitHandle? waitEvent, EnterLockType enterLockType)
         {
 #if DEBUG
             Debug.Assert(_spinLock.IsHeld);
@@ -947,14 +947,14 @@ namespace System.Threading
             }
             _spinLock.Enter(enterMyLockReason);
 
-            if (waitEvent == null)          // maybe someone snuck in. 
+            if (waitEvent == null)          // maybe someone snuck in.
                 waitEvent = newEvent;
             else
                 newEvent.Dispose();
         }
 
         /// <summary>
-        /// Waits on 'waitEvent' with a timeout  
+        /// Waits on 'waitEvent' with a timeout
         /// Before the wait 'numWaiters' is incremented and is restored before leaving this routine.
         /// </summary>
         private bool WaitOnEvent(
@@ -1072,7 +1072,7 @@ namespace System.Threading
         }
 
         /// <summary>
-        /// Determines the appropriate events to set, leaves the locks, and sets the events. 
+        /// Determines the appropriate events to set, leaves the locks, and sets the events.
         /// </summary>
         private void ExitAndWakeUpAppropriateWaiters()
         {
@@ -1099,19 +1099,19 @@ namespace System.Threading
                 if (_numWriteUpgradeWaiters > 0 && _fUpgradeThreadHoldingRead && readercount == 2)
                 {
                     _spinLock.Exit();      // Exit before signaling to improve efficiency (wakee will need the lock)
-                    _waitUpgradeEvent.Set();     // release all upgraders (however there can be at most one). 
+                    _waitUpgradeEvent!.Set();     // release all upgraders (however there can be at most one).  Known non-null because _numWriteUpgradeWaiters > 0.
                     return;
                 }
             }
 
             if (readercount == 1 && _numWriteUpgradeWaiters > 0)
             {
-                //We have to be careful now, as we are dropping the lock. 
+                //We have to be careful now, as we are dropping the lock.
                 //No new writes should be allowed to sneak in if an upgrade
-                //was pending. 
+                //was pending.
 
                 _spinLock.Exit();      // Exit before signaling to improve efficiency (wakee will need the lock)
-                _waitUpgradeEvent.Set();     // release all upgraders (however there can be at most one).            
+                _waitUpgradeEvent!.Set();     // release all upgraders (however there can be at most one). Known non-null because _numWriteUpgradeWaiters > 0.
             }
             else if (readercount == 0 && _numWriteWaiters > 0)
             {
@@ -1127,7 +1127,7 @@ namespace System.Threading
 
                 if (signaled == WaiterStates.None)
                 {
-                    _writeEvent.Set();   // release one writer. 
+                    _writeEvent!.Set();   // release one writer.  Known non-null because _numWriteWaiters > 0.
                 }
             }
             else
@@ -1169,10 +1169,10 @@ namespace System.Threading
             _spinLock.Exit();    // Exit before signaling to improve efficiency (wakee will need the lock)
 
             if (setReadEvent)
-                _readEvent.Set();  // release all readers. 
+                _readEvent!.Set();  // release all readers. Known non-null because _numUpgradeWaiters != 0.
 
             if (setUpgradeEvent)
-                _upgradeEvent.Set(); //release one upgrader.
+                _upgradeEvent!.Set(); //release one upgrader.
         }
 
         private bool IsWriterAcquired()
@@ -1241,11 +1241,11 @@ namespace System.Threading
             //Exponential back-off
             if ((spinCount < 5) && (ProcessorCount > 1))
             {
-                RuntimeThread.SpinWait(LockSpinCycles * spinCount);
+                Thread.SpinWait(LockSpinCycles * spinCount);
             }
             else
             {
-                RuntimeThread.Sleep(0);
+                Thread.Sleep(0);
             }
 
             // Don't want to Sleep(1) in this spin wait:
@@ -1365,7 +1365,7 @@ namespace System.Threading
             get
             {
                 int count = 0;
-                ReaderWriterCount lrwc = GetThreadRWCount(true);
+                ReaderWriterCount? lrwc = GetThreadRWCount(dontAllocate: true);
                 if (lrwc != null)
                     count = lrwc.readercount;
 
@@ -1381,7 +1381,7 @@ namespace System.Threading
                 {
                     int count = 0;
 
-                    ReaderWriterCount lrwc = GetThreadRWCount(true);
+                    ReaderWriterCount? lrwc = GetThreadRWCount(dontAllocate: true);
                     if (lrwc != null)
                         count = lrwc.upgradecount;
 
@@ -1405,7 +1405,7 @@ namespace System.Threading
                 {
                     int count = 0;
 
-                    ReaderWriterCount lrwc = GetThreadRWCount(true);
+                    ReaderWriterCount? lrwc = GetThreadRWCount(dontAllocate: true);
                     if (lrwc != null)
                         count = lrwc.writercount;
 
@@ -1453,7 +1453,7 @@ namespace System.Threading
             /// Used to deprioritize threads attempting to enter the lock when they would not make progress after doing so.
             /// <see cref="EnterSpin(EnterSpinLockReason)"/> avoids acquiring the lock as long as the operation for which it
             /// was called is deprioritized.
-            /// 
+            ///
             /// Layout:
             /// - Low 16 bits: Number of threads that have deprioritized an enter-any-write operation
             /// - High 16 bits: Number of threads that have deprioritized an enter-any-read operation
@@ -1592,15 +1592,15 @@ namespace System.Threading
                 {
                     if (spinIndex < LockSpinCount && processorCount > 1)
                     {
-                        RuntimeThread.SpinWait(LockSpinCycles * (spinIndex + 1)); // Wait a few dozen instructions to let another processor release lock.
+                        Thread.SpinWait(LockSpinCycles * (spinIndex + 1)); // Wait a few dozen instructions to let another processor release lock.
                     }
                     else if (spinIndex < (LockSpinCount + LockSleep0Count))
                     {
-                        RuntimeThread.Sleep(0);   // Give up my quantum.
+                        Thread.Sleep(0);   // Give up my quantum.
                     }
                     else
                     {
-                        RuntimeThread.Sleep(1);   // Give up my quantum.
+                        Thread.Sleep(1);   // Give up my quantum.
                     }
 
                     if (!IsEnterDeprioritized(reason))

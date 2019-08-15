@@ -34,12 +34,12 @@ namespace System.Data.SqlClient
             _clientConnectionId = conId;
         }
 
-        private SqlException(SerializationInfo si, StreamingContext sc) : base(si, sc) 
+        private SqlException(SerializationInfo si, StreamingContext sc) : base(si, sc)
         {
             HResult = SqlExceptionHResult;
             foreach (SerializationEntry siEntry in si)
             {
-                if ("ClientConnectionId" == siEntry.Name) 
+                if ("ClientConnectionId" == siEntry.Name)
                 {
                     _clientConnectionId = (Guid)siEntry.Value;
                     break;
@@ -117,7 +117,7 @@ namespace System.Data.SqlClient
             get { return Errors.Count > 0 ? Errors[0].State : default; }
         }
 
-        override public string Source
+        public override string Source
         {
             get { return Errors.Count > 0 ? Errors[0].Source : default; }
         }
@@ -207,7 +207,7 @@ namespace System.Data.SqlClient
             }
             exception.Data.Add("HelpLink.EvtSrc", "MSSQLServer");
             exception.Data.Add("HelpLink.EvtID", errorCollection[0].Number.ToString(CultureInfo.InvariantCulture));
-            exception.Data.Add("HelpLink.BaseHelpUrl", "http://go.microsoft.com/fwlink");
+            exception.Data.Add("HelpLink.BaseHelpUrl", "https://go.microsoft.com/fwlink");
             exception.Data.Add("HelpLink.LinkId", "20476");
 
             return exception;

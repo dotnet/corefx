@@ -15,6 +15,15 @@ namespace System.Security.Cryptography.EcDsa.Tests
         protected override byte[] SignData(ECDsa ecdsa, byte[] data, int offset, int count, HashAlgorithmName hashAlgorithm) =>
             TryWithOutputArray(dest => ecdsa.TrySignData(new ReadOnlySpan<byte>(data, offset, count), dest, hashAlgorithm, out int bytesWritten) ? (true, bytesWritten) : (false, 0));
 
+        protected override void UseAfterDispose(ECDsa ecdsa, byte[] data, byte[] sig)
+        {
+            base.UseAfterDispose(ecdsa, data, sig);
+            byte[] hash = new byte[32];
+
+            Assert.Throws<ObjectDisposedException>(() => ecdsa.VerifyHash(hash.AsSpan(), sig.AsSpan()));
+            Assert.Throws<ObjectDisposedException>(() => ecdsa.TrySignHash(hash, sig, out _));
+        }
+
         [Theory, MemberData(nameof(RealImplementations))]
         public void SignData_InvalidArguments_Throws(ECDsa ecdsa)
         {
@@ -79,7 +88,7 @@ namespace System.Security.Cryptography.EcDsa.Tests
             using (ec = ECDsaFactory.Create(curveDef.Curve))
             {
                 param = ec.ExportExplicitParameters(true);
-                Assert.NotEqual(null, param.D);
+                Assert.NotNull(param.D);
                 using (newEc = ECDsaFactory.Create())
                 {
                     newEc.ImportParameters(param);
@@ -114,7 +123,7 @@ namespace System.Security.Cryptography.EcDsa.Tests
                             newEc.GenerateKey(ECCurve.NamedCurves.nistP256);
                             Assert.Equal(256, newEc.KeySize);
                             param2 = newEc.ExportExplicitParameters(true);
-                            // Keys should should not match
+                            // Keys should not match
                             ComparePrivateKey(param, param2, false);
                             ComparePublicKey(param.Q, param2.Q, false);
                             // P,X,Y (and others) should not match
@@ -136,7 +145,7 @@ namespace System.Security.Cryptography.EcDsa.Tests
                             newEc.GenerateKey(param2.Curve);
                             Assert.Equal(256, newEc.KeySize);
                             param2 = newEc.ExportExplicitParameters(true);
-                            // Keys should should not match
+                            // Keys should not match
                             ComparePrivateKey(param, param2, false);
                             ComparePublicKey(param.Q, param2.Q, false);
                             // P,X,Y (and others) should not match
@@ -156,7 +165,7 @@ namespace System.Security.Cryptography.EcDsa.Tests
                                 newEc.GenerateKey(ECCurve.CreateFromValue(ECDSA_Sect193r1_OID_VALUE));
                                 Assert.Equal(193, newEc.KeySize);
                                 param2 = newEc.ExportExplicitParameters(true);
-                                // Keys should should not match
+                                // Keys should not match
                                 ComparePrivateKey(param, param2, false);
                                 ComparePublicKey(param.Q, param2.Q, false);
                                 // Polynomial,X,Y (and others) should not match
@@ -181,7 +190,7 @@ namespace System.Security.Cryptography.EcDsa.Tests
             using (ec = ECDsaFactory.Create(curveDef.Curve))
             {
                 param = ec.ExportParameters(true);
-                Assert.NotEqual(param.D, null);
+                Assert.NotNull(param.D);
                 param.Validate();
 
                 ec.GenerateKey(param.Curve);
@@ -204,7 +213,7 @@ namespace System.Security.Cryptography.EcDsa.Tests
             using (ec = ECDsaFactory.Create(256))
             {
                 param = ec.ExportExplicitParameters(true);
-                Assert.NotEqual(param.D, null);
+                Assert.NotNull(param.D);
 
                 ec.GenerateKey(param.Curve);
                 param2 = ec.ExportExplicitParameters(true);

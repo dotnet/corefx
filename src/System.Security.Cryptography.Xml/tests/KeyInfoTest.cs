@@ -4,7 +4,7 @@
 // KeyInfoTest.cs - Test Cases for KeyInfo
 //
 // Author:
-//	Sebastien Pouliot <sebastien@ximian.com>
+//  Sebastien Pouliot <sebastien@ximian.com>
 //
 // (C) 2002, 2003 Motus Technologies Inc. (http://www.motus.com)
 // Copyright (C) 2004-2005 Novell, Inc (http://www.novell.com)
@@ -249,7 +249,7 @@ namespace System.Security.Cryptography.Xml.Tests
             foreach (var clause in info)
             {
                 i++;
-                
+
                 if (clause is KeyInfoName)
                 {
                     pathsCovered |= 1 << 0;
@@ -339,7 +339,7 @@ namespace System.Security.Cryptography.Xml.Tests
             }
 
             // 0x1f = b11111, number of ones = 5
-            Assert.Equal(pathsCovered, 0x1f);
+            Assert.Equal(0x1f, pathsCovered);
             Assert.Equal(5, i);
         }
 
@@ -367,7 +367,7 @@ namespace System.Security.Cryptography.Xml.Tests
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(bad);
             info.LoadXml(doc.DocumentElement);
-            // LAMESPEC: no expection but Xml isn't loaded
+            // no expection but Xml isn't loaded
             Assert.Equal("<KeyInfo xmlns=\"http://www.w3.org/2000/09/xmldsig#\" />", (info.GetXml().OuterXml));
             Assert.Equal(0, info.Count);
         }

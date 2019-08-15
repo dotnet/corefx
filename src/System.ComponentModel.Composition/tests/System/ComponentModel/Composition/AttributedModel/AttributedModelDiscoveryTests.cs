@@ -45,7 +45,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             // Attribute.GetCustomAttributes does find the inherited attributes
             var c2 = Attribute.GetCustomAttributes(propInfo, true);
 
-            // This seems like it should be a bug in the reflection API's... 
+            // This seems like it should be a bug in the reflection API's...
             Assert.NotEqual(c1, c2);
         }
 
@@ -127,7 +127,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             // CompositionConstants.PartCreationPolicyMetadataName should be ignored
             Assert.NotEqual(CreationPolicy.NonShared, definition.Metadata.GetValue<CreationPolicy>(CompositionConstants.PartCreationPolicyMetadataName));
 
-            // Key ShouldNotBeIgnored should actully be in the dictionary
+            // Key ShouldNotBeIgnored should actually be in the dictionary
             Assert.Equal("Value", definition.Metadata["ShouldNotBeIgnored"]);
         }
 

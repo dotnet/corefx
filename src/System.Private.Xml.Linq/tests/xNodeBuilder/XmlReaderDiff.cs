@@ -37,7 +37,7 @@ namespace CoreXml.Test.XLinq
             public void Add(int depth, string prefix, string ns)
             {
                 // verify whether we do have duplicate
-                TestLog.Compare(!IsDuplicate(depth, prefix, ns), String.Format("Duplicate: {0}, {1}", prefix, ns));
+                TestLog.Compare(!IsDuplicate(depth, prefix, ns), string.Format("Duplicate: {0}, {1}", prefix, ns));
                 // no duplicates, add new one
                 _nsStack.TryAdd(depth, new Dictionary<string, string>());
                 _nsStack[depth].Add(prefix, ns);
@@ -192,7 +192,7 @@ namespace CoreXml.Test.XLinq
                         // removed are only namespace declarations
                         TestLog.Compare(n[2] == XNamespace.Xmlns || n[1] == "xmlns", "Removed is not namespace declaration");
 
-                        // Lookup namespace ... should pass 
+                        // Lookup namespace ... should pass
                         TestLog.Compare(filteredReader.LookupNamespace(n[0] != "" ? n[1] : ""), n[3], "Lookup namespace failed - for removed declaration");
                     }
 
@@ -269,7 +269,7 @@ namespace CoreXml.Test.XLinq
             }
         }
 
-        public static void Compare(IEnumerable<string[]> r1, IEnumerable<String[]> r2, NSStack nsTable, int depth)
+        public static void Compare(IEnumerable<string[]> r1, IEnumerable<string[]> r2, NSStack nsTable, int depth)
         {
             IEnumerator<string[]> r1E = r1.GetEnumerator();
             IEnumerator<string[]> r2E = r2.GetEnumerator();
@@ -284,7 +284,7 @@ namespace CoreXml.Test.XLinq
                     if (!found)
                     {
                         // Verify the one thrown out is a) ns decl: b) the nsTable detect it as duplicate
-                        TestLog.Compare(r1E.Current[2] == XNamespace.Xmlns.NamespaceName || r1E.Current[1] == "xmlns", String.Format("Reader removed the non NS declaration attribute: {0},{1},{2},{3}", r1E.Current[0], r1E.Current[1], r1E.Current[2], r1E.Current[3]));
+                        TestLog.Compare(r1E.Current[2] == XNamespace.Xmlns.NamespaceName || r1E.Current[1] == "xmlns", string.Format("Reader removed the non NS declaration attribute: {0},{1},{2},{3}", r1E.Current[0], r1E.Current[1], r1E.Current[2], r1E.Current[3]));
                         TestLog.Compare(nsTable.IsDuplicate(depth, r1E.Current[1], r1E.Current[3]), "The namespace decl was not duplicate");
                     }
                 }

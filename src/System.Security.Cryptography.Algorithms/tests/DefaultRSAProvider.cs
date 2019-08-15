@@ -19,12 +19,6 @@ namespace System.Security.Cryptography.Rsa.Tests
 #else
             RSA rsa = Create();
 
-            if (PlatformDetection.IsFullFramework && rsa is RSACryptoServiceProvider)
-            {
-                rsa.Dispose();
-                return new RSACryptoServiceProvider(keySize);
-            }
-            
             rsa.KeySize = keySize;
             return rsa;
 #endif
@@ -45,14 +39,11 @@ namespace System.Security.Cryptography.Rsa.Tests
             }
         }
 
-        public bool SupportsSha2Oaep { get; } =
-            !PlatformDetection.IsFullFramework || !(RSA.Create() is RSACryptoServiceProvider);
+        public bool SupportsLargeExponent => true;
 
-        public bool SupportsPss { get; } =
-            !PlatformDetection.IsFullFramework || !(RSA.Create() is RSACryptoServiceProvider);
+        public bool SupportsSha2Oaep { get; } = true;
 
-        public bool SupportsDecryptingIntoExactSpaceRequired => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-
+        public bool SupportsPss { get; } = true;
     }
 
     public partial class RSAFactory

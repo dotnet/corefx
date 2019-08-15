@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 //
 // Copyright (C) 2005-2006 Novell, Inc (http://www.novell.com)
@@ -25,13 +25,21 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.DotNet.XUnitExtensions;
 using Xunit;
 
 namespace System.Drawing.Drawing2D.Tests
 {
     public class MatrixTests
     {
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        private static Matrix CreateDisposedMatrix()
+        {
+            var matrix = new Matrix();
+            matrix.Dispose();
+            return matrix;
+        }
+
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Ctor_Default()
         {
             using (var matrix = new Matrix())
@@ -45,7 +53,7 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(float.NaN)]
         [InlineData(float.NegativeInfinity)]
         [InlineData(float.PositiveInfinity)]
@@ -59,7 +67,7 @@ namespace System.Drawing.Drawing2D.Tests
             Ctor_Elements(1, 0, 0, 1, 0, f, false, false);
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(1, 0, 0, 1, 0, 0, true, true)]
         [InlineData(0, 1, 2, 1, 3, 4, false, true)]
         [InlineData(0, 0, 0, 0, 0, 0, false, false)]
@@ -94,7 +102,7 @@ namespace System.Drawing.Drawing2D.Tests
             yield return new object[] { new Rectangle(0, 0, 1, 1), new Point[] { new Point(0, 0), new Point(1, 0), new Point(0, 1) }, new float[] { 1, 0, 0, 1, 0, 0 }, true, true };
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Ctor_Rectangle_Points_TestData))]
         public void Ctor_Rectangle_Points(Rectangle rect, Point[] plgpnts, float[] expectedElements, bool isIdentity, bool isInvertible)
         {
@@ -108,7 +116,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Ctor_Rectangle_Points_TestData))]
         public void Ctor_RectangleF_Points(Rectangle rect, Point[] plgpnts, float[] expectedElements, bool isIdentity, bool isInvertible)
         {
@@ -122,14 +130,14 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Ctor_NullPoints_ThrowsArgumentNullException()
         {
             AssertExtensions.Throws<ArgumentNullException>("plgpts", () => new Matrix(new RectangleF(), null));
             AssertExtensions.Throws<ArgumentNullException>("plgpts", () => new Matrix(new Rectangle(), null));
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(0)]
         [InlineData(2)]
         [InlineData(4)]
@@ -139,21 +147,21 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => new Matrix(new Rectangle(), new Point[length]));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Ctor_WidthZero_ThrowsOutOfMemoryException()
         {
             Assert.Throws<OutOfMemoryException>(() => new Matrix(new Rectangle(1, 1, 0, 1), new Point[3]));
             Assert.Throws<OutOfMemoryException>(() => new Matrix(new RectangleF(1, 1, 0, 1), new PointF[3]));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Ctor_HeightZero_ThrowsOutOfMemoryException()
         {
             Assert.Throws<OutOfMemoryException>(() => new Matrix(new Rectangle(1, 1, 1, 0), new Point[3]));
             Assert.Throws<OutOfMemoryException>(() => new Matrix(new RectangleF(1, 1, 1, 0), new PointF[3]));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Clone_Matrix_ReturnsExpected()
         {
             using (var matrix = new Matrix(1, 2, 3, 4, 5, 6))
@@ -164,13 +172,10 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Clone_Disposed_ThrowsArgumentException()
         {
-            var matrix = new Matrix();
-            matrix.Dispose();
-
-            AssertExtensions.Throws<ArgumentException>(null, () => matrix.Clone());
+            AssertExtensions.Throws<ArgumentException>(null, () => CreateDisposedMatrix().Clone());
         }
 
         public static IEnumerable<object[]> Equals_TestData()
@@ -198,11 +203,12 @@ namespace System.Drawing.Drawing2D.Tests
             yield return new object[] { new Matrix(), new object(), false };
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Equals_TestData))]
         public void Equals_Other_ReturnsExpected(Matrix matrix, object other, bool expected)
         {
-            try
+            using (matrix)
+            using (other as IDisposable)
             {
                 Assert.Equal(expected, matrix.Equals(other));
                 if (other is Matrix otherMatrix)
@@ -210,38 +216,24 @@ namespace System.Drawing.Drawing2D.Tests
                     Assert.Equal(ReferenceEquals(matrix, other), matrix.GetHashCode().Equals(other.GetHashCode()));
                 }
             }
-            finally
-            {
-                matrix.Dispose();
-                (other as IDisposable)?.Dispose();
-            }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Equals_Disposed_ThrowsArgumentException()
         {
-            var matrix = new Matrix();
-            matrix.Dispose();
-
-            AssertExtensions.Throws<ArgumentException>(null, () => matrix.Equals(new Matrix()));
+            AssertExtensions.Throws<ArgumentException>(null, () => CreateDisposedMatrix().Equals(new Matrix()));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Equals_DisposedOther_ThrowsArgumentException()
         {
-            var matrix = new Matrix();
-            matrix.Dispose();
-
-            AssertExtensions.Throws<ArgumentException>(null, () => new Matrix().Equals(matrix));
+            AssertExtensions.Throws<ArgumentException>(null, () => new Matrix().Equals(CreateDisposedMatrix()));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Elements_Disposed_ThrowsArgumentException()
         {
-            var matrix = new Matrix();
-            matrix.Dispose();
-
-            AssertExtensions.Throws<ArgumentException>(null, () => matrix.Elements);
+            AssertExtensions.Throws<ArgumentException>(null, () => CreateDisposedMatrix().Elements);
         }
 
         public static IEnumerable<object[]> Invert_TestData()
@@ -251,23 +243,19 @@ namespace System.Drawing.Drawing2D.Tests
             yield return new object[] { new Matrix(), new float[] { 1, 0, 0, 1, 0, 0 } };
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Invert_TestData))]
         public void Invert_Matrix_Success(Matrix matrix, float[] expectedElements)
         {
-            try
+            using (matrix)
             {
                 matrix.Invert();
                 Assert.Equal(expectedElements, matrix.Elements);
             }
-            finally
-            {
-                matrix.Dispose();
-            }
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(float.NaN)]
         [InlineData(float.PositiveInfinity)]
         [InlineData(float.NegativeInfinity)]
@@ -289,31 +277,22 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Invert_Disposed_ThrowsArgumentException()
         {
-            var matrix = new Matrix();
-            matrix.Dispose();
-
-            AssertExtensions.Throws<ArgumentException>(null, () => matrix.Invert());
+            AssertExtensions.Throws<ArgumentException>(null, () => CreateDisposedMatrix().Invert());
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void IsIdentity_Disposed_ThrowsArgumentException()
         {
-            var matrix = new Matrix();
-            matrix.Dispose();
-
-            AssertExtensions.Throws<ArgumentException>(null, () => matrix.IsIdentity);
+            AssertExtensions.Throws<ArgumentException>(null, () => CreateDisposedMatrix().IsIdentity);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void IsInvertible_Disposed_ThrowsArgumentException()
         {
-            var matrix = new Matrix();
-            matrix.Dispose();
-
-            AssertExtensions.Throws<ArgumentException>(null, () => matrix.IsInvertible);
+            AssertExtensions.Throws<ArgumentException>(null, () => CreateDisposedMatrix().IsInvertible);
         }
 
         public static IEnumerable<object[]> Multiply_TestData()
@@ -344,12 +323,19 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Multiply_TestData))]
         public void Multiply_Matrix_Success(Matrix matrix, Matrix multiple, MatrixOrder order, float[] expected)
         {
-            try
+            using (matrix)
+            using (multiple)
             {
+                if (PlatformDetection.IsArmOrArm64Process)
+                {
+                    //ActiveIssue: 35744
+                    throw new SkipTestException("Precision on float numbers");
+                }
+
                 if (order == MatrixOrder.Prepend)
                 {
                     using (Matrix clone1 = matrix.Clone())
@@ -361,14 +347,9 @@ namespace System.Drawing.Drawing2D.Tests
                 matrix.Multiply(multiple, order);
                 Assert.Equal(expected, matrix.Elements);
             }
-            finally
-            {
-                matrix.Dispose();
-                multiple.Dispose();
-            }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Multiply_NullMatrix_ThrowsArgumentNullException()
         {
             using (var matrix = new Matrix())
@@ -378,7 +359,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(MatrixOrder.Prepend - 1)]
         [InlineData(MatrixOrder.Append + 1)]
         public void Multiply_InvalidMatrixOrder_ThrowsArgumentException(MatrixOrder order)
@@ -390,33 +371,31 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Multiply_Disposed_ThrowsArgumentException()
         {
-            var matrix = new Matrix();
-            matrix.Dispose();
+            Matrix disposedMatrix = CreateDisposedMatrix();
 
             using (var other = new Matrix())
             {
-                AssertExtensions.Throws<ArgumentException>(null, () => matrix.Multiply(other));
-                AssertExtensions.Throws<ArgumentException>(null, () => matrix.Multiply(other, MatrixOrder.Prepend));
+                AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.Multiply(other));
+                AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.Multiply(other, MatrixOrder.Prepend));
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Multiply_DisposedMatrix_ThrowsArgumentException()
         {
+            Matrix disposedMatrix = CreateDisposedMatrix();
+
             using (var matrix = new Matrix())
             {
-                var other = new Matrix();
-                other.Dispose();
-
-                AssertExtensions.Throws<ArgumentException>(null, () => matrix.Multiply(other));
-                AssertExtensions.Throws<ArgumentException>(null, () => matrix.Multiply(other, MatrixOrder.Prepend));
+                AssertExtensions.Throws<ArgumentException>(null, () => matrix.Multiply(disposedMatrix));
+                AssertExtensions.Throws<ArgumentException>(null, () => matrix.Multiply(disposedMatrix, MatrixOrder.Prepend));
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Multiply_SameMatrix_ThrowsInvalidOperationException()
         {
             using (var matrix = new Matrix())
@@ -426,7 +405,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Reset_Matrix_ReturnsExpected()
         {
             using (var matrix = new Matrix(1, 2, 3, 4, 5, 6))
@@ -439,13 +418,10 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Reset_Disposed_ThrowsArgumentException()
         {
-            var matrix = new Matrix();
-            matrix.Dispose();
-
-            AssertExtensions.Throws<ArgumentException>(null, () => matrix.Reset());
+            AssertExtensions.Throws<ArgumentException>(null, () => CreateDisposedMatrix().Reset());
         }
 
         public static IEnumerable<object[]> Rotate_TestData()
@@ -459,18 +435,22 @@ namespace System.Drawing.Drawing2D.Tests
             yield return new object[] { new Matrix(), 45, PointF.Empty, MatrixOrder.Prepend, new float[] { 0.707106769f, 0.707106769f, -0.707106829f, 0.707106769f, 0, 0 }, null, false };
             yield return new object[] { new Matrix(), 45, PointF.Empty, MatrixOrder.Append, new float[] { 0.707106769f, 0.707106769f, -0.707106829f, 0.707106769f, 0, 0 }, null, false };
 
-            var rotated45 = new Matrix();
-            rotated45.Rotate(45);
-            yield return new object[] { rotated45.Clone(), 135, PointF.Empty, MatrixOrder.Prepend, new float[] { -1, 0, 0, -1, 0, 0 }, null, false };
-            yield return new object[] { rotated45.Clone(), 135, PointF.Empty, MatrixOrder.Append, new float[] { -1, 0, 0, -1, 0, 0 }, null, false };
+            using (var rotated45 = new Matrix())
+            {
+                rotated45.Rotate(45);
+                yield return new object[] { rotated45.Clone(), 135, PointF.Empty, MatrixOrder.Prepend, new float[] { -1, 0, 0, -1, 0, 0 }, null, false };
+                yield return new object[] { rotated45.Clone(), 135, PointF.Empty, MatrixOrder.Append, new float[] { -1, 0, 0, -1, 0, 0 }, null, false };
+            }
 
             yield return new object[] { new Matrix(), 90, PointF.Empty, MatrixOrder.Prepend, new float[] { 0, 1, -1, 0, 0, 0 }, null, false };
             yield return new object[] { new Matrix(), 90, PointF.Empty, MatrixOrder.Append, new float[] { 0, 1, -1, 0, 0, 0 }, null, false };
 
-            var rotated90 = new Matrix();
-            rotated90.Rotate(90);
-            yield return new object[] { rotated90.Clone(), 270, PointF.Empty, MatrixOrder.Prepend, new float[] { 1, 0, 0, 1, 0, 0 }, null, true };
-            yield return new object[] { rotated90.Clone(), 270, PointF.Empty, MatrixOrder.Append, new float[] { 1, 0, 0, 1, 0, 0 }, null, true };
+            using (var rotated90 = new Matrix())
+            {
+                rotated90.Rotate(90);
+                yield return new object[] { rotated90.Clone(), 270, PointF.Empty, MatrixOrder.Prepend, new float[] { 1, 0, 0, 1, 0, 0 }, null, true };
+                yield return new object[] { rotated90.Clone(), 270, PointF.Empty, MatrixOrder.Append, new float[] { 1, 0, 0, 1, 0, 0 }, null, true };
+            }
 
             yield return new object[] { new Matrix(10, 20, 30, 40, 50, 60), 180, new PointF(10, 10), MatrixOrder.Prepend, new float[] { -10, -20, -30, -40, 850, 1260 }, null, false };
             yield return new object[] { new Matrix(10, 20, 30, 40, 50, 60), 180, new PointF(10, 10), MatrixOrder.Append, new float[] { -10, -20, -30, -40, -30, -40 }, null, false };
@@ -486,11 +466,11 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Rotate_TestData))]
         public void Rotate_Matrix_Success(Matrix matrix, float angle, PointF point, MatrixOrder order, float[] expectedElements, float[] expectedElementsRotateAt, bool isIdentity)
         {
-            try
+            using (matrix)
             {
                 if (order == MatrixOrder.Prepend)
                 {
@@ -529,22 +509,15 @@ namespace System.Drawing.Drawing2D.Tests
                     Assert.False(clone4.IsIdentity);
                 }
             }
-            finally
-            {
-                matrix.Dispose();
-            }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Rotate_Disposed_ThrowsArgumentException()
         {
-            var matrix = new Matrix();
-            matrix.Dispose();
-
-            AssertExtensions.Throws<ArgumentException>(null, () => matrix.Rotate(1, MatrixOrder.Append));
+            AssertExtensions.Throws<ArgumentException>(null, () => CreateDisposedMatrix().Rotate(1, MatrixOrder.Append));
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(MatrixOrder.Prepend - 1)]
         [InlineData(MatrixOrder.Append + 1)]
         public void Rotate_InvalidMatrixOrder_ThrowsArgumentException(MatrixOrder order)
@@ -555,17 +528,16 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void RotateAt_Disposed_ThrowsArgumentException()
         {
-            var matrix = new Matrix();
-            matrix.Dispose();
+            Matrix disposedMatrix = CreateDisposedMatrix();
 
-            AssertExtensions.Throws<ArgumentException>(null, () => matrix.RotateAt(1, PointF.Empty));
-            AssertExtensions.Throws<ArgumentException>(null, () => matrix.RotateAt(1, PointF.Empty, MatrixOrder.Append));
+            AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.RotateAt(1, PointF.Empty));
+            AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.RotateAt(1, PointF.Empty, MatrixOrder.Append));
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(MatrixOrder.Prepend - 1)]
         [InlineData(MatrixOrder.Append + 1)]
         public void RotateAt_InvalidMatrixOrder_ThrowsArgumentException(MatrixOrder order)
@@ -607,12 +579,18 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Scale_TestData))]
         public void Scale_Matrix_Succss(Matrix matrix, float scaleX, float scaleY, MatrixOrder order, float[] expectedElements)
         {
-            try
+            using (matrix)
             {
+                if (PlatformDetection.IsArmOrArm64Process)
+                {
+                    //ActiveIssue: 35744
+                    throw new SkipTestException("Precision on float numbers");
+                }
+
                 if (order == MatrixOrder.Prepend)
                 {
                     using (Matrix clone = matrix.Clone())
@@ -625,13 +603,9 @@ namespace System.Drawing.Drawing2D.Tests
                 matrix.Scale(scaleX, scaleY, order);
                 Assert.Equal(expectedElements, matrix.Elements);
             }
-            finally
-            {
-                matrix.Dispose();
-            }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(MatrixOrder.Prepend - 1)]
         [InlineData(MatrixOrder.Append + 1)]
         public void Scale_InvalidMatrixOrder_ThrowsArgumentException(MatrixOrder order)
@@ -642,14 +616,13 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Scale_Disposed_ThrowsArgumentException()
         {
-            var matrix = new Matrix();
-            matrix.Dispose();
+            Matrix disposedMatrix = CreateDisposedMatrix();
 
-            AssertExtensions.Throws<ArgumentException>(null, () => matrix.Scale(1, 2));
-            AssertExtensions.Throws<ArgumentException>(null, () => matrix.Scale(1, 2, MatrixOrder.Append));
+            AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.Scale(1, 2));
+            AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.Scale(1, 2, MatrixOrder.Append));
         }
 
         public static IEnumerable<object[]> Shear_TestData()
@@ -683,12 +656,18 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Shear_TestData))]
         public void Shear_Matrix_Succss(Matrix matrix, float shearX, float shearY, MatrixOrder order, float[] expectedElements)
         {
-            try
+            using (matrix)
             {
+                if (PlatformDetection.IsArmOrArm64Process)
+                {
+                    //ActiveIssue: 35744
+                    throw new SkipTestException("Precision on float numbers");
+                }
+
                 if (order == MatrixOrder.Prepend)
                 {
                     using (Matrix clone = matrix.Clone())
@@ -701,14 +680,10 @@ namespace System.Drawing.Drawing2D.Tests
                 matrix.Shear(shearX, shearY, order);
                 Assert.Equal(expectedElements, matrix.Elements);
             }
-            finally
-            {
-                matrix.Dispose();
-            }
         }
 
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(MatrixOrder.Prepend - 1)]
         [InlineData(MatrixOrder.Append + 1)]
         public void Shear_InvalidMatrixOrder_ThrowsArgumentException(MatrixOrder order)
@@ -719,14 +694,13 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Shear_Disposed_ThrowsArgumentException()
         {
-            var matrix = new Matrix();
-            matrix.Dispose();
+            Matrix disposedMatrix = CreateDisposedMatrix();
 
-            AssertExtensions.Throws<ArgumentException>(null, () => matrix.Shear(1, 2));
-            AssertExtensions.Throws<ArgumentException>(null, () => matrix.Shear(1, 2, MatrixOrder.Append));
+            AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.Shear(1, 2));
+            AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.Shear(1, 2, MatrixOrder.Append));
         }
 
         public static IEnumerable<object[]> Translate_TestData()
@@ -751,12 +725,18 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Translate_TestData))]
         public void Translate_Matrix_Success(Matrix matrix, float offsetX, float offsetY, MatrixOrder order, float[] expectedElements)
         {
-            try
+            using (matrix)
             {
+                if (PlatformDetection.IsArmOrArm64Process)
+                {
+                    //ActiveIssue: 35744
+                    throw new SkipTestException("Precision on float numbers");
+                }
+
                 if (order == MatrixOrder.Prepend)
                 {
                     using (Matrix clone = matrix.Clone())
@@ -769,13 +749,9 @@ namespace System.Drawing.Drawing2D.Tests
                 matrix.Translate(offsetX, offsetY, order);
                 AssertEqualFloatArray(expectedElements, matrix.Elements);
             }
-            finally
-            {
-                matrix.Dispose();
-            }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(MatrixOrder.Prepend - 1)]
         [InlineData(MatrixOrder.Append + 1)]
         public void Translate_InvalidMatrixOrder_ThrowsArgumentException(MatrixOrder order)
@@ -786,14 +762,13 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Translate_Disposed_ThrowsArgumentException()
         {
-            var matrix = new Matrix();
-            matrix.Dispose();
+            Matrix disposedMatrix = CreateDisposedMatrix();
 
-            AssertExtensions.Throws<ArgumentException>(null, () => matrix.Translate(1, 2));
-            AssertExtensions.Throws<ArgumentException>(null, () => matrix.Translate(1, 2, MatrixOrder.Append));
+            AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.Translate(1, 2));
+            AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.Translate(1, 2, MatrixOrder.Append));
         }
 
         public static IEnumerable<object[]> TransformPoints_TestData()
@@ -803,38 +778,30 @@ namespace System.Drawing.Drawing2D.Tests
             yield return new object[] { new Matrix(2, 4, 6, 8, 10, 12), new Point[1], new Point[] { new Point(10, 12) } };
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(TransformPoints_TestData))]
         public void TransformPoints_Point_Success(Matrix matrix, Point[] points, Point[] expectedPoints)
         {
-            try
+            using (matrix)
             {
                 matrix.TransformPoints(points);
                 Assert.Equal(expectedPoints, points);
             }
-            finally
-            {
-                matrix.Dispose();
-            }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(TransformPoints_TestData))]
         public void TransformPoints_PointF_Success(Matrix matrix, Point[] points, Point[] expectedPoints)
         {
-            try
+            using (matrix)
             {
                 PointF[] pointFs = points.Select(p => (PointF)p).ToArray();
                 matrix.TransformPoints(pointFs);
                 Assert.Equal(expectedPoints.Select(p => (PointF)p), pointFs);
             }
-            finally
-            {
-                matrix.Dispose();
-            }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TransformPoints_NullPoints_ThrowsArgumentNullException()
         {
             using (var matrix = new Matrix())
@@ -844,7 +811,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TransformPoints_EmptyPoints_ThrowsArgumentException()
         {
             using (var matrix = new Matrix())
@@ -854,14 +821,13 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TransformPoints_Disposed_ThrowsArgumentException()
         {
-            var matrix = new Matrix();
-            matrix.Dispose();
+            Matrix disposedMatrix = CreateDisposedMatrix();
 
-            AssertExtensions.Throws<ArgumentException>(null, () => matrix.TransformPoints(new Point[1]));
-            AssertExtensions.Throws<ArgumentException>(null, () => matrix.TransformPoints(new PointF[1]));
+            AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.TransformPoints(new Point[1]));
+            AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.TransformPoints(new PointF[1]));
         }
 
         public static IEnumerable<object[]> TransformVectors_TestData()
@@ -871,53 +837,41 @@ namespace System.Drawing.Drawing2D.Tests
             yield return new object[] { new Matrix(2, 4, 6, 8, 10, 12), new Point[1], new Point[1] };
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(TransformVectors_TestData))]
         public void TransformVectors_Point_Success(Matrix matrix, Point[] points, Point[] expectedPoints)
         {
-            try
+            using (matrix)
             {
                 matrix.TransformVectors(points);
                 Assert.Equal(expectedPoints, points);
             }
-            finally
-            {
-                matrix.Dispose();
-            }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(TransformVectors_TestData))]
         public void TransformVectors_PointF_Success(Matrix matrix, Point[] points, Point[] expectedPoints)
         {
-            try
+            using (matrix)
             {
                 PointF[] pointFs = points.Select(p => (PointF)p).ToArray();
                 matrix.TransformVectors(pointFs);
                 Assert.Equal(expectedPoints.Select(p => (PointF)p), pointFs);
             }
-            finally
-            {
-                matrix.Dispose();
-            }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(TransformVectors_TestData))]
         public void VectorTransformPoints_Points_Success(Matrix matrix, Point[] points, Point[] expectedPoints)
         {
-            try
+            using (matrix)
             {
                 matrix.VectorTransformPoints(points);
                 Assert.Equal(expectedPoints, points);
             }
-            finally
-            {
-                matrix.Dispose();
-            }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TransformVectors_NullPoints_ThrowsArgumentNullException()
         {
             using (var matrix = new Matrix())
@@ -928,7 +882,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TransformVectors_EmptyPoints_ThrowsArgumentException()
         {
             using (var matrix = new Matrix())
@@ -939,15 +893,14 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TransformVectors_Disposed_ThrowsArgumentException()
         {
-            var matrix = new Matrix();
-            matrix.Dispose();
+            Matrix disposedMatrix = CreateDisposedMatrix();
 
-            AssertExtensions.Throws<ArgumentException>(null, () => matrix.VectorTransformPoints(new Point[1]));
-            AssertExtensions.Throws<ArgumentException>(null, () => matrix.TransformPoints(new Point[1]));
-            AssertExtensions.Throws<ArgumentException>(null, () => matrix.TransformVectors(new PointF[1]));
+            AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.VectorTransformPoints(new Point[1]));
+            AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.TransformPoints(new Point[1]));
+            AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.TransformVectors(new PointF[1]));
         }
 
         private static void AssertEqualFloatArray(float[] expected, float[] actual)

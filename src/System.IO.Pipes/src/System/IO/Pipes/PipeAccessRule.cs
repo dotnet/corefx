@@ -7,13 +7,12 @@ using System.Security.Principal;
 
 namespace System.IO.Pipes
 {
-    // [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public sealed class PipeAccessRule : AccessRule
     {
         //
         // Constructor for creating access rules for pipe objects
         //
-        public PipeAccessRule( String identity, PipeAccessRights rights, AccessControlType type)
+        public PipeAccessRule( string identity, PipeAccessRights rights, AccessControlType type)
             : this( new NTAccount(identity), AccessMaskFromRights(rights, type), false, type)
         {
         }
@@ -40,9 +39,9 @@ namespace System.IO.Pipes
             }
         }
 
-        // ACL's on pipes have a SYNCHRONIZE bit, and CreateFile ALWAYS asks for it.  
+        // ACL's on pipes have a SYNCHRONIZE bit, and CreateFile ALWAYS asks for it.
         // So for allows, let's always include this bit, and for denies, let's never
-        // include this bit unless we're denying full control.  This is the right 
+        // include this bit unless we're denying full control.  This is the right
         // thing for users, even if it does make the model look asymmetrical from a
         // purist point of view.
         internal static int AccessMaskFromRights(PipeAccessRights rights, AccessControlType controlType)
@@ -71,4 +70,3 @@ namespace System.IO.Pipes
         }
     }
 }
-

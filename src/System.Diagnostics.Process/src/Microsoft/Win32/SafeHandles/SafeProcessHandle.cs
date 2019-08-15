@@ -4,17 +4,15 @@
 
 /*============================================================
 **
-** Class:  SafeProcessHandle 
+** Class:  SafeProcessHandle
 **
 ** A wrapper for a process handle
 **
-** 
+**
 ===========================================================*/
 
 using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Security;
 
 namespace Microsoft.Win32.SafeHandles
 {
@@ -23,7 +21,7 @@ namespace Microsoft.Win32.SafeHandles
         internal static readonly SafeProcessHandle InvalidHandle = new SafeProcessHandle();
 
         internal SafeProcessHandle()
-            : this(new IntPtr(DefaultInvalidHandleValue))
+            : this(IntPtr.Zero)
         {
         }
 

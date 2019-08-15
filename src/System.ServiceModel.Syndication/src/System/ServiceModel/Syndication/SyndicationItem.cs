@@ -2,15 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
 using System.Xml;
-using System.Runtime.Serialization;
-using System.Xml.Serialization;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace System.ServiceModel.Syndication
 {
@@ -18,22 +13,14 @@ namespace System.ServiceModel.Syndication
     public class SyndicationItem : IExtensibleSyndicationObject
     {
         private Collection<SyndicationPerson> _authors;
-        private Uri _baseUri;
         private Collection<SyndicationCategory> _categories;
-        private SyndicationContent _content;
         private Collection<SyndicationPerson> _contributors;
-        private TextSyndicationContent _copyright;
         private ExtensibleSyndicationObject _extensions = new ExtensibleSyndicationObject();
-        private string _id;
         private DateTimeOffset _lastUpdatedTime;
         private Collection<SyndicationLink> _links;
         private DateTimeOffset _publishDate;
-        private SyndicationFeed _sourceFeed;
-        private TextSyndicationContent _summary;
-        private TextSyndicationContent _title;
 
-        public SyndicationItem()
-            : this(null, null, null)
+        public SyndicationItem() : this(null, null, null)
         {
         }
 
@@ -51,14 +38,14 @@ namespace System.ServiceModel.Syndication
         {
             if (title != null)
             {
-                this.Title = new TextSyndicationContent(title);
+                Title = new TextSyndicationContent(title);
             }
-            _content = content;
+            Content = content;
             if (itemAlternateLink != null)
             {
-                this.Links.Add(SyndicationLink.CreateAlternateLink(itemAlternateLink));
+                Links.Add(SyndicationLink.CreateAlternateLink(itemAlternateLink));
             }
-            _id = id;
+            Id = id;
             _lastUpdatedTime = lastUpdatedTime;
         }
 
@@ -66,97 +53,55 @@ namespace System.ServiceModel.Syndication
         {
             if (source == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("source");
+                throw new ArgumentNullException(nameof(source));
             }
+
             _extensions = source._extensions.Clone();
             _authors = FeedUtils.ClonePersons(source._authors);
             _categories = FeedUtils.CloneCategories(source._categories);
-            _content = (source._content != null) ? source._content.Clone() : null;
+            Content = (source.Content != null) ? source.Content.Clone() : null;
             _contributors = FeedUtils.ClonePersons(source._contributors);
-            _copyright = FeedUtils.CloneTextContent(source._copyright);
-            _id = source._id;
+            Copyright = FeedUtils.CloneTextContent(source.Copyright);
+            Id = source.Id;
             _lastUpdatedTime = source._lastUpdatedTime;
             _links = FeedUtils.CloneLinks(source._links);
             _publishDate = source._publishDate;
             if (source.SourceFeed != null)
             {
-                _sourceFeed = source._sourceFeed.Clone(false);
-                _sourceFeed.Items = new Collection<SyndicationItem>();
+                SourceFeed = source.SourceFeed.Clone(false);
+                SourceFeed.Items = new Collection<SyndicationItem>();
             }
-            _summary = FeedUtils.CloneTextContent(source._summary);
-            _baseUri = source._baseUri;
-            _title = FeedUtils.CloneTextContent(source._title);
+            Summary = FeedUtils.CloneTextContent(source.Summary);
+            BaseUri = source.BaseUri;
+            Title = FeedUtils.CloneTextContent(source.Title);
         }
 
-        public Dictionary<XmlQualifiedName, string> AttributeExtensions
-        {
-            get { return _extensions.AttributeExtensions; }
-        }
+        public Dictionary<XmlQualifiedName, string> AttributeExtensions => _extensions.AttributeExtensions;
 
         public Collection<SyndicationPerson> Authors
         {
-            get
-            {
-                if (_authors == null)
-                {
-                    _authors = new NullNotAllowedCollection<SyndicationPerson>();
-                }
-                return _authors;
-            }
+            get => _authors ?? (_authors = new NullNotAllowedCollection<SyndicationPerson>());
         }
 
-        public Uri BaseUri
-        {
-            get { return _baseUri; }
-            set { _baseUri = value; }
-        }
+        public Uri BaseUri { get; set; }
 
         public Collection<SyndicationCategory> Categories
         {
-            get
-            {
-                if (_categories == null)
-                {
-                    _categories = new NullNotAllowedCollection<SyndicationCategory>();
-                }
-                return _categories;
-            }
+            get => _categories ?? (_categories = new NullNotAllowedCollection<SyndicationCategory>());
         }
 
-        public SyndicationContent Content
-        {
-            get { return _content; }
-            set { _content = value; }
-        }
+        public SyndicationContent Content { get; set; }
 
         public Collection<SyndicationPerson> Contributors
         {
-            get
-            {
-                if (_contributors == null)
-                {
-                    _contributors = new NullNotAllowedCollection<SyndicationPerson>();
-                }
-                return _contributors;
-            }
+            get => _contributors ?? (_contributors = new NullNotAllowedCollection<SyndicationPerson>());
         }
 
-        public TextSyndicationContent Copyright
-        {
-            get { return _copyright; }
-            set { _copyright = value; }
-        }
+        public TextSyndicationContent Copyright { get; set; }
 
-        public SyndicationElementExtensionCollection ElementExtensions
-        {
-            get { return _extensions.ElementExtensions; }
-        }
+        public SyndicationElementExtensionCollection ElementExtensions => _extensions.ElementExtensions;
 
-        public string Id
-        {
-            get { return _id; }
-            set { _id = value; }
-        }
+        public string Id { get; set; }
 
         internal Exception LastUpdatedTimeException { get; set; }
 
@@ -180,14 +125,7 @@ namespace System.ServiceModel.Syndication
 
         public Collection<SyndicationLink> Links
         {
-            get
-            {
-                if (_links == null)
-                {
-                    _links = new NullNotAllowedCollection<SyndicationLink>();
-                }
-                return _links;
-            }
+            get => _links ?? (_links = new NullNotAllowedCollection<SyndicationLink>());
         }
 
         internal Exception PublishDateException { get; set; }
@@ -210,36 +148,21 @@ namespace System.ServiceModel.Syndication
             }
         }
 
-        public SyndicationFeed SourceFeed
-        {
-            get { return _sourceFeed; }
-            set { _sourceFeed = value; }
-        }
+        public SyndicationFeed SourceFeed { get; set; }
 
-        public TextSyndicationContent Summary
-        {
-            get { return _summary; }
-            set { _summary = value; }
-        }
+        public TextSyndicationContent Summary { get; set; }
 
-        public TextSyndicationContent Title
-        {
-            get { return _title; }
-            set { _title = value; }
-        }
+        public TextSyndicationContent Title { get; set; }
 
-        public static SyndicationItem Load(XmlReader reader)
-        {
-            return Load<SyndicationItem>(reader);
-        }
+        public static SyndicationItem Load(XmlReader reader) => Load<SyndicationItem>(reader);
 
-        public static TSyndicationItem Load<TSyndicationItem>(XmlReader reader)
-            where TSyndicationItem : SyndicationItem, new()
+        public static TSyndicationItem Load<TSyndicationItem>(XmlReader reader) where TSyndicationItem : SyndicationItem, new()
         {
             if (reader == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("reader");
+                throw new ArgumentNullException(nameof(reader));
             }
+
             Atom10ItemFormatter<TSyndicationItem> atomSerializer = new Atom10ItemFormatter<TSyndicationItem>();
             if (atomSerializer.CanRead(reader))
             {
@@ -252,7 +175,8 @@ namespace System.ServiceModel.Syndication
                 rssSerializer.ReadFrom(reader);
                 return rssSerializer.Item as TSyndicationItem;
             }
-            throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new XmlException(SR.Format(SR.UnknownItemXml, reader.LocalName, reader.NamespaceURI)));
+
+            throw new XmlException(SR.Format(SR.UnknownItemXml, reader.LocalName, reader.NamespaceURI));
         }
 
 
@@ -262,26 +186,18 @@ namespace System.ServiceModel.Syndication
         {
             if (permalink == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("permalink");
+                throw new ArgumentNullException(nameof(permalink));
             }
-            this.Id = permalink.AbsoluteUri;
-            this.Links.Add(SyndicationLink.CreateAlternateLink(permalink));
+
+            Id = permalink.AbsoluteUri;
+            Links.Add(SyndicationLink.CreateAlternateLink(permalink));
         }
 
-        public virtual SyndicationItem Clone()
-        {
-            return new SyndicationItem(this);
-        }
+        public virtual SyndicationItem Clone() => new SyndicationItem(this);
 
-        public Atom10ItemFormatter GetAtom10Formatter()
-        {
-            return new Atom10ItemFormatter(this);
-        }
+        public Atom10ItemFormatter GetAtom10Formatter() => new Atom10ItemFormatter(this);
 
-        public Rss20ItemFormatter GetRss20Formatter()
-        {
-            return GetRss20Formatter(true);
-        }
+        public Rss20ItemFormatter GetRss20Formatter() => GetRss20Formatter(true);
 
         public Rss20ItemFormatter GetRss20Formatter(bool serializeExtensionsAsAtom)
         {
@@ -290,12 +206,12 @@ namespace System.ServiceModel.Syndication
 
         public void SaveAsAtom10(XmlWriter writer)
         {
-            this.GetAtom10Formatter().WriteTo(writer);
+            GetAtom10Formatter().WriteTo(writer);
         }
 
         public void SaveAsRss20(XmlWriter writer)
         {
-            this.GetRss20Formatter().WriteTo(writer);
+            GetRss20Formatter().WriteTo(writer);
         }
 
         protected internal virtual SyndicationCategory CreateCategory()
@@ -350,5 +266,3 @@ namespace System.ServiceModel.Syndication
         }
     }
 }
-
-

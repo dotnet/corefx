@@ -24,7 +24,7 @@ public enum NodeFlags
     Indent = 512
 }
 
-abstract public class CXmlBase
+public abstract class CXmlBase
 {
     protected XmlNodeType _nType;
     protected string _strName;
@@ -66,11 +66,11 @@ abstract public class CXmlBase
     //
     // Virtual Methods and Properties
     //
-    abstract public void Write(XmlWriter rXmlWriter);
+    public abstract void Write(XmlWriter rXmlWriter);
 
-    abstract public void WriteXml(TextWriter rTW);
+    public abstract void WriteXml(TextWriter rTW);
 
-    abstract public string Value
+    public abstract string Value
     { get; }
 
     //
@@ -183,7 +183,7 @@ public class CXmlAttribute : CXmlBase
     //
     // Public Methods and Properties (Override)
     //
-    override public void Write(XmlWriter rXmlWriter)
+    public override void Write(XmlWriter rXmlWriter)
     {
         CXmlBase rNode;
 
@@ -203,7 +203,7 @@ public class CXmlAttribute : CXmlBase
         }
     }
 
-    override public void WriteXml(TextWriter rTW)
+    public override void WriteXml(TextWriter rTW)
     {
         if ((this._eFlags & NodeFlags.DefaultAttribute) == 0)
         {
@@ -221,7 +221,7 @@ public class CXmlAttribute : CXmlBase
     //
     // Public Methods and Properties
     //
-    override public string Value
+    public override string Value
     {
         get
         {
@@ -302,7 +302,7 @@ public class CXmlNode : CXmlBase
     //
     // Public Methods and Properties (Override)
     //
-    override public void Write(XmlWriter rXmlWriter)
+    public override void Write(XmlWriter rXmlWriter)
     {
         CXmlBase rNode;
         CXmlAttribute rAttribute;
@@ -400,9 +400,9 @@ public class CXmlNode : CXmlBase
         }
     }
 
-    override public void WriteXml(TextWriter rTW)
+    public override void WriteXml(TextWriter rTW)
     {
-        String strXml;
+        string strXml;
         CXmlAttribute rAttribute;
         CXmlBase rNode;
 
@@ -495,7 +495,7 @@ public class CXmlNode : CXmlBase
         get { return _strValue; }
     }
 
-    override public string Value
+    public override string Value
     {
         get
         {
@@ -1047,14 +1047,14 @@ public class CXmlCache
             }
             else
             {
-                rNewNode._eFlags |= NodeFlags.Indent;		// Turn on Indent for current Node
+                rNewNode._eFlags |= NodeFlags.Indent;        // Turn on Indent for current Node
             }
 
             // Set all Depth 0 nodes to No Mixed Content and Indent True
             if (_rXmlReader.Depth == 0)
             {
-                rNewNode._eFlags |= NodeFlags.Indent;			// Turn on Indent
-                rNewNode._eFlags &= ~NodeFlags.MixedContent;	// Turn off MixedContent
+                rNewNode._eFlags |= NodeFlags.Indent;        // Turn on Indent
+                rNewNode._eFlags &= ~NodeFlags.MixedContent; // Turn off MixedContent
             }
 
             rParentNode.InsertNode(rNewNode);
@@ -1123,10 +1123,10 @@ public class CXmlCache
                         {
                             int nEnd;
 
-                            nPos = strValue.IndexOf("=", nPos);			//Find the = sign
-                            nEnd = strValue.IndexOf("\"", nPos) + 1;	//Find the next " character
-                            nPos = strValue.IndexOf("'", nPos) + 1;		//Find the next ' character
-                            if (nEnd == 0 || (nPos < nEnd && nPos > 0))	//Pick the one that's closer to the = sign
+                            nPos = strValue.IndexOf("=", nPos);         //Find the = sign
+                            nEnd = strValue.IndexOf("\"", nPos) + 1;    //Find the next " character
+                            nPos = strValue.IndexOf("'", nPos) + 1;     //Find the next ' character
+                            if (nEnd == 0 || (nPos < nEnd && nPos > 0)) //Pick the one that's closer to the = sign
                             {
                                 nEnd = strValue.IndexOf("'", nPos);
                             }
@@ -1154,17 +1154,17 @@ public class CXmlCache
                     {
                         rNewNode._eFlags = _eDefaultFlags | NodeFlags.AttributeTextNode;
                     }
-                    rNewNode._eFlags |= NodeFlags.MixedContent;		// turn on Mixed Content for current node
-                    rNewNode._eFlags &= ~NodeFlags.Indent;			// turn off Indent for current node
-                    rParentNode._eFlags |= NodeFlags.MixedContent;	// turn on Mixed Content for Parent Node
+                    rNewNode._eFlags |= NodeFlags.MixedContent;       // turn on Mixed Content for current node
+                    rNewNode._eFlags &= ~NodeFlags.Indent;            // turn off Indent for current node
+                    rParentNode._eFlags |= NodeFlags.MixedContent;    // turn on Mixed Content for Parent Node
                     break;
 
                 case XmlNodeType.Whitespace:
                 case XmlNodeType.SignificantWhitespace:
                 case XmlNodeType.CDATA:
-                    rNewNode._eFlags |= NodeFlags.MixedContent;		// turn on Mixed Content for current node
-                    rNewNode._eFlags &= ~NodeFlags.Indent;			// turn off Indent for current node
-                    rParentNode._eFlags |= NodeFlags.MixedContent;	// turn on Mixed Content for Parent Node
+                    rNewNode._eFlags |= NodeFlags.MixedContent;       // turn on Mixed Content for current node
+                    rNewNode._eFlags &= ~NodeFlags.Indent;            // turn off Indent for current node
+                    rParentNode._eFlags |= NodeFlags.MixedContent;    // turn on Mixed Content for Parent Node
                     break;
 
                 case XmlNodeType.Comment:
@@ -1202,7 +1202,7 @@ public class CXmlCache
     private void ValidationCallback(object sender, ValidationEventArgs args)
     {
         //  commented by ROCHOA -- don't know where ValidationEventArgs comes from
-        //	_hr = Convert.ToInt16(args.ErrorCode);
+        //  _hr = Convert.ToInt16(args.ErrorCode);
         throw (new Exception("[" + Convert.ToString(_hr) + "] " + args.Message));
     }
 }
@@ -1210,7 +1210,7 @@ public class CXmlCache
 public class ChecksumWriter : TextWriter
 {
     private int _nPosition = 0;
-    private Decimal _dResult = 0;
+    private decimal _dResult = 0;
     private Encoding _encoding;
 
     // --------------------------------------------------------------------------------------------------
@@ -1224,7 +1224,7 @@ public class ChecksumWriter : TextWriter
     // --------------------------------------------------------------------------------------------------
     //    Properties
     // --------------------------------------------------------------------------------------------------
-    public Decimal CheckSum
+    public decimal CheckSum
     {
         get { return _dResult; }
     }
@@ -1237,7 +1237,7 @@ public class ChecksumWriter : TextWriter
     // --------------------------------------------------------------------------------------------------
     //    Public methods
     // --------------------------------------------------------------------------------------------------
-    override public void Write(String str)
+    public override void Write(string str)
     {
         int i;
         int m;
@@ -1249,7 +1249,7 @@ public class ChecksumWriter : TextWriter
         }
     }
 
-    override public void Write(Char[] rgch)
+    public override void Write(char[] rgch)
     {
         int i;
         int m;
@@ -1261,7 +1261,7 @@ public class ChecksumWriter : TextWriter
         }
     }
 
-    override public void Write(Char[] rgch, Int32 iOffset, Int32 iCount)
+    public override void Write(char[] rgch, int iOffset, int iCount)
     {
         int i;
         int m;
@@ -1273,13 +1273,13 @@ public class ChecksumWriter : TextWriter
         }
     }
 
-    override public void Write(Char ch)
+    public override void Write(char ch)
     {
-        _dResult += Math.Round((Decimal)(ch / (_nPosition + 1.0)), 10);
+        _dResult += Math.Round((decimal)(ch / (_nPosition + 1.0)), 10);
         _nPosition++;
     }
 
-    override public void Close()
+    public override void Close()
     {
         _nPosition = 0;
         _dResult = 0;

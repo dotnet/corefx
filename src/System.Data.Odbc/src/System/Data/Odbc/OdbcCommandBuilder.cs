@@ -105,7 +105,7 @@ namespace System.Data.Odbc
 
             if (null == command)
             {
-                throw ADP.ArgumentNull("command");
+                throw ADP.ArgumentNull(nameof(command));
             }
             switch (command.CommandType)
             {
@@ -227,7 +227,7 @@ namespace System.Data.Odbc
                             parameter.Direction = ParameterDirection.ReturnValue;
                             break;
                         default:
-                            Debug.Assert(false, "Unexpected Parametertype while DeriveParamters");
+                            Debug.Fail("Unexpected Parametertype while DeriveParamters");
                             break;
                     }
                     parameter.OdbcType = TypeMap.FromSqlType((ODBC32.SQL_TYPE)reader.GetInt16(ODBC32.DATA_TYPE - 1))._odbcType;
@@ -236,8 +236,8 @@ namespace System.Data.Odbc
                     {
                         case OdbcType.Decimal:
                         case OdbcType.Numeric:
-                            parameter.ScaleInternal = (Byte)reader.GetInt16(ODBC32.DECIMAL_DIGITS - 1);
-                            parameter.PrecisionInternal = (Byte)reader.GetInt16(ODBC32.NUM_PREC_RADIX - 1);
+                            parameter.ScaleInternal = (byte)reader.GetInt16(ODBC32.DECIMAL_DIGITS - 1);
+                            parameter.PrecisionInternal = (byte)reader.GetInt16(ODBC32.NUM_PREC_RADIX - 1);
                             break;
                     }
                     rParams.Add(parameter);
@@ -264,7 +264,7 @@ namespace System.Data.Odbc
             {
                 if (connection == null)
                 {
-                    // Use the adapter's connection if QuoteIdentifier was called from 
+                    // Use the adapter's connection if QuoteIdentifier was called from
                     // DbCommandBuilder instance (which does not have an overload that gets connection object)
                     connection = DataAdapter?.SelectCommand?.Connection;
                     if (connection == null)
@@ -319,7 +319,7 @@ namespace System.Data.Odbc
             {
                 if (connection == null)
                 {
-                    // Use the adapter's connection if UnquoteIdentifier was called from 
+                    // Use the adapter's connection if UnquoteIdentifier was called from
                     // DbCommandBuilder instance (which does not have an overload that gets connection object)
                     connection = DataAdapter?.SelectCommand?.Connection;
                     if (connection == null)
@@ -331,7 +331,7 @@ namespace System.Data.Odbc
                 quoteSuffix = quotePrefix;
             }
 
-            String unquotedIdentifier;
+            string unquotedIdentifier;
             // by the ODBC spec "If the data source does not support quoted identifiers, a blank is returned."
             // So if a blank is returned the string is returned unchanged. Otherwise the returned string is used
             // to unquote the string

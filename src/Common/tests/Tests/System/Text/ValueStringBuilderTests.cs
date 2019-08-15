@@ -31,6 +31,17 @@ namespace System.Text.Tests
         }
 
         [Fact]
+        public void Ctor_InitialCapacity_CanAppend()
+        {
+            var vsb = new ValueStringBuilder(1);
+            Assert.Equal(0, vsb.Length);
+
+            vsb.Append('a');
+            Assert.Equal(1, vsb.Length);
+            Assert.Equal("a", vsb.ToString());
+        }
+
+        [Fact]
         public void Append_Char_MatchesStringBuilder()
         {
             var sb = new StringBuilder();
@@ -153,6 +164,26 @@ namespace System.Text.Tests
         }
 
         [Fact]
+        public void AsSpan_ReturnsCorrectValue_DoesntClearBuilder()
+        {
+            var sb = new StringBuilder();
+            var vsb = new ValueStringBuilder();
+
+            for (int i = 1; i <= 100; i++)
+            {
+                string s = i.ToString();
+                sb.Append(s);
+                vsb.Append(s);
+            }
+
+            var resultString = new string(vsb.AsSpan());
+            Assert.Equal(sb.ToString(), resultString);
+
+            Assert.NotEqual(0, sb.Length);
+            Assert.Equal(sb.Length, vsb.Length);
+        }
+
+        [Fact]
         public void ToString_ClearsBuilder_ThenReusable()
         {
             const string Text1 = "test";
@@ -214,6 +245,27 @@ namespace System.Text.Tests
         }
 
         [Fact]
+        public void Dispose_ClearsBuilder_ThenReusable()
+        {
+            const string Text1 = "test";
+            var vsb = new ValueStringBuilder();
+
+            vsb.Append(Text1);
+            Assert.Equal(Text1.Length, vsb.Length);
+
+            vsb.Dispose();
+
+            Assert.Equal(0, vsb.Length);
+            Assert.Equal(string.Empty, vsb.ToString());
+            Assert.True(vsb.TryCopyTo(Span<char>.Empty, out _));
+
+            const string Text2 = "another test";
+            vsb.Append(Text2);
+            Assert.Equal(Text2.Length, vsb.Length);
+            Assert.Equal(Text2, vsb.ToString());
+        }
+
+        [Fact]
         public unsafe void Indexer()
         {
             const string Text1 = "foobar";
@@ -221,9 +273,46 @@ namespace System.Text.Tests
 
             vsb.Append(Text1);
 
-            Assert.Equal(vsb[3], 'b');
+            Assert.Equal('b', vsb[3]);
             vsb[3] = 'c';
-            Assert.Equal(vsb[3], 'c');
+            Assert.Equal('c', vsb[3]);
+        }
+
+        [Fact]
+        public void EnsureCapacity_IfRequestedCapacityWins()
+        {
+            // Note: constants used here may be dependent on minimal buffer size
+            // the ArrayPool is able to return.
+            Span<char> initialBuffer = stackalloc char[32];
+            var builder = new ValueStringBuilder(initialBuffer);
+
+            builder.EnsureCapacity(65);
+
+            Assert.Equal(128, builder.Capacity);
+        }
+
+        [Fact]
+        public void EnsureCapacity_IfBufferTimesTwoWins()
+        {
+            Span<char> initialBuffer = stackalloc char[32];
+            var builder = new ValueStringBuilder(initialBuffer);
+
+            builder.EnsureCapacity(33);
+
+            Assert.Equal(64, builder.Capacity);
+        }
+
+        [Fact]
+        public void EnsureCapacity_NoAllocIfNotNeeded()
+        {
+            // Note: constants used here may be dependent on minimal buffer size
+            // the ArrayPool is able to return.
+            Span<char> initialBuffer = stackalloc char[64];
+            var builder = new ValueStringBuilder(initialBuffer);
+
+            builder.EnsureCapacity(16);
+
+            Assert.Equal(64, builder.Capacity);
         }
     }
 }

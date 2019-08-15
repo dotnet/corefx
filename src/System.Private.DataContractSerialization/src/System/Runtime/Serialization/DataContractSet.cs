@@ -14,8 +14,8 @@ namespace System.Runtime.Serialization
     {
         private Dictionary<XmlQualifiedName, DataContract> _contracts;
         private Dictionary<DataContract, object> _processedContracts;
-        private ICollection<Type> _referencedTypes;
-        private ICollection<Type> _referencedCollectionTypes;
+        private readonly ICollection<Type> _referencedTypes;
+        private readonly ICollection<Type> _referencedCollectionTypes;
 
 #if SUPPORT_SURROGATE
         private IDataContractSurrogate _dataContractSurrogate;
@@ -211,21 +211,6 @@ namespace System.Runtime.Serialization
                     Add(knownDataContract);
                 }
             }
-        }
-
-        internal XmlQualifiedName GetStableName(Type clrType)
-        {
-#if SUPPORT_SURROGATE
-            if (_dataContractSurrogate != null)
-            {
-                Type dcType = DataContractSurrogateCaller.GetDataContractType(_dataContractSurrogate, clrType);
-
-                //if (clrType.IsValueType != dcType.IsValueType)
-                //    throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidDataContractException(SR.GetString(SR.ValueTypeMismatchInSurrogatedType, dcType, clrType)));
-                return DataContract.GetStableName(dcType);
-            }
-#endif
-            return DataContract.GetStableName(clrType);
         }
 
         internal DataContract GetDataContract(Type clrType)

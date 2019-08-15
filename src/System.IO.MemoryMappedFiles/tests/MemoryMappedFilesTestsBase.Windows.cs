@@ -13,13 +13,13 @@ namespace System.IO.MemoryMappedFiles.Tests
     public abstract partial class MemoryMappedFilesTestBase : FileCleanupTestBase
     {
         /// <summary>Gets the system's page size.</summary>
-        protected static Lazy<int> s_pageSize = new Lazy<int>(() => 
+        protected static Lazy<int> s_pageSize = new Lazy<int>(() =>
         {
             int pageSize;
             SYSTEM_INFO info;
             GetSystemInfo(out info);
             pageSize = (int)info.dwPageSize;
-            Assert.InRange(pageSize, 1, Int32.MaxValue);
+            Assert.InRange(pageSize, 1, int.MaxValue);
             return pageSize;
         });
 

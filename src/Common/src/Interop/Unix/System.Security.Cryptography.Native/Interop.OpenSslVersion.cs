@@ -2,35 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Runtime.InteropServices;
 
 internal static partial class Interop
 {
     internal static partial class OpenSsl
     {
-        private static Version s_opensslVersion;
-
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SSLEayVersion")]
-        private static extern string OpenSslVersionDescription();
-
-        internal static Version OpenSslVersion
-        {
-            get
-            {
-                if (s_opensslVersion == null)
-                {
-                    const string OpenSSL = "OpenSSL ";
-
-                    // Skip OpenSSL part, and get the version string of format x.y.z
-                    if (!Version.TryParse(OpenSslVersionDescription().AsSpan(OpenSSL.Length, 5).ToString(), out s_opensslVersion))
-                    {
-                        s_opensslVersion = new Version(0, 0, 0);
-                    }
-                }
-
-                return s_opensslVersion;
-            }
-        }
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_OpenSslVersionNumber")]
+        internal static extern long OpenSslVersionNumber();
     }
 }

@@ -7,7 +7,7 @@
 //
 //
 // Compiler-targeted type for switching back into the current execution context, e.g.
-// 
+//
 //   await Task.Yield();
 //   =====================
 //   var $awaiter = Task.Yield().GetAwaiter();
@@ -21,8 +21,6 @@
 //
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-using System;
-using System.Security;
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using System.Threading;
@@ -46,10 +44,7 @@ namespace System.Runtime.CompilerServices
 
         /// <summary>Provides an awaiter that switches into a target environment.</summary>
         /// <remarks>This type is intended for compiler use only.</remarks>
-        public readonly struct YieldAwaiter : ICriticalNotifyCompletion
-#if CORECLR
-            , IStateMachineBoxAwareAwaiter
-#endif
+        public readonly struct YieldAwaiter : ICriticalNotifyCompletion, IStateMachineBoxAwareAwaiter
         {
             /// <summary>Gets whether a yield is not required.</summary>
             /// <remarks>This property is intended for compiler user rather than use directly in code.</remarks>
@@ -80,7 +75,7 @@ namespace System.Runtime.CompilerServices
                 // Validate arguments
                 if (continuation == null) throw new ArgumentNullException(nameof(continuation));
 
-                if (TplEtwProvider.Log.IsEnabled())
+                if (TplEventSource.Log.IsEnabled())
                 {
                     continuation = OutputCorrelationEtwEvent(continuation);
                 }
@@ -113,18 +108,17 @@ namespace System.Runtime.CompilerServices
                     // We're targeting a custom scheduler, so queue a task.
                     else
                     {
-                        Task.Factory.StartNew(continuation, default(CancellationToken), TaskCreationOptions.PreferFairness, scheduler);
+                        Task.Factory.StartNew(continuation, default, TaskCreationOptions.PreferFairness, scheduler);
                     }
                 }
             }
 
-#if CORECLR
             void IStateMachineBoxAwareAwaiter.AwaitUnsafeOnCompleted(IAsyncStateMachineBox box)
             {
                 Debug.Assert(box != null);
 
                 // If tracing is enabled, delegate the Action-based implementation.
-                if (TplEtwProvider.Log.IsEnabled())
+                if (TplEventSource.Log.IsEnabled())
                 {
                     QueueContinuation(box.MoveNextAction, flowContext: false);
                     return;
@@ -133,25 +127,24 @@ namespace System.Runtime.CompilerServices
                 // Otherwise, this is the same logic as in QueueContinuation, except using
                 // an IAsyncStateMachineBox instead of an Action, and only for flowContext:false.
 
-                SynchronizationContext syncCtx = SynchronizationContext.Current;
+                SynchronizationContext? syncCtx = SynchronizationContext.Current;
                 if (syncCtx != null && syncCtx.GetType() != typeof(SynchronizationContext))
                 {
-                    syncCtx.Post(s => ((IAsyncStateMachineBox)s).MoveNext(), box);
+                    syncCtx.Post(s => ((IAsyncStateMachineBox)s!).MoveNext(), box);
                 }
                 else
                 {
                     TaskScheduler scheduler = TaskScheduler.Current;
                     if (scheduler == TaskScheduler.Default)
                     {
-                        ThreadPool.UnsafeQueueUserWorkItem(s => ((IAsyncStateMachineBox)s).MoveNext(), box);
+                        ThreadPool.UnsafeQueueUserWorkItemInternal(box, preferLocal: false);
                     }
                     else
                     {
-                        Task.Factory.StartNew(s => ((IAsyncStateMachineBox)s).MoveNext(), box, default, TaskCreationOptions.PreferFairness, scheduler);
+                        Task.Factory.StartNew(s => ((IAsyncStateMachineBox)s!).MoveNext(), box, default, TaskCreationOptions.PreferFairness, scheduler);
                     }
                 }
             }
-#endif
 
             private static Action OutputCorrelationEtwEvent(Action continuation)
             {
@@ -160,29 +153,29 @@ namespace System.Runtime.CompilerServices
                 return continuation;
 #else
                 int continuationId = Task.NewId();
-                Task currentTask = Task.InternalCurrent;
+                Task? currentTask = Task.InternalCurrent;
                 // fire the correlation ETW event
-                TplEtwProvider.Log.AwaitTaskContinuationScheduled(TaskScheduler.Current.Id, (currentTask != null) ? currentTask.Id : 0, continuationId);
+                TplEventSource.Log.AwaitTaskContinuationScheduled(TaskScheduler.Current.Id, (currentTask != null) ? currentTask.Id : 0, continuationId);
 
                 return AsyncMethodBuilderCore.CreateContinuationWrapper(continuation, (innerContinuation,continuationIdTask) =>
                 {
-                    var etwLog = TplEtwProvider.Log;
-                    etwLog.TaskWaitContinuationStarted(((Task<int>)continuationIdTask).Result);
+                    var log = TplEventSource.Log;
+                    log.TaskWaitContinuationStarted(((Task<int>)continuationIdTask).Result);
 
                     // ETW event for Task Wait End.
                     Guid prevActivityId = new Guid();
                     // Ensure the continuation runs under the correlated activity ID generated above
-                    if (etwLog.TasksSetActivityIds)
-                        EventSource.SetCurrentThreadActivityId(TplEtwProvider.CreateGuidForTaskID(((Task<int>)continuationIdTask).Result), out prevActivityId);
+                    if (log.TasksSetActivityIds)
+                        EventSource.SetCurrentThreadActivityId(TplEventSource.CreateGuidForTaskID(((Task<int>)continuationIdTask).Result), out prevActivityId);
 
                     // Invoke the original continuation provided to OnCompleted.
                     innerContinuation();
                     // Restore activity ID
 
-                    if (etwLog.TasksSetActivityIds)
+                    if (log.TasksSetActivityIds)
                         EventSource.SetCurrentThreadActivityId(prevActivityId);
 
-                    etwLog.TaskWaitContinuationComplete(((Task<int>)continuationIdTask).Result);
+                    log.TaskWaitContinuationComplete(((Task<int>)continuationIdTask).Result);
                 }, Task.FromResult(continuationId)); // pass the ID in a task to avoid a closure\
 #endif
             }
@@ -193,7 +186,7 @@ namespace System.Runtime.CompilerServices
             private static readonly SendOrPostCallback s_sendOrPostCallbackRunAction = RunAction;
             /// <summary>Runs an Action delegate provided as state.</summary>
             /// <param name="state">The Action delegate to invoke.</param>
-            private static void RunAction(object state) { ((Action)state)(); }
+            private static void RunAction(object? state) { ((Action)state!)(); }
 
             /// <summary>Ends the await operation.</summary>
             public void GetResult() { } // Nop. It exists purely because the compiler pattern demands it.

@@ -54,7 +54,7 @@ namespace System.Collections.Immutable
         private ImmutableStack(T head, ImmutableStack<T> tail)
         {
             Debug.Assert(tail != null);
-            
+
             _head = head;
             _tail = tail;
         }
@@ -66,9 +66,7 @@ namespace System.Collections.Immutable
         {
             get
             {
-                Contract.Ensures(Contract.Result<ImmutableStack<T>>() != null);
-                Contract.Ensures(Contract.Result<ImmutableStack<T>>().IsEmpty);
-                Contract.Assume(s_EmptyField.IsEmpty);
+                Debug.Assert(s_EmptyField.IsEmpty);
                 return s_EmptyField;
             }
         }
@@ -78,9 +76,7 @@ namespace System.Collections.Immutable
         /// </summary>
         public ImmutableStack<T> Clear()
         {
-            Contract.Ensures(Contract.Result<ImmutableStack<T>>() != null);
-            Contract.Ensures(Contract.Result<ImmutableStack<T>>().IsEmpty);
-            Contract.Assume(s_EmptyField.IsEmpty);
+            Debug.Assert(s_EmptyField.IsEmpty);
             return Empty;
         }
 
@@ -107,7 +103,7 @@ namespace System.Collections.Immutable
         /// Gets the element on the top of the stack.
         /// </summary>
         /// <returns>
-        /// The element on the top of the stack. 
+        /// The element on the top of the stack.
         /// </returns>
         /// <exception cref="InvalidOperationException">Thrown when the stack is empty.</exception>
         [Pure]
@@ -121,12 +117,12 @@ namespace System.Collections.Immutable
             return _head;
         }
 
-#if FEATURE_ITEMREFAPI
+#if !NETSTANDARD10
         /// <summary>
         /// Gets a read-only reference to the element on the top of the stack.
         /// </summary>
         /// <returns>
-        /// A read-only reference to the element on the top of the stack. 
+        /// A read-only reference to the element on the top of the stack.
         /// </returns>
         /// <exception cref="InvalidOperationException">Thrown when the stack is empty.</exception>
         [Pure]
@@ -149,8 +145,6 @@ namespace System.Collections.Immutable
         [Pure]
         public ImmutableStack<T> Push(T value)
         {
-            Contract.Ensures(Contract.Result<ImmutableStack<T>>() != null);
-            Contract.Ensures(!Contract.Result<ImmutableStack<T>>().IsEmpty);
             return new ImmutableStack<T>(value, this);
         }
 
@@ -173,12 +167,12 @@ namespace System.Collections.Immutable
         [Pure]
         public ImmutableStack<T> Pop()
         {
-            Contract.Ensures(Contract.Result<ImmutableStack<T>>() != null);
             if (this.IsEmpty)
             {
                 throw new InvalidOperationException(SR.InvalidEmptyOperation);
             }
 
+            Debug.Assert(_tail != null);
             return _tail;
         }
 
@@ -253,15 +247,14 @@ namespace System.Collections.Immutable
         [Pure]
         internal ImmutableStack<T> Reverse()
         {
-            Contract.Ensures(Contract.Result<ImmutableStack<T>>() != null);
-            Contract.Ensures(Contract.Result<ImmutableStack<T>>().IsEmpty == this.IsEmpty);
-
             var r = this.Clear();
             for (ImmutableStack<T> f = this; !f.IsEmpty; f = f.Pop())
             {
                 r = r.Push(f.Peek());
             }
 
+            Debug.Assert(r != null);
+            Debug.Assert(r.IsEmpty == IsEmpty);
             return r;
         }
     }

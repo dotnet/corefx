@@ -2,7 +2,7 @@
 // See the LICENSE file in the project root for more information.
 
 // Copyright (c) 2004 Mainsoft Co.
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
 // "Software"), to deal in the Software without restriction, including
@@ -10,10 +10,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -44,16 +44,16 @@ namespace System.Data.Tests
             dc.AutoIncrement = false;
 
             // Checking default value (True)
-            Assert.Equal(true, dc.AllowDBNull);
+            Assert.True(dc.AllowDBNull);
 
             // AllowDBNull=true - adding new row with null value
             dt.Rows.Add(dt.NewRow());
             Assert.Equal(DBNull.Value, dt.Rows[0][0]);
 
-            // set AllowDBNull=false 
+            // set AllowDBNull=false
             Assert.Throws<DataException>(() =>
             {
-                dc.AllowDBNull = false; //the exisiting row contains null value
+                dc.AllowDBNull = false; //the existing row contains null value
             });
 
             dt.Rows.Clear();
@@ -78,12 +78,12 @@ namespace System.Data.Tests
             dc = new DataColumn("ColName", typeof(string));
 
             // Checking default value (False)
-            Assert.Equal(false, dc.AutoIncrement);
+            Assert.False(dc.AutoIncrement);
 
             //Cheking Set
             dc.AutoIncrement = true;
             // Checking Get
-            Assert.Equal(true, dc.AutoIncrement);
+            Assert.True(dc.AutoIncrement);
         }
 
         [Fact]
@@ -197,7 +197,7 @@ namespace System.Data.Tests
             dc2 = new DataColumn();
             // #1
             // Equals 1
-            Assert.Equal(false, dc1.Equals(dc2));
+            Assert.False(dc1.Equals(dc2));
 
             dc1 = dc2;
             // #2
@@ -213,10 +213,10 @@ namespace System.Data.Tests
             dc = new DataColumn();
 
             pc = dc.ExtendedProperties;
-            // Checking ExtendedProperties default 
-            Assert.Equal(true, pc != null);
+            // Checking ExtendedProperties default
+            Assert.True(pc != null);
 
-            // Checking ExtendedProperties count 
+            // Checking ExtendedProperties count
             Assert.Equal(0, pc.Count);
         }
 
@@ -321,13 +321,13 @@ namespace System.Data.Tests
 
             //Checking default value (false)
             // ReadOnly default
-            Assert.Equal(false, dc.ReadOnly);
+            Assert.False(dc.ReadOnly);
 
             //Cheking Set
             dc.ReadOnly = true;
             //Checking Get
             // ReadOnly Get/Set
-            Assert.Equal(true, dc.ReadOnly);
+            Assert.True(dc.ReadOnly);
         }
 
         [Fact]
@@ -338,7 +338,7 @@ namespace System.Data.Tests
 
             //Checking First Get
             // Table test1
-            Assert.Equal(null, dc.Table);
+            Assert.Null(dc.Table);
 
             DataTable dt = new DataTable();
             dt.Columns.Add(dc);
@@ -355,7 +355,7 @@ namespace System.Data.Tests
             string sColName, sExp;
             dc = new DataColumn();
 
-            //ToString = ColumnName 			
+            //ToString = ColumnName
             sColName = "Test1";
             dc.ColumnName = sColName;
             // ToString - ColumnName
@@ -376,14 +376,14 @@ namespace System.Data.Tests
             //Checking default value (false)
 
             // Unique default
-            Assert.Equal(false, dc.Unique);
+            Assert.False(dc.Unique);
 
             //Cheking Set
             dc.Unique = true;
 
             //Checking Get
             // Unique Get/Set
-            Assert.Equal(true, dc.Unique);
+            Assert.True(dc.Unique);
         }
 
         [Fact]
@@ -414,7 +414,7 @@ namespace System.Data.Tests
             dc = new DataColumn();
 
             // ctor
-            Assert.Equal(false, dc == null);
+            Assert.False(dc == null);
         }
 
         [Fact]
@@ -425,7 +425,7 @@ namespace System.Data.Tests
             dc = new DataColumn(sName);
 
             // ctor - object
-            Assert.Equal(false, dc == null);
+            Assert.False(dc == null);
 
             // ctor - ColName
             Assert.Equal(sName, dc.ColumnName);
@@ -446,7 +446,7 @@ namespace System.Data.Tests
                 typTest = Type.GetType(sType);
                 dc = new DataColumn("ColName", typTest);
                 // ctor - object
-                Assert.Equal(false, dc == null);
+                Assert.False(dc == null);
 
                 // ctor - ColName
                 Assert.Equal(typTest, dc.DataType);
@@ -460,7 +460,7 @@ namespace System.Data.Tests
             dc = new DataColumn("ColName", typeof(string), "Price * 1.18");
 
             // ctor - object
-            Assert.Equal(false, dc == null);
+            Assert.False(dc == null);
         }
 
         [Fact]
@@ -473,7 +473,7 @@ namespace System.Data.Tests
                 dc = null;
                 dc = new DataColumn("ColName", typeof(string), "Price * 1.18", (MappingType)i);
                 // Ctor #" + i.ToString());
-                Assert.Equal(false, dc == null);
+                Assert.False(dc == null);
             }
         }
 
@@ -483,11 +483,11 @@ namespace System.Data.Tests
             DataColumn dc;
             dc = new DataColumn("ColName", typeof(string));
 
-            //Checking default value 
+            //Checking default value
             // Ordinal default value
             Assert.Equal(-1, dc.Ordinal);
 
-            // needs a DataTable.Columns to test   
+            // needs a DataTable.Columns to test
             DataColumnCollection dcColl;
             DataTable tb = new DataTable();
             dcColl = tb.Columns;
@@ -662,7 +662,7 @@ namespace System.Data.Tests
 
             ds.Relations.Add("Relation1", parent.Columns[0], child.Columns[0], false);
 
-            //Create the computed columns 
+            //Create the computed columns
 
             DataColumn dcComputedParent = new DataColumn("computedParent", Type.GetType("System.Double"));
             parent.Columns.Add(dcComputedParent);

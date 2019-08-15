@@ -18,6 +18,7 @@ internal partial class Interop
         internal const int ERROR_NOT_READY = 0x15;
         internal const int ERROR_SHARING_VIOLATION = 0x20;
         internal const int ERROR_HANDLE_EOF = 0x26;
+        internal const int ERROR_NOT_SUPPORTED = 0x32;
         internal const int ERROR_FILE_EXISTS = 0x50;
         internal const int ERROR_INVALID_PARAMETER = 0x57;
         internal const int ERROR_BROKEN_PIPE = 0x6D;
@@ -39,8 +40,7 @@ internal partial class Interop
         internal const int ERROR_NO_UNICODE_TRANSLATION = 0x459;
         internal const int ERROR_NOT_FOUND = 0x490;
         internal const int ERROR_BAD_IMPERSONATION_LEVEL = 0x542;
-        internal const int ERROR_NO_SYSTEM_RESOURCES = 0x5AA;        
-        internal const int E_FILENOTFOUND = unchecked((int)0x80070002);
+        internal const int ERROR_NO_SYSTEM_RESOURCES = 0x5AA;
         internal const int ERROR_TIMEOUT = 0x000005B4;
     }
 }

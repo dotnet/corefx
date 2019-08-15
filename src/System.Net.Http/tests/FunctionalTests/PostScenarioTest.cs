@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
@@ -13,119 +16,139 @@ namespace System.Net.Http.Functional.Tests
 
     // Note:  Disposing the HttpClient object automatically disposes the handler within. So, it is not necessary
     // to separately Dispose (or have a 'using' statement) for the handler.
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "dotnet/corefx #20010")]
-    public abstract class PostScenarioTest : HttpClientTestBase
+    public abstract class PostScenarioTest : HttpClientHandlerTestBase
     {
         private const string ExpectedContent = "Test contest";
         private const string UserName = "user1";
         private const string Password = "password1";
-        private static readonly Uri BasicAuthServerUri =
-            Configuration.Http.BasicAuthUriForCreds(false, UserName, Password);
-        private static readonly Uri SecureBasicAuthServerUri =
-            Configuration.Http.BasicAuthUriForCreds(true, UserName, Password);
 
-        private readonly ITestOutputHelper _output;
+        public PostScenarioTest(ITestOutputHelper output) : base(output) { }
 
-        public static readonly object[][] EchoServers = Configuration.Http.EchoServers;
+        [ActiveIssue(30057, TargetFrameworkMonikers.Uap)]
+        [OuterLoop("Uses external servers")]
+        [Theory, MemberData(nameof(RemoteServersMemberData))]
+        public async Task PostRewindableStreamContentMultipleTimes_StreamContentFullySent(Configuration.Http.RemoteServer remoteServer)
+        {
+            if (IsCurlHandler)
+            {
+                // CurlHandler rewinds the stream at the end: https://github.com/dotnet/corefx/issues/23782
+                return;
+            }
 
-        public static readonly object[][] BasicAuthEchoServers =
-            new object[][]
+            const string requestBody = "ABC";
+
+            using (HttpClient client = CreateHttpClientForRemoteServer(remoteServer))
+            using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(requestBody)))
+            {
+                var content = new StreamContent(ms);
+
+                for (int i = 1; i <= 3; i++)
                 {
-                    new object[] { BasicAuthServerUri },
-                    new object[] { SecureBasicAuthServerUri }
-                };
+                    HttpResponseMessage response = await client.PostAsync(remoteServer.EchoUri, content);
+                    Assert.Equal(requestBody.Length, ms.Position); // Stream left at end after send.
 
-        public PostScenarioTest(ITestOutputHelper output)
-        {
-            _output = output;
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    _output.WriteLine(responseBody);
+                    Assert.True(TestHelper.JsonMessageContainsKeyValue(responseBody, "BodyContent", requestBody));
+                }
+            }
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task PostNoContentUsingContentLengthSemantics_Success(Uri serverUri)
+        [OuterLoop("Uses external servers")]
+        [Theory, MemberData(nameof(RemoteServersMemberData))]
+        public async Task PostNoContentUsingContentLengthSemantics_Success(Configuration.Http.RemoteServer remoteServer)
         {
-            await PostHelper(serverUri, string.Empty, null,
+            await PostHelper(remoteServer, string.Empty, null,
                 useContentLengthUpload: true, useChunkedEncodingUpload: false);
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task PostEmptyContentUsingContentLengthSemantics_Success(Uri serverUri)
+        [OuterLoop("Uses external servers")]
+        [Theory, MemberData(nameof(RemoteServersMemberData))]
+        public async Task PostEmptyContentUsingContentLengthSemantics_Success(Configuration.Http.RemoteServer remoteServer)
         {
-            await PostHelper(serverUri, string.Empty, new StringContent(string.Empty),
+            await PostHelper(remoteServer, string.Empty, new StringContent(string.Empty),
                 useContentLengthUpload: true, useChunkedEncodingUpload: false);
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task PostEmptyContentUsingChunkedEncoding_Success(Uri serverUri)
+        [OuterLoop("Uses external servers")]
+        [Theory, MemberData(nameof(RemoteServersMemberData))]
+        public async Task PostEmptyContentUsingChunkedEncoding_Success(Configuration.Http.RemoteServer remoteServer)
         {
-            await PostHelper(serverUri, string.Empty, new StringContent(string.Empty),
+            await PostHelper(remoteServer, string.Empty, new StringContent(string.Empty),
                 useContentLengthUpload: false, useChunkedEncodingUpload: true);
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task PostEmptyContentUsingConflictingSemantics_Success(Uri serverUri)
+        [OuterLoop("Uses external servers")]
+        [Theory, MemberData(nameof(RemoteServersMemberData))]
+        public async Task PostEmptyContentUsingConflictingSemantics_Success(Configuration.Http.RemoteServer remoteServer)
         {
-            await PostHelper(serverUri, string.Empty, new StringContent(string.Empty),
+            await PostHelper(remoteServer, string.Empty, new StringContent(string.Empty),
                 useContentLengthUpload: true, useChunkedEncodingUpload: true);
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task PostUsingContentLengthSemantics_Success(Uri serverUri)
+        [OuterLoop("Uses external servers")]
+        [Theory, MemberData(nameof(RemoteServersMemberData))]
+        public async Task PostUsingContentLengthSemantics_Success(Configuration.Http.RemoteServer remoteServer)
         {
-            await PostHelper(serverUri, ExpectedContent, new StringContent(ExpectedContent),
+            await PostHelper(remoteServer, ExpectedContent, new StringContent(ExpectedContent),
                 useContentLengthUpload: true, useChunkedEncodingUpload: false);
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task PostUsingChunkedEncoding_Success(Uri serverUri)
+        [OuterLoop("Uses external servers")]
+        [Theory, MemberData(nameof(RemoteServersMemberData))]
+        public async Task PostUsingChunkedEncoding_Success(Configuration.Http.RemoteServer remoteServer)
         {
-            await PostHelper(serverUri, ExpectedContent, new StringContent(ExpectedContent),
+            await PostHelper(remoteServer, ExpectedContent, new StringContent(ExpectedContent),
                 useContentLengthUpload: false, useChunkedEncodingUpload: true);
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task PostSyncBlockingContentUsingChunkedEncoding_Success(Uri serverUri)
+        [OuterLoop("Uses external servers")]
+        [Theory, MemberData(nameof(RemoteServersMemberData))]
+        public async Task PostSyncBlockingContentUsingChunkedEncoding_Success(Configuration.Http.RemoteServer remoteServer)
         {
-            await PostHelper(serverUri, ExpectedContent, new SyncBlockingContent(ExpectedContent),
+            await PostHelper(remoteServer, ExpectedContent, new SyncBlockingContent(ExpectedContent),
                 useContentLengthUpload: false, useChunkedEncodingUpload: true);
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task PostRepeatedFlushContentUsingChunkedEncoding_Success(Uri serverUri)
+        [OuterLoop("Uses external servers")]
+        [Theory, MemberData(nameof(RemoteServersMemberData))]
+        public async Task PostRepeatedFlushContentUsingChunkedEncoding_Success(Configuration.Http.RemoteServer remoteServer)
         {
-            await PostHelper(serverUri, ExpectedContent, new RepeatedFlushContent(ExpectedContent),
+            await PostHelper(remoteServer, ExpectedContent, new RepeatedFlushContent(ExpectedContent),
                 useContentLengthUpload: false, useChunkedEncodingUpload: true);
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task PostUsingUsingConflictingSemantics_UsesChunkedSemantics(Uri serverUri)
+        [OuterLoop("Uses external servers")]
+        [Theory, MemberData(nameof(RemoteServersMemberData))]
+        public async Task PostUsingUsingConflictingSemantics_UsesChunkedSemantics(Configuration.Http.RemoteServer remoteServer)
         {
-            await PostHelper(serverUri, ExpectedContent, new StringContent(ExpectedContent),
+            await PostHelper(remoteServer, ExpectedContent, new StringContent(ExpectedContent),
                 useContentLengthUpload: true, useChunkedEncodingUpload: true);
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [Theory, MemberData(nameof(EchoServers))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "netfx behaves differently and will buffer content and use 'Content-Length' semantics")]
-        public async Task PostUsingNoSpecifiedSemantics_UsesChunkedSemantics(Uri serverUri)
+        [OuterLoop("Uses external servers")]
+        [Theory, MemberData(nameof(RemoteServersMemberData))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "WinRT behaves differently and will use 'Content-Length' semantics")]
+        public async Task PostUsingNoSpecifiedSemantics_UsesChunkedSemantics(Configuration.Http.RemoteServer remoteServer)
         {
-            await PostHelper(serverUri, ExpectedContent, new StringContent(ExpectedContent),
+            await PostHelper(remoteServer, ExpectedContent, new StringContent(ExpectedContent),
                 useContentLengthUpload: false, useChunkedEncodingUpload: false);
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        public static IEnumerable<object[]> RemoteServersAndLargeContentSizes()
+        {
+            foreach (Configuration.Http.RemoteServer remoteServer in Configuration.Http.RemoteServers)
+            {
+                yield return new object[] { remoteServer, 5 * 1024 };
+                yield return new object[] { remoteServer, 63 * 1024 };
+                yield return new object[] { remoteServer, 129 * 1024 };
+            }
+        }
+
+        [OuterLoop("Uses external server")]
         [Theory]
-        [InlineData(5 * 1024)]
-        [InlineData(63 * 1024)]
-        public async Task PostLongerContentLengths_UsesChunkedSemantics(int contentLength)
+        [MemberData(nameof(RemoteServersAndLargeContentSizes))]
+        public async Task PostLargeContentUsingContentLengthSemantics_Success(Configuration.Http.RemoteServer remoteServer, int contentLength)
         {
             var rand = new Random(42);
             var sb = new StringBuilder(contentLength);
@@ -135,32 +158,43 @@ namespace System.Net.Http.Functional.Tests
             }
             string content = sb.ToString();
 
-            await PostHelper(Configuration.Http.RemoteEchoServer, content, new StringContent(content),
+            await PostHelper(remoteServer, content, new StringContent(content),
                 useContentLengthUpload: true, useChunkedEncodingUpload: false);
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [Theory, MemberData(nameof(BasicAuthEchoServers))]
-        public async Task PostRewindableContentUsingAuth_NoPreAuthenticate_Success(Uri serverUri)
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "WinRT based handler has PreAuthenticate always true")]
+        [OuterLoop("Uses external servers")]
+        [Theory, MemberData(nameof(RemoteServersMemberData))]
+        public async Task PostRewindableContentUsingAuth_NoPreAuthenticate_Success(Configuration.Http.RemoteServer remoteServer)
         {
-            HttpContent content = CustomContent.Create(ExpectedContent, true);
+            if (remoteServer.HttpVersion == new Version(2, 0))
+            {
+                // This is occasionally timing out in CI with SocketsHttpHandler and HTTP2, particularly on Linux
+                // Likely this is just a very slow test and not a product issue, so just increasing the timeout may be the right fix.
+                // Disable until we can investigate further.
+                return;
+            }
+
+            HttpContent content = new StreamContent(new CustomContent.CustomStream(Encoding.UTF8.GetBytes(ExpectedContent), true));
             var credential = new NetworkCredential(UserName, Password);
-            await PostUsingAuthHelper(serverUri, ExpectedContent, content, credential, false);
+            await PostUsingAuthHelper(remoteServer, ExpectedContent, content, credential, false);
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [Theory, MemberData(nameof(BasicAuthEchoServers))]
-        public async Task PostNonRewindableContentUsingAuth_NoPreAuthenticate_ThrowsHttpRequestException(Uri serverUri)
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "WinRT based handler has PreAuthenticate always true")]
+        [OuterLoop("Uses external servers")]
+        [Theory, MemberData(nameof(RemoteServersMemberData))]
+        public async Task PostNonRewindableContentUsingAuth_NoPreAuthenticate_ThrowsHttpRequestException(Configuration.Http.RemoteServer remoteServer)
         {
-            HttpContent content = CustomContent.Create(ExpectedContent, false);
+            HttpContent content = new StreamContent(new CustomContent.CustomStream(Encoding.UTF8.GetBytes(ExpectedContent), false));
             var credential = new NetworkCredential(UserName, Password);
-            await Assert.ThrowsAsync<HttpRequestException>(() => 
-                PostUsingAuthHelper(serverUri, ExpectedContent, content, credential, preAuthenticate: false));
+            await Assert.ThrowsAsync<HttpRequestException>(() =>
+                PostUsingAuthHelper(remoteServer, ExpectedContent, content, credential, preAuthenticate: false));
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [Theory, MemberData(nameof(BasicAuthEchoServers))]
-        public async Task PostNonRewindableContentUsingAuth_PreAuthenticate_Success(Uri serverUri)
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "WinRT based handler has PreAuthenticate always true")]
+        [OuterLoop("Uses external servers")]
+        [Theory, MemberData(nameof(RemoteServersMemberData))]
+        public async Task PostNonRewindableContentUsingAuth_PreAuthenticate_Success(Configuration.Http.RemoteServer remoteServer)
         {
             if (IsWinHttpHandler)
             {
@@ -168,17 +202,17 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
-            HttpContent content = CustomContent.Create(ExpectedContent, false);
+            HttpContent content = new StreamContent(new CustomContent.CustomStream(Encoding.UTF8.GetBytes(ExpectedContent), false));
             var credential = new NetworkCredential(UserName, Password);
-            await PostUsingAuthHelper(serverUri, ExpectedContent, content, credential, preAuthenticate: true);
+            await PostUsingAuthHelper(remoteServer, ExpectedContent, content, credential, preAuthenticate: true);
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task PostAsync_EmptyContent_ContentTypeHeaderNotSent(Uri serverUri)
+        [OuterLoop("Uses external servers")]
+        [Theory, MemberData(nameof(RemoteServersMemberData))]
+        public async Task PostAsync_EmptyContent_ContentTypeHeaderNotSent(Configuration.Http.RemoteServer remoteServer)
         {
-            using (HttpClient client = CreateHttpClient())
-            using (HttpResponseMessage response = await client.PostAsync(serverUri, null))
+            using (HttpClient client = CreateHttpClientForRemoteServer(remoteServer))
+            using (HttpResponseMessage response = await client.PostAsync(remoteServer.EchoUri, null))
             {
                 string responseContent = await response.Content.ReadAsStringAsync();
                 bool sentContentType = TestHelper.JsonMessageContainsKey(responseContent, "Content-Type");
@@ -188,13 +222,13 @@ namespace System.Net.Http.Functional.Tests
         }
 
         private async Task PostHelper(
-            Uri serverUri,
+            Configuration.Http.RemoteServer remoteServer,
             string requestBody,
             HttpContent requestContent,
             bool useContentLengthUpload,
             bool useChunkedEncodingUpload)
         {
-            using (HttpClient client = CreateHttpClient())
+            using (HttpClient client = CreateHttpClientForRemoteServer(remoteServer))
             {
                 if (requestContent != null)
                 {
@@ -207,55 +241,48 @@ namespace System.Net.Http.Functional.Tests
                     {
                         requestContent.Headers.ContentLength = null;
                     }
+
+                    // Compute MD5 of request body data. This will be verified by the server when it
+                    // receives the request.
+                    requestContent.Headers.ContentMD5 = TestHelper.ComputeMD5Hash(requestBody);
                 }
-                
+
                 if (useChunkedEncodingUpload)
                 {
                     client.DefaultRequestHeaders.TransferEncodingChunked = true;
                 }
 
-                using (HttpResponseMessage response = await client.PostAsync(serverUri, requestContent))
+                using (HttpResponseMessage response = await client.PostAsync(remoteServer.VerifyUploadUri, requestContent))
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                    string responseContent = await response.Content.ReadAsStringAsync();
-                    _output.WriteLine(responseContent);
-
-                    if (!useContentLengthUpload && !useChunkedEncodingUpload)
-                    {
-                        useChunkedEncodingUpload = true;
-                    }
-
-                    TestHelper.VerifyResponseBody(
-                        responseContent,
-                        response.Content.Headers.ContentMD5,
-                        useChunkedEncodingUpload,
-                        requestBody);
                 }
-            }          
+            }
         }
 
         private async Task PostUsingAuthHelper(
-            Uri serverUri,
+            Configuration.Http.RemoteServer remoteServer,
             string requestBody,
             HttpContent requestContent,
             NetworkCredential credential,
             bool preAuthenticate)
         {
+            Uri serverUri = remoteServer.BasicAuthUriForCreds(UserName, Password);
+
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.PreAuthenticate = preAuthenticate;
             handler.Credentials = credential;
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClientForRemoteServer(remoteServer, handler))
             {
                 // Send HEAD request to help bypass the 401 auth challenge for the latter POST assuming
                 // that the authentication will be cached and re-used later when PreAuthenticate is true.
-                var request = new HttpRequestMessage(HttpMethod.Head, serverUri);
+                var request = new HttpRequestMessage(HttpMethod.Head, serverUri) { Version = remoteServer.HttpVersion };
                 using (HttpResponseMessage response = await client.SendAsync(request))
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 }
 
                 // Now send POST request.
-                request = new HttpRequestMessage(HttpMethod.Post, serverUri);
+                request = new HttpRequestMessage(HttpMethod.Post, serverUri) { Version = remoteServer.HttpVersion };
                 request.Content = requestContent;
                 requestContent.Headers.ContentLength = null;
                 request.Headers.TransferEncodingChunked = true;

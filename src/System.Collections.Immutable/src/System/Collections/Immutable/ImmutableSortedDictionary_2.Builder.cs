@@ -202,7 +202,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-#if FEATURE_ITEMREFAPI
+#if !NETSTANDARD10
             /// <summary>
             /// Returns a read-only reference to the value associated with the provided key.
             /// </summary>
@@ -275,7 +275,7 @@ namespace System.Collections.Immutable
                 {
                     if (_syncRoot == null)
                     {
-                        Threading.Interlocked.CompareExchange<Object>(ref _syncRoot, new Object(), null);
+                        Threading.Interlocked.CompareExchange<object>(ref _syncRoot, new object(), null);
                     }
 
                     return _syncRoot;
@@ -676,7 +676,7 @@ namespace System.Collections.Immutable
         /// </summary>
         private KeyValuePair<TKey, TValue>[] _contents;
 
-        /// <summary>   
+        /// <summary>
         /// Initializes a new instance of the <see cref="ImmutableSortedDictionaryBuilderDebuggerProxy{TKey, TValue}"/> class.
         /// </summary>
         /// <param name="map">The collection to display in the debugger</param>

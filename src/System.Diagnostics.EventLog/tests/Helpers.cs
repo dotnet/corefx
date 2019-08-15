@@ -1,8 +1,9 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
+using System.Diagnostics.Eventing.Reader;
 using System.Threading;
 using Xunit;
 
@@ -13,8 +14,9 @@ namespace System.Diagnostics.Tests
 {
     internal class Helpers
     {
+        public static bool NotElevatedAndSupportsEventLogs { get => !AdminHelpers.IsProcessElevated() && SupportsEventLogs; }
         public static bool IsElevatedAndSupportsEventLogs { get => AdminHelpers.IsProcessElevated() && SupportsEventLogs; }
-        public static bool SupportsEventLogs { get => PlatformDetection.IsNotWindowsNanoServer; }
+        public static bool SupportsEventLogs { get => PlatformDetection.IsNotWindowsNanoServer && PlatformDetection.IsNotWindowsIoTCore; }
 
         public static void RetryOnWin7(Action func)
         {
@@ -30,34 +32,19 @@ namespace System.Diagnostics.Tests
 
             return RetryOnAllPlatforms(func);
             // We are retrying on windows 7 because it throws win32exception while some operations like Writing,retrieving and Deleting log.
-            // So We just try to do the operation again in case of this exception 
+            // So We just try to do the operation again in case of this exception
         }
 
         public static T RetryOnAllPlatforms<T>(Func<T> func)
         {
-            T entry = default(T);
-            int retries = 20;
-            while (retries > 0)
+            // Harden the tests increasing the retry count and the timeout.
+            T result = default;
+            RetryHelper.Execute(() =>
             {
-                try
-                {
-                    entry = func();
-                    retries = -1;
-                }
-                catch (Win32Exception)
-                {
-                    Thread.Sleep(100);
-                    retries--;
-                }
-                catch (ArgumentException)
-                {
-                    Thread.Sleep(100);
-                    retries--;
-                }
-            }
+                result = func();
+            }, maxAttempts: 10, (iteration) => iteration * 300);
 
-            Assert.NotEqual(0, retries);
-            return entry;
+            return result;
         }
 
         public static void WaitForEventLog(EventLog eventLog, int entriesExpected)
@@ -81,6 +68,14 @@ namespace System.Diagnostics.Tests
                 Console.WriteLine($"{stopwatch.ElapsedMilliseconds / 1000 } seconds");
 
             Assert.Equal(entriesExpected, RetryOnWin7((() => eventLog.Entries.Count)));
+        }
+
+        internal static EventBookmark GetBookmark(string log, PathType pathType)
+        {
+            var elq = new EventLogQuery(log, pathType) { ReverseDirection = true };
+            var reader = new EventLogReader(elq);
+            EventRecord record = reader.ReadEvent();
+            return record?.Bookmark;
         }
     }
 }

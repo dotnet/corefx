@@ -8,7 +8,6 @@ using System.DirectoryServices.Interop;
 using System.ComponentModel;
 using System.Threading;
 using System.Reflection;
-using System.Security.Permissions;
 using System.DirectoryServices.Design;
 using System.Globalization;
 using System.Net;
@@ -43,7 +42,7 @@ namespace System.DirectoryServices
         private bool _objectSecurityInitialized = false;
         private bool _objectSecurityModified = false;
         private ActiveDirectorySecurity _objectSecurity = null;
-        private static string s_securityDescriptorProperty = "ntSecurityDescriptor";
+        private const string SecurityDescriptorProperty = "ntSecurityDescriptor";
 
         /// <devdoc>
         /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectoryEntry'/>class.
@@ -52,7 +51,7 @@ namespace System.DirectoryServices
         {
             _options = new DirectoryEntryConfiguration(this);
         }
-        
+
         /// <devdoc>
         /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectoryEntry'/> class that will bind
         /// to the directory entry at <paramref name="path"/>.
@@ -64,7 +63,7 @@ namespace System.DirectoryServices
 
         /// <devdoc>
         /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectoryEntry'/> class.
-        /// </devdoc>        
+        /// </devdoc>
         public DirectoryEntry(string path, string username, string password) : this(path, username, password, AuthenticationTypes.Secure)
         {
         }
@@ -120,11 +119,11 @@ namespace System.DirectoryServices
             if (_adsObject == null)
                 throw new ArgumentException(SR.DSDoesNotImplementIADs);
 
-            // GetInfo is not needed here. ADSI executes an implicit GetInfo when GetEx 
-            // is called on the PropertyValueCollection. 0x800704BC error might be returned 
+            // GetInfo is not needed here. ADSI executes an implicit GetInfo when GetEx
+            // is called on the PropertyValueCollection. 0x800704BC error might be returned
             // on some WinNT entries, when iterating through 'Users' group members.
             // if (forceBind)
-            //     this.adsObject.GetInfo();                
+            //     this.adsObject.GetInfo();
             _path = _adsObject.ADsPath;
             _useCache = useCache;
 
@@ -157,7 +156,7 @@ namespace System.DirectoryServices
                 return _adsObject;
             }
         }
-        
+
         [DefaultValue(AuthenticationTypes.Secure)]
         public AuthenticationTypes AuthenticationType
         {
@@ -204,7 +203,7 @@ namespace System.DirectoryServices
                     byte[] intGuid = new byte[16];
                     for (int j = 0; j < 16; j++)
                     {
-                        intGuid[j] = Convert.ToByte(new String(new char[] { guid[j * 2], guid[j * 2 + 1] }), 16);
+                        intGuid[j] = Convert.ToByte(new string(new char[] { guid[j * 2], guid[j * 2 + 1] }), 16);
                     }
                     return new Guid(intGuid);
                     // return new Guid(guid.Substring(0, 8) + "-" + guid.Substring(8, 4) + "-" + guid.Substring(12, 4) + "-" + guid.Substring(16, 4) + "-" + guid.Substring(20));
@@ -230,7 +229,7 @@ namespace System.DirectoryServices
             {
                 if (value == null)
                 {
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 }
 
                 _objectSecurity = value;
@@ -265,7 +264,7 @@ namespace System.DirectoryServices
                 return tmpName;
             }
         }
-    
+
         public string NativeGuid
         {
             get
@@ -385,9 +384,9 @@ namespace System.DirectoryServices
         }
 
         /// <devdoc>
-        /// Gets the <see cref='System.DirectoryServices.DirectoryEntry'/> that holds schema information for this 
+        /// Gets the <see cref='System.DirectoryServices.DirectoryEntry'/> that holds schema information for this
         /// entry. An entry's <see cref='System.DirectoryServices.DirectoryEntry.SchemaClassName'/>
-        /// determines what properties are valid for it.</para>
+        /// determines what properties are valid for it.
         /// </devdoc>
         public DirectoryEntry SchemaEntry
         {
@@ -426,7 +425,7 @@ namespace System.DirectoryServices
         }
 
         /// <devdoc>
-        /// Gets or sets the username to use when authenticating the client.</para>
+        /// Gets or sets the username to use when authenticating the client.
         /// </devdoc>
         [
             DefaultValue(null),
@@ -588,7 +587,7 @@ namespace System.DirectoryServices
         {
             if (JustCreated)
             {
-                // Note: Permissions Demand is not necessary here, because entry has already been created with appr. permissions. 
+                // Note: Permissions Demand is not necessary here, because entry has already been created with appr. permissions.
                 // Write changes regardless of Caching mode to finish construction of a new entry.
                 try
                 {
@@ -734,13 +733,13 @@ namespace System.DirectoryServices
 
         /// <devdoc>
         /// Searches the directory store at the given path to see whether an entry exists.
-        /// </devdoc>        
+        /// </devdoc>
         public static bool Exists(string path)
         {
             DirectoryEntry entry = new DirectoryEntry(path);
             try
             {
-                entry.Bind(true);       // throws exceptions (possibly can break applications) 
+                entry.Bind(true);       // throws exceptions (possibly can break applications)
                 return entry.Bound;
             }
             catch (System.Runtime.InteropServices.COMException e)
@@ -816,7 +815,7 @@ namespace System.DirectoryServices
                     }
                 }
 
-                throw e;
+                throw;
             }
 
             if (result is UnsafeNativeMethods.IAds)
@@ -854,7 +853,7 @@ namespace System.DirectoryServices
                     }
                 }
 
-                throw e;
+                throw;
             }
 
             return result;
@@ -887,7 +886,7 @@ namespace System.DirectoryServices
                     }
                 }
 
-                throw e;
+                throw;
             }
         }
 
@@ -920,7 +919,7 @@ namespace System.DirectoryServices
                                     System.DirectoryServices.ActiveDirectory.Utils.NORM_IGNOREKANATYPE |
                                     System.DirectoryServices.ActiveDirectory.Utils.NORM_IGNOREWIDTH |
                                     System.DirectoryServices.ActiveDirectory.Utils.SORT_STRINGSORT;
-                        // work around the ADSI case sensitive 
+                        // work around the ADSI case sensitive
                         if (System.DirectoryServices.ActiveDirectory.Utils.Compare(childPath, 0, parentPath.Length, parentPath, 0, parentPath.Length, compareFlags) != 0)
                         {
                             childPath = parentPath + childPath.Substring(parentPath.Length);
@@ -987,7 +986,7 @@ namespace System.DirectoryServices
 
             //Consider there shouldn't be any marshaling issues
             //by just doing: AdsObject.GetInfoEx(object[]propertyNames, 0);
-            Object[] names = new Object[propertyNames.Length];
+            object[] names = new object[propertyNames.Length];
             for (int i = 0; i < propertyNames.Length; i++)
                 names[i] = propertyNames[i];
             try
@@ -1032,7 +1031,7 @@ namespace System.DirectoryServices
                         }
 
                         // if this is "ntSecurityDescriptor" we should refresh the objectSecurity property
-                        if (String.Compare(propertyNames[i], s_securityDescriptorProperty, StringComparison.OrdinalIgnoreCase) == 0)
+                        if (string.Equals(propertyNames[i], SecurityDescriptorProperty, StringComparison.OrdinalIgnoreCase))
                         {
                             _objectSecurityInitialized = false;
                             _objectSecurityModified = false;
@@ -1084,10 +1083,10 @@ namespace System.DirectoryServices
                 // This property is the managed version of the "ntSecurityDescriptor"
                 // attribute. In order to build an ActiveDirectorySecurity object from it
                 // we need to get the binary form of the security descriptor.
-                // If we use IADs::Get to get the IADsSecurityDescriptor interface and then 
-                // convert to raw form, there would be a performance overhead (because of 
+                // If we use IADs::Get to get the IADsSecurityDescriptor interface and then
+                // convert to raw form, there would be a performance overhead (because of
                 // sid lookups and reverse lookups during conversion).
-                // So to get the security descriptor in binary form, we use 
+                // So to get the security descriptor in binary form, we use
                 // IADsPropertyList::GetPropertyItem
                 //
 
@@ -1105,7 +1104,7 @@ namespace System.DirectoryServices
                     // while initializing the ObjectSecurity property
                     //
                     securityMasksUsedInRetrieval = this.Options.SecurityMasks;
-                    RefreshCache(new string[] { s_securityDescriptorProperty });
+                    RefreshCache(new string[] { SecurityDescriptorProperty });
 
                     //
                     // Get the IAdsPropertyList interface
@@ -1116,7 +1115,7 @@ namespace System.DirectoryServices
 
                     UnsafeNativeMethods.IAdsPropertyList list = (UnsafeNativeMethods.IAdsPropertyList)NativeObject;
 
-                    UnsafeNativeMethods.IAdsPropertyEntry propertyEntry = (UnsafeNativeMethods.IAdsPropertyEntry)list.GetPropertyItem(s_securityDescriptorProperty, (int)AdsType.ADSTYPE_OCTET_STRING);
+                    UnsafeNativeMethods.IAdsPropertyEntry propertyEntry = (UnsafeNativeMethods.IAdsPropertyEntry)list.GetPropertyItem(SecurityDescriptorProperty, (int)AdsType.ADSTYPE_OCTET_STRING);
                     GC.KeepAlive(this);
 
                     //
@@ -1174,7 +1173,7 @@ namespace System.DirectoryServices
 
                 UnsafeNativeMethods.IAdsPropertyEntry newSDEntry = (UnsafeNativeMethods.IAdsPropertyEntry)new UnsafeNativeMethods.PropertyEntry();
 
-                newSDEntry.Name = s_securityDescriptorProperty;
+                newSDEntry.Name = SecurityDescriptorProperty;
                 newSDEntry.ADsType = (int)AdsType.ADSTYPE_OCTET_STRING;
                 newSDEntry.ControlCode = (int)AdsPropertyOperation.Update;
                 newSDEntry.Values = new object[] { sDValue };

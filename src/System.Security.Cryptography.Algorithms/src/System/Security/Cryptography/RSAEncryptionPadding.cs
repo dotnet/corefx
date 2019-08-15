@@ -40,8 +40,8 @@ namespace System.Security.Cryptography
         /// </summary>
         public static RSAEncryptionPadding OaepSHA512 { get { return s_oaepSHA512; } }
 
-        private RSAEncryptionPaddingMode _mode;
-        private HashAlgorithmName _oaepHashAlgorithm;
+        private readonly RSAEncryptionPaddingMode _mode;
+        private readonly HashAlgorithmName _oaepHashAlgorithm;
 
         private RSAEncryptionPadding(RSAEncryptionPaddingMode mode, HashAlgorithmName oaepHashAlgorithm)
         {
@@ -50,12 +50,12 @@ namespace System.Security.Cryptography
         }
 
         /// <summary>
-        /// Creates a new instance representing <see cref="RSAEncryptionPaddingMode.Oaep"/> 
+        /// Creates a new instance representing <see cref="RSAEncryptionPaddingMode.Oaep"/>
         /// with the given hash algorithm.
         /// </summary>
         public static RSAEncryptionPadding CreateOaep(HashAlgorithmName hashAlgorithm)
         {
-            if (String.IsNullOrEmpty(hashAlgorithm.Name))
+            if (string.IsNullOrEmpty(hashAlgorithm.Name))
             {
                 throw new ArgumentException(SR.Cryptography_HashAlgorithmNameNullOrEmpty, nameof(hashAlgorithm));
             }
@@ -107,9 +107,9 @@ namespace System.Security.Cryptography
 
         public static bool operator ==(RSAEncryptionPadding left, RSAEncryptionPadding right)
         {
-            if (Object.ReferenceEquals(left, null))
+            if (object.ReferenceEquals(left, null))
             {
-                return Object.ReferenceEquals(right, null);
+                return object.ReferenceEquals(right, null);
             }
 
             return left.Equals(right);

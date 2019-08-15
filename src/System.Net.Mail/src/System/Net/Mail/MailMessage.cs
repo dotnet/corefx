@@ -26,7 +26,7 @@ namespace System.Net.Mail
         private TransferEncoding _bodyTransferEncoding = TransferEncoding.Unknown;
         private bool _isBodyHtml = false;
         private bool _disposed = false;
-        private Message _message;
+        private readonly Message _message;
         private DeliveryNotificationOptions _deliveryStatusNotification = DeliveryNotificationOptions.None;
 
         public MailMessage()
@@ -101,7 +101,7 @@ namespace System.Net.Mail
             }
         }
 
-        [Obsolete("ReplyTo is obsoleted for this type.  Please use ReplyToList instead which can accept multiple addresses. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("ReplyTo is obsoleted for this type.  Please use ReplyToList instead which can accept multiple addresses. https://go.microsoft.com/fwlink/?linkid=14202")]
         public MailAddress ReplyTo
         {
             get
@@ -444,7 +444,7 @@ namespace System.Net.Mail
                     }
                     part.Parts.Add(attachmentsPart);
                     _message.Content = part;
-                } 
+                }
                 // If there is no Attachement, AND only "1" Alternate View AND !!no body!!
                 // then in fact, this is NOT a multipart region.
                 else if (viewsPart.Parts.Count == 1 && string.IsNullOrEmpty(_body))

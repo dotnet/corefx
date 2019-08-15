@@ -11,7 +11,7 @@ namespace System.Text
     // Latin1Encoding is a simple override to optimize the GetString version of Latin1Encoding.
     // because of the best fit cases we can't do this when encoding the string, only when decoding
     //
-    internal class Latin1Encoding : EncodingNLS
+    internal sealed class Latin1Encoding : EncodingNLS
     {
         // Used by Encoding.Latin1 for lazy initialization
         // The initialization code will not be run until a static member of the class is referenced
@@ -25,7 +25,7 @@ namespace System.Text
         // GetByteCount
         // Note: We start by assuming that the output will be the same as count.  Having
         // an encoder or fallback may change that assumption
-        internal override unsafe int GetByteCount(char* chars, int charCount, EncoderNLS encoder)
+        internal override unsafe int GetByteCount(char* chars, int charCount, EncoderNLS? encoder)
         {
             // Just need to ASSERT, this is called by something else internal that checked parameters already
             Debug.Assert(charCount >= 0, "[Latin1Encoding.GetByteCount]count is negative");
@@ -38,11 +38,11 @@ namespace System.Text
 
             // If we have an encoder AND we aren't using default fallback,
             // then we may have a complicated count.
-            EncoderReplacementFallback fallback;
+            EncoderReplacementFallback? fallback;
             if (encoder != null)
             {
                 charLeftOver = encoder._charLeftOver;
-                Debug.Assert(charLeftOver == 0 || Char.IsHighSurrogate(charLeftOver),
+                Debug.Assert(charLeftOver == 0 || char.IsHighSurrogate(charLeftOver),
                     "[Latin1Encoding.GetByteCount]leftover character should be high surrogate");
 
                 fallback = encoder.Fallback as EncoderReplacementFallback;
@@ -79,7 +79,7 @@ namespace System.Text
             char* charEnd = chars + charCount;
 
             // For fallback we may need a fallback buffer, we know we aren't default fallback.
-            EncoderFallbackBuffer fallbackBuffer = null;
+            EncoderFallbackBuffer? fallbackBuffer = null;
             char* charsForFallback;
 
             // We may have a left over character from last time, try and process it.
@@ -146,7 +146,7 @@ namespace System.Text
         }
 
         internal override unsafe int GetBytes(char* chars, int charCount,
-                                                byte* bytes, int byteCount, EncoderNLS encoder)
+                                                byte* bytes, int byteCount, EncoderNLS? encoder)
         {
             // Just need to ASSERT, this is called by something else internal that checked parameters already
             Debug.Assert(bytes != null, "[Latin1Encoding.GetBytes]bytes is null");
@@ -159,12 +159,12 @@ namespace System.Text
 
             // Get any left over characters & check fast or slower fallback type
             char charLeftOver = (char)0;
-            EncoderReplacementFallback fallback = null;
+            EncoderReplacementFallback? fallback = null;
             if (encoder != null)
             {
                 charLeftOver = encoder._charLeftOver;
                 fallback = encoder.Fallback as EncoderReplacementFallback;
-                Debug.Assert(charLeftOver == 0 || Char.IsHighSurrogate(charLeftOver),
+                Debug.Assert(charLeftOver == 0 || char.IsHighSurrogate(charLeftOver),
                     "[Latin1Encoding.GetBytes]leftover character should be high surrogate");
 
                 // Verify that we have no fallbackbuffer, for ASCII its always empty, so just assert
@@ -244,7 +244,7 @@ namespace System.Text
             byte* byteEnd = bytes + byteCount;
 
             // For fallback we may need a fallback buffer, we know we aren't default fallback, create & init it
-            EncoderFallbackBuffer fallbackBuffer = null;
+            EncoderFallbackBuffer? fallbackBuffer = null;
             char* charsForFallback;
 
             // We may have a left over character from last time, try and process it.
@@ -365,7 +365,7 @@ namespace System.Text
         }
 
         // This is internal and called by something else,
-        internal override unsafe int GetCharCount(byte* bytes, int count, DecoderNLS decoder)
+        internal override unsafe int GetCharCount(byte* bytes, int count, DecoderNLS? decoder)
         {
             // Just assert, we're called internally so these should be safe, checked already
             Debug.Assert(bytes != null, "[Latin1Encoding.GetCharCount]bytes is null");
@@ -377,7 +377,7 @@ namespace System.Text
         }
 
         internal override unsafe int GetChars(byte* bytes, int byteCount,
-                                                char* chars, int charCount, DecoderNLS decoder)
+                                                char* chars, int charCount, DecoderNLS? decoder)
         {
             // Just need to ASSERT, this is called by something else internal that checked parameters already
             Debug.Assert(bytes != null, "[Latin1Encoding.GetChars]bytes is null");

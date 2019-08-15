@@ -25,7 +25,7 @@ namespace System.Reflection.Tests
             }
         }
 
-        private static IEnumerable<object[]> IsSignatureTypeTestData
+        public static IEnumerable<object[]> IsSignatureTypeTestData
         {
             get
             {
@@ -47,6 +47,9 @@ namespace System.Reflection.Tests
                 yield return new object[] { sigType.MakeByRefType(), true };
                 yield return new object[] { sigType.MakePointerType(), true };
                 yield return new object[] { typeof(List<>).MakeGenericType(sigType), true };
+
+                yield return new object[] { Type.MakeGenericSignatureType(typeof(List<>), typeof(int)), true };
+                yield return new object[] { Type.MakeGenericSignatureType(typeof(List<>), sigType), true };
             }
         }
 
@@ -281,21 +284,33 @@ namespace System.Reflection.Tests
         [InlineData(typeof(Span<>))]
         public static void MakeSignatureConstructedGenericType(Type genericTypeDefinition)
         {
-            Type t = Type.MakeGenericMethodParameter(5);
-            t = genericTypeDefinition.MakeGenericType(t);
+            Type gmp = Type.MakeGenericMethodParameter(5);
 
-            Assert.True(t.IsConstructedGenericType);
-            Assert.Equal(genericTypeDefinition, t.GetGenericTypeDefinition());
-            Assert.Equal(1, t.GenericTypeArguments.Length);
+            Type[] testTypes = { genericTypeDefinition.MakeGenericType(gmp), Type.MakeGenericSignatureType(genericTypeDefinition, gmp) };
+            Assert.All(testTypes,
+                (Type t) =>
+                {
+                    Assert.True(t.IsConstructedGenericType);
+                    Assert.Equal(genericTypeDefinition, t.GetGenericTypeDefinition());
+                    Assert.Equal(1, t.GenericTypeArguments.Length);
 
-            Type et = t.GenericTypeArguments[0];
-            Assert.True(et.IsSignatureType);
-            Assert.True(et.IsGenericParameter);
-            Assert.False(et.IsGenericTypeParameter);
-            Assert.True(et.IsGenericMethodParameter);
-            Assert.Equal(5, et.GenericParameterPosition);
+                    Type et = t.GenericTypeArguments[0];
+                    Assert.True(et.IsSignatureType);
+                    Assert.True(et.IsGenericParameter);
+                    Assert.False(et.IsGenericTypeParameter);
+                    Assert.True(et.IsGenericMethodParameter);
+                    Assert.Equal(5, et.GenericParameterPosition);
 
-            TestSignatureTypeInvariants(t);
+                    TestSignatureTypeInvariants(t);
+                });
+        }
+
+        [Fact]
+        public static void MakeGenericSignatureTypeValidation()
+        {
+            AssertExtensions.Throws<ArgumentNullException>("genericTypeDefinition", () => Type.MakeGenericSignatureType(null));
+            AssertExtensions.Throws<ArgumentNullException>("typeArguments", () => Type.MakeGenericSignatureType(typeof(IList<>), typeArguments: null));
+            AssertExtensions.Throws<ArgumentNullException>("typeArguments", () => Type.MakeGenericSignatureType(typeof(IList<>), new Type[] { null }));
         }
 
         private static Type ToSignatureType(this Type type)
@@ -354,7 +369,7 @@ namespace System.Reflection.Tests
             [Marker(0)] public static void Moo(int x, int[] y) { }
             [Marker(1)] public static void Moo<T>(T x, T[] y) { }
             [Marker(2)] public static void Moo<T>(int x, int[] y) { }
-            [Marker(3)] public static void Moo<T, U>(T x, U[] y) { } 
+            [Marker(3)] public static void Moo<T, U>(T x, U[] y) { }
             [Marker(4)] public static void Moo<T, U>(int x, int[] y) { }
         }
 
@@ -393,7 +408,7 @@ namespace System.Reflection.Tests
             Assert.Equal(MemberTypes.TypeInfo, type.MemberType);
             Assert.Same(type, type.UnderlyingSystemType);
 
-            // SignatureTypes don't override Equality/GetHashCode at this time, but they don't promise never to do so either. 
+            // SignatureTypes don't override Equality/GetHashCode at this time, but they don't promise never to do so either.
             // Thus, we'll only test the most basic behavior.
             Assert.True(type.Equals((object)type));
             Assert.True(type.Equals((Type)type));
@@ -503,7 +518,7 @@ namespace System.Reflection.Tests
 
                 if (type.IsGenericTypeParameter)
                 {
-                    throw new Exception("Unexpected: There is no mechanism at this time to create Signature Types of generic parameters on types.");    
+                    throw new Exception("Unexpected: There is no mechanism at this time to create Signature Types of generic parameters on types.");
                 }
                 else
                 {

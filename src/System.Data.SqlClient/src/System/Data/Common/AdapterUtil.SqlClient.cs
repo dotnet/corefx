@@ -116,7 +116,7 @@ namespace System.Data.Common
                 case CommandType.Text:
                 case CommandType.StoredProcedure:
                 case CommandType.TableDirect:
-                    Debug.Assert(false, "valid CommandType " + value.ToString());
+                    Debug.Fail("valid CommandType " + value.ToString());
                     break;
             }
 #endif
@@ -154,7 +154,7 @@ namespace System.Data.Common
                 case ParameterDirection.Output:
                 case ParameterDirection.InputOutput:
                 case ParameterDirection.ReturnValue:
-                    Debug.Assert(false, "valid ParameterDirection " + value.ToString());
+                    Debug.Fail("valid ParameterDirection " + value.ToString());
                     break;
             }
 #endif
@@ -177,7 +177,7 @@ namespace System.Data.Common
                 case UpdateRowSource.OutputParameters:
                 case UpdateRowSource.FirstReturnedRecord:
                 case UpdateRowSource.Both:
-                    Debug.Assert(false, "valid UpdateRowSource " + value.ToString());
+                    Debug.Fail("valid UpdateRowSource " + value.ToString());
                     break;
             }
 #endif
@@ -321,7 +321,7 @@ namespace System.Data.Common
         {
             return Argument(SR.GetString(SR.MDF_InvalidXmlInvalidValue, collectionName, columnName));
         }
-        
+
         internal static Exception CollectionNameIsNotUnique(string collectionName)
         {
             return Argument(SR.GetString(SR.MDF_CollectionNameISNotUnique, collectionName));
@@ -492,7 +492,7 @@ namespace System.Data.Common
         {
             return Argument(SR.GetString(SR.ADP_InvalidSizeValue, value.ToString(CultureInfo.InvariantCulture)));
         }
-        internal static ArgumentException ParameterValueOutOfRange(Decimal value)
+        internal static ArgumentException ParameterValueOutOfRange(decimal value)
         {
             return ADP.Argument(SR.GetString(SR.ADP_ParameterValueOutOfRange, value.ToString((IFormatProvider)null)));
         }
@@ -580,9 +580,6 @@ namespace System.Data.Common
 
         internal const int DefaultCommandTimeout = 30;
         internal const float FailoverTimeoutStep = 0.08F;    // fraction of timeout to use for fast failover connections
-
-        // security issue, don't rely upon public static readonly values
-        internal static readonly string StrEmpty = ""; // String.Empty
 
         internal const int CharSize = sizeof(char);
 
@@ -909,6 +906,18 @@ namespace System.Data.Common
         internal static ArgumentException InvalidMixedArgumentOfSecureCredentialAndIntegratedSecurity()
         {
             return Argument(SR.GetString(SR.ADP_InvalidMixedUsageOfSecureCredentialAndIntegratedSecurity));
+        }
+        internal static InvalidOperationException InvalidMixedUsageOfAccessTokenAndIntegratedSecurity()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.ADP_InvalidMixedUsageOfAccessTokenAndIntegratedSecurity));
+        }
+        internal static InvalidOperationException InvalidMixedUsageOfAccessTokenAndUserIDPassword()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.ADP_InvalidMixedUsageOfAccessTokenAndUserIDPassword));
+        }
+        internal static Exception InvalidMixedUsageOfCredentialAndAccessToken()
+        {
+            return ADP.InvalidOperation(SR.GetString(SR.ADP_InvalidMixedUsageOfCredentialAndAccessToken));
         }
     }
 }

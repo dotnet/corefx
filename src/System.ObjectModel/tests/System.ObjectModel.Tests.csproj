@@ -1,13 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{43841228-2A2B-4215-B97F-33006995E486}</ProjectGuid>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\Collections\IEnumerableTest.cs">
       <Link>Common\System\CollectionsIEnumerableTest.cs</Link>
@@ -27,14 +22,20 @@
     <Compile Include="$(CommonTestPath)\System\Collections\IDictionaryTest.cs">
       <Link>Common\System\CollectionsIDictionaryTest.cs</Link>
     </Compile>
-    <Compile Include="ComponentModel\INotifyPropertyChangingTests.cs" />
-    <Compile Include="ComponentModel\PropertyChangingEventArgsTests.cs" />
-    <Compile Include="KeyedCollection\TestMethods.cs" />
-    <Compile Include="KeyedCollection\ConcreteTestClasses.cs" />
-    <Compile Include="KeyedCollection\Utils.cs" />
     <Compile Include="ObservableCollection\ObservableCollection_ConstructorAndPropertyTests.cs" />
     <Compile Include="ObservableCollection\ObservableCollection_MethodsTest.cs" />
     <Compile Include="ObservableCollection\ObservableCollection_ReentrancyTests.cs" />
+    <Compile Include="ObservableCollection\ObservableCollection_Serialization.cs" />
+    <Compile Include="System\Collections\ObjectModel\KeyedCollectionTests.cs" />
+    <Compile Include="System\Collections\Specialized\NotifyCollectionChangedEventArgsTests.cs" />
+    <Compile Include="System\ComponentModel\DataErrorsChangedEventArgsTests.cs" />
+    <Compile Include="System\ComponentModel\PropertyChangedEventArgsTests.cs" />
+    <Compile Include="System\ComponentModel\PropertyChangingEventArgsTests.cs" />
+    <Compile Include="System\ComponentModel\TypeConverterAttributeTests.cs" />
+    <Compile Include="System\ComponentModel\TypeDescriptionProviderAttributeTests.cs" />
+    <Compile Include="KeyedCollection\TestMethods.cs" />
+    <Compile Include="KeyedCollection\ConcreteTestClasses.cs" />
+    <Compile Include="KeyedCollection\Utils.cs" />
     <Compile Include="ReadOnlyDictionary\ReadOnlyDictionaryTests.cs" />
     <Compile Include="ReadOnlyObservableCollection\ReadOnlyObservableCollection_EventsTests.cs" />
     <Compile Include="ReadOnlyObservableCollection\ReadOnlyObservableCollectionTests.cs" />
@@ -42,17 +43,17 @@
       <Link>Common\System\Diagnostics\DebuggerAttributes.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp'">
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
     <Compile Include="KeyedCollection\TestMethods.netcoreapp.cs" />
+    <Compile Include="System\Collections\ObjectModel\KeyedCollectionTests.netcoreapp.cs" />
+    <Compile Include="System\Windows\Markup\ValueSerializerAttributeTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="KeyedCollection\Serialization.cs" />
-    <Compile Include="ObservableCollection\ObservableCollection_Serialization.cs" />
     <Compile Include="ReadOnlyDictionary\ReadOnlyDictionary_SerializationTests.cs" />
     <Compile Include="ReadOnlyObservableCollection\ReadOnlyObservableCollection_SerializationTests.cs" />
     <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs">
       <Link>Common\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
     </Compile>
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

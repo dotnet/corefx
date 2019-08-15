@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics.Contracts;
 using System.Diagnostics;
 using System.IO;
 using Windows.Foundation;
@@ -18,38 +17,28 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         #region (Byte []).AsBuffer extensions
 
         [CLSCompliant(false)]
-        public static IBuffer AsBuffer(this Byte[] source)
+        public static IBuffer AsBuffer(this byte[] source)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
-
-            Contract.Ensures(Contract.Result<IBuffer>() != null);
-            Contract.Ensures(Contract.Result<IBuffer>().Length == unchecked((UInt32)source.Length));
-            Contract.Ensures(Contract.Result<IBuffer>().Capacity == unchecked((UInt32)source.Length));
-            Contract.EndContractBlock();
 
             return AsBuffer(source, 0, source.Length, source.Length);
         }
 
 
         [CLSCompliant(false)]
-        public static IBuffer AsBuffer(this Byte[] source, Int32 offset, Int32 length)
+        public static IBuffer AsBuffer(this byte[] source, int offset, int length)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
             if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
             if (source.Length - offset < length) throw new ArgumentException(SR.Argument_InsufficientArrayElementsAfterOffset);
 
-            Contract.Ensures(Contract.Result<IBuffer>() != null);
-            Contract.Ensures(Contract.Result<IBuffer>().Length == unchecked((UInt32)length));
-            Contract.Ensures(Contract.Result<IBuffer>().Capacity == unchecked((UInt32)length));
-            Contract.EndContractBlock();
-
             return AsBuffer(source, offset, length, length);
         }
 
 
         [CLSCompliant(false)]
-        public static IBuffer AsBuffer(this Byte[] source, Int32 offset, Int32 length, Int32 capacity)
+        public static IBuffer AsBuffer(this byte[] source, int offset, int length, int capacity)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
@@ -58,11 +47,6 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (source.Length - offset < length) throw new ArgumentException(SR.Argument_InsufficientArrayElementsAfterOffset);
             if (source.Length - offset < capacity) throw new ArgumentException(SR.Argument_InsufficientArrayElementsAfterOffset);
             if (capacity < length) throw new ArgumentException(SR.Argument_InsufficientBufferCapacity);
-
-            Contract.Ensures(Contract.Result<IBuffer>() != null);
-            Contract.Ensures(Contract.Result<IBuffer>().Length == unchecked((UInt32)length));
-            Contract.Ensures(Contract.Result<IBuffer>().Capacity == unchecked((UInt32)capacity));
-            Contract.EndContractBlock();
 
             return new WindowsRuntimeBuffer(source, offset, length, capacity);
         }
@@ -79,11 +63,10 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         /// <param name="source">Array to copy data from.</param>
         /// <param name="destination">The buffer to copy to.</param>
         [CLSCompliant(false)]
-        public static void CopyTo(this Byte[] source, IBuffer destination)
+        public static void CopyTo(this byte[] source, IBuffer destination)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (destination == null) throw new ArgumentNullException(nameof(destination));
-            Contract.EndContractBlock();
 
             CopyTo(source, 0, destination, 0, source.Length);
         }
@@ -100,7 +83,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         /// <param name="destinationIndex">Position in the buffer to where to start copying.</param>
         /// <param name="count">The number of bytes to copy.</param>
         [CLSCompliant(false)]
-        public static void CopyTo(this Byte[] source, Int32 sourceIndex, IBuffer destination, UInt32 destinationIndex, Int32 count)
+        public static void CopyTo(this byte[] source, int sourceIndex, IBuffer destination, uint destinationIndex, int count)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (destination == null) throw new ArgumentNullException(nameof(destination));
@@ -109,11 +92,10 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (source.Length <= sourceIndex) throw new ArgumentException(SR.Argument_IndexOutOfArrayBounds, nameof(sourceIndex));
             if (source.Length - sourceIndex < count) throw new ArgumentException(SR.Argument_InsufficientArrayElementsAfterOffset);
             if (destination.Capacity - destinationIndex < count) throw new ArgumentException(SR.Argument_InsufficientSpaceInTargetBuffer);
-            Contract.EndContractBlock();
 
             // If destination is backed by a managed array, use the array instead of the pointer as it does not require pinning:
-            Byte[] destDataArr;
-            Int32 destDataOffs;
+            byte[] destDataArr;
+            int destDataOffs;
             if (destination.TryGetUnderlyingData(out destDataArr, out destDataOffs))
             {
                 Buffer.BlockCopy(source, sourceIndex, destDataArr, (int)(destDataOffs + destinationIndex), count);
@@ -130,28 +112,26 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         #region (IBuffer).ToArray extensions for copying to a new (Byte [])
 
         [CLSCompliant(false)]
-        public static Byte[] ToArray(this IBuffer source)
+        public static byte[] ToArray(this IBuffer source)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
-            Contract.EndContractBlock();
 
-            return ToArray(source, 0, checked((Int32)source.Length));
+            return ToArray(source, 0, checked((int)source.Length));
         }
 
 
         [CLSCompliant(false)]
-        public static Byte[] ToArray(this IBuffer source, UInt32 sourceIndex, Int32 count)
+        public static byte[] ToArray(this IBuffer source, uint sourceIndex, int count)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
             if (source.Capacity <= sourceIndex) throw new ArgumentException(SR.Argument_BufferIndexExceedsCapacity);
             if (source.Capacity - sourceIndex < count) throw new ArgumentException(SR.Argument_InsufficientSpaceInSourceBuffer);
-            Contract.EndContractBlock();
 
             if (count == 0)
-                return Array.Empty<Byte>();
+                return Array.Empty<byte>();
 
-            Byte[] destination = new Byte[count];
+            byte[] destination = new byte[count];
             source.CopyTo(sourceIndex, destination, 0, count);
             return destination;
         }
@@ -162,18 +142,17 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         #region (IBuffer).CopyTo extensions for copying to a (Byte [])
 
         [CLSCompliant(false)]
-        public static void CopyTo(this IBuffer source, Byte[] destination)
+        public static void CopyTo(this IBuffer source, byte[] destination)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (destination == null) throw new ArgumentNullException(nameof(destination));
-            Contract.EndContractBlock();
 
-            CopyTo(source, 0, destination, 0, checked((Int32)source.Length));
+            CopyTo(source, 0, destination, 0, checked((int)source.Length));
         }
 
 
         [CLSCompliant(false)]
-        public static void CopyTo(this IBuffer source, UInt32 sourceIndex, Byte[] destination, Int32 destinationIndex, Int32 count)
+        public static void CopyTo(this IBuffer source, uint sourceIndex, byte[] destination, int destinationIndex, int count)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (destination == null) throw new ArgumentNullException(nameof(destination));
@@ -183,11 +162,10 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (source.Capacity - sourceIndex < count) throw new ArgumentException(SR.Argument_InsufficientSpaceInSourceBuffer);
             if (destination.Length <= destinationIndex) throw new ArgumentException(SR.Argument_IndexOutOfArrayBounds);
             if (destination.Length - destinationIndex < count) throw new ArgumentException(SR.Argument_InsufficientArrayElementsAfterOffset);
-            Contract.EndContractBlock();
 
             // If source is backed by a managed array, use the array instead of the pointer as it does not require pinning:
-            Byte[] srcDataArr;
-            Int32 srcDataOffs;
+            byte[] srcDataArr;
+            int srcDataOffs;
             if (source.TryGetUnderlyingData(out srcDataArr, out srcDataOffs))
             {
                 Buffer.BlockCopy(srcDataArr, (int)(srcDataOffs + sourceIndex), destination, destinationIndex, count);
@@ -208,14 +186,13 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (destination == null) throw new ArgumentNullException(nameof(destination));
-            Contract.EndContractBlock();
 
             CopyTo(source, 0, destination, 0, source.Length);
         }
 
 
         [CLSCompliant(false)]
-        public static void CopyTo(this IBuffer source, UInt32 sourceIndex, IBuffer destination, UInt32 destinationIndex, UInt32 count)
+        public static void CopyTo(this IBuffer source, uint sourceIndex, IBuffer destination, uint destinationIndex, uint count)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (destination == null) throw new ArgumentNullException(nameof(destination));
@@ -223,22 +200,21 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (source.Capacity - sourceIndex < count) throw new ArgumentException(SR.Argument_InsufficientSpaceInSourceBuffer);
             if (destination.Capacity <= destinationIndex) throw new ArgumentException(SR.Argument_BufferIndexExceedsCapacity);
             if (destination.Capacity - destinationIndex < count) throw new ArgumentException(SR.Argument_InsufficientSpaceInTargetBuffer);
-            Contract.EndContractBlock();
 
             // If source are destination are backed by managed arrays, use the arrays instead of the pointers as it does not require pinning:
-            Byte[] srcDataArr, destDataArr;
-            Int32 srcDataOffs, destDataOffs;
+            byte[] srcDataArr, destDataArr;
+            int srcDataOffs, destDataOffs;
 
             bool srcIsManaged = source.TryGetUnderlyingData(out srcDataArr, out srcDataOffs);
             bool destIsManaged = destination.TryGetUnderlyingData(out destDataArr, out destDataOffs);
 
             if (srcIsManaged && destIsManaged)
             {
-                Debug.Assert(count <= Int32.MaxValue);
-                Debug.Assert(sourceIndex <= Int32.MaxValue);
-                Debug.Assert(destinationIndex <= Int32.MaxValue);
+                Debug.Assert(count <= int.MaxValue);
+                Debug.Assert(sourceIndex <= int.MaxValue);
+                Debug.Assert(destinationIndex <= int.MaxValue);
 
-                Buffer.BlockCopy(srcDataArr, srcDataOffs + (Int32)sourceIndex, destDataArr, destDataOffs + (Int32)destinationIndex, (Int32)count);
+                Buffer.BlockCopy(srcDataArr, srcDataOffs + (int)sourceIndex, destDataArr, destDataOffs + (int)destinationIndex, (int)count);
                 return;
             }
 
@@ -246,21 +222,21 @@ namespace System.Runtime.InteropServices.WindowsRuntime
 
             if (srcIsManaged)
             {
-                Debug.Assert(count <= Int32.MaxValue);
-                Debug.Assert(sourceIndex <= Int32.MaxValue);
+                Debug.Assert(count <= int.MaxValue);
+                Debug.Assert(sourceIndex <= int.MaxValue);
 
                 destPtr = destination.GetPointerAtOffset(destinationIndex);
-                Marshal.Copy(srcDataArr, srcDataOffs + (Int32)sourceIndex, destPtr, (Int32)count);
+                Marshal.Copy(srcDataArr, srcDataOffs + (int)sourceIndex, destPtr, (int)count);
                 return;
             }
 
             if (destIsManaged)
             {
-                Debug.Assert(count <= Int32.MaxValue);
-                Debug.Assert(destinationIndex <= Int32.MaxValue);
+                Debug.Assert(count <= int.MaxValue);
+                Debug.Assert(destinationIndex <= int.MaxValue);
 
                 srcPtr = source.GetPointerAtOffset(sourceIndex);
-                Marshal.Copy(srcPtr, destDataArr, destDataOffs + (Int32)destinationIndex, (Int32)count);
+                Marshal.Copy(srcPtr, destDataArr, destDataOffs + (int)destinationIndex, (int)count);
                 return;
             }
 
@@ -287,12 +263,10 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         /// <param name="underlyingDataArrayStartOffset">Will be set to the start offset of the buffer data in the backing array
         /// or to <code>-1</code>.</param>
         /// <returns>Whether the <code>IBuffer</code> is backed by a managed byte array.</returns>
-        internal static bool TryGetUnderlyingData(this IBuffer buffer, out Byte[] underlyingDataArray, out Int32 underlyingDataArrayStartOffset)
+        internal static bool TryGetUnderlyingData(this IBuffer buffer, out byte[] underlyingDataArray, out int underlyingDataArrayStartOffset)
         {
             if (buffer == null)
                 throw new ArgumentNullException(nameof(buffer));
-
-            Contract.EndContractBlock();
 
             WindowsRuntimeBuffer winRtBuffer = buffer as WindowsRuntimeBuffer;
             if (winRtBuffer == null)
@@ -323,16 +297,14 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (buffer == null)
                 throw new ArgumentNullException(nameof(buffer));
 
-            Contract.EndContractBlock();
-
             if (otherBuffer == null)
                 return false;
 
             if (buffer == otherBuffer)
                 return true;
 
-            Byte[] thisDataArr, otherDataArr;
-            Int32 thisDataOffs, otherDataOffs;
+            byte[] thisDataArr, otherDataArr;
+            int thisDataOffs, otherDataOffs;
 
             bool thisIsManaged = buffer.TryGetUnderlyingData(out thisDataArr, out thisDataOffs);
             bool otherIsManaged = otherBuffer.TryGetUnderlyingData(out otherDataArr, out otherDataOffs);
@@ -357,14 +329,14 @@ namespace System.Runtime.InteropServices.WindowsRuntime
 
         #region Extensions for co-operation with memory streams (share mem stream data; expose data as managed/unmanaged mem stream)
         /// <summary>
-        /// Creates a new <code>IBuffer<code> instance backed by the same memory as is backing the specified <code>MemoryStream</code>.
+        /// Creates a new <code>IBuffer</code> instance backed by the same memory as is backing the specified <code>MemoryStream</code>.
         /// The <code>MemoryStream</code> may re-sized in future, as a result the stream will be backed by a different memory region.
         /// In such case, the buffer created by this method will remain backed by the memory behind the stream at the time the buffer was created.<br />
         /// This method can throw an <code>ObjectDisposedException</code> if the specified stream is closed.<br />
         /// This method can throw an <code>UnauthorizedAccessException</code> if the specified stream cannot expose its underlying memory buffer.
         /// </summary>
         /// <param name="underlyingStream">A memory stream to share the data memory with the buffer being created.</param>
-        /// <returns>A new <code>IBuffer<code> backed by the same memory as this specified stream.</returns>
+        /// <returns>A new <code>IBuffer</code> backed by the same memory as this specified stream.</returns>
         // The naming inconsistency with (Byte []).AsBuffer is intentional: as this extension method will appear on
         // MemoryStream, consistency with method names on MemoryStream is more important. There we already have an API
         // called GetBuffer which returns the underlying array.
@@ -374,22 +346,17 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (underlyingStream == null)
                 throw new ArgumentNullException(nameof(underlyingStream));
 
-            Contract.Ensures(Contract.Result<IBuffer>() != null);
-            Contract.Ensures(Contract.Result<IBuffer>().Length == underlyingStream.Length);
-            Contract.Ensures(Contract.Result<IBuffer>().Capacity == underlyingStream.Capacity);
-
-            Contract.EndContractBlock();
             ArraySegment<byte> streamData;
             if (!underlyingStream.TryGetBuffer(out streamData))
             {
                 throw new UnauthorizedAccessException(SR.UnauthorizedAccess_InternalBuffer);
             }
-            return new WindowsRuntimeBuffer(streamData.Array, (Int32)streamData.Offset, (Int32)underlyingStream.Length, underlyingStream.Capacity);
+            return new WindowsRuntimeBuffer(streamData.Array, (int)streamData.Offset, (int)underlyingStream.Length, underlyingStream.Capacity);
         }
 
 
         /// <summary>
-        /// Creates a new <code>IBuffer<code> instance backed by the same memory as is backing the specified <code>MemoryStream</code>.
+        /// Creates a new <code>IBuffer</code> instance backed by the same memory as is backing the specified <code>MemoryStream</code>.
         /// The <code>MemoryStream</code> may re-sized in future, as a result the stream will be backed by a different memory region.
         /// In such case buffer created by this method will remain backed by the memory behind the stream at the time the buffer was created.<br />
         /// This method can throw an <code>ObjectDisposedException</code> if the specified stream is closed.<br />
@@ -402,13 +369,14 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         /// length end, or zero if <code>positionInStream</code> is beyond stream length end, but not more than <code>length</code>.
         /// </summary>
         /// <param name="underlyingStream">A memory stream to share the data memory with the buffer being created.</param>
-        /// <returns>A new <code>IBuffer<code> backed by the same memory as this specified stream.</returns>
-        // The naming inconsistency with (Byte []).AsBuffer is intentional: as this extension method will appear on
-        // MemoryStream, consistency with method names on MemoryStream is more important. There we already have an API
-        // called GetBuffer which returns the underlying array.
+        /// <returns>A new <code>IBuffer</code> backed by the same memory as this specified stream.</returns>
         [CLSCompliant(false)]
-        public static IBuffer GetWindowsRuntimeBuffer(this MemoryStream underlyingStream, Int32 positionInStream, Int32 length)
+        public static IBuffer GetWindowsRuntimeBuffer(this MemoryStream underlyingStream, int positionInStream, int length)
         {
+            // The naming inconsistency with (Byte []).AsBuffer is intentional: as this extension method will appear on
+            // MemoryStream, consistency with method names on MemoryStream is more important. There we already have an API
+            // called GetBuffer which returns the underlying array.
+
             if (underlyingStream == null)
                 throw new ArgumentNullException(nameof(underlyingStream));
 
@@ -421,11 +389,6 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (underlyingStream.Capacity <= positionInStream)
                 throw new ArgumentException(SR.Argument_StreamPositionBeyondEOS);
 
-            Contract.Ensures(Contract.Result<IBuffer>() != null);
-            Contract.Ensures(Contract.Result<IBuffer>().Length == length);
-            Contract.Ensures(Contract.Result<IBuffer>().Capacity == length);
-
-            Contract.EndContractBlock();
             ArraySegment<byte> streamData;
 
             if (!underlyingStream.TryGetBuffer(out streamData))
@@ -433,9 +396,9 @@ namespace System.Runtime.InteropServices.WindowsRuntime
                 throw new UnauthorizedAccessException(SR.UnauthorizedAccess_InternalBuffer);
             }
 
-            Int32 originInStream = streamData.Offset;
-            Int32 buffCapacity = Math.Min(length, underlyingStream.Capacity - positionInStream);
-            Int32 buffLength = Math.Max(0, Math.Min(length, ((Int32)underlyingStream.Length) - positionInStream));
+            int originInStream = streamData.Offset;
+            int buffCapacity = Math.Min(length, underlyingStream.Capacity - positionInStream);
+            int buffLength = Math.Max(0, Math.Min(length, ((int)underlyingStream.Length) - positionInStream));
             return new WindowsRuntimeBuffer(streamData.Array, originInStream + positionInStream, buffLength, buffCapacity);
         }
 
@@ -446,17 +409,12 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            Contract.Ensures(Contract.Result<Stream>() != null);
-            Contract.Ensures(Contract.Result<Stream>().Length == (UInt32)source.Capacity);
-
-            Contract.EndContractBlock();
-
-            Byte[] dataArr;
-            Int32 dataOffs;
+            byte[] dataArr;
+            int dataOffs;
             if (source.TryGetUnderlyingData(out dataArr, out dataOffs))
             {
-                Debug.Assert(source.Capacity < Int32.MaxValue);
-                return new MemoryStream(dataArr, dataOffs, (Int32)source.Capacity, true);
+                Debug.Assert(source.Capacity < int.MaxValue);
+                return new MemoryStream(dataArr, dataOffs, (int)source.Capacity, true);
             }
 
             unsafe
@@ -472,15 +430,13 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         #region Extensions for direct by-offset access to buffer data elements
 
         [CLSCompliant(false)]
-        public static Byte GetByte(this IBuffer source, UInt32 byteOffset)
+        public static byte GetByte(this IBuffer source, uint byteOffset)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (source.Capacity <= byteOffset) throw new ArgumentException(SR.Argument_BufferIndexExceedsCapacity, nameof(byteOffset));
 
-            Contract.EndContractBlock();
-
-            Byte[] srcDataArr;
-            Int32 srcDataOffs;
+            byte[] srcDataArr;
+            int srcDataOffs;
             if (source.TryGetUnderlyingData(out srcDataArr, out srcDataOffs))
             {
                 return srcDataArr[srcDataOffs + byteOffset];
@@ -490,7 +446,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             unsafe
             {
                 // Let's avoid an unnesecary call to Marshal.ReadByte():
-                Byte* ptr = (Byte*)srcPtr;
+                byte* ptr = (byte*)srcPtr;
                 return *ptr;
             }
         }
@@ -506,17 +462,17 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             // we must keep around a reference to the IBuffer from which we got the memory pointer. Otherwise the ref count
             // of the underlying COM object may drop to zero and the memory may get freed.
 
-            private IBuffer _sourceBuffer;
+            private readonly IBuffer _sourceBuffer;
 
-            internal unsafe WindowsRuntimeBufferUnmanagedMemoryStream(IBuffer sourceBuffer, Byte* dataPtr)
+            internal unsafe WindowsRuntimeBufferUnmanagedMemoryStream(IBuffer sourceBuffer, byte* dataPtr)
 
-                : base(dataPtr, (Int64)sourceBuffer.Length, (Int64)sourceBuffer.Capacity, FileAccess.ReadWrite)
+                : base(dataPtr, (long)sourceBuffer.Length, (long)sourceBuffer.Capacity, FileAccess.ReadWrite)
             {
                 _sourceBuffer = sourceBuffer;
             }
         }  // class WindowsRuntimeBufferUnmanagedMemoryStream
 
-        private static IntPtr GetPointerAtOffset(this IBuffer buffer, UInt32 offset)
+        private static IntPtr GetPointerAtOffset(this IBuffer buffer, uint offset)
         {
             Debug.Assert(0 <= offset);
             Debug.Assert(offset < buffer.Capacity);
@@ -528,23 +484,23 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             }
         }
 
-        private static unsafe void MemCopy(IntPtr src, IntPtr dst, UInt32 count)
+        private static unsafe void MemCopy(IntPtr src, IntPtr dst, uint count)
         {
-            if (count > Int32.MaxValue)
+            if (count > int.MaxValue)
             {
-                MemCopy(src, dst, Int32.MaxValue);
-                MemCopy(src + Int32.MaxValue, dst + Int32.MaxValue, count - Int32.MaxValue);
+                MemCopy(src, dst, int.MaxValue);
+                MemCopy(src + int.MaxValue, dst + int.MaxValue, count - int.MaxValue);
                 return;
             }
 
-            Debug.Assert(count <= Int32.MaxValue);
-            Int32 bCount = (Int32)count;
+            Debug.Assert(count <= int.MaxValue);
+            int bCount = (int)count;
 
 
             // Copy via buffer.
             // Note: if becomes perf critical, we will port the routine that
             // copies the data without using Marshal (and byte[])
-            Byte[] tmp = new Byte[bCount];
+            byte[] tmp = new byte[bCount];
             Marshal.Copy(src, tmp, 0, bCount);
             Marshal.Copy(tmp, 0, dst, bCount);
             return;

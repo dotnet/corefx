@@ -62,11 +62,11 @@ namespace System.Threading.Tasks.Tests
                 // Some "cancel" continuations will be queued when the token is signaled
                 ContinueWithTortureTest(numToCancel, numToComplete, completeAfter: 1000, cancelAfter: 100);
 
-                // All "leftover" continuations should be queued when antecedent completes 
+                // All "leftover" continuations should be queued when antecedent completes
                 // There may or may not be leftover "cancel" continuations when the antecedent completes
                 ContinueWithTortureTest(numToCancel, numToComplete, completeAfter: 10000, cancelAfter: 9900);
 
-                // All continuations should be queued when antecedent completes 
+                // All continuations should be queued when antecedent completes
                 ContinueWithTortureTest(numToCancel, numToComplete, completeAfter: 10000, cancelAfter: 10000);
             }
         }
@@ -716,7 +716,7 @@ namespace System.Threading.Tasks.Tests
             //// Test against buggy schedulers
             ////
             //
-            //// More specifically, ensure that inline execution via synchronous continuations 
+            //// More specifically, ensure that inline execution via synchronous continuations
             //// causes the predictable exception from the NonInliningTaskScheduler.
             //
             //Task<Task> t1 = null;
@@ -724,7 +724,7 @@ namespace System.Threading.Tasks.Tests
             //Task hanging1 = new TaskFactory(new NonInliningTaskScheduler()).StartNew(() =>
             //{
             //    // To avoid fast-path optimizations in Unwrap, ensure that both inner
-            //    // and outer tasks are not completed before Unwrap is called.  (And a 
+            //    // and outer tasks are not completed before Unwrap is called.  (And a
             //    // good way to do this is to ensure that they are not even started!)
             //    Task inner = new Task(() => { });
             //    t1 = new Task<Task>(() => inner, TaskCreationOptions.AttachedToParent);
@@ -749,7 +749,7 @@ namespace System.Threading.Tasks.Tests
             //Task hanging2 = new TaskFactory(new NonInliningTaskScheduler()).StartNew(() =>
             //{
             //    // To avoid fast-path optimizations in Unwrap, ensure that both inner
-            //    // and outer tasks are not completed before Unwrap is called.  (And a 
+            //    // and outer tasks are not completed before Unwrap is called.  (And a
             //    // good way to do this is to ensure that they are not even started!)
             //    Task<int> inner = new Task<int>(() => 10);
             //    Task<Task<int>> f1 = new Task<Task<int>>(() => inner, TaskCreationOptions.AttachedToParent);
@@ -788,7 +788,7 @@ namespace System.Threading.Tasks.Tests
             Task c8 = null;
 
             Action doExc = delegate { throw new Exception("some exception"); };
-            // 
+            //
             // Exception tests
             //
             taskRoot = new Task(delegate { });
@@ -1211,34 +1211,49 @@ namespace System.Threading.Tasks.Tests
         }
 
         [Fact]
-        public static void RunStackGuardTests()
+        public static void LongContinuationChain_ContinueWith_DoesNotStackOverflow()
         {
-            const int DIVE_DEPTH = 12000;
+            const int DiveDepth = 12_000;
 
-            // Test stack guard with ContinueWith.
+            var tcs = new TaskCompletionSource<bool>();
+            var t = (Task)tcs.Task;
+            for (int i = 0; i < DiveDepth; i++)
             {
-                Func<Task, Task> func = completed => completed.ContinueWith(delegate { }, TaskContinuationOptions.ExecuteSynchronously);
-                var tcs = new TaskCompletionSource<bool>();
-                var t = (Task)tcs.Task;
-                for (int i = 0; i < DIVE_DEPTH; i++) t = func(t);
-                tcs.TrySetResult(true);
-                t.Wait();
+                t = t.ContinueWith(_ => { }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
             }
+            tcs.TrySetResult(true);
+            t.Wait();
+        }
 
-            // Test stack guard with Unwrap
+        [Fact]
+        public static void LongContinuationChain_Unwrap_DoesNotStackOverflow()
+        {
+            const int DiveDepth = 12_000;
+
+            Func<long, Task<long>> func = null;
+            func = iterationsRemaining =>
             {
-                Func<long, Task<long>> func = null;
-                func = iterationsRemaining =>
-                {
-                    --iterationsRemaining;
-                    return iterationsRemaining > 0 ?
-                        Task.Factory.StartNew(() => func(iterationsRemaining)).Unwrap() :
-                        Task.FromResult(iterationsRemaining);
-                };
-                func(DIVE_DEPTH).Wait();
-            }
+                --iterationsRemaining;
+                return iterationsRemaining > 0 ?
+                    Task.Factory.StartNew(() => func(iterationsRemaining)).Unwrap() :
+                    Task.FromResult(iterationsRemaining);
+            };
+            func(DiveDepth).Wait();
+        }
 
-            // These tests will have stack overflowed if they failed.
+        [Fact]
+        public static void LongContinuationChain_Await_DoesNotStackOverflow()
+        {
+            const int DiveDepth = 12_000;
+
+            Func<int, Task<int>> func = null;
+            func = async count =>
+            {
+                return ++count < DiveDepth ?
+                    await await Task.Factory.StartNew(() => func(count), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default) :
+                    count;
+            };
+            func(0).Wait();
         }
 
         [Theory]
@@ -1252,7 +1267,7 @@ namespace System.Threading.Tasks.Tests
             Task task1 = new Task(() => { });
 
             var barrier = new Barrier(2);
-            Task task2 = task1.ContinueWith((_task) => 
+            Task task2 = task1.ContinueWith((_task) =>
             {
                 barrier.SignalAndWait(); // alert caller that we've started running
                 barrier.SignalAndWait(); // wait for caller to be done waiting
@@ -1261,7 +1276,7 @@ namespace System.Threading.Tasks.Tests
             task1.Start();
             barrier.SignalAndWait(); // wait for task to start running
 
-            // Wait should return once the task is complete, regardless of what other 
+            // Wait should return once the task is complete, regardless of what other
             // continuations were scheduled off of it.
             if (useWaitAll)
             {
@@ -1280,7 +1295,7 @@ namespace System.Threading.Tasks.Tests
 
         #region Helper Methods
 
-        public static void ContinueWithTortureTest(int numCanceled, int numLeftover, int completeAfter, int cancelAfter)
+        private static void ContinueWithTortureTest(int numCanceled, int numLeftover, int completeAfter, int cancelAfter)
         {
             //Debug.WriteLine("    - ContinueWithTortureTest(numCanceled={0}, numLeftover={1}, completeAfter={2}, cancelAfter={3})",
             //    numCanceled, numLeftover, completeAfter, cancelAfter);
@@ -1320,7 +1335,7 @@ namespace System.Threading.Tasks.Tests
                         // Use both synchronous and asynchronous continuations
                         TaskContinuationOptions tco = ((i % 2) == 0) ? TaskContinuationOptions.None : TaskContinuationOptions.ExecuteSynchronously;
 
-                        // The cancelAction should run exactly once per "to be canceled" continuation -- either in the first continuation or, 
+                        // The cancelAction should run exactly once per "to be canceled" continuation -- either in the first continuation or,
                         // if the first continuation is canceled, in the second continuation.
                         cancelContinuations[i] = antecedent.ContinueWith(cancelAction, cts.Token, tco, TaskScheduler.Default)
                             .ContinueWith(cancelAction, tco | TaskContinuationOptions.OnlyOnCanceled);
@@ -1363,7 +1378,7 @@ namespace System.Threading.Tasks.Tests
         }
 
         // Ensures that the specified action throws a AggregateException wrapping a TaskCanceledException
-        public static void EnsureTaskCanceledExceptionThrown(Action action, string message)
+        private static void EnsureTaskCanceledExceptionThrown(Action action, string message)
         {
             Exception exception = null;
 
@@ -1380,7 +1395,7 @@ namespace System.Threading.Tasks.Tests
         }
 
         // Ensures that the specified exception is an AggregateException wrapping a TaskCanceledException
-        public static void EnsureExceptionIsAEofTCE(Exception exception, string message)
+        private static void EnsureExceptionIsAEofTCE(Exception exception, string message)
         {
             if (exception == null)
             {
@@ -1397,7 +1412,7 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        private static Task<Int32> Choose(CancellationToken cancellationToken)
+        private static Task<int> Choose(CancellationToken cancellationToken)
         {
             // Set up completion structures
             //var boxedCompleted = new StrongBox<Task>(); // Acts as both completion marker and sync obj for targets

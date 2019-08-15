@@ -15,12 +15,12 @@ namespace System.Reflection
         {
         }
 
-        public InvalidFilterCriteriaException(string message)
+        public InvalidFilterCriteriaException(string? message)
             : this(message, null)
         {
         }
 
-        public InvalidFilterCriteriaException(string message, Exception inner)
+        public InvalidFilterCriteriaException(string? message, Exception? inner)
             : base(message, inner)
         {
             HResult = HResults.COR_E_INVALIDFILTERCRITERIA;

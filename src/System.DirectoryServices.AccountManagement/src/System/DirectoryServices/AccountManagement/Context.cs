@@ -15,7 +15,6 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Collections;
-using System.Security.Permissions;
 
 namespace System.DirectoryServices.AccountManagement
 {
@@ -36,7 +35,7 @@ namespace System.DirectoryServices.AccountManagement
         WinLH = 3
     };
 
-    static internal class CapabilityMap
+    internal static class CapabilityMap
     {
         public const string LDAP_CAP_ACTIVE_DIRECTORY_OID = "1.2.840.113556.1.4.800";
         public const string LDAP_CAP_ACTIVE_DIRECTORY_V51_OID = "1.2.840.113556.1.4.1670";
@@ -56,13 +55,13 @@ namespace System.DirectoryServices.AccountManagement
 
         private bool _fastConcurrentSupported = true;
 
-        private Hashtable _connCache = new Hashtable(4);
+        private readonly Hashtable _connCache = new Hashtable(4);
         private LdapDirectoryIdentifier _directoryIdent;
-        private object _cacheLock = new object();
+        private readonly object _cacheLock = new object();
 
         private AuthMethod _lastBindMethod = AuthMethod.Simple;
-        private string _serverName;
-        private ContextType _contextType;
+        private readonly string _serverName;
+        private readonly ContextType _contextType;
         private ServerProperties _serverProperties;
 
         private const ContextOptions defaultContextOptionsNegotiate = ContextOptions.Signing | ContextOptions.Sealing | ContextOptions.Negotiate;
@@ -91,7 +90,7 @@ namespace System.DirectoryServices.AccountManagement
             adsPath.Append("WinNT://");
             adsPath.Append(_serverName);
             adsPath.Append(",computer");
-            Guid g = new Guid("fd8256d0-fd15-11ce-abc4-02608c9e7553"); // IID_IUnknown                
+            Guid g = new Guid("fd8256d0-fd15-11ce-abc4-02608c9e7553"); // IID_IUnknown
             object value = null;
             // always attempt secure auth..
             int authenticationType = 1;
@@ -381,7 +380,7 @@ namespace System.DirectoryServices.AccountManagement
                 throw new ArgumentException(SR.ContextBadUserPwdCombo);
 
             if ((options & ~(ContextOptions.Signing | ContextOptions.Negotiate | ContextOptions.Sealing | ContextOptions.SecureSocketLayer | ContextOptions.SimpleBind | ContextOptions.ServerBind)) != 0)
-                throw new InvalidEnumArgumentException("options", (int)options, typeof(ContextOptions));
+                throw new InvalidEnumArgumentException(nameof(options), (int)options, typeof(ContextOptions));
 
             if (contextType == ContextType.Machine && ((options & ~ContextOptions.Negotiate) != 0))
             {
@@ -398,18 +397,18 @@ namespace System.DirectoryServices.AccountManagement
             if ((contextType != ContextType.Machine) &&
                 (contextType != ContextType.Domain) &&
                 (contextType != ContextType.ApplicationDirectory)
-#if TESTHOOK                
+#if TESTHOOK
                 && (contextType != ContextType.Test)
 #endif
                 )
             {
-                throw new InvalidEnumArgumentException("contextType", (int)contextType, typeof(ContextType));
+                throw new InvalidEnumArgumentException(nameof(contextType), (int)contextType, typeof(ContextType));
             }
 
             if ((contextType == ContextType.Machine) && (container != null))
                 throw new ArgumentException(SR.ContextNoContainerForMachineCtx);
 
-            if ((contextType == ContextType.ApplicationDirectory) && ((String.IsNullOrEmpty(container)) || (String.IsNullOrEmpty(name))))
+            if ((contextType == ContextType.ApplicationDirectory) && ((string.IsNullOrEmpty(container)) || (string.IsNullOrEmpty(name))))
                 throw new ArgumentException(SR.ContextNoContainerForApplicationDirectoryCtx);
 
             _contextType = contextType;
@@ -499,7 +498,7 @@ namespace System.DirectoryServices.AccountManagement
 
         /// <summary>
         /// Validate the passed credentials against the directory supplied.
-        //   This function will use the best determined method to do the evaluation
+        /// This function will use the best determined method to do the evaluation.
         /// </summary>
 
         public bool ValidateCredentials(string userName, string password)
@@ -522,11 +521,11 @@ namespace System.DirectoryServices.AccountManagement
 
         /// <summary>
         /// Validate the passed credentials against the directory supplied.
-        //   The supplied options will determine the directory method for credential validation.
+        /// The supplied options will determine the directory method for credential validation.
         /// </summary>
         public bool ValidateCredentials(string userName, string password, ContextOptions options)
         {
-            // Perform credential validation using fast concurrent bind...            
+            // Perform credential validation using fast concurrent bind...
             CheckDisposed();
 
             if ((userName == null && password != null) ||
@@ -548,7 +547,7 @@ namespace System.DirectoryServices.AccountManagement
 
         //
         // Private methods for initialization
-        //                
+        //
         private void Initialize()
         {
             if (!_initialized)
@@ -690,7 +689,7 @@ namespace System.DirectoryServices.AccountManagement
 
                 if (_serverProperties.contextType != _contextType)
                 {
-                    throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.PassedContextTypeDoesNotMatchDetectedType, _serverProperties.contextType.ToString()));
+                    throw new ArgumentException(SR.Format(SR.PassedContextTypeDoesNotMatchDetectedType, _serverProperties.contextType.ToString()));
                 }
             }
         }
@@ -882,7 +881,7 @@ namespace System.DirectoryServices.AccountManagement
                 // Build DEs for the Users and Computers containers.
                 // The Users container will also be used as the default for Groups.
                 // The reason there are different contexts for groups, users and computers is so that
-                // when a principal is created it will go into the appropriate default container.  This is so users don't 
+                // when a principal is created it will go into the appropriate default container.  This is so users don't
                 // be default create principals in the root of their directory.  When a search happens the base context is used so that
                 // the whole directory will be covered.
                 //
@@ -939,7 +938,7 @@ namespace System.DirectoryServices.AccountManagement
 
 #if TESTHOOK
 
-        static public PrincipalContext Test
+        public static PrincipalContext Test
         {
             get
             {
@@ -947,39 +946,39 @@ namespace System.DirectoryServices.AccountManagement
                 PrincipalContext ctx = new PrincipalContext(ContextType.Test);
                 ctx.SetupContext(storeCtx);
                 ctx.initialized = true;
-                
+
                 storeCtx.OwningContext = ctx;
                 return ctx;
             }
         }
 
-        static public PrincipalContext TestAltValidation
+        public static PrincipalContext TestAltValidation
         {
             get
             {
                 TestStoreCtx storeCtx = new TestStoreCtx(true);
-                storeCtx.SwitchValidationMode = true;                
+                storeCtx.SwitchValidationMode = true;
                 PrincipalContext ctx = new PrincipalContext(ContextType.Test);
                 ctx.SetupContext(storeCtx);
                 ctx.initialized = true;
-                
+
                 storeCtx.OwningContext = ctx;
-                return ctx;                
+                return ctx;
             }
         }
 
-        static public PrincipalContext TestNoTimeLimited
+        public static PrincipalContext TestNoTimeLimited
         {
             get
             {
                 TestStoreCtx storeCtx = new TestStoreCtx(true);
-                storeCtx.SupportTimeLimited = false;                
+                storeCtx.SupportTimeLimited = false;
                 PrincipalContext ctx = new PrincipalContext(ContextType.Test);
                 ctx.SetupContext(storeCtx);
                 ctx.initialized = true;
-                
+
                 storeCtx.OwningContext = ctx;
-                return ctx;            
+                return ctx;
             }
         }
 
@@ -1023,7 +1022,7 @@ namespace System.DirectoryServices.AccountManagement
 
         // Are we initialized?
         private bool _initialized = false;
-        private object _initializationLock = new object();
+        private readonly object _initializationLock = new object();
 
         // Have we been disposed?
         private bool _disposed = false;
@@ -1032,11 +1031,11 @@ namespace System.DirectoryServices.AccountManagement
         // Our constructor parameters
 
         // encryption nor zeroing out the string when you're done with it.
-        private string _username;
-        private string _password;
+        private readonly string _username;
+        private readonly string _password;
 
         // Cached connections to the server for fast credential validation
-        private CredentialValidator _credValidate;
+        private readonly CredentialValidator _credValidate;
         private ServerProperties _serverProperties;
 
         internal ServerProperties ServerInformation
@@ -1047,16 +1046,16 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        private string _name;
-        private string _container;
-        private ContextOptions _options;
-        private ContextType _contextType;
+        private readonly string _name;
+        private readonly string _container;
+        private readonly ContextOptions _options;
+        private readonly ContextType _contextType;
 
         // The server we're connected to
         private string _connectedServer = null;
 
         // The reason there are different contexts for groups, users and computers is so that
-        // when a principal is created it will go into the appropriate default container.  This is so users don't 
+        // when a principal is created it will go into the appropriate default container.  This is so users don't
         // by default create principals in the root of their directory.  When a search happens the base context is used so that
         // the whole directory will be covered.  User and Computers default are the same ( USERS container ), Computers are
         // put under COMPUTERS container.  If a container is specified then all the contexts will point to the same place.
@@ -1263,4 +1262,3 @@ namespace System.DirectoryServices.AccountManagement
         }
     }
 }
-

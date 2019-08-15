@@ -101,8 +101,8 @@ namespace System.Net.Http
                     return;
                 }
 
-                // libcurl supports options for either enabling all of the TLS1.* protocols or enabling 
-                // just one protocol; it doesn't currently support enabling two of the three, e.g. you can't 
+                // libcurl supports options for either enabling all of the TLS1.* protocols or enabling
+                // just one protocol; it doesn't currently support enabling two of the three, e.g. you can't
                 // pick TLS1.1 and TLS1.2 but not TLS1.0, but you can select just TLS1.2.
                 Interop.Http.CurlSslVersion curlSslVersion;
                 switch (protocols)
@@ -125,8 +125,12 @@ namespace System.Net.Http
                     case SslProtocols.Tls12:
                         curlSslVersion = Interop.Http.CurlSslVersion.CURL_SSLVERSION_TLSv1_2;
                         break;
+                    case SslProtocols.Tls13:
+                        curlSslVersion = Interop.Http.CurlSslVersion.CURL_SSLVERSION_TLSv1_3;
+                        break;
 
                     case SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12:
+                    case SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12 | SslProtocols.Tls13:
                         curlSslVersion = Interop.Http.CurlSslVersion.CURL_SSLVERSION_TLSv1;
                         break;
 

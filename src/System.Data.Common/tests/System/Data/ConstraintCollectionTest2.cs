@@ -2,7 +2,7 @@
 // See the LICENSE file in the project root for more information.
 
 // Copyright (c) 2004 Mainsoft Co.
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
 // "Software"), to deal in the Software without restriction, including
@@ -10,10 +10,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -35,21 +35,21 @@ namespace System.Data.Tests
         [Fact]
         public void CanRemove_ParentForeign()
         {
-            DataSet ds = DataProvider.CreateForigenConstraint();
+            DataSet ds = DataProvider.CreateForeignConstraint();
             Assert.False(ds.Tables["parent"].Constraints.CanRemove(ds.Tables["parent"].Constraints[0]));
         }
 
         [Fact]
         public void CanRemove_ChildForeign()
         {
-            DataSet ds = DataProvider.CreateForigenConstraint();
+            DataSet ds = DataProvider.CreateForeignConstraint();
             Assert.True(ds.Tables["child"].Constraints.CanRemove(ds.Tables["child"].Constraints[0]));
         }
 
         [Fact]
         public void CanRemove_ParentAndChildForeign()
         {
-            DataSet ds = DataProvider.CreateForigenConstraint();
+            DataSet ds = DataProvider.CreateForeignConstraint();
             //remove the forigen and ask about the unique
             ds.Tables["child"].Constraints.Remove(ds.Tables["child"].Constraints[0]);
             Assert.True(ds.Tables["parent"].Constraints.CanRemove(ds.Tables["parent"].Constraints[0]));
@@ -58,7 +58,7 @@ namespace System.Data.Tests
         [Fact]
         public void Clear_Foreign()
         {
-            DataSet ds = DataProvider.CreateForigenConstraint();
+            DataSet ds = DataProvider.CreateForeignConstraint();
             foreach (DataTable dt in ds.Tables)
             {
                 dt.Constraints.Clear();
@@ -92,7 +92,7 @@ namespace System.Data.Tests
         [Fact]
         public void Contains_ByName()
         {
-            DataSet ds = DataProvider.CreateForigenConstraint();
+            DataSet ds = DataProvider.CreateForeignConstraint();
 
             //changing the constraints's name
 
@@ -162,7 +162,7 @@ namespace System.Data.Tests
             dt.Constraints.Add(con);
             Assert.Equal(1, dt.Constraints.IndexOf(con));
 
-            //Remove it and try to look for it 
+            //Remove it and try to look for it
 
             dt.Constraints.Remove(con);
             Assert.Equal(-1, dt.Constraints.IndexOf(con));
@@ -182,7 +182,7 @@ namespace System.Data.Tests
             dt.Constraints.Add(con);
             Assert.Equal(1, dt.Constraints.IndexOf("name2"));
 
-            //Remove it and try to look for it 
+            //Remove it and try to look for it
 
             dt.Constraints.Remove(con);
             Assert.Equal(-1, dt.Constraints.IndexOf("name2"));
@@ -229,7 +229,7 @@ namespace System.Data.Tests
 
             table2.Constraints.Add("fk_cons", pcol, ccol);
 
-            // Should not throw DataException 
+            // Should not throw DataException
             ds.Relations.Add("fk_rel", pcol, ccol);
 
             Assert.Equal(1, table2.Constraints.Count);
@@ -386,7 +386,7 @@ namespace System.Data.Tests
             Assert.Equal(1, dt.Constraints.Count);
             Assert.Equal("Constraint1", dt.Constraints[0].ConstraintName);
 
-            DataSet ds = DataProvider.CreateForigenConstraint();
+            DataSet ds = DataProvider.CreateForeignConstraint();
             Assert.Equal(1, ds.Tables[1].Constraints.Count);
             Assert.Equal(1, ds.Tables[0].Constraints.Count);
 
@@ -399,7 +399,7 @@ namespace System.Data.Tests
             TestException(new testExceptionMethodCallback(DataProvider.TryToBreakForigenConstraint), arr);
         }
 
-        public void TestException(testExceptionMethodCallback dlg, IList exceptionList)
+        private static void TestException(testExceptionMethodCallback dlg, IList exceptionList)
         {
             Exception ex = Assert.ThrowsAny<Exception>(() => dlg());
             foreach (Exception expectedEx in exceptionList)
@@ -504,7 +504,7 @@ namespace System.Data.Tests
                 ds.Tables.Add(DataProvider.CreateChildDataTable());
                 Constraint badConstraint = new UniqueConstraint(ds.Tables[0].Columns[0]);
 
-                ds.Tables[1].Constraints.AddRange(new Constraint[] { badConstraint }); //Cuz foreign key belongs to child table	
+                ds.Tables[1].Constraints.AddRange(new Constraint[] { badConstraint }); //Cuz foreign key belongs to child table
             });
         }
 
@@ -514,9 +514,9 @@ namespace System.Data.Tests
             DataTable child = ds.Tables[1];
             Constraint[] constArray = new Constraint[2];
 
-            //Create unique 
+            //Create unique
             constArray[0] = new UniqueConstraint("Unique1", child.Columns["ChildDouble"]);
-            //Create foreign 
+            //Create foreign
             constArray[1] = new ForeignKeyConstraint(parent.Columns[0], child.Columns[1]);
 
             return constArray;
@@ -562,7 +562,7 @@ namespace System.Data.Tests
             dt = DataProvider.CreateUniqueConstraint();
             dt.Constraints.CollectionChanged += new CollectionChangeEventHandler(Constraints_CollectionChanged);
             dt.Constraints.RemoveAt(0);
-            Assert.Equal(true, _collectionChanged);
+            Assert.True(_collectionChanged);
 
             ArrayList arr = new ArrayList(1);
             arr.Add(new IndexOutOfRangeException());

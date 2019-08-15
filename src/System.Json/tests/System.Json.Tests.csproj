@@ -1,17 +1,14 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{DC683D60-34EC-4D85-B6E0-E97FDB37A583}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="JsonArrayTests.cs" />
-    <Compile Include="JsonObjectTests.cs" />
-    <Compile Include="JsonPrimitiveTests.cs" />
-    <Compile Include="JsonValueTests.cs" />
+    <Compile Include="System\Json\JsonArrayTests.cs" />
+    <Compile Include="System\Json\JsonObjectTests.cs" />
+    <Compile Include="System\Json\JsonPrimitiveTests.cs" />
+    <Compile Include="System\Json\JsonValueTests.cs" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -98,7 +98,7 @@ namespace System.IO.Tests
             MemoryStream mstr = null;
             byte[] bArr = null;
             StringBuilder sb = new StringBuilder();
-            Int64 lReturn = 0;
+            long lReturn = 0;
 
             mstr = new MemoryStream();
             dw2 = new BinaryWriter(mstr);
@@ -261,7 +261,7 @@ namespace System.IO.Tests
             {
                 writer.Write("012345789".ToCharArray());
 
-                AssertExtensions.Throws<ArgumentException>(null, () => 
+                AssertExtensions.Throws<ArgumentException>(null, () =>
                 {
                     writer.Seek(3, ~SeekOrigin.Begin);
                 });
@@ -364,14 +364,32 @@ namespace System.IO.Tests
             Assert.Throws<ObjectDisposedException>(() => binaryWriter.Write(5.3));
             Assert.Throws<ObjectDisposedException>(() => binaryWriter.Write((short)3));
             Assert.Throws<ObjectDisposedException>(() => binaryWriter.Write(33));
-            Assert.Throws<ObjectDisposedException>(() => binaryWriter.Write((Int64)42));
+            Assert.Throws<ObjectDisposedException>(() => binaryWriter.Write((long)42));
             Assert.Throws<ObjectDisposedException>(() => binaryWriter.Write((sbyte)4));
             Assert.Throws<ObjectDisposedException>(() => binaryWriter.Write("Hello There"));
             Assert.Throws<ObjectDisposedException>(() => binaryWriter.Write((float)4.3));
-            Assert.Throws<ObjectDisposedException>(() => binaryWriter.Write((UInt16)3));
+            Assert.Throws<ObjectDisposedException>(() => binaryWriter.Write((ushort)3));
             Assert.Throws<ObjectDisposedException>(() => binaryWriter.Write((uint)4));
             Assert.Throws<ObjectDisposedException>(() => binaryWriter.Write((ulong)5));
             Assert.Throws<ObjectDisposedException>(() => binaryWriter.Write("Bah"));
+        }
+
+        private class BinaryWriterOutStream : BinaryWriter
+        {
+            public BinaryWriterOutStream(Stream output)
+                : base(output)
+            {
+            }
+
+            public Stream GetOutStream => OutStream;
+        }
+
+        [Fact]
+        public void BinaryWriter_OutStream()
+        {
+            var stream = new MemoryStream();
+            var bw = new BinaryWriterOutStream(stream);
+            Assert.Same(stream, bw.GetOutStream);
         }
     }
 }

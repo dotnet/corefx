@@ -6,9 +6,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Microsoft.Internal;
 
-using PermissionSet = System.Security.PermissionSet;
-using PermissionState = System.Security.Permissions.PermissionState;
-
 namespace System.ComponentModel.Composition
 {
     /// <summary>
@@ -18,22 +15,20 @@ namespace System.ComponentModel.Composition
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false,Inherited = true)]
     public class CatalogReflectionContextAttribute : Attribute
     {
-        Type _reflectionContextType;
+        private readonly Type _reflectionContextType;
 
         public CatalogReflectionContextAttribute(Type reflectionContextType)
         {
-            Requires.NotNull(reflectionContextType, "reflectionContextType");
+            Requires.NotNull(reflectionContextType, nameof(reflectionContextType));
 
             _reflectionContextType = reflectionContextType;
         }
 
         public ReflectionContext CreateReflectionContext()
         {
-            Assumes.NotNull<Type>(_reflectionContextType);
-
-            if (!_reflectionContextType.IsPublic)
+            if (_reflectionContextType == null)
             {
-                new PermissionSet(PermissionState.Unrestricted).Demand();
+                throw new ArgumentNullException(nameof(_reflectionContextType));
             }
 
             ReflectionContext reflectionContext = null;

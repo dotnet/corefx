@@ -9,7 +9,7 @@ using System.Security.Cryptography;
 namespace Internal.Cryptography
 {
     //
-    // A cross-platform ICryptoTransform implementation for decryption. 
+    // A cross-platform ICryptoTransform implementation for decryption.
     //
     //  - Implements the various padding algorithms (as we support padding algorithms that the underlying native apis don't.)
     //
@@ -97,7 +97,18 @@ namespace Internal.Cryptography
             byte[] outputData;
             if (ciphertext.Length > 0)
             {
-                outputData = DepadBlock(decryptedBytes, 0, decryptedBytes.Length);
+                unsafe
+                {
+                    fixed (byte* decryptedBytesPtr = decryptedBytes)
+                    {
+                        outputData = DepadBlock(decryptedBytes, 0, decryptedBytes.Length);
+
+                        if (outputData != decryptedBytes)
+                        {
+                            CryptographicOperations.ZeroMemory(decryptedBytes);
+                        }
+                    }
+                }
             }
             else
             {

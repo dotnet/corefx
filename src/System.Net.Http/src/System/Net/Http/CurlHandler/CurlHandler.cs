@@ -90,9 +90,6 @@ namespace System.Net.Http
     {
         #region Constants
 
-        private const char SpaceChar = ' ';
-        private const int StatusCodeLength = 3;
-
         private const string UriSchemeHttp = "http";
         private const string UriSchemeHttps = "https";
         private const string EncodingNameGzip = "gzip";
@@ -102,8 +99,6 @@ namespace System.Net.Http
         private const string NoTransferEncoding = HttpKnownHeaderNames.TransferEncoding + ":";
         private const string NoContentType = HttpKnownHeaderNames.ContentType + ":";
         private const string NoExpect = HttpKnownHeaderNames.Expect + ":";
-        private const int CurlAge = 5;
-        private const int MinCurlAge = 3;
 
         #endregion
 
@@ -116,10 +111,6 @@ namespace System.Net.Http
             new KeyValuePair<string,CURLAUTH>("Basic", CURLAUTH.Basic),
         };
 
-        // Max timeout value used by WinHttp handler, so mapping to that here.
-        private static readonly TimeSpan s_maxTimeout = TimeSpan.FromMilliseconds(int.MaxValue);
-
-        private static readonly char[] s_newLineCharArray = new char[] { HttpRuleParser.CR, HttpRuleParser.LF };
         private static readonly bool s_supportsAutomaticDecompression;
         private static readonly bool s_supportsSSL;
         private static readonly bool s_supportsHttp2Multiplexing;
@@ -141,7 +132,6 @@ namespace System.Net.Http
         private bool _useDefaultCredentials = HttpHandlerDefaults.DefaultUseDefaultCredentials;
         private CookieContainer _cookieContainer = new CookieContainer();
         private bool _useCookies = HttpHandlerDefaults.DefaultUseCookies;
-        private TimeSpan _connectTimeout = Timeout.InfiniteTimeSpan;
         private bool _automaticRedirection = HttpHandlerDefaults.DefaultAutomaticRedirection;
         private int _maxAutomaticRedirections = HttpHandlerDefaults.DefaultMaxAutomaticRedirections;
         private int _maxConnectionsPerServer = HttpHandlerDefaults.DefaultMaxConnectionsPerServer;
@@ -151,12 +141,13 @@ namespace System.Net.Http
         private Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> _serverCertificateValidationCallback;
         private bool _checkCertificateRevocationList = HttpHandlerDefaults.DefaultCheckCertificateRevocationList;
         private SslProtocols _sslProtocols = SslProtocols.None; // use default
-        private IDictionary<String, Object> _properties; // Only create dictionary when required.
+        private IDictionary<string, object> _properties; // Only create dictionary when required.
 
         private object LockObject { get { return _agent; } }
 
         #endregion
 
+#pragma warning disable CA1810 // explicit static cctor
         static CurlHandler()
         {
             // curl_global_init call handled by Interop.LibCurl's cctor
@@ -164,7 +155,7 @@ namespace System.Net.Http
             Interop.Http.CurlFeatures features = Interop.Http.GetSupportedFeatures();
             s_supportsSSL = (features & Interop.Http.CurlFeatures.CURL_VERSION_SSL) != 0;
             s_supportsAutomaticDecompression = (features & Interop.Http.CurlFeatures.CURL_VERSION_LIBZ) != 0;
-            s_supportsHttp2Multiplexing = (features & Interop.Http.CurlFeatures.CURL_VERSION_HTTP2) != 0 && Interop.Http.GetSupportsHttp2Multiplexing();
+            s_supportsHttp2Multiplexing = (features & Interop.Http.CurlFeatures.CURL_VERSION_HTTP2) != 0 && Interop.Http.GetSupportsHttp2Multiplexing() && !UseSingletonMultiAgent;
 
             if (NetEventSource.IsEnabled)
             {
@@ -179,6 +170,7 @@ namespace System.Net.Http
                 s_singletonSharedAgent = new MultiAgent(null);
             }
         }
+#pragma warning restore CA1810
 
         public CurlHandler()
         {
@@ -420,7 +412,7 @@ namespace System.Net.Http
             {
                 if (_properties == null)
                 {
-                    _properties = new Dictionary<String, object>();
+                    _properties = new Dictionary<string, object>();
                 }
 
                 return _properties;
@@ -610,7 +602,7 @@ namespace System.Net.Http
                         {
                             nc = networkCredential;
                         }
-                        else if(!AreEqualNetworkCredentials(nc, networkCredential))
+                        else if (!AreEqualNetworkCredentials(nc, networkCredential))
                         {
                             throw new PlatformNotSupportedException(SR.Format(SR.net_http_unix_invalid_credential, CurlVersionDescription));
                         }

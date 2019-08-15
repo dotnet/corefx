@@ -22,7 +22,7 @@ namespace System
         }
 
         //
-        // Check if highSurr and lowSurr are a surrogate pair then 
+        // Check if highSurr and lowSurr are a surrogate pair then
         // it checks if the combined char is in the range
         // Takes in isQuery because iri restrictions for query are different
         //
@@ -36,7 +36,7 @@ namespace System
             if (char.IsSurrogatePair(highSurr, lowSurr))
             {
                 surrogatePair = true;
-                char[] chars = new char[2] { highSurr, lowSurr };
+                ReadOnlySpan<char> chars = stackalloc char[2] { highSurr, lowSurr };
                 string surrPair = new string(chars);
                 if (((string.CompareOrdinal(surrPair, "\U00010000") >= 0)
                         && (string.CompareOrdinal(surrPair, "\U0001FFFD") <= 0)) ||
@@ -133,13 +133,13 @@ namespace System
         }
 
         //
-        // IRI normalization for strings containing characters that are not allowed or 
+        // IRI normalization for strings containing characters that are not allowed or
         // escaped characters that should be unescaped in the context of the specified Uri component.
         //
         internal static unsafe string EscapeUnescapeIri(char* pInput, int start, int end, UriComponents component)
         {
             char[] dest = new char[end - start];
-            byte[] bytes = null;
+            byte[]? bytes = null;
 
             // Pin the array to do pointer accesses
             GCHandle destHandle = GCHandle.Alloc(dest, GCHandleType.Pinned);
@@ -198,7 +198,7 @@ namespace System
                             int startSeq = next;
                             int byteCount = 1;
                             // lazy initialization of max size, will reuse the array for next sequences
-                            if ((object)bytes == null)
+                            if ((object?)bytes == null)
                                 bytes = new byte[end - next];
 
                             bytes[0] = (byte)ch;
@@ -242,7 +242,7 @@ namespace System
 
                             if (charCount != 0)
                             {
-                                // If invalid sequences were present in the original escaped string, we need to 
+                                // If invalid sequences were present in the original escaped string, we need to
                                 // copy the escaped versions of those sequences.
                                 // Decoded Unicode values will be kept only when they are allowed by the URI/IRI RFC
                                 // rules.

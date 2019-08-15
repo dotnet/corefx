@@ -82,11 +82,11 @@ namespace System.Net.Http.Headers
             {
                 // Note that we don't consider double.Epsilon here. We really consider two values equal if they're
                 // actually equal. This makes sure that we also get the same hashcode for two values considered equal
-                // by Equals(). 
+                // by Equals().
                 return other._quality.HasValue && (_quality.Value == other._quality.Value);
             }
 
-            // If we don't have a quality value, then 'other' must also have no quality assigned in order to be 
+            // If we don't have a quality value, then 'other' must also have no quality assigned in order to be
             // considered equal.
             return !other._quality.HasValue;
         }
@@ -203,7 +203,7 @@ namespace System.Net.Http.Headers
             }
 
             double quality = 0;
-            if (!double.TryParse(input.Substring(current, qualityLength), NumberStyles.AllowDecimalPoint,
+            if (!double.TryParse(input.AsSpan(current, qualityLength), NumberStyles.AllowDecimalPoint,
                 NumberFormatInfo.InvariantInfo, out quality))
             {
                 return false;

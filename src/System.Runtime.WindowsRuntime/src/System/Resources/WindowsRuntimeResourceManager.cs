@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if FEATURE_APPX
+using Internal.Resources;
+#endif
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -49,7 +52,7 @@ namespace System.Resources
         private static volatile CultureInfo s_globalResourceContextBestFitCultureInfo;
         private static volatile global::Windows.ApplicationModel.Resources.Core.ResourceManager s_globalResourceManager;
 
-        private static Object s_objectForLock = new Object(); // Used by InitializeStatics
+        private static readonly object s_objectForLock = new object(); // Used by InitializeStatics
 
         private static bool InitializeStatics()
         {
@@ -118,7 +121,7 @@ namespace System.Resources
 #pragma warning restore 618
                             if (globalResourceContext != null)
                             {
-                                List<String> languages = new List<string>(globalResourceContext.Languages);
+                                List<string> languages = new List<string>(globalResourceContext.Languages);
 
                                 s_globalResourceContextBestFitCultureInfo = GetBestFitCultureFromLanguageList(languages);
                                 s_globalResourceContextFallBackList = ReadOnlyListToString(languages);
@@ -134,22 +137,23 @@ namespace System.Resources
 
         // Returns the CultureInfo representing the first language in the list that we can construct a CultureInfo for or null if
         // no such culture exists.
-        private static CultureInfo GetBestFitCultureFromLanguageList(List<string> languages)
+        private static unsafe CultureInfo GetBestFitCultureFromLanguageList(List<string> languages)
         {
-            StringBuilder localeNameBuffer = new StringBuilder(Interop.Kernel32.LOCALE_NAME_MAX_LENGTH);
+            char* localeNameBuffer = stackalloc char[Interop.Kernel32.LOCALE_NAME_MAX_LENGTH]; // LOCALE_NAME_MAX_LENGTH includes null terminator
 
             for (int i = 0; i < languages.Count; i++)
             {
-                if (CultureData.GetCultureData(languages[i], true) != null)
+                if (WindowsRuntimeResourceManagerBase.IsValidCulture(languages[i]))
                 {
                     return new CultureInfo(languages[i]);
                 }
 
-                if (Interop.Kernel32.ResolveLocaleName(languages[i], localeNameBuffer, localeNameBuffer.MaxCapacity) != 0)
+                int result = Interop.Kernel32.ResolveLocaleName(languages[i], localeNameBuffer, Interop.Kernel32.LOCALE_NAME_MAX_LENGTH);
+                if (result != 0)
                 {
-                    string localeName = localeNameBuffer.ToString();
+                    string localeName = new string(localeNameBuffer, 0, result - 1); // result length includes null terminator
 
-                    if (CultureData.GetCultureData(localeName, true) != null)
+                    if (WindowsRuntimeResourceManagerBase.IsValidCulture(localeName))
                     {
                         return new CultureInfo(localeName);
                     }
@@ -243,24 +247,24 @@ namespace System.Resources
                 return;
             }
 
-            List<String> languages = new List<string>(langs);
-            
+            List<string> languages = new List<string>(langs);
+
             if (languages.Count > 0 && languages[0] == c_InvariantCulturePrivateName)
             {
                 languages[0] = CultureInfo.InvariantCulture.Name;
             }
-            
+
             s_globalResourceContextBestFitCultureInfo = GetBestFitCultureFromLanguageList(languages);
             s_globalResourceContextFallBackList = ReadOnlyListToString(languages);
         }
 
-        private static bool LibpathMatchesPackagepath(String libpath, String packagepath)
+        private static bool LibpathMatchesPackagepath(string libpath, string packagepath)
         {
             Debug.Assert(libpath != null);
             Debug.Assert(packagepath != null);
 
             return packagepath.Length < libpath.Length &&
-                   String.Compare(packagepath, 0,
+                   string.Compare(packagepath, 0,
                                   libpath, 0,
                                   packagepath.Length,
                                   StringComparison.OrdinalIgnoreCase) == 0 &&
@@ -271,7 +275,7 @@ namespace System.Resources
 
 #if netstandard
         /* Returns true if libpath is path to an ni image and if the path contains packagename as a subfolder */
-        private static bool LibpathContainsPackagename(String libpath, String packagename)
+        private static bool LibpathContainsPackagename(string libpath, string packagename)
         {
             Debug.Assert(libpath != null);
             Debug.Assert(packagename != null);
@@ -352,7 +356,7 @@ namespace System.Resources
                 // exceptionInfo structure at this point since we don't have any
                 // reliable information to include in it.
 
-                IReadOnlyDictionary<String, ResourceMap>
+                IReadOnlyDictionary<string, ResourceMap>
                     resourceMapDictionary = s_globalResourceManager.AllResourceMaps;
 
                 if (resourceMapDictionary != null)
@@ -393,8 +397,8 @@ namespace System.Resources
                                 if (_resourceMap == null)
                                 {
                                     exceptionInfo = new PRIExceptionInfo();
-                                    exceptionInfo._PackageSimpleName = packageSimpleName;
-                                    exceptionInfo._ResWFile = reswFilename;
+                                    exceptionInfo.PackageSimpleName = packageSimpleName;
+                                    exceptionInfo.ResWFile = reswFilename;
                                 }
                                 else
                                 {
@@ -431,7 +435,7 @@ namespace System.Resources
         {
             Debug.Assert(list != null);
 
-            return String.Join(";", list);
+            return string.Join(";", list);
         }
 
         public override CultureInfo GlobalResourceContextBestFitCultureInfo
@@ -459,7 +463,7 @@ namespace System.Resources
             {
                 if (!ReferenceEquals(s_globalResourceContextBestFitCultureInfo, ci))
                 {
-                    // We have same culture name but different reference, we'll need to update s_globalResourceContextBestFitCultureInfo only as ci can 
+                    // We have same culture name but different reference, we'll need to update s_globalResourceContextBestFitCultureInfo only as ci can
                     // be a customized subclassed culture which setting different values for NFI, DTFI...etc.
                     s_globalResourceContextBestFitCultureInfo = ci;
                 }
@@ -468,7 +472,7 @@ namespace System.Resources
                 return true;
             }
 
-            List<String> languages = new List<String>(s_globalResourceContext.Languages);
+            List<string> languages = new List<string>(s_globalResourceContext.Languages);
             languages.Insert(0, ci.Name == CultureInfo.InvariantCulture.Name ? c_InvariantCulturePrivateName : ci.Name);
 
             // remove any duplication in the list
@@ -497,8 +501,8 @@ namespace System.Resources
         // continue to be thread-safe.
 
         // Throws exceptions
-        public override String GetString(String stringName,
-                 String startingCulture, String neutralResourcesCulture)
+        public override string GetString(string stringName,
+                 string startingCulture, string neutralResourcesCulture)
         {
             Debug.Assert(stringName != null);
             Debug.Assert(_resourceMap != null); // Should have been initialized by now
@@ -539,7 +543,7 @@ namespace System.Resources
                     // The worst that can happen is that a string is unexpectedly missing
                     // or in the wrong language.
 
-                    if (!String.Equals(newResourceFallBackList, _clonedResourceContextFallBackList, StringComparison.Ordinal))
+                    if (!string.Equals(newResourceFallBackList, _clonedResourceContextFallBackList, StringComparison.Ordinal))
                     {
                         _clonedResourceContext.Languages = StringToReadOnlyList(newResourceFallBackList);
                         _clonedResourceContextFallBackList = newResourceFallBackList;

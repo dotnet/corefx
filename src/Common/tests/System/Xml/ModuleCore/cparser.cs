@@ -64,7 +64,7 @@ namespace OLEDB.Test.ModuleCore
                     switch (state)
                     {
                         case PARSE.Initial:
-                            if (Char.IsLetterOrDigit(ch))
+                            if (char.IsLetterOrDigit(ch))
                             {
                                 keyStart = index;
                                 state = PARSE.Keyword;
@@ -81,11 +81,11 @@ namespace OLEDB.Test.ModuleCore
                             break;
 
                         case PARSE.Equal:
-                            if (Char.IsWhiteSpace(ch))
+                            if (char.IsWhiteSpace(ch))
                                 break;
                             builder.Length = 0;
 
-                            //Note: Since we allow you to alter the tokens, these are not 
+                            //Note: Since we allow you to alter the tokens, these are not
                             //constant values, so we cannot use a switch statement...
                             if (tokens.SingleQuote.IndexOf(ch) >= 0)
                             {
@@ -97,7 +97,7 @@ namespace OLEDB.Test.ModuleCore
                             }
                             else if (tokens.Seperator.IndexOf(ch) >= 0)
                             {
-                                keywords[key] = String.Empty;
+                                keywords[key] = string.Empty;
                                 state = PARSE.Initial;
                             }
                             else
@@ -182,7 +182,7 @@ namespace OLEDB.Test.ModuleCore
                         break;
 
                     case PARSE.Equal:
-                        keywords[key] = String.Empty;
+                        keywords[key] = string.Empty;
                         break;
 
                     case PARSE.Value:
@@ -205,5 +205,3 @@ namespace OLEDB.Test.ModuleCore
         }
     }
 }
-
-

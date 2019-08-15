@@ -7,11 +7,10 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using Xunit;
 
-namespace Microsoft.Framework.WebEncoders
+namespace System.Text.Encodings.Web.Tests
 {
     public class UrlEncoderTests
     {
@@ -27,7 +26,7 @@ namespace Microsoft.Framework.WebEncoders
                 Assert.Equal("%F0%9F%92%A9", writer.GetStringBuilder().ToString());
             }
         }
-        
+
         [Fact]
         public void Ctor_WithTextEncoderSettings()
         {
@@ -79,11 +78,11 @@ namespace Microsoft.Framework.WebEncoders
             UrlEncoder testEncoder = UrlEncoder.Default;
 
             // Act & assert
-            for (int i = 0; i <= Char.MaxValue; i++)
+            for (int i = 0; i <= char.MaxValue; i++)
             {
                 if (!IsSurrogateCodePoint(i))
                 {
-                    string input = new String((char)i, 1);
+                    string input = new string((char)i, 1);
                     Assert.Equal(controlEncoder.UrlEncode(input), testEncoder.UrlEncode(input));
                 }
             }
@@ -98,7 +97,7 @@ namespace Microsoft.Framework.WebEncoders
             // Act & assert - BMP chars
             for (int i = 0; i <= 0xFFFF; i++)
             {
-                string input = new String((char)i, 1);
+                string input = new string((char)i, 1);
                 string expected;
                 if (IsSurrogateCodePoint(i))
                 {
@@ -161,7 +160,7 @@ namespace Microsoft.Framework.WebEncoders
             // Act & assert - astral chars
             for (int i = 0x10000; i <= 0x10FFFF; i++)
             {
-                string input = Char.ConvertFromUtf32(i);
+                string input = char.ConvertFromUtf32(i);
                 string expected = GetKnownGoodPercentEncodedValue(i);
                 string retVal = encoder.UrlEncode(input);
                 Assert.Equal(expected, retVal);
@@ -285,7 +284,7 @@ namespace Microsoft.Framework.WebEncoders
                     continue; // surrogates don't matter here
                 }
 
-                string urlEncoded = urlEncoder.UrlEncode(Char.ConvertFromUtf32(i));
+                string urlEncoded = urlEncoder.UrlEncode(char.ConvertFromUtf32(i));
                 string thenHtmlEncoded = htmlEncoder.HtmlEncode(urlEncoded);
                 Assert.Equal(urlEncoded, thenHtmlEncoded); // should have contained no HTML-sensitive characters
             }
@@ -294,7 +293,7 @@ namespace Microsoft.Framework.WebEncoders
         private static string GetKnownGoodPercentEncodedValue(int codePoint)
         {
             // Convert the code point to UTF16, then call Encoding.UTF8.GetBytes, then hex-encode everything
-            return String.Concat(_utf8EncodingThrowOnInvalidBytes.GetBytes(Char.ConvertFromUtf32(codePoint)).Select(b => String.Format(CultureInfo.InvariantCulture, "%{0:X2}", b)));
+            return string.Concat(_utf8EncodingThrowOnInvalidBytes.GetBytes(char.ConvertFromUtf32(codePoint)).Select(b => string.Format(CultureInfo.InvariantCulture, "%{0:X2}", b)));
         }
 
         private static bool IsSurrogateCodePoint(int codePoint)

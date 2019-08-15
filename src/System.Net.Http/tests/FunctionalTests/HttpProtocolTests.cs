@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -7,16 +7,20 @@ using System.IO;
 using System.Net.Test.Common;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.XUnitExtensions;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
-    public abstract class HttpProtocolTests : HttpClientTestBase
+    public abstract class HttpProtocolTests : HttpClientHandlerTestBase
     {
         protected virtual Stream GetStream(Stream s) => s;
         protected virtual Stream GetStream_ClientDisconnectOk(Stream s) => s;
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // Uap does not support 1.0
+        public HttpProtocolTests(ITestOutputHelper output) : base(output) { }
+
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Uap does not support 1.0")]
         [Fact]
         public async Task GetAsync_RequestVersion10_Success()
         {
@@ -66,11 +70,7 @@ namespace System.Net.Http.Functional.Tests
         public async Task GetAsync_RequestVersion0X_ThrowsOr11(int minorVersion)
         {
             Type exceptionType = null;
-            if (PlatformDetection.IsFullFramework)
-            {
-                exceptionType = typeof(ArgumentException);
-            }
-            else if (UseSocketsHttpHandler)
+            if (UseSocketsHttpHandler)
             {
                 exceptionType = typeof(NotSupportedException);
             }
@@ -110,10 +110,6 @@ namespace System.Net.Http.Functional.Tests
         public async Task GetAsync_UnknownRequestVersion_ThrowsOrDegradesTo11(int majorVersion, int minorVersion)
         {
             Type exceptionType = null;
-            if (PlatformDetection.IsFullFramework)
-            {
-                exceptionType = typeof(ArgumentException);
-            }
 
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
@@ -172,7 +168,7 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(7)]
         public async Task GetAsync_ResponseUnknownVersion1X_Success(int responseMinorVersion)
         {
-            bool reportAs11 = PlatformDetection.IsFullFramework;
+            bool reportAs11 = false;
             bool reportAs00 = !UseSocketsHttpHandler;
 
             await LoopbackServer.CreateServerAsync(async (server, url) =>
@@ -211,14 +207,14 @@ namespace System.Net.Http.Functional.Tests
             }, new LoopbackServer.Options { StreamWrapper = GetStream });
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // Uap ignores response version if not 1.0 or 1.1
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Uap ignores response version if not 1.0 or 1.1")]
         [Theory]
         [InlineData(0)]
         [InlineData(1)]
         [InlineData(9)]
         public async Task GetAsync_ResponseVersion0X_ThrowsOr10(int responseMinorVersion)
         {
-            bool reportAs10 = PlatformDetection.IsFullFramework;
+            bool reportAs10 = false;
 
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
@@ -250,7 +246,7 @@ namespace System.Net.Http.Functional.Tests
             }, new LoopbackServer.Options { StreamWrapper = GetStream_ClientDisconnectOk });
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // Uap ignores response version if not 1.0 or 1.1
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Uap ignores response version if not 1.0 or 1.1")]
         [Theory]
         [InlineData(2, 0)]
         [InlineData(2, 1)]
@@ -259,7 +255,7 @@ namespace System.Net.Http.Functional.Tests
         public async Task GetAsyncVersion11_BadResponseVersion_ThrowsOr00(int responseMajorVersion, int responseMinorVersion)
         {
             // Full framework reports 1.0 or 1.1, depending on minor version, instead of throwing
-            bool reportAs1X = PlatformDetection.IsFullFramework;
+            bool reportAs1X = false;
 
             // CurlHandler reports these as 0.0, except for 2.0 which is reported as 2.0, instead of throwing.
             bool reportAs00 = false;
@@ -355,7 +351,7 @@ namespace System.Net.Http.Functional.Tests
         public async Task GetAsync_ExpectedStatusCodeAndReason_PlatformBehaviorTest(string statusLine,
             int expectedStatusCode, string reasonWithSpace, string reasonNoSpace)
         {
-            if (UseSocketsHttpHandler || PlatformDetection.IsFullFramework)
+            if (UseSocketsHttpHandler)
             {
                 // SocketsHttpHandler and .NET Framework will keep the space characters.
                 await GetAsyncSuccessHelper(statusLine, expectedStatusCode, reasonWithSpace);
@@ -366,9 +362,8 @@ namespace System.Net.Http.Functional.Tests
                 await GetAsyncSuccessHelper(statusLine, expectedStatusCode, reasonNoSpace);
             }
         }
-        
+
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The following pass on .NET Core but fail on .NET Framework.")]
         [InlineData("HTTP/1.1 200", 200, "")] // This test data requires the fix in .NET Framework 4.7.3
         [InlineData("HTTP/1.1 200 O\tK", 200, "O\tK")]
         [InlineData("HTTP/1.1 200 O    \t\t  \t\t\t\t  \t K", 200, "O    \t\t  \t\t\t\t  \t K")]
@@ -408,9 +403,9 @@ namespace System.Net.Http.Functional.Tests
             yield return "HTTP/1.1 2345";
             yield return "HTTP/A.1 200 OK";
             yield return "HTTP/X.Y.Z 200 OK";
-            
+
             // Only pass on .NET Core Windows & SocketsHttpHandler.
-            if (PlatformDetection.IsNetCore && PlatformDetection.IsWindows)
+            if (PlatformDetection.IsNetCore && !PlatformDetection.IsUap && PlatformDetection.IsWindows)
             {
                 yield return "HTTP/0.1 200 OK";
                 yield return "HTTP/3.5 200 OK";
@@ -431,7 +426,7 @@ namespace System.Net.Http.Functional.Tests
                 yield return "HTTP/1.1\t";
                 yield return "HTTP/1.1  ";
             }
-            
+
             // Skip these test cases on UAP since the behavior is different.
             if (!PlatformDetection.IsUap)
             {
@@ -452,7 +447,7 @@ namespace System.Net.Http.Functional.Tests
                 yield return "NOTHTTP/1.1 200 OK";
             }
         }
-        
+
         public static TheoryData InvalidStatusLine = GetInvalidStatusLine().ToTheoryData();
 
         [Theory]
@@ -461,7 +456,7 @@ namespace System.Net.Http.Functional.Tests
         {
             await GetAsyncThrowsExceptionHelper(responseString);
         }
-        
+
         [Fact]
         public async Task GetAsync_ReasonPhraseHasLF_BehaviorDifference()
         {
@@ -486,7 +481,7 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("HTTP/1.1 200\t")]
         public async Task GetAsync_InvalidStatusLine_ThrowsExceptionOnSocketsHttpHandler(string responseString)
         {
-            if (UseSocketsHttpHandler || PlatformDetection.IsFullFramework)
+            if (UseSocketsHttpHandler)
             {
                 // SocketsHttpHandler and .NET Framework will throw HttpRequestException.
                 await GetAsyncThrowsExceptionHelper(responseString);
@@ -508,7 +503,6 @@ namespace System.Net.Http.Functional.Tests
             }, new LoopbackServer.Options { StreamWrapper = GetStream });
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]   // Does not support LF-only
         [Theory]
         [InlineData("\r\n")]
         [InlineData("\n")]
@@ -566,7 +560,7 @@ namespace System.Net.Http.Functional.Tests
             await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 using (HttpMessageInvoker client = new HttpMessageInvoker(CreateHttpClientHandler()))
-                using (HttpResponseMessage resp = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, uri), CancellationToken.None))
+                using (HttpResponseMessage resp = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, uri) { Version = VersionFromUseHttp2 }, CancellationToken.None))
                 using (Stream respStream = await resp.Content.ReadAsStreamAsync())
                 {
                     var actualData = new MemoryStream();
@@ -608,10 +602,42 @@ namespace System.Net.Http.Functional.Tests
                 });
             });
         }
+
+        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
+        [Theory]
+        [InlineData("get", "GET")]
+        [InlineData("head", "HEAD")]
+        [InlineData("post", "POST")]
+        [InlineData("put", "PUT")]
+        [InlineData("other", "other")]
+        [InlineData("SometHING", "SometHING")]
+        public async Task CustomMethod_SentUppercasedIfKnown(string specifiedMethod, string expectedMethod)
+        {
+            if (IsCurlHandler && specifiedMethod == "get")
+            {
+                // CurlHandler doesn't special-case "get" and sends it in the original casing.
+                expectedMethod = specifiedMethod;
+            }
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (HttpClient client = CreateHttpClient())
+                {
+                    var m = new HttpRequestMessage(new HttpMethod(specifiedMethod), uri) { Version = VersionFromUseHttp2 };
+                    (await client.SendAsync(m)).Dispose();
+                }
+            }, async server =>
+            {
+                List<string> headers = await server.AcceptConnectionSendResponseAndCloseAsync();
+                Assert.StartsWith(expectedMethod + " ", headers[0]);
+            });
+        }
     }
 
     public abstract class HttpProtocolTests_Dribble : HttpProtocolTests
     {
+        public HttpProtocolTests_Dribble(ITestOutputHelper output) : base(output) { }
+
         protected override Stream GetStream(Stream s) => new DribbleStream(s);
         protected override Stream GetStream_ClientDisconnectOk(Stream s) => new DribbleStream(s, true);
     }

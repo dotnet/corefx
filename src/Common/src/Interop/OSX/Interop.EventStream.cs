@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 
 using Microsoft.Win32.SafeHandles;
 
+#pragma warning disable SA1121 // we don't want to simplify built-ins here as we're using aliasing
 using CFStringRef = System.IntPtr;
 using CFArrayRef = System.IntPtr;
 using FSEventStreamRef = System.IntPtr;
@@ -82,16 +83,13 @@ internal static partial class Interop
         /// <param name="eventFlags">The events for the corresponding path.</param>
         /// <param name="eventIds">The machine-and-disk-drive-unique Event ID for the specific event.</param>
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        internal delegate void FSEventStreamCallback(
+        internal unsafe delegate void FSEventStreamCallback(
             FSEventStreamRef streamReference,
             IntPtr clientCallBackInfo,
             size_t numEvents,
-            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
-            String[] eventPaths,
-            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
-            FSEventStreamEventFlags[] eventFlags,
-            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
-            FSEventStreamEventId[] eventIds);
+            byte** eventPaths,
+            FSEventStreamEventFlags* eventFlags,
+            FSEventStreamEventId* eventIds);
 
         /// <summary>
         /// Internal wrapper to create a new EventStream to listen to events from the core OS (such as File System events).
@@ -101,7 +99,7 @@ internal static partial class Interop
         /// <param name="context">Should be IntPtr.Zero</param>
         /// <param name="pathsToWatch">A CFArray of the path(s) to watch for events.</param>
         /// <param name="sinceWhen">
-        /// The start point to receive events from. This can be to retrieve historical events or only new events. 
+        /// The start point to receive events from. This can be to retrieve historical events or only new events.
         /// To get historical events, pass in the corresponding ID of the event you want to start from.
         /// To get only new events, pass in kFSEventStreamEventIdSinceNow.
         /// </param>
@@ -125,7 +123,7 @@ internal static partial class Interop
         /// <param name="cb">A callback instance that will be called for every event batch.</param>
         /// <param name="pathsToWatch">A CFArray of the path(s) to watch for events.</param>
         /// <param name="sinceWhen">
-        /// The start point to receive events from. This can be to retrieve historical events or only new events. 
+        /// The start point to receive events from. This can be to retrieve historical events or only new events.
         /// To get historical events, pass in the corresponding ID of the event you want to start from.
         /// To get only new events, pass in kFSEventStreamEventIdSinceNow.
         /// </param>

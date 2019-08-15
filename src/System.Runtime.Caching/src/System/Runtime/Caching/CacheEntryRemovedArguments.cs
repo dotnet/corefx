@@ -6,9 +6,9 @@ namespace System.Runtime.Caching
 {
     public class CacheEntryRemovedArguments
     {
-        private CacheItem _cacheItem;
-        private ObjectCache _source;
-        private CacheEntryRemovedReason _reason;
+        private readonly CacheItem _cacheItem;
+        private readonly ObjectCache _source;
+        private readonly CacheEntryRemovedReason _reason;
 
         public CacheItem CacheItem
         {
@@ -29,11 +29,11 @@ namespace System.Runtime.Caching
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             }
             if (cacheItem == null)
             {
-                throw new ArgumentNullException("cacheItem");
+                throw new ArgumentNullException(nameof(cacheItem));
             }
             _source = source;
             _reason = reason;

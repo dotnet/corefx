@@ -13,9 +13,9 @@ using System.Runtime.Versioning;
 
 namespace System.Xml.Resolvers
 {
-    // 
+    //
     // XmlPreloadedResolver is an XmlResolver that which can be pre-loaded with data.
-    // By default it contains well-known DTDs for XHTML 1.0 and RSS 0.91. 
+    // By default it contains well-known DTDs for XHTML 1.0 and RSS 0.91.
     // Custom mappings of URIs to data can be added with the Add method.
     //
     public partial class XmlPreloadedResolver : XmlResolver
@@ -52,7 +52,7 @@ namespace System.Xml.Resolvers
         {
             internal string publicId;
             internal string systemId;
-            private string _resourceName;
+            private readonly string _resourceName;
 
             internal XmlKnownDtdData(string publicId, string systemId, string resourceName)
             {
@@ -70,9 +70,9 @@ namespace System.Xml.Resolvers
 
         private class ByteArrayChunk : PreloadedData
         {
-            private byte[] _array;
-            private int _offset;
-            private int _length;
+            private readonly byte[] _array;
+            private readonly int _offset;
+            private readonly int _length;
 
             internal ByteArrayChunk(byte[] array)
                 : this(array, 0, array.Length)
@@ -94,7 +94,7 @@ namespace System.Xml.Resolvers
 
         private class StringData : PreloadedData
         {
-            private string _str;
+            private readonly string _str;
 
             internal StringData(string str)
             {
@@ -124,14 +124,14 @@ namespace System.Xml.Resolvers
         //
         // Fields
         //
-        private XmlResolver _fallbackResolver;
-        private Dictionary<Uri, PreloadedData> _mappings;
-        private XmlKnownDtds _preloadedDtds;
+        private readonly XmlResolver _fallbackResolver;
+        private readonly Dictionary<Uri, PreloadedData> _mappings;
+        private readonly XmlKnownDtds _preloadedDtds;
 
         //
         // Static/constant fiels
         //
-        private static XmlKnownDtdData[] s_xhtml10_Dtd = new XmlKnownDtdData[] {
+        private static readonly XmlKnownDtdData[] s_xhtml10_Dtd = new XmlKnownDtdData[] {
             new XmlKnownDtdData( "-//W3C//DTD XHTML 1.0 Strict//EN", "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd", "xhtml1-strict.dtd" ),
             new XmlKnownDtdData( "-//W3C//DTD XHTML 1.0 Transitional//EN", "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd", "xhtml1-transitional.dtd" ),
             new XmlKnownDtdData( "-//W3C//DTD XHTML 1.0 Frameset//EN", "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd", "xhtml1-frameset.dtd" ),
@@ -140,7 +140,7 @@ namespace System.Xml.Resolvers
             new XmlKnownDtdData( "-//W3C//ENTITIES Special for XHTML//EN", "http://www.w3.org/TR/xhtml1/DTD/xhtml-special.ent", "xhtml-special.ent" ),
         };
 
-        private static XmlKnownDtdData[] s_rss091_Dtd = new XmlKnownDtdData[] {
+        private static readonly XmlKnownDtdData[] s_rss091_Dtd = new XmlKnownDtdData[] {
             new XmlKnownDtdData( "-//Netscape Communications//DTD RSS 0.91//EN", "http://my.netscape.com/publish/formats/rss-0.91.dtd", "rss-0.91.dtd" ),
         };
 
@@ -220,7 +220,7 @@ namespace System.Xml.Resolvers
             return base.ResolveUri(baseUri, relativeUri);
         }
 
-        public override Object GetEntity(Uri absoluteUri, string role, Type ofObjectToReturn)
+        public override object GetEntity(Uri absoluteUri, string role, Type ofObjectToReturn)
         {
             if (absoluteUri == null)
             {
@@ -234,10 +234,10 @@ namespace System.Xml.Resolvers
                 {
                     return _fallbackResolver.GetEntity(absoluteUri, role, ofObjectToReturn);
                 }
-                throw new XmlException(SR.Format(SR.Xml_CannotResolveUrl, absoluteUri.ToString()));
+                throw new XmlException(SR.Format(SR.Xml_CannotResolveUrl, absoluteUri));
             }
 
-            if (ofObjectToReturn == null || ofObjectToReturn == typeof(Stream) || ofObjectToReturn == typeof(Object))
+            if (ofObjectToReturn == null || ofObjectToReturn == typeof(Stream) || ofObjectToReturn == typeof(object))
             {
                 return data.AsStream();
             }
@@ -351,7 +351,7 @@ namespace System.Xml.Resolvers
                 }
                 int size = checked((int)ms.Position);
                 byte[] bytes = new byte[size];
-                Array.Copy(ms.ToArray(), bytes, size);
+                Array.Copy(ms.ToArray(), 0, bytes, 0, size);
                 Add(uri, new ByteArrayChunk(bytes));
             }
         }

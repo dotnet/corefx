@@ -27,9 +27,9 @@ namespace System.Threading
             HResult = HResults.COR_E_THREADABORTED;
         }
 
-        public object ExceptionState => null;
+        public object? ExceptionState => null;
 
-        internal ThreadAbortException(SerializationInfo info, StreamingContext context)
+        private ThreadAbortException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }

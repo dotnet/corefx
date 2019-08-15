@@ -21,7 +21,7 @@ namespace System.DirectoryServices.AccountManagement.Tests
         public void Ctor_NullContext_ThrowsArgumentException()
         {
             AssertExtensions.Throws<ArgumentException>(null, () => new ComputerPrincipal(null));
-            AssertExtensions.Throws<ArgumentException>(null, () => new ComputerPrincipal(null, "samAcountName", "password", enabled: true));
+            AssertExtensions.Throws<ArgumentException>(null, () => new ComputerPrincipal(null, "samAccountName", "password", enabled: true));
         }
 
         [Fact]
@@ -45,7 +45,7 @@ namespace System.DirectoryServices.AccountManagement.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => new ComputerPrincipal(context, "samAccountName", null, enabled: true));
         }
 
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] 
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer), nameof(PlatformDetection.IsNotWindowsIoTCore))]
         public void Ctor_MachineContext_NoException()
         {
             var context = new PrincipalContext(ContextType.Machine);

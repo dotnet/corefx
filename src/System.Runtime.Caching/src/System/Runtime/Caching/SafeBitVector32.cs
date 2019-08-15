@@ -1,6 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.                                                         
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Threading;
@@ -37,10 +37,7 @@ namespace System.Runtime.Caching
                         newData = oldData & ~bit;
                     }
 
-#pragma warning disable 0420
                     int result = Interlocked.CompareExchange(ref _data, newData, oldData);
-#pragma warning restore 0420
-
                     if (result == oldData)
                     {
                         break;
@@ -69,10 +66,7 @@ namespace System.Runtime.Caching
                     return false;
                 }
 
-#pragma warning disable 0420
                 int result = Interlocked.CompareExchange(ref _data, newData, oldData);
-#pragma warning restore 0420
-
                 if (result == oldData)
                 {
                     return true;
@@ -81,4 +75,3 @@ namespace System.Runtime.Caching
         }
     }
 }
-

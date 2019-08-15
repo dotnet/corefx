@@ -61,6 +61,9 @@ internal static partial class Interop
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_PemReadX509FromBio")]
         internal static extern SafeX509Handle PemReadX509FromBio(SafeBioHandle bio);
 
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_PemReadX509FromBioAux")]
+        internal static extern SafeX509Handle PemReadX509FromBioAux(SafeBioHandle bio);
+
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_X509GetSerialNumber")]
         private static extern SafeSharedAsn1IntegerHandle X509GetSerialNumber_private(SafeX509Handle x);
 
@@ -83,11 +86,23 @@ internal static partial class Interop
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool X509CheckPurpose(SafeX509Handle x, int id, int ca);
 
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_X509CheckIssued")]
-        internal static extern int X509CheckIssued(SafeX509Handle issuer, SafeX509Handle subject);
-
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_X509IssuerNameHash")]
         internal static extern ulong X509IssuerNameHash(SafeX509Handle x);
+
+        [DllImport(Libraries.CryptoNative)]
+        private static extern SafeSharedAsn1OctetStringHandle CryptoNative_X509FindExtensionData(
+            SafeX509Handle x,
+            int extensionNid);
+
+        internal static SafeSharedAsn1OctetStringHandle X509FindExtensionData(SafeX509Handle x, int extensionNid)
+        {
+            CheckValidOpenSslHandle(x);
+
+            return SafeInteriorHandle.OpenInteriorHandle(
+                (handle, arg) => CryptoNative_X509FindExtensionData(handle, arg),
+                x,
+                extensionNid);
+        }
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_X509GetExtCount")]
         internal static extern int X509GetExtCount(SafeX509Handle x);
@@ -109,15 +124,23 @@ internal static partial class Interop
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool X509ExtensionGetCritical(IntPtr ex);
 
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_X509StoreCreate")]
-        internal static extern SafeX509StoreHandle X509StoreCreate();
+        [DllImport(Libraries.CryptoNative)]
+        private static extern SafeX509StoreHandle CryptoNative_X509ChainNew(SafeX509StackHandle systemTrust, SafeX509StackHandle userTrust);
+
+        internal static SafeX509StoreHandle X509ChainNew(SafeX509StackHandle systemTrust, SafeX509StackHandle userTrust)
+        {
+            SafeX509StoreHandle store = CryptoNative_X509ChainNew(systemTrust, userTrust);
+
+            if (store.IsInvalid)
+            {
+                throw CreateOpenSslCryptographicException();
+            }
+
+            return store;
+        }
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_X509StoreDestory")]
         internal static extern void X509StoreDestory(IntPtr v);
-
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_X509StoreAddCert")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool X509StoreAddCert(SafeX509StoreHandle ctx, SafeX509Handle x);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_X509StoreAddCrl")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -125,7 +148,15 @@ internal static partial class Interop
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_X509StoreSetRevocationFlag")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool X509StoreSetRevocationFlag(SafeX509StoreHandle ctx, X509RevocationFlag revocationFlag);
+        private static extern bool CryptoNative_X509StoreSetRevocationFlag(SafeX509StoreHandle ctx, X509RevocationFlag revocationFlag);
+
+        internal static void X509StoreSetRevocationFlag(SafeX509StoreHandle ctx, X509RevocationFlag revocationFlag)
+        {
+            if (!CryptoNative_X509StoreSetRevocationFlag(ctx, revocationFlag))
+            {
+                throw CreateOpenSslCryptographicException();
+            }
+        }
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_X509StoreCtxInit")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -135,11 +166,49 @@ internal static partial class Interop
             SafeX509Handle x509,
             SafeX509StackHandle extraCerts);
 
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_X509VerifyCert")]
-        internal static extern int X509VerifyCert(SafeX509StoreCtxHandle ctx);
+        [DllImport(Libraries.CryptoNative)]
+        private static extern int CryptoNative_X509VerifyCert(SafeX509StoreCtxHandle ctx);
+
+        internal static bool X509VerifyCert(SafeX509StoreCtxHandle ctx)
+        {
+            int result = CryptoNative_X509VerifyCert(ctx);
+
+            if (result < 0)
+            {
+                throw CreateOpenSslCryptographicException();
+            }
+
+            return result != 0;
+        }
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_X509StoreCtxGetError")]
         internal static extern X509VerifyStatusCode X509StoreCtxGetError(SafeX509StoreCtxHandle ctx);
+
+        [DllImport(Libraries.CryptoNative)]
+        private static extern int CryptoNative_X509StoreCtxReset(SafeX509StoreCtxHandle ctx);
+
+        internal static void X509StoreCtxReset(SafeX509StoreCtxHandle ctx)
+        {
+            if (CryptoNative_X509StoreCtxReset(ctx) != 1)
+            {
+                throw CreateOpenSslCryptographicException();
+            }
+        }
+
+        [DllImport(Libraries.CryptoNative)]
+        private static extern int CryptoNative_X509StoreCtxRebuildChain(SafeX509StoreCtxHandle ctx);
+
+        internal static bool X509StoreCtxRebuildChain(SafeX509StoreCtxHandle ctx)
+        {
+            int result = CryptoNative_X509StoreCtxRebuildChain(ctx);
+
+            if (result < 0)
+            {
+                throw CreateOpenSslCryptographicException();
+            }
+
+            return result != 0;
+        }
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_X509StoreCtxGetErrorDepth")]
         internal static extern int X509StoreCtxGetErrorDepth(SafeX509StoreCtxHandle ctx);
@@ -209,6 +278,38 @@ internal static partial class Interop
             X509_V_ERR_INVALID_EXTENSION = 41,
             X509_V_ERR_INVALID_POLICY_EXTENSION = 42,
             X509_V_ERR_NO_EXPLICIT_POLICY = 43,
+            X509_V_ERR_DIFFERENT_CRL_SCOPE = 44,
+            X509_V_ERR_UNSUPPORTED_EXTENSION_FEATURE = 45,
+            X509_V_ERR_UNNESTED_RESOURCE = 46,
+            X509_V_ERR_PERMITTED_VIOLATION = 47,
+            X509_V_ERR_EXCLUDED_VIOLATION = 48,
+            X509_V_ERR_SUBTREE_MINMAX = 49,
+            X509_V_ERR_APPLICATION_VERIFICATION = 50,
+            X509_V_ERR_UNSUPPORTED_CONSTRAINT_TYPE = 51,
+            X509_V_ERR_UNSUPPORTED_CONSTRAINT_SYNTAX = 52,
+            X509_V_ERR_UNSUPPORTED_NAME_SYNTAX = 53,
+            X509_V_ERR_CRL_PATH_VALIDATION_ERROR = 54,
+            X509_V_ERR_PATH_LOOP = 55,
+            X509_V_ERR_SUITE_B_INVALID_VERSION = 56,
+            X509_V_ERR_SUITE_B_INVALID_ALGORITHM = 57,
+            X509_V_ERR_SUITE_B_INVALID_CURVE = 58,
+            X509_V_ERR_SUITE_B_INVALID_SIGNATURE_ALGORITHM = 59,
+            X509_V_ERR_SUITE_B_LOS_NOT_ALLOWED = 60,
+            X509_V_ERR_SUITE_B_CANNOT_SIGN_P_384_WITH_P_256 = 61,
+            X509_V_ERR_HOSTNAME_MISMATCH = 62,
+            X509_V_ERR_EMAIL_MISMATCH = 63,
+            X509_V_ERR_IP_ADDRESS_MISMATCH = 64,
+            X509_V_ERR_DANE_NO_MATCH = 65,
+            X509_V_ERR_EE_KEY_TOO_SMALL = 66,
+            X509_V_ERR_CA_KEY_TOO_SMALL = 67,
+            X509_V_ERR_CA_MD_TOO_WEAK = 68,
+            X509_V_ERR_INVALID_CALL = 69,
+            X509_V_ERR_STORE_LOOKUP = 70,
+            X509_V_ERR_NO_VALID_SCTS = 71,
+            X509_V_ERR_PROXY_SUBJECT_NAME_VIOLATION = 72,
+            X509_V_ERR_OCSP_VERIFY_NEEDED = 73,
+            X509_V_ERR_OCSP_VERIFY_FAILED = 74,
+            X509_V_ERR_OCSP_CERT_UNKNOWN = 75,
         }
     }
 }

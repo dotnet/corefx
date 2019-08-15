@@ -9,13 +9,13 @@ using System.Threading.Tasks;
 
 namespace System.Data.SqlClient
 {
-    sealed internal class SqlSequentialStream : System.IO.Stream
+    internal sealed class SqlSequentialStream : System.IO.Stream
     {
         private SqlDataReader _reader;  // The SqlDataReader that we are reading data from
-        private int _columnIndex;       // The index of out column in the table
+        private readonly int _columnIndex;       // The index of out column in the table
         private Task _currentTask;      // Holds the current task being processed
         private int _readTimeout;       // Read timeout for this stream in ms (for Stream.ReadTimeout)
-        private CancellationTokenSource _disposalTokenSource;    // Used to indicate that a cancellation is requested due to disposal
+        private readonly CancellationTokenSource _disposalTokenSource;    // Used to indicate that a cancellation is requested due to disposal
 
         internal SqlSequentialStream(SqlDataReader reader, int columnIndex)
         {
@@ -30,7 +30,7 @@ namespace System.Data.SqlClient
             // Safely convert the CommandTimeout from seconds to milliseconds
             if ((reader.Command != null) && (reader.Command.CommandTimeout != 0))
             {
-                _readTimeout = (int)Math.Min((long)reader.Command.CommandTimeout * 1000L, (long)Int32.MaxValue);
+                _readTimeout = (int)Math.Min((long)reader.Command.CommandTimeout * 1000L, (long)int.MaxValue);
             }
             else
             {
@@ -283,7 +283,7 @@ namespace System.Data.SqlClient
         /// Checks the parameters passed into a Read() method are valid
         /// </summary>
         /// <param name="buffer"></param>
-        /// <param name="index"></param>
+        /// <param name="offset"></param>
         /// <param name="count"></param>
         internal static void ValidateReadParameters(byte[] buffer, int offset, int count)
         {

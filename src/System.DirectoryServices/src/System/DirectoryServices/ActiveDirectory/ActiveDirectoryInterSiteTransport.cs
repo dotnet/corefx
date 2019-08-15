@@ -9,15 +9,15 @@ namespace System.DirectoryServices.ActiveDirectory
 {
     public class ActiveDirectoryInterSiteTransport : IDisposable
     {
-        private DirectoryContext _context = null;
-        private DirectoryEntry _cachedEntry = null;
-        private ActiveDirectoryTransportType _transport;
+        private readonly DirectoryContext _context = null;
+        private readonly DirectoryEntry _cachedEntry = null;
+        private readonly ActiveDirectoryTransportType _transport;
         private bool _disposed = false;
         private bool _linkRetrieved = false;
         private bool _bridgeRetrieved = false;
 
-        private ReadOnlySiteLinkCollection _siteLinkCollection = new ReadOnlySiteLinkCollection();
-        private ReadOnlySiteLinkBridgeCollection _bridgeCollection = new ReadOnlySiteLinkBridgeCollection();
+        private readonly ReadOnlySiteLinkCollection _siteLinkCollection = new ReadOnlySiteLinkCollection();
+        private readonly ReadOnlySiteLinkBridgeCollection _bridgeCollection = new ReadOnlySiteLinkBridgeCollection();
 
         internal ActiveDirectoryInterSiteTransport(DirectoryContext context, ActiveDirectoryTransportType transport, DirectoryEntry entry)
         {
@@ -29,19 +29,19 @@ namespace System.DirectoryServices.ActiveDirectory
         public static ActiveDirectoryInterSiteTransport FindByTransportType(DirectoryContext context, ActiveDirectoryTransportType transport)
         {
             if (context == null)
-                throw new ArgumentNullException("context");
+                throw new ArgumentNullException(nameof(context));
 
             // if target is not specified, then we determin the target from the logon credential, so if it is a local user context, it should fail
             if ((context.Name == null) && (!context.isRootDomain()))
             {
-                throw new ArgumentException(SR.ContextNotAssociatedWithDomain, "context");
+                throw new ArgumentException(SR.ContextNotAssociatedWithDomain, nameof(context));
             }
 
             // more validation for the context, if the target is not null, then it should be either forest name or server name
             if (context.Name != null)
             {
                 if (!(context.isRootDomain() || context.isServer() || context.isADAMConfigSet()))
-                    throw new ArgumentException(SR.NotADOrADAM, "context");
+                    throw new ArgumentException(SR.NotADOrADAM, nameof(context));
             }
 
             if (transport < ActiveDirectoryTransportType.Rpc || transport > ActiveDirectoryTransportType.Smtp)
@@ -89,7 +89,7 @@ namespace System.DirectoryServices.ActiveDirectory
                         throw new NotSupportedException(SR.NotSupportTransportSMTP);
                     }
 
-                    throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.TransportNotFound , transport.ToString()), typeof(ActiveDirectoryInterSiteTransport), transport.ToString());
+                    throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.TransportNotFound, transport.ToString()), typeof(ActiveDirectoryInterSiteTransport), transport.ToString());
                 }
                 else
                     throw ExceptionHelper.GetExceptionFromCOMException(context, e);
@@ -178,7 +178,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 }
 
                 // NTDSTRANSPORT_OPT_BRIDGES_REQUIRED (1 << 1 ) siteLink bridges are required
-                // That is to say, if this bit is set, it means that all site links are not bridged and user needs to create specific bridge 
+                // That is to say, if this bit is set, it means that all site links are not bridged and user needs to create specific bridge
                 if ((option & 0x2) != 0)
                     return false;
                 else
@@ -196,7 +196,7 @@ namespace System.DirectoryServices.ActiveDirectory
                         option = (int)_cachedEntry.Properties["options"][0];
 
                     // NTDSTRANSPORT_OPT_BRIDGES_REQUIRED (1 << 1 ) siteLink bridges are required, all site links are not bridged
-                    // That is to say, if this bit is set, it means that all site links are not bridged and user needs to create specific bridge 
+                    // That is to say, if this bit is set, it means that all site links are not bridged and user needs to create specific bridge
                     // if this bit is not set, all the site links are bridged
                     if (value)
                         option &= (~(0x2));
@@ -350,12 +350,12 @@ namespace System.DirectoryServices.ActiveDirectory
         {
             if (disposing)
             {
-                // free other state (managed objects)                
+                // free other state (managed objects)
                 if (_cachedEntry != null)
                     _cachedEntry.Dispose();
             }
 
-            // free your own state (unmanaged objects)   
+            // free your own state (unmanaged objects)
 
             _disposed = true;
         }

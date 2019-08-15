@@ -33,7 +33,7 @@ namespace System.Text.RegularExpressions
         protected internal Hashtable capnames;               // if named captures are used, this maps names->index
         protected internal string[] capslist;                // if captures are sparse or named captures are used, this is the sorted list of names
         protected internal int capsize;                      // the size of the capture array
-        
+
         internal ExclusiveReference _runnerref;              // cached runner
         internal WeakReference<RegexReplacement> _replref; // cached parsed replacement pattern
         internal RegexCode _code;                            // if interpreted, this is the code for RegexInterpreter
@@ -106,22 +106,22 @@ namespace System.Text.RegularExpressions
 
             ValidateMatchTimeout(matchTimeout);
 
-            // After parameter validation assign 
+            // After parameter validation assign
             this.pattern = pattern;
             roptions = options;
             internalMatchTimeout = matchTimeout;
 
             // Cache handling. Try to look up this regex in the cache.
-            string cultureKey = (options & RegexOptions.CultureInvariant) != 0 ?
-                    CultureInfo.InvariantCulture.ToString() :
-                    CultureInfo.CurrentCulture.ToString();                        
-            var key = new CachedCodeEntryKey(options, cultureKey, pattern);
+            CultureInfo culture = (options & RegexOptions.CultureInvariant) != 0 ?
+                CultureInfo.InvariantCulture :
+                CultureInfo.CurrentCulture;
+            var key = new CachedCodeEntryKey(options, culture.ToString(), pattern);
             CachedCodeEntry cached = GetCachedCode(key, false);
 
             if (cached == null)
             {
                 // Parse the input
-                RegexTree tree = RegexParser.Parse(pattern, roptions);
+                RegexTree tree = RegexParser.Parse(pattern, roptions, culture);
 
                 // Extract the relevant information
                 capnames = tree.CapNames;
@@ -203,7 +203,7 @@ namespace System.Text.RegularExpressions
 
 #if FEATURE_COMPILED
         /// <summary>
-        /// This method is here for perf reasons: if the call to RegexCompiler is NOT in the 
+        /// This method is here for perf reasons: if the call to RegexCompiler is NOT in the
         /// Regex constructor, we don't load RegexCompiler and its reflection classes when
         /// instantiating a non-compiled regex.
         /// </summary>
@@ -212,7 +212,9 @@ namespace System.Text.RegularExpressions
         {
             return RegexCompiler.Compile(code, roptions);
         }
+#endif
 
+#if FEATURE_COMPILEAPIS
         public static void CompileToAssembly(RegexCompilationInfo[] regexinfos, AssemblyName assemblyname)
         {
             throw new PlatformNotSupportedException(SR.PlatformNotSupported_CompileToAssembly);
@@ -227,7 +229,7 @@ namespace System.Text.RegularExpressions
         {
             throw new PlatformNotSupportedException(SR.PlatformNotSupported_CompileToAssembly);
         }
-#endif
+#endif // FEATURE_COMPILEAPIS
 
         /// <summary>
         /// Escapes a minimal set of metacharacters (\, *, +, ?, |, {, [, (, ), ^, $, ., #, and

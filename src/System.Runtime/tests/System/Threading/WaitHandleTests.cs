@@ -45,6 +45,30 @@ namespace System.Threading.Tests
         }
 
         [Fact]
+        public static void WaitAny_NullArray_Throws()
+        {
+            WaitHandle[] handles = null;
+
+            Assert.Throws<ArgumentNullException>("waitHandles", () => WaitHandle.WaitAny(handles));
+            Assert.Throws<ArgumentNullException>("waitHandles", () => WaitHandle.WaitAny(handles, 0));
+            Assert.Throws<ArgumentNullException>("waitHandles", () => WaitHandle.WaitAny(handles, TimeSpan.Zero));
+            Assert.Throws<ArgumentNullException>("waitHandles", () => WaitHandle.WaitAny(handles, 0, exitContext: false));
+            Assert.Throws<ArgumentNullException>("waitHandles", () => WaitHandle.WaitAny(handles, TimeSpan.Zero, exitContext: false));
+        }
+
+        [Fact]
+        public static void WaitAny_NullHandle_Throws()
+        {
+            var handles = new WaitHandle[] { new ManualResetEvent(true), null, new AutoResetEvent(true) };
+
+            Assert.Throws<ArgumentNullException>("waitHandles[1]", () => WaitHandle.WaitAny(handles));
+            Assert.Throws<ArgumentNullException>("waitHandles[1]", () => WaitHandle.WaitAny(handles, 0));
+            Assert.Throws<ArgumentNullException>("waitHandles[1]", () => WaitHandle.WaitAny(handles, TimeSpan.Zero));
+            Assert.Throws<ArgumentNullException>("waitHandles[1]", () => WaitHandle.WaitAny(handles, 0, exitContext: false));
+            Assert.Throws<ArgumentNullException>("waitHandles[1]", () => WaitHandle.WaitAny(handles, TimeSpan.Zero, exitContext: false));
+        }
+
+        [Fact]
         public static void WaitAny_SameHandles()
         {
             ManualResetEvent[] wh = new ManualResetEvent[2];
@@ -71,6 +95,30 @@ namespace System.Threading.Tests
 
             Assert.False(WaitHandle.WaitAll(handles, 1));
             Assert.False(WaitHandle.WaitAll(handles, TimeSpan.FromMilliseconds(1)));
+        }
+
+        [Fact]
+        public static void WaitAll_NullArray_Throws()
+        {
+            WaitHandle[] handles = null;
+
+            Assert.Throws<ArgumentNullException>("waitHandles", () => WaitHandle.WaitAll(handles));
+            Assert.Throws<ArgumentNullException>("waitHandles", () => WaitHandle.WaitAll(handles, 0));
+            Assert.Throws<ArgumentNullException>("waitHandles", () => WaitHandle.WaitAll(handles, TimeSpan.Zero));
+            Assert.Throws<ArgumentNullException>("waitHandles", () => WaitHandle.WaitAll(handles, 0, exitContext: false));
+            Assert.Throws<ArgumentNullException>("waitHandles", () => WaitHandle.WaitAll(handles, TimeSpan.Zero, exitContext: false));
+        }
+
+        [Fact]
+        public static void WaitAll_NullHandle_Throws()
+        {
+            var handles = new WaitHandle[] { new ManualResetEvent(true), null, new AutoResetEvent(true) };
+
+            Assert.Throws<ArgumentNullException>("waitHandles[1]", () => WaitHandle.WaitAll(handles));
+            Assert.Throws<ArgumentNullException>("waitHandles[1]", () => WaitHandle.WaitAll(handles, 0));
+            Assert.Throws<ArgumentNullException>("waitHandles[1]", () => WaitHandle.WaitAll(handles, TimeSpan.Zero));
+            Assert.Throws<ArgumentNullException>("waitHandles[1]", () => WaitHandle.WaitAll(handles, 0, exitContext: false));
+            Assert.Throws<ArgumentNullException>("waitHandles[1]", () => WaitHandle.WaitAll(handles, TimeSpan.Zero, exitContext: false));
         }
 
         [Fact]
@@ -129,7 +177,7 @@ namespace System.Threading.Tests
                 base.Dispose(explicitDisposing);
             }
         }
-        
+
 #pragma warning disable 0618 // 'WaitHandle.Handle' is obsolete: 'Use the SafeWaitHandle property instead.'
         [Fact]
         public static void Handle()
@@ -251,7 +299,7 @@ namespace System.Threading.Tests
 
         [Theory]
         [MemberData(nameof(SignalAndWait_MemberData))]
-        private static void SignalAndWait(
+        public static void SignalAndWait(
             WaitHandle toSignal,
             AutoResetEvent toWaitOn,
             Func<WaitHandle, WaitHandle, bool> callSignalAndWait,

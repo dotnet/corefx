@@ -14,16 +14,12 @@ using System.Diagnostics;
 
 namespace System.Runtime.Serialization.Json
 {
-#if uapaot
-    public class XmlObjectSerializerReadContextComplexJson : XmlObjectSerializerReadContextComplex
-#else
     internal class XmlObjectSerializerReadContextComplexJson : XmlObjectSerializerReadContextComplex
-#endif
     {
         private string _extensionDataValueType;
-        private DataContractJsonSerializer _jsonSerializer;
-        private DateTimeFormat _dateTimeFormat;
-        private bool _useSimpleDictionaryFormat;
+        private readonly DataContractJsonSerializer _jsonSerializer;
+        private readonly DateTimeFormat _dateTimeFormat;
+        private readonly bool _useSimpleDictionaryFormat;
 
         public XmlObjectSerializerReadContextComplexJson(DataContractJsonSerializer serializer, DataContract rootTypeDataContract)
             : base(null, int.MaxValue, new StreamingContext(), true)
@@ -207,55 +203,6 @@ namespace System.Runtime.Serialization.Json
             xmlReader.MoveToElement();
         }
 
-        internal DataContract ResolveDataContractFromType(string typeName, string typeNs, DataContract memberTypeContract)
-        {
-            this.PushKnownTypes(this.rootTypeDataContract);
-            this.PushKnownTypes(memberTypeContract);
-            XmlQualifiedName qname = ParseQualifiedName(typeName);
-            DataContract contract = ResolveDataContractFromKnownTypes(qname.Name, TrimNamespace(qname.Namespace), memberTypeContract);
-
-            this.PopKnownTypes(this.rootTypeDataContract);
-            this.PopKnownTypes(memberTypeContract);
-            return contract;
-        }
-
-        internal void CheckIfTypeNeedsVerifcation(DataContract declaredContract, DataContract runtimeContract)
-        {
-            bool verifyType = true;
-            CollectionDataContract collectionContract = declaredContract as CollectionDataContract;
-            if (collectionContract != null && collectionContract.UnderlyingType.IsInterface)
-            {
-                switch (collectionContract.Kind)
-                {
-                    case CollectionKind.Dictionary:
-                    case CollectionKind.GenericDictionary:
-                        verifyType = declaredContract.Name == runtimeContract.Name;
-                        break;
-
-                    default:
-                        Type t = collectionContract.ItemType.MakeArrayType();
-                        verifyType = (t != runtimeContract.UnderlyingType);
-                        break;
-                }
-            }
-
-            if (verifyType)
-            {
-                this.PushKnownTypes(declaredContract);
-                VerifyType(runtimeContract);
-                this.PopKnownTypes(declaredContract);
-            }
-        }
-
-        internal void VerifyType(DataContract dataContract)
-        {
-            DataContract knownContract = ResolveDataContractFromKnownTypes(dataContract.StableName.Name, dataContract.StableName.Namespace, null /*memberTypeContract*/);
-            if (knownContract == null || knownContract.UnderlyingType != dataContract.UnderlyingType)
-            {
-                throw System.ServiceModel.DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlObjectSerializer.CreateSerializationException(SR.Format(SR.DcTypeNotFoundOnSerialize, DataContract.GetClrTypeFullName(dataContract.UnderlyingType), dataContract.StableName.Name, dataContract.StableName.Namespace)));
-            }
-        }
-
         internal string TrimNamespace(string serverTypeNamespace)
         {
             if (!string.IsNullOrEmpty(serverTypeNamespace))
@@ -291,7 +238,7 @@ namespace System.Runtime.Serialization.Json
             string name, ns;
             if (string.IsNullOrEmpty(qname))
             {
-                name = ns = String.Empty;
+                name = ns = string.Empty;
             }
             else
             {
@@ -355,7 +302,6 @@ namespace System.Runtime.Serialization.Json
             return name;
         }
 
-#if !uapaot
         public static void ThrowDuplicateMemberException(object obj, XmlDictionaryString[] memberNames, int memberIndex)
         {
             throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new SerializationException(
@@ -393,6 +339,5 @@ namespace System.Runtime.Serialization.Json
         {
             return BitFlagsGenerator.IsBitSet(bytes, bitIndex);
         }
-#endif
     }
 }

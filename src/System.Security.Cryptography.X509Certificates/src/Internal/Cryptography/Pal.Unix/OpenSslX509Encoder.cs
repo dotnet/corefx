@@ -5,6 +5,7 @@
 using System;
 using System.Diagnostics;
 using System.Security.Cryptography;
+using System.Security.Cryptography.Asn1;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Win32.SafeHandles;
 
@@ -14,16 +15,16 @@ namespace Internal.Cryptography.Pal
     {
         public AsymmetricAlgorithm DecodePublicKey(Oid oid, byte[] encodedKeyValue, byte[] encodedParameters, ICertificatePal certificatePal)
         {
-            if (oid.Value == Oids.Ecc && certificatePal != null)
+            if (oid.Value == Oids.EcPublicKey && certificatePal != null)
             {
                 return ((OpenSslX509CertificateReader)certificatePal).GetECDsaPublicKey();
             }
 
             switch (oid.Value)
             {
-                case Oids.RsaRsa:
+                case Oids.Rsa:
                     return BuildRsaPublicKey(encodedKeyValue);
-                case Oids.DsaDsa:
+                case Oids.Dsa:
                     return BuildDsaPublicKey(encodedKeyValue, encodedParameters);
             }
 
@@ -55,8 +56,8 @@ namespace Internal.Cryptography.Pal
             {
                 ICertificatePal certPal;
 
-                if (CertificatePal.TryReadX509Der(rawData, out certPal) ||
-                    CertificatePal.TryReadX509Pem(rawData, out certPal))
+                if (OpenSslX509CertificateReader.TryReadX509Der(rawData, out certPal) ||
+                    OpenSslX509CertificateReader.TryReadX509Pem(rawData, out certPal))
                 {
                     certPal.Dispose();
 
@@ -98,23 +99,23 @@ namespace Internal.Cryptography.Pal
                 {
                     ICertificatePal certPal;
 
-                    if (CertificatePal.TryReadX509Der(fileBio, out certPal))
+                    if (OpenSslX509CertificateReader.TryReadX509Der(fileBio, out certPal))
                     {
                         certPal.Dispose();
 
                         return X509ContentType.Cert;
                     }
 
-                    CertificatePal.RewindBio(fileBio, bioPosition);
+                    OpenSslX509CertificateReader.RewindBio(fileBio, bioPosition);
 
-                    if (CertificatePal.TryReadX509Pem(fileBio, out certPal))
+                    if (OpenSslX509CertificateReader.TryReadX509Pem(fileBio, out certPal))
                     {
                         certPal.Dispose();
 
                         return X509ContentType.Cert;
                     }
 
-                    CertificatePal.RewindBio(fileBio, bioPosition);
+                    OpenSslX509CertificateReader.RewindBio(fileBio, bioPosition);
                 }
 
                 // X509ContentType.Pkcs7
@@ -124,14 +125,14 @@ namespace Internal.Cryptography.Pal
                         return X509ContentType.Pkcs7;
                     }
 
-                    CertificatePal.RewindBio(fileBio, bioPosition);
+                    OpenSslX509CertificateReader.RewindBio(fileBio, bioPosition);
 
                     if (PkcsFormatReader.IsPkcs7Pem(fileBio))
                     {
                         return X509ContentType.Pkcs7;
                     }
 
-                    CertificatePal.RewindBio(fileBio, bioPosition);
+                    OpenSslX509CertificateReader.RewindBio(fileBio, bioPosition);
                 }
 
                 // X509ContentType.Pkcs12 (aka PFX)
@@ -145,7 +146,7 @@ namespace Internal.Cryptography.Pal
                         return X509ContentType.Pkcs12;
                     }
 
-                    CertificatePal.RewindBio(fileBio, bioPosition);
+                    OpenSslX509CertificateReader.RewindBio(fileBio, bioPosition);
                 }
             }
 
@@ -254,84 +255,42 @@ namespace Internal.Cryptography.Pal
 
         private static RSA BuildRsaPublicKey(byte[] encodedData)
         {
-            using (SafeRsaHandle rsaHandle = Interop.Crypto.DecodeRsaPublicKey(encodedData, encodedData.Length))
+            RSA rsa = new RSAOpenSsl();
+            try
             {
-                Interop.Crypto.CheckValidOpenSslHandle(rsaHandle);
-
-                RSAParameters rsaParameters = Interop.Crypto.ExportRsaParameters(rsaHandle, false);
-                RSA rsa = new RSAOpenSsl();
-                rsa.ImportParameters(rsaParameters);
-                return rsa;
+                rsa.ImportRSAPublicKey(new ReadOnlySpan<byte>(encodedData), out _);
             }
+            catch (Exception)
+            {
+                rsa.Dispose();
+                throw;
+            }
+            return rsa;
         }
 
-        private static DSA BuildDsaPublicKey(byte[] encodedKey, byte[] encodedParameters)
+        private static DSA BuildDsaPublicKey(byte[] encodedKeyValue, byte[] encodedParameters)
         {
-            // Dss-Parms ::= SEQUENCE { 
-            //   p INTEGER, 
-            //   q INTEGER, 
-            //   g INTEGER 
-            // } 
-
-            // The encodedKey value is a DER INTEGER representing the Y value
-
-            DerSequenceReader parametersReader = new DerSequenceReader(encodedParameters);
-            DerSequenceReader keyReader = DerSequenceReader.CreateForPayload(encodedKey);
-
-            DSAParameters parameters = new DSAParameters();
-
-            // While this could use the object initializer, the read modifies the data stream, so
-            // leaving these in flat call for clarity.
-            parameters.P = parametersReader.ReadIntegerBytes();
-            parameters.Q = parametersReader.ReadIntegerBytes();
-            parameters.G = parametersReader.ReadIntegerBytes();
-            parameters.Y = keyReader.ReadIntegerBytes();
-
-            // Make the structure look like it would from Windows / .NET Framework
-            TrimPaddingByte(ref parameters.P);
-            TrimPaddingByte(ref parameters.Q);
-
-            PadOrTrim(ref parameters.G, parameters.P.Length);
-            PadOrTrim(ref parameters.Y, parameters.P.Length);
-
-            DSA dsa = new DSAOpenSsl();
-            dsa.ImportParameters(parameters);
-            return dsa;
-        }
-
-        private static void TrimPaddingByte(ref byte[] data)
-        {
-            if (data.Length > 0 && data[0] == 0)
+            SubjectPublicKeyInfoAsn spki = new SubjectPublicKeyInfoAsn
             {
-                byte[] tmp = new byte[data.Length - 1];
-                Buffer.BlockCopy(data, 1, tmp, 0, tmp.Length);
-                data = tmp;
-            }
-        }
+                Algorithm = new AlgorithmIdentifierAsn { Algorithm = new Oid(Oids.Dsa, null), Parameters = encodedParameters },
+                SubjectPublicKey = encodedKeyValue,
+            };
 
-        private static void PadOrTrim(ref byte[] data, int dataLen)
-        {
-            if (data.Length == dataLen)
-                return;
-
-            if (data.Length < dataLen)
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
             {
-                // Add leading 0s
-                byte[] tmp = new byte[dataLen];
-                Buffer.BlockCopy(data, 0, tmp, dataLen - data.Length, dataLen);
-                data = tmp;
-                return;
+                spki.Encode(writer);
+                DSA dsa = new DSAOpenSsl();
+                try
+                {
+                    dsa.ImportSubjectPublicKeyInfo(writer.EncodeAsSpan(), out _);
+                    return dsa;
+                }
+                catch (Exception)
+                {
+                    dsa.Dispose();
+                    throw;
+                }
             }
-
-            if (data.Length == dataLen + 1 && data[0] == 0)
-            {
-                byte[] tmp = new byte[dataLen];
-                Buffer.BlockCopy(data, 1, tmp, 0, dataLen);
-                data = tmp;
-                return;
-            }
-
-            throw new CryptographicException();
         }
     }
 }

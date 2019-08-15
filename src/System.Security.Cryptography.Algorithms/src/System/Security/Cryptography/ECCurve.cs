@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -10,7 +10,7 @@ namespace System.Security.Cryptography
     /// An elliptic curve.
     /// </summary>
     /// <remarks>
-    /// The CurveType property determines whether the curve is a named curve or an explicit curve 
+    /// The CurveType property determines whether the curve is a named curve or an explicit curve
     /// which is either a prime curve or a characteristic-2 curve.
     /// </remarks>
     [DebuggerDisplay("ECCurve: {Oid}")]
@@ -84,7 +84,7 @@ namespace System.Security.Cryptography
                     throw new ArgumentNullException(nameof(Oid));
 
                 if (string.IsNullOrEmpty(value.Value) && string.IsNullOrEmpty(value.FriendlyName))
-                    throw new ArgumentException(string.Format(SR.Cryptography_InvalidCurveOid));
+                    throw new ArgumentException(SR.Cryptography_InvalidCurveOid);
 
                 _oid = value;
             }
@@ -129,7 +129,7 @@ namespace System.Security.Cryptography
         /// <summary>
         /// Create a curve from the given cref="Oid" value.
         /// </summary>
-        /// <param name="oidFriendlyName">The Oid value to use.</param>
+        /// <param name="oidValue">The Oid value to use.</param>
         /// <returns>An ECCurve representing a named curve.</returns>
         public static ECCurve CreateFromValue(string oidValue)
         {
@@ -142,7 +142,21 @@ namespace System.Security.Cryptography
 
         private static ECCurve CreateFromValueAndName(string oidValue, string oidFriendlyName)
         {
-            return ECCurve.Create(new Oid(oidValue, oidFriendlyName));
+            Oid oid = null;
+
+            if (oidValue == null && oidFriendlyName != null)
+            {
+                try
+                {
+                    oid = Oid.FromFriendlyName(oidFriendlyName, OidGroup.PublicKeyAlgorithm);
+                }
+                catch (CryptographicException)
+                {
+                }
+            }
+
+            oid ??= new Oid(oidValue, oidFriendlyName);
+            return ECCurve.Create(oid);
         }
 
         public bool IsPrime
@@ -247,7 +261,7 @@ namespace System.Security.Cryptography
                 Debug.Assert(CurveType == ECCurveType.Implicit);
                 if (HasAnyExplicitParameters() || Oid != null)
                 {
-                    throw new CryptographicException(string.Format(SR.Cryptography_CurveNotSupported, CurveType.ToString()));
+                    throw new CryptographicException(SR.Format(SR.Cryptography_CurveNotSupported, CurveType.ToString()));
                 }
             }
         }

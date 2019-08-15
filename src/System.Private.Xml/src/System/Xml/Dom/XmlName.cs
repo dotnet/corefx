@@ -10,11 +10,11 @@ namespace System.Xml
 
     internal class XmlName : IXmlSchemaInfo
     {
-        private string _prefix;
-        private string _localName;
-        private string _ns;
+        private readonly string _prefix;
+        private readonly string _localName;
+        private readonly string _ns;
         private string _name;
-        private int _hashCode;
+        private readonly int _hashCode;
         internal XmlDocument ownerDoc;
         internal XmlName next;
 
@@ -182,18 +182,7 @@ namespace System.Xml
             int hashCode = 0;
             if (name != null)
             {
-                unchecked
-                {
-                    for (int i = name.Length - 1; i >= 0; i--)
-                    {
-                        char ch = name[i];
-                        if (ch == ':') break;
-                        hashCode += (hashCode << 7) ^ ch;
-                    }
-                    hashCode -= hashCode >> 17;
-                    hashCode -= hashCode >> 11;
-                    hashCode -= hashCode >> 5;
-                }
+                return string.GetHashCode(name.AsSpan(name.LastIndexOf(':') + 1));
             }
             return hashCode;
         }
@@ -202,9 +191,9 @@ namespace System.Xml
     internal sealed class XmlNameEx : XmlName
     {
         private byte _flags;
-        private XmlSchemaSimpleType _memberType;
-        private XmlSchemaType _schemaType;
-        private object _decl;
+        private readonly XmlSchemaSimpleType _memberType;
+        private readonly XmlSchemaType _schemaType;
+        private readonly object _decl;
 
         // flags
         // 0,1  : Validity

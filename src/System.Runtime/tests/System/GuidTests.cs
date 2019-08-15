@@ -51,8 +51,9 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(GuidStrings_Valid_TestData))]
-        public static void Ctor_String(string input, string _, Guid expected)
+        public static void Ctor_String(string input, string format, Guid expected)
         {
+            _ = format;
             Assert.Equal(expected, new Guid(input));
         }
 
@@ -132,9 +133,9 @@ namespace System.Tests
                 Array.Copy(bytes, 0, random, i * GuidSize, GuidSize);
             }
 
-            // Verify the randomness of the data in the array. Guid has some small bias in it 
+            // Verify the randomness of the data in the array. Guid has some small bias in it
             // due to several bits fixed based on the format, but that bias is small enough and
-            // the variability allowed by VerifyRandomDistribution large enough that we don't do 
+            // the variability allowed by VerifyRandomDistribution large enough that we don't do
             // anything special for it.
             RandomDataGenerator.VerifyRandomDistribution(random);
         }
@@ -158,25 +159,6 @@ namespace System.Tests
             Guid result3;
             Assert.True(Guid.TryParseExact(input, format.ToLowerInvariant(), out result3)); // Format should be case insensitive
             Assert.Equal(expected, result3);
-        }
-
-        [Theory]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "The coreclr fixed a bug where Guid.TryParse throws a format or overflow exception (https://github.com/dotnet/corefx/issues/6316)")]
-        [MemberData(nameof(GuidStrings_TryParseThrows_TestData))]
-        public static void Parse_Invalid_Netfx(string input, Type exceptionType)
-        {
-            Guid result = default(Guid);
-            Assert.Throws(exceptionType, () => Guid.TryParse(input, out result));
-            Assert.Equal(default(Guid), result);
-
-            Assert.Throws(exceptionType, () => Guid.Parse(input));
-        }
-
-        [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET framework has a bug where Guid.TryParse throws a format or overflow exception")]
-        public static void Parse_Invalid_NetcoreApp(string input, Type exceptionType)
-        {
-            Parse_Invalid(input, exceptionType);
         }
 
         [Theory]
@@ -336,6 +318,7 @@ namespace System.Tests
                 Assert.Equal(expected, guid1.Equals(guid2));
                 Assert.Equal(expected, guid1 == guid2);
                 Assert.Equal(!expected, guid1 != guid2);
+                Assert.Equal(expected, guid1.GetHashCode().Equals(guid2.GetHashCode()));
             }
             Assert.Equal(expected, guid1.Equals(obj));
         }
@@ -372,12 +355,25 @@ namespace System.Tests
             Assert.Equal(expected, formattable.ToString(format, null));
         }
 
+        public static IEnumerable<object[]> InvalidFormat_TestData()
+        {
+            yield return new object[] { "a" };
+            yield return new object[] { "c" };
+            yield return new object[] { "e" };
+            yield return new object[] { "m" };
+            yield return new object[] { "o" };
+            yield return new object[] { "q" };
+            yield return new object[] { "w" };
+            yield return new object[] { "y" };
+            yield return new object[] { "xx" };
+        }
+
         [Theory]
-        [InlineData("Y")]
-        [InlineData("XX")]
+        [MemberData(nameof(InvalidFormat_TestData))]
         public static void ToString_InvalidFormat_ThrowsFormatException(string format)
         {
             Assert.Throws<FormatException>(() => s_testGuid.ToString(format));
+            Assert.Throws<FormatException>(() => s_testGuid.ToString(format.ToUpperInvariant()));
         }
 
         public static IEnumerable<object[]> GuidStrings_Valid_TestData()
@@ -477,9 +473,9 @@ namespace System.Tests
 
             yield return new object[] { "(dddddddd-dddd-dddd-dddd-dddddddd}", typeof(FormatException) }; // 8-4-4-4-8 with leading parenthesis and trailing brace
             yield return new object[] { "{dddddddd-dddd-dddd-dddd-dddddddd)", typeof(FormatException) }; // 8-4-4-4-8 with trailing parenthesis and leading brace
-            
+
             yield return new object[] { "{0xdddddddd, 0xdddd, 0xdddd,{0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd}}", typeof(FormatException) }; // 8-4-4-{2-2-2-2-2-2-2-2} - missing group
-            
+
             yield return new object[] { "{0xdddddddd, 0xdddd, 0xdddd,{0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd", typeof(FormatException) }; // 8-4-4-{2-2-2-2-2-2-2-2} without a trailing brace
             yield return new object[] { "{0xdddddddd, 0xdddd, 0xdddd,{0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd}", typeof(FormatException) }; // 8-4-4-{2-2-2-2-2-2-2-2} without a trailing brace
 
@@ -489,12 +485,12 @@ namespace System.Tests
 
             yield return new object[] { "(0xdddddddd, 0xdddd, 0xdddd,{0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd))", typeof(FormatException) }; // 8-4-4-{2-2-2-2-2-2-2-2} with parentheses
             yield return new object[] { "(0xdddddddd, 0xdddd, 0xdddd,{0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd})", typeof(FormatException) };// 8-4-4-{2-2-2-2-2-2-2-2} with parentheses
-            
+
             yield return new object[] { "{0xdddddddd 0xdddd 0xdddd,{0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd}}", typeof(OverflowException) }; // 8-4-4-{2-2-2-2-2-2-2-2} without comma
             yield return new object[] { "{0xdddddddd, 0xdddd 0xdddd,{0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd}}", typeof(FormatException) }; // 8-4-4-{2-2-2-2-2-2-2-2} without comma
             yield return new object[] { "{0xdddddddd, 0xdddd 0xdddd,{0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd}}", typeof(FormatException) }; // 8-4-4-{2-2-2-2-2-2-2-2} without comma
             yield return new object[] { "{0xdddddddd, 0xdddd, 0xdddd{0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd}}", typeof(FormatException) }; // 8-4-4-{2-2-2-2-2-2-2-2} without comma
-            
+
             yield return new object[] { "{dddddddd, 0xdddd, 0xdddd,{0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd}}", typeof(FormatException) }; // 8-4-4-{2-2-2-2-2-2-2-2} without 0x prefix
             yield return new object[] { "{0xdddddddd, dddd, 0xdddd,{0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd}}", typeof(FormatException) }; // 8-4-4-{2-2-2-2-2-2-2-2} without 0x prefix
             yield return new object[] { "{0xdddddddd, 0xdddd, dddd,{0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd}}", typeof(FormatException) }; // 8-4-4-{2-2-2-2-2-2-2-2} without 0x prefix

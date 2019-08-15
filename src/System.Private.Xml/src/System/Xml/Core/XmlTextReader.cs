@@ -18,7 +18,7 @@ namespace System.Xml
         //
         // Member fields
         //
-        private XmlTextReaderImpl _impl;
+        private readonly XmlTextReaderImpl _impl;
         //
         //
         // Constructors
@@ -101,7 +101,7 @@ namespace System.Xml
             _impl.OuterReader = this;
         }
 
-        public XmlTextReader(String url, XmlNameTable nt)
+        public XmlTextReader(string url, XmlNameTable nt)
         {
             _impl = new XmlTextReaderImpl(url, nt);
             _impl.OuterReader = this;
@@ -263,7 +263,7 @@ namespace System.Xml
             get { return _impl.NameTable; }
         }
 
-        public override String LookupNamespace(String prefix)
+        public override string LookupNamespace(string prefix)
         {
             string ns = _impl.LookupNamespace(prefix);
             if (ns != null && ns.Length == 0)
@@ -352,7 +352,7 @@ namespace System.Xml
             return _impl.LookupPrefix(namespaceName);
         }
 
-        // This pragma disables a warning that the return type is not CLS-compliant, but generics are part of CLS in Whidbey. 
+        // This pragma disables a warning that the return type is not CLS-compliant, but generics are part of CLS in Whidbey.
 #pragma warning disable 3002
         // FXCOP: ExplicitMethodImplementationsInUnsealedClassesHaveVisibleAlternates
         // public versions of IXmlNamespaceResolver methods, so that XmlTextReader subclasses can access them
@@ -363,7 +363,7 @@ namespace System.Xml
 #pragma warning restore 3002
 
         //
-        // XmlTextReader 
+        // XmlTextReader
         //
         public bool Namespaces
         {
@@ -461,4 +461,3 @@ namespace System.Xml
         }
     }
 }
-

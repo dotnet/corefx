@@ -52,7 +52,7 @@ namespace System.DirectoryServices
         private const string defaultFilter = "(objectClass=*)";
 
         /// <devdoc>
-        /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/>, 
+        /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/>,
         /// <see cref='System.DirectoryServices.DirectorySearcher.Filter'/>, <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/>, and <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> set to their default values.
         /// </devdoc>
         public DirectorySearcher() : this(null, defaultFilter, null, System.DirectoryServices.SearchScope.Subtree)
@@ -61,8 +61,8 @@ namespace System.DirectoryServices
         }
 
         /// <devdoc>
-        /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with 
-        /// <see cref='System.DirectoryServices.DirectorySearcher.Filter'/>, <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/>, and <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> set to their default 
+        /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with
+        /// <see cref='System.DirectoryServices.DirectorySearcher.Filter'/>, <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/>, and <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> set to their default
         ///  values, and <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/> set to the given value.
         /// </devdoc>
         public DirectorySearcher(DirectoryEntry searchRoot) : this(searchRoot, defaultFilter, null, System.DirectoryServices.SearchScope.Subtree)
@@ -71,8 +71,8 @@ namespace System.DirectoryServices
         }
 
         /// <devdoc>
-        /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with 
-        /// <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/> and <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> set to their default 
+        /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with
+        /// <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/> and <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> set to their default
         /// values, and <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/> and <see cref='System.DirectoryServices.DirectorySearcher.Filter'/> set to the respective given values.
         /// </devdoc>
         public DirectorySearcher(DirectoryEntry searchRoot, string filter) : this(searchRoot, filter, null, System.DirectoryServices.SearchScope.Subtree)
@@ -81,8 +81,8 @@ namespace System.DirectoryServices
         }
 
         /// <devdoc>
-        /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with 
-        /// <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> set to its default 
+        /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with
+        /// <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> set to its default
         /// value, and <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/>, <see cref='System.DirectoryServices.DirectorySearcher.Filter'/>, and <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/> set to the respective given values.
         /// </devdoc>
         public DirectorySearcher(DirectoryEntry searchRoot, string filter, string[] propertiesToLoad) : this(searchRoot, filter, propertiesToLoad, System.DirectoryServices.SearchScope.Subtree)
@@ -91,8 +91,8 @@ namespace System.DirectoryServices
         }
 
         /// <devdoc>
-        /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/>, 
-        /// <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/>, and <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> set to their default 
+        /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/>,
+        /// <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/>, and <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> set to their default
         ///    values, and <see cref='System.DirectoryServices.DirectorySearcher.Filter'/> set to the given value.
         /// </devdoc>
         public DirectorySearcher(string filter) : this(null, filter, null, System.DirectoryServices.SearchScope.Subtree)
@@ -101,7 +101,7 @@ namespace System.DirectoryServices
         }
 
         /// <devdoc>
-        /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/> 
+        /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/>
         /// and <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> set to their default
         /// values, and <see cref='System.DirectoryServices.DirectorySearcher.Filter'/> and <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/> set to the respective given values.
         /// </devdoc>
@@ -111,15 +111,15 @@ namespace System.DirectoryServices
         }
 
         /// <devdoc>
-        /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/> set to its default 
-        /// value, and <see cref='System.DirectoryServices.DirectorySearcher.Filter'/>, <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/>, and <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> set to the respective given values.</para>
+        /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/> set to its default
+        /// value, and <see cref='System.DirectoryServices.DirectorySearcher.Filter'/>, <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/>, and <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> set to the respective given values.
         /// </devdoc>
         public DirectorySearcher(string filter, string[] propertiesToLoad, SearchScope scope) : this(null, filter, propertiesToLoad, scope)
         {
         }
 
         /// <devdoc>
-        /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with the <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/>, <see cref='System.DirectoryServices.DirectorySearcher.Filter'/>, <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/>, and <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> properties set to the given 
+        /// Initializes a new instance of the <see cref='System.DirectoryServices.DirectorySearcher'/> class with the <see cref='System.DirectoryServices.DirectorySearcher.SearchRoot'/>, <see cref='System.DirectoryServices.DirectorySearcher.Filter'/>, <see cref='System.DirectoryServices.DirectorySearcher.PropertiesToLoad'/>, and <see cref='System.DirectoryServices.DirectorySearcher.SearchScope'/> properties set to the given
         /// values.
         /// </devdoc>
         public DirectorySearcher(DirectoryEntry searchRoot, string filter, string[] propertiesToLoad, SearchScope scope)
@@ -168,7 +168,7 @@ namespace System.DirectoryServices
         /// <devdoc>
         ///  Gets or sets the maximum amount of time that the client waits for
         ///  the server to return results. If the server does not respond within this time,
-        ///  the search is aborted, and no results are returned.</para>
+        ///  the search is aborted, and no results are returned.
         /// </devdoc>
         public TimeSpan ClientTimeout
         {
@@ -176,9 +176,9 @@ namespace System.DirectoryServices
             set
             {
                 // prevent integer overflow
-                if (value.TotalSeconds > Int32.MaxValue)
+                if (value.TotalSeconds > int.MaxValue)
                 {
-                    throw new ArgumentException(SR.TimespanExceedMax, "value");
+                    throw new ArgumentException(SR.TimespanExceedMax, nameof(value));
                 }
 
                 _clientTimeout = value;
@@ -187,8 +187,8 @@ namespace System.DirectoryServices
 
         /// <devdoc>
         /// Gets or sets a value indicating whether the search should retrieve only the names of requested
-        /// properties or the names and values of requested properties.</para>
-        /// </devdoc>        
+        /// properties or the names and values of requested properties.
+        /// </devdoc>
         [DefaultValue(false)]
         public bool PropertyNamesOnly { get; set; }
 
@@ -197,7 +197,7 @@ namespace System.DirectoryServices
         /// </devdoc>
         [
             DefaultValue(defaultFilter),
-            // CoreFXPort - Remove design support      
+            // CoreFXPort - Remove design support
             // TypeConverter("System.Diagnostics.Design.StringValueConverter, " + AssemblyRef.SystemDesign)
         ]
         public string Filter
@@ -260,7 +260,7 @@ namespace System.DirectoryServices
                     value != ReferralChasingOption.Subordinate &&
                     value != ReferralChasingOption.External &&
                     value != ReferralChasingOption.All)
-                    throw new InvalidEnumArgumentException("value", (int)value, typeof(ReferralChasingOption));
+                    throw new InvalidEnumArgumentException(nameof(value), (int)value, typeof(ReferralChasingOption));
 
                 _referralChasing = value;
             }
@@ -276,7 +276,7 @@ namespace System.DirectoryServices
             set
             {
                 if (value < SearchScope.Base || value > SearchScope.Subtree)
-                    throw new InvalidEnumArgumentException("value", (int)value, typeof(SearchScope));
+                    throw new InvalidEnumArgumentException(nameof(value), (int)value, typeof(SearchScope));
 
                 // user explicitly set SearchScope to something other than Base and also want to do ASQ, it is not supported
                 if (_attributeScopeQuerySpecified == true && value != SearchScope.Base)
@@ -300,9 +300,9 @@ namespace System.DirectoryServices
             set
             {
                 // prevent integer overflow
-                if (value.TotalSeconds > Int32.MaxValue)
+                if (value.TotalSeconds > int.MaxValue)
                 {
-                    throw new ArgumentException(SR.TimespanExceedMax, "value");
+                    throw new ArgumentException(SR.TimespanExceedMax, nameof(value));
                 }
 
                 _serverPageTimeLimit = value;
@@ -319,9 +319,9 @@ namespace System.DirectoryServices
             set
             {
                 // prevent integer overflow
-                if (value.TotalSeconds > Int32.MaxValue)
+                if (value.TotalSeconds > int.MaxValue)
                 {
-                    throw new ArgumentException(SR.TimespanExceedMax, "value");
+                    throw new ArgumentException(SR.TimespanExceedMax, nameof(value));
                 }
 
                 _serverTimeLimit = value;
@@ -329,7 +329,7 @@ namespace System.DirectoryServices
         }
 
         /// <devdoc>
-        ///  Gets or sets the maximum number of objects that the 
+        ///  Gets or sets the maximum number of objects that the
         ///  server should return in a search.
         /// </devdoc>
         [DefaultValue(0)]
@@ -345,7 +345,7 @@ namespace System.DirectoryServices
         }
 
         /// <devdoc>
-        /// Gets or sets the node in the Active Directory hierarchy 
+        /// Gets or sets the node in the Active Directory hierarchy
         /// at which the search will start.
         /// </devdoc>
         [DefaultValue(null)]
@@ -391,21 +391,21 @@ namespace System.DirectoryServices
         }
 
         /// <devdoc>
-        /// Gets or sets a value indicating whether searches should be carried out in an asynchronous  
+        /// Gets or sets a value indicating whether searches should be carried out in an asynchronous
         /// way.
         /// </devdoc>
         [DefaultValue(false)]
         public bool Asynchronous { get; set; }
 
         /// <devdoc>
-        /// Gets or sets a value indicating whether the search should also return deleted objects that match the search  
+        /// Gets or sets a value indicating whether the search should also return deleted objects that match the search
         /// filter.
         /// </devdoc>
         [DefaultValue(false)]
         public bool Tombstone { get; set; }
 
         /// <devdoc>
-        /// Gets or sets an attribute name to indicate that an attribute-scoped query search should be   
+        /// Gets or sets an attribute name to indicate that an attribute-scoped query search should be
         /// performed.
         /// </devdoc>
         [
@@ -445,7 +445,7 @@ namespace System.DirectoryServices
         }
 
         /// <devdoc>
-        /// Gets or sets a value to indicate how the aliases of found objects are to be  
+        /// Gets or sets a value to indicate how the aliases of found objects are to be
         /// resolved.
         /// </devdoc>
         [DefaultValue(DereferenceAlias.Never)]
@@ -455,14 +455,14 @@ namespace System.DirectoryServices
             set
             {
                 if (value < DereferenceAlias.Never || value > DereferenceAlias.Always)
-                    throw new InvalidEnumArgumentException("value", (int)value, typeof(DereferenceAlias));
+                    throw new InvalidEnumArgumentException(nameof(value), (int)value, typeof(DereferenceAlias));
 
                 _derefAlias = value;
             }
         }
 
         /// <devdoc>
-        /// Gets or sets a value to indicate the search should return security access information for the specified 
+        /// Gets or sets a value to indicate the search should return security access information for the specified
         /// attributes.
         /// </devdoc>
         [DefaultValue(SecurityMasks.None)]
@@ -473,14 +473,14 @@ namespace System.DirectoryServices
             {
                 // make sure the behavior is consistent with native ADSI
                 if (value > (SecurityMasks.None | SecurityMasks.Owner | SecurityMasks.Group | SecurityMasks.Dacl | SecurityMasks.Sacl))
-                    throw new InvalidEnumArgumentException("value", (int)value, typeof(SecurityMasks));
+                    throw new InvalidEnumArgumentException(nameof(value), (int)value, typeof(SecurityMasks));
 
                 _securityMask = value;
             }
         }
 
         /// <devdoc>
-        /// Gets or sets a value to return extended DNs according to the requested 
+        /// Gets or sets a value to return extended DNs according to the requested
         /// format.
         /// </devdoc>
         [DefaultValue(ExtendedDN.None)]
@@ -490,7 +490,7 @@ namespace System.DirectoryServices
             set
             {
                 if (value < ExtendedDN.None || value > ExtendedDN.Standard)
-                    throw new InvalidEnumArgumentException("value", (int)value, typeof(ExtendedDN));
+                    throw new InvalidEnumArgumentException(nameof(value), (int)value, typeof(ExtendedDN));
 
                 _extendedDN = value;
             }
@@ -515,7 +515,7 @@ namespace System.DirectoryServices
 
             set
             {
-                // specify non-zero pagesize explicitly and also want dirsync      
+                // specify non-zero pagesize explicitly and also want dirsync
                 if (value != null)
                 {
                     if (PageSize != 0)
@@ -558,7 +558,7 @@ namespace System.DirectoryServices
             }
             set
             {
-                // if user explicitly set CacheResults to true and also want to set VLV                
+                // if user explicitly set CacheResults to true and also want to set VLV
                 if (value != null)
                 {
                     if (_cacheResultsSpecified == true && CacheResults == true)
@@ -623,17 +623,7 @@ namespace System.DirectoryServices
 
         private SearchResultCollection FindAll(bool findMoreThanOne)
         {
-            searchResult = null;
-
-            DirectoryEntry clonedRoot = null;
-            if (_assertDefaultNamingContext == null)
-            {
-                clonedRoot = SearchRoot.CloneBrowsable();
-            }
-            else
-            {
-                clonedRoot = SearchRoot.CloneBrowsable();
-            }
+            DirectoryEntry clonedRoot = SearchRoot.CloneBrowsable();
 
             UnsafeNativeMethods.IAds adsObject = clonedRoot.AdsObject;
             if (!(adsObject is UnsafeNativeMethods.IDirectorySearch))
@@ -658,7 +648,7 @@ namespace System.DirectoryServices
             {
                 if (!PropertiesToLoad.Contains("ADsPath"))
                 {
-                    // if we don't get this property, we won't be able to return a list of DirectoryEntry objects!                
+                    // if we don't get this property, we won't be able to return a list of DirectoryEntry objects!
                     PropertiesToLoad.Add("ADsPath");
                 }
                 properties = new string[PropertiesToLoad.Count];
@@ -667,16 +657,16 @@ namespace System.DirectoryServices
 
             IntPtr resultsHandle;
             if (properties != null)
+            {
                 adsSearch.ExecuteSearch(Filter, properties, properties.Length, out resultsHandle);
+            }
             else
             {
                 adsSearch.ExecuteSearch(Filter, null, -1, out resultsHandle);
                 properties = Array.Empty<string>();
             }
 
-            SearchResultCollection result = new SearchResultCollection(clonedRoot, resultsHandle, properties, this);
-            searchResult = result;
-            return result;
+            return new SearchResultCollection(clonedRoot, resultsHandle, properties, this);
         }
 
         private unsafe void SetSearchPreferences(UnsafeNativeMethods.IDirectorySearch adsSearch, bool findMoreThanOne)
@@ -893,7 +883,7 @@ namespace System.DirectoryServices
 
                 //
                 // now make the call
-                //                
+                //
                 AdsSearchPreferenceInfo[] prefs = new AdsSearchPreferenceInfo[prefList.Count];
                 for (int i = 0; i < prefList.Count; i++)
                 {

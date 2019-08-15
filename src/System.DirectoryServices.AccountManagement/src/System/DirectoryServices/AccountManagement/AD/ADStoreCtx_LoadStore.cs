@@ -27,7 +27,7 @@ namespace System.DirectoryServices.AccountManagement
         // Native <--> Principal
         //
 
-        // For modified object, pushes any changes (including IdentityClaim changes) 
+        // For modified object, pushes any changes (including IdentityClaim changes)
         // into the underlying store-specific object (e.g., DirectoryEntry) and returns the underlying object.
         // For unpersisted object, creates a  underlying object if one doesn't already exist (in
         // Principal.UnderlyingObject), then pushes any changes into the underlying object.
@@ -213,7 +213,7 @@ namespace System.DirectoryServices.AccountManagement
         }
 
         // Given a underlying store object (e.g., DirectoryEntry), further narrowed down a discriminant
-        // (if applicable for the StoreCtx type), returns a fresh instance of a Principal 
+        // (if applicable for the StoreCtx type), returns a fresh instance of a Principal
         // object based on it.  The WinFX Principal API follows ADSI-style semantics, where you get multiple
         // in-memory objects all referring to the same store pricipal, rather than WinFS semantics, where
         // multiple searches all return references to the same in-memory object.
@@ -226,12 +226,12 @@ namespace System.DirectoryServices.AccountManagement
         //
         //
         // This method works for native objects from the store corresponding to _this_ StoreCtx.
-        // Each StoreCtx will also have its own internal algorithms used for dealing with cross-store objects, e.g., 
-        // for use when iterating over group membership.  These routines are exposed as 
+        // Each StoreCtx will also have its own internal algorithms used for dealing with cross-store objects, e.g.,
+        // for use when iterating over group membership.  These routines are exposed as
         // ResolveCrossStoreRefToPrincipal, and will be called by the StoreCtx's associated ResultSet
         // classes when iterating over a representation of a "foreign" principal.
 
-        // This method will either be passed a DirectoryEntry or SearchResult object if this is the result of a search.  
+        // This method will either be passed a DirectoryEntry or SearchResult object if this is the result of a search.
         // We need to determine the type and then use the appropriate object.
         internal override Principal GetAsPrincipal(object storeObject, object discriminant)
         {
@@ -270,12 +270,12 @@ namespace System.DirectoryServices.AccountManagement
 
                 // if the object was obtained from a GC, we have to construct a new context, and build a new DirectoryEntry
                 // if the object is not from a GC but belongs to another domain, we just have to construct a new context. We can still use the storeObject or searchresult's DirectoryEntry.
-                // if our context is not a domain (that is, it's ADLDS) we don't build a new context unless the object was obtained from a GC. 
+                // if our context is not a domain (that is, it's ADLDS) we don't build a new context unless the object was obtained from a GC.
                 if (targetIsFromGC || OwningContext.ContextType == ContextType.Domain)
                 {
                     string dnsDomainName = SDSUtils.ConstructDnsDomainNameFromDn(distinguishedName);
                     if (targetIsFromGC ||
-                        (!String.IsNullOrEmpty(this.domainDnsName) && String.Compare(this.DnsDomainName, dnsDomainName, StringComparison.OrdinalIgnoreCase) != 0))
+                        (!string.IsNullOrEmpty(this.domainDnsName) && !string.Equals(this.DnsDomainName, dnsDomainName, StringComparison.OrdinalIgnoreCase)))
                     {
                         constructedContext = SDSCache.Domain.GetContext(dnsDomainName, this.Credentials, this.OwningContext.Options);
                     }
@@ -480,7 +480,7 @@ namespace System.DirectoryServices.AccountManagement
             {
                 ds.SizeLimit = 2;   // so we can efficiently check for duplicates
 
-                // If we are searching for AuthPrincpal or Principal in the end we will construct the acutal type
+                // If we are searching for AuthPrincpal or Principal in the end we will construct the actual type
                 // i.e. if the objects objectClass is User we will construct a UserPrincipal even though they searched for Principal.FindByIdentity
                 // At this time we don't know the actual object type so we have to ask AD for all the attributes of the derived types so they are there
                 // when we go to load the principal.
@@ -559,7 +559,7 @@ namespace System.DirectoryServices.AccountManagement
                 {
                     // Are they perhaps searching for a fake group?
                     // If they passed in a valid SID for a fake group, construct and return the fake
-                    // group.                
+                    // group.
                     if (principalType == typeof(Principal) || principalType == typeof(GroupPrincipal) || principalType.IsSubclassOf(typeof(GroupPrincipal)))
                     {
                         SecurityIdentifier sid = null;
@@ -697,7 +697,7 @@ namespace System.DirectoryServices.AccountManagement
         // When updating this table, be sure to also update LoadDirectoryEntryAttributes() to load
         // in any newly-added attributes.
 
-        private static object[,] s_propertyMappingTableRaw =
+        private static readonly object[,] s_propertyMappingTableRaw =
         {
             // PropertyName                          AD property             Converter(LDAP->PAPI)                                    Converter(PAPI->LDAP)
             {PropertyNames.PrincipalDisplayName,     "displayname",          new FromLdapConverterDelegate(StringFromLdapConverter),  new ToLdapConverterDelegate(StringToLdapConverter)},
@@ -748,11 +748,11 @@ namespace System.DirectoryServices.AccountManagement
         };
         /*/
         ///*******  Mapping table for perf testing...
-                static object[,] propertyMappingTableRaw = 
+                static object[,] propertyMappingTableRaw =
                 {
                     // PropertyName                          AD property             Converter(LDAP->PAPI)                                    Converter(PAPI->LDAP)
                     {PropertyNames.PrincipalDisplayName,     "displayName",          new FromLdapConverterDelegate(StringFromLdapConverter),  new ToLdapConverterDelegate(StringToLdapConverter)},
-                    {PropertyNames.PrincipalDescription,     "description",          new FromLdapConverterDelegate(StringFromLdapConverter),  new ToLdapConverterDelegate(StringToLdapConverter)},  
+                    {PropertyNames.PrincipalDescription,     "description",          new FromLdapConverterDelegate(StringFromLdapConverter),  new ToLdapConverterDelegate(StringToLdapConverter)},
         //            {PropertyNames.PrincipalDistinguishedName,  "distinguishedName",    null, null},
                     {PropertyNames.PrincipalSid,  "objectSid",            new FromLdapConverterDelegate(SidFromLdapConverter),  null},
                     {PropertyNames.PrincipalSamAccountName,  "samAccountName",       new FromLdapConverterDelegate(StringFromLdapConverter), new ToLdapConverterDelegate(StringToLdapConverter)},
@@ -760,14 +760,14 @@ namespace System.DirectoryServices.AccountManagement
                     {PropertyNames.PrincipalGuid,  "objectGuid",           new FromLdapConverterDelegate(GuidFromLdapConverter),   null},
                     {PropertyNames.PrincipalStructuralObjectClass,  "objectClass",           null, null},
                     {PropertyNames.PrincipalName,  "name",           new FromLdapConverterDelegate(StringFromLdapConverter), new ToLdapConverterDelegate(StringToLdapConverter)},
-                    {PropertyNames.PrincipalExtensionCache,  null,  null, null},                
+                    {PropertyNames.PrincipalExtensionCache,  null,  null, null},
 
                     {PropertyNames.AuthenticablePrincipalEnabled,      "userAccountControl", null, null},
                   {PropertyNames.AuthenticablePrincipalCertificates, "userCertificate",    null, null},
 
                     {PropertyNames.GroupIsSecurityGroup,   "groupType", null, null},
                                 {PropertyNames.GroupGroupScope, "groupType", null, null},
-                   // 
+                   //
                               {PropertyNames.UserGivenName,             "givenName",        null, null},
                                {PropertyNames.UserMiddleName,            "middleName",       null, null},
                                 {PropertyNames.UserSurname,               "sn",               null, null},
@@ -895,7 +895,7 @@ namespace System.DirectoryServices.AccountManagement
 
         protected static void CommaStringFromLdapConverter(dSPropertyCollection properties, string suggestedAdProperty, Principal p, string propertyName)
         {
-            Debug.Assert(String.Compare(suggestedAdProperty, "userWorkstations", StringComparison.OrdinalIgnoreCase) == 0);
+            Debug.Assert(string.Equals(suggestedAdProperty, "userWorkstations", StringComparison.OrdinalIgnoreCase));
 
             // The userWorkstations attribute is odd.  Rather than being a multivalued string attribute, it's a single-valued
             // string of comma-separated values.
@@ -940,7 +940,7 @@ namespace System.DirectoryServices.AccountManagement
 
         protected static void UACFromLdapConverter(dSPropertyCollection properties, string suggestedAdProperty, Principal p, string propertyName)
         {
-            Debug.Assert(String.Compare(suggestedAdProperty, "userAccountControl", StringComparison.OrdinalIgnoreCase) == 0);
+            Debug.Assert(string.Equals(suggestedAdProperty, "userAccountControl", StringComparison.OrdinalIgnoreCase));
 
             SDSUtils.AccountControlFromDirectoryEntry(properties, suggestedAdProperty, p, propertyName, false);
         }
@@ -966,7 +966,7 @@ namespace System.DirectoryServices.AccountManagement
         {
             // W2k DCs support just "lastLogon".  W2k3 DCs also support "lastLogonTimestamp".  The latter is replicated, and
             // preferred over the former.
-            if (String.Compare(suggestedAdProperty, "lastLogon", StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Equals(suggestedAdProperty, "lastLogon", StringComparison.OrdinalIgnoreCase))
             {
                 // Is "lastLogonTimestamp" available instead?
 
@@ -998,10 +998,10 @@ namespace System.DirectoryServices.AccountManagement
             {
                 Debug.Assert(values.Count == 1);
 
-                Int64 filetime;
+                long filetime;
 
-                if (values[0] is Int64)
-                    filetime = (Int64)values[0];
+                if (values[0] is long)
+                    filetime = (long)values[0];
                 else
                     filetime = ADUtils.LargeIntToInt64((UnsafeNativeMethods.IADsLargeInteger)values[0]);
 
@@ -1022,7 +1022,7 @@ namespace System.DirectoryServices.AccountManagement
 
         protected static void GroupTypeFromLdapConverter(dSPropertyCollection properties, string suggestedAdProperty, Principal p, string propertyName)
         {
-            Debug.Assert(String.Compare(suggestedAdProperty, "groupType", StringComparison.OrdinalIgnoreCase) == 0);
+            Debug.Assert(string.Equals(suggestedAdProperty, "groupType", StringComparison.OrdinalIgnoreCase));
 
             dSPropertyValueCollection values = properties[suggestedAdProperty];
 
@@ -1183,7 +1183,7 @@ namespace System.DirectoryServices.AccountManagement
             if ((value == null) || (value.Length > 0))
                 de.Properties[suggestedAdProperty].Value = value;
             else
-                throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, SR.InvalidStringValueForStore, propertyName));
+                throw new ArgumentException(SR.Format(SR.InvalidStringValueForStore, propertyName));
         }
 
         protected static void BinaryToLdapConverter(Principal p, string propertyName, DirectoryEntry de, string suggestedAdProperty)
@@ -1286,7 +1286,7 @@ namespace System.DirectoryServices.AccountManagement
 
         protected static void UACToLdapConverter(Principal p, string propertyName, DirectoryEntry de, string suggestedAdProperty)
         {
-            Debug.Assert(String.Compare(suggestedAdProperty, "userAccountControl", StringComparison.OrdinalIgnoreCase) == 0);
+            Debug.Assert(string.Equals(suggestedAdProperty, "userAccountControl", StringComparison.OrdinalIgnoreCase));
 
             SDSUtils.AccountControlToDirectoryEntry(p, propertyName, de, suggestedAdProperty, false, p.unpersisted);
         }
@@ -1309,7 +1309,7 @@ namespace System.DirectoryServices.AccountManagement
             }
             else
             {
-                Int64 filetime = ADUtils.DateTimeToADFileTime(dt.Value);
+                long filetime = ADUtils.DateTimeToADFileTime(dt.Value);
 
                 uint lowPart = (uint)(((ulong)filetime) & ((ulong)0x00000000ffffffff));
                 uint highPart = (uint)((((ulong)filetime) & ((ulong)0xffffffff00000000)) >> 32);
@@ -1532,7 +1532,7 @@ namespace System.DirectoryServices.AccountManagement
                         (!memberType.IsSubclassOf(typeof(AuthenticablePrincipal))))
                     {
                         throw new InvalidOperationException(
-                                        String.Format(CultureInfo.CurrentCulture, SR.StoreCtxUnsupportedPrincipalTypeForGroupInsert, memberType.ToString()));
+                                        SR.Format(SR.StoreCtxUnsupportedPrincipalTypeForGroupInsert, memberType));
                     }
                     // Can't inserted unpersisted principal
                     if (member.unpersisted)

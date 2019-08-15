@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -179,7 +179,7 @@ namespace System.IO.Tests
         public void GetFullPath_CommonDevice_Windows(string path, string basePath, string expected)
         {
             Assert.Equal(@"\\.\" + expected, Path.GetFullPath(path, @"\\.\" + basePath));
-            Assert.Equal(@"\\?\" + expected, Path.GetFullPath(path, @"\\?\" + basePath));            
+            Assert.Equal(@"\\?\" + expected, Path.GetFullPath(path, @"\\?\" + basePath));
         }
 
         public static TheoryData<string, string, string> GetFullPath_CommonRootedWindowsData => new TheoryData<string, string, string>
@@ -263,6 +263,81 @@ namespace System.IO.Tests
         public void GetFullPath_ThrowsOnEmbeddedNulls()
         {
             Assert.Throws<ArgumentException>(null, () => Path.GetFullPath("/gi\0t", @"C:\foo\bar"));
+        }
+
+        public static TheoryData<string, string> TestData_TrimEndingDirectorySeparator => new TheoryData<string, string>
+        {
+            { @"C:\folder\", @"C:\folder" },
+            { @"C:/folder/", @"C:/folder" },
+            { @"/folder/", @"/folder" },
+            { @"\folder\", @"\folder" },
+            { @"folder\", @"folder" },
+            { @"folder/", @"folder" },
+            { @"C:\", @"C:\" },
+            { @"C:/", @"C:/" },
+            { @"", @"" },
+            { @"/", @"/" },
+            { @"\", @"\" },
+            { @"\\server\share\", @"\\server\share" },
+            { @"\\server\share\folder\", @"\\server\share\folder" },
+            { @"\\?\C:\", @"\\?\C:\" },
+            { @"\\?\C:\folder\", @"\\?\C:\folder" },
+            { @"\\?\UNC\", @"\\?\UNC\" },
+            { @"\\?\UNC\a\", @"\\?\UNC\a\" },
+            { @"\\?\UNC\a\folder\", @"\\?\UNC\a\folder" },
+            { null, null }
+        };
+
+        public static TheoryData<string, bool> TestData_EndsInDirectorySeparator => new TheoryData<string, bool>
+        {
+            { @"\", true },
+            { @"/", true },
+            { @"C:\folder\", true },
+            { @"C:/folder/", true },
+            { @"C:\", true },
+            { @"C:/", true },
+            { @"\\", true },
+            { @"//", true },
+            { @"\\server\share\", true },
+            { @"\\?\UNC\a\", true },
+            { @"\\?\C:\", true },
+            { @"\\?\UNC\", true },
+            { @"folder\", true },
+            { @"folder", false },
+            { @"", false },
+            { null, false }
+        };
+
+        [Theory,
+            MemberData(nameof(TestData_TrimEndingDirectorySeparator))]
+        public void TrimEndingDirectorySeparator_String(string path, string expected)
+        {
+            string trimmed = Path.TrimEndingDirectorySeparator(path);
+            Assert.Equal(expected, trimmed);
+            Assert.Same(trimmed, Path.TrimEndingDirectorySeparator(trimmed));
+        }
+
+        [Theory,
+            MemberData(nameof(TestData_TrimEndingDirectorySeparator))]
+        public void TrimEndingDirectorySeparator_ReadOnlySpan(string path, string expected)
+        {
+            ReadOnlySpan<char> trimmed = Path.TrimEndingDirectorySeparator(path.AsSpan());
+            PathAssert.Equal(expected, trimmed);
+            PathAssert.Equal(trimmed, Path.TrimEndingDirectorySeparator(trimmed));
+        }
+
+        [Theory,
+            MemberData(nameof(TestData_EndsInDirectorySeparator))]
+        public void EndsInDirectorySeparator_String(string path, bool expected)
+        {
+            Assert.Equal(expected, Path.EndsInDirectorySeparator(path));
+        }
+
+        [Theory,
+            MemberData(nameof(TestData_EndsInDirectorySeparator))]
+        public void EndsInDirectorySeparator_ReadOnlySpan(string path, bool expected)
+        {
+            Assert.Equal(expected, Path.EndsInDirectorySeparator(path.AsSpan()));
         }
     }
 }

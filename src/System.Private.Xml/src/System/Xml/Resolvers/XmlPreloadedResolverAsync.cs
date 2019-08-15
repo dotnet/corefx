@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace System.Xml.Resolvers
 {
-    // 
+    //
     // XmlPreloadedResolver is an XmlResolver that which can be pre-loaded with data.
-    // By default it contains well-known DTDs for XHTML 1.0 and RSS 0.91. 
+    // By default it contains well-known DTDs for XHTML 1.0 and RSS 0.91.
     // Custom mappings of URIs to data can be added with the Add method.
     //
     public partial class XmlPreloadedResolver : XmlResolver
     {
-        public override Task<Object> GetEntityAsync(Uri absoluteUri,
+        public override Task<object> GetEntityAsync(Uri absoluteUri,
                                              string role,
                                              Type ofObjectToReturn)
         {
@@ -31,16 +31,16 @@ namespace System.Xml.Resolvers
                 {
                     return _fallbackResolver.GetEntityAsync(absoluteUri, role, ofObjectToReturn);
                 }
-                throw new XmlException(SR.Format(SR.Xml_CannotResolveUrl, absoluteUri.ToString()));
+                throw new XmlException(SR.Format(SR.Xml_CannotResolveUrl, absoluteUri));
             }
 
-            if (ofObjectToReturn == null || ofObjectToReturn == typeof(Stream) || ofObjectToReturn == typeof(Object))
+            if (ofObjectToReturn == null || ofObjectToReturn == typeof(Stream) || ofObjectToReturn == typeof(object))
             {
-                return Task.FromResult<Object>(data.AsStream());
+                return Task.FromResult<object>(data.AsStream());
             }
             else if (ofObjectToReturn == typeof(TextReader))
             {
-                return Task.FromResult<Object>(data.AsTextReader());
+                return Task.FromResult<object>(data.AsTextReader());
             }
             else
             {

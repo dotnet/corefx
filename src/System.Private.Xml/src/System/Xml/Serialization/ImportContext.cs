@@ -15,16 +15,12 @@ namespace System.Xml.Serialization
 
     public class ImportContext
     {
-        private bool _shareTypes;
+        private readonly bool _shareTypes;
         private SchemaObjectCache _cache; // cached schema top-level items
         private Hashtable _mappings; // XmlSchema -> SerializableMapping, XmlSchemaSimpleType -> EnumMapping, XmlSchemaComplexType -> StructMapping
         private Hashtable _elements; // XmlSchemaElement -> ElementAccessor
         private CodeIdentifiers _typeIdentifiers;
 
-        /// <include file='doc\ImportContext.uex' path='docs/doc[@for="ImportContext.ImportContext"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public ImportContext(CodeIdentifiers identifiers, bool shareTypes)
         {
             _typeIdentifiers = identifiers;
@@ -62,10 +58,6 @@ namespace System.Xml.Serialization
             }
         }
 
-        /// <include file='doc\ImportContext.uex' path='docs/doc[@for="ImportContext.TypeIdentifiers"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public CodeIdentifiers TypeIdentifiers
         {
             get
@@ -76,19 +68,11 @@ namespace System.Xml.Serialization
             }
         }
 
-        /// <include file='doc\ImportContext.uex' path='docs/doc[@for="ImportContext.ShareTypes"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public bool ShareTypes
         {
             get { return _shareTypes; }
         }
 
-        /// <include file='doc\ImportContext.uex' path='docs/doc[@for="ImportContext.Warnings"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public StringCollection Warnings
         {
             get { return Cache.Warnings; }
@@ -270,10 +254,10 @@ namespace System.Xml.Serialization
 
     internal class SchemaGraph
     {
-        private ArrayList _empty = new ArrayList();
-        private XmlSchemas _schemas;
-        private Hashtable _scope;
-        private int _items;
+        private readonly ArrayList _empty = new ArrayList();
+        private readonly XmlSchemas _schemas;
+        private readonly Hashtable _scope;
+        private readonly int _items;
 
         internal SchemaGraph(Hashtable scope, XmlSchemas schemas)
         {
@@ -409,10 +393,6 @@ namespace System.Xml.Serialization
                             baseType = list.ItemType;
                         }
                     }
-                    else if (content is XmlSchemaSimpleTypeRestriction)
-                    {
-                        baseName = ((XmlSchemaSimpleTypeRestriction)content).BaseTypeName;
-                    }
                     else if (t == typeof(XmlSchemaSimpleTypeUnion))
                     {
                         XmlQualifiedName[] memberTypes = ((XmlSchemaSimpleTypeUnion)item).MemberTypes;
@@ -540,4 +520,3 @@ namespace System.Xml.Serialization
         }
     }
 }
-

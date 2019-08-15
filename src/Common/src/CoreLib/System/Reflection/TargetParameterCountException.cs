@@ -16,19 +16,19 @@ namespace System.Reflection
             HResult = HResults.COR_E_TARGETPARAMCOUNT;
         }
 
-        public TargetParameterCountException(string message)
+        public TargetParameterCountException(string? message)
             : base(message)
         {
             HResult = HResults.COR_E_TARGETPARAMCOUNT;
         }
 
-        public TargetParameterCountException(string message, Exception inner)
+        public TargetParameterCountException(string? message, Exception? inner)
             : base(message, inner)
         {
             HResult = HResults.COR_E_TARGETPARAMCOUNT;
         }
 
-        internal TargetParameterCountException(SerializationInfo info, StreamingContext context)
+        private TargetParameterCountException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }

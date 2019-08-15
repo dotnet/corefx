@@ -36,36 +36,36 @@ namespace System.Xml.Xsl.Runtime
     public sealed class XmlQueryRuntime
     {
         // Early-Bound Library Objects
-        private XmlQueryContext _ctxt;
+        private readonly XmlQueryContext _ctxt;
         private XsltLibrary _xsltLib;
-        private EarlyBoundInfo[] _earlyInfo;
-        private object[] _earlyObjects;
+        private readonly EarlyBoundInfo[] _earlyInfo;
+        private readonly object[] _earlyObjects;
 
         // Global variables and parameters
-        private string[] _globalNames;
-        private object[] _globalValues;
+        private readonly string[] _globalNames;
+        private readonly object[] _globalValues;
 
         // Names, prefix mappings, and name filters
-        private XmlNameTable _nameTableQuery;
-        private string[] _atomizedNames;             // Names after atomization
-        private XmlNavigatorFilter[] _filters;       // Name filters (contain atomized names)
-        private StringPair[][] _prefixMappingsList;  // Lists of prefix mappings (used to resolve computed names)
+        private readonly XmlNameTable _nameTableQuery;
+        private readonly string[] _atomizedNames;             // Names after atomization
+        private readonly XmlNavigatorFilter[] _filters;       // Name filters (contain atomized names)
+        private readonly StringPair[][] _prefixMappingsList;  // Lists of prefix mappings (used to resolve computed names)
 
         // Xml types
-        private XmlQueryType[] _types;
+        private readonly XmlQueryType[] _types;
 
         // Collations
-        private XmlCollation[] _collations;
+        private readonly XmlCollation[] _collations;
 
         // Document ordering
-        private DocumentOrderComparer _docOrderCmp;
+        private readonly DocumentOrderComparer _docOrderCmp;
 
         // Indexes
         private ArrayList[] _indexes;
 
         // Output construction
         private XmlQueryOutput _output;
-        private Stack<XmlQueryOutput> _stkOutput;
+        private readonly Stack<XmlQueryOutput> _stkOutput;
 
 
         //-----------------------------------------------
@@ -1003,7 +1003,7 @@ namespace System.Xml.Xsl.Runtime
         }
 
         /// <summary>
-        /// End construction of a nested sequence of items and return the items as an IList<XPathItem>
+        /// End construction of a nested sequence of items and return the items as an IList{XPathItem}
         /// internal class.  Return previous XmlQueryOutput.
         /// </summary>
         public IList<XPathItem> EndSequenceConstruction(out XmlQueryOutput output)

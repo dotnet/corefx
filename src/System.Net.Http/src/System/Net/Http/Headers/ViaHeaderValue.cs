@@ -175,7 +175,7 @@ namespace System.Net.Http.Headers
             int current = GetProtocolEndIndex(input, startIndex, out protocolName, out protocolVersion);
 
             // If we reached the end of the string after reading protocolName/Version we return (we expect at least
-            // <receivedBy> to follow). If reading protocolName/Version read 0 bytes, we return. 
+            // <receivedBy> to follow). If reading protocolName/Version read 0 bytes, we return.
             if ((current == startIndex) || (current == input.Length))
             {
                 return 0;
@@ -298,7 +298,7 @@ namespace System.Net.Http.Headers
             string host = null;
             if (HttpRuleParser.GetHostLength(receivedBy, 0, true, out host) != receivedBy.Length)
             {
-                throw new FormatException(string.Format(System.Globalization.CultureInfo.InvariantCulture, SR.net_http_headers_invalid_value, receivedBy));
+                throw new FormatException(SR.Format(System.Globalization.CultureInfo.InvariantCulture, SR.net_http_headers_invalid_value, receivedBy));
             }
         }
     }

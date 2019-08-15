@@ -14,18 +14,8 @@ using ErrorCode = Interop.NCrypt.ErrorCode;
 
 namespace Internal.Cryptography
 {
-    internal static class Helpers
+    internal static partial class Helpers
     {
-        public static byte[] CloneByteArray(this byte[] src)
-        {
-            if (src == null)
-            {
-                return null;
-            }
-
-            return (byte[])(src.Clone());
-        }
-
         public static bool UsesIv(this CipherMode cipherMode)
         {
             return cipherMode != CipherMode.ECB;
@@ -48,7 +38,7 @@ namespace Internal.Cryptography
 
         //
         // The C# construct
-        //   
+        //
         //    fixed (byte* p = new byte[0])
         //
         // sets "p" to 0 rather than a valid address. Sometimes, we actually want a non-NULL pointer instead. (Some CNG apis actually care whether the buffer pointer is
@@ -58,7 +48,7 @@ namespace Internal.Cryptography
         //
         //    fixed (byte* p = new byte[0].MapZeroLengthArrayToNonNullPointer())
         //
-        // which always sets "p" to a non-NULL pointer for a non-null byte array. 
+        // which always sets "p" to a non-NULL pointer for a non-null byte array.
         //
         public static byte[] MapZeroLengthArrayToNonNullPointer(this byte[] src)
         {
@@ -108,11 +98,11 @@ namespace Internal.Cryptography
                 Array.Resize(ref propertyValue, numBytesNeeded);
                 return propertyValue;
             }
-        } 
+        }
 
         /// <summary>
         /// Retrieve a well-known CNG string property. (Note: desktop compat: this helper likes to return special values rather than throw exceptions for missing
-        /// or ill-formatted property values. Only use it for well-known properties that are unlikely to be ill-formatted.) 
+        /// or ill-formatted property values. Only use it for well-known properties that are unlikely to be ill-formatted.)
         /// </summary>
         public static string GetPropertyAsString(this SafeNCryptHandle ncryptHandle, string propertyName, CngPropertyOptions options)
         {
@@ -133,7 +123,7 @@ namespace Internal.Cryptography
 
         /// <summary>
         /// Retrieve a well-known CNG dword property. (Note: desktop compat: this helper likes to return special values rather than throw exceptions for missing
-        /// or ill-formatted property values. Only use it for well-known properties that are unlikely to be ill-formatted.) 
+        /// or ill-formatted property values. Only use it for well-known properties that are unlikely to be ill-formatted.)
         /// </summary>
         public static int GetPropertyAsDword(this SafeNCryptHandle ncryptHandle, string propertyName, CngPropertyOptions options)
         {
@@ -145,7 +135,7 @@ namespace Internal.Cryptography
 
         /// <summary>
         /// Retrieve a well-known CNG pointer property. (Note: desktop compat: this helper likes to return special values rather than throw exceptions for missing
-        /// or ill-formatted property values. Only use it for well-known properties that are unlikely to be ill-formatted.) 
+        /// or ill-formatted property values. Only use it for well-known properties that are unlikely to be ill-formatted.)
         /// </summary>
         public static IntPtr GetPropertyAsIntPtr(this SafeNCryptHandle ncryptHandle, string propertyName, CngPropertyOptions options)
         {
@@ -175,34 +165,6 @@ namespace Internal.Cryptography
             }
         }
 
-        public static bool IsLegalSize(this int size, KeySizes[] legalSizes)
-        {
-            for (int i = 0; i < legalSizes.Length; i++)
-            {
-                KeySizes currentSizes = legalSizes[i];
-
-                // If a cipher has only one valid key size, MinSize == MaxSize and SkipSize will be 0
-                if (currentSizes.SkipSize == 0)
-                {
-                    if (currentSizes.MinSize == size)
-                        return true;
-                }
-                else if (size >= currentSizes.MinSize && size <= currentSizes.MaxSize)
-                {
-                    // If the number is in range, check to see if it's a legal increment above MinSize
-                    int delta = size - currentSizes.MinSize;
-
-                    // While it would be unusual to see KeySizes { 10, 20, 5 } and { 11, 14, 1 }, it could happen.
-                    // So don't return false just because this one doesn't match.
-                    if (delta % currentSizes.SkipSize == 0)
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
         public static int BitSizeToByteSize(this int bits)
         {
             return (bits + 7) / 8;
@@ -211,13 +173,8 @@ namespace Internal.Cryptography
         public static byte[] GenerateRandom(int count)
         {
             byte[] buffer = new byte[count];
-            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(buffer);
-            }
+            RandomNumberGenerator.Fill(buffer);
             return buffer;
         }
     }
 }
-
-

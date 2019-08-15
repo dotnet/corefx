@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Reflection;
 
 namespace System.Drawing
@@ -14,34 +13,25 @@ namespace System.Drawing
 
         private static Dictionary<string, Color> GetColors()
         {
-            var dict = new Dictionary<string, Color>(StringComparer.OrdinalIgnoreCase);
-            FillConstants(dict, typeof(Color));
-            return dict;
+            var colors = new Dictionary<string, Color>(StringComparer.OrdinalIgnoreCase);
+            FillWithProperties(colors, typeof(Color));
+            FillWithProperties(colors, typeof(SystemColors));
+            return colors;
+        }
+
+        private static void FillWithProperties(Dictionary<string, Color> dictionary, Type typeWithColors)
+        {
+            foreach (PropertyInfo prop in typeWithColors.GetProperties(BindingFlags.Public | BindingFlags.Static))
+            {
+                if (prop.PropertyType == typeof(Color))
+                    dictionary[prop.Name] = (Color)prop.GetValue(null, null);
+            }
         }
 
         internal static Dictionary<string, Color> Colors => s_colorConstants.Value;
 
-        private static void FillConstants(Dictionary<string, Color> colors, Type enumType)
-        {
-            const MethodAttributes attrs = MethodAttributes.Public | MethodAttributes.Static;
-            foreach (PropertyInfo prop in enumType.GetProperties())
-            {
-                if (prop.PropertyType == typeof(Color))
-                {
-                    Debug.Assert(prop.GetGetMethod() != null);
-                    Debug.Assert((prop.GetGetMethod().Attributes & attrs) == attrs);
-                    colors[prop.Name] = (Color)prop.GetValue(null, null);
-                }
-            }
-        }
+        internal static bool TryGetNamedColor(string name, out Color result) => Colors.TryGetValue(name, out result);
 
-        internal static bool TryGetNamedColor(string name, out Color result) =>
-            Colors.TryGetValue(name, out result);
-
-        internal static bool IsKnownNamedColor(string name)
-        {
-            Color result;
-            return Colors.TryGetValue(name, out result);
-        }
+        internal static bool IsKnownNamedColor(string name) => Colors.TryGetValue(name, out _);
     }
 }

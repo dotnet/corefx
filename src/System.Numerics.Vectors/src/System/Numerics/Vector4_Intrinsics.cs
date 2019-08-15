@@ -9,26 +9,26 @@ namespace System.Numerics
     // This file contains the definitions for all of the JIT intrinsic methods and properties that are recognized by the current x64 JIT compiler.
     // The implementation defined here is used in any circumstance where the JIT fails to recognize these members as intrinsic.
     // The JIT recognizes these methods and properties by name and signature: if either is changed, the JIT will no longer recognize the member.
-    // Some methods declared here are not strictly intrinsic, but delegate to an intrinsic method. For example, only one overload of CopyTo() 
+    // Some methods declared here are not strictly intrinsic, but delegate to an intrinsic method. For example, only one overload of CopyTo()
 
     public partial struct Vector4
     {
         /// <summary>
         /// The X component of the vector.
         /// </summary>
-        public Single X;
+        public float X;
         /// <summary>
         /// The Y component of the vector.
         /// </summary>
-        public Single Y;
+        public float Y;
         /// <summary>
         /// The Z component of the vector.
         /// </summary>
-        public Single Z;
+        public float Z;
         /// <summary>
         /// The W component of the vector.
         /// </summary>
-        public Single W;
+        public float W;
 
         #region Constructors
 
@@ -37,7 +37,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="value">The element to fill the vector with.</param>
         [Intrinsic]
-        public Vector4(Single value)
+        public Vector4(float value)
             : this(value, value, value, value)
         {
         }
@@ -49,7 +49,7 @@ namespace System.Numerics
         /// <param name="y">Y component.</param>
         /// <param name="z">Z component.</param>
         [Intrinsic]
-        public Vector4(Single x, Single y, Single z, Single w)
+        public Vector4(float x, float y, float z, float w)
         {
             W = w;
             X = x;
@@ -63,7 +63,8 @@ namespace System.Numerics
         /// <param name="value">The vector to use as the X and Y components.</param>
         /// <param name="z">The Z component.</param>
         /// <param name="w">The W component.</param>
-        public Vector4(Vector2 value, Single z, Single w)
+        [Intrinsic]
+        public Vector4(Vector2 value, float z, float w)
         {
             X = value.X;
             Y = value.Y;
@@ -76,7 +77,8 @@ namespace System.Numerics
         /// </summary>
         /// <param name="value">The vector to use as the X, Y, and Z components.</param>
         /// <param name="w">The W component.</param>
-        public Vector4(Vector3 value, Single w)
+        [Intrinsic]
+        public Vector4(Vector3 value, float w)
         {
             X = value.X;
             Y = value.Y;
@@ -89,8 +91,9 @@ namespace System.Numerics
         /// <summary>
         /// Copies the contents of the vector into the given array.
         /// </summary>
+        [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyTo(Single[] array)
+        public readonly void CopyTo(float[] array)
         {
             CopyTo(array, 0);
         }
@@ -104,7 +107,7 @@ namespace System.Numerics
         /// <exception cref="ArgumentException">If number of elements in source vector is greater than those available in destination array.</exception>
         [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyTo(Single[] array, int index)
+        public readonly void CopyTo(float[] array, int index)
         {
             if (array == null)
             {
@@ -131,7 +134,7 @@ namespace System.Numerics
         /// <param name="other">The Vector4 to compare this instance to.</param>
         /// <returns>True if the other Vector4 is equal to this instance; False otherwise.</returns>
         [Intrinsic]
-        public bool Equals(Vector4 other)
+        public readonly bool Equals(Vector4 other)
         {
             return this.X == other.X
                 && this.Y == other.Y
@@ -264,7 +267,7 @@ namespace System.Numerics
         /// <returns>The scaled vector.</returns>
         [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 operator *(Vector4 left, Single right)
+        public static Vector4 operator *(Vector4 left, float right)
         {
             return left * new Vector4(right);
         }
@@ -277,7 +280,7 @@ namespace System.Numerics
         /// <returns>The scaled vector.</returns>
         [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 operator *(Single left, Vector4 right)
+        public static Vector4 operator *(float left, Vector4 right)
         {
             return new Vector4(left) * right;
         }
@@ -337,6 +340,7 @@ namespace System.Numerics
         /// <param name="left">The first vector to compare.</param>
         /// <param name="right">The second vector to compare.</param>
         /// <returns>True if the vectors are not equal; False if they are equal.</returns>
+        [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Vector4 left, Vector4 right)
         {

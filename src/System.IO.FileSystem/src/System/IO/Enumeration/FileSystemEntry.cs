@@ -2,7 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.IO;
+
+#if MS_IO_REDIST
+namespace Microsoft.IO.Enumeration
+#else
 namespace System.IO.Enumeration
+#endif
 {
     public ref partial struct FileSystemEntry
     {
@@ -34,7 +41,7 @@ namespace System.IO.Enumeration
             // didn't have a separator. Join() would handle it if we did trim it, not doing so is an optimization.
 
             ReadOnlySpan<char> relativePath = Directory.Slice(RootDirectory.Length);
-            if (PathInternal.EndsInDirectorySeparator(OriginalRootDirectory) && PathInternal.StartsWithDirectorySeparator(relativePath))
+            if (Path.EndsInDirectorySeparator(OriginalRootDirectory) && PathInternal.StartsWithDirectorySeparator(relativePath))
                 relativePath = relativePath.Slice(1);
 
             return Path.Join(OriginalRootDirectory, relativePath, FileName);

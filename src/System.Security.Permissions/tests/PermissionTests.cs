@@ -3,12 +3,85 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
+using System.Configuration;
+using System.DirectoryServices;
 using System.Reflection;
+using System.Web;
 
 namespace System.Security.Permissions.Tests
 {
     public class PermissionTests
     {
+        [Fact]
+        public static void AspNetHostingPermissionCallMethods()
+        {
+            AspNetHostingPermission ap = new AspNetHostingPermission(new PermissionState());
+            AspNetHostingPermissionLevel level = ap.Level;
+            IPermission other = new AspNetHostingPermission(level);
+            bool isunrestricted = ap.IsUnrestricted();
+            other = ap.Copy();
+            other = ap.Union(other);
+            other = ap.Intersect(other);
+            bool isSubsetOf = ap.IsSubsetOf(other);
+            SecurityElement se = ap.ToXml();
+            ap.FromXml(se);
+        }
+
+        [Fact]
+        public static void AspNetHostingPermissionAttributeCallMethods()
+        {
+            var apa = new AspNetHostingPermissionAttribute(new SecurityAction());
+            AspNetHostingPermissionLevel level = apa.Level;
+            IPermission ip = apa.CreatePermission();
+        }
+
+        [Fact]
+        public static void ConfigurationPermissionCallMethods()
+        {
+            ConfigurationPermission cp = new ConfigurationPermission(new PermissionState());
+            bool isunrestricted = cp.IsUnrestricted();
+            IPermission other = cp.Copy();
+            other = cp.Union(other);
+            other = cp.Intersect(other);
+            bool isSubsetOf = cp.IsSubsetOf(other);
+            SecurityElement se = cp.ToXml();
+            cp.FromXml(se);
+        }
+
+        [Fact]
+        public static void ConfigurationPermissionAttributeCallMethods()
+        {
+            var cpa = new ConfigurationPermissionAttribute(new SecurityAction());
+            IPermission ip = cpa.CreatePermission();
+        }
+
+        [Fact]
+        public static void DataProtectionPermissionCallMethods()
+        {
+            DataProtectionPermission dp = new DataProtectionPermission(new PermissionState());
+            bool isunrestricted = dp.IsUnrestricted();
+            DataProtectionPermissionFlags flags = dp.Flags;
+            IPermission other = new DataProtectionPermission(flags);
+            other = dp.Copy();
+            other = dp.Union(other);
+            other = dp.Intersect(other);
+            bool isSubsetOf = dp.IsSubsetOf(other);
+            SecurityElement se = dp.ToXml();
+            dp.FromXml(se);
+        }
+
+        [Fact]
+        public static void DataProtectionPermissionAttributeCallMethods()
+        {
+            var dpa = new DataProtectionPermissionAttribute(new SecurityAction());
+            DataProtectionPermissionFlags flags = dpa.Flags;
+            bool protectData = dpa.ProtectData;
+            bool unprotectData = dpa.UnprotectData;
+            bool protectMemory = dpa.ProtectMemory;
+            bool unprotectMemory = dpa.UnprotectMemory;
+            IPermission ip = dpa.CreatePermission();
+        }
+
         [Fact]
         public static void EnvironmentPermissionCallMethods()
         {
@@ -91,6 +164,33 @@ namespace System.Security.Permissions.Tests
         {
             GacIdentityPermissionAttribute gipa = new GacIdentityPermissionAttribute(new Permissions.SecurityAction());
             IPermission ip = gipa.CreatePermission();
+        }
+
+        [Fact]
+        public static void MediaPermissionCallMethods()
+        {
+            MediaPermission mp = new MediaPermission();
+            MediaPermission mp2 = new MediaPermission(MediaPermissionAudio.AllAudio);
+            MediaPermission mp3 = new MediaPermission(MediaPermissionVideo.AllVideo);
+            MediaPermission mp4 = new MediaPermission(MediaPermissionImage.AllImage);
+            MediaPermission mp5 = new MediaPermission(MediaPermissionAudio.AllAudio,
+                                                     MediaPermissionVideo.AllVideo,
+                                                     MediaPermissionImage.AllImage);
+            bool testbool = mp.IsUnrestricted();
+            IPermission ip = mp.Copy();
+            IPermission ip2 = mp.Intersect(ip);
+            IPermission ip3 = mp.Union(ip);
+            testbool = mp.IsSubsetOf(ip);
+            SecurityElement se = new SecurityElement("");
+            mp.FromXml(se);
+            se = mp.ToXml();
+        }
+
+        [Fact]
+        public static void MediaPermissionAttributeCallMethods()
+        {
+            MediaPermissionAttribute mpa = new MediaPermissionAttribute(new Permissions.SecurityAction());
+            IPermission ip = mpa.CreatePermission();
         }
 
         [Fact]
@@ -318,6 +418,29 @@ namespace System.Security.Permissions.Tests
         {
             UrlIdentityPermissionAttribute uipa = new UrlIdentityPermissionAttribute(new Permissions.SecurityAction());
             IPermission ip = uipa.CreatePermission();
+        }
+
+        [Fact]
+        public static void WebBrowserPermissionCallMethods()
+        {
+            WebBrowserPermission wp = new WebBrowserPermission();
+            WebBrowserPermission wp2 = new WebBrowserPermission(PermissionState.Unrestricted);
+            WebBrowserPermission wp3 = new WebBrowserPermission(WebBrowserPermissionLevel.Unrestricted);
+            bool testbool = wp.IsUnrestricted();
+            IPermission ip = wp.Copy();
+            IPermission ip2 = wp.Intersect(ip);
+            IPermission ip3= wp.Union(ip);
+            testbool = wp.IsSubsetOf(ip);
+            SecurityElement se = new SecurityElement("");
+            wp.FromXml(se);
+            se = wp.ToXml();
+        }
+
+        [Fact]
+        public static void WebBrowserPermissionAttributeCallMethods()
+        {
+            WebBrowserPermissionAttribute wpa = new WebBrowserPermissionAttribute(new Permissions.SecurityAction());
+            IPermission ip = wpa.CreatePermission();
         }
 
         [Fact]

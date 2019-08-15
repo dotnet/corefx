@@ -80,7 +80,6 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public static void DebuggerAttribute()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(new ArrayList());
@@ -195,7 +194,7 @@ namespace System.Collections.Tests
             IEnumerator enumeratorBasic = arrList.GetEnumerator();
             ArrayList adapter = ArrayList.Adapter(arrList);
             IEnumerator numeratorWrapped = arrList.GetEnumerator();
-            
+
             enumeratorBasic.MoveNext();
             numeratorWrapped.MoveNext();
 
@@ -215,7 +214,7 @@ namespace System.Collections.Tests
             IEnumerator enumeratorBasic = arrList.GetEnumerator();
             ArrayList adapter = ArrayList.Adapter(arrList);
             IEnumerator enumeratorWrapped = arrList.GetEnumerator();
-            
+
             enumeratorBasic.MoveNext();
             enumeratorWrapped.MoveNext();
 
@@ -241,7 +240,7 @@ namespace System.Collections.Tests
 
             Assert.Equal(20, adapter.Count);
         }
-        
+
         [Fact]
         public static void Adapter_Capacity_Set()
         {
@@ -320,7 +319,7 @@ namespace System.Collections.Tests
                 {
                     Assert.Equal(i, arrList2[i]);
                 }
-                // Assumes that the array list and collection contain integer types 
+                // Assumes that the array list and collection contain integer types
                 // and the first item in the collection is the count of the array list
                 for (int i = arrList2.Count; i < c.Count; i++)
                 {
@@ -390,7 +389,7 @@ namespace System.Collections.Tests
                 AssertExtensions.Throws<ArgumentNullException>("c", () => arrList2.AddRange(null)); // Collection is null
             });
         }
-        
+
         [Theory]
         [InlineData(1)]
         [InlineData(10)]
@@ -615,7 +614,7 @@ namespace System.Collections.Tests
             arrList.Capacity = nCapacity;
             Assert.Equal(nCapacity, arrList.Capacity);
 
-            // Synchronized 
+            // Synchronized
             arrList = ArrayList.Synchronized(new ArrayList(Helpers.CreateIntArray(10)));
             arrList.Capacity = 1000;
             Assert.Equal(1000, arrList.Capacity);
@@ -734,7 +733,7 @@ namespace System.Collections.Tests
             stringValue = "Hello World";
             Assert.Equal(stringValue, ((Foo)clone[0]).StringValue);
         }
-        
+
         [Fact]
         public static void CopyTo_Int()
         {
@@ -888,7 +887,7 @@ namespace System.Collections.Tests
                     arrCopy = new string[1];
                     arrList2.CopyTo(0, arrCopy, 3, 15);
                 });
-                
+
                 Assert.ThrowsAny<ArgumentException>(() => arrList2.CopyTo(0, new object[arrList2.Count, arrList2.Count], 0, -1)); // Should throw ArgumentOutOfRangeException
             });
         }
@@ -1005,7 +1004,7 @@ namespace System.Collections.Tests
         {
             AssertExtensions.Throws<ArgumentNullException>("list", () => ArrayList.FixedSize((IList)null)); // List is null
         }
-        
+
         [Fact]
         public static void GetEnumerator_Basic_ArrayListContainingItself()
         {
@@ -1046,7 +1045,7 @@ namespace System.Collections.Tests
                 enumerator.Reset();
             }
         }
-                
+
         [Fact]
         public static void GetEnumerator_Int_Int()
         {
@@ -1176,7 +1175,7 @@ namespace System.Collections.Tests
                 while (enumerator.MoveNext()) ;
                 Assert.Throws<InvalidOperationException>(() => enumerator.Current);
 
-                // Invalid parameters    
+                // Invalid parameters
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => arrList2.GetEnumerator(-1, arrList2.Count)); // Index < 0
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => arrList2.GetEnumerator(0, -1)); // Count < 0
                 AssertExtensions.Throws<ArgumentException>(null, () => arrList2.GetEnumerator(0, arrList2.Count + 1)); // Count + list.Count
@@ -1453,7 +1452,7 @@ namespace System.Collections.Tests
             ArrayList arrList1 = Helpers.CreateIntArrayList(10);
             Helpers.PerformActionOnAllArrayListWrappers(arrList1, arrList2 =>
             {
-                AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => arrList2.IndexOf("Batman", -1)); // Start index < 0                
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => arrList2.IndexOf("Batman", -1)); // Start index < 0
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => arrList2.IndexOf("Batman", arrList2.Count + 1)); // Start index > list.Count
 
                 Assert.Equal(-1, arrList2.IndexOf("Batman", arrList2.Count, 0)); // Index = list.Count
@@ -1690,7 +1689,7 @@ namespace System.Collections.Tests
                 {
                     Assert.Equal(Array.LastIndexOf(data, value), arrList2.LastIndexOf(value));
                 }
-                
+
                 Assert.Equal(-1, arrList2.LastIndexOf(null));
             });
         }
@@ -1890,7 +1889,7 @@ namespace System.Collections.Tests
             Assert.Throws<NotSupportedException>(() => arrList2[2] = 5);
             Assert.Throws<NotSupportedException>(() => arrList2.SetRange(0, new ArrayList()));
 
-            // We can get a readonly from this readonly 
+            // We can get a readonly from this readonly
             ArrayList arrList3 = ArrayList.ReadOnly(arrList2);
             Assert.True(arrList2.IsReadOnly);
             Assert.True(arrList3.IsReadOnly);
@@ -2576,12 +2575,12 @@ namespace System.Collections.Tests
                 _arrGrandDaughter = ArrayList.Synchronized(arrMother2);
                 _arrDaughter = ArrayList.Synchronized(arrMother2);
 
-                Assert.False(arrMother2.SyncRoot is ArrayList);
-                Assert.False(arrSon1.SyncRoot is ArrayList);
-                Assert.False(arrSon2.SyncRoot is ArrayList);
-                Assert.False(_arrDaughter.SyncRoot is ArrayList);
+                Assert.True(arrMother2.SyncRoot is ArrayList);
+                Assert.True(arrSon1.SyncRoot is ArrayList);
+                Assert.True(arrSon2.SyncRoot is ArrayList);
+                Assert.True(_arrDaughter.SyncRoot is ArrayList);
                 Assert.Equal(arrSon1.SyncRoot, arrMother2.SyncRoot);
-                Assert.False(_arrGrandDaughter.SyncRoot is ArrayList);
+                Assert.True(_arrGrandDaughter.SyncRoot is ArrayList);
 
                 arrMother2 = new ArrayList();
                 for (int i = 0; i < NumberOfElements; i++)
@@ -2910,7 +2909,7 @@ namespace System.Collections.Tests
             Assert.Equal(0, _iList.Count);
         }
 
-        public void AddElems(string currThreadName)
+        private void AddElems(string currThreadName)
         {
             int iNumTimesThreadUsed = 0;
 

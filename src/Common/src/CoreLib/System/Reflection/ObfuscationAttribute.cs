@@ -15,7 +15,6 @@ namespace System.Reflection
         public bool StripAfterObfuscation { get; set; } = true;
         public bool Exclude { get; set; } = true;
         public bool ApplyToMembers { get; set; } = true;
-        public string Feature { get; set; } = "all";
+        public string? Feature { get; set; } = "all";
     }
 }
-

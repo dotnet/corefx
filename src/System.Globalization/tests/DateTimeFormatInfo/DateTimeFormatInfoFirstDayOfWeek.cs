@@ -9,15 +9,15 @@ namespace System.Globalization.Tests
 {
     public class DateTimeFormatInfoFirstDayOfWeek
     {
-        public static IEnumerable<object[]> FirstDayOfWeek_TestData()
+        public static IEnumerable<object[]> FirstDayOfWeek_Get_TestData()
         {
             yield return new object[] { DateTimeFormatInfo.InvariantInfo, DayOfWeek.Sunday };
-            yield return new object[] { new CultureInfo("en-US").DateTimeFormat, DayOfWeek.Sunday };
-            yield return new object[] { new CultureInfo("fr-FR").DateTimeFormat, DayOfWeek.Monday };
+            yield return new object[] { new CultureInfo("en-US", false).DateTimeFormat, DayOfWeek.Sunday };
+            yield return new object[] { new CultureInfo("fr-FR", false).DateTimeFormat, DayOfWeek.Monday };
         }
 
         [Theory]
-        [MemberData(nameof(FirstDayOfWeek_TestData))]
+        [MemberData(nameof(FirstDayOfWeek_Get_TestData))]
         public void FirstDayOfWeek(DateTimeFormatInfo format, DayOfWeek expected)
         {
             Assert.Equal(expected, format.FirstDayOfWeek);
@@ -31,25 +31,26 @@ namespace System.Globalization.Tests
         [InlineData(DayOfWeek.Thursday)]
         [InlineData(DayOfWeek.Friday)]
         [InlineData(DayOfWeek.Saturday)]
-        public void FirstDayOfWeek_Set(DayOfWeek newFirstDayOfWeek)
+        public void FirstDayOfWeek_Set_GetReturnsExpected(DayOfWeek value)
         {
             var format = new DateTimeFormatInfo();
-            format.FirstDayOfWeek = newFirstDayOfWeek;
-            Assert.Equal(newFirstDayOfWeek, format.FirstDayOfWeek);
+            format.FirstDayOfWeek = value;
+            Assert.Equal(value, format.FirstDayOfWeek);
         }
 
         [Theory]
         [InlineData(DayOfWeek.Sunday - 1)]
         [InlineData(DayOfWeek.Saturday + 1)]
-        public void FirstDayOfWeek_Set_Invalid_ThrowsArgumentOutOfRangeException(DayOfWeek value)
+        public void FirstDayOfWeek_SetInvalid_ThrowsArgumentOutOfRangeException(DayOfWeek value)
         {
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => new DateTimeFormatInfo().FirstDayOfWeek = value);
+            var format = new DateTimeFormatInfo();
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => format.FirstDayOfWeek = value);
         }
 
         [Fact]
-        public void FirstDayOfWeek_Set_ReadOnly_ThrowsInvalidOperationException()
+        public void FirstDayOfWeek_SetReadOnly_ThrowsInvalidOperationException()
         {
-            Assert.Throws<InvalidOperationException>(() => DateTimeFormatInfo.InvariantInfo.FirstDayOfWeek = DayOfWeek.Wednesday); // DateTimeFormatInfo.InvariantInfo is read only
+            Assert.Throws<InvalidOperationException>(() => DateTimeFormatInfo.InvariantInfo.FirstDayOfWeek = DayOfWeek.Wednesday);
         }
     }
 }

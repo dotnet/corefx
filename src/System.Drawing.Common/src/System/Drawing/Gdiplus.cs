@@ -2,75 +2,25 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Internal;
-using System.Text;
 using System.Collections;
-using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Drawing.Internal;
-using System.Drawing.Imaging;
-using System.Drawing.Text;
-using System.Drawing.Drawing2D;
-using System.Threading;
-using System.Security;
-using System.Runtime.ConstrainedExecution;
 using System.Runtime.CompilerServices;
-
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+BITMAP.bmBits")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+DIBSECTION.dshSection")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+Gdip.initToken")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+Gdip+StartupInput.DebugEventCallback")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+Gdip+StartupOutput.hook")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+Gdip+StartupOutput.unhook")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+ICONINFO.hbmColor")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+ICONINFO.hbmMask")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+MSG.hwnd")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+MSG.lParam")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+MSG.wParam")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+OBJECTHEADER.pInfo")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+PICTDESC.union1")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+PRINTDLG.hDC")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+PRINTDLG.hDevMode")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+PRINTDLG.hDevNames")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+PRINTDLG.hInstance")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+PRINTDLG.hPrintTemplate")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+PRINTDLG.hSetupTemplate")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+PRINTDLG.hwndOwner")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+PRINTDLG.lCustData")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+PRINTDLGX86.hDC")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+PRINTDLGX86.hDevMode")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+PRINTDLGX86.hDevNames")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+PRINTDLGX86.hInstance")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+PRINTDLGX86.hPrintTemplate")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+PRINTDLGX86.hSetupTemplate")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+PRINTDLGX86.hwndOwner")]
-[assembly: SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Scope = "member", Target = "System.Drawing.SafeNativeMethods+PRINTDLGX86.lCustData")]
-[assembly: SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Scope = "member", Target = "System.Drawing.SafeNativeMethods+StreamConsts..ctor()")]
-[assembly: SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Scope = "member", Target = "System.Drawing.SafeNativeMethods+POINT..ctor()")]
-[assembly: SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Scope = "member", Target = "System.Drawing.SafeNativeMethods+LOGPEN..ctor()")]
-[assembly: SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Scope = "member", Target = "System.Drawing.SafeNativeMethods+DIBSECTION..ctor()")]
-[assembly: SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Scope = "member", Target = "System.Drawing.SafeNativeMethods..ctor()")]
-[assembly: SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Scope = "member", Target = "System.Drawing.SafeNativeMethods+Ole..ctor()")]
-[assembly: SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Scope = "member", Target = "System.Drawing.SafeNativeMethods+CommonHandles..ctor()")]
-[assembly: SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Scope = "type", Target = "System.Drawing.SafeNativeMethods+CommonHandles")]
-[assembly: SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Scope = "type", Target = "System.Drawing.SafeNativeMethods+ENHMETAHEADER")]
-[assembly: SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Scope = "type", Target = "System.Drawing.SafeNativeMethods+StreamConsts")]
-[assembly: SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Scope = "type", Target = "System.Drawing.SafeNativeMethods+Ole")]
-[assembly: SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Scope = "type", Target = "System.Drawing.SafeNativeMethods+Gdip")]
-[assembly: SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Scope = "member", Target = "System.Drawing.SafeNativeMethods+ENHMETAHEADER..ctor()")]
+using System.Runtime.ConstrainedExecution;
+using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace System.Drawing
 {
-    internal partial class SafeNativeMethods
+    internal static partial class SafeNativeMethods
     {
         // We make this a nested class so that we don't have to initialize GDI+ to access SafeNativeMethods (mostly gdi/user32).
-        internal partial class Gdip
+        internal static partial class Gdip
         {
             private static readonly TraceSwitch s_gdiPlusInitialization = new TraceSwitch("GdiPlusInitialization", "Tracks GDI+ initialization and teardown");
 
-            private static IntPtr s_initToken;
+            private static readonly IntPtr s_initToken;
             private const string ThreadDataSlotName = "system.drawing.threaddata";
 
             static Gdip()
@@ -79,16 +29,13 @@ namespace System.Drawing
                 Debug.WriteLineIf(s_gdiPlusInitialization.TraceVerbose, "Initialize GDI+ [" + AppDomain.CurrentDomain.FriendlyName + "]");
                 Debug.Indent();
 
-                s_gdipModule = LoadNativeLibrary();
-                LoadSharedFunctionPointers();
                 PlatformInitialize();
 
                 StartupInput input = StartupInput.GetDefault();
-                StartupOutput output;
 
                 // GDI+ ref counts multiple calls to Startup in the same process, so calls from multiple
                 // domains are ok, just make sure to pair each w/GdiplusShutdown
-                int status = GdiplusStartup(out s_initToken, ref input, out output);
+                int status = GdiplusStartup(out s_initToken, ref input, out StartupOutput output);
                 CheckStatus(status);
 
                 Debug.Unindent();
@@ -96,20 +43,12 @@ namespace System.Drawing
                 // Sync to event for handling shutdown
                 AppDomain currentDomain = AppDomain.CurrentDomain;
                 currentDomain.ProcessExit += new EventHandler(OnProcessExit);
-
-                // Also sync to DomainUnload for non-default domains since they will not get a ProcessExit if
-                // they are unloaded prior to ProcessExit (and this object's static fields are scoped to AppDomains, 
-                // so we must cleanup on AppDomain shutdown)
-                if (!currentDomain.IsDefaultAppDomain())
-                {
-                    currentDomain.DomainUnload += new EventHandler(OnProcessExit);
-                }
             }
 
             /// <summary>
             /// Returns true if GDI+ has been started, but not shut down
             /// </summary>
-            private static bool Initialized => s_initToken != IntPtr.Zero;
+            internal static bool Initialized => s_initToken != IntPtr.Zero;
 
             /// <summary>
             /// This property will give us back a hashtable we can use to store all of our static brushes and pens on
@@ -143,7 +82,7 @@ namespace System.Drawing
 
             /// <summary>
             /// Shutsdown GDI+
-            /// </summary>            
+            /// </summary>
             private static void Shutdown()
             {
                 Debug.WriteLineIf(s_gdiPlusInitialization.TraceVerbose, "Shutdown GDI+ [" + AppDomain.CurrentDomain.FriendlyName + "]");
@@ -155,10 +94,10 @@ namespace System.Drawing
 
                     ClearThreadData();
 
-                    // Due to conditions at shutdown, we can't be sure all objects will be finalized here: e.g. a Global variable 
+                    // Due to conditions at shutdown, we can't be sure all objects will be finalized here: e.g. a Global variable
                     // in the application/domain may still be holding a GDI+ object. If so, calling GdiplusShutdown will free the GDI+ heap,
-                    // causing AppVerifier exceptions due to active crit sections. 
-                    // For now, we will simply not call shutdown, the resultant heap leak should occur most often during shutdown anyway. 
+                    // causing AppVerifier exceptions due to active crit sections.
+                    // For now, we will simply not call shutdown, the resultant heap leak should occur most often during shutdown anyway.
                     // If GDI+ moves their allocations to the standard heap we can revisit.
 
 #if GDIP_SHUTDOWN
@@ -174,7 +113,7 @@ namespace System.Drawing
                     //
                     Debug.WriteLineIf(GdiPlusInitialization.TraceVerbose, "Instruct GDI+ to shutdown");
 
-                    GdiplusShutdown(new HandleRef(null, initToken));
+                    GdiplusShutdown(ref initToken);
                     initToken = IntPtr.Zero;
 #endif
 
@@ -204,36 +143,7 @@ namespace System.Drawing
             {
             }
 
-            //----------------------------------------------------------------------------------------                                                           
-            // Initialization methods (GdiplusInit.h)
             //----------------------------------------------------------------------------------------
-
-            internal static int GdipDeletePath(HandleRef path) => Initialized ? IntGdipDeletePath(path) : Ok;
-            internal static int GdipDeletePathIter(HandleRef pathIter) => Initialized ? IntGdipDeletePathIter(pathIter) : Ok;
-            internal static int GdipDeleteMatrix(HandleRef matrix) => Initialized ? IntGdipDeleteMatrix(matrix) : Ok;
-            internal static int GdipDeleteRegion(HandleRef region) => Initialized ? IntGdipDeleteRegion(region) : Ok;
-            internal static int GdipDeleteBrush(HandleRef brush) => Initialized ? IntGdipDeleteBrush(brush) : Ok;
-            internal static int GdipDeletePen(HandleRef pen) => Initialized ? IntGdipDeletePen(pen) : Ok;
-            internal static int GdipDeleteCustomLineCap(HandleRef customCap) => Initialized ? IntGdipDeleteCustomLineCap(customCap) : Ok;
-            internal static int GdipDisposeImage(HandleRef image) => Initialized ? IntGdipDisposeImage(image) : Ok;
-            internal static int GdipDisposeImageAttributes(HandleRef imageattr) => Initialized ? IntGdipDisposeImageAttributes(imageattr) : Ok;
-            internal static int GdipDeleteGraphics(HandleRef graphics) => Initialized ? IntGdipDeleteGraphics(graphics) : Ok;
-            internal static int GdipReleaseDC(HandleRef graphics, HandleRef hdc) => Initialized ? IntGdipReleaseDC(graphics, hdc) : Ok;
-            internal static int GdipDeletePrivateFontCollection(ref IntPtr fontCollection)
-            {
-                if (!Initialized)
-                {
-                    fontCollection = IntPtr.Zero;
-                    return Ok;
-                }
-
-                return IntGdipDeletePrivateFontCollection(ref fontCollection);
-            }
-            internal static int GdipDeleteFontFamily(HandleRef fontFamily) => Initialized ? IntGdipDeleteFontFamily(fontFamily) : Ok;
-            internal static int GdipDeleteFont(HandleRef font) => Initialized ? IntGdipDeleteFont(font) : Ok;
-            internal static int GdipDeleteStringFormat(HandleRef format) => Initialized ? IntGdipDeleteStringFormat(format) : Ok;
-
-            //----------------------------------------------------------------------------------------                                                           
             // Status codes
             //----------------------------------------------------------------------------------------
             internal const int Ok = 0;
@@ -261,9 +171,7 @@ namespace System.Drawing
             internal static void CheckStatus(int status)
             {
                 if (status != Ok)
-                {
                     throw StatusException(status);
-                }
             }
 
             internal static Exception StatusException(int status)
@@ -322,142 +230,7 @@ namespace System.Drawing
                         return new ExternalException(SR.GdiplusNotInitialized, E_FAIL);
                 }
 
-                return new ExternalException(SR.GdiplusUnknown, E_UNEXPECTED);
-            }
-
-            //----------------------------------------------------------------------------------------                                                           
-            // Helper function:  Convert GpPointF* memory block to PointF[]
-            //----------------------------------------------------------------------------------------
-            internal static PointF[] ConvertGPPOINTFArrayF(IntPtr memory, int count)
-            {
-                if (memory == IntPtr.Zero)
-                {
-                    throw new ArgumentNullException(nameof(memory));
-                }
-
-                var points = new PointF[count];
-                Type pointType = typeof(GPPOINTF);
-                int size = Marshal.SizeOf(pointType);
-
-                for (int index = 0; index < count; index++)
-                {
-                    var pt = (GPPOINTF)Marshal.PtrToStructure((IntPtr)((long)memory + index * size), pointType);
-                    points[index] = new PointF(pt.X, pt.Y);
-                }
-
-                return points;
-            }
-
-            //----------------------------------------------------------------------------------------                                                           
-            // Helper function:  Convert GpPoint* memory block to Point[]
-            //----------------------------------------------------------------------------------------
-            internal static Point[] ConvertGPPOINTArray(IntPtr memory, int count)
-            {
-                if (memory == IntPtr.Zero)
-                {
-                    throw new ArgumentNullException(nameof(memory));
-                }
-
-                var points = new Point[count];
-                Type pointType = typeof(GPPOINT);
-
-                int size = Marshal.SizeOf(pointType);
-
-                for (int index = 0; index < count; index++)
-                {
-                    var pt = (GPPOINT)Marshal.PtrToStructure((IntPtr)((long)memory + index * size), pointType);
-                    points[index] = new Point(pt.X, pt.Y);
-                }
-
-                return points;
-            }
-
-            //----------------------------------------------------------------------------------------                                                           
-            // Helper function:  Convert PointF[] to native memory block GpPointF*
-            //----------------------------------------------------------------------------------------
-            internal static IntPtr ConvertPointToMemory(PointF[] points)
-            {
-                if (points == null)
-                {
-                    throw new ArgumentNullException(nameof(points));
-                }
-
-                int size = (int)Marshal.SizeOf(typeof(GPPOINTF));
-                int count = points.Length;
-                IntPtr memory = Marshal.AllocHGlobal(checked(count * size));
-
-                for (int index = 0; index < count; index++)
-                {
-                    Marshal.StructureToPtr(new GPPOINTF(points[index]), (IntPtr)(checked((long)memory + index * size)), false);
-                }
-
-                return memory;
-            }
-
-            //----------------------------------------------------------------------------------------                                                           
-            // Helper function:  Convert Point[] to native memory block GpPoint*
-            //----------------------------------------------------------------------------------------
-            internal static IntPtr ConvertPointToMemory(Point[] points)
-            {
-                if (points == null)
-                {
-                    throw new ArgumentNullException(nameof(points));
-                }
-
-                int size = Marshal.SizeOf(typeof(GPPOINT));
-                int count = points.Length;
-                IntPtr memory = Marshal.AllocHGlobal(checked(count * size));
-
-                for (int index = 0; index < count; index++)
-                {
-                    Marshal.StructureToPtr(new GPPOINT(points[index]), (IntPtr)(checked((long)memory + index * size)), false);
-                }
-
-                return memory;
-            }
-
-            //----------------------------------------------------------------------------------------                                                           
-            // Helper function:  Convert RectangleF[] to native memory block GpRectF*
-            //----------------------------------------------------------------------------------------
-            internal static IntPtr ConvertRectangleToMemory(RectangleF[] rect)
-            {
-                if (rect == null)
-                {
-                    throw new ArgumentNullException(nameof(rect));
-                }
-
-                int size = Marshal.SizeOf(typeof(GPRECTF));
-                int count = rect.Length;
-                IntPtr memory = Marshal.AllocHGlobal(checked(count * size));
-
-                for (int index = 0; index < count; index++)
-                {
-                    Marshal.StructureToPtr(new GPRECTF(rect[index]), (IntPtr)(checked((long)memory + index * size)), false);
-                }
-
-                return memory;
-            }
-
-            //----------------------------------------------------------------------------------------                                                           
-            // Helper function:  Convert Rectangle[] to native memory block GpRect*
-            //----------------------------------------------------------------------------------------
-            internal static IntPtr ConvertRectangleToMemory(Rectangle[] rect)
-            {
-                if (rect == null)
-                {
-                    throw new ArgumentNullException(nameof(rect));
-                }
-
-                int size = (int)Marshal.SizeOf(typeof(GPRECT));
-                int count = rect.Length;
-                IntPtr memory = Marshal.AllocHGlobal(checked(count * size));
-
-                for (int index = 0; index < count; index++)
-                {
-                    Marshal.StructureToPtr(new GPRECT(rect[index]), (IntPtr)(checked((long)memory + index * size)), false);
-                }
-
-                return memory;
+                return new ExternalException($"{SR.GdiplusUnknown} [{status}]", E_UNEXPECTED);
             }
         }
 
@@ -501,7 +274,6 @@ namespace System.Drawing
         IDI_WARNING = 32515,
         IDI_ERROR = 32513,
         IDI_INFORMATION = 32516,
-        SRCCOPY = 0x00CC0020,
         PLANES = 14,
         BITSPIXEL = 12,
         LOGPIXELSX = 88,
@@ -677,38 +449,12 @@ namespace System.Drawing
         DMCOLLATE_TRUE = 1,
         PRINTER_ENUM_LOCAL = 0x00000002,
         PRINTER_ENUM_CONNECTIONS = 0x00000004,
-        SRCPAINT = 0x00EE0086, /* dest = source OR dest           */
-        SRCAND = 0x008800C6, /* dest = source AND dest          */
-        SRCINVERT = 0x00660046, /* dest = source XOR dest          */
-        SRCERASE = 0x00440328, /* dest = source AND (NOT dest )   */
-        NOTSRCCOPY = 0x00330008, /* dest = (NOT source)             */
-        NOTSRCERASE = 0x001100A6, /* dest = (NOT src) AND (NOT dest) */
-        MERGECOPY = 0x00C000CA, /* dest = (source AND pattern)     */
-        MERGEPAINT = 0x00BB0226, /* dest = (NOT source) OR dest     */
-        PATCOPY = 0x00F00021, /* dest = pattern                  */
-        PATPAINT = 0x00FB0A09, /* dest = DPSnoo                   */
-        PATINVERT = 0x005A0049, /* dest = pattern XOR dest         */
-        DSTINVERT = 0x00550009, /* dest = (NOT dest)               */
-        BLACKNESS = 0x00000042, /* dest = BLACK                    */
-        WHITENESS = 0x00FF0062, /* dest = WHITE                    */
-        CAPTUREBLT = 0x40000000, /* Include layered windows */
         SM_CXICON = 11,
         SM_CYICON = 12,
         DEFAULT_CHARSET = 1;
 
-        public const int NOMIRRORBITMAP = unchecked((int)0x80000000); /* Do not Mirror the bitmap in this call */
-
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, EntryPoint = "CreateCompatibleBitmap", CharSet = CharSet.Auto)]
-        public static extern IntPtr IntCreateCompatibleBitmap(HandleRef hDC, int width, int height);
-
-        public static IntPtr CreateCompatibleBitmap(HandleRef hDC, int width, int height)
-        {
-            return System.Internal.HandleCollector.Add(IntCreateCompatibleBitmap(hDC, width, height), CommonHandles.GDI);
-        }
-
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]
-        public static extern int BitBlt(HandleRef hDC, int x, int y, int nWidth, int nHeight,
-                                         HandleRef hSrcDC, int xSrc, int ySrc, int dwRop);
+        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true)]
+        public static extern IntPtr CreateCompatibleBitmap(HandleRef hDC, int width, int height);
 
         [DllImport(ExternDll.Gdi32)]
         public static extern int GetDIBits(HandleRef hdc, HandleRef hbm, int arg1, int arg2, IntPtr arg3, ref NativeMethods.BITMAPINFO_FLAT bmi, int arg5);
@@ -716,13 +462,8 @@ namespace System.Drawing
         [DllImport(ExternDll.Gdi32)]
         public static extern uint GetPaletteEntries(HandleRef hpal, int iStartIndex, int nEntries, byte[] lppe);
 
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, EntryPoint = "CreateDIBSection", CharSet = CharSet.Auto)]
-        public static extern IntPtr IntCreateDIBSection(HandleRef hdc, ref NativeMethods.BITMAPINFO_FLAT bmi, int iUsage, ref IntPtr ppvBits, IntPtr hSection, int dwOffset);
-
-        public static IntPtr CreateDIBSection(HandleRef hdc, ref NativeMethods.BITMAPINFO_FLAT bmi, int iUsage, ref IntPtr ppvBits, IntPtr hSection, int dwOffset)
-        {
-            return System.Internal.HandleCollector.Add(IntCreateDIBSection(hdc, ref bmi, iUsage, ref ppvBits, hSection, dwOffset), SafeNativeMethods.CommonHandles.GDI);
-        }
+        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true)]
+        public static extern IntPtr CreateDIBSection(HandleRef hdc, ref NativeMethods.BITMAPINFO_FLAT bmi, int iUsage, ref IntPtr ppvBits, IntPtr hSection, int dwOffset);
 
         [DllImport(ExternDll.Kernel32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]
         public static extern IntPtr GlobalFree(HandleRef handle);
@@ -770,13 +511,8 @@ namespace System.Drawing
         [DllImport(ExternDll.Kernel32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]
         public static extern bool GlobalUnlock(HandleRef handle);
 
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, EntryPoint = "CreateRectRgn", CharSet = CharSet.Auto)]
-        private static extern IntPtr IntCreateRectRgn(int x1, int y1, int x2, int y2);
-
-        public static IntPtr CreateRectRgn(int x1, int y1, int x2, int y2)
-        {
-            return System.Internal.HandleCollector.Add(IntCreateRectRgn(x1, y1, x2, y2), SafeNativeMethods.CommonHandles.GDI);
-        }
+        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true)]
+        public static extern IntPtr CreateRectRgn(int x1, int y1, int x2, int y2);
 
         [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]
         public static extern int GetClipRgn(HandleRef hDC, HandleRef hRgn);
@@ -784,7 +520,6 @@ namespace System.Drawing
         [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]
         public static extern int SelectClipRgn(HandleRef hDC, HandleRef hRgn);
 
-        [SuppressMessage("Microsoft.Security", "CA2101:SpecifyMarshalingForPInvokeStringArguments")]
         [DllImport(ExternDll.Gdi32, SetLastError = true, CharSet = CharSet.Auto)]
         public static extern int AddFontResourceEx(string lpszFilename, int fl, IntPtr pdv);
 
@@ -850,24 +585,17 @@ namespace System.Drawing
         {
             return IntGlobalAlloc(uFlags, new UIntPtr(dwBytes));
         }
-        
-        static internal unsafe void ZeroMemory(byte* ptr, ulong length)
-        {
-            byte* end = ptr + length;
-            while (ptr != end) *ptr++ = 0;
-        }
 
         public const int ERROR_ACCESS_DENIED = 5;
         public const int ERROR_INVALID_PARAMETER = 87;
         public const int ERROR_PROC_NOT_FOUND = 127;
 
-
         [StructLayout(LayoutKind.Sequential)]
         public class ENHMETAHEADER
         {
-            /// The ENHMETAHEADER structure is defined natively as a union with WmfHeader.  
-            /// Extreme care should be taken if changing the layout of the corresponding managed 
-            /// structures to minimize the risk of buffer overruns.  The affected managed classes 
+            /// The ENHMETAHEADER structure is defined natively as a union with WmfHeader.
+            /// Extreme care should be taken if changing the layout of the corresponding managed
+            /// structures to minimize the risk of buffer overruns.  The affected managed classes
             /// are the following: ENHMETAHEADER, MetaHeader, MetafileHeaderWmf, MetafileHeaderEmf.
             public int iType;
             public int nSize = 40; // ndirect.DllLib.sizeOf( this )
@@ -960,25 +688,25 @@ namespace System.Drawing
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public class ICONINFO
+        public struct ICONINFO
         {
-            public int fIcon;
-            public int xHotspot;
-            public int yHotspot;
-            public IntPtr hbmMask = IntPtr.Zero;
-            public IntPtr hbmColor = IntPtr.Zero;
+            public uint fIcon;
+            public uint xHotspot;
+            public uint yHotspot;
+            public IntPtr hbmMask;
+            public IntPtr hbmColor;
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public class BITMAP
+        public struct BITMAP
         {
-            public int bmType;
-            public int bmWidth;
-            public int bmHeight;
-            public int bmWidthBytes;
-            public short bmPlanes;
-            public short bmBitsPixel;
-            public IntPtr bmBits = IntPtr.Zero;
+            public uint bmType;
+            public uint bmWidth;
+            public uint bmHeight;
+            public uint bmWidthBytes;
+            public ushort bmPlanes;
+            public ushort bmBitsPixel;
+            public IntPtr bmBits;
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -997,9 +725,11 @@ namespace System.Drawing
             public int biClrImportant;
         }
 
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-        public class LOGFONT
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        public unsafe struct LOGFONT
         {
+            private const int LF_FACESIZE = 32;
+
             public int lfHeight;
             public int lfWidth;
             public int lfEscapement;
@@ -1013,8 +743,11 @@ namespace System.Drawing
             public byte lfClipPrecision;
             public byte lfQuality;
             public byte lfPitchAndFamily;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
-            public string lfFaceName;
+            private fixed char _lfFaceName[LF_FACESIZE];
+            public Span<char> lfFaceName
+            {
+                get { fixed (char* c = _lfFaceName) { return new Span<char>(c, LF_FACESIZE); } }
+            }
 
             public override string ToString()
             {
@@ -1032,55 +765,39 @@ namespace System.Drawing
                     "lfClipPrecision=" + lfClipPrecision + ", " +
                     "lfQuality=" + lfQuality + ", " +
                     "lfPitchAndFamily=" + lfPitchAndFamily + ", " +
-                    "lfFaceName=" + lfFaceName;
+                    "lfFaceName=" + lfFaceName.ToString();
             }
         }
 
+        // https://devblogs.microsoft.com/oldnewthing/20101018-00/?p=12513
+        // https://devblogs.microsoft.com/oldnewthing/20120720-00/?p=7083
+
+        // Needs to be packed to 2 to get ICONDIRENTRY to follow immediately after idCount.
         [StructLayout(LayoutKind.Sequential, Pack = 2)]
         public struct ICONDIR
         {
-            public short idReserved;
-            public short idType;
-            public short idCount;
+            // Must be 0
+            public ushort idReserved;
+            // Must be 1
+            public ushort idType;
+            // Count of entries
+            public ushort idCount;
+            // First entry (anysize array)
             public ICONDIRENTRY idEntries;
         }
 
         [StructLayout(LayoutKind.Sequential)]
         public struct ICONDIRENTRY
         {
+            // Width and height are 1 - 255 or 0 for 256
             public byte bWidth;
             public byte bHeight;
             public byte bColorCount;
             public byte bReserved;
-            public short wPlanes;
-            public short wBitCount;
-            public int dwBytesInRes;
-            public int dwImageOffset;
-        }
-
-        public class Ole
-        {
-            public const int PICTYPE_ICON = 3;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public class PICTDESC
-        {
-            internal int cbSizeOfStruct;
-            public int picType;
-            internal IntPtr union1;
-            internal int union2;
-            internal int union3;
-
-            public static PICTDESC CreateIconPICTDESC(IntPtr hicon)
-            {
-                return new PICTDESC()
-                {
-                    cbSizeOfStruct = 12,
-                    picType = Ole.PICTYPE_ICON,
-                    union1 = hicon
-                };
-            }
+            public ushort wPlanes;
+            public ushort wBitCount;
+            public uint dwBytesInRes;
+            public uint dwImageOffset;
         }
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
@@ -1165,193 +882,53 @@ namespace System.Drawing
             }
         }
 
-        public sealed class CommonHandles
-        {
-            static CommonHandles()
-            {
-#if DEBUG
-                // Setup the DebugHandleTracker
-                DebugHandleTracker.Initialize();
-                AppDomain.CurrentDomain.DomainUnload += new EventHandler(CurrentDomain_DomainUnload);
-                AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
-#endif
-            }
-
-            /// <summary>
-            /// Handle type for GDI objects.
-            /// </summary>
-            public static readonly int GDI = System.Internal.HandleCollector.RegisterType("GDI", 50, 500);
-
-            /// <summary>
-            /// Handle type for HDC's that count against the Win98 limit of five DC's. 
-            /// HDC's which are not scarce, such as HDC's for bitmaps, are counted as GDIHANDLE's.
-            /// </summary>
-            public static readonly int HDC = System.Internal.HandleCollector.RegisterType("HDC", 100, 2); // wait for 2 dc's before collecting
-
-            /// <summary>
-            /// Handle type for icons.
-            /// </summary>
-            public static readonly int Icon = System.Internal.HandleCollector.RegisterType("Icon", 20, 500);
-
-            /// <summary>
-            /// Handle type for kernel objects.
-            /// </summary>
-            public static readonly int Kernel = System.Internal.HandleCollector.RegisterType("Kernel", 0, 1000);
-
-#if DEBUG
-            private static void CurrentDomain_DomainUnload(object sender, EventArgs e)
-            {
-                DebugHandleTracker.CheckLeaks();
-            }
-
-            private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
-            {
-                DebugHandleTracker.CheckLeaks();
-            }
-#endif
-        }
-
-        public class StreamConsts
-        {
-            public const int STREAM_SEEK_SET = 0x0;
-            public const int STREAM_SEEK_CUR = 0x1;
-            public const int STREAM_SEEK_END = 0x2;
-        }
-
         [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, EntryPoint = "DeleteObject", CharSet = CharSet.Auto)]
         internal static extern int IntDeleteObject(HandleRef hObject);
 
         public static int DeleteObject(HandleRef hObject)
         {
-            System.Internal.HandleCollector.Remove((IntPtr)hObject, CommonHandles.GDI);
             return IntDeleteObject(hObject);
         }
 
         [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]
         public static extern IntPtr SelectObject(HandleRef hdc, HandleRef obj);
 
-        [DllImport(ExternDll.User32, SetLastError = true, EntryPoint = "CreateIconFromResourceEx")]
-        private unsafe static extern IntPtr IntCreateIconFromResourceEx(byte* pbIconBits, int cbIconBits, bool fIcon, int dwVersion, int csDesired, int cyDesired, int flags);
+        [DllImport(ExternDll.User32, ExactSpelling = true, SetLastError = true)]
+        public static extern unsafe IntPtr CreateIconFromResourceEx(
+            byte* pbIconBits,
+            uint cbIconBits,
+            bool fIcon,
+            int dwVersion,
+            int csDesired,
+            int cyDesired,
+            int flags);
 
-        public unsafe static IntPtr CreateIconFromResourceEx(byte* pbIconBits, int cbIconBits, bool fIcon, int dwVersion, int csDesired, int cyDesired, int flags)
-        {
-            return System.Internal.HandleCollector.Add(IntCreateIconFromResourceEx(pbIconBits, cbIconBits, fIcon, dwVersion, csDesired, cyDesired, flags), SafeNativeMethods.CommonHandles.Icon);
-        }
+        [DllImport(ExternDll.Shell32, CharSet = CharSet.Unicode)]
+        public static extern unsafe IntPtr ExtractAssociatedIcon(HandleRef hInst, char* iconPath, ref int index);
 
-        [DllImport(ExternDll.Shell32, CharSet = CharSet.Auto, BestFitMapping = false, EntryPoint = "ExtractAssociatedIcon")]
-        public unsafe static extern IntPtr IntExtractAssociatedIcon(HandleRef hInst, StringBuilder iconPath, ref int index);
+        [DllImport(ExternDll.User32, SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern IntPtr LoadIcon(HandleRef hInst, IntPtr iconId);
 
-        public unsafe static IntPtr ExtractAssociatedIcon(HandleRef hInst, StringBuilder iconPath, ref int index)
-        {
-            return System.Internal.HandleCollector.Add(IntExtractAssociatedIcon(hInst, iconPath, ref index), CommonHandles.Icon);
-        }
+        [DllImport(ExternDll.User32, SetLastError = true, ExactSpelling = true)]
+        public static extern bool DestroyIcon(HandleRef hIcon);
 
-        [DllImport(ExternDll.User32, SetLastError = true, EntryPoint = "LoadIcon", CharSet = CharSet.Auto)]
-        private static extern IntPtr IntLoadIcon(HandleRef hInst, IntPtr iconId);
-
-        public static IntPtr LoadIcon(HandleRef hInst, int iconId)
-        {
-            // We only use the case were the low word of the IntPtr is used a resource id but it still has to be an intptr.
-            return IntLoadIcon(hInst, new IntPtr(iconId));
-        }
-
-        [DllImport(ExternDll.User32, SetLastError = true, ExactSpelling = true, EntryPoint = "DestroyIcon", CharSet = CharSet.Auto)]
-        private static extern bool IntDestroyIcon(HandleRef hIcon);
-
-        public static bool DestroyIcon(HandleRef hIcon)
-        {
-            System.Internal.HandleCollector.Remove((IntPtr)hIcon, SafeNativeMethods.CommonHandles.Icon);
-            return IntDestroyIcon(hIcon);
-        }
-
-        [DllImport(ExternDll.User32, SetLastError = true, ExactSpelling = true, EntryPoint = "CopyImage", CharSet = CharSet.Auto)]
-        private static extern IntPtr IntCopyImage(HandleRef hImage, int uType, int cxDesired, int cyDesired, int fuFlags);
-
-        public static IntPtr CopyImage(HandleRef hImage, int uType, int cxDesired, int cyDesired, int fuFlags)
-        {
-            int handleType;
-            switch (uType)
-            {
-                case IMAGE_ICON:
-                    handleType = CommonHandles.Icon;
-                    break;
-                default:
-                    handleType = CommonHandles.GDI;
-                    break;
-            }
-            return System.Internal.HandleCollector.Add(IntCopyImage(hImage, uType, cxDesired, cyDesired, fuFlags), handleType);
-        }
+        [DllImport(ExternDll.User32, SetLastError = true, ExactSpelling = true)]
+        public static extern IntPtr CopyImage(HandleRef hImage, int uType, int cxDesired, int cyDesired, int fuFlags);
 
         // GetObject stuff
-        [DllImport(ExternDll.Gdi32, SetLastError = true, CharSet = CharSet.Auto)]
-        public static extern int GetObject(HandleRef hObject, int nSize, [In, Out] BITMAP bm);
+        [DllImport(ExternDll.Gdi32, SetLastError = true)]
+        public static extern int GetObject(HandleRef hObject, int nSize, ref BITMAP bm);
 
-        [DllImport(ExternDll.Gdi32, SetLastError = true, CharSet = CharSet.Auto)]
-        public static extern int GetObject(HandleRef hObject, int nSize, [In, Out] LOGFONT lf);
+        [DllImport(ExternDll.Gdi32, SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern int GetObject(HandleRef hObject, int nSize, ref LOGFONT lf);
 
-        public static int GetObject(HandleRef hObject, LOGFONT lp)
-        {
-            return GetObject(hObject, Marshal.SizeOf(typeof(LOGFONT)), lp);
-        }
+        public static unsafe int GetObject(HandleRef hObject, ref LOGFONT lp)
+            => GetObject(hObject, sizeof(LOGFONT), ref lp);
 
-        [DllImport(ExternDll.User32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]
-        public static extern bool GetIconInfo(HandleRef hIcon, [In, Out] ICONINFO info);
+        [DllImport(ExternDll.User32, SetLastError = true, ExactSpelling = true)]
+        public static extern bool GetIconInfo(HandleRef hIcon, ref ICONINFO info);
 
         [DllImport(ExternDll.User32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]
         public static extern bool DrawIconEx(HandleRef hDC, int x, int y, HandleRef hIcon, int width, int height, int iStepIfAniCursor, HandleRef hBrushFlickerFree, int diFlags);
-
-#if CUSTOM_MARSHALING_ISTREAM
-        [DllImport(ExternDll.Oleaut32, PreserveSig=false)]
-        public static extern IPicture OleLoadPictureEx(
-                                                        [return: MarshalAs(UnmanagedType.CustomMarshaler,MarshalType="StreamToIStreamMarshaler")] Stream pStream, 
-                                                        int lSize, bool fRunmode, ref Guid refiid, int width, int height, int dwFlags);
-                                                        
-                                                        
-#endif
-        [DllImport(ExternDll.Oleaut32, PreserveSig = false)]
-        public static extern IPicture OleCreatePictureIndirect(SafeNativeMethods.PICTDESC pictdesc, [In]ref Guid refiid, bool fOwn);
-
-        [ComImport()]
-        [Guid("7BF80980-BF32-101A-8BBB-00AA00300CAB")]
-        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-        public interface IPicture
-        {
-            IntPtr GetHandle();
-
-            IntPtr GetHPal();
-
-            [return: MarshalAs(UnmanagedType.I2)]
-            short GetPictureType();
-
-            int GetWidth();
-
-            int GetHeight();
-
-            void Render();
-
-            void SetHPal([In] IntPtr phpal);
-
-            IntPtr GetCurDC();
-
-            void SelectPicture([In] IntPtr hdcIn,
-                               [Out, MarshalAs(UnmanagedType.LPArray)] int[] phdcOut,
-                               [Out, MarshalAs(UnmanagedType.LPArray)] int[] phbmpOut);
-
-            [return: MarshalAs(UnmanagedType.Bool)]
-            bool GetKeepOriginalFormat();
-
-            void SetKeepOriginalFormat([In, MarshalAs(UnmanagedType.Bool)] bool pfkeep);
-
-            void PictureChanged();
-
-            [PreserveSig]
-            int SaveAsFile([In, MarshalAs(UnmanagedType.Interface)] UnsafeNativeMethods.IStream pstm,
-                           [In] int fSaveMemCopy,
-                           [Out] out int pcbSize);
-
-            int GetAttributes();
-
-            void SetHdc([In] IntPtr hdc);
-        }
     }
 }

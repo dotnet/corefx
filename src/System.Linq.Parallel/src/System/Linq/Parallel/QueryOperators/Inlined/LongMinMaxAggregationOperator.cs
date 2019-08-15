@@ -15,7 +15,7 @@ using System.Threading;
 namespace System.Linq.Parallel
 {
     /// <summary>
-    /// An inlined min/max aggregation and its enumerator, for longs. 
+    /// An inlined min/max aggregation and its enumerator, for longs.
     /// </summary>
     internal sealed class LongMinMaxAggregationOperator : InlinedAggregationOperator<long, long, long>
     {
@@ -41,7 +41,7 @@ namespace System.Linq.Parallel
 
         protected override long InternalAggregate(ref Exception singularExceptionToThrow)
         {
-            // Because the final reduction is typically much cheaper than the intermediate 
+            // Because the final reduction is typically much cheaper than the intermediate
             // reductions over the individual partitions, and because each parallel partition
             // will do a lot of work to produce a single output element, we prefer to turn off
             // pipelining, and process the final reductions serially.
@@ -102,8 +102,8 @@ namespace System.Linq.Parallel
 
         private class LongMinMaxAggregationOperatorEnumerator<TKey> : InlinedAggregationOperatorEnumerator<long>
         {
-            private QueryOperatorEnumerator<long, TKey> _source; // The source data.
-            private int _sign; // The sign for comparisons (-1 means min, 1 means max).
+            private readonly QueryOperatorEnumerator<long, TKey> _source; // The source data.
+            private readonly int _sign; // The sign for comparisons (-1 means min, 1 means max).
 
             //---------------------------------------------------------------------------------------
             // Instantiates a new aggregation operator.

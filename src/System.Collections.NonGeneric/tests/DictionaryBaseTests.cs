@@ -41,7 +41,7 @@ namespace System.Collections.Tests
 
             FooKey nullKey = CreateKey(101);
             dictBase.Add(nullKey, null);
-            Assert.Equal(null, dictBase[nullKey]);
+            Assert.Null(dictBase[nullKey]);
         }
 
         [Fact]
@@ -104,7 +104,7 @@ namespace System.Collections.Tests
             {
                 Assert.Equal(CreateValue(i), dictBase[CreateKey(i)]);
             }
-            Assert.Equal(null, dictBase[new FooKey()]);
+            Assert.Null(dictBase[new FooKey()]);
         }
 
         [Fact]
@@ -130,8 +130,8 @@ namespace System.Collections.Tests
             FooKey nonExistentKey = CreateKey(101);
 
             dictBase[nonExistentKey] = null;
-            Assert.Equal(101, dictBase.Count); // Should add a key/value pair if the key 
-            Assert.Equal(null, dictBase[nonExistentKey]);
+            Assert.Equal(101, dictBase.Count); // Should add a key/value pair if the key
+            Assert.Null(dictBase[nonExistentKey]);
         }
 
         [Fact]
@@ -295,8 +295,8 @@ namespace System.Collections.Tests
             // SyncRoot should be the reference to the underlying dictionary, not to MyDictionary
             var dictBase = new MyDictionary();
             object syncRoot = dictBase.SyncRoot;
-            Assert.NotEqual(syncRoot, dictBase);
-            Assert.Equal(dictBase.SyncRoot, dictBase.SyncRoot);
+            Assert.NotSame(syncRoot, dictBase);
+            Assert.Same(dictBase.SyncRoot, dictBase.SyncRoot);
         }
 
         [Fact]
@@ -590,7 +590,7 @@ namespace System.Collections.Tests
                 StringValue = str;
             }
 
-            public int IntValue { get; set; }            
+            public int IntValue { get; set; }
             public string StringValue { get; set; }
 
             public override bool Equals(object obj)
@@ -621,7 +621,7 @@ namespace System.Collections.Tests
                 IntValue = intValue;
                 StringValue = stringValue;
             }
-            
+
             public int IntValue { get; set; }
             public string StringValue { get; set; }
 

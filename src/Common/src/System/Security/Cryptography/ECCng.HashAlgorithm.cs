@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -61,23 +61,26 @@ namespace System.Security.Cryptography
         /// <summary>
         /// Maps algorithm to curve name accounting for the special nist curves
         /// </summary>
-        internal static string SpecialNistAlgorithmToCurveName(string algorithm)
+        internal static string SpecialNistAlgorithmToCurveName(string algorithm, out string oidValue)
         {
             switch (algorithm)
             {
                 case BCryptNative.AlgorithmName.ECDHP256:
                 case BCryptNative.AlgorithmName.ECDsaP256:
+                    oidValue = Oids.secp256r1;
                     return "nistP256";
                 case BCryptNative.AlgorithmName.ECDHP384:
                 case BCryptNative.AlgorithmName.ECDsaP384:
+                    oidValue = Oids.secp384r1;
                     return "nistP384";
                 case BCryptNative.AlgorithmName.ECDHP521:
                 case BCryptNative.AlgorithmName.ECDsaP521:
+                    oidValue = Oids.secp521r1;
                     return "nistP521";
             }
-            
+
             Debug.Fail($"Unknown curve {algorithm}");
-            throw new PlatformNotSupportedException(string.Format(SR.Cryptography_CurveNotSupported, algorithm));
+            throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_CurveNotSupported, algorithm));
         }
     }
 }

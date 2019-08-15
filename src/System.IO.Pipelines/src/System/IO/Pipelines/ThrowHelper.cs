@@ -16,10 +16,6 @@ namespace System.IO.Pipelines
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static Exception CreateArgumentNullException(ExceptionArgument argument) => new ArgumentNullException(argument.ToString());
 
-        public static void ThrowInvalidOperationException_NotWritingNoAlloc() { throw CreateInvalidOperationException_NotWritingNoAlloc(); }
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static Exception CreateInvalidOperationException_NotWritingNoAlloc() => new InvalidOperationException(SR.NoWritingOperation);
-
         public static void ThrowInvalidOperationException_AlreadyReading() => throw CreateInvalidOperationException_AlreadyReading();
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static Exception CreateInvalidOperationException_AlreadyReading() => new InvalidOperationException(SR.ReadingIsInProgress);
@@ -45,13 +41,13 @@ namespace System.IO.Pipelines
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static Exception CreateInvalidOperationException_NoReadingAllowed() => new InvalidOperationException(SR.ReadingAfterCompleted);
 
-        public static void ThrowInvalidOperationException_AdvancingPastBufferSize() => throw CreateInvalidOperationException_AdvancingPastBufferSize();
+        public static void ThrowInvalidOperationException_InvalidExaminedPosition() => throw CreateInvalidOperationException_InvalidExaminedPosition();
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static Exception CreateInvalidOperationException_AdvancingPastBufferSize() => new InvalidOperationException(SR.CannotAdvancePastCurrentBufferSize);
+        public static Exception CreateInvalidOperationException_InvalidExaminedPosition() => new InvalidOperationException(SR.InvalidExaminedPosition);
 
-        public static void ThrowInvalidOperationException_BackpressureDeadlock() => throw CreateInvalidOperationException_BackpressureDeadlock();
+        public static void ThrowInvalidOperationException_InvalidExaminedOrConsumedPosition() => throw CreateInvalidOperationException_InvalidExaminedOrConsumedPosition();
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static Exception CreateInvalidOperationException_BackpressureDeadlock() => new InvalidOperationException(SR.BackpressureDeadlock);
+        public static Exception CreateInvalidOperationException_InvalidExaminedOrConsumedPosition() => new InvalidOperationException(SR.InvalidExaminedOrConsumedPosition);
 
         public static void ThrowInvalidOperationException_AdvanceToInvalidCursor() => throw CreateInvalidOperationException_AdvanceToInvalidCursor();
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -60,15 +56,28 @@ namespace System.IO.Pipelines
         public static void ThrowInvalidOperationException_ResetIncompleteReaderWriter() => throw CreateInvalidOperationException_ResetIncompleteReaderWriter();
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static Exception CreateInvalidOperationException_ResetIncompleteReaderWriter() => new InvalidOperationException(SR.ReaderAndWriterHasToBeCompleted);
+
+        public static void ThrowOperationCanceledException_ReadCanceled() => throw CreateOperationCanceledException_ReadCanceled();
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static Exception CreateOperationCanceledException_ReadCanceled() => new OperationCanceledException(SR.ReadCanceledOnPipeReader);
+
+        public static void ThrowOperationCanceledException_FlushCanceled() => throw CreateOperationCanceledException_FlushCanceled();
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static Exception CreateOperationCanceledException_FlushCanceled() => new OperationCanceledException(SR.FlushCanceledOnPipeWriter);
+
+        public static void ThrowInvalidOperationException_InvalidZeroByteRead() => throw CreateInvalidOperationException_InvalidZeroByteRead();
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static Exception CreateInvalidOperationException_InvalidZeroByteRead() => new InvalidOperationException(SR.InvalidZeroByteRead);
     }
 
     internal enum ExceptionArgument
     {
         minimumSize,
-        bytesWritten,
+        bytes,
         callback,
         options,
         pauseWriterThreshold,
-        resumeWriterThreshold
+        resumeWriterThreshold,
+        sizeHint
     }
 }

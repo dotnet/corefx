@@ -6,7 +6,6 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Security.Principal;
-using System.Security.Permissions;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Collections;
@@ -15,14 +14,14 @@ namespace System.DirectoryServices.AccountManagement
 {
     public class AdvancedFilters
     {
-        internal protected AdvancedFilters(Principal p)
+        protected internal AdvancedFilters(Principal p)
         {
             _p = p;
         }
 
         private bool _badPasswordAttemptChanged = false;
         private QbeMatchType _badPasswordAttemptVal = null;
-        private Principal _p;
+        private readonly Principal _p;
 
         public void LastBadPasswordAttempt(DateTime lastAttempt, MatchType match)
         {

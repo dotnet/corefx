@@ -105,12 +105,12 @@ namespace System.Data
         private bool _savedEnforceConstraints = false;
         private bool _inDataLoad = false;
         private bool _initialLoad;
-        private bool _schemaLoading = false;
+        private readonly bool _schemaLoading = false;
         private bool _enforceConstraints = true;
         internal bool _suspendEnforceConstraints = false;
 
         protected internal bool fInitInProgress = false;
-        private bool _inLoad = false;
+        private readonly bool _inLoad = false;
         internal bool _fInLoadDiffgram = false;
 
         private byte _isTypedDataTable; // 0 == unknown, 1 = yes, 2 = No
@@ -144,7 +144,6 @@ namespace System.Data
         private readonly DataRowBuilder _rowBuilder;
         private const string KEY_XMLSCHEMA = "XmlSchema";
         private const string KEY_XMLDIFFGRAM = "XmlDiffGram";
-        private const string KEY_NAME = "TableName";
 
         internal readonly List<DataView> _delayedViews = new List<DataView>();
         private readonly List<DataViewListener> _dataViewListeners = new List<DataViewListener>();
@@ -1225,7 +1224,6 @@ namespace System.Data
                         view.SetIndex2("", DataViewRowState.CurrentRows, null, true);
                     }
 
-                    // avoid HostProtectionAttribute(Synchronization=true) by not calling virtual methods from inside a lock
                     view = Interlocked.CompareExchange<DataView>(ref _defaultView, view, null);
                     if (null == view)
                     {
@@ -1329,7 +1327,7 @@ namespace System.Data
             get
             {
                 // used for Formating/Parsing
-                // http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpref/html/frlrfsystemglobalizationcultureinfoclassisneutralculturetopic.asp
+                // https://docs.microsoft.com/en-us/dotnet/api/system.globalization.cultureinfo.isneutralculture
                 if (null == _formatProvider)
                 {
                     CultureInfo culture = Locale;
@@ -1971,8 +1969,6 @@ namespace System.Data
             {
                 if ((rel.Nested) && (rel.ChildTable != this))
                 {
-                    DataTable childTable = rel.ChildTable;
-
                     rel.ChildTable.DoRaiseNamespaceChange();
                 }
             }
@@ -2363,7 +2359,7 @@ namespace System.Data
             // start cloning relation
             foreach (DataRelation r in sourceTable.ChildRelations)
             {
-                DataTable childTable = CloneHierarchy(r.ChildTable, ds, visitedMap);
+                CloneHierarchy(r.ChildTable, ds, visitedMap);
             }
 
             return destinationTable;
@@ -2741,7 +2737,7 @@ namespace System.Data
             {
                 throw ExceptionBuilder.RowAlreadyInTheCollection();
             }
-            row.BeginEdit(); // ensure something's there.            
+            row.BeginEdit(); // ensure something's there.
 
             int record = row._tempRecord;
             row._tempRecord = -1;
@@ -4439,7 +4435,7 @@ namespace System.Data
                     // deferred until after the row has been completely added.
                     if (action != DataRowAction.Add)
                     {
-                        throw exc;
+                        throw;
                     }
                     else
                     {
@@ -4587,7 +4583,7 @@ namespace System.Data
                 _loadIndex = null;
 
                 // LoadDataRow may have been called before BeginLoadData and already
-                // initialized loadIndexwithOriginalAdded & loadIndexwithCurrentDeleted 
+                // initialized loadIndexwithOriginalAdded & loadIndexwithCurrentDeleted
 
                 _initialLoad = (Rows.Count == 0);
                 if (_initialLoad)
@@ -5151,7 +5147,7 @@ namespace System.Data
                             }
                             break;
                         case DataRowState.Deleted:
-                            Debug.Assert(false, "LoadOption.Upsert with deleted row, should not be here");
+                            Debug.Fail("LoadOption.Upsert with deleted row, should not be here");
                             break;
                         default:
                             action = DataRowAction.Change;
@@ -5590,7 +5586,7 @@ namespace System.Data
 
             XmlTextReader xr = new XmlTextReader(stream);
 
-            // Prevent Dtd entity in DataTable 
+            // Prevent Dtd entity in DataTable
             xr.XmlResolver = null;
 
             return ReadXml(xr, false);
@@ -5605,7 +5601,7 @@ namespace System.Data
 
             XmlTextReader xr = new XmlTextReader(reader);
 
-            // Prevent Dtd entity in DataTable 
+            // Prevent Dtd entity in DataTable
             xr.XmlResolver = null;
 
             return ReadXml(xr, false);
@@ -5615,7 +5611,7 @@ namespace System.Data
         {
             XmlTextReader xr = new XmlTextReader(fileName);
 
-            // Prevent Dtd entity in DataTable 
+            // Prevent Dtd entity in DataTable
             xr.XmlResolver = null;
 
             try
@@ -6221,7 +6217,7 @@ namespace System.Data
         internal void ReadXDRSchema(XmlReader reader)
         {
             XmlDocument xdoc = new XmlDocument(); // we may need this to infer the schema
-            XmlNode schNode = xdoc.ReadNode(reader); ;
+            xdoc.ReadNode(reader);
             //consume and ignore it - No support
         }
 
@@ -6513,7 +6509,7 @@ namespace System.Data
                         dataset.Tables.Add(this);
                     }
 
-                    DataTable targetTable = CloneHierarchy(currentTable, DataSet, null);
+                    CloneHierarchy(currentTable, DataSet, null);
 
                     foreach (DataTable tempTable in tableList)
                     {
@@ -6684,8 +6680,8 @@ namespace System.Data
         //        finally {
         //            rowDiffIdUsage.Cleanup();
         //        }
-        // 
-        // Nested calls are allowed on different tables. For example, user can register to row change events and trigger 
+        //
+        // Nested calls are allowed on different tables. For example, user can register to row change events and trigger
         // ReadXml on different table/ds). But, if user code will try to call ReadXml on table that is already in the scope,
         // this code will assert since nested calls on same table are unsupported.
         internal struct RowDiffIdUsageSection
@@ -6697,7 +6693,7 @@ namespace System.Data
             // * in case of ReadXml on empty DataSet, this list can be initialized as empty (so empty list != null).
             // * only one scope is allowed on single thread, either for datatable or dataset
             // * assert is triggered if same table is added to this list twice
-            // 
+            //
             // do not allocate TLS data in RETAIL bits!
             [ThreadStatic]
             internal static List<DataTable> t_usedTables;
@@ -6769,7 +6765,7 @@ namespace System.Data
                 // note: it might remain empty (still initialization is needed for assert to operate)
                 if (RowDiffIdUsageSection.t_usedTables == null)
                     RowDiffIdUsageSection.t_usedTables = new List<DataTable>();
-#endif 
+#endif
                 for (int tableIndex = 0; tableIndex < ds.Tables.Count; ++tableIndex)
                 {
                     DataTable table = ds.Tables[tableIndex];
@@ -6796,7 +6792,7 @@ namespace System.Data
                     {
                         DataTable table = _targetDS.Tables[tableIndex];
 #if DEBUG
-                        // cannot assert that table exists in the usedTables - new tables might be 
+                        // cannot assert that table exists in the usedTables - new tables might be
                         // created during diffgram processing in DataSet.ReadXml.
                         if (RowDiffIdUsageSection.t_usedTables != null)
                             RowDiffIdUsageSection.t_usedTables.Remove(table);

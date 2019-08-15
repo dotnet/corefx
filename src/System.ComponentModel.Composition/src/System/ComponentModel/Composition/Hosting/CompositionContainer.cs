@@ -7,7 +7,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Threading;
 using Microsoft.Internal;
 
@@ -15,7 +14,7 @@ namespace System.ComponentModel.Composition.Hosting
 {
     public partial class CompositionContainer : ExportProvider, ICompositionService, IDisposable
     {
-        private CompositionOptions _compositionOptions;
+        private readonly CompositionOptions _compositionOptions;
         private ImportEngine _importEngine;
         private ComposablePartExportProvider _partExportProvider;
         private ExportProvider _rootProvider;
@@ -25,11 +24,11 @@ namespace System.ComponentModel.Composition.Hosting
         private IDisposable _disposableLocalExportProvider;
         private ExportProvider _ancestorExportProvider;
         private IDisposable _disposableAncestorExportProvider;
-        
+
         private readonly ReadOnlyCollection<ExportProvider> _providers;
         private volatile bool _isDisposed = false;
-        private object _lock = new object();
-        private static ReadOnlyCollection<ExportProvider> EmptyProviders = new ReadOnlyCollection<ExportProvider>(new ExportProvider[]{});
+        private readonly object _lock = new object();
+        private static readonly ReadOnlyCollection<ExportProvider> EmptyProviders = new ReadOnlyCollection<ExportProvider>(Array.Empty<ExportProvider>());
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="CompositionContainer"/> class.
@@ -40,11 +39,11 @@ namespace System.ComponentModel.Composition.Hosting
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="CompositionContainer"/> class 
+        ///     Initializes a new instance of the <see cref="CompositionContainer"/> class
         ///     with the specified export providers.
         /// </summary>
         /// <param name="providers">
-        ///     A <see cref="Array"/> of <see cref="ExportProvider"/> objects which provide 
+        ///     A <see cref="Array"/> of <see cref="ExportProvider"/> objects which provide
         ///     the <see cref="CompositionContainer"/> access to <see cref="Export"/> objects,
         ///     or <see langword="null"/> to set <see cref="Providers"/> to an empty
         ///     <see cref="ReadOnlyCollection{T}"/>.
@@ -52,20 +51,20 @@ namespace System.ComponentModel.Composition.Hosting
         /// <exception cref="ArgumentException">
         ///     <paramref name="providers"/> contains an element that is <see langword="null"/>.
         /// </exception>
-        public CompositionContainer(params ExportProvider[] providers) : 
+        public CompositionContainer(params ExportProvider[] providers) :
             this((ComposablePartCatalog)null, providers)
         {
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="CompositionContainer"/> class 
+        ///     Initializes a new instance of the <see cref="CompositionContainer"/> class
         ///     with the specified export providers.
         /// </summary>
-        /// <param name="compositionOPtionss">
+        /// <param name="compositionOptions">
         ///     <see cref="CompositionOptions"/> enumeration with flags controlling the composition.
         /// </param>
         /// <param name="providers">
-        ///     A <see cref="Array"/> of <see cref="ExportProvider"/> objects which provide 
+        ///     A <see cref="Array"/> of <see cref="ExportProvider"/> objects which provide
         ///     the <see cref="CompositionContainer"/> access to <see cref="Export"/> objects,
         ///     or <see langword="null"/> to set <see cref="Providers"/> to an empty
         ///     <see cref="ReadOnlyCollection{T}"/>.
@@ -73,40 +72,40 @@ namespace System.ComponentModel.Composition.Hosting
         /// <exception cref="ArgumentException">
         ///     <paramref name="providers"/> contains an element that is <see langword="null"/>.
         /// </exception>
-        public CompositionContainer(CompositionOptions compositionOptions, params ExportProvider[] providers) : 
+        public CompositionContainer(CompositionOptions compositionOptions, params ExportProvider[] providers) :
             this((ComposablePartCatalog)null, compositionOptions, providers)
         {
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="CompositionContainer"/> class 
+        ///     Initializes a new instance of the <see cref="CompositionContainer"/> class
         ///     with the specified catalog and export providers.
         /// </summary>
         /// <param name="providers">
-        ///     A <see cref="Array"/> of <see cref="ExportProvider"/> objects which provide 
+        ///     A <see cref="Array"/> of <see cref="ExportProvider"/> objects which provide
         ///     the <see cref="CompositionContainer"/> access to <see cref="Export"/> objects,
-        ///     or <see langword="null"/> to set <see cref="Providers"/> to an empty 
+        ///     or <see langword="null"/> to set <see cref="Providers"/> to an empty
         ///     <see cref="ReadOnlyCollection{T}"/>.
         /// </param>
         /// <exception cref="ArgumentException">
         ///     <paramref name="providers"/> contains an element that is <see langword="null"/>.
         /// </exception>
-        public CompositionContainer(ComposablePartCatalog catalog, params ExportProvider[] providers): 
+        public CompositionContainer(ComposablePartCatalog catalog, params ExportProvider[] providers):
             this(catalog, false, providers)
         {
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="CompositionContainer"/> class 
+        ///     Initializes a new instance of the <see cref="CompositionContainer"/> class
         ///     with the specified catalog and export providers.
         /// </summary>
         /// <param name="isThreadSafe">
         ///     <see cref="bool"/> indicates whether container instances are threadsafe.
         /// </param>
         /// <param name="providers">
-        ///     A <see cref="Array"/> of <see cref="ExportProvider"/> objects which provide 
+        ///     A <see cref="Array"/> of <see cref="ExportProvider"/> objects which provide
         ///     the <see cref="CompositionContainer"/> access to <see cref="Export"/> objects,
-        ///     or <see langword="null"/> to set <see cref="Providers"/> to an empty 
+        ///     or <see langword="null"/> to set <see cref="Providers"/> to an empty
         ///     <see cref="ReadOnlyCollection{T}"/>.
         /// </param>
         /// <exception cref="ArgumentException">
@@ -118,16 +117,16 @@ namespace System.ComponentModel.Composition.Hosting
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="CompositionContainer"/> class 
+        ///     Initializes a new instance of the <see cref="CompositionContainer"/> class
         ///     with the specified catalog and export providers.
         /// </summary>
-        /// <param name="compositionSettings">
+        /// <param name="compositionOptions">
         ///     <see cref="CompositionOptions"/> enumeration with flags controlling the composition.
         /// </param>
         /// <param name="providers">
-        ///     A <see cref="Array"/> of <see cref="ExportProvider"/> objects which provide 
+        ///     A <see cref="Array"/> of <see cref="ExportProvider"/> objects which provide
         ///     the <see cref="CompositionContainer"/> access to <see cref="Export"/> objects,
-        ///     or <see langword="null"/> to set <see cref="Providers"/> to an empty 
+        ///     or <see langword="null"/> to set <see cref="Providers"/> to an empty
         ///     <see cref="ReadOnlyCollection{T}"/>.
         /// </param>
         /// <exception cref="ArgumentException">
@@ -137,7 +136,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             if (compositionOptions > (CompositionOptions.DisableSilentRejection | CompositionOptions.IsThreadSafe | CompositionOptions.ExportCompositionService))
             {
-                throw new ArgumentOutOfRangeException("compositionOptions");
+                throw new ArgumentOutOfRangeException(nameof(compositionOptions));
             }
             _compositionOptions = compositionOptions;
 
@@ -145,7 +144,7 @@ namespace System.ComponentModel.Composition.Hosting
             _partExportProvider = new ComposablePartExportProvider(compositionOptions);
             _partExportProvider.SourceProvider = this;
 
-            // Create the catalog export provider, only if necessary 
+            // Create the catalog export provider, only if necessary
             if (catalog != null)
             {
                 _catalogExportProvider = new CatalogExportProvider(catalog, compositionOptions);
@@ -176,7 +175,7 @@ namespace System.ComponentModel.Composition.Hosting
                 {
                     if (providers[0] == null)
                     {
-                        throw ExceptionBuilder.CreateContainsNullElement("providers");
+                        throw ExceptionBuilder.CreateContainsNullElement(nameof(providers));
                     }
                     _ancestorExportProvider = providers[0];
                 }
@@ -214,10 +213,10 @@ namespace System.ComponentModel.Composition.Hosting
             }
 
 //Insert Composition Service
-            if(compositionOptions.HasFlag(CompositionOptions.ExportCompositionService))
+            if (compositionOptions.HasFlag(CompositionOptions.ExportCompositionService))
             {
                 this.ComposeExportedValue<ICompositionService>(new CompositionServiceShim(this));
-            }           
+            }
 
             _rootProvider.ExportsChanged += OnExportsChangedInternal;
             _rootProvider.ExportsChanging += OnExportsChangingInternal;
@@ -227,19 +226,19 @@ namespace System.ComponentModel.Composition.Hosting
 
         internal CompositionOptions CompositionOptions
         {
-            get 
+            get
             {
                 ThrowIfDisposed();
-                return _compositionOptions; 
+                return _compositionOptions;
             }
-        }                                                   
+        }
 
         /// <summary>
         ///     Gets the catalog which provides the container access to exports produced
         ///     from composable parts.
         /// </summary>
         /// <value>
-        ///     The <see cref="ComposablePartCatalog"/> which provides the 
+        ///     The <see cref="ComposablePartCatalog"/> which provides the
         ///     <see cref="CompositionContainer"/> access to exports produced from
         ///     <see cref="ComposablePart"/> objects. The default is <see langword="null"/>.
         /// </value>
@@ -248,7 +247,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public ComposablePartCatalog Catalog
         {
-            get 
+            get
             {
                 ThrowIfDisposed();
 
@@ -258,7 +257,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         internal CatalogExportProvider CatalogExportProvider
         {
-            get 
+            get
             {
                 ThrowIfDisposed();
 
@@ -272,7 +271,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// <value>
         ///     A <see cref="ReadOnlyCollection{T}"/> of <see cref="ExportProvider"/> objects
         ///     which provide the <see cref="CompositionContainer"/> access to additional
-        ///     <see cref="Export"/> objects. The default is an empty 
+        ///     <see cref="Export"/> objects. The default is an empty
         ///     <see cref="ReadOnlyCollection{T}"/>.
         /// </value>
         /// <exception cref="ObjectDisposedException">
@@ -283,7 +282,7 @@ namespace System.ComponentModel.Composition.Hosting
             get
             {
                 ThrowIfDisposed();
-                Contract.Ensures(Contract.Result<ReadOnlyCollection<ExportProvider>>() != null);
+                Debug.Assert(_providers != null);
 
                 return _providers;
             }
@@ -316,7 +315,7 @@ namespace System.ComponentModel.Composition.Hosting
                     CatalogExportProvider catalogExportProvider = null;
                     ImportEngine importEngine = null;
 
-                    lock(_lock)
+                    lock (_lock)
                     {
                         if (!_isDisposed)
                         {
@@ -386,7 +385,7 @@ namespace System.ComponentModel.Composition.Hosting
 
             }
         }
-  
+
         public void Compose(CompositionBatch batch)
         {
             Requires.NotNull(batch, nameof(batch));
@@ -397,17 +396,17 @@ namespace System.ComponentModel.Composition.Hosting
 
         /// <summary>
         ///     Releases the <see cref="Export"/> from the <see cref="CompositionContainer"/>. The behavior
-        ///     may vary depending on the implementation of the <see cref="ExportProvider"/> that produced 
-        ///     the <see cref="Export"/> instance. As a general rule non shared exports should be early 
+        ///     may vary depending on the implementation of the <see cref="ExportProvider"/> that produced
+        ///     the <see cref="Export"/> instance. As a general rule non shared exports should be early
         ///     released causing them to be detached from the container.
         ///
-        ///     For example the <see cref="CatalogExportProvider"/> will only release 
+        ///     For example the <see cref="CatalogExportProvider"/> will only release
         ///     an <see cref="Export"/> if it comes from a <see cref="ComposablePart"/> that was constructed
         ///     under a <see cref="CreationPolicy.NonShared" /> context. Release in this context means walking
-        ///     the dependency chain of the <see cref="Export"/>s, detaching references from the container and 
-        ///     calling Dispose on the <see cref="ComposablePart"/>s as needed. If the <see cref="Export"/> 
-        ///     was constructed under a <see cref="CreationPolicy.Shared" /> context the 
-        ///     <see cref="CatalogExportProvider"/> will do nothing as it may be in use by other requestors. 
+        ///     the dependency chain of the <see cref="Export"/>s, detaching references from the container and
+        ///     calling Dispose on the <see cref="ComposablePart"/>s as needed. If the <see cref="Export"/>
+        ///     was constructed under a <see cref="CreationPolicy.Shared" /> context the
+        ///     <see cref="CatalogExportProvider"/> will do nothing as it may be in use by other requestors.
         ///     Those will only be detached when the container is itself disposed.
         /// </summary>
         /// <param name="export"><see cref="Export"/> that needs to be released.</param>
@@ -429,17 +428,17 @@ namespace System.ComponentModel.Composition.Hosting
 
         /// <summary>
         ///     Releases the <see cref="Lazy{T}"/> from the <see cref="CompositionContainer"/>. The behavior
-        ///     may vary depending on the implementation of the <see cref="ExportProvider"/> that produced 
-        ///     the <see cref="Export"/> instance. As a general rule non shared exports should be early 
+        ///     may vary depending on the implementation of the <see cref="ExportProvider"/> that produced
+        ///     the <see cref="Export"/> instance. As a general rule non shared exports should be early
         ///     released causing them to be detached from the container.
         ///
-        ///     For example the <see cref="CatalogExportProvider"/> will only release 
+        ///     For example the <see cref="CatalogExportProvider"/> will only release
         ///     an <see cref="Lazy{T}"/> if it comes from a <see cref="ComposablePart"/> that was constructed
         ///     under a <see cref="CreationPolicy.NonShared" /> context. Release in this context means walking
-        ///     the dependency chain of the <see cref="Export"/>s, detaching references from the container and 
-        ///     calling Dispose on the <see cref="ComposablePart"/>s as needed. If the <see cref="Export"/> 
-        ///     was constructed under a <see cref="CreationPolicy.Shared" /> context the 
-        ///     <see cref="CatalogExportProvider"/> will do nothing as it may be in use by other requestors. 
+        ///     the dependency chain of the <see cref="Export"/>s, detaching references from the container and
+        ///     calling Dispose on the <see cref="ComposablePart"/>s as needed. If the <see cref="Export"/>
+        ///     was constructed under a <see cref="CreationPolicy.Shared" /> context the
+        ///     <see cref="CatalogExportProvider"/> will do nothing as it may be in use by other requestors.
         ///     Those will only be detached when the container is itself disposed.
         /// </summary>
         /// <param name="export"><see cref="Export"/> that needs to be released.</param>
@@ -460,7 +459,7 @@ namespace System.ComponentModel.Composition.Hosting
         }
 
         /// <summary>
-        ///     Releases a set of <see cref="Export"/>s from the <see cref="CompositionContainer"/>. 
+        ///     Releases a set of <see cref="Export"/>s from the <see cref="CompositionContainer"/>.
         ///     See also <see cref="ReleaseExport"/>.
         /// </summary>
         /// <param name="exports"><see cref="Export"/>s that need to be released.</param>
@@ -472,7 +471,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public void ReleaseExports(IEnumerable<Export> exports)
         {
-            Requires.NotNullOrNullElements(exports, "exports");
+            Requires.NotNullOrNullElements(exports, nameof(exports));
 
             foreach (Export export in exports)
             {
@@ -481,7 +480,7 @@ namespace System.ComponentModel.Composition.Hosting
         }
 
         /// <summary>
-        ///     Releases a set of <see cref="Export"/>s from the <see cref="CompositionContainer"/>. 
+        ///     Releases a set of <see cref="Export"/>s from the <see cref="CompositionContainer"/>.
         ///     See also <see cref="ReleaseExport"/>.
         /// </summary>
         /// <param name="exports"><see cref="Export"/>s that need to be released.</param>
@@ -494,7 +493,7 @@ namespace System.ComponentModel.Composition.Hosting
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public void ReleaseExports<T>(IEnumerable<Lazy<T>> exports)
         {
-            Requires.NotNullOrNullElements(exports, "exports");
+            Requires.NotNullOrNullElements(exports, nameof(exports));
 
             foreach (Lazy<T> export in exports)
             {
@@ -503,7 +502,7 @@ namespace System.ComponentModel.Composition.Hosting
         }
 
         /// <summary>
-        ///     Releases a set of <see cref="Export"/>s from the <see cref="CompositionContainer"/>. 
+        ///     Releases a set of <see cref="Export"/>s from the <see cref="CompositionContainer"/>.
         ///     See also <see cref="ReleaseExport"/>.
         /// </summary>
         /// <param name="exports"><see cref="Export"/>s that need to be released.</param>
@@ -516,7 +515,7 @@ namespace System.ComponentModel.Composition.Hosting
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public void ReleaseExports<T, TMetadataView>(IEnumerable<Lazy<T, TMetadataView>> exports)
         {
-            Requires.NotNullOrNullElements(exports, "exports");
+            Requires.NotNullOrNullElements(exports, nameof(exports));
 
             foreach (Lazy<T, TMetadataView> export in exports)
             {
@@ -544,12 +543,12 @@ namespace System.ComponentModel.Composition.Hosting
         public void SatisfyImportsOnce(ComposablePart part)
         {
             ThrowIfDisposed();
-            
+
             if (_importEngine == null)
             {
                 ImportEngine importEngine = new ImportEngine(this, _compositionOptions);
-                
-                lock(_lock)
+
+                lock (_lock)
                 {
                     if (_importEngine == null)
                     {
@@ -558,7 +557,7 @@ namespace System.ComponentModel.Composition.Hosting
                         importEngine = null;
                     }
                 }
-                if(importEngine != null)
+                if (importEngine != null)
                 {
                     importEngine.Dispose();
                 }
@@ -588,7 +587,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// empty <see cref="IEnumerable{T}"/>.
         /// </result>
         /// <remarks>
-        /// 	<note type="inheritinfo">
+        /// <note type="inheritinfo">
         /// The implementers should not treat the cardinality-related mismatches as errors, and are not
         /// expected to throw exceptions in those cases.
         /// For instance, if the import requests exactly one export and the provider has no matching exports or more than one,
@@ -602,23 +601,29 @@ namespace System.ComponentModel.Composition.Hosting
             IEnumerable<Export> exports = null;
 
             object source;
-            if(!definition.Metadata.TryGetValue(CompositionConstants.ImportSourceMetadataName, out source))
+            if (!definition.Metadata.TryGetValue(CompositionConstants.ImportSourceMetadataName, out source))
             {
                 source = ImportSource.Any;
             }
 
-            switch((ImportSource)source)
+            switch ((ImportSource)source)
             {
                 case ImportSource.Any:
-                    Assumes.NotNull(_rootProvider);
+                    if (_rootProvider == null)
+                    {
+                        throw new Exception(SR.Diagnostic_InternalExceptionMessage);
+                    }
                     _rootProvider.TryGetExports(definition, atomicComposition, out exports);
                     break;
                 case ImportSource.Local:
-                    Assumes.NotNull(_localExportProvider);
+                    if (_localExportProvider == null)
+                    {
+                        throw new Exception(SR.Diagnostic_InternalExceptionMessage);
+                    }
                     _localExportProvider.TryGetExports(definition.RemoveImportSource(), atomicComposition, out exports);
                     break;
                 case ImportSource.NonLocal:
-                    if(_ancestorExportProvider != null)
+                    if (_ancestorExportProvider != null)
                     {
                         _ancestorExportProvider.TryGetExports(definition.RemoveImportSource(), atomicComposition, out exports);
                     }

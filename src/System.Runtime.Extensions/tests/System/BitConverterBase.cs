@@ -1,15 +1,16 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
 using System.Collections.Generic;
 
+#pragma warning disable xUnit1013 // https://github.com/xunit/xunit/issues/1973
+
 namespace System.Tests
 {
     public abstract class BitConverterBase
     {
-
         [Theory]
         [InlineData(true, new byte[] { 0x01 })]
         [InlineData(false, new byte[] { 0x00 })]
@@ -34,7 +35,7 @@ namespace System.Tests
         [InlineData('{', new byte[] { 0x7B, 0x00 })]
         [InlineData('\0', new byte[] { 0x00, 0x00 })]
         [InlineData(' ', new byte[] { 0x20, 0x00 })]
-        [InlineData('\u263a', new byte[] { 0x3A, 0x26 })] // Smiley Face (☺)
+        [InlineData('\u263a', new byte[] { 0x3A, 0x26 })] // Smiley Face
         public abstract void ConvertFromChar(char character, byte[] expected);
 
         [Theory]
@@ -138,18 +139,18 @@ namespace System.Tests
 
         private static byte[] s_toCharByteArray = { 32, 0, 0, 42, 0, 65, 0, 125, 0, 197, 0, 168, 3, 41, 4, 172, 32, 0x3A, 0x26 };
 
-        private static IEnumerable<object[]> ToCharTestData()
+        public static IEnumerable<object[]> ToCharTestData()
         {
             yield return new object[] { 0, ' ', s_toCharByteArray};
             yield return new object[] { 1, '\0', s_toCharByteArray };
             yield return new object[] { 3, '*', s_toCharByteArray };
             yield return new object[] { 5, 'A', s_toCharByteArray };
             yield return new object[] { 7, '}', s_toCharByteArray };
-            yield return new object[] { 9, '\u00C5', s_toCharByteArray }; // Latin capital letter A with ring above (Å)
-            yield return new object[] { 11, '\u03A8', s_toCharByteArray }; // Greek capital letter Psi (Ψ)
-            yield return new object[] { 13, '\u0429', s_toCharByteArray }; // Cyrillic capital letter Shcha (Щ)
-            yield return new object[] { 15, '\u20AC', s_toCharByteArray }; // Euro sign (€)
-            yield return new object[] { 17, '\u263A', s_toCharByteArray }; // Smiley Face (☺)
+            yield return new object[] { 9, '\u00C5', s_toCharByteArray }; // Latin capital letter A with ring above (\u00C5)
+            yield return new object[] { 11, '\u03A8', s_toCharByteArray }; // Greek capital letter Psi (\u03A8)
+            yield return new object[] { 13, '\u0429', s_toCharByteArray }; // Cyrillic capital letter Shcha (\u0429)
+            yield return new object[] { 15, '\u20AC', s_toCharByteArray }; // Euro sign (\u20AC)
+            yield return new object[] { 17, '\u263A', s_toCharByteArray }; // Smiley Face (\u263A)
         }
 
         [Theory]
@@ -158,7 +159,7 @@ namespace System.Tests
 
         private static byte[] s_toInt16ByteArray = { 15, 0, 0, 128, 16, 39, 240, 216, 241, 255, 127 };
 
-        private static IEnumerable<object[]> ToInt16TestData()
+        public static IEnumerable<object[]> ToInt16TestData()
         {
             yield return new object[] { 1, (short)0, s_toInt16ByteArray };
             yield return new object[] { 0, (short)15, s_toInt16ByteArray };
@@ -179,13 +180,13 @@ namespace System.Tests
         [InlineData(0x1000, new byte[] { 0x00, 0x10, 0x00, 0x00 })]
         public abstract void ToInt32(int expected, byte[] byteArray);
 
-        private static byte[] s_toInt64ByteArray = 
+        private static byte[] s_toInt64ByteArray =
             { 0x00, 0x36, 0x65, 0xC4, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0xCA, 0x9A,
             0x3B, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x01, 0x00, 0x00, 0xFF, 0xFF, 0xFF,
             0xFF, 0xFF, 0xFF, 0xFF, 0x7F, 0x56, 0x55, 0x55, 0x55, 0x55, 0x55, 0xFF, 0xFF, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0x00,
             0x00, 0x64, 0xA7, 0xB3, 0xB6, 0xE0, 0x0D, 0x00, 0x00, 0x9C, 0x58, 0x4C, 0x49, 0x1F, 0xF2 };
 
-        private static IEnumerable<object[]> ToInt64TestData()
+        public static IEnumerable<object[]> ToInt64TestData()
         {
             yield return new object[] { 8, (long)0, s_toInt64ByteArray };
             yield return new object[] { 5, (long)16777215, s_toInt64ByteArray };
@@ -208,7 +209,7 @@ namespace System.Tests
 
         private static byte[] s_toUInt16ByteArray = { 15, 0, 0, 255, 3, 16, 39, 255, 255, 127 };
 
-        private static IEnumerable<object[]> ToUInt16TestData()
+        public static IEnumerable<object[]> ToUInt16TestData()
         {
             yield return new object[] { 1, (ushort)0, s_toUInt16ByteArray };
             yield return new object[] { 0, (ushort)15, s_toUInt16ByteArray };
@@ -224,7 +225,7 @@ namespace System.Tests
 
         private static byte[] s_toUInt32ByteArray = { 15, 0, 0, 0, 0, 16, 0, 255, 3, 0, 0, 202, 154, 59, 255, 255, 255, 255, 127 };
 
-        private static IEnumerable<object[]> ToUInt32TestData()
+        public static IEnumerable<object[]> ToUInt32TestData()
         {
             yield return new object[] { 1, (uint)0, s_toUInt32ByteArray };
             yield return new object[] { 0, (uint)15, s_toUInt32ByteArray };
@@ -244,7 +245,7 @@ namespace System.Tests
             0x0d, 0x00, 0xca, 0x9a, 0x3b, 0x00, 0x00, 0x00, 0x00, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x00, 0x00, 0xe8, 0x89, 0x04,
             0x23, 0xc7, 0x8a, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f };
 
-        private static IEnumerable<object[]> ToUInt64TestData()
+        public static IEnumerable<object[]> ToUInt64TestData()
         {
             yield return new object[] { 3, (ulong)0, s_toUInt64ByteArray };
             yield return new object[] { 0, (ulong)16777215, s_toUInt64ByteArray };
@@ -267,7 +268,7 @@ namespace System.Tests
             0xBE, 0x79, 0xFF, 0xFF, 0x7F, 0xFF, 0xFF, 0x7F, 0x7F, 0x01, 0x00, 0x00, 0x00, 0xC0, 0xFF, 0x00, 0x00, 0x80, 0xFF, 0x00,
             0x00, 0x80, 0x7F };
 
-        private static IEnumerable<object[]> ToSingleTestData()
+        public static IEnumerable<object[]> ToSingleTestData()
         {
             yield return new object[] { 0, 0.0000000E+000, s_toSingleByteArray };
             yield return new object[] { 2, 1.0000000E+000, s_toSingleByteArray };
@@ -301,7 +302,7 @@ namespace System.Tests
             0x00, 0x00, 0x00, 0x00, 0x00, 0xF8, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0xF0, 0x7F };
 
-        private static IEnumerable<object[]> ToDoubleTestData()
+        public static IEnumerable<object[]> ToDoubleTestData()
         {
             yield return new object[] { 0, 0.0000000000000000E+000, s_toDoubleByteArray };
             yield return new object[] { 2, 1.0000000000000000E+000, s_toDoubleByteArray };
@@ -328,7 +329,7 @@ namespace System.Tests
 
         private static byte[] s_toBooleanByteArray = { 0, 1, 2, 4, 8, 16, 32, 64, 128, 255 };
 
-        private static IEnumerable<object[]> ToBooleanTestData()
+        public static IEnumerable<object[]> ToBooleanTestData()
         {
             yield return new object[] { 0, false, s_toBooleanByteArray };
             yield return new object[] { 1, true, s_toBooleanByteArray };

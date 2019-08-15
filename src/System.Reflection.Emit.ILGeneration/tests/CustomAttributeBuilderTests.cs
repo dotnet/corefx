@@ -68,7 +68,7 @@ namespace System.Reflection.Emit.Tests
                 new string[] { nameof(TestAttribute.TestInt), nameof(TestAttribute.TestStringField) }, new object[] { intValue1, stringValue1 },
                 new object[] { intValue1, stringValue1, null, 0 }
             };
-            
+
             // 2 ctor, 0 properties, 2 fields
             yield return new object[]
             {
@@ -202,35 +202,35 @@ namespace System.Reflection.Emit.Tests
         {
             PropertyInfo[] namedProperties = Helpers.GetProperties(typeof(TestAttribute), propertyNames);
             FieldInfo[] namedFields = Helpers.GetFields(typeof(TestAttribute), fieldNames);
-            
-            Action<CustomAttributeBuilder> verify = attr =>
+
+            void Verify(CustomAttributeBuilder attr)
             {
                 VerifyCustomAttributeBuilder(attr, TestAttribute.AllProperties, expectedPropertyValues, TestAttribute.AllFields, expectedFieldValues);
-            };
-            
+            }
+
             if (namedProperties.Length == 0)
             {
                 if (namedFields.Length == 0)
                 {
                     // Use CustomAttributeBuilder(ConstructorInfo, object[])
                     CustomAttributeBuilder attribute1 = new CustomAttributeBuilder(con, constructorArgs);
-                    verify(attribute1);
+                    Verify(attribute1);
                 }
                 // Use CustomAttributeBuilder(ConstructorInfo, object[], FieldInfo[], object[])
                 CustomAttributeBuilder attribute2 = new CustomAttributeBuilder(con, constructorArgs, namedFields, fieldValues);
-                verify(attribute2);
+                Verify(attribute2);
             }
             if (namedFields.Length == 0)
             {
                 // Use CustomAttributeBuilder(ConstructorInfo, object[], PropertyInfo[], object[])
                 CustomAttributeBuilder attribute3 = new CustomAttributeBuilder(con, constructorArgs, namedProperties, propertyValues);
-                verify(attribute3);
+                Verify(attribute3);
             }
             // Use CustomAttributeBuilder(ConstructorInfo, object[], PropertyInfo[], object[], FieldInfo[], object[])
             CustomAttributeBuilder attribute4 = new CustomAttributeBuilder(con, constructorArgs, namedProperties, propertyValues, namedFields, fieldValues);
-            verify(attribute4);
+            Verify(attribute4);
         }
-        
+
         private static void VerifyCustomAttributeBuilder(CustomAttributeBuilder builder,
                                                         PropertyInfo[] propertyNames, object[] propertyValues,
                                                         FieldInfo[] fieldNames, object[] fieldValues)
@@ -456,7 +456,7 @@ namespace System.Reflection.Emit.Tests
                                                   PropertyInfo[] namedProperties, object[] propertyValues,
                                                   FieldInfo[] namedFields, object[] fieldValues)
         {
-            CustomAttributeBuilder attribute = new CustomAttributeBuilder(con, new object[0], namedProperties, propertyValues, namedFields, fieldValues);
+            CustomAttributeBuilder attribute = new CustomAttributeBuilder(con, constructorArgs, namedProperties, propertyValues, namedFields, fieldValues);
 
             AssemblyBuilder assembly = Helpers.DynamicAssembly();
             assembly.SetCustomAttribute(attribute);
@@ -478,7 +478,7 @@ namespace System.Reflection.Emit.Tests
 
             AssemblyBuilder assembly = Helpers.DynamicAssembly();
             assembly.SetCustomAttribute(attribute);
-            
+
             object customAttribute = assembly.GetCustomAttributes().First();
             Assert.Equal(fieldValues[0], namedFields[0].GetValue(namedFields[0].IsStatic ? null : customAttribute));
         }
@@ -493,7 +493,7 @@ namespace System.Reflection.Emit.Tests
 
             AssemblyBuilder assembly = Helpers.DynamicAssembly();
             assembly.SetCustomAttribute(attribute);
-            
+
             object customAttribute = assembly.GetCustomAttributes().First();
             Assert.Equal(propertyValues[0], TestAttribute.StaticProperty);
         }
@@ -531,7 +531,7 @@ namespace System.Reflection.Emit.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => new CustomAttributeBuilder(con, new object[0], new PropertyInfo[0], new object[0]));
             AssertExtensions.Throws<ArgumentException>(null, () => new CustomAttributeBuilder(con, new object[0], new PropertyInfo[0], new object[0], new FieldInfo[0], new object[0]));
         }
-        
+
         [Fact]
         public static void PrivateConstructor_ThrowsArgumentException()
         {
@@ -731,7 +731,7 @@ namespace System.Reflection.Emit.Tests
             ConstructorInfo con = typeof(TestAttribute).GetConstructor(new Type[0]);
             FieldInfo[] namedFields = new FieldInfo[] { field };
             object[] fieldValues = new object[] { value };
-            
+
             AssertExtensions.Throws<ArgumentException>(null, () => new CustomAttributeBuilder(con, new object[0], namedFields, fieldValues));
             AssertExtensions.Throws<ArgumentException>(null, () => new CustomAttributeBuilder(con, new object[0], new PropertyInfo[0], new object[0], namedFields, fieldValues));
         }
@@ -835,9 +835,9 @@ namespace System.Reflection.Emit.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Coreclr fixed an issue where IntPtr/UIntPtr in fieldValues causes a corrupt created binary.")]
         public static void NotSupportedPrimitiveInFieldValues_ThrowsArgumentException(object value)
         {
-        	// Used to assert in CustomAttributeBuilder.EmitType(), not writing any CustomAttributeEncoding.
-        	// This created a blob that (probably) generates a CustomAttributeFormatException. In theory, this
-        	// could have been something more uncontrolled, so was fixed. See issue #11703.
+            // Used to assert in CustomAttributeBuilder.EmitType(), not writing any CustomAttributeEncoding.
+            // This created a blob that (probably) generates a CustomAttributeFormatException. In theory, this
+            // could have been something more uncontrolled, so was fixed. See issue #11703.
             ConstructorInfo con = typeof(TestAttribute).GetConstructor(new Type[0]);
             FieldInfo[] namedFields = Helpers.GetFields(typeof(TestAttribute), nameof(TestAttribute.ObjectField));
             object[] fieldValues = new object[] { value };

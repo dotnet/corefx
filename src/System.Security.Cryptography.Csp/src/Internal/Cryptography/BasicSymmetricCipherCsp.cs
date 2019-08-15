@@ -2,10 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Internal.NativeCrypto;
 using System;
 using System.Diagnostics;
 using System.Security.Cryptography;
+using Internal.NativeCrypto;
+using Microsoft.Win32.SafeHandles;
 using static Internal.NativeCrypto.CapiHelper;
 
 namespace Internal.Cryptography
@@ -88,7 +89,7 @@ namespace Internal.Cryptography
         private void Reset()
         {
             // Ensure we've called CryptEncrypt with the final=true flag so the handle is reset property
-            EncryptData(_hKey, Array.Empty<Byte>(), 0, 0, Array.Empty<Byte>(), 0, 0, true);
+            EncryptData(_hKey, Array.Empty<byte>(), 0, 0, Array.Empty<byte>(), 0, 0, true);
         }
 
         private int Transform(byte[] input, int inputOffset, int count, byte[] output, int outputOffset, bool isFinal)

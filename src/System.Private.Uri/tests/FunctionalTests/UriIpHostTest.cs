@@ -282,6 +282,8 @@ namespace System.PrivateUri.Tests
         [InlineData("1:0:0:1:0:0:1:1", "1::1:0:0:1:1")]
         [InlineData("1:1:0:0:0:1:0:1", "1:1::1:0:1")]
         [InlineData("1:0:0:0:1:0:1:1", "1::1:0:1:1")]
+        [InlineData("::2:3:4:5:6:7:8", "0:2:3:4:5:6:7:8")]
+        [InlineData("1:2:3:4:5:6:7::", "1:2:3:4:5:6:7:0")]
         public void UriIPv6Host_CompressionRangeSelection_Success(string address, string expected)
         {
             ParseIPv6Address(address, expected);
@@ -313,7 +315,25 @@ namespace System.PrivateUri.Tests
         [InlineData("")]
         [InlineData(" ")]
         [InlineData("1")]
-        [InlineData(":1")]
+        [InlineData(":")] // leading single colon
+        [InlineData(":1")] // leading single colon
+        [InlineData(":1:2")] // leading single colon
+        [InlineData(":1:2:3")] // leading single colon
+        [InlineData(":1:2:3:4")] // leading single colon
+        [InlineData(":1:2:3:4:5")] // leading single colon
+        [InlineData(":1:2:3:4:5:6")] // leading single colon
+        [InlineData(":1:2:3:4:5:6:7")] // leading single colon
+        [InlineData(":1:2:3:4:5:6:7:8:9")] // leading single colon
+        [InlineData("::1:2:3:4:5:6:7:8")] // compressor with too many number groups
+        [InlineData("1::2:3:4:5:6:7:8")] // compressor with too many number groups
+        [InlineData("1:2::3:4:5:6:7:8")] // compressor with too many number groups
+        [InlineData("1:2:3::4:5:6:7:8")] // compressor with too many number groups
+        [InlineData("1:2:3:4::5:6:7:8")] // compressor with too many number groups
+        [InlineData("1:2:3:4:5::6:7:8")] // compressor with too many number groups
+        [InlineData("1:2:3:4:5:6::7:8")] // compressor with too many number groups
+        [InlineData("1:2:3:4:5:6:7::8")] // compressor with too many number groups
+        [InlineData("1:2:3:4:5:6:7:8::")] // compressor with too many number groups
+        [InlineData("::1:2:3:4:5:6:7:8:9")] // compressor with too many number groups
         [InlineData("1:")]
         [InlineData("::1 ")]
         [InlineData(" ::1")]
@@ -332,6 +352,15 @@ namespace System.PrivateUri.Tests
         {
             ParseBadIPv6Address(address);
         }
+
+        [Theory]
+        [InlineData(":1:2:3:4:5:6:7:8")] // leading single colon
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework machines are not yet patched with the fix for this")]
+        public void UriIPv6Host_BadAddress_SkipOnFramework(string address)
+        {
+            ParseBadIPv6Address(address);
+        }
+
 
         #region Helpers
 

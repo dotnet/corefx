@@ -16,7 +16,7 @@ namespace System.Xml
         //
         private class NamespaceResolverProxy : IXmlNamespaceResolver
         {
-            private XmlWellFormedWriter _wfWriter;
+            private readonly XmlWellFormedWriter _wfWriter;
 
             internal NamespaceResolverProxy(XmlWellFormedWriter wfWriter)
             {
@@ -379,7 +379,7 @@ namespace System.Xml
                             writer.WriteValue((string)item.data);
                             break;
                         default:
-                            Debug.Assert(false, "Unexpected ItemType value.");
+                            Debug.Fail("Unexpected ItemType value.");
                             break;
                     }
                 }
@@ -511,7 +511,7 @@ namespace System.Xml
                 else if (_items.Length == newItemIndex)
                 {
                     Item[] newItems = new Item[newItemIndex * 2];
-                    Array.Copy(_items, newItems, newItemIndex);
+                    Array.Copy(_items, 0, newItems, 0, newItemIndex);
                     _items = newItems;
                 }
                 if (_items[newItemIndex] == null)

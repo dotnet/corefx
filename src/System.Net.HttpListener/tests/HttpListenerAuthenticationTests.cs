@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -13,6 +13,7 @@ using Xunit;
 
 namespace System.Net.Tests
 {
+    [ConditionalClass(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // httpsys component missing in Nano.
     public class HttpListenerAuthenticationTests : IDisposable
     {
         private const string Basic = "Basic";
@@ -66,7 +67,6 @@ namespace System.Net.Tests
 
         [Theory]
         [InlineData(AuthenticationSchemes.Basic)]
-        [InlineData(AuthenticationSchemes.Basic | AuthenticationSchemes.None)]
         [InlineData(AuthenticationSchemes.Basic | AuthenticationSchemes.Anonymous)]
         public async Task BasicAuthentication_ValidUsernameAndPassword_Success(AuthenticationSchemes authScheme)
         {
@@ -74,7 +74,6 @@ namespace System.Net.Tests
             await ValidateValidUser();
         }
 
-        [ActiveIssue(19967, TargetFrameworkMonikers.NetFramework)]
         [Theory]
         [MemberData(nameof(BasicAuthenticationHeader_TestData))]
         public async Task BasicAuthentication_InvalidRequest_SendsStatusCodeClient(string header, HttpStatusCode statusCode)
@@ -106,7 +105,6 @@ namespace System.Net.Tests
             yield return new object[] { "abc", HttpStatusCode.InternalServerError };
         }
 
-        [ActiveIssue(19967, TargetFrameworkMonikers.NetFramework)]
         [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20098, TestPlatforms.Unix)]
         [InlineData("ExampleRealm")]
         [InlineData("  ExampleRealm  ")]
@@ -165,7 +163,6 @@ namespace System.Net.Tests
         }
 
         [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support NTLM")]
-        [ActiveIssue(20604)]
         public async Task NtlmAuthentication_Conversation_ReturnsExpectedType2Message()
         {
             _listener.AuthenticationSchemes = AuthenticationSchemes.Ntlm;
@@ -187,8 +184,7 @@ namespace System.Net.Tests
             yield return new object[] { "abcd", HttpStatusCode.BadRequest };
         }
 
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support NTLM")]
-        [ActiveIssue(20604)]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support NTLM")]
         [MemberData(nameof(InvalidNtlmNegotiateAuthentication_TestData))]
         public async Task NtlmAuthentication_InvalidRequestHeaders_ReturnsExpectedStatusCode(string header, HttpStatusCode statusCode)
         {
@@ -211,7 +207,6 @@ namespace System.Net.Tests
         }
 
         [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support Negotiate")]
-        [ActiveIssue(20604)]
         public async Task NegotiateAuthentication_Conversation_ReturnsExpectedType2Message()
         {
             _listener.AuthenticationSchemes = AuthenticationSchemes.Negotiate;
@@ -225,8 +220,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support Negotiate")]
-        [ActiveIssue(20604)]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support Negotiate")]
         [MemberData(nameof(InvalidNtlmNegotiateAuthentication_TestData))]
         public async Task NegotiateAuthentication_InvalidRequestHeaders_ReturnsExpectedStatusCode(string header, HttpStatusCode statusCode)
         {
@@ -237,7 +231,14 @@ namespace System.Net.Tests
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Negotiate", header);
 
                 HttpResponseMessage message = await AuthenticationFailure(client, statusCode);
-                Assert.Empty(message.Headers.WwwAuthenticate);
+                if (statusCode == HttpStatusCode.Unauthorized)
+                {
+                    Assert.NotEmpty(message.Headers.WwwAuthenticate);
+                }
+                else
+                {
+                    Assert.Empty(message.Headers.WwwAuthenticate);
+                }
             }
         }
 
@@ -329,13 +330,13 @@ namespace System.Net.Tests
                 AssertExtensions.Throws<ArgumentException>("value", "CustomChannelBinding", () => listener.ExtendedProtectionPolicy = protectionPolicy);
             }
         }
-        
+
         [Fact]
         public void UnsafeConnectionNtlmAuthentication_SetGet_ReturnsExpected()
         {
             using (var listener = new HttpListener())
             {
-                Assert.Equal(false, listener.UnsafeConnectionNtlmAuthentication);
+                Assert.False(listener.UnsafeConnectionNtlmAuthentication);
 
                 listener.UnsafeConnectionNtlmAuthentication = true;
                 Assert.True(listener.UnsafeConnectionNtlmAuthentication);
@@ -437,7 +438,7 @@ namespace System.Net.Tests
             Assert.Equal(errorCode, clientTask.Result.StatusCode);
             return clientTask.Result;
         }
-        
+
         private async Task ValidateNullUser()
         {
             Task<HttpListenerContext> serverContextTask = _listener.GetContextAsync();

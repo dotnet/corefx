@@ -2,13 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using Xunit;
 
 namespace System.Tests
 {
-    public static class ActivatorTests
+    public partial class ActivatorTests
     {
         [Fact]
         public static void CreateInstance()
@@ -64,21 +66,124 @@ namespace System.Tests
         }
 
         [Fact]
-        public static void CreateInstance_Invalid()
+        public void CreateInstance_ValueTypeWithPublicDefaultConstructor_Success()
         {
-            Type nullType = null;
-            AssertExtensions.Throws<ArgumentNullException>("type", () => Activator.CreateInstance(nullType)); // Type is null
-            AssertExtensions.Throws<ArgumentNullException>("type", () => Activator.CreateInstance(null, new object[0])); // Type is null
+            // Activator holds a cache of constructors and the types to which they belong.
+            // Test caching behaviour by activating multiple times.
+            Assert.IsType<ValueTypeWithDefaultConstructor>(Activator.CreateInstance(typeof(ValueTypeWithDefaultConstructor)));
+            Assert.IsType<ValueTypeWithDefaultConstructor>(Activator.CreateInstance(typeof(ValueTypeWithDefaultConstructor), nonPublic: true));
+            Assert.IsType<ValueTypeWithDefaultConstructor>(Activator.CreateInstance(typeof(ValueTypeWithDefaultConstructor), nonPublic: false));
+        }
 
+        [Fact]
+        public void CreateInstance_NonPublicTypeWithPrivateDefaultConstructor_Success()
+        {
+            // Activator holds a cache of constructors and the types to which they belong.
+            // Test caching behaviour by activating multiple times.
+            TypeWithPrivateDefaultConstructor c1 = (TypeWithPrivateDefaultConstructor)Activator.CreateInstance(typeof(TypeWithPrivateDefaultConstructor), nonPublic: true);
+            Assert.Equal(-1, c1.Property);
+
+            TypeWithPrivateDefaultConstructor c2 = (TypeWithPrivateDefaultConstructor)Activator.CreateInstance(typeof(TypeWithPrivateDefaultConstructor), nonPublic: true);
+            Assert.Equal(-1, c2.Property);
+        }
+
+        [Fact]
+        public void CreateInstance_PublicOnlyTypeWithPrivateDefaultConstructor_ThrowsMissingMethodException()
+        {
+            Assert.Throws<MissingMethodException>(() => Activator.CreateInstance(typeof(TypeWithPrivateDefaultConstructor)));
+            Assert.Throws<MissingMethodException>(() => Activator.CreateInstance(typeof(TypeWithPrivateDefaultConstructor), nonPublic: false));
+
+            // Put the private default constructor into the cache and make sure we still throw if public only.
+            Assert.NotNull(Activator.CreateInstance(typeof(TypeWithPrivateDefaultConstructor), nonPublic: true));
+
+            Assert.Throws<MissingMethodException>(() => Activator.CreateInstance(typeof(TypeWithPrivateDefaultConstructor)));
+            Assert.Throws<MissingMethodException>(() => Activator.CreateInstance(typeof(TypeWithPrivateDefaultConstructor), nonPublic: false));
+        }
+
+        [Fact]
+        public void CreateInstance_NullableType_ReturnsNull()
+        {
+            Assert.Null(Activator.CreateInstance(typeof(int?)));
+        }
+
+        [Fact]
+        public void CreateInstance_NullType_ThrowsArgumentNullException()
+        {
+            AssertExtensions.Throws<ArgumentNullException>("type", () => Activator.CreateInstance((Type)null));
+            AssertExtensions.Throws<ArgumentNullException>("type", () => Activator.CreateInstance(null, new object[0]));
+        }
+
+        [Fact]
+        public static void CreateInstance_MultipleMatchingConstructors_ThrowsAmbiguousMatchException()
+        {
             Assert.Throws<AmbiguousMatchException>(() => Activator.CreateInstance(typeof(Choice1), new object[] { null }));
+        }
 
+#if netcoreapp
+        [Fact]
+        public void CreateInstance_NotRuntimeType_ThrowsArgumentException()
+        {
+            // This cannot be a [Theory] due to https://github.com/xunit/xunit/issues/1325.
+            foreach (Type nonRuntimeType in Helpers.NonRuntimeTypes)
+            {
+                AssertExtensions.Throws<ArgumentException>("type", () => Activator.CreateInstance(nonRuntimeType));
+                AssertExtensions.Throws<ArgumentException>("type", () => Activator.CreateInstance(nonRuntimeType, new object[0]));
+            }
+        }
+#endif // netcoreapp
+
+        public static IEnumerable<object[]> CreateInstance_ContainsGenericParameters_TestData()
+        {
+            yield return new object[] { typeof(List<>) };
+            yield return new object[] { typeof(List<>).GetTypeInfo().GenericTypeParameters[0] };
+        }
+
+        [Theory]
+        [MemberData(nameof(CreateInstance_ContainsGenericParameters_TestData))]
+        public void CreateInstance_ContainsGenericParameters_ThrowsArgumentException(Type type)
+        {
+            AssertExtensions.Throws<ArgumentException>(null, () => Activator.CreateInstance(type));
+            AssertExtensions.Throws<ArgumentException>(null, () => Activator.CreateInstance(type, new object[0]));
+        }
+
+        public static IEnumerable<object[]> CreateInstance_InvalidType_TestData()
+        {
+            yield return new object[] { typeof(void) };
+            yield return new object[] { typeof(void).MakeArrayType() };
+            yield return new object[] { Type.GetType("System.ArgIterator") };
+            // Fails with TypeLoadException in .NET Core as array types of ref structs
+            // are not supported.
+            if (!PlatformDetection.IsNetCore)
+            {
+                yield return new object[] { Type.GetType("System.ArgIterator").MakeArrayType() };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(CreateInstance_InvalidType_TestData))]
+        public void CreateInstance_InvalidType_ThrowsNotSupportedException(Type type)
+        {
+            Assert.Throws<NotSupportedException>(() => Activator.CreateInstance(type));
+            Assert.Throws<NotSupportedException>(() => Activator.CreateInstance(type, new object[0]));
+        }
+
+        [Fact]
+        public void CreateInstance_DesignatedOptionalParameters_ThrowsMissingMemberException()
+        {
             // C# designated optional parameters are not optional as far as Activator.CreateInstance() is concerned.
             Assert.ThrowsAny<MissingMemberException>(() => Activator.CreateInstance(typeof(Choice1), new object[] { 5.1 }));
             Assert.ThrowsAny<MissingMemberException>(() => Activator.CreateInstance(typeof(Choice1), new object[] { 5.1, Type.Missing }));
+        }
 
-            // Invalid params args
+        [Fact]
+        public void CreateInstance_InvalidParamArgs_ThrowsMissingMemberException()
+        {
             Assert.ThrowsAny<MissingMemberException>(() => Activator.CreateInstance(typeof(Choice1), new object[] { new VarStringArgs(), 5, 6 }));
+        }
 
+        [Fact]
+        public void CreateInstance_PrimitiveWidening_ThrowsInvalidCastException()
+        {
             // Primitive widening not supported for "params" arguments.
             //
             // (This is probably an accidental behavior on the desktop as the default binder specifically checks to see if the params arguments are widenable to the
@@ -86,40 +191,79 @@ namespace System.Tests
             // the params arguments. Since Array.Copy() doesn't tolerate this sort of type mismatch, it throws an InvalidCastException which bubbles out
             // out of Activator.CreateInstance. Accidental or not, we'll inherit that behavior on .NET Native.)
             Assert.Throws<InvalidCastException>(() => Activator.CreateInstance(typeof(Choice1), new object[] { new VarIntArgs(), 1, (short)2 }));
+        }
 
-            Assert.ThrowsAny<MissingMemberException>(() => Activator.CreateInstance(typeof(TypeWithoutDefaultCtor))); // Type has no default constructor
-            Assert.Throws<TargetInvocationException>(() => Activator.CreateInstance(typeof(TypeWithDefaultCtorThatThrows))); // Type has a default constructor throws an exception
-            Assert.ThrowsAny<MissingMemberException>(() => Activator.CreateInstance(typeof(AbstractTypeWithDefaultCtor))); // Type is abstract
-            Assert.ThrowsAny<MissingMemberException>(() => Activator.CreateInstance(typeof(IInterfaceType))); // Type is an interface
+        public static IEnumerable<object[]> CreateInstance_NoDefaultConstructor_TestData()
+        {
+            yield return new object[] { typeof(TypeWithoutDefaultCtor) };
+            yield return new object[] { typeof(int[]) };
+            yield return new object[] { typeof(int).MakeByRefType() };
+            yield return new object[] { typeof(int).MakePointerType() };
+        }
 
-#if netcoreapp || uapaot
-            foreach (Type nonRuntimeType in Helpers.NonRuntimeTypes)
-            {
-                // Type is not a valid RuntimeType
-                AssertExtensions.Throws<ArgumentException>("type", () => Activator.CreateInstance(nonRuntimeType));
-            }
-#endif // netcoreapp || uapaot
+        [Theory]
+        [MemberData(nameof(CreateInstance_NoDefaultConstructor_TestData))]
+        public void CreateInstance_NoDefaultConstructor_ThrowsMissingMemberException(Type type)
+        {
+            Assert.ThrowsAny<MissingMemberException>(() => Activator.CreateInstance(type));
+        }
+
+        [Theory]
+        [InlineData(typeof(AbstractTypeWithDefaultCtor))]
+        [InlineData(typeof(Array))]
+        public void CreateInstance_AbstractClass_ThrowsMissingMemberException(Type type)
+        {
+            Assert.ThrowsAny<MissingMemberException>(() => Activator.CreateInstance(type));
+        }
+
+        [Theory]
+        [InlineData(typeof(TypedReference))]
+        [InlineData(typeof(RuntimeArgumentHandle))]
+        public void CreateInstance_BoxedByRefType_ThrowsNotSupportedException(Type type)
+        {
+            Assert.Throws<NotSupportedException>(() => Activator.CreateInstance(type));
         }
 
         [Fact]
-        public static void CreateInstance_Generic()
+        public void CreateInstance_Span_ThrowsNotSupportedException()
         {
-            Choice1 c = Activator.CreateInstance<Choice1>();
-            Assert.Equal(1, c.I);
-
-            Activator.CreateInstance<DateTime>();
-            Activator.CreateInstance<StructTypeWithoutReflectionMetadata>();
+            CreateInstance_BoxedByRefType_ThrowsNotSupportedException(typeof(Span<int>));
         }
 
         [Fact]
-        public static void CreateInstance_Generic_Invalid()
+        public void CreateInstance_InterfaceType_ThrowsMissingMemberException()
         {
-            Assert.ThrowsAny<MissingMemberException>(() => Activator.CreateInstance<int[]>()); // Cannot create array type
+            Assert.ThrowsAny<MissingMemberException>(() => Activator.CreateInstance(typeof(IInterfaceType)));
+        }
 
-            Assert.ThrowsAny<MissingMemberException>(() => Activator.CreateInstance<TypeWithoutDefaultCtor>()); // Type has no default constructor
-            Assert.Throws<TargetInvocationException>(() => Activator.CreateInstance<TypeWithDefaultCtorThatThrows>()); // Type has a default constructor that throws
-            Assert.ThrowsAny<MissingMemberException>(() => Activator.CreateInstance<AbstractTypeWithDefaultCtor>()); // Type is abstract
-            Assert.ThrowsAny<MissingMemberException>(() => Activator.CreateInstance<IInterfaceType>()); // Type is an interface
+        public class SubMarshalByRefObject : MarshalByRefObject
+        {
+        }
+
+        [Fact]
+        public void CreateInstance_ConstructorThrows_ThrowsTargetInvocationException()
+        {
+            // Put the constructor into the cache and make sure we still throw if cached.
+            Assert.Throws<TargetInvocationException>(() => Activator.CreateInstance(typeof(TypeWithDefaultCtorThatThrows)));
+            Assert.Throws<TargetInvocationException>(() => Activator.CreateInstance(typeof(TypeWithDefaultCtorThatThrows)));
+        }
+
+        [Fact]
+        public void CreateInstance_ConstructorThrowsFromCache_ThrowsTargetInvocationException()
+        {
+            // Put the constructor into the cache and make sure we still throw if cached.
+            Assert.IsType<TypeWithDefaultCtorThatThrowsOnSecondCall>(Activator.CreateInstance(typeof(TypeWithDefaultCtorThatThrowsOnSecondCall)));
+            Assert.Throws<TargetInvocationException>(() => Activator.CreateInstance(typeof(TypeWithDefaultCtorThatThrowsOnSecondCall)));
+        }
+
+        [Theory]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Netcoreapp, "Activation Attributes are not supported in .NET Core.")]
+        [InlineData(typeof(MarshalByRefObject))]
+        [InlineData(typeof(SubMarshalByRefObject))]
+        public void CreateInstance_MarshalByRefObjectNetCore_ThrowsPlatformNotSupportedException(Type type)
+        {
+            Assert.Throws<PlatformNotSupportedException>(() => Activator.CreateInstance(type, null, new object[] { 1 } ));
+            Assert.Throws<PlatformNotSupportedException>(() => Activator.CreateInstance(type, null, new object[] { 1, 2 } ));
         }
 
         [Fact]
@@ -137,7 +281,7 @@ namespace System.Tests
             Assert.False(TypeWithPrivateDefaultCtorAndFinalizer.WasCreated);
         }
 
-        class PrivateType
+        private class PrivateType
         {
             public PrivateType() { }
         }
@@ -219,6 +363,20 @@ namespace System.Tests
 
         public class VarIntArgs { }
 
+        public struct ValueTypeWithDefaultConstructor
+        {
+        }
+
+        public class TypeWithPrivateDefaultConstructor
+        {
+            public int Property { get; }
+
+            private TypeWithPrivateDefaultConstructor()
+            {
+                Property = -1;
+            }
+        }
+
         public class TypeWithPrivateDefaultCtorAndFinalizer
         {
             public static bool WasCreated { get; private set; }
@@ -250,6 +408,21 @@ namespace System.Tests
         public class TypeWithDefaultCtorThatThrows
         {
             public TypeWithDefaultCtorThatThrows() { throw new Exception(); }
+        }
+
+        public class TypeWithDefaultCtorThatThrowsOnSecondCall
+        {
+            private static int i;
+
+            public TypeWithDefaultCtorThatThrowsOnSecondCall()
+            {
+                if (i != 0)
+                {
+                    throw new Exception();
+                }
+
+                i++;
+            }
         }
 
         class ClassWithPrivateCtor
@@ -309,7 +482,7 @@ namespace System.Tests
         }
 
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsInvokingStaticConstructorsSupported))]
-        static void TestingBindingFlags()
+        public static void TestingBindingFlags()
         {
             Assert.Throws<MissingMethodException>(() => Activator.CreateInstance(typeof(ClassWithPrivateCtor), BindingFlags.Public | BindingFlags.Instance, null, null, CultureInfo.CurrentCulture));
             Assert.Throws<MissingMethodException>(() => Activator.CreateInstance(typeof(ClassWithPrivateCtor), BindingFlags.Public | BindingFlags.Instance, null, new object[] { 1, 2, 3 }, CultureInfo.CurrentCulture));
@@ -340,7 +513,7 @@ namespace System.Tests
         }
 
         [Fact]
-        static void TestingBindingFlagsInstanceOnly()
+        public static void TestingBindingFlagsInstanceOnly()
         {
             Assert.Throws<MissingMethodException>(() => Activator.CreateInstance(typeof(HasPublicCtor), default(BindingFlags), null, null, null));
             Assert.Throws<MissingMethodException>(() => Activator.CreateInstance(typeof(HasPublicCtor), BindingFlags.NonPublic | BindingFlags.Instance, null, null, null));
@@ -362,7 +535,7 @@ namespace System.Tests
         }
 
         [Fact]
-        static void TestingBindingFlags1()
+        public static void TestingBindingFlags1()
         {
             Assert.Throws<MissingMethodException>(() => Activator.CreateInstance(typeof(ClassWithPrivateCtor), BindingFlags.Public | BindingFlags.Instance, null, null, CultureInfo.CurrentCulture, null));
             Assert.Throws<MissingMethodException>(() => Activator.CreateInstance(typeof(ClassWithPrivateCtor), BindingFlags.Public | BindingFlags.Instance, null, new object[] { 1, 2, 3 }, CultureInfo.CurrentCulture, null));
@@ -372,10 +545,9 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        static void TestingActivationAttributes()
+        public static void TestingActivationAttributes()
         {
-            Assert.Throws<PlatformNotSupportedException>(() => Activator.CreateInstance(typeof(ClassWithIsTestedAttribute), null, new object[] { new Object() }));
+            Assert.Throws<PlatformNotSupportedException>(() => Activator.CreateInstance(typeof(ClassWithIsTestedAttribute), null, new object[] { new object() }));
             Assert.Throws<PlatformNotSupportedException>(() => Activator.CreateInstance(typeof(ClassWithIsTestedAttribute), null, new object[] { new IsTestedAttribute(true) }));
             Assert.Throws<PlatformNotSupportedException>(() => Activator.CreateInstance(typeof(ClassWithSerializableAttribute), null, new object[] { new ClassWithIsTestedAttribute() }));
             Assert.Throws<PlatformNotSupportedException>(() => Activator.CreateInstance(typeof(MBRWithIsTestedAttribute), null, new object[] { new IsTestedAttribute(true) }));
@@ -386,11 +558,10 @@ namespace System.Tests
         }
 
         [Fact]
-        static void TestingActivationAttributes1()
+        public static void TestingActivationAttributes1()
         {
             Activator.CreateInstance(typeof(ClassWithIsTestedAttribute), null, null);
             Activator.CreateInstance(typeof(ClassWithIsTestedAttribute), null, new object[] { });
-
         }
     }
 }

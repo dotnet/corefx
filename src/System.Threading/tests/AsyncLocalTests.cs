@@ -17,13 +17,13 @@ namespace System.Threading.Tests
         public static async Task ValueProperty()
         {
             AsyncLocal<int> local = new AsyncLocal<int>();
-            Assert.Equal(local.Value, 0);
+            Assert.Equal(0, local.Value);
 
             local.Value = 1;
-            Assert.Equal(local.Value, 1);
+            Assert.Equal(1, local.Value);
 
             local.Value = 0;
-            Assert.Equal(local.Value, 0);
+            Assert.Equal(0, local.Value);
         }
 
         [Fact]
@@ -41,12 +41,12 @@ namespace System.Threading.Tests
                 ec,
                 _ =>
                 {
-                    Assert.Equal(local.Value, 42);
+                    Assert.Equal(42, local.Value);
                     local.Value = 56;
                 },
                 null);
 
-            Assert.Equal(local.Value, 12);
+            Assert.Equal(12, local.Value);
         }
 
         [Fact]
@@ -62,12 +62,12 @@ namespace System.Threading.Tests
                 ec,
                 _ =>
                 {
-                    Assert.Equal(local.Value, 0);
+                    Assert.Equal(0, local.Value);
                     local.Value = 56;
                 },
                 null);
 
-            Assert.Equal(local.Value, 12);
+            Assert.Equal(12, local.Value);
         }
 
         [Theory]
@@ -251,7 +251,7 @@ namespace System.Threading.Tests
                     Assert.True(gotNotification);
                     gotNotification = false;
 
-                    Assert.Equal(local.Value, 1);
+                    Assert.Equal(1, local.Value);
 
                     expectNotification = true;
                     expectedPreviousValue = 1;
@@ -272,7 +272,7 @@ namespace System.Threading.Tests
             Assert.True(gotNotification);
             gotNotification = false;
 
-            Assert.Equal(local.Value, 2);
+            Assert.Equal(2, local.Value);
 
             expectNotification = true;
             expectThreadContextChange = true;
@@ -324,7 +324,7 @@ namespace System.Threading.Tests
                     Assert.True(gotNotification);
                     gotNotification = false;
 
-                    Assert.Equal(local.Value, 0);
+                    Assert.Equal(0, local.Value);
 
                     expectNotification = true;
                     expectedPreviousValue = 0;
@@ -337,7 +337,7 @@ namespace System.Threading.Tests
             Assert.True(gotNotification);
             gotNotification = false;
 
-            Assert.Equal(local.Value, 1);
+            Assert.Equal(1, local.Value);
 
             expectNotification = true;
             expectThreadContextChange = true;
@@ -376,7 +376,7 @@ namespace System.Threading.Tests
             await Run(async () =>
             {
                 Assert.Equal(tls.Value, als.Value);
-                Assert.Equal(als.Value, 2);
+                Assert.Equal(2, als.Value);
 
                 als.Value = 3;
                 Assert.Equal(tls.Value, als.Value);
@@ -384,49 +384,49 @@ namespace System.Threading.Tests
                 Task t = Run(async () =>
                 {
                     Assert.Equal(tls.Value, als.Value);
-                    Assert.Equal(als.Value, 3);
+                    Assert.Equal(3, als.Value);
 
                     als.Value = 4;
 
                     Assert.Equal(tls.Value, als.Value);
-                    Assert.Equal(als.Value, 4);
+                    Assert.Equal(4, als.Value);
 
                     await Task.Run(() =>
                     {
                         Assert.Equal(tls.Value, als.Value);
-                        Assert.Equal(als.Value, 4);
+                        Assert.Equal(4, als.Value);
 
                         als.Value = 5;
 
                         Assert.Equal(tls.Value, als.Value);
-                        Assert.Equal(als.Value, 5);
+                        Assert.Equal(5, als.Value);
                     });
 
                     Assert.Equal(tls.Value, als.Value);
-                    Assert.Equal(als.Value, 4);
+                    Assert.Equal(4, als.Value);
 
                     als.Value = 6;
 
                     Assert.Equal(tls.Value, als.Value);
-                    Assert.Equal(als.Value, 6);
+                    Assert.Equal(6, als.Value);
                 });
 
                 Assert.Equal(tls.Value, als.Value);
-                Assert.Equal(als.Value, 3);
+                Assert.Equal(3, als.Value);
 
                 await Task.Yield();
 
                 Assert.Equal(tls.Value, als.Value);
-                Assert.Equal(als.Value, 3);
+                Assert.Equal(3, als.Value);
 
                 await t;
 
                 Assert.Equal(tls.Value, als.Value);
-                Assert.Equal(als.Value, 3);
+                Assert.Equal(3, als.Value);
             });
 
             Assert.Equal(tls.Value, als.Value);
-            Assert.Equal(als.Value, 2);
+            Assert.Equal(2, als.Value);
         }
 
         [Fact]
@@ -438,7 +438,7 @@ namespace System.Threading.Tests
 
             valueToSet = 2;
             local.Value = 1;
-            Assert.Equal(local.Value, 1);
+            Assert.Equal(1, local.Value);
 
             await Run(async () =>
             {
@@ -446,7 +446,7 @@ namespace System.Threading.Tests
                 valueToSet = 4;
             });
 
-            Assert.Equal(local.Value, 4);
+            Assert.Equal(4, local.Value);
         }
 
         [Fact]
@@ -463,7 +463,7 @@ namespace System.Threading.Tests
                     local.Value = 12;
                 });
 
-            Assert.Equal(local.Value, 42);
+            Assert.Equal(42, local.Value);
         }
 
         [Theory]
@@ -516,6 +516,61 @@ namespace System.Threading.Tests
             {
                 locals[i].Value = null;
                 Assert.Null(locals[i].Value);
+                for (int j = i + 1; j < locals.Length; j++)
+                {
+                    Assert.Equal(j.ToString(), locals[j].Value);
+                }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(GetCounts))]
+        public static async Task AddUpdateAndRemoveManyLocals_ReferenceType_NotifyOnChange(int count)
+        {
+            string valueChangedLog = string.Empty;
+            string expectedValueChangedLog = string.Empty;
+            string GetValueChangedLogLine(string previousValue, string currentValue) =>
+                $"{previousValue ?? "(null)"} => {currentValue ?? "(null)"}{Environment.NewLine}";
+            Action<AsyncLocalValueChangedArgs<string>> valueChangedHandler =
+                args => valueChangedLog += GetValueChangedLogLine(args.PreviousValue, args.CurrentValue);
+            void VerifyValueChangedLog()
+            {
+                Assert.Equal(expectedValueChangedLog, valueChangedLog);
+                valueChangedLog = string.Empty;
+                expectedValueChangedLog = string.Empty;
+            }
+
+            var locals = new AsyncLocal<string>[count];
+
+            for (int i = 0; i < locals.Length; i++)
+            {
+                locals[i] = new AsyncLocal<string>(valueChangedHandler);
+                expectedValueChangedLog += GetValueChangedLogLine(locals[i].Value, i.ToString());
+                locals[i].Value = i.ToString();
+                VerifyValueChangedLog();
+
+                for (int j = 0; j <= i; j++)
+                {
+                    Assert.Equal(j.ToString(), locals[j].Value);
+
+                    expectedValueChangedLog += GetValueChangedLogLine(locals[j].Value, (j + 1).ToString());
+                    locals[j].Value = (j + 1).ToString();
+                    Assert.Equal((j + 1).ToString(), locals[j].Value);
+                    VerifyValueChangedLog();
+
+                    expectedValueChangedLog += GetValueChangedLogLine(locals[j].Value, j.ToString());
+                    locals[j].Value = j.ToString();
+                    Assert.Equal(j.ToString(), locals[j].Value);
+                    VerifyValueChangedLog();
+                }
+            }
+
+            for (int i = 0; i < locals.Length; i++)
+            {
+                expectedValueChangedLog += GetValueChangedLogLine(locals[i].Value, null);
+                locals[i].Value = null;
+                Assert.Null(locals[i].Value);
+                VerifyValueChangedLog();
                 for (int j = i + 1; j < locals.Length; j++)
                 {
                     Assert.Equal(j.ToString(), locals[j].Value);
@@ -587,8 +642,8 @@ namespace System.Threading.Tests
                     ClearCounts();
 
                     ExecutionContext.Run(
-                        capturedContexts[contextIndex].CreateCopy(), 
-                        (o) => TestCapturedExecutionContext((int)o), 
+                        capturedContexts[contextIndex].CreateCopy(),
+                        (o) => TestCapturedExecutionContext((int)o),
                         contextIndex);
 
                     // Validate locals have been restored to the Default context's values
@@ -604,8 +659,8 @@ namespace System.Threading.Tests
 
                 // Validate locals are correctly reset Running with a Default context from a non-Default context
                 ExecutionContext.Run(
-                    Default.CreateCopy(), 
-                    _ => ValidateAsyncLocalsValuesNull(), 
+                    Default.CreateCopy(),
+                    _ => ValidateAsyncLocalsValuesNull(),
                     null);
 
                 ValidateCounts(thresholdIndex: contextIndex, maunalSets: 0, automaticUnsets: 1, automaticSets: 2);
@@ -616,7 +671,7 @@ namespace System.Threading.Tests
                 {
                     // Validate locals are correctly restored Running with another non-Default context from a non-Default context
                     ExecutionContext.Run(
-                        capturedContexts[innerContextIndex].CreateCopy(), 
+                        capturedContexts[innerContextIndex].CreateCopy(),
                         o => ValidateAsyncLocalsValues(thresholdIndex: (int)o),
                         innerContextIndex);
 

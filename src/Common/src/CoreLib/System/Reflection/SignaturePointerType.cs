@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-
 namespace System.Reflection
 {
     internal sealed class SignaturePointerType : SignatureHasElementType
@@ -12,16 +10,16 @@ namespace System.Reflection
             : base(elementType)
         {
         }
-    
+
         protected sealed override bool IsArrayImpl() => false;
         protected sealed override bool IsByRefImpl() => false;
         protected sealed override bool IsPointerImpl() => true;
-    
+
         public sealed override bool IsSZArray => false;
         public sealed override bool IsVariableBoundArray => false;
-    
+
         public sealed override int GetArrayRank() => throw new ArgumentException(SR.Argument_HasToBeArrayClass);
-    
+
         protected sealed override string Suffix => "*";
     }
 }

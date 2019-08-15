@@ -4,7 +4,6 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.Contracts;
 
 namespace System.Collections.Immutable
 {
@@ -14,10 +13,10 @@ namespace System.Collections.Immutable
         /// Enumerates the contents of a binary tree.
         /// </summary>
         /// <remarks>
-        /// This struct can and should be kept in exact sync with the other binary tree enumerators: 
+        /// This struct can and should be kept in exact sync with the other binary tree enumerators:
         /// <see cref="ImmutableList{T}.Enumerator"/>, <see cref="ImmutableSortedDictionary{TKey, TValue}.Enumerator"/>, and <see cref="ImmutableSortedSet{T}.Enumerator"/>.
-        /// 
-        /// CAUTION: when this enumerator is actually used as a valuetype (not boxed) do NOT copy it by assigning to a second variable 
+        ///
+        /// CAUTION: when this enumerator is actually used as a valuetype (not boxed) do NOT copy it by assigning to a second variable
         /// or by passing it to another method.  When this enumerator is disposed of it returns a mutable reference type stack to a resource pool,
         /// and if the value type enumerator is copied (which can easily happen unintentionally if you pass the value around) there is a risk
         /// that a stack that has already been returned to the resource pool may still be in use by one of the enumerator copies, leading to data
@@ -64,7 +63,7 @@ namespace System.Collections.Immutable
             /// <summary>
             /// A value indicating whether this enumerator walks in reverse order.
             /// </summary>
-            private bool _reversed;
+            private readonly bool _reversed;
 
             /// <summary>
             /// The set being enumerated.
@@ -249,9 +248,6 @@ namespace System.Collections.Immutable
             /// </summary>
             private void ThrowIfDisposed()
             {
-                Contract.Ensures(_root != null);
-                Contract.EnsuresOnThrow<ObjectDisposedException>(_root == null);
-
                 // Since this is a struct, copies might not have been marked as disposed.
                 // But the stack we share across those copies would know.
                 // This trick only works when we have a non-null stack.

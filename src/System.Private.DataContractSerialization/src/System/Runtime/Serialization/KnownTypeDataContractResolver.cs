@@ -7,13 +7,13 @@ using System.Reflection;
 
 namespace System.Runtime.Serialization
 {
-#if USE_REFEMIT || uapaot
+#if USE_REFEMIT
     public sealed class KnownTypeDataContractResolver : DataContractResolver
 #else
     internal sealed class KnownTypeDataContractResolver : DataContractResolver
 #endif
     {
-        private XmlObjectSerializerContext _context;
+        private readonly XmlObjectSerializerContext _context;
 
         internal KnownTypeDataContractResolver(XmlObjectSerializerContext context)
         {

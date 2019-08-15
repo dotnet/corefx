@@ -12,13 +12,13 @@ using System.Reflection;
 
 namespace System.Xml.Schema
 {
-    // This is an atomic value converted for Silverlight XML core that knows only how to convert to and from string. 
+    // This is an atomic value converted for Silverlight XML core that knows only how to convert to and from string.
     // It does not recognize XmlAtomicValue or XPathItemType.
     internal class XmlUntypedStringConverter
     {
         // Fields
-        private bool _listsAllowed;
-        private XmlUntypedStringConverter _listItemConverter;
+        private readonly bool _listsAllowed;
+        private readonly XmlUntypedStringConverter _listItemConverter;
 
         // Cached types
         private static readonly Type s_decimalType = typeof(decimal);
@@ -37,12 +37,12 @@ namespace System.Xml.Schema
         private static readonly Type s_dateTimeType = typeof(DateTime);
         private static readonly Type s_dateTimeOffsetType = typeof(DateTimeOffset);
         private static readonly Type s_booleanType = typeof(bool);
-        private static readonly Type s_byteArrayType = typeof(Byte[]);
+        private static readonly Type s_byteArrayType = typeof(byte[]);
         private static readonly Type s_xmlQualifiedNameType = typeof(XmlQualifiedName);
         private static readonly Type s_uriType = typeof(Uri);
         private static readonly Type s_timeSpanType = typeof(TimeSpan);
 
-        private static readonly string s_untypedStringTypeName = "xdt:untypedAtomic";
+        private const string UntypedStringTypeName = "xdt:untypedAtomic";
 
         // Static convertor instance
         internal static XmlUntypedStringConverter Instance = new XmlUntypedStringConverter(true);
@@ -87,7 +87,7 @@ namespace System.Xml.Schema
 
         private byte Int32ToByte(int value)
         {
-            if (value < (int)Byte.MinValue || value > (int)Byte.MaxValue)
+            if (value < (int)byte.MinValue || value > (int)byte.MaxValue)
                 throw new OverflowException(SR.Format(SR.XmlConvert_Overflow, new string[] { XmlConvert.ToString(value), "Byte" }));
 
             return (byte)value;
@@ -95,7 +95,7 @@ namespace System.Xml.Schema
 
         private short Int32ToInt16(int value)
         {
-            if (value < (int)Int16.MinValue || value > (int)Int16.MaxValue)
+            if (value < (int)short.MinValue || value > (int)short.MaxValue)
                 throw new OverflowException(SR.Format(SR.XmlConvert_Overflow, new string[] { XmlConvert.ToString(value), "Int16" }));
 
             return (short)value;
@@ -103,7 +103,7 @@ namespace System.Xml.Schema
 
         private sbyte Int32ToSByte(int value)
         {
-            if (value < (int)SByte.MinValue || value > (int)SByte.MaxValue)
+            if (value < (int)sbyte.MinValue || value > (int)sbyte.MaxValue)
                 throw new OverflowException(SR.Format(SR.XmlConvert_Overflow, new string[] { XmlConvert.ToString(value), "SByte" }));
 
             return (sbyte)value;
@@ -111,7 +111,7 @@ namespace System.Xml.Schema
 
         private ushort Int32ToUInt16(int value)
         {
-            if (value < (int)UInt16.MinValue || value > (int)UInt16.MaxValue)
+            if (value < (int)ushort.MinValue || value > (int)ushort.MaxValue)
                 throw new OverflowException(SR.Format(SR.XmlConvert_Overflow, new string[] { XmlConvert.ToString(value), "UInt16" }));
 
             return (ushort)value;
@@ -119,7 +119,7 @@ namespace System.Xml.Schema
 
         private uint Int64ToUInt32(long value)
         {
-            if (value < (long)UInt32.MinValue || value > (long)UInt32.MaxValue)
+            if (value < (long)uint.MinValue || value > (long)uint.MaxValue)
                 throw new OverflowException(SR.Format(SR.XmlConvert_Overflow, new string[] { XmlConvert.ToString(value), "UInt32" }));
 
             return (uint)value;
@@ -127,7 +127,7 @@ namespace System.Xml.Schema
 
         private ulong DecimalToUInt64(decimal value)
         {
-            if (value < (decimal)UInt64.MinValue || value > (decimal)UInt64.MaxValue)
+            if (value < (decimal)ulong.MinValue || value > (decimal)ulong.MaxValue)
                 throw new OverflowException(SR.Format(SR.XmlConvert_Overflow, new string[] { XmlConvert.ToString(value), "UInt64" }));
 
             return (ulong)value;
@@ -189,19 +189,19 @@ namespace System.Xml.Schema
                 Type itemTypeDst = destinationType.GetElementType();
 
                 // Different StringSplitOption needs to be used because of following bugs:
-                // 566053: Behavior change between SL2 and Dev10 in the way string arrays are deserialized by the XmlReader.ReadContentsAs method	
-                // 643697: Deserialization of typed arrays by the XmlReader.ReadContentsAs method fails	
+                // 566053: Behavior change between SL2 and Dev10 in the way string arrays are deserialized by the XmlReader.ReadContentsAs method
+                // 643697: Deserialization of typed arrays by the XmlReader.ReadContentsAs method fails
                 //
                 // In Silverligt 2 the XmlConvert.SplitString was not using the StringSplitOptions, which is the same as using StringSplitOptions.None.
-                // What it meant is that whenever there is a double space between two values in the input string it turned into 
+                // What it meant is that whenever there is a double space between two values in the input string it turned into
                 // an string.Empty entry in the intermediate string array. In Dev10 empty entries were always removed (StringSplitOptions.RemoveEmptyEntries).
                 //
                 // Moving forward in coreclr we'll use Dev10 behavior which empty entries were always removed (StringSplitOptions.RemoveEmptyEntries).
                 // we didn't quirk the change because we discover not many apps using ReadContentAs with string array type parameter
                 //
-                // The types Object, Byte[], String and Uri can be successfully deserialized from string.Empty, so we need to preserve the 
+                // The types Object, Byte[], String and Uri can be successfully deserialized from string.Empty, so we need to preserve the
                 // Silverlight 2 behavior for back-compat (=use StringSplitOptions.None). All the other array types failed to deserialize
-                // from string.Empty in Silverlight 2 (threw an exception), so we can fix all of these as they are not breaking changes 
+                // from string.Empty in Silverlight 2 (threw an exception), so we can fix all of these as they are not breaking changes
                 // (=use StringSplitOptions.RemoveEmptyEntries).
 
                 if (itemTypeDst == s_objectType) return ToArray<object>(XmlConvert.SplitString(value, StringSplitOptions.RemoveEmptyEntries), nsResolver);
@@ -240,7 +240,7 @@ namespace System.Xml.Schema
 
         private Exception CreateInvalidClrMappingException(Type sourceType, Type destinationType)
         {
-            return new InvalidCastException(SR.Format(SR.XmlConvert_TypeListBadMapping2, s_untypedStringTypeName, sourceType.Name, destinationType.Name));
+            return new InvalidCastException(SR.Format(SR.XmlConvert_TypeListBadMapping2, UntypedStringTypeName, sourceType.Name, destinationType.Name));
         }
     }
 }

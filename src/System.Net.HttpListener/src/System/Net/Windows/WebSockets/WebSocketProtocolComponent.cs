@@ -72,6 +72,7 @@ namespace System.Net.WebSockets
             Receive = 2,
         }
 
+#pragma warning disable CA1810 // explicit static cctor
         static WebSocketProtocolComponent()
         {
             s_webSocketDllHandle = Interop.Kernel32.LoadLibraryExW(Interop.Libraries.WebSocket, IntPtr.Zero, 0);
@@ -120,6 +121,7 @@ namespace System.Net.WebSockets
                 };
             }
         }
+#pragma warning restore CA1810
 
         internal static string SupportedVersion
         {
@@ -180,9 +182,9 @@ namespace System.Net.WebSockets
                 string version = null;
                 foreach (Interop.WebSocket.HttpHeader header in additionalHeaders)
                 {
-                    if (string.Compare(header.Name,
+                    if (string.Equals(header.Name,
                             HttpKnownHeaderNames.SecWebSocketVersion,
-                            StringComparison.OrdinalIgnoreCase) == 0)
+                            StringComparison.OrdinalIgnoreCase))
                     {
                         version = header.Value;
                         break;
@@ -471,7 +473,7 @@ namespace System.Net.WebSockets
             if ((httpHeader.Name == null && length != 0) ||
                 (httpHeader.Name != null && length != httpHeader.Name.Length))
             {
-                Debug.Assert(false, "The length of 'httpHeader.Name' MUST MATCH 'length'.");
+                Debug.Fail("The length of 'httpHeader.Name' MUST MATCH 'length'.");
                 throw new AccessViolationException();
             }
 
@@ -480,8 +482,8 @@ namespace System.Net.WebSockets
             //   NameLength = uint*
             //   Value = string*
             //   ValueLength = uint*
-            // NOTE - All fields in the object are pointers to the actual value, hence the use of 
-            //        n * IntPtr.Size to get to the correct place in the object. 
+            // NOTE - All fields in the object are pointers to the actual value, hence the use of
+            //        n * IntPtr.Size to get to the correct place in the object.
             int valueOffset = 2 * IntPtr.Size;
             int lengthOffset = 3 * IntPtr.Size;
 
@@ -494,7 +496,7 @@ namespace System.Net.WebSockets
             if ((httpHeader.Value == null && length != 0) ||
                 (httpHeader.Value != null && length != httpHeader.Value.Length))
             {
-                Debug.Assert(false, "The length of 'httpHeader.Value' MUST MATCH 'length'.");
+                Debug.Fail("The length of 'httpHeader.Value' MUST MATCH 'length'.");
                 throw new AccessViolationException();
             }
         }
@@ -513,8 +515,8 @@ namespace System.Net.WebSockets
             //   NameLength = uint*
             //   Value = string*
             //   ValueLength = uint*
-            // NOTE - All fields in the object are pointers to the actual value, hence the use of 
-            //        4 * IntPtr.Size to get to the next header. 
+            // NOTE - All fields in the object are pointers to the actual value, hence the use of
+            //        4 * IntPtr.Size to get to the next header.
             int httpHeaderStructSize = 4 * IntPtr.Size;
 
             for (int i = 0; i < nativeHeaderCount; i++)

@@ -19,13 +19,13 @@ namespace System.Xml
         //
         // Fields
         //
-        private bool _checkValues;
-        private bool _checkNames;
-        private bool _replaceNewLines;
-        private string _newLineChars;
+        private readonly bool _checkValues;
+        private readonly bool _checkNames;
+        private readonly bool _replaceNewLines;
+        private readonly string _newLineChars;
 
         private XmlCharType _xmlCharType;
-        // 
+        //
         // Constructor
         //
         internal XmlCharCheckingWriter(XmlWriter baseWriter, bool checkValues, bool checkNames, bool replaceNewLines, string newLineChars)
@@ -340,7 +340,7 @@ namespace System.Xml
             int len = ValidateNames.ParseNCName(ncname, 0);
             if (len != ncname.Length)
             {
-                throw new ArgumentException(string.Format(len == 0 ? SR.Xml_BadStartNameChar : SR.Xml_BadNameChar, XmlException.BuildCharExceptionArgs(ncname, len)));
+                throw new ArgumentException(SR.Format(len == 0 ? SR.Xml_BadStartNameChar : SR.Xml_BadNameChar, XmlException.BuildCharExceptionArgs(ncname, len)));
             }
         }
 
@@ -514,9 +514,9 @@ namespace System.Xml
             }
         }
 
-        // Interleave 2 adjacent invalid chars with a space. This is used for fixing invalid values of comments and PIs. 
+        // Interleave 2 adjacent invalid chars with a space. This is used for fixing invalid values of comments and PIs.
         // Any "--" in comment must be replaced with "- -" and any "-" at the end must be appended with " ".
-        // Any "?>" in PI value must be replaced with "? >". 
+        // Any "?>" in PI value must be replaced with "? >".
         private string InterleaveInvalidChars(string text, char invChar1, char invChar2)
         {
             StringBuilder sb = null;
@@ -557,4 +557,3 @@ namespace System.Xml
         }
     }
 }
-

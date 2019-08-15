@@ -16,19 +16,19 @@ namespace System.Reflection
             HResult = HResults.COR_E_AMBIGUOUSMATCH;
         }
 
-        public AmbiguousMatchException(string message)
+        public AmbiguousMatchException(string? message)
             : base(message)
         {
             HResult = HResults.COR_E_AMBIGUOUSMATCH;
         }
 
-        public AmbiguousMatchException(string message, Exception inner)
+        public AmbiguousMatchException(string? message, Exception? inner)
             : base(message, inner)
         {
             HResult = HResults.COR_E_AMBIGUOUSMATCH;
         }
 
-        internal AmbiguousMatchException(SerializationInfo info, StreamingContext context) : base(info, context)
+        private AmbiguousMatchException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }

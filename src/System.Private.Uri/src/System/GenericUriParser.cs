@@ -11,7 +11,7 @@ namespace System {
     public enum GenericUriParserOptions
     {
         // A hierarchical URI, allows a userinfo, non empty Inet-based authority, path, query and fragment
-        // The URI path gets agressively compressed means dots, slashes and backslashes are unescaped,
+        // The URI path gets aggressively compressed means dots, slashes and backslashes are unescaped,
         // backslashesare converted, and then it compresses the path. It also removes trailing dots,
         // empty segments and dots-only segments
         Default                         = 0x0,
@@ -43,11 +43,11 @@ namespace System {
         // if false  then a/%2e./b  becomes a/../b and then usually compressed
         DontUnescapePathDotsAndSlashes= 0x100,
 
-        // IDN hosts supported. if true then unicode hostname is converted to IDN host 
+        // IDN hosts supported. if true then unicode hostname is converted to IDN host
         //  and vice versa
         Idn = 0x200,
 
-        //  Iri strict parsing flag. Makes sense for Unicode. If true then string is 
+        //  Iri strict parsing flag. Makes sense for Unicode. If true then string is
         //  normalized, bidi control characters are removed, unicode char limits are checked
         IriParsing = 0x400
     }

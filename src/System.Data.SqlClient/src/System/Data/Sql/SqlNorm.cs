@@ -10,7 +10,6 @@ using System.IO;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
 using System.Text;
 using System.Runtime.CompilerServices;
 using System.Data.SqlTypes;
@@ -48,11 +47,11 @@ namespace Microsoft.SqlServer.Server
     {
         internal readonly FieldInfoEx[] FieldsToNormalize;
         private int _size;
-        private byte[] _padBuffer;
+        private readonly byte[] _padBuffer;
         internal readonly object NullInstance;
         //a boolean that tells us if a udt is a "top-level" udt,
         //i.e. one that does not require a null byte header.
-        private bool _isTopLevelUdt;
+        private readonly bool _isTopLevelUdt;
 
         private FieldInfo[] GetFields(Type t)
         {

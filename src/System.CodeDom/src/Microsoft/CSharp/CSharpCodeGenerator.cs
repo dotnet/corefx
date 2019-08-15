@@ -5,9 +5,7 @@
 using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -56,109 +54,6 @@ namespace Microsoft.CSharp
                                                          GeneratorSupport.GenericTypeDeclaration |
                                                          GeneratorSupport.DeclareIndexerProperties;
 
-        private static readonly string[][] s_keywords = new string[][] {
-            null,           // 1 character
-            new string[] {  // 2 characters
-                "as",
-                "do",
-                "if",
-                "in",
-                "is",
-            },
-            new string[] {  // 3 characters
-                "for",
-                "int",
-                "new",
-                "out",
-                "ref",
-                "try",
-            },
-            new string[] {  // 4 characters
-                "base",
-                "bool",
-                "byte",
-                "case",
-                "char",
-                "else",
-                "enum",
-                "goto",
-                "lock",
-                "long",
-                "null",
-                "this",
-                "true",
-                "uint",
-                "void",
-            },
-            new string[] {  // 5 characters
-                "break",
-                "catch",
-                "class",
-                "const",
-                "event",
-                "false",
-                "fixed",
-                "float",
-                "sbyte",
-                "short",
-                "throw",
-                "ulong",
-                "using",
-                "while",
-            },
-            new string[] {  // 6 characters
-                "double",
-                "extern",
-                "object",
-                "params",
-                "public",
-                "return",
-                "sealed",
-                "sizeof",
-                "static",
-                "string",
-                "struct",
-                "switch",
-                "typeof",
-                "unsafe",
-                "ushort",
-            },
-            new string[] {  // 7 characters
-                "checked",
-                "decimal",
-                "default",
-                "finally",
-                "foreach",
-                "private",
-                "virtual",
-            },
-            new string[] {  // 8 characters
-                "abstract",
-                "continue",
-                "delegate",
-                "explicit",
-                "implicit",
-                "internal",
-                "operator",
-                "override",
-                "readonly",
-                "volatile",
-            },
-            new string[] {  // 9 characters
-                "__arglist",
-                "__makeref",
-                "__reftype",
-                "interface",
-                "namespace",
-                "protected",
-                "unchecked",
-            },
-            new string[] {  // 10 characters
-                "__refvalue",
-                "stackalloc",
-            },
-        };
-
         internal CSharpCodeGenerator() { }
 
         internal CSharpCodeGenerator(IDictionary<string, string> providerOptions)
@@ -168,16 +63,16 @@ namespace Microsoft.CSharp
 
         private bool _generatingForLoop = false;
 
-        private string FileExtension { get { return ".cs"; } }
+        private string FileExtension => ".cs";
 
-        private string CompilerName { get { return "csc.exe"; } }
+        private string CompilerName => "csc.exe";
 
         private string CurrentTypeName => _currentClass != null ? _currentClass.Name : "<% unknown %>";
 
         private int Indent
         {
-            get { return _output.Indent; }
-            set { _output.Indent = value; }
+            get => _output.Indent;
+            set => _output.Indent = value;
         }
 
         private bool IsCurrentInterface => _currentClass != null && !(_currentClass is CodeTypeDelegate) ? _currentClass.IsInterface : false;
@@ -191,8 +86,6 @@ namespace Microsoft.CSharp
         private bool IsCurrentDelegate => _currentClass != null && _currentClass is CodeTypeDelegate;
 
         private string NullToken => "null";
-
-        private CodeGeneratorOptions Options => _options;
 
         private TextWriter Output => _output;
 
@@ -242,12 +135,10 @@ namespace Microsoft.CSharp
 
                 if (i > 0 && i % MaxLineLength == 0)
                 {
-                    //
-                    // If current character is a high surrogate and the following 
-                    // character is a low surrogate, don't break them. 
-                    // Otherwise when we write the string to a file, we might lose 
+                    // If current character is a high surrogate and the following
+                    // character is a low surrogate, don't break them.
+                    // Otherwise when we write the string to a file, we might lose
                     // the characters.
-                    // 
                     if (char.IsHighSurrogate(value[i]) && (i < value.Length - 1) && char.IsLowSurrogate(value[i + 1]))
                     {
                         b.Append(value[++i]);
@@ -290,7 +181,7 @@ namespace Microsoft.CSharp
             // If the string is short, use C style quoting (e.g "\r\n")
             // Also do it if it is too long to fit in one line
             // If the string contains '\0', verbatim style won't work.
-            if (value.Length < 256 || value.Length > 1500 || (value.IndexOf('\0') != -1))
+            if (value.Length < 256 || value.Length > 1500 || (value.IndexOf('\0') != -1)) // string.Contains(char) is .NetCore2.1+ specific
                 return QuoteSnippetStringCStyle(value);
 
             // Otherwise, use 'verbatim' style quoting (e.g. @"foo")
@@ -773,7 +664,7 @@ namespace Microsoft.CSharp
             }
             else if (e.Value is sbyte)
             {
-                // C# has no literal marker for types smaller than Int32                
+                // C# has no literal marker for types smaller than Int32
                 Output.Write(((sbyte)e.Value).ToString(CultureInfo.InvariantCulture));
             }
             else if (e.Value is ushort)
@@ -853,7 +744,7 @@ namespace Microsoft.CSharp
             }
             else
             {
-                throw new ArgumentException(SR.Format(SR.InvalidPrimitiveType, e.Value.GetType().ToString()));
+                throw new ArgumentException(SR.Format(SR.InvalidPrimitiveType, e.Value.GetType()));
             }
         }
 
@@ -1042,7 +933,7 @@ namespace Microsoft.CSharp
             if (falseStatemetns.Count > 0)
             {
                 Output.Write('}');
-                if (Options.ElseOnClosing)
+                if (_options.ElseOnClosing)
                 {
                     Output.Write(' ');
                 }
@@ -1072,7 +963,7 @@ namespace Microsoft.CSharp
                 foreach (CodeCatchClause current in catches)
                 {
                     Output.Write('}');
-                    if (Options.ElseOnClosing)
+                    if (_options.ElseOnClosing)
                     {
                         Output.Write(' ');
                     }
@@ -1096,7 +987,7 @@ namespace Microsoft.CSharp
             if (finallyStatements.Count > 0)
             {
                 Output.Write('}');
-                if (Options.ElseOnClosing)
+                if (_options.ElseOnClosing)
                 {
                     Output.Write(' ');
                 }
@@ -1935,7 +1826,7 @@ namespace Microsoft.CSharp
 
             GenerateTypeStart(e);
 
-            if (Options.VerbatimOrder)
+            if (_options.VerbatimOrder)
             {
                 foreach (CodeTypeMember member in e.Members)
                 {
@@ -2117,7 +2008,7 @@ namespace Microsoft.CSharp
 
                 // Generate an extra new line at the end of the snippet.
                 // If the snippet is comment and this type only contains comments.
-                // The generated code will not compile. 
+                // The generated code will not compile.
                 Output.WriteLine();
             }
 
@@ -2203,7 +2094,7 @@ namespace Microsoft.CSharp
             }
             // Generate an extra new line at the end of the snippet.
             // If the snippet is comment and this type only contains comments.
-            // The generated code will not compile. 
+            // The generated code will not compile.
             if (hasSnippet)
             {
                 Output.WriteLine();
@@ -2527,9 +2418,6 @@ namespace Microsoft.CSharp
             Output.WriteLine(SR.AutoGen_Comment_Line1);
             Output.Write("//     ");
             Output.WriteLine(SR.AutoGen_Comment_Line2);
-            Output.Write("//     ");
-            Output.Write(SR.AutoGen_Comment_Line3);
-            Output.WriteLine(Environment.Version.ToString());
             Output.WriteLine("//");
             Output.Write("//     ");
             Output.WriteLine(SR.AutoGen_Comment_Line4);
@@ -2673,8 +2561,8 @@ namespace Microsoft.CSharp
             bool paramArray = false;
             foreach (CodeAttributeDeclaration current in attributes)
             {
-                // we need to convert paramArrayAttribute to params keyword to 
-                // make csharp compiler happy. In addition, params keyword needs to be after 
+                // we need to convert paramArrayAttribute to params keyword to
+                // make csharp compiler happy. In addition, params keyword needs to be after
                 // other attributes.
 
                 if (current.Name.Equals("system.paramarrayattribute", StringComparison.OrdinalIgnoreCase))
@@ -2890,8 +2778,8 @@ namespace Microsoft.CSharp
                                 GetTypeArgumentsOutput(typeRef.TypeArguments, currentTypeArgStart, numTypeArgs, sb);
                                 currentTypeArgStart += numTypeArgs;
 
-                                // Arity can be in the middle of a nested type name, so we might have a . or + after it. 
-                                // Skip it if so. 
+                                // Arity can be in the middle of a nested type name, so we might have a . or + after it.
+                                // Skip it if so.
                                 if (i < baseType.Length && (baseType[i] == '+' || baseType[i] == '.'))
                                 {
                                     sb.Append('.');
@@ -2932,7 +2820,7 @@ namespace Microsoft.CSharp
                 }
 
                 // it's possible that we call GetTypeArgumentsOutput with an empty typeArguments collection.  This is the case
-                // for open types, so we want to just output the brackets and commas. 
+                // for open types, so we want to just output the brackets and commas.
                 if (i < typeArguments.Count)
                     sb.Append(GetTypeOutput(typeArguments[i]));
             }
@@ -2968,7 +2856,7 @@ namespace Microsoft.CSharp
 
         private void OutputStartingBrace()
         {
-            if (Options.BracingStyle == "C")
+            if (_options.BracingStyle == "C")
             {
                 Output.WriteLine();
                 Output.WriteLine('{');
@@ -3148,7 +3036,7 @@ namespace Microsoft.CSharp
             {
                 if (ea[i] == null)
                 {
-                    continue;       // the other two batch methods just work if one element is null, so we'll match that. 
+                    continue;       // the other two batch methods just work if one element is null, so we'll match that.
                 }
 
                 ResolveReferencedAssemblies(options, ea[i]);
@@ -3156,7 +3044,7 @@ namespace Microsoft.CSharp
                 using (var fs = new FileStream(filenames[i], FileMode.Create, FileAccess.Write, FileShare.Read))
                 using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))
                 {
-                    ((ICodeGenerator)this).GenerateCodeFromCompileUnit(ea[i], sw, Options);
+                    ((ICodeGenerator)this).GenerateCodeFromCompileUnit(ea[i], sw, _options);
                     sw.Flush();
                 }
             }

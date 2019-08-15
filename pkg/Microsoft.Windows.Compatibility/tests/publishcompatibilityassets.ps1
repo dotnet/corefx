@@ -1,7 +1,7 @@
 param (
-$targetFramework = "netcoreapp2.2",
-$runtimeVersion = "2.2.0-*",
-$refDirName = "netcoreapp22_compat",
+$frameworkVersion = "3.0",
+$runtimeVersion = "3.0.0-*",
+$refDirName = "netcoreapp30_compat",
 $rid = "win7-x64"
 )
 
@@ -14,32 +14,40 @@ function _getPackageVersion($packageName)
 		Exit;
 	}
 
-	if (!((get-item $searchPattern).FullName -match '([0-9].[0-9].[0-9][-a-z0-9]*)'))
+	if (!([string]((get-item $searchPattern).FullName) -match '([0-9].[0-9].[0-9][-a-z]*.[0-9]*.[0-9]*)'))
 	{
 		Write-Error -Message "Package name is invalid"
 		Exit;
 	}
 
-	return $matches[0]
+	if (!$matches)
+	{
+		Write-Error -Message (-join("Couldn't get package version for: ", $packageName))
+		Exit;
+	}
+	return $matches[1]
 }
 
-$repoRoot = ((get-item $PSScriptRoot).parent.parent.parent.FullName);
-$dotnetPath = -join($repoRoot, "\Tools\dotnetcli\dotnet.exe")
+$env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE = 1
+
+$repoRoot = ((get-item $PSScriptRoot).parent.parent.parent.FullName)
+$dotnetPath = -join($repoRoot, "\.dotnet\dotnet.exe")
 $csprojPath = -join($PSScriptRoot, "\", (Get-ChildItem $PSScriptRoot"\*.csproj" | Select-Object -ExpandProperty Name))
 $packagesCachePath = -join($repoRoot, "\packages")
-$localPackageSourcePath = -join($repoRoot, "\bin\packages\Debug\")
+$localPackageSourcePath = -join($repoRoot, "\artifacts\packages\Debug\")
+$targetFramework = -join("netcoreapp", $frameworkVersion)
 
 if (!(Test-Path $localPackageSourcePath))
 {
-	$localPackageSourcePath = -join($repoRoot, "\bin\packages\Release\")
+	$localPackageSourcePath = -join($repoRoot, "\artifacts\packages\Release\")
 	if (!(Test-Path $localPackageSourcePath))
 	{
-		Write-Error -Message "Local package source must exist.";
+		Write-Error -Message (-join('Local package source must exist ', $localPackageSourcePath))
 		Exit;
 	}
 }
 
-$restoreSources = -join("https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json;https://api.nuget.org/v3/index.json;https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;", $localPackageSourcePath)
+$restoreSources = -join("https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json;https://api.nuget.org/v3/index.json;https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;", $localPackageSourcePath)
 
 $compatPackageVersion = _getPackageVersion "Microsoft.Windows.Compatibility"
 $privatePackageVersion = _getPackageVersion "Microsoft.Private.CoreFx.NETCoreApp"
@@ -47,10 +55,10 @@ $privatePackageVersion = _getPackageVersion "Microsoft.Private.CoreFx.NETCoreApp
 Write-Output "Calling dotnet restore"
 & $dotnetPath restore --packages $packagesCachePath /p:RestoreSources="$restoreSources" /p:TargetFramework=$targetFramework /p:CompatibilityPackageVersion=$compatPackageVersion /p:PrivateCorefxPackageVersion=$privatePackageVersion /p:RuntimeIdentifiers=$rid $csprojPath
 
-Write-Output "Calling dotnet publish"
-& $dotnetPath publish -r $rid /p:RestoreSources="$restoreSources" /p:TargetFramework=$targetFramework /p:CompatibilityPackageVersion=$compatPackageVersion /p:RuntimeFrameworkVersion=$runtimeFramework /p:PrivateCorefxPackageVersion=$privatePackageVersion /p:RuntimeIdentifiers=$rid $csprojPath
+$outputPath = -join($PSScriptRoot, "\bin\Debug\", $targetFramework, "\", $rid, "\publish\")
 
-$outputPath = -join($PSScriptRoot, "\bin\Debug\", $targetFramework, "\", $rid, "\publish\refs\")
+Write-Output "Calling dotnet publish"
+& $dotnetPath publish -r $rid -o $outputPath /p:NugetMonikerVersion=$frameworkVersion /p:RestoreSources="$restoreSources" /p:TargetFramework=$targetFramework /p:CompatibilityPackageVersion=$compatPackageVersion /p:RuntimeFrameworkVersion=$runtimeFramework /p:PrivateCorefxPackageVersion=$privatePackageVersion /p:RuntimeIdentifiers=$rid $csprojPath
 
 if (!(Test-Path $outputPath))
 {
@@ -60,7 +68,7 @@ if (!(Test-Path $outputPath))
 
 Write-Output (-join("Published succedded for: ", $targetFramework))
 
-$refPath = -join($repoRoot, "\bin\ref\", $refDirName)
+$refPath = -join($repoRoot, "\artifacts\bin\ref\", $refDirName)
 
 if (Test-Path $refPath)
 {
@@ -68,4 +76,5 @@ if (Test-Path $refPath)
 }
 
 New-Item $refPath -ItemType directory
-Copy-Item (-join($outputPath, "*")) $refPath
+Remove-Item (-join($outputPath, "Microsoft.Windows.Compatibility.Validation.dll")) -force
+Copy-Item (-join($outputPath,"\refs\", "*.dll")) $refPath

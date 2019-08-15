@@ -8,15 +8,14 @@ namespace System.Drawing.Tests
 {
     public class BufferedGraphicsTests
     {
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Dispose_TempMultipleTimes_Success()
         {
             using (var context = new BufferedGraphicsContext())
             using (var image = new Bitmap(3, 3))
             using (Graphics targetGraphics = Graphics.FromImage(image))
             {
-                BufferedGraphics graphics = context.Allocate(targetGraphics, Rectangle.Empty);
+                BufferedGraphics graphics = context.Allocate(targetGraphics, new Rectangle(0, 0, 1, 1));
                 Assert.NotNull(graphics.Graphics);
 
                 graphics.Dispose();
@@ -26,8 +25,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Dispose_ActualMultipleTimes_Success()
         {
             using (var context = new BufferedGraphicsContext())
@@ -45,7 +43,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Render_ParameterlessWithTargetGraphics_Success()
         {
             Color color = Color.FromArgb(255, 0, 0, 0);
@@ -72,7 +70,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Render_ParameterlessWithNullTargetGraphics_Success()
         {
             Color color = Color.FromArgb(255, 0, 0, 0);
@@ -100,7 +98,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Render_TargetGraphics_Success()
         {
             Color color = Color.FromArgb(255, 0, 0, 0);
@@ -128,19 +126,20 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Render_NullGraphics_Nop()
         {
             using (var context = new BufferedGraphicsContext())
-            using (BufferedGraphics graphics = context.Allocate(null, Rectangle.Empty))
+            using (var image = new Bitmap(3, 3))
+            using (Graphics graphics = Graphics.FromImage(image))
+            using (BufferedGraphics bufferedGraphics = context.Allocate(graphics, new Rectangle(0, 0, 1, 1)))
             {
-                graphics.Render(null);
+                bufferedGraphics.Render(null);
             }
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Render_InvalidTargetDC_Nop()
         {
             using (var context = new BufferedGraphicsContext())

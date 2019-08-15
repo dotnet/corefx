@@ -33,9 +33,31 @@ namespace System.Net.Http
                 Task copyTask = bufferSize == 0 ?
                     source.CopyToAsync(destination, cancellationToken) :
                     source.CopyToAsync(destination, bufferSize, cancellationToken);
-                return disposeSource ?
-                    DisposeSourceWhenCompleteAsync(copyTask, source) :
-                    copyTask;
+
+                if (!disposeSource)
+                {
+                    return copyTask;
+                }
+
+                switch (copyTask.Status)
+                {
+                    case TaskStatus.RanToCompletion:
+                        DisposeSource(source);
+                        return Task.CompletedTask;
+
+                    case TaskStatus.Faulted:
+                    case TaskStatus.Canceled:
+                        return copyTask;
+
+                    default:
+                        return DisposeSourceAsync(copyTask, source);
+
+                        static async Task DisposeSourceAsync(Task copyTask, Stream source)
+                        {
+                            await copyTask.ConfigureAwait(false);
+                            DisposeSource(source);
+                        }
+                }
             }
             catch (Exception e)
             {
@@ -45,29 +67,7 @@ namespace System.Net.Http
             }
         }
 
-        private static Task DisposeSourceWhenCompleteAsync(Task task, Stream source)
-        {
-            switch (task.Status)
-            {
-                case TaskStatus.RanToCompletion:
-                    DisposeSource(source);
-                    return Task.CompletedTask;
-
-                case TaskStatus.Faulted:
-                case TaskStatus.Canceled:
-                    return task;
-
-                default:
-                    return task.ContinueWith((completed, innerSource) =>
-                    {
-                        completed.GetAwaiter().GetResult(); // propagate any exceptions
-                        DisposeSource((Stream)innerSource);
-                    },
-                    source, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.DenyChildAttach, TaskScheduler.Default);
-            }
-        }
-
-        /// <summary>Disposes the source stream if <paramref name="disposeSource"/> is true.</summary>
+        /// <summary>Disposes the source stream.</summary>
         private static void DisposeSource(Stream source)
         {
             try

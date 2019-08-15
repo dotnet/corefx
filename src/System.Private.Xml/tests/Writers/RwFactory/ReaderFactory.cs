@@ -242,12 +242,12 @@ namespace System.Xml.Tests
 
 
         /// <summary>
-        /// This method calls the Create Method on the XmlReader and puts the state in CreateSuccess or TestPass. 
+        /// This method calls the Create Method on the XmlReader and puts the state in CreateSuccess or TestPass.
         /// It goes in PASS also if the reader threw an expected error. In all other cases it should throw
         /// TestFailedException.
         /// </summary>
-        /// <param name="readThru">This param determines which overload to call. 
-        /// In future on multiple overloads we can make this param 
+        /// <param name="readThru">This param determines which overload to call.
+        /// In future on multiple overloads we can make this param
         /// an enum which can be set using the spec file data</param>
         protected void CreateReader(ReadThru readThru)
         {
@@ -309,11 +309,11 @@ namespace System.Xml.Tests
         ///    <ReaderType>Dtd</ReaderType>
         ///    <NameTable>new</NameTable>
         ///    <LineNumberOffset>1</LineNumberOffset>
-        ///		 <LinePositionOffset>0</LinePositionOffset>
+        ///      <LinePositionOffset>0</LinePositionOffset>
         ///    <IgnoreInlineSchema>false</IgnoreInlineSchema>
         ///    <IgnoreSchemaLocation>true</IgnoreSchemaLocation>
         ///    <IgnoreIdentityConstraints>false</IgnoreIdentityConstraints>
-        ///		 <IgnoreValidationWarnings>true</IgnoreValidationWarnings>
+        ///      <IgnoreValidationWarnings>true</IgnoreValidationWarnings>
         ///    <Schemas>2</Schemas>
         ///    <ValidationEventHandler>0</ValidationEventHandler>
         ///    <ProhibitDtd>true</ProhibitDtd>
@@ -333,7 +333,7 @@ namespace System.Xml.Tests
             _settings.ConformanceLevel = (ConformanceLevel)Enum.Parse(typeof(ConformanceLevel), ReadFilterCriteria("ConformanceLevel", true));
 
             //CheckCharacters
-            _settings.CheckCharacters = Boolean.Parse(ReadFilterCriteria("CheckCharacters", true));
+            _settings.CheckCharacters = bool.Parse(ReadFilterCriteria("CheckCharacters", true));
 
             //Reader Type : Parse and then set the Xsd or Dtd validation accordingly.
             string readertype = ReadFilterCriteria("ReaderType", true);
@@ -367,13 +367,13 @@ namespace System.Xml.Tests
             }
 
             //Line number
-            _settings.LineNumberOffset = Int32.Parse(ReadFilterCriteria("LineNumberOffset", true));
+            _settings.LineNumberOffset = int.Parse(ReadFilterCriteria("LineNumberOffset", true));
             //Line position
-            _settings.LinePositionOffset = Int32.Parse(ReadFilterCriteria("LinePositionOffset", true));
+            _settings.LinePositionOffset = int.Parse(ReadFilterCriteria("LinePositionOffset", true));
 
-            _settings.IgnoreProcessingInstructions = Boolean.Parse(ReadFilterCriteria("IgnorePI", true));
-            _settings.IgnoreComments = Boolean.Parse(ReadFilterCriteria("IgnoreComments", true));
-            _settings.IgnoreWhitespace = Boolean.Parse(ReadFilterCriteria("IgnoreWhiteSpace", true));
+            _settings.IgnoreProcessingInstructions = bool.Parse(ReadFilterCriteria("IgnorePI", true));
+            _settings.IgnoreComments = bool.Parse(ReadFilterCriteria("IgnoreComments", true));
+            _settings.IgnoreWhitespace = bool.Parse(ReadFilterCriteria("IgnoreWhiteSpace", true));
         }//End of SetupSettings
 
         //Validation Event Handlers and their Counts for Reader to verify

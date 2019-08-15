@@ -38,10 +38,11 @@ namespace System.Security.Cryptography.Tests.Asn1
             PublicEncodingRules ruleSet,
             string inputHex)
         {
+            _ = description;
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<CryptographicException>(() => reader.ReadObjectIdentifier(true));
+            Assert.Throws<CryptographicException>(() => reader.ReadObjectIdentifier());
         }
 
         [Theory]
@@ -107,20 +108,17 @@ namespace System.Security.Cryptography.Tests.Asn1
         }
 
         [Theory]
-        [InlineData(PublicEncodingRules.BER, "06082A864886F70D0307", false, "3des")]
-        [InlineData(PublicEncodingRules.CER, "06082A864886F70D0307", true, "1.2.840.113549.3.7")]
-        [InlineData(PublicEncodingRules.DER, "0609608648016503040201", true, "2.16.840.1.101.3.4.2.1")]
-        [InlineData(PublicEncodingRules.BER, "0609608648016503040201", false, "sha256")]
-        public static void ReadObjectIdentifier_SkipFriendlyName(
+        [InlineData(PublicEncodingRules.BER, "06082A864886F70D0307", "3des")]
+        [InlineData(PublicEncodingRules.BER, "0609608648016503040201", "sha256")]
+        public static void ReadObjectIdentifier_FriendlyName(
             PublicEncodingRules ruleSet,
             string inputHex,
-            bool skipFriendlyName,
             string expectedFriendlyName)
         {
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            Oid oid = reader.ReadObjectIdentifier(skipFriendlyName);
+            Oid oid = reader.ReadObjectIdentifier();
             Assert.Equal(expectedFriendlyName, oid.FriendlyName);
         }
 
@@ -135,7 +133,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             AssertExtensions.Throws<ArgumentException>(
                 "expectedTag",
-                () => reader.GetIntegerBytes(Asn1Tag.Null));
+                () => reader.ReadIntegerBytes(Asn1Tag.Null));
 
             Assert.True(reader.HasData, "HasData after bad universal tag");
 
@@ -159,7 +157,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             AssertExtensions.Throws<ArgumentException>(
                 "expectedTag",
-                () => reader.GetIntegerBytes(Asn1Tag.Null));
+                () => reader.ReadIntegerBytes(Asn1Tag.Null));
 
             Assert.True(reader.HasData, "HasData after bad universal tag");
 

@@ -4,7 +4,6 @@
 
 using System.Buffers;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Headers;
 using System.Text;
@@ -196,13 +195,25 @@ namespace System.Net.Http
             Encoding encoding = null;
             int bomLength = -1;
 
+            string charset = headers.ContentType?.CharSet;
+
             // If we do have encoding information in the 'Content-Type' header, use that information to convert
             // the content to a string.
-            if ((headers.ContentType != null) && (headers.ContentType.CharSet != null))
+            if (charset != null)
             {
                 try
                 {
-                    encoding = Encoding.GetEncoding(headers.ContentType.CharSet);
+                    // Remove at most a single set of quotes.
+                    if (charset.Length > 2 &&
+                        charset[0] == '\"' &&
+                        charset[charset.Length - 1] == '\"')
+                    {
+                        encoding = Encoding.GetEncoding(charset.Substring(1, charset.Length - 2));
+                    }
+                    else
+                    {
+                        encoding = Encoding.GetEncoding(charset);
+                    }
 
                     // Byte-order-mark (BOM) characters may be present even if a charset was specified.
                     bomLength = GetPreambleLength(buffer, encoding);
@@ -311,6 +322,14 @@ namespace System.Net.Http
         internal virtual Task SerializeToStreamAsync(Stream stream, TransportContext context, CancellationToken cancellationToken) =>
             SerializeToStreamAsync(stream, context);
 
+        // TODO #38559: Expose something to enable this publicly.  For very specific HTTP/2 scenarios (e.g. gRPC), we need
+        // to be able to allow request content to continue sending after SendAsync has completed, which goes against the
+        // previous design of content, and which means that with some servers, even outside of desired scenarios we could
+        // end up unexpectedly having request content still sending even after the response completes, which could lead to
+        // spurious failures in unsuspecting client code.  To mitigate that, we prohibit duplex on all known HttpContent
+        // types, waiting for the request content to complete before completing the SendAsync task.
+        internal virtual bool AllowDuplex => true;
+
         public Task CopyToAsync(Stream stream, TransportContext context) =>
             CopyToAsync(stream, context, CancellationToken.None);
 
@@ -351,7 +370,7 @@ namespace System.Net.Http
             }
             catch (Exception e) when (StreamCopyExceptionNeedsWrapping(e))
             {
-                throw GetStreamCopyException(e);
+                throw WrapStreamCopyException(e);
             }
         }
 
@@ -379,7 +398,7 @@ namespace System.Net.Http
                 // This should only be hit when called directly; HttpClient/HttpClientHandler
                 // will not exceed this limit.
                 throw new ArgumentOutOfRangeException(nameof(maxBufferSize), maxBufferSize,
-                    string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                    SR.Format(System.Globalization.CultureInfo.InvariantCulture,
                     SR.net_http_content_buffersize_limit, HttpContent.MaxBufferSize));
             }
 
@@ -483,9 +502,6 @@ namespace System.Net.Http
 
         private MemoryStream CreateMemoryStream(long maxBufferSize, out Exception error)
         {
-            Contract.Ensures((Contract.Result<MemoryStream>() != null) ||
-                (Contract.ValueAtReturn<Exception>(out error) != null));
-
             error = null;
 
             // If we have a Content-Length allocate the right amount of buffer up-front. Also check whether the
@@ -498,7 +514,7 @@ namespace System.Net.Http
 
                 if (contentLength > maxBufferSize)
                 {
-                    error = new HttpRequestException(string.Format(System.Globalization.CultureInfo.InvariantCulture, SR.net_http_content_buffersize_exceeded, maxBufferSize));
+                    error = new HttpRequestException(SR.Format(System.Globalization.CultureInfo.InvariantCulture, SR.net_http_content_buffersize_exceeded, maxBufferSize));
                     return null;
                 }
 
@@ -561,7 +577,7 @@ namespace System.Net.Http
             }
         }
 
-        private static bool StreamCopyExceptionNeedsWrapping(Exception e) => e is IOException || e is ObjectDisposedException;
+        internal static bool StreamCopyExceptionNeedsWrapping(Exception e) => e is IOException || e is ObjectDisposedException;
 
         private static Exception GetStreamCopyException(Exception originalException)
         {
@@ -575,8 +591,14 @@ namespace System.Net.Http
             // ObjectDisposedException is also wrapped, since aborting HWR after a request is complete will result in
             // the response stream being closed.
             return StreamCopyExceptionNeedsWrapping(originalException) ?
-                new HttpRequestException(SR.net_http_content_stream_copy_error, originalException) :
+                WrapStreamCopyException(originalException) :
                 originalException;
+        }
+
+        internal static Exception WrapStreamCopyException(Exception e)
+        {
+            Debug.Assert(StreamCopyExceptionNeedsWrapping(e));
+            return new HttpRequestException(SR.net_http_content_stream_copy_error, e);
         }
 
         private static int GetPreambleLength(ArraySegment<byte> buffer, Encoding encoding)

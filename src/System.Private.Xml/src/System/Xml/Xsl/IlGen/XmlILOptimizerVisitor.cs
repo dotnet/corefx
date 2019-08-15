@@ -13,50 +13,53 @@ namespace System.Xml.Xsl.IlGen
 {
     internal class XmlILOptimizerVisitor : QilPatternVisitor
     {
-        private static readonly QilPatterns s_patternsNoOpt, s_patternsOpt;
-        private QilExpression _qil;
-        private XmlILElementAnalyzer _elemAnalyzer;
-        private XmlILStateAnalyzer _contentAnalyzer;
-        private XmlILNamespaceAnalyzer _nmspAnalyzer;
-        private NodeCounter _nodeCounter = new NodeCounter();
-        private SubstitutionList _subs = new SubstitutionList();
+        private static readonly QilPatterns s_patternsNoOpt = CreatePatternsNoOpt();
 
-        static XmlILOptimizerVisitor()
+        // Enable all normalizations and annotations for Release code
+        // Enable all patterns for Release code
+        private static readonly QilPatterns s_patternsOpt = new QilPatterns((int)XmlILOptimization.Last_, allSet: true);
+
+        private readonly QilExpression _qil;
+        private readonly XmlILElementAnalyzer _elemAnalyzer;
+        private readonly XmlILStateAnalyzer _contentAnalyzer;
+        private readonly XmlILNamespaceAnalyzer _nmspAnalyzer;
+        private readonly NodeCounter _nodeCounter = new NodeCounter();
+        private readonly SubstitutionList _subs = new SubstitutionList();
+
+        private static QilPatterns CreatePatternsNoOpt()
         {
-            // Enable all normalizations and annotations for Release code
-            // Enable all patterns for Release code
-            s_patternsOpt = new QilPatterns((int)XmlILOptimization.Last_, true);
-
             // Only enable Required and OptimizedConstruction pattern groups
             // Only enable Required patterns
-            s_patternsNoOpt = new QilPatterns((int)XmlILOptimization.Last_, false);
+            var patterns = new QilPatterns((int)XmlILOptimization.Last_, allSet: false);
 
-            s_patternsNoOpt.Add((int)XmlILOptimization.FoldNone);
-            s_patternsNoOpt.Add((int)XmlILOptimization.EliminatePositionOf);
-            s_patternsNoOpt.Add((int)XmlILOptimization.EliminateTypeAssert);
-            s_patternsNoOpt.Add((int)XmlILOptimization.EliminateIsType);
-            s_patternsNoOpt.Add((int)XmlILOptimization.EliminateIsEmpty);
-            s_patternsNoOpt.Add((int)XmlILOptimization.EliminateAverage);
-            s_patternsNoOpt.Add((int)XmlILOptimization.EliminateSum);
-            s_patternsNoOpt.Add((int)XmlILOptimization.EliminateMinimum);
-            s_patternsNoOpt.Add((int)XmlILOptimization.EliminateMaximum);
-            s_patternsNoOpt.Add((int)XmlILOptimization.EliminateSort);
-            s_patternsNoOpt.Add((int)XmlILOptimization.EliminateStrConcatSingle);
+            patterns.Add((int)XmlILOptimization.FoldNone);
+            patterns.Add((int)XmlILOptimization.EliminatePositionOf);
+            patterns.Add((int)XmlILOptimization.EliminateTypeAssert);
+            patterns.Add((int)XmlILOptimization.EliminateIsType);
+            patterns.Add((int)XmlILOptimization.EliminateIsEmpty);
+            patterns.Add((int)XmlILOptimization.EliminateAverage);
+            patterns.Add((int)XmlILOptimization.EliminateSum);
+            patterns.Add((int)XmlILOptimization.EliminateMinimum);
+            patterns.Add((int)XmlILOptimization.EliminateMaximum);
+            patterns.Add((int)XmlILOptimization.EliminateSort);
+            patterns.Add((int)XmlILOptimization.EliminateStrConcatSingle);
 
-            s_patternsNoOpt.Add((int)XmlILOptimization.NormalizeUnion);
-            s_patternsNoOpt.Add((int)XmlILOptimization.NormalizeIntersect);
-            s_patternsNoOpt.Add((int)XmlILOptimization.NormalizeDifference);
+            patterns.Add((int)XmlILOptimization.NormalizeUnion);
+            patterns.Add((int)XmlILOptimization.NormalizeIntersect);
+            patterns.Add((int)XmlILOptimization.NormalizeDifference);
 
-            s_patternsNoOpt.Add((int)XmlILOptimization.AnnotatePositionalIterator);
-            s_patternsNoOpt.Add((int)XmlILOptimization.AnnotateTrackCallers);
-            s_patternsNoOpt.Add((int)XmlILOptimization.AnnotateDod);
-            s_patternsNoOpt.Add((int)XmlILOptimization.AnnotateConstruction);
+            patterns.Add((int)XmlILOptimization.AnnotatePositionalIterator);
+            patterns.Add((int)XmlILOptimization.AnnotateTrackCallers);
+            patterns.Add((int)XmlILOptimization.AnnotateDod);
+            patterns.Add((int)XmlILOptimization.AnnotateConstruction);
 
             // Enable indexes in debug mode
-            s_patternsNoOpt.Add((int)XmlILOptimization.AnnotateIndex1);
-            s_patternsNoOpt.Add((int)XmlILOptimization.AnnotateIndex2);
-            s_patternsNoOpt.Add((int)XmlILOptimization.AnnotateBarrier);
-            s_patternsNoOpt.Add((int)XmlILOptimization.AnnotateFilter);
+            patterns.Add((int)XmlILOptimization.AnnotateIndex1);
+            patterns.Add((int)XmlILOptimization.AnnotateIndex2);
+            patterns.Add((int)XmlILOptimization.AnnotateBarrier);
+            patterns.Add((int)XmlILOptimization.AnnotateFilter);
+
+            return patterns;
         }
 
         public XmlILOptimizerVisitor(QilExpression qil, bool optimize) : base(optimize ? s_patternsOpt : s_patternsNoOpt, qil.Factory)
@@ -5445,7 +5448,7 @@ namespace System.Xml.Xsl.IlGen
             if (left.NodeType == QilNodeType.LiteralDouble)
             {
                 // Equals and CompareTo do not handle NaN correctly
-                if (Double.IsNaN((double)litLeft) || Double.IsNaN((double)litRight))
+                if (double.IsNaN((double)litLeft) || double.IsNaN((double)litRight))
                     return (opType == QilNodeType.Ne) ? f.True() : f.False();
             }
 
@@ -5473,7 +5476,7 @@ namespace System.Xml.Xsl.IlGen
                 case QilNodeType.Le: return cmp <= 0 ? f.True() : f.False();
             }
 
-            Debug.Assert(false, "Cannot fold this comparison operation: " + opType);
+            Debug.Fail($"Cannot fold this comparison operation: {opType}");
             return null;
         }
 
@@ -5585,7 +5588,7 @@ namespace System.Xml.Xsl.IlGen
                 case QilNodeType.Modulo: return f.Modulo(left, right);
             }
 
-            Debug.Assert(false, "Cannot fold this arithmetic operation: " + opType);
+            Debug.Fail($"Cannot fold this arithmetic operation: {opType}");
             return null;
         }
 

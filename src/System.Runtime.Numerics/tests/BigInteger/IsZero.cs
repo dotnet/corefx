@@ -9,7 +9,7 @@ namespace System.Numerics.Tests
     public class IsZeroTest
     {
         private static int s_seed = 0;
-        
+
         [Fact]
         public static void RunIsZeroTests()
         {
@@ -26,19 +26,19 @@ namespace System.Numerics.Tests
             VerifyIsZero(BigInteger.One, false);
 
             // -Int32.MaxValue
-            VerifyIsZero((BigInteger)Int32.MaxValue * -1, false);
+            VerifyIsZero((BigInteger)int.MaxValue * -1, false);
 
             // Int32.MaxValue
-            VerifyIsZero((BigInteger)Int32.MaxValue, false);
+            VerifyIsZero((BigInteger)int.MaxValue, false);
 
             // int32.MaxValue + 1
-            VerifyIsZero((BigInteger)Int32.MaxValue + 1, false);
+            VerifyIsZero((BigInteger)int.MaxValue + 1, false);
 
             // UInt32.MaxValue
-            VerifyIsZero((BigInteger)UInt32.MaxValue, false);
+            VerifyIsZero((BigInteger)uint.MaxValue, false);
 
             // Uint32.MaxValue + 1
-            VerifyIsZero((BigInteger)UInt32.MaxValue + 1, false);
+            VerifyIsZero((BigInteger)uint.MaxValue + 1, false);
         }
 
         private static void VerifyIsZero(BigInteger bigInt, bool expectedAnswer)

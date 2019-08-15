@@ -128,7 +128,7 @@ namespace System.Numerics.Tests
                 Assert.Equal(sc.snCalc.Peek().ToString(), sc.myCalc.Peek().ToString());
             }
         }
-        
+
         private static byte[] GetRandomByteArray(Random random)
         {
             return GetRandomByteArray(random, random.Next(0, 100));
@@ -139,7 +139,7 @@ namespace System.Numerics.Tests
             return MyBigIntImp.GetRandomByteArray(random, size);
         }
 
-        private static String Print(byte[] bytes)
+        private static string Print(byte[] bytes)
         {
             return MyBigIntImp.Print(bytes);
         }

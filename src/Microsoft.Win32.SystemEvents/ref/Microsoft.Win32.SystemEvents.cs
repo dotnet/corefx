@@ -49,11 +49,11 @@ namespace Microsoft.Win32
         ConsoleDisconnect = 2,
         RemoteConnect = 3,
         RemoteDisconnect = 4,
-        SessionLock = 7,
-        SessionLogoff = 6,
         SessionLogon = 5,
-        SessionRemoteControl = 9,
+        SessionLogoff = 6,
+        SessionLock = 7,
         SessionUnlock = 8,
+        SessionRemoteControl = 9,
     }
     public sealed partial class SystemEvents
     {
@@ -63,8 +63,8 @@ namespace Microsoft.Win32
         public static event System.EventHandler EventsThreadShutdown { add { } remove { } }
         public static event System.EventHandler InstalledFontsChanged { add { } remove { } }
         [System.ComponentModel.BrowsableAttribute(false)]
-        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
-        [System.ObsoleteAttribute("This event has been deprecated. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+        [System.ObsoleteAttribute("This event has been deprecated. https://go.microsoft.com/fwlink/?linkid=14202")]
         public static event System.EventHandler LowMemory { add { } remove { } }
         public static event System.EventHandler PaletteChanged { add { } remove { } }
         public static event Microsoft.Win32.PowerModeChangedEventHandler PowerModeChanged { add { } remove { } }
@@ -93,14 +93,14 @@ namespace Microsoft.Win32
         General = 4,
         Icon = 5,
         Keyboard = 6,
-        Locale = 13,
         Menu = 7,
         Mouse = 8,
         Policy = 9,
         Power = 10,
         Screensaver = 11,
-        VisualStyle = 14,
         Window = 12,
+        Locale = 13,
+        VisualStyle = 14,
     }
     public partial class UserPreferenceChangedEventArgs : System.EventArgs
     {

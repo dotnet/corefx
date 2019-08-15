@@ -26,13 +26,13 @@ namespace System.Xml
     {
         private const int MaxTextChunk = 2048;
 
-        private PrefixHandle _prefix;
-        private StringHandle _localName;
+        private readonly PrefixHandle _prefix;
+        private readonly StringHandle _localName;
         private int[] _rowOffsets;
         private OnXmlDictionaryReaderClose _onClose;
         private bool _buffered;
         private int _maxBytesPerRead;
-        private static byte[] s_charType = new byte[256]
+        private static readonly byte[] s_charType = new byte[256]
             {
                 /*  0 (.) */
                          CharType.None,
@@ -559,11 +559,11 @@ namespace System.Xml
             if (buffer == null)
                 throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException(nameof(buffer)));
             if (offset < 0)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(offset), SR.Format(SR.ValueMustBeNonNegative)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(offset), SR.ValueMustBeNonNegative));
             if (offset > buffer.Length)
                 throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(offset), SR.Format(SR.OffsetExceedsBufferSize, buffer.Length)));
             if (count < 0)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(count), SR.Format(SR.ValueMustBeNonNegative)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(count), SR.ValueMustBeNonNegative));
             if (count > buffer.Length - offset)
                 throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(count), SR.Format(SR.SizeExceedsRemainingBufferSpace, buffer.Length - offset)));
             MoveToInitial(quotas, onClose);
@@ -879,7 +879,7 @@ namespace System.Xml
                     break;
 
                 if (!space)
-                    XmlExceptionHelper.ThrowXmlException(this, new XmlException(SR.Format(SR.XmlSpaceBetweenAttributes)));
+                    XmlExceptionHelper.ThrowXmlException(this, new XmlException(SR.XmlSpaceBetweenAttributes));
             }
 
             if (_buffered && (BufferReader.Offset - startOffset) > _maxBytesPerRead)
@@ -888,8 +888,8 @@ namespace System.Xml
             ProcessAttributes();
         }
 
-        // NOTE: Call only if 0xEF has been seen in the stream AND there are three valid bytes to check (buffer[offset], buffer[offset + 1], buffer[offset + 2]). 
-        // 0xFFFE and 0xFFFF are not valid characters per Unicode specification. The first byte in the UTF8 representation is 0xEF. 
+        // NOTE: Call only if 0xEF has been seen in the stream AND there are three valid bytes to check (buffer[offset], buffer[offset + 1], buffer[offset + 2]).
+        // 0xFFFE and 0xFFFF are not valid characters per Unicode specification. The first byte in the UTF8 representation is 0xEF.
         private bool IsNextCharacterNonFFFE(byte[] buffer, int offset)
         {
             Fx.Assert(buffer[offset] == 0xEF, "buffer[offset] MUST be 0xEF.");
@@ -912,7 +912,7 @@ namespace System.Xml
             byte[] buff = BufferReader.GetBuffer(3, out off);
             if (buff[off + 1] == 0xBF && (buff[off + 2] == 0xBE || buff[off + 2] == 0xBF))
             {
-                XmlExceptionHelper.ThrowXmlException(this, new XmlException(SR.Format(SR.XmlInvalidFFFE)));
+                XmlExceptionHelper.ThrowXmlException(this, new XmlException(SR.XmlInvalidFFFE));
             }
             BufferReader.Advance(3);
         }
@@ -1048,7 +1048,7 @@ namespace System.Xml
                 {
                     if (buffer[offset + 2] == (byte)'>')
                         break;
-                    XmlExceptionHelper.ThrowXmlException(this, new XmlException(SR.Format(SR.XmlInvalidCommentChars)));
+                    XmlExceptionHelper.ThrowXmlException(this, new XmlException(SR.XmlInvalidCommentChars));
                 }
                 BufferReader.SkipByte();
             }
@@ -1170,8 +1170,8 @@ namespace System.Xml
                 }
                 else
                 {
-                    // Ensure that we have three bytes (buffer[offset], buffer[offset + 1], buffer[offset + 2])  
-                    // available for IsNextCharacterNonFFFE to check. 
+                    // Ensure that we have three bytes (buffer[offset], buffer[offset + 1], buffer[offset + 2])
+                    // available for IsNextCharacterNonFFFE to check.
                     if (offset + 2 < offsetMax)
                     {
                         if (IsNextCharacterNonFFFE(buffer, offset))
@@ -1181,7 +1181,7 @@ namespace System.Xml
                         }
                         else
                         {
-                            XmlExceptionHelper.ThrowXmlException(this, new XmlException(SR.Format(SR.XmlInvalidFFFE)));
+                            XmlExceptionHelper.ThrowXmlException(this, new XmlException(SR.XmlInvalidFFFE));
                         }
                     }
                     else
@@ -1340,7 +1340,7 @@ namespace System.Xml
                     else
                     {
                         if (OutsideRootElement)
-                            XmlExceptionHelper.ThrowXmlException(this, new XmlException(SR.Format(SR.XmlCDATAInvalidAtTopLevel)));
+                            XmlExceptionHelper.ThrowXmlException(this, new XmlException(SR.XmlCDATAInvalidAtTopLevel));
 
                         ReadCData();
                     }
@@ -1383,7 +1383,7 @@ namespace System.Xml
                     buffer[offset + 1] == (byte)']' &&
                     buffer[offset + 2] == (byte)'>')
                 {
-                    XmlExceptionHelper.ThrowXmlException(this, new XmlException(SR.Format(SR.XmlCloseCData)));
+                    XmlExceptionHelper.ThrowXmlException(this, new XmlException(SR.XmlCloseCData));
                 }
 
                 BufferReader.SkipByte();

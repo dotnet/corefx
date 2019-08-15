@@ -5,13 +5,11 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-
 namespace System.IO
 {
     public sealed partial class DriveInfo : System.Runtime.Serialization.ISerializable
     {
         public DriveInfo(string driveName) { }
-        void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public long AvailableFreeSpace { get { throw null; } }
         public string DriveFormat { get { throw null; } }
         public System.IO.DriveType DriveType { get { throw null; } }
@@ -22,23 +20,24 @@ namespace System.IO
         public long TotalSize { get { throw null; } }
         public string VolumeLabel { get { throw null; } set { } }
         public static System.IO.DriveInfo[] GetDrives() { throw null; }
+        void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public override string ToString() { throw null; }
     }
     public partial class DriveNotFoundException : System.IO.IOException
     {
         public DriveNotFoundException() { }
+        protected DriveNotFoundException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public DriveNotFoundException(string message) { }
         public DriveNotFoundException(string message, System.Exception innerException) { }
-        protected DriveNotFoundException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
     public enum DriveType
     {
-        CDRom = 5,
+        Unknown = 0,
+        NoRootDirectory = 1,
+        Removable = 2,
         Fixed = 3,
         Network = 4,
-        NoRootDirectory = 1,
+        CDRom = 5,
         Ram = 6,
-        Removable = 2,
-        Unknown = 0,
     }
 }

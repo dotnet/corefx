@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -10,16 +10,16 @@ namespace System.Configuration
 {
     // ConfigXmlDocument - the default Xml Document doesn't track line numbers, and line
     // numbers are necessary to display source on config errors.
-    // These classes wrap corresponding System.Xml types and also carry 
+    // These classes wrap corresponding System.Xml types and also carry
     // the necessary information for reporting filename / line numbers.
     // Note: these classes will go away if webdata ever decides to incorporate line numbers
     // into the default XML classes.  This class could also go away if webdata brings back
     // the UserData property to hang any info off of any node.
     public sealed class ConfigXmlDocument : XmlDocument, IConfigErrorInfo
     {
-        XmlTextReader _reader;
-        int _lineOffset;
-        string _filename;
+        private XmlTextReader _reader;
+        private int _lineOffset;
+        private string _filename;
 
         int IConfigErrorInfo.LineNumber
         {
@@ -106,22 +106,22 @@ namespace System.Configuration
             return new ConfigXmlText(_filename, LineNumber, text, this);
         }
 
-        public override XmlCDataSection CreateCDataSection(String data)
+        public override XmlCDataSection CreateCDataSection(string data)
         {
             return new ConfigXmlCDataSection(_filename, LineNumber, data, this);
         }
 
-        public override XmlComment CreateComment(String data)
+        public override XmlComment CreateComment(string data)
         {
             return new ConfigXmlComment(_filename, LineNumber, data, this);
         }
 
-        public override XmlSignificantWhitespace CreateSignificantWhitespace(String data)
+        public override XmlSignificantWhitespace CreateSignificantWhitespace(string data)
         {
             return new ConfigXmlSignificantWhitespace(_filename, LineNumber, data, this);
         }
 
-        public override XmlWhitespace CreateWhitespace(String data)
+        public override XmlWhitespace CreateWhitespace(string data)
         {
             return new ConfigXmlWhitespace(_filename, LineNumber, data, this);
         }

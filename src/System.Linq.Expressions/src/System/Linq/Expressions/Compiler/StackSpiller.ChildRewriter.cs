@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -16,8 +16,8 @@ namespace System.Linq.Expressions.Compiler
         /// Rewrites child expressions, spilling them into temps if needed. The
         /// stack starts in the initial state, and after the first subexpression
         /// is added it is changed to non-empty.
-        /// 
-        /// When all children have been added, the caller should rewrite the 
+        ///
+        /// When all children have been added, the caller should rewrite the
         /// node if Rewrite is true. Then, it should call Finish with either
         /// the original expression or the rewritten expression. Finish will call
         /// Expression.Block if necessary and return a new Result.
@@ -71,13 +71,13 @@ namespace System.Linq.Expressions.Compiler
             /// <summary>
             /// The current computed rewrite action, obtained by OR-ing together
             /// the rewrite actions returned from rewriting the child expressions
-            /// in calls to <see cref="Add"/>.
+            /// in calls to <see cref="Add(Expression)"/>.
             /// </summary>
             private RewriteAction _action;
 
             /// <summary>
             /// The current computed evaluation stack state. After adding the first
-            /// child expression through <see cref="Add"/>, the state changes from
+            /// child expression through <see cref="Add(Expression)"/>, the state changes from
             /// the initial state (provided to the constructor) to non-empty.
             /// </summary>
             private Stack _stack;
@@ -86,7 +86,7 @@ namespace System.Linq.Expressions.Compiler
             /// Indicates whether the rewrite has completed. This flag is toggled
             /// upon the first access to an indexer or the <see cref="Finish"/>
             /// method on the child rewriter instance. Once set to <c>true</c>,
-            /// calls to <see cref="Add"/> are no longer allowed.
+            /// calls to <see cref="Add(Expression)"/> are no longer allowed.
             /// </summary>
             private bool _done;
 
@@ -99,8 +99,8 @@ namespace System.Linq.Expressions.Compiler
 
             /// <summary>
             /// Creates a new child rewriter instance using the specified initial
-            /// evaluation <see cref="stack"/> state and the number of child
-            /// expressions specified in <see cref="count"/>.
+            /// evaluation <paramref name="stack"/> state and the number of child
+            /// expressions specified in <paramref name="count"/>.
             /// </summary>
             /// <param name="self">The parent stack spiller.</param>
             /// <param name="stack">The initial evaluation stack state.</param>
@@ -173,7 +173,7 @@ namespace System.Linq.Expressions.Compiler
             }
 
             /// <summary>
-            /// Called after all child expressions have been added using <see cref="Add"/>
+            /// Called after all child expressions have been added using <see cref="Add(Expression)"/>
             /// invocations, causing the comma to be populated with the rewritten child
             /// expressions and necessary assignments to temporary variables. A comma is
             /// only built when the rewrite action is <see cref="RewriteAction.SpillStack"/>.
@@ -299,14 +299,14 @@ namespace System.Linq.Expressions.Compiler
 
             /// <summary>
             /// Gets the rewrite action computed from rewriting child expressions during
-            /// calls to <see cref="Add"/>.
+            /// calls to <see cref="Add(Expression)"/>.
             /// </summary>
             internal RewriteAction Action => _action;
 
             /// <summary>
             /// Marks the child expression representing the instance as a ByRef value.
             /// </summary>
-            /// <param name="expression">
+            /// <param name="expr">
             /// The child expression representing the instance.
             /// </param>
             internal void MarkRefInstance(Expression expr)
@@ -418,7 +418,7 @@ namespace System.Linq.Expressions.Compiler
 
             /// <summary>
             /// Gets the rewritten child expressions between the specified <paramref name="first"/>
-            /// and <paramref name="last"/> (inclusive) indexes, used to rewrite the parent 
+            /// and <paramref name="last"/> (inclusive) indexes, used to rewrite the parent
             /// expression. In case stack spilling has taken place, the returned expressions will
             /// contain temporary variables.
             /// </summary>

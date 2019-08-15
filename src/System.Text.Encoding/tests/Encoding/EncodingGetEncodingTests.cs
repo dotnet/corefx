@@ -4,11 +4,12 @@
 
 using System.Diagnostics;
 using System.Globalization;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Text.Tests
 {
-    public class EncodingGetEncodingTest : RemoteExecutorTestBase
+    public class EncodingGetEncodingTest
     {
         [Fact]
         public void GetEncoding_String_Invalid()
@@ -41,7 +42,7 @@ namespace System.Text.Tests
             public int CodePage { set; get; }
         }
 
-        private static CodePageMapping[] s_mapping = new CodePageMapping[] 
+        private static CodePageMapping[] s_mapping = new CodePageMapping[]
         {
             new CodePageMapping("ANSI_X3.4-1968", 20127 ),
             new CodePageMapping("ANSI_X3.4-1986", 20127 ),
@@ -101,7 +102,7 @@ namespace System.Text.Tests
         public void GetEncoding_EncodingName()
         {
             // Workaround issue: UWP culture is process wide
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
 

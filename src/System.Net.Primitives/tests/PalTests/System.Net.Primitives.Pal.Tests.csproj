@@ -1,19 +1,10 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{7860A11A-1841-4416-8A30-28EEEB42C6BB}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <StringResourcesPath>../../src/Resources/Strings.resx</StringResourcesPath>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup>
     <!-- SYSTEM_NET_PRIMITIVES_DLL is required to allow source-level code sharing for types defined within the 
          System.Net.Internals namespace. -->
@@ -21,9 +12,9 @@
   </PropertyGroup>
   <!-- Do not reference these assemblies from the TargetingPack since we are building part of the source code for tests. -->
   <ItemGroup>
-    <TargetingPackExclusions Include="System.Net.Primitives" />
+    <DefaultReferenceExclusions Include="System.Net.Primitives" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+  <ItemGroup>
     <Compile Include="..\..\src\System\Net\Sockets\AddressFamily.cs">
       <Link>ProductionCode\System\Net\Sockets\AddressFamily.cs</Link>
     </Compile>
@@ -36,11 +27,11 @@
     <Compile Include="..\..\src\System\Net\IPAddressParser.cs">
       <Link>ProductionCode\System\Net\IPAddressParser.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\System\Net\IPv4AddressHelper.cs">
-      <Link>ProductionCode\System\Net\IPv4AddressHelper.cs</Link>
+    <Compile Include="$(CommonPath)\System\Net\IPv4AddressHelper.Common.cs">
+      <Link>ProductionCode\System\Net\IPv4AddressHelper.Common.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\System\Net\IPv6AddressHelper.cs">
-      <Link>ProductionCode\System\Net\IPv6AddressHelper.cs</Link>
+    <Compile Include="$(CommonPath)\System\Net\IPv6AddressHelper.Common.cs">
+      <Link>ProductionCode\System\Net\IPv6AddressHelper.Common.cs</Link>
     </Compile>
     <Compile Include="..\..\src\System\Net\IPEndPoint.cs">
       <Link>ProductionCode\System\Net\IPEndPoint.cs</Link>
@@ -62,7 +53,6 @@
     <Compile Include="HostInformationPalTest.cs" />
     <Compile Include="SocketAddressPalTest.cs" />
     <Compile Include="Fakes\NetEventSource.cs" />
-    <Compile Include="Fakes\Serialization.cs" Condition="'$(TargetGroup)' != 'netstandard' And '$(TargetGroup)' != 'netcoreapp'" />
     <Compile Include="..\..\src\System\Net\SocketException.cs">
       <Link>ProductionCode\System\Net\SocketException.cs</Link>
     </Compile>
@@ -81,8 +71,8 @@
     <Compile Include="$(CommonPath)\System\NotImplemented.cs">
       <Link>ProductionCode\Common\System\NotImplemented.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.ErrorCodes.cs">
-      <Link>ProductionCode\Common\Interop\Windows\Winsock\Interop.ErrorCodes.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\WinSock\Interop.ErrorCodes.cs">
+      <Link>ProductionCode\Common\Interop\Windows\WinSock\Interop.ErrorCodes.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
@@ -113,17 +103,23 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>ProductionCode\Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.LocalAlloc.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.LocalAlloc.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.LocalAlloc.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.LocalAlloc.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.LocalAlloc.Constants.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.LocalAlloc.Constants.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.LocalAlloc.Constants.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.LocalAlloc.Constants.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.LocalFree.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.LocalFree.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.LocalFree.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.LocalFree.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\NtDll\Interop.NtStatus.cs">
       <Link>ProductionCode\Common\Interop\Windows\NtDll\Interop.NtStatus.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\InterfaceInfoPal.Windows.cs">
+      <Link>ProductionCode\System\Net\NetworkInformation\InterfaceInfoPal.Windows.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\IpHlpApi\Interop.if_nametoindex.cs">
+      <Link>ProductionCode\Common\Interop\Windows\IpHlpApi\Interop.if_nametoindex.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
@@ -151,7 +147,7 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetDomainName.cs">
       <Link>ProductionCode\Common\Interop\Unix\System.Native\Interop.GetDomainName.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetHostName.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.GetHostName.cs">
       <Link>ProductionCode\Common\Interop\Unix\System.Native\Interop.GetHostName.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetNameInfo.cs">
@@ -166,6 +162,11 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.SocketAddress.cs">
       <Link>ProductionCode\Common\Interop\Unix\System.Native\Interop.SocketAddress.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\InterfaceInfoPal.Unix.cs">
+      <Link>ProductionCode\Common\System\Net\NetworkInformation\InterfaceInfoPal.Unix.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.InterfaceNameToIndex.cs">
+      <Link>ProductionCode\Common\Interop\Unix\System.Native\Interop.InterfaceNameToIndex.cs</Link>
+    </Compile>
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

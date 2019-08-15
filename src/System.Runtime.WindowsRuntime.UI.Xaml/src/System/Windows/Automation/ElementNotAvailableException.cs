@@ -13,9 +13,11 @@
 =============================================================================*/
 using System;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 
 namespace Windows.UI.Xaml.Automation
 {
+    [Serializable]
     public class ElementNotAvailableException : Exception
     {
         public ElementNotAvailableException()
@@ -24,16 +26,21 @@ namespace Windows.UI.Xaml.Automation
             HResult = HResults.E_ELEMENTNOTAVAILABLE;
         }
 
-        public ElementNotAvailableException(String message)
+        public ElementNotAvailableException(string message)
             : base(message)
         {
             HResult = HResults.E_ELEMENTNOTAVAILABLE;
         }
 
-        public ElementNotAvailableException(String message, Exception innerException)
+        public ElementNotAvailableException(string message, Exception innerException)
             : base(message, innerException)
         {
             HResult = HResults.E_ELEMENTNOTAVAILABLE;
+        }
+
+        protected ElementNotAvailableException(SerializationInfo serializationInfo, StreamingContext streamingContext)
+            : base(serializationInfo, streamingContext)
+        {
         }
     }
 }

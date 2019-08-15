@@ -78,8 +78,8 @@ namespace System.Configuration
 
         private static void ThrowIfContainsDelimiter(string value)
         {
-            if (value.Contains(","))
-                throw new ConfigurationErrorsException(string.Format(SR.Config_base_value_cannot_contain, ","));
+            if (value.Contains(",")) // string.Contains(char) is .NetCore2.1+ specific
+                throw new ConfigurationErrorsException(SR.Format(SR.Config_base_value_cannot_contain, ","));
         }
 
         public void SetReadOnly()

@@ -4,7 +4,6 @@
 
 using System.ComponentModel.Composition.Primitives;
 using System.Reflection;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.ReflectionModel
 {
@@ -13,11 +12,14 @@ namespace System.ComponentModel.Composition.ReflectionModel
         private static readonly MethodInfo _createStronglyTypedExportFactoryOfT = typeof(ExportFactoryCreator).GetMethod("CreateStronglyTypedExportFactoryOfT", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly MethodInfo _createStronglyTypedExportFactoryOfTM = typeof(ExportFactoryCreator).GetMethod("CreateStronglyTypedExportFactoryOfTM", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
-        private Type    _exportFactoryType;
+        private readonly Type    _exportFactoryType;
 
         public ExportFactoryCreator(Type exportFactoryType)
         {
-            Assumes.NotNull(exportFactoryType);
+            if (exportFactoryType == null)
+            {
+                throw new ArgumentNullException(nameof(exportFactoryType));
+            }
 
             _exportFactoryType = exportFactoryType;
         }
@@ -34,7 +36,11 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 genericMethod = _createStronglyTypedExportFactoryOfTM.MakeGenericMethod(exportType, metadataViewType);
             }
 
-            Assumes.NotNull(genericMethod);
+            if (genericMethod == null)
+            {
+                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
+            }
+
             Func<Export, object> exportFactoryFactory = (Func<Export, object>)Delegate.CreateDelegate(typeof(Func<Export, object>), this, genericMethod);
             return (e) => exportFactoryFactory.Invoke(e);
         }

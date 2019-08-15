@@ -34,13 +34,13 @@ namespace System.Data
         private Hashtable _prefixes;
 
         private DataSet _ds;
-        private ArrayList _tables = new ArrayList();
-        private ArrayList _relations = new ArrayList();
+        private readonly ArrayList _tables = new ArrayList();
+        private readonly ArrayList _relations = new ArrayList();
 
         private XmlDocument _dc;
         private XmlElement _sRoot;
         private int _prefixCount = 0;
-        private SchemaFormat _schFormat = SchemaFormat.Public;
+        private readonly SchemaFormat _schFormat = SchemaFormat.Public;
         private string _filePath = null;
         private string _fileName = null;
         private string _fileExt = null;
@@ -534,7 +534,6 @@ namespace System.Data
 
         // SxS: this method can generate XSD files if the input xmlWriter is XmlTextWriter or DataTextWriter and its underlying stream is FileStream
         // These XSDs are located in the same folder as the underlying stream's file path (see SetPath method).
-        // These XSDs are not exposed out of this method, so ResourceExposure annotation is None.
         internal void SchemaTree(XmlDocument xd, XmlWriter xmlWriter, DataSet ds, DataTable dt, bool writeHierarchy)
         {
             _constraintNames = new ArrayList();
@@ -2207,7 +2206,6 @@ namespace System.Data
         /// </summary>
         /// <param name="root"></param>
         /// <param name="type">non-special type to resolve</param>
-        /// <returns>type.AssemblyQualifiedName or targeted to a different version</returns>
         /// <exception cref="DataException">if multipleTargetConverter throws or returns an empty result</exception>
         private void SetMSDataAttribute(XmlElement root, Type type)
         {
@@ -2222,7 +2220,7 @@ namespace System.Data
                 if (!string.IsNullOrEmpty(result))
                 {
                     // SetAttribute doesn't fail with invalid data, but the final XmlDocument.Save will fail later
-                    // with the ArugmentException when calling the actual XmlWriter.SetAttribute
+                    // with the ArgumentException when calling the actual XmlWriter.SetAttribute
                     root.SetAttribute(Keywords.MSD_DATATYPE, Keywords.MSDNS, result);
                 }
             }
@@ -2249,8 +2247,8 @@ namespace System.Data
         private bool _fBefore = false;
         private bool _fErrors = false;
         internal Hashtable _rowsOrder = null;
-        private ArrayList _tables = new ArrayList();
-        private bool _writeHierarchy = false;
+        private readonly ArrayList _tables = new ArrayList();
+        private readonly bool _writeHierarchy = false;
 
 
         internal NewDiffgramGen(DataSet ds)
@@ -2616,7 +2614,7 @@ namespace System.Data
                                 {
                                     string xsdTypeName = Keywords.XSD_PREFIXCOLON + XmlTreeGen.XmlDataTypeName(valuesType);
                                     _xmlw.WriteAttributeString(Keywords.XSI, Keywords.TYPE, Keywords.XSINS, xsdTypeName);
-                                    _xmlw.WriteAttributeString(Keywords.XMLNS_XSD, Keywords.XSDNS);
+                                    _xmlw.WriteAttributeString(Keywords.XSD_PREFIX, Keywords.XMLNS, Keywords.XSDNS, xsdTypeName);
                                 }
                                 if (!DataStorage.IsSqlType(valuesType))
                                 {
@@ -2652,16 +2650,16 @@ namespace System.Data
     {
         private XmlWriter _xmlw;
 
-        private DataSet _ds = null;
-        private DataTable _dt = null;
+        private readonly DataSet _ds = null;
+        private readonly DataTable _dt = null;
 
-        private ArrayList _dTables = new ArrayList();
-        private DataTable[] _topLevelTables;
+        private readonly ArrayList _dTables = new ArrayList();
+        private readonly DataTable[] _topLevelTables;
 
-        private bool _fFromTable = false; // also means no hierarchy
+        private readonly bool _fFromTable = false; // also means no hierarchy
         private bool _isDiffgram = false;
         private Hashtable _rowsOrder = null;
-        private bool _writeHierarchy = false;
+        private readonly bool _writeHierarchy = false;
 
 
 
@@ -2935,9 +2933,6 @@ namespace System.Data
                 }
             }
 
-
-
-
             //write the attribute columns first, if any
             foreach (DataColumn col in row.Table.Columns)
             {
@@ -3045,7 +3040,7 @@ namespace System.Data
                                 {
                                     string xsdTypeName = Keywords.XSD_PREFIXCOLON + XmlTreeGen.XmlDataTypeName(valuesType);
                                     _xmlw.WriteAttributeString(Keywords.XSI, Keywords.TYPE, Keywords.XSINS, xsdTypeName);
-                                    _xmlw.WriteAttributeString(Keywords.XMLNS_XSD, Keywords.XSDNS);
+                                    _xmlw.WriteAttributeString(Keywords.XSD_PREFIX, Keywords.XMLNS, Keywords.XSDNS, xsdTypeName);
                                 }
                                 if (!DataStorage.IsSqlType(valuesType))
                                 {
@@ -3095,7 +3090,7 @@ namespace System.Data
 
     internal sealed class DataTextWriter : XmlWriter
     {
-        private XmlWriter _xmltextWriter;
+        private readonly XmlWriter _xmltextWriter;
 
         internal static XmlWriter CreateWriter(XmlWriter xw)
         {
@@ -3288,7 +3283,7 @@ namespace System.Data
 
     internal sealed class DataTextReader : XmlReader
     {
-        private XmlReader _xmlreader;
+        private readonly XmlReader _xmlreader;
 
         internal static XmlReader CreateReader(XmlReader xr)
         {

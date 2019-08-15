@@ -9,7 +9,7 @@ namespace System.Data.Odbc
 {
     internal struct SQLLEN
     {
-        private IntPtr _value;
+        private readonly IntPtr _value;
 
         internal SQLLEN(int value)
         {
@@ -31,7 +31,7 @@ namespace System.Data.Odbc
         }
 
         public static implicit operator SQLLEN(int value)
-        { // 
+        { //
             return new SQLLEN(value);
         }
 
@@ -41,7 +41,7 @@ namespace System.Data.Odbc
         }
 
         public static unsafe implicit operator int (SQLLEN value)
-        { // 
+        { //
 #if WIN32
             return (int)value._value.ToInt32();
 #else
@@ -188,7 +188,7 @@ namespace System.Data.Odbc
             return retcode;
         }
 
-        internal ODBC32.RetCode GetTypeInfo(Int16 fSqlType)
+        internal ODBC32.RetCode GetTypeInfo(short fSqlType)
         {
             ODBC32.RetCode retcode = Interop.Odbc.SQLGetTypeInfo(this, fSqlType);
             ODBC.TraceODBC(3, "SQLGetTypeInfo", retcode);
@@ -291,18 +291,31 @@ namespace System.Data.Odbc
         internal ODBC32.RetCode Statistics(string tableCatalog,
                                            string tableSchema,
                                            string tableName,
-                                           Int16 unique,
-                                           Int16 accuracy)
+                                           short unique,
+                                           short accuracy)
         {
-            ODBC32.RetCode retcode = Interop.Odbc.SQLStatisticsW(this,
-                                                                        tableCatalog,
-                                                                        ODBC.ShortStringLength(tableCatalog),
-                                                                        tableSchema,
-                                                                        ODBC.ShortStringLength(tableSchema),
-                                                                        tableName,
-                                                                        ODBC.ShortStringLength(tableName),
-                                                                        unique,
-                                                                        accuracy);
+            ODBC32.RetCode retcode;
+
+            // MDAC Bug 75928 - SQLStatisticsW damages the string passed in
+            // To protect the tablename we need to pass in a copy of that string
+
+            IntPtr pwszTableName = Marshal.StringToCoTaskMemUni(tableName);
+            try
+            {
+                retcode = Interop.Odbc.SQLStatisticsW(this,
+                                                      tableCatalog,
+                                                      ODBC.ShortStringLength(tableCatalog),
+                                                      tableSchema,
+                                                      ODBC.ShortStringLength(tableSchema),
+                                                      pwszTableName,
+                                                      ODBC.ShortStringLength(tableName),
+                                                      unique,
+                                                      accuracy);
+            }
+            finally
+            {
+                Marshal.FreeCoTaskMem(pwszTableName);
+            }
 
             ODBC.TraceODBC(3, "SQLStatisticsW", retcode);
             return retcode;
@@ -310,13 +323,7 @@ namespace System.Data.Odbc
 
         internal ODBC32.RetCode Statistics(string tableName)
         {
-            ODBC32.RetCode retcode = Interop.Odbc.SQLStatisticsW(this,
-            null, 0, null, 0,
-            tableName, ODBC.ShortStringLength(tableName),
-            (Int16)ODBC32.SQL_INDEX.UNIQUE,
-            (Int16)ODBC32.SQL_STATISTICS_RESERVED.ENSURE);
-            ODBC.TraceODBC(3, "SQLStatisticsW", retcode);
-            return retcode;
+            return Statistics(null, null, tableName, (short)ODBC32.SQL_INDEX.UNIQUE, (short)ODBC32.SQL_STATISTICS_RESERVED.ENSURE);
         }
 
         internal ODBC32.RetCode Tables(string tableCatalog,

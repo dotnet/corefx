@@ -14,7 +14,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks.Dataflow.Internal;
 
@@ -73,8 +72,6 @@ namespace System.Threading.Tasks.Dataflow
             // Validate arguments
             if (action == null) throw new ArgumentNullException(nameof(action));
             if (dataflowBlockOptions == null) throw new ArgumentNullException(nameof(dataflowBlockOptions));
-            Contract.Ensures((_spscTarget != null) ^ (_defaultTarget != null), "One and only one of the two targets must be non-null after construction");
-            Contract.EndContractBlock();
 
             // Ensure we have options that can't be changed by the caller
             dataflowBlockOptions = dataflowBlockOptions.DefaultOrClone();
@@ -125,6 +122,8 @@ namespace System.Threading.Tasks.Dataflow
                 etwLog.DataflowBlockCreated(this, dataflowBlockOptions);
             }
 #endif
+
+            Debug.Assert((_spscTarget != null) ^ (_defaultTarget != null), "One and only one of the two targets must be non-null after construction");
         }
 
         /// <summary>Processes the message with a user-provided action.</summary>
@@ -211,7 +210,7 @@ namespace System.Threading.Tasks.Dataflow
             }
 
             // Regardless of faults, note that we're done processing.  There are
-            // no outputs to keep track of for action block, so we always decrement 
+            // no outputs to keep track of for action block, so we always decrement
             // the bounding count here (the callee will handle checking whether
             // we're actually in a bounded mode).
             _defaultTarget.SignalOneAsyncMessageCompleted(boundingCountChange: -1);
@@ -234,7 +233,6 @@ namespace System.Threading.Tasks.Dataflow
         void IDataflowBlock.Fault(Exception exception)
         {
             if (exception == null) throw new ArgumentNullException(nameof(exception));
-            Contract.EndContractBlock();
 
             if (_defaultTarget != null)
             {
@@ -252,18 +250,18 @@ namespace System.Threading.Tasks.Dataflow
             get { return _defaultTarget != null ? _defaultTarget.Completion : _spscTarget.Completion; }
         }
 
-        /// <summary>Posts an item to the <see cref="T:System.Threading.Tasks.Dataflow.ITargetBlock`1"/>.</summary>
+        /// <summary>Posts an item to the <see cref="System.Threading.Tasks.Dataflow.ITargetBlock{T}"/>.</summary>
         /// <param name="item">The item being offered to the target.</param>
         /// <returns>true if the item was accepted by the target block; otherwise, false.</returns>
         /// <remarks>
         /// This method will return once the target block has decided to accept or decline the item,
         /// but unless otherwise dictated by special semantics of the target block, it does not wait
-        /// for the item to actually be processed (for example, <see cref="T:System.Threading.Tasks.Dataflow.ActionBlock`1"/>
+        /// for the item to actually be processed (for example, <see cref="System.Threading.Tasks.Dataflow.ActionBlock{T}"/>
         /// will return from Post as soon as it has stored the posted item into its input queue).  From the perspective
-        /// of the block's processing, Post is asynchronous. For target blocks that support postponing offered messages, 
+        /// of the block's processing, Post is asynchronous. For target blocks that support postponing offered messages,
         /// or for blocks that may do more processing in their Post implementation, consider using
-        ///  <see cref="T:System.Threading.Tasks.Dataflow.DataflowBlock.SendAsync">SendAsync</see>, 
-        /// which will return immediately and will enable the target to postpone the posted message and later consume it 
+        /// <see cref="System.Threading.Tasks.Dataflow.DataflowBlock.SendAsync{TInput}(ITargetBlock{TInput}, TInput)">SendAsync</see>,
+        /// which will return immediately and will enable the target to postpone the posted message and later consume it
         /// after SendAsync returns.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -271,7 +269,7 @@ namespace System.Threading.Tasks.Dataflow
         {
             // Even though this method is available with the exact same functionality as an extension method
             // on ITargetBlock, using that extension method goes through an interface call on ITargetBlock,
-            // which for very high-throughput scenarios shows up as noticeable overhead on certain architectures.  
+            // which for very high-throughput scenarios shows up as noticeable overhead on certain architectures.
             // We can eliminate that call for direct ActionBlock usage by providing the same method as an instance method.
 
             return _defaultTarget != null ?
@@ -280,7 +278,7 @@ namespace System.Threading.Tasks.Dataflow
         }
 
         /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Targets/Member[@name="OfferMessage"]/*' />
-        DataflowMessageStatus ITargetBlock<TInput>.OfferMessage(DataflowMessageHeader messageHeader, TInput messageValue, ISourceBlock<TInput> source, Boolean consumeToAccept)
+        DataflowMessageStatus ITargetBlock<TInput>.OfferMessage(DataflowMessageHeader messageHeader, TInput messageValue, ISourceBlock<TInput> source, bool consumeToAccept)
         {
             return _defaultTarget != null ?
                 _defaultTarget.OfferMessage(messageHeader, messageValue, source, consumeToAccept) :
@@ -357,7 +355,7 @@ namespace System.Threading.Tasks.Dataflow
             }
 
             /// <summary>Gets the number of outstanding input operations.</summary>
-            public Int32 CurrentDegreeOfParallelism
+            public int CurrentDegreeOfParallelism
             {
                 get { return _defaultDebugInfo != null ? _defaultDebugInfo.CurrentDegreeOfParallelism : _spscDebugInfo.CurrentDegreeOfParallelism; }
             }

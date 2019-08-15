@@ -1,7 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using Xunit;
 
 namespace System.PrivateUri.Tests
@@ -110,7 +111,7 @@ namespace System.PrivateUri.Tests
 
             Assert.Equal<Uri>(test, result); //"Transitivity failure"
 
-            Assert.True(String.CompareOrdinal(rel.ToString(), 0, "./", 0, 2) == 0, "Cannot have colon in first segment, must append ./");
+            Assert.True(string.CompareOrdinal(rel.ToString(), 0, "./", 0, 2) == 0, "Cannot have colon in first segment, must append ./");
         }
 
         [Fact]
@@ -126,7 +127,7 @@ namespace System.PrivateUri.Tests
 
             Assert.Equal<Uri>(test, result); //"Transitivity failure"
 
-            Assert.True(String.CompareOrdinal(rel.ToString(), 0, "./", 0, 2) == 0, "Cannot have colon in first segment, must append ./");
+            Assert.True(string.CompareOrdinal(rel.ToString(), 0, "./", 0, 2) == 0, "Cannot have colon in first segment, must append ./");
         }
 
         [Fact]
@@ -141,9 +142,9 @@ namespace System.PrivateUri.Tests
 
             Uri result = new Uri(baseUri, rel);
 
-            Assert.Equal<String>(test.LocalPath, result.LocalPath); //  "Transitivity failure"
+            Assert.Equal(test.LocalPath, result.LocalPath); //  "Transitivity failure"
 
-            Assert.True(String.CompareOrdinal(rel.ToString(), 0, "./", 0, 2) == 0, "Cannot have colon in first segment, must append ./");
+            Assert.True(string.CompareOrdinal(rel.ToString(), 0, "./", 0, 2) == 0, "Cannot have colon in first segment, must append ./");
         }
 
         [Fact]
@@ -155,7 +156,7 @@ namespace System.PrivateUri.Tests
 
             Uri result = new Uri(baseUri, rel);
 
-            Assert.Equal<String>(test.LocalPath, result.LocalPath); //"Transitivity failure"
+            Assert.Equal(test.LocalPath, result.LocalPath); //"Transitivity failure"
         }
 
         [Fact]
@@ -167,12 +168,12 @@ namespace System.PrivateUri.Tests
 
             Assert.False(rel.IsAbsoluteUri, "Result should be relative");
 
-            Assert.Equal<String>("d:/hi:there/", rel.ToString());
+            Assert.Equal("d:/hi:there/", rel.ToString());
 
             Uri result = new Uri(baseUri, rel);
 
-            Assert.Equal<String>(test.LocalPath, result.LocalPath); //  "Transitivity failure"
-            Assert.Equal<String>(test.ToString(), result.ToString()); //  "Transitivity failure"
+            Assert.Equal(test.LocalPath, result.LocalPath); //  "Transitivity failure"
+            Assert.Equal(test.ToString(), result.ToString()); //  "Transitivity failure"
         }
 
         [Fact]
@@ -184,9 +185,9 @@ namespace System.PrivateUri.Tests
 
             Uri result = new Uri(baseUri, rel);
 
-            // This is a known oddity when mix and matching Unc & dos paths in this order. 
+            // This is a known oddity when mix and matching Unc & dos paths in this order.
             // The other way works as expected.
-            Assert.Equal<string>("file:///u:/unc/hi:there/", result.ToString());
+            Assert.Equal("file:///u:/unc/hi:there/", result.ToString());
         }
 
         [Fact]
@@ -198,7 +199,7 @@ namespace System.PrivateUri.Tests
 
             Uri result = new Uri(baseUri, rel);
 
-            Assert.Equal<String>(test.LocalPath, result.LocalPath);  // "Transitivity failure"
+            Assert.Equal(test.LocalPath, result.LocalPath);  // "Transitivity failure"
         }
 
         [Fact]
@@ -210,7 +211,7 @@ namespace System.PrivateUri.Tests
 
             Uri result = new Uri(baseUri, rel);
 
-            Assert.Equal<String>(test.LocalPath, result.LocalPath); //"Transitivity failure"
+            Assert.Equal(test.LocalPath, result.LocalPath); //"Transitivity failure"
         }
 
         [Fact]
@@ -222,7 +223,7 @@ namespace System.PrivateUri.Tests
 
             Uri result = new Uri(baseUri, rel);
 
-            Assert.Equal<String>(test.LocalPath, result.LocalPath); //"Transitivity failure"
+            Assert.Equal(test.LocalPath, result.LocalPath); //"Transitivity failure"
         }
 
         [Fact]
@@ -234,7 +235,7 @@ namespace System.PrivateUri.Tests
 
             Uri result = new Uri(baseUri, rel);
 
-            Assert.Equal<String>(test.LocalPath, result.LocalPath); //"Transitivity failure"
+            Assert.Equal(test.LocalPath, result.LocalPath); //"Transitivity failure"
         }
 
         [Fact]
@@ -289,6 +290,221 @@ namespace System.PrivateUri.Tests
         public void UriIsWellFormed_IPv6HostIriOn_True()
         {
             Assert.True(Uri.IsWellFormedUriString("http://[::1]/", UriKind.Absolute));
+        }
+
+        public static IEnumerable<object[]> TestIsWellFormedUriStringData =>
+        new List<object[]>
+        {
+            // Test ImplicitFile/UNC
+            new object[] { "c:\\directory\filename", false },
+            new object[] { "file://c:/directory/filename", false },
+            new object[] { "\\\\?\\UNC\\Server01\\user\\docs\\Letter.txt", false },
+
+            // Test Host
+            new object[] { "http://www.contoso.com", true },
+            new object[] { "http://\u00E4.contos.com", true },
+            new object[] { "http://www.contos\u00E4.com", true },
+
+            new object[] { "http://www.contoso.com ", true },
+            new object[] { "http://\u00E4.contos.com ", true },
+
+            new object[] { "http:// www.contoso.com", false },
+            new object[] { "http:// \u00E4.contos.com", false },
+            new object[] { "http:// www.contos\u00E4.com", false },
+
+            new object[] { "http://www.contos o.com", false },
+            new object[] { "http://www.contos \u00E4.com", false },
+
+
+            // Test Path
+            new object[] { "http://www.contoso.com/path???/file name", false },
+            new object[] { "http://www.contoso.com/\u00E4???/file name", false },
+            new object[] { "http:\\host/path/file", false },
+
+            new object[] { "http://www.contoso.com/a/sek http://test.com", false },
+            new object[] { "http://www.contoso.com/\u00E4/sek http://test.com", false },
+
+            new object[] { "http://www.contoso.com/ seka http://test.com", false },
+            new object[] { "http://www.contoso.com/ sek\u00E4 http://test.com", false },
+
+            new object[] { "http://www.contoso.com/ a sek http://test.com", false },
+            new object[] { "http://www.contoso.com/ \u00E4 sek http://test.com", false },
+
+            new object[] { "http://www.contoso.com/ \u00E4/", false },
+            new object[] { "http://www.contoso.com/ path/", false },
+
+            new object[] { "http://www.contoso.com/path", true },
+            new object[] { "http://www.contoso.com/\u00E4/", true },
+
+            new object[] { "http://www.contoso.com/path/#", true },
+            new object[] { "http://www.contoso.com/\u00E4/#", true },
+
+            new object[] { "http://www.contoso.com/path/# ", true },
+            new object[] { "http://www.contoso.com/\u00E4/# ", true },
+
+            new object[] { "http://www.contoso.com/path/ # ", false },
+            new object[] { "http://www.contoso.com/\u00E4/ # ", false },
+
+            new object[] { "http://www.contoso.com/path/ #", false },
+            new object[] { "http://www.contoso.com/\u00E4/ #", false },
+
+            new object[] { "http://www.contoso.com/path ", true },
+            new object[] { "http://www.contoso.com/\u00E4/ ", true },
+
+            new object[] { "http://www.contoso.com/path/\u00E4/path /", false },
+            new object[] { "http://www.contoso.com/path/\u00E4/path / ", false },
+            new object[] { "http://www.contoso.com/path/\u00E4/path/", true },
+            new object[] { "http://www.contoso.com/path/\u00E4 /path/", false },
+            new object[] { "http://www.contoso.com/path/\u00E4 /path/ ", false },
+            new object[] { "http://www.contoso.com/path/\u00E4/path/ \u00E4/", false },
+
+            // Test Query
+            new object[] { "http://www.contoso.com/path?name", true },
+            new object[] { "http://www.contoso.com/path?\u00E4", true },
+
+            new object[] { "http://www.contoso.com/path?name ", true },
+            new object[] { "http://www.contoso.com/path?\u00E4 ", true },
+
+            new object[] { "http://www.contoso.com/path ?name ", false },
+            new object[] { "http://www.contoso.com/path ?\u00E4 ", false },
+
+            new object[] { "http://www.contoso.com/path?par=val?", true },
+            new object[] { "http://www.contoso.com/path?\u00E4=\u00E4?", true },
+
+            new object[] { "http://www.contoso.com/path? name ", false },
+            new object[] { "http://www.contoso.com/path? \u00E4 ", false },
+
+            new object[] { "http://www.contoso.com/path?p=", true },
+            new object[] { "http://www.contoso.com/path?\u00E4=", true },
+
+            new object[] { "http://www.contoso.com/path?p= ", true },
+            new object[] { "http://www.contoso.com/path?\u00E4= ", true },
+
+            new object[] { "http://www.contoso.com/path?p= val", false },
+            new object[] { "http://www.contoso.com/path?\u00E4= \u00E4", false },
+
+            new object[] { "http://www.contoso.com/path?par=value& par=value", false },
+            new object[] { "http://www.contoso.com/path?\u00E4=\u00E4& \u00E4=\u00E4", false },
+
+            // Test Fragment
+            new object[] { "http://www.contoso.com/path?name#", true },
+            new object[] { "http://www.contoso.com/path?\u00E4#", true },
+
+            new object[] { "http://www.contoso.com/path?name# ", true },
+            new object[] { "http://www.contoso.com/path?\u00E4# ", true },
+
+            new object[] { "http://www.contoso.com/path?name#a", true },
+            new object[] { "http://www.contoso.com/path?\u00E4#\u00E4", true },
+
+            new object[] { "http://www.contoso.com/path?name#a ", true },
+            new object[] { "http://www.contoso.com/path?\u00E4#\u00E4 ", true },
+
+            new object[] { "http://www.contoso.com/path?name# a", false },
+            new object[] { "http://www.contoso.com/path?\u00E4# \u00E4", false },
+
+
+            // Test Path+Query
+            new object[] { "http://www.contoso.com/path? a ", false },
+            new object[] { "http://www.contoso.com/\u00E4? \u00E4 ", false },
+
+            new object[] { "http://www.contoso.com/a?val", true },
+            new object[] { "http://www.contoso.com/\u00E4?\u00E4", true },
+
+            new object[] { "http://www.contoso.com/path /path?par=val", false },
+            new object[] { "http://www.contoso.com/\u00E4 /\u00E4?\u00E4=\u00E4", false },
+
+            // Test Path+Query+Fragment
+            new object[] { "http://www.contoso.com/path?a#a", true },
+            new object[] { "http://www.contoso.com/\u00E4?\u00E4#\u00E4", true },
+
+            new object[] { "http://www.contoso.com/path?par=val#a ", true },
+            new object[] { "http://www.contoso.com/\u00E4?\u00E4=\u00E4#\u00E4 ", true },
+
+            new object[] { "http://www.contoso.com/path?val#", true },
+            new object[] { "http://www.contoso.com/\u00E4?\u00E4#", true },
+
+            new object[] { "http://www.contoso.com/path?val#?val", true },
+            new object[] { "http://www.contoso.com/\u00E4?\u00E4#?\u00E4", true },
+
+            new object[] { "http://www.contoso.com/path?val #", false },
+            new object[] { "http://www.contoso.com/\u00E4?\u00E4 #", false },
+
+            new object[] { "http://www.contoso.com/path?val# val", false },
+            new object[] { "http://www.contoso.com/\u00E4?\u00E4# \u00E4", false },
+
+            new object[] { "http://www.contoso.com/path?val# val ", false },
+            new object[] { "http://www.contoso.com/\u00E4?\u00E4# \u00E4 ", false },
+
+            new object[] { "http://www.contoso.com/path?val#val ", true },
+            new object[] { "http://www.contoso.com/\u00E4?\u00E4#\u00E4 ", true },
+
+            new object[] { "http://www.contoso.com/ path?a#a", false },
+            new object[] { "http://www.contoso.com/ \u00E4?\u00E4#\u00E4", false },
+
+            new object[] { "http://www.contoso.com/ path?a #a", false },
+            new object[] { "http://www.contoso.com/ \u00E4?\u00E4 #\u00E4", false },
+
+            new object[] { "http://www.contoso.com/ path?a #a ", false },
+            new object[] { "http://www.contoso.com/ \u00E4?\u00E4 #\u00E4 ", false },
+
+            new object[] { "http://www.contoso.com/path?a# a ", false },
+            new object[] { "http://www.contoso.com/path?\u00E4# \u00E4 ", false },
+
+
+            new object[] { "http://www.contoso.com/path?a#a?a", true },
+            new object[] { "http://www.contoso.com/\u00E4?\u00E4#u00E4?\u00E4", true },
+
+            // Sample in "private unsafe Check CheckCanonical(char* str, ref ushort idx, ushort end, char delim)" code comments
+            new object[] { "http://www.contoso.com/\u00E4/ path2/ param=val", false },
+            new object[] { "http://www.contoso.com/\u00E4? param=val", false },
+            new object[] { "http://www.contoso.com/\u00E4?param=val# fragment", false },
+        };
+
+        [Theory]
+        [MemberData(nameof(TestIsWellFormedUriStringData))]
+        public static void TestIsWellFormedUriString(string uriString, bool expected)
+        {
+            Assert.Equal(expected, Uri.IsWellFormedUriString(uriString, UriKind.RelativeOrAbsolute));
+        }
+
+        public static IEnumerable<object[]> UriIsWellFormedUnwiseStringData =>
+        new List<object[]>
+        {
+            // escaped
+            new object[] { "https://www.contoso.com/?a=%7B%7C%7D&b=%E2%80%99", true },
+            new object[] { "https://www.contoso.com/?a=%7B%7C%7D%E2%80%99", true },
+
+            // unescaped
+            new object[] { "https://www.contoso.com/?a=}", false },
+            new object[] { "https://www.contoso.com/?a=|", false },
+            new object[] { "https://www.contoso.com/?a={", false },
+
+            // not query
+            new object[] { "https://www.%7Bcontoso.com/", false },
+            new object[] { "http%7Bs://www.contoso.com/", false },
+            new object[] { "https://www.contoso.com%7B/", false },
+            new object[] { "htt%7Cps://www.contoso.com/", false },
+            new object[] { "https://www.con%7Ctoso.com/", false },
+            new object[] { "https://www.contoso.com%7C/", false },
+            new object[] { "htt%7Dps://www.contoso.com/", false },
+            new object[] { "https://www.con%7Dtoso.com/", false },
+            new object[] { "https://www.contoso.com%7D/", false },
+            new object[] { "htt{ps://www.contoso.com/", false },
+            new object[] { "https://www.con{toso.com/", false },
+            new object[] { "https://www.contoso.com{/", false },
+            new object[] { "htt|ps://www.contoso.com/", false },
+            new object[] { "https://www.con|toso.com/", false },
+            new object[] { "https://www.contoso.com|/", false },
+            new object[] { "htt}ps://www.contoso.com/", false },
+            new object[] { "https://www.con}toso.com/", false },
+            new object[] { "https://www.contoso.com}/", false },
+        };
+
+        [Theory]
+        [MemberData(nameof(UriIsWellFormedUnwiseStringData))]
+        public void UriIsWellFormed_AbsoluteUnicodeWithUnwise_Success(string uriString, bool expected)
+        {
+            Assert.Equal(expected, Uri.IsWellFormedUriString(uriString, UriKind.Absolute));
         }
     }
 }

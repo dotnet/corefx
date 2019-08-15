@@ -1,18 +1,11 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{4266D58F-EB60-46C2-BA81-3ABDE759A7D5}</ProjectGuid>
-    <RootNamespace>System.ComponentModel.Annotations</RootNamespace>
-    <AssemblyName>System.ComponentModel.Annotations</AssemblyName>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)'=='netfx'">true</IsPartialFacadeAssembly>
+    <Configurations>netstandard2.1-Debug;netstandard2.1-Release</Configurations>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the options -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)'=='netstandard'">
+  <ItemGroup>
+    <Compile Include="System\ComponentModel\DataAnnotations\AssociatedMetadataTypeTypeDescriptor.cs" />
+    <Compile Include="System\ComponentModel\DataAnnotations\AssociatedMetadataTypeTypeDescriptionProvider.cs" />
     <Compile Include="System\ComponentModel\DataAnnotations\AssociationAttribute.cs" />
     <Compile Include="System\ComponentModel\DataAnnotations\CompareAttribute.cs" />
     <Compile Include="System\ComponentModel\DataAnnotations\ConcurrencyCheckAttribute.cs" />
@@ -32,6 +25,8 @@
     <Compile Include="System\ComponentModel\DataAnnotations\KeyAttribute.cs" />
     <Compile Include="System\ComponentModel\DataAnnotations\LocalizableString.cs" />
     <Compile Include="System\ComponentModel\DataAnnotations\MaxLengthAttribute.cs" />
+    <Compile Include="System\ComponentModel\DataAnnotations\MetadataPropertyDescriptorWrapper.cs" />
+    <Compile Include="System\ComponentModel\DataAnnotations\MetadataTypeAttribute.cs" />
     <Compile Include="System\ComponentModel\DataAnnotations\MinLengthAttribute.cs" />
     <Compile Include="System\ComponentModel\DataAnnotations\PhoneAttribute.cs" />
     <Compile Include="System\ComponentModel\DataAnnotations\RangeAttribute.cs" />
@@ -60,12 +55,4 @@
       <Link>Common\System\NotImplemented.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'=='netfx'">
-    <Reference Include="mscorlib" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
-  </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

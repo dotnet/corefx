@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Threading.Tests
@@ -16,7 +17,7 @@ namespace System.Threading.Tests
         // Wait longer for a thread to time out, so that an unexpected timeout in the thread is more likely to expire first and
         // provide a better stack trace for the failure
         public const int UnexpectedThreadTimeoutMilliseconds =
-            UnexpectedTimeoutMilliseconds + RemoteExecutorTestBase.FailWaitTimeoutMilliseconds;
+            UnexpectedTimeoutMilliseconds + RemoteExecutor.FailWaitTimeoutMilliseconds;
 
         public static Thread CreateGuardedThread(out Action waitForThread, Action start)
         {
@@ -107,6 +108,11 @@ namespace System.Threading.Tests
             waitForThread();
         }
 
+        public static void RunTestInBackgroundThread(Func<Task> test)
+        {
+            RunTestInBackgroundThread(() => test().Wait());
+        }
+
         public static void WaitForCondition(Func<bool> condition)
         {
             WaitForConditionWithCustomDelay(condition, () => Thread.Sleep(1));
@@ -117,13 +123,29 @@ namespace System.Threading.Tests
             WaitForConditionWithCustomDelay(condition, () => Thread.Yield());
         }
 
+        public static void WaitForConditionWithoutRelinquishingTimeSlice(Func<bool> condition)
+        {
+            WaitForConditionWithCustomDelay(condition, () => Thread.SpinWait(1));
+        }
+
         public static void WaitForConditionWithCustomDelay(Func<bool> condition, Action delay)
         {
-            var startTime = DateTime.Now;
-            while (!condition())
+            if (condition())
             {
-                Assert.True((DateTime.Now - startTime).TotalMilliseconds < UnexpectedTimeoutMilliseconds);
+                return;
+            }
+
+            int startTimeMs = Environment.TickCount;
+            while (true)
+            {
                 delay();
+
+                if (condition())
+                {
+                    return;
+                }
+
+                Assert.InRange(Environment.TickCount - startTimeMs, 0, UnexpectedTimeoutMilliseconds);
             }
         }
 

@@ -11,57 +11,35 @@ namespace System.Xml.Serialization
     using System.Collections;
     using System.ComponentModel;
     using System.Threading;
-    using System.Linq;
     using System.Xml;
     using System.Xml.Serialization;
 
-    /// <include file='doc\SoapReflectionImporter.uex' path='docs/doc[@for="SoapReflectionImporter"]/*' />
-    /// <devdoc>
-    ///    <para>[To be supplied.]</para>
-    /// </devdoc>
     public class SoapReflectionImporter
     {
-        private TypeScope _typeScope;
-        private SoapAttributeOverrides _attributeOverrides;
-        private NameTable _types = new NameTable();      // xmltypename + xmlns -> Mapping
-        private NameTable _nullables = new NameTable();  // xmltypename + xmlns -> NullableMapping
+        private readonly TypeScope _typeScope;
+        private readonly SoapAttributeOverrides _attributeOverrides;
+        private readonly NameTable _types = new NameTable();      // xmltypename + xmlns -> Mapping
+        private readonly NameTable _nullables = new NameTable();  // xmltypename + xmlns -> NullableMapping
         private StructMapping _root;
-        private string _defaultNs;
-        private ModelScope _modelScope;
+        private readonly string _defaultNs;
+        private readonly ModelScope _modelScope;
 
-
-        /// <include file='doc\SoapReflectionImporter.uex' path='docs/doc[@for="SoapReflectionImporter.SoapReflectionImporter"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public SoapReflectionImporter() : this(null, null)
         {
         }
 
-        /// <include file='doc\SoapReflectionImporter.uex' path='docs/doc[@for="SoapReflectionImporter.SoapReflectionImporter1"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public SoapReflectionImporter(string defaultNamespace) : this(null, defaultNamespace)
         {
         }
 
-        /// <include file='doc\SoapReflectionImporter.uex' path='docs/doc[@for="SoapReflectionImporter.SoapReflectionImporter2"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public SoapReflectionImporter(SoapAttributeOverrides attributeOverrides) : this(attributeOverrides, null)
         {
         }
 
-        /// <include file='doc\SoapReflectionImporter.uex' path='docs/doc[@for="SoapReflectionImporter.SoapReflectionImporter3"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public SoapReflectionImporter(SoapAttributeOverrides attributeOverrides, string defaultNamespace)
         {
             if (defaultNamespace == null)
-                defaultNamespace = String.Empty;
+                defaultNamespace = string.Empty;
             if (attributeOverrides == null)
                 attributeOverrides = new SoapAttributeOverrides();
             _attributeOverrides = attributeOverrides;
@@ -70,10 +48,6 @@ namespace System.Xml.Serialization
             _modelScope = new ModelScope(_typeScope);
         }
 
-        /// <include file='doc\SoapReflectionImporter.uex' path='docs/doc[@for="SoapReflectionImporter.IncludeTypes"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public void IncludeTypes(ICustomAttributeProvider provider)
         {
             IncludeTypes(provider, new RecursionLimiter());
@@ -88,10 +62,6 @@ namespace System.Xml.Serialization
             }
         }
 
-        /// <include file='doc\SoapReflectionImporter.uex' path='docs/doc[@for="SoapReflectionImporter.IncludeType"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public void IncludeType(Type type)
         {
             IncludeType(type, new RecursionLimiter());
@@ -102,19 +72,11 @@ namespace System.Xml.Serialization
             ImportTypeMapping(_modelScope.GetTypeModel(type), limiter);
         }
 
-        /// <include file='doc\SoapReflectionImporter.uex' path='docs/doc[@for="XmlReflectionImporter.ImportTypeMapping"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public XmlTypeMapping ImportTypeMapping(Type type)
         {
             return ImportTypeMapping(type, null);
         }
 
-        /// <include file='doc\SoapReflectionImporter.uex' path='docs/doc[@for="XmlReflectionImporter.ImportTypeMapping1"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public XmlTypeMapping ImportTypeMapping(Type type, string defaultNamespace)
         {
             ElementAccessor element = new ElementAccessor();
@@ -130,36 +92,21 @@ namespace System.Xml.Serialization
             return xmlMapping;
         }
 
-        /// <include file='doc\SoapReflectionImporter.uex' path='docs/doc[@for="SoapReflectionImporter.ImportMembersMapping"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public XmlMembersMapping ImportMembersMapping(string elementName, string ns, XmlReflectionMember[] members)
         {
             return ImportMembersMapping(elementName, ns, members, true, true, false);
         }
 
-        /// <include file='doc\SoapReflectionImporter.uex' path='docs/doc[@for="SoapReflectionImporter.ImportMembersMapping1"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public XmlMembersMapping ImportMembersMapping(string elementName, string ns, XmlReflectionMember[] members, bool hasWrapperElement, bool writeAccessors)
         {
             return ImportMembersMapping(elementName, ns, members, hasWrapperElement, writeAccessors, false);
         }
 
-        /// <include file='doc\SoapReflectionImporter.uex' path='docs/doc[@for="SoapReflectionImporter.ImportMembersMapping2"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public XmlMembersMapping ImportMembersMapping(string elementName, string ns, XmlReflectionMember[] members, bool hasWrapperElement, bool writeAccessors, bool validate)
         {
             return ImportMembersMapping(elementName, ns, members, hasWrapperElement, writeAccessors, validate, XmlMappingAccess.Read | XmlMappingAccess.Write);
         }
-        /// <include file='doc\SoapReflectionImporter.uex' path='docs/doc[@for="SoapReflectionImporter.ImportMembersMapping3"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
+
         public XmlMembersMapping ImportMembersMapping(string elementName, string ns, XmlReflectionMember[] members, bool hasWrapperElement, bool writeAccessors, bool validate, XmlMappingAccess access)
         {
             ElementAccessor element = new ElementAccessor();
@@ -197,7 +144,7 @@ namespace System.Xml.Serialization
 
         private TypeMapping ImportTypeMapping(TypeModel model, RecursionLimiter limiter)
         {
-            return ImportTypeMapping(model, String.Empty, limiter);
+            return ImportTypeMapping(model, string.Empty, limiter);
         }
 
         private TypeMapping ImportTypeMapping(TypeModel model, string dataType, RecursionLimiter limiter)
@@ -736,7 +683,7 @@ namespace System.Xml.Serialization
                 attribute.Name = Accessor.EscapeQName(a.SoapAttribute == null || a.SoapAttribute.AttributeName.Length == 0 ? accessorName : a.SoapAttribute.AttributeName);
                 attribute.Namespace = a.SoapAttribute == null || a.SoapAttribute.Namespace == null ? ns : a.SoapAttribute.Namespace;
                 attribute.Form = XmlSchemaForm.Qualified; // attributes are always qualified since they're only used for encoded soap headers
-                attribute.Mapping = ImportTypeMapping(_modelScope.GetTypeModel(accessorType), (a.SoapAttribute == null ? String.Empty : a.SoapAttribute.DataType), limiter);
+                attribute.Mapping = ImportTypeMapping(_modelScope.GetTypeModel(accessorType), (a.SoapAttribute == null ? string.Empty : a.SoapAttribute.DataType), limiter);
                 attribute.Default = GetDefaultValue(model.FieldTypeDesc, a);
                 accessor.Attribute = attribute;
                 accessor.Elements = Array.Empty<ElementAccessor>();
@@ -751,7 +698,7 @@ namespace System.Xml.Serialization
                 element.Name = XmlConvert.EncodeLocalName(a.SoapElement == null || a.SoapElement.ElementName.Length == 0 ? accessorName : a.SoapElement.ElementName);
                 element.Namespace = ns;
                 element.Form = form;
-                element.Mapping = ImportTypeMapping(_modelScope.GetTypeModel(accessorType), (a.SoapElement == null ? String.Empty : a.SoapElement.DataType), limiter);
+                element.Mapping = ImportTypeMapping(_modelScope.GetTypeModel(accessorType), (a.SoapElement == null ? string.Empty : a.SoapElement.DataType), limiter);
                 if (a.SoapElement != null)
                     element.IsNullable = a.SoapElement.IsNullable;
                 accessor.Elements = new ElementAccessor[] { element };
@@ -804,7 +751,7 @@ namespace System.Xml.Serialization
             if (a.SoapType != null && a.SoapType.TypeName.Length > 0)
                 typeName = a.SoapType.TypeName;
 
-            if (type.IsGenericType && typeName.IndexOf('{') >= 0)
+            if (type.IsGenericType && typeName.Contains('{'))
             {
                 Type genType = type.GetGenericTypeDefinition();
                 Type[] names = genType.GetGenericArguments();
@@ -816,7 +763,7 @@ namespace System.Xml.Serialization
                     if (typeName.Contains(argument))
                     {
                         typeName = typeName.Replace(argument, XsdTypeName(types[i]));
-                        if (typeName.IndexOf('{') < 0)
+                        if (!typeName.Contains('{'))
                         {
                             break;
                         }

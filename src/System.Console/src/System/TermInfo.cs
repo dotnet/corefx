@@ -24,6 +24,7 @@ namespace System
         {
             Bell = 1,
             Clear = 5,
+            ClrEol = 6,
             CursorAddress = 10,
             CursorLeft = 14,
             CursorPositionReport = 294,
@@ -129,7 +130,7 @@ namespace System
                 _readAs32Bit =
                     magic == MagicLegacyNumber ? false :
                     magic == Magic32BitNumber ? true :
-                    throw new InvalidOperationException(SR.Format(SR.IO_TermInfoInvalidMagicNumber, String.Concat("O" + Convert.ToString(magic, 8)))); // magic number was not recognized. Printing the magic number in octal.
+                    throw new InvalidOperationException(SR.Format(SR.IO_TermInfoInvalidMagicNumber, string.Concat("O" + Convert.ToString(magic, 8)))); // magic number was not recognized. Printing the magic number in octal.
                 _sizeOfInt = (_readAs32Bit) ? 4 : 2;
 
                 _nameSectionNumBytes = ReadInt16(data, 2);
@@ -176,6 +177,7 @@ namespace System
                     "/etc/terminfo",
                     "/lib/terminfo",
                     "/usr/share/terminfo",
+                    "/usr/share/misc/terminfo"
                 };
 
             /// <summary>Read the database for the specified terminal.</summary>
@@ -300,7 +302,7 @@ namespace System
 
                 if (index >= _stringSectionNumOffsets)
                 {
-                    // Some terminfo files may not contain enough entries to actually 
+                    // Some terminfo files may not contain enough entries to actually
                     // have the requested one.
                     return null;
                 }
@@ -379,7 +381,7 @@ namespace System
                     return null;
                 }
 
-                // Skip over the extended bools.  We don't need them now and can add this in later 
+                // Skip over the extended bools.  We don't need them now and can add this in later
                 // if needed. Also skip over extended numbers, for the same reason.
 
                 // Get the location where the extended string offsets begin.  These point into
@@ -480,9 +482,9 @@ namespace System
             /// <returns>The 32-bit value read.</returns>
             private static int ReadInt32(byte[] buffer, int pos)
             {
-                return (int)((buffer[pos] & 0xff) | 
-                             buffer[pos + 1] << 8 | 
-                             buffer[pos + 2] << 16 | 
+                return (int)((buffer[pos] & 0xff) |
+                             buffer[pos + 1] << 8 |
+                             buffer[pos + 2] << 16 |
                              buffer[pos + 3] << 24);
             }
 
@@ -610,7 +612,7 @@ namespace System
                 string format, ref int pos, FormatParam[] args, Stack<FormatParam> stack,
                 ref FormatParam[] dynamicVars, ref FormatParam[] staticVars)
             {
-                // Create a StringBuilder to store the output of this processing.  We use the format's length as an 
+                // Create a StringBuilder to store the output of this processing.  We use the format's length as an
                 // approximation of an upper-bound for how large the output will be, though with parameter processing,
                 // this is just an estimate, sometimes way over, sometimes under.
                 StringBuilder output = StringBuilderCache.Acquire(format.Length);
@@ -774,8 +776,8 @@ namespace System
                                 ~value);
                             break;
 
-                        // Some terminfo files appear to have a fairly liberal interpretation of %i. The spec states that %i increments the first two arguments, 
-                        // but some uses occur when there's only a single argument. To make sure we accommodate these files, we increment the values 
+                        // Some terminfo files appear to have a fairly liberal interpretation of %i. The spec states that %i increments the first two arguments,
+                        // but some uses occur when there's only a single argument. To make sure we accommodate these files, we increment the values
                         // of up to (but not requiring) two arguments.
                         case 'i':
                             if (args.Length > 0)
@@ -854,7 +856,7 @@ namespace System
             /// <summary>Converts an Int32 to a Boolean, with 0 meaning false and all non-zero values meaning true.</summary>
             /// <param name="i">The integer value to convert.</param>
             /// <returns>true if the integer was non-zero; otherwise, false.</returns>
-            private static bool AsBool(Int32 i) { return i != 0; }
+            private static bool AsBool(int i) { return i != 0; }
 
             /// <summary>Converts a Boolean to an Int32, with true meaning 1 and false meaning 0.</summary>
             /// <param name="b">The Boolean value to convert.</param>
@@ -867,7 +869,7 @@ namespace System
             /// <returns>The formatted string.</returns>
             private static unsafe string FormatPrintF(string format, object arg)
             {
-                Debug.Assert(arg is string || arg is Int32);
+                Debug.Assert(arg is string || arg is int);
 
                 // Determine how much space is needed to store the formatted string.
                 string stringArg = arg as string;
@@ -922,7 +924,7 @@ namespace System
 
             /// <summary>
             /// Represents a parameter to a terminfo formatting string.
-            /// It is a discriminated union of either an integer or a string, 
+            /// It is a discriminated union of either an integer or a string,
             /// with characters represented as integers.
             /// </summary>
             public readonly struct FormatParam
@@ -934,16 +936,16 @@ namespace System
 
                 /// <summary>Initializes the parameter with an integer value.</summary>
                 /// <param name="value">The value to be stored in the parameter.</param>
-                public FormatParam(Int32 value) : this(value, null) { }
+                public FormatParam(int value) : this(value, null) { }
 
                 /// <summary>Initializes the parameter with a string value.</summary>
                 /// <param name="value">The value to be stored in the parameter.</param>
-                public FormatParam(String value) : this(0, value ?? string.Empty) { }
+                public FormatParam(string value) : this(0, value ?? string.Empty) { }
 
                 /// <summary>Initializes the parameter.</summary>
                 /// <param name="intValue">The integer value.</param>
                 /// <param name="stringValue">The string value.</param>
-                private FormatParam(Int32 intValue, String stringValue)
+                private FormatParam(int intValue, string stringValue)
                 {
                     _int32 = intValue;
                     _string = stringValue;

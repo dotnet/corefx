@@ -7,7 +7,7 @@
 ** Class:  ObjectSecurity
 **
 ** Purpose: Generic Managed ACL wrapper
-** 
+**
 ** Date:  February 7, 2007
 **
 ===========================================================*/
@@ -41,7 +41,7 @@ namespace System.Security.AccessControl
         { }
 
         public AccessRule(
-            String identity,
+            string identity,
             T rights,
             AccessControlType type)
             : this(
@@ -73,7 +73,7 @@ namespace System.Security.AccessControl
         { }
 
         public AccessRule(
-            String identity,
+            string identity,
             T rights,
             InheritanceFlags inheritanceFlags,
             PropagationFlags propagationFlags,
@@ -154,7 +154,7 @@ namespace System.Security.AccessControl
         }
 
         public AuditRule(
-            String identity,
+            string identity,
             T rights,
             AuditFlags flags)
             : this(
@@ -167,7 +167,7 @@ namespace System.Security.AccessControl
         }
 
         public AuditRule(
-            String identity,
+            string identity,
             T rights,
             InheritanceFlags inheritanceFlags,
             PropagationFlags propagationFlags,
@@ -301,7 +301,7 @@ namespace System.Security.AccessControl
         #region Protected Methods
 
         // Use this in your own Persist after you have demanded any appropriate CAS permissions.
-        // Note that you will want your version to be internal and use a specialized Safe Handle. 
+        // Note that you will want your version to be internal and use a specialized Safe Handle.
         protected internal void Persist(SafeHandle handle)
         {
             WriteLock();
@@ -319,8 +319,8 @@ namespace System.Security.AccessControl
         }
 
         // Use this in your own Persist after you have demanded any appropriate CAS permissions.
-        // Note that you will want your version to be internal. 
-        protected internal void Persist(String name)
+        // Note that you will want your version to be internal.
+        protected internal void Persist(string name)
         {
             WriteLock();
 
@@ -339,8 +339,8 @@ namespace System.Security.AccessControl
         #endregion
         #region Public Methods
 
-        // Override these if you need to do some custom bit remapping to hide any 
-        // complexity from the user. 
+        // Override these if you need to do some custom bit remapping to hide any
+        // complexity from the user.
         public virtual void AddAccessRule(AccessRule<T> rule)
         {
             base.AddAccessRule(rule);

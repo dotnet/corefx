@@ -33,25 +33,19 @@ namespace System.Collections.Immutable.Tests
             yield return new object[] { new[] { 2, 3, 5 } };
         }
 
-        public static IEnumerable<object[]> StrongBoxedInt32EnumerableData()
+        public static IEnumerable<object[]> SpecialInt32ImmutableArrayData()
         {
-            // Once https://github.com/xunit/assert.xunit/pull/5 comes into corefx, all the StrongBox stuff can be removed.
-
-            return Int32EnumerableData()
-                .Select(array => array[0])
-                .Cast<IEnumerable<int>>()
-                .Select(enumerable => new object[]
-                {
-                    new StrongBox<IEnumerable<int>>(enumerable)
-                });
+            yield return new object[] { s_emptyDefault };
+            yield return new object[] { s_empty };
         }
 
-        public static IEnumerable<object[]> StrongBoxedSpecialInt32ImmutableArrayData()
+        public static IEnumerable<object[]> StringImmutableArrayData()
         {
-            // Once https://github.com/xunit/assert.xunit/pull/5 comes into corefx, all the StrongBox stuff can be removed.
-
-            yield return new object[] { new StrongBox<IEnumerable<int>>(s_emptyDefault) };
-            yield return new object[] { new StrongBox<IEnumerable<int>>(s_empty) };
+            yield return new object[] { new string[0] };
+            yield return new object[] { new[] { "a" } };
+            yield return new object[] { new[] { "a", "b", "c" } };
+            yield return new object[] { new[] { string.Empty } };
+            yield return new object[] { new[] { (string)null } };
         }
 
         [Theory]
@@ -59,6 +53,104 @@ namespace System.Collections.Immutable.Tests
         public void Clear(IEnumerable<int> source)
         {
             Assert.True(s_empty == source.ToImmutableArray().Clear());
+        }
+
+        [Theory]
+        [MemberData(nameof(Int32EnumerableData))]
+        public void AsSpanRoundTripTests(IEnumerable<int> source)
+        {
+            ImmutableArray<int> immutableArray = source.ToImmutableArray();
+            ReadOnlySpan<int> span = immutableArray.AsSpan();
+            Assert.Equal(immutableArray, span.ToArray());
+            Assert.Equal(immutableArray.Length, span.Length);
+        }
+
+        [Fact]
+        public void AsSpanRoundTripEmptyArrayTests()
+        {
+            ImmutableArray<int> immutableArray = ImmutableArray.Create(Array.Empty<int>());
+            ReadOnlySpan<int> span = immutableArray.AsSpan();
+            Assert.Equal(immutableArray, span.ToArray());
+            Assert.Equal(immutableArray.Length, span.Length);
+        }
+
+        [Fact]
+        public void AsSpanRoundTripDefaultArrayTests()
+        {
+            ImmutableArray<int> immutableArray = new ImmutableArray<int>();
+            ReadOnlySpan<int> span = immutableArray.AsSpan();
+            Assert.True(immutableArray.IsDefault);
+            Assert.Equal(0, span.Length);
+            Assert.True(span.IsEmpty);
+        }
+
+        [Theory]
+        [MemberData(nameof(StringImmutableArrayData))]
+        public void AsSpanRoundTripStringTests(IEnumerable<string> source)
+        {
+            ImmutableArray<string> immutableArray = source.ToImmutableArray();
+            ReadOnlySpan<string> span = immutableArray.AsSpan();
+            Assert.Equal(immutableArray, span.ToArray());
+            Assert.Equal(immutableArray.Length, span.Length);
+        }
+
+        [Fact]
+        public void AsSpanRoundTripDefaultArrayStringTests()
+        {
+            ImmutableArray<string> immutableArray = new ImmutableArray<string>();
+            ReadOnlySpan<string> span = immutableArray.AsSpan();
+            Assert.True(immutableArray.IsDefault);
+            Assert.Equal(0, span.Length);
+            Assert.True(span.IsEmpty);
+        }
+
+        [Theory]
+        [MemberData(nameof(Int32EnumerableData))]
+        public void AsMemoryRoundTripTests(IEnumerable<int> source)
+        {
+            ImmutableArray<int> immutableArray = source.ToImmutableArray();
+            ReadOnlyMemory<int> memory = immutableArray.AsMemory();
+            Assert.Equal(immutableArray, memory.ToArray());
+            Assert.Equal(immutableArray.Length, memory.Length);
+        }
+
+        [Fact]
+        public void AsMemoryRoundTripEmptyArrayTests()
+        {
+            ImmutableArray<int> immutableArray = ImmutableArray.Create(Array.Empty<int>());
+            ReadOnlyMemory<int> memory = immutableArray.AsMemory();
+            Assert.Equal(immutableArray, memory.ToArray());
+            Assert.Equal(immutableArray.Length, memory.Length);
+        }
+
+        [Fact]
+        public void AsMemoryRoundTripDefaultArrayTests()
+        {
+            ImmutableArray<int> immutableArray = new ImmutableArray<int>();
+            ReadOnlyMemory<int> memory = immutableArray.AsMemory();
+            Assert.True(immutableArray.IsDefault);
+            Assert.Equal(0, memory.Length);
+            Assert.True(memory.IsEmpty);
+        }
+
+        [Theory]
+        [MemberData(nameof(StringImmutableArrayData))]
+        public void AsMemoryRoundTripStringTests(IEnumerable<string> source)
+        {
+            ImmutableArray<string> immutableArray = source.ToImmutableArray();
+            ReadOnlyMemory<string> memory = immutableArray.AsMemory();
+            Assert.Equal(immutableArray, memory.ToArray());
+            Assert.Equal(immutableArray.Length, memory.Length);
+        }
+
+        [Fact]
+        public void AsMemoryRoundTripDefaultArrayStringTests()
+        {
+            ImmutableArray<string> immutableArray = new ImmutableArray<string>();
+            ReadOnlyMemory<string> memory = immutableArray.AsMemory();
+            Assert.True(immutableArray.IsDefault);
+            Assert.Equal(0, memory.Length);
+            Assert.True(memory.IsEmpty);
         }
 
         [Fact]
@@ -108,19 +200,18 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Theory]
+        [ActiveIssue("https://github.com/xunit/xunit/issues/1794")]
         [MemberData(nameof(CreateRangeWithSelectorData))]
-        public void CreateRangeWithSelector<TResult>(IEnumerable<int> source, Func<int, TResult> selector, TResult dummy)
+        public void CreateRangeWithSelector<TResult>(IEnumerable<int> source, Func<int, TResult> selector)
         {
-            // Remove the dummy parameters once https://github.com/xunit/xunit/pull/965 makes it into corefx.
-
             Assert.Equal(source.Select(selector), ImmutableArray.CreateRange(source.ToImmutableArray(), selector));
         }
 
         public static IEnumerable<object[]> CreateRangeWithSelectorData()
         {
-            yield return new object[] { new int[] { }, new Func<int, int>(i => i), 0 };
-            yield return new object[] { new[] { 4, 5, 6, 7 }, new Func<int, float>(i => i + 0.5f), 0f };
-            yield return new object[] { new[] { 4, 5, 6, 7 }, new Func<int, int>(i => i + 1), 0 };
+            yield return new object[] { new int[] { }, new Func<int, int>(i => i) };
+            yield return new object[] { new[] { 4, 5, 6, 7 }, new Func<int, float>(i => i + 0.5f) };
+            yield return new object[] { new[] { 4, 5, 6, 7 }, new Func<int, int>(i => i + 1) };
         }
 
         [Theory]
@@ -134,21 +225,20 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Theory]
+        [ActiveIssue("https://github.com/xunit/xunit/issues/1794")]
         [MemberData(nameof(CreateRangeWithSelectorAndArgumentData))]
-        public void CreateRangeWithSelectorAndArgument<TArg, TResult>(IEnumerable<int> source, Func<int, TArg, TResult> selector, TArg arg, TArg dummy1, TResult dummy2)
+        public void CreateRangeWithSelectorAndArgument<TArg, TResult>(IEnumerable<int> source, Func<int, TArg, TResult> selector, TArg arg)
         {
-            // Remove the dummy parameters once https://github.com/xunit/xunit/pull/965 makes it into corefx.
-
             var expected = source.Zip(Enumerable.Repeat(arg, source.Count()), selector);
             Assert.Equal(expected, ImmutableArray.CreateRange(source.ToImmutableArray(), selector, arg));
         }
 
         public static IEnumerable<object[]> CreateRangeWithSelectorAndArgumentData()
         {
-            yield return new object[] { new int[] { }, new Func<int, int, int>((x, y) => x + y), 0, 0, 0 };
-            yield return new object[] { new[] { 4, 5, 6, 7 }, new Func<int, float, float>((x, y) => x + y), 0.5f, 0f, 0f };
-            yield return new object[] { new[] { 4, 5, 6, 7 }, new Func<int, int, int>((x, y) => x + y), 1, 0, 0 };
-            yield return new object[] { new[] { 4, 5, 6, 7 }, new Func<int, object, int>((x, y) => x), null, new object(), 0 };
+            yield return new object[] { new int[] { }, new Func<int, int, int>((x, y) => x + y), 0 };
+            yield return new object[] { new[] { 4, 5, 6, 7 }, new Func<int, float, float>((x, y) => x + y), 0.5f };
+            yield return new object[] { new[] { 4, 5, 6, 7 }, new Func<int, int, int>((x, y) => x + y), 1 };
+            yield return new object[] { new[] { 4, 5, 6, 7 }, new Func<int, object, int>((x, y) => x), null };
         }
 
         [Theory]
@@ -162,26 +252,25 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Theory]
+        [ActiveIssue("https://github.com/xunit/xunit/issues/1794")]
         [MemberData(nameof(CreateRangeSliceWithSelectorData))]
-        public void CreateRangeSliceWithSelector<TResult>(IEnumerable<int> source, int start, int length, Func<int, TResult> selector, TResult dummy)
+        public void CreateRangeSliceWithSelector<TResult>(IEnumerable<int> source, int start, int length, Func<int, TResult> selector)
         {
-            // Remove the dummy parameters once https://github.com/xunit/xunit/pull/965 makes it into corefx.
-
             var expected = source.Skip(start).Take(length).Select(selector);
             Assert.Equal(expected, ImmutableArray.CreateRange(source.ToImmutableArray(), start, length, selector));
         }
 
         public static IEnumerable<object[]> CreateRangeSliceWithSelectorData()
         {
-            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 0, new Func<int, float>(i => i + 0.5f), 0f };
-            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 0, new Func<int, double>(i => i + 0.5d), 0d };
-            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 0, new Func<int, int>(i => i), 0 };
-            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 1, new Func<int, int>(i => i * 2), 0 };
-            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 2, new Func<int, int>(i => i + 1), 0 };
-            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 4, new Func<int, int>(i => i), 0 };
-            yield return new object[] { new[] { 4, 5, 6, 7 }, 3, 1, new Func<int, int>(i => i), 0 };
-            yield return new object[] { new[] { 4, 5, 6, 7 }, 3, 0, new Func<int, int>(i => i), 0 };
-            yield return new object[] { new[] { 4, 5, 6, 7 }, 4, 0, new Func<int, int>(i => i), 0 };
+            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 0, new Func<int, float>(i => i + 0.5f) };
+            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 0, new Func<int, double>(i => i + 0.5d) };
+            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 0, new Func<int, int>(i => i) };
+            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 1, new Func<int, int>(i => i * 2) };
+            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 2, new Func<int, int>(i => i + 1) };
+            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 4, new Func<int, int>(i => i) };
+            yield return new object[] { new[] { 4, 5, 6, 7 }, 3, 1, new Func<int, int>(i => i) };
+            yield return new object[] { new[] { 4, 5, 6, 7 }, 3, 0, new Func<int, int>(i => i) };
+            yield return new object[] { new[] { 4, 5, 6, 7 }, 4, 0, new Func<int, int>(i => i) };
         }
 
         [Theory]
@@ -204,28 +293,27 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Theory]
+        [ActiveIssue("https://github.com/xunit/xunit/issues/1794")]
         [MemberData(nameof(CreateRangeSliceWithSelectorAndArgumentData))]
-        public void CreateRangeSliceWithSelectorAndArgument<TArg, TResult>(IEnumerable<int> source, int start, int length, Func<int, TArg, TResult> selector, TArg arg, TArg dummy1, TResult dummy2)
+        public void CreateRangeSliceWithSelectorAndArgument<TArg, TResult>(IEnumerable<int> source, int start, int length, Func<int, TArg, TResult> selector, TArg arg)
         {
-            // Remove the dummy parameters once https://github.com/xunit/xunit/pull/965 makes it into corefx.
-
             var expected = source.Skip(start).Take(length).Zip(Enumerable.Repeat(arg, length), selector);
             Assert.Equal(expected, ImmutableArray.CreateRange(source.ToImmutableArray(), start, length, selector, arg));
         }
 
         public static IEnumerable<object[]> CreateRangeSliceWithSelectorAndArgumentData()
         {
-            yield return new object[] { new int[] { }, 0, 0, new Func<int, int, int>((x, y) => x + y), 0, 0, 0 };
-            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 0, new Func<int, float, float>((x, y) => x + y), 0.5f, 0f, 0f };
-            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 0, new Func<int, double, double>((x, y) => x + y), 0.5d, 0d, 0d };
-            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 0, new Func<int, int, int>((x, y) => x + y), 0, 0, 0 };
-            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 1, new Func<int, int, int>((x, y) => x * y), 2, 0, 0 };
-            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 2, new Func<int, int, int>((x, y) => x + y), 1, 0, 0 };
-            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 4, new Func<int, int, int>((x, y) => x + y), 0, 0, 0 };
-            yield return new object[] { new[] { 4, 5, 6, 7 }, 3, 1, new Func<int, int, int>((x, y) => x + y), 0, 0, 0 };
-            yield return new object[] { new[] { 4, 5, 6, 7 }, 3, 0, new Func<int, int, int>((x, y) => x + y), 0, 0, 0 };
-            yield return new object[] { new[] { 4, 5, 6, 7 }, 4, 0, new Func<int, int, int>((x, y) => x + y), 0, 0, 0 };
-            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 1, new Func<int, object, int>((x, y) => x), null, new object(), 0 };
+            yield return new object[] { new int[] { }, 0, 0, new Func<int, int, int>((x, y) => x + y), 0 };
+            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 0, new Func<int, float, float>((x, y) => x + y), 0.5f };
+            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 0, new Func<int, double, double>((x, y) => x + y), 0.5d };
+            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 0, new Func<int, int, int>((x, y) => x + y), 0 };
+            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 1, new Func<int, int, int>((x, y) => x * y), 2 };
+            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 2, new Func<int, int, int>((x, y) => x + y), 1 };
+            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 4, new Func<int, int, int>((x, y) => x + y), 0 };
+            yield return new object[] { new[] { 4, 5, 6, 7 }, 3, 1, new Func<int, int, int>((x, y) => x + y), 0 };
+            yield return new object[] { new[] { 4, 5, 6, 7 }, 3, 0, new Func<int, int, int>((x, y) => x + y), 0 };
+            yield return new object[] { new[] { 4, 5, 6, 7 }, 4, 0, new Func<int, int, int>((x, y) => x + y), 0 };
+            yield return new object[] { new[] { 4, 5, 6, 7 }, 0, 1, new Func<int, object, int>((x, y) => x), null };
         }
 
         [Theory]
@@ -500,7 +588,7 @@ namespace System.Collections.Immutable.Tests
         {
             var array = source.ToImmutableArray();
             Assert.Equal(source, array);
-            Assert.True(array == array.ToImmutableArray()); // Compares referential equality.
+            Assert.True(array == array.ToImmutableArray());
         }
 
         [Theory]
@@ -596,19 +684,17 @@ namespace System.Collections.Immutable.Tests
 
         [Theory]
         [MemberData(nameof(ContainsNullData))]
-        public void ContainsNull<T>(IEnumerable<T> source, T dummy) where T : class
+        public void ContainsNull<T>(IEnumerable<T> source) where T : class
         {
-            // Remove the dummy parameters once https://github.com/xunit/xunit/pull/965 makes it into corefx.
-
             bool expected = source.Contains(null, EqualityComparer<T>.Default);
             Assert.Equal(expected, source.ToImmutableArray().Contains(null));
         }
 
         public static IEnumerable<object[]> ContainsNullData()
         {
-            yield return new object[] { s_oneElementRefType, new GenericParameterHelper() };
-            yield return new object[] { s_twoElementRefTypeWithNull, string.Empty };
-            yield return new object[] { new[] { new object() }, new object() };
+            yield return new object[] { s_oneElementRefType };
+            yield return new object[] { s_twoElementRefTypeWithNull };
+            yield return new object[] { new[] { new object() } };
         }
 
         [Fact]
@@ -735,10 +821,8 @@ namespace System.Collections.Immutable.Tests
 
         [Theory]
         [MemberData(nameof(EnumeratorTraversalNullData))]
-        public void EnumeratorTraversalNull<T>(IEnumerable<T> source, T dummy) where T : class
+        public void EnumeratorTraversalNull<T>(IEnumerable<T> source) where T : class
         {
-            // Remove the dummy parameters once https://github.com/xunit/xunit/pull/965 makes it into corefx.
-
             var array = ForceLazy(source.ToImmutableArray()).ToArray();
             Assert.Equal(source, array);
             Assert.Contains(null, array);
@@ -746,19 +830,16 @@ namespace System.Collections.Immutable.Tests
 
         public static IEnumerable<object[]> EnumeratorTraversalNullData()
         {
-            yield return new object[] { s_twoElementRefTypeWithNull, string.Empty };
-            yield return new object[] { new[] { default(object) }, new object() };
-            yield return new object[] { new[] { null, new object() }, new object() };
-            yield return new object[] { new[] { null, string.Empty }, string.Empty };
+            yield return new object[] { s_twoElementRefTypeWithNull };
+            yield return new object[] { new[] { default(object) } };
+            yield return new object[] { new[] { null, new object() } };
+            yield return new object[] { new[] { null, string.Empty } };
         }
 
         [Theory]
         [MemberData(nameof(EqualsData))]
-        public void Equals(StrongBox<ImmutableArray<int>> firstBox, StrongBox<ImmutableArray<int>> secondBox, bool expected)
+        public void Equals(ImmutableArray<int> first, ImmutableArray<int> second, bool expected)
         {
-            ImmutableArray<int> first = firstBox.Value;
-            ImmutableArray<int> second = secondBox.Value;
-
             Assert.Equal(expected, first == second);
             Assert.NotEqual(expected, first != second);
 
@@ -776,8 +857,6 @@ namespace System.Collections.Immutable.Tests
 
         public static IEnumerable<object[]> EqualsData()
         {
-            // Once https://github.com/xunit/assert.xunit/pull/5 comes into corefx, all the StrongBox stuff can be removed.
-
             var enumerables = Int32EnumerableData()
                 .Select(array => array[0])
                 .Cast<IEnumerable<int>>();
@@ -788,16 +867,16 @@ namespace System.Collections.Immutable.Tests
 
                 yield return new object[]
                 {
-                    new StrongBox<ImmutableArray<int>>(array),
-                    new StrongBox<ImmutableArray<int>>(array),
+                    array,
+                    array,
                     true
                 };
 
                 // Reference equality, not content equality, should be compared.
                 yield return new object[]
                 {
-                    new StrongBox<ImmutableArray<int>>(array),
-                    new StrongBox<ImmutableArray<int>>(enumerable.ToImmutableArray()),
+                    array,
+                    enumerable.ToImmutableArray(),
                     !enumerable.Any() || enumerable is ImmutableArray<int>
                 };
             }
@@ -805,25 +884,24 @@ namespace System.Collections.Immutable.Tests
             // Empty and default ImmutableArrays should not be seen as equal.
             yield return new object[]
             {
-                new StrongBox<ImmutableArray<int>>(s_empty),
-                new StrongBox<ImmutableArray<int>>(s_emptyDefault),
+                s_empty,
+                s_emptyDefault,
                 false
             };
 
             yield return new object[]
             {
-                new StrongBox<ImmutableArray<int>>(s_empty),
-                new StrongBox<ImmutableArray<int>>(s_oneElement),
+                s_empty,
+                s_oneElement,
                 false
             };
         }
 
         [Theory]
-        [MemberData(nameof(StrongBoxedInt32EnumerableData))]
-        [MemberData(nameof(StrongBoxedSpecialInt32ImmutableArrayData))]
-        public void EqualsSelf(StrongBox<IEnumerable<int>> box)
+        [MemberData(nameof(Int32EnumerableData))]
+        [MemberData(nameof(SpecialInt32ImmutableArrayData))]
+        public void EqualsSelf(IEnumerable<int> source)
         {
-            IEnumerable<int> source = box.Value;
             var array = source.ToImmutableArray();
 
 #pragma warning disable CS1718 // Comparison made to same variable
@@ -837,24 +915,22 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Theory]
-        [MemberData(nameof(StrongBoxedInt32EnumerableData))]
-        [MemberData(nameof(StrongBoxedSpecialInt32ImmutableArrayData))]
-        public void EqualsNull(StrongBox<IEnumerable<int>> box)
+        [MemberData(nameof(Int32EnumerableData))]
+        [MemberData(nameof(SpecialInt32ImmutableArrayData))]
+        public void EqualsNull(IEnumerable<int> source)
         {
-            IEnumerable<int> source = box.Value;
             Assert.False(source.ToImmutableArray().Equals(null));
         }
 
         [Theory]
-        [MemberData(nameof(StrongBoxedInt32EnumerableData))]
-        [MemberData(nameof(StrongBoxedSpecialInt32ImmutableArrayData))]
-        public void EqualsNullable(StrongBox<IEnumerable<int>> box)
+        [MemberData(nameof(Int32EnumerableData))]
+        [MemberData(nameof(SpecialInt32ImmutableArrayData))]
+        public void EqualsNullable(IEnumerable<int> source)
         {
             // ImmutableArray<T> overrides the equality operators for ImmutableArray<T>?.
             // If one nullable with HasValue = false is compared to a nullable with HasValue = true,
             // but Value.IsDefault = true, the nullables will compare as equal.
 
-            IEnumerable<int> source = box.Value;
             var array = source.ToImmutableArray();
             ImmutableArray<int>? nullable = array;
 
@@ -866,11 +942,10 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Theory]
-        [MemberData(nameof(StrongBoxedInt32EnumerableData))]
-        [MemberData(nameof(StrongBoxedSpecialInt32ImmutableArrayData))]
-        public void GetHashCode(StrongBox<IEnumerable<int>> box)
+        [MemberData(nameof(Int32EnumerableData))]
+        [MemberData(nameof(SpecialInt32ImmutableArrayData))]
+        public void GetHashCode(IEnumerable<int> source)
         {
-            IEnumerable<int> source = box.Value;
             var array = source.ToImmutableArray();
 
             // We must box once. Otherwise, the following assert would not have much purpose since
@@ -1149,7 +1224,7 @@ namespace System.Collections.Immutable.Tests
 
             Assert.Equal(expected, array.Remove(item, comparer));
             Assert.Equal(expected, ((IImmutableList<T>)array).Remove(item, comparer));
-            
+
             if (comparer == null || comparer == EqualityComparer<T>.Default)
             {
                 Assert.Equal(expected, array.Remove(item));
@@ -1331,7 +1406,7 @@ namespace System.Collections.Immutable.Tests
         {
             // Validates that a fixed bug in the inappropriate adding of the Empty
             // singleton enumerator to the reusable instances bag does not regress.
-            
+
             IEnumerable<int> oneElementBoxed = s_oneElement;
             IEnumerable<int> emptyBoxed = s_empty;
             IEnumerable<int> emptyDefaultBoxed = s_emptyDefault;
@@ -1593,9 +1668,9 @@ namespace System.Collections.Immutable.Tests
 
         [Theory]
         [MemberData(nameof(IsDefaultOrEmptyData))]
-        public void IsDefault(StrongBox<IEnumerable<int>> box, bool isDefault, bool isEmpty)
+        public void IsDefault(IEnumerable<int> source, bool isDefault, bool isEmpty)
         {
-            IEnumerable<int> source = box.Value;
+            _ = isEmpty;
             var array = source.ToImmutableArray();
 
             Assert.Equal(isDefault, array.IsDefault);
@@ -1603,9 +1678,8 @@ namespace System.Collections.Immutable.Tests
 
         [Theory]
         [MemberData(nameof(IsDefaultOrEmptyData))]
-        public void IsDefaultOrEmpty(StrongBox<IEnumerable<int>> box, bool isDefault, bool isEmpty)
+        public void IsDefaultOrEmpty(IEnumerable<int> source, bool isDefault, bool isEmpty)
         {
-            IEnumerable<int> source = box.Value;
             var array = source.ToImmutableArray();
 
             Assert.Equal(isDefault || isEmpty, array.IsDefaultOrEmpty);
@@ -1613,11 +1687,9 @@ namespace System.Collections.Immutable.Tests
 
         public static IEnumerable<object[]> IsDefaultOrEmptyData()
         {
-            // Once https://github.com/xunit/assert.xunit/pull/5 comes into corefx, all the StrongBox stuff can be removed.
-
-            yield return new object[] { new StrongBox<IEnumerable<int>>(s_emptyDefault), true, false };
-            yield return new object[] { new StrongBox<IEnumerable<int>>(s_empty), false, true };
-            yield return new object[] { new StrongBox<IEnumerable<int>>(s_oneElement), false, false };
+            yield return new object[] { s_emptyDefault, true, false };
+            yield return new object[] { s_empty, false, true };
+            yield return new object[] { s_oneElement, false, false };
         }
 
         [Theory]
@@ -1625,7 +1697,7 @@ namespace System.Collections.Immutable.Tests
         public void GetIndexer(IEnumerable<int> source)
         {
             var array = source.ToImmutableArray();
-            
+
             for (int i = 0; i < array.Length; i++)
             {
                 int expected = source.ElementAt(i);
@@ -1673,10 +1745,8 @@ namespace System.Collections.Immutable.Tests
 
         [Theory]
         [MemberData(nameof(SortData))]
-        public void Sort<T>(IEnumerable<T> source, int index, int count, IComparer<T> comparer, T dummy)
+        public void Sort<T>(IEnumerable<T> source, int index, int count, IComparer<T> comparer)
         {
-            // Remove the dummy parameters once https://github.com/xunit/xunit/pull/965 makes it into corefx.
-
             var array = source.ToImmutableArray();
 
             var expected = source.ToArray();
@@ -1709,14 +1779,14 @@ namespace System.Collections.Immutable.Tests
             return SharedComparers<int>().SelectMany(comparer =>
                 new[]
                 {
-                    new object[] { new[] { 2, 4, 1, 3 }, 0, 4, comparer, 0 },
-                    new object[] { new[] { 1 }, 0, 1, comparer, 0 },
-                    new object[] { new int[0], 0, 0, comparer, 0 },
-                    new object[] { new[] { 2, 4, 1, 3 }, 1, 2, comparer, 0 },
-                    new object[] { new[] { 2, 4, 1, 3 }, 4, 0, comparer, 0 },
-                    new object[] { new[] { "c", "B", "a" }, 0, 3, StringComparer.OrdinalIgnoreCase, string.Empty },
-                    new object[] { new[] { "c", "B", "a" }, 0, 3, StringComparer.Ordinal, string.Empty },
-                    new object[] { new[] { 1, 2, 3, 4, 6, 5, 7, 8, 9, 10 }, 4, 2, comparer, 0 }
+                    new object[] { new[] { 2, 4, 1, 3 }, 0, 4, comparer },
+                    new object[] { new[] { 1 }, 0, 1, comparer },
+                    new object[] { new int[0], 0, 0, comparer },
+                    new object[] { new[] { 2, 4, 1, 3 }, 1, 2, comparer },
+                    new object[] { new[] { 2, 4, 1, 3 }, 4, 0, comparer },
+                    new object[] { new[] { "c", "B", "a" }, 0, 3, StringComparer.OrdinalIgnoreCase },
+                    new object[] { new[] { "c", "B", "a" }, 0, 3, StringComparer.Ordinal },
+                    new object[] { new[] { 1, 2, 3, 4, 6, 5, 7, 8, 9, 10 }, 4, 2, comparer }
                 });
         }
 
@@ -1829,12 +1899,9 @@ namespace System.Collections.Immutable.Tests
         [Theory]
         [MemberData(nameof(IStructuralEquatableEqualsData))]
         [MemberData(nameof(IStructuralEquatableEqualsNullComparerData))]
-        public void IStructuralEquatableEquals(StrongBox<IEnumerable<int>> firstBox, StrongBox<object> secondBox, IEqualityComparer comparer, bool expected)
+        public void IStructuralEquatableEquals(IEnumerable<int> source, object second, IEqualityComparer comparer, bool expected)
         {
-            // Once https://github.com/xunit/assert.xunit/pull/5 comes into corefx, all the StrongBox stuff can be removed.
-
-            ImmutableArray<int> first = firstBox.Value.ToImmutableArray();
-            object second = secondBox.Value;
+            ImmutableArray<int> first = source.ToImmutableArray();
 
             Assert.Equal(expected, ((IStructuralEquatable)first).Equals(second, comparer));
 
@@ -1869,25 +1936,25 @@ namespace System.Collections.Immutable.Tests
 
             foreach (IEqualityComparer comparer in optimisticComparers)
             {
-                yield return new object[] { new StrongBox<IEnumerable<int>>(s_empty), new StrongBox<object>(s_empty), comparer, true };
-                yield return new object[] { new StrongBox<IEnumerable<int>>(s_emptyDefault), new StrongBox<object>(s_emptyDefault), comparer, true };
-                yield return new object[] { new StrongBox<IEnumerable<int>>(new[] { 1, 2, 3 }), new StrongBox<object>(new[] { 1, 2, 3 }), comparer, true };
-                yield return new object[] { new StrongBox<IEnumerable<int>>(new[] { 1, 2, 3 }), new StrongBox<object>(ImmutableArray.Create(1, 2, 3)), comparer, true };
-                yield return new object[] { new StrongBox<IEnumerable<int>>(new[] { 1, 2, 3 }), new StrongBox<object>(new object[] { 1, 2, 3 }), comparer, true };
-                yield return new object[] { new StrongBox<IEnumerable<int>>(new[] { 1, 2, 3 }), new StrongBox<object>(ImmutableArray.Create<object>(1, 2, 3)), comparer, true };
+                yield return new object[] { s_empty, s_empty, comparer, true };
+                yield return new object[] { s_emptyDefault, s_emptyDefault, comparer, true };
+                yield return new object[] { new[] { 1, 2, 3 }, new[] { 1, 2, 3 }, comparer, true };
+                yield return new object[] { new[] { 1, 2, 3 }, ImmutableArray.Create(1, 2, 3), comparer, true };
+                yield return new object[] { new[] { 1, 2, 3 }, new object[] { 1, 2, 3 }, comparer, true };
+                yield return new object[] { new[] { 1, 2, 3 }, ImmutableArray.Create<object>(1, 2, 3), comparer, true };
             }
 
             foreach (IEqualityComparer comparer in pessimisticComparers)
             {
-                yield return new object[] { new StrongBox<IEnumerable<int>>(s_emptyDefault), new StrongBox<object>(s_empty), comparer, false };
-                yield return new object[] { new StrongBox<IEnumerable<int>>(s_emptyDefault), new StrongBox<object>(s_oneElement), comparer, false };
-                yield return new object[] { new StrongBox<IEnumerable<int>>(new[] { 1, 2, 3 }), new StrongBox<object>(new List<int> { 1, 2, 3 }), comparer, false };
-                yield return new object[] { new StrongBox<IEnumerable<int>>(new[] { 1, 2, 3 }), new StrongBox<object>(new object()), comparer, false };
-                yield return new object[] { new StrongBox<IEnumerable<int>>(new[] { 1, 2, 3 }), new StrongBox<object>(null), comparer, false };
-                yield return new object[] { new StrongBox<IEnumerable<int>>(new[] { 1, 2, 3 }), new StrongBox<object>(new[] { 1, 2, 4 }), comparer, false };
-                yield return new object[] { new StrongBox<IEnumerable<int>>(new[] { 1, 2, 3 }), new StrongBox<object>(ImmutableArray.Create(1, 2, 4)), comparer, false };
-                yield return new object[] { new StrongBox<IEnumerable<int>>(new[] { 1, 2, 3 }), new StrongBox<object>(new string[3]), comparer, false };
-                yield return new object[] { new StrongBox<IEnumerable<int>>(new[] { 1, 2, 3 }), new StrongBox<object>(ImmutableArray.Create(new string[3])), comparer, false };
+                yield return new object[] { s_emptyDefault, s_empty, comparer, false };
+                yield return new object[] { s_emptyDefault, s_oneElement, comparer, false };
+                yield return new object[] { new[] { 1, 2, 3 }, new List<int> { 1, 2, 3 }, comparer, false };
+                yield return new object[] { new[] { 1, 2, 3 }, new object(), comparer, false };
+                yield return new object[] { new[] { 1, 2, 3 }, null, comparer, false };
+                yield return new object[] { new[] { 1, 2, 3 }, new[] { 1, 2, 4 }, comparer, false };
+                yield return new object[] { new[] { 1, 2, 3 }, ImmutableArray.Create(1, 2, 4), comparer, false };
+                yield return new object[] { new[] { 1, 2, 3 }, new string[3], comparer, false };
+                yield return new object[] { new[] { 1, 2, 3 }, ImmutableArray.Create(new string[3]), comparer, false };
             }
         }
 
@@ -1898,14 +1965,14 @@ namespace System.Collections.Immutable.Tests
             // if Array's IStructuralEquatable.Equals implementation (which it calls under the cover) short-circuits before
             // trying to use the comparer.
 
-            yield return new object[] { new StrongBox<IEnumerable<int>>(s_emptyDefault), new StrongBox<object>(s_emptyDefault), null, true };
-            yield return new object[] { new StrongBox<IEnumerable<int>>(s_emptyDefault), new StrongBox<object>(ImmutableArray.Create(1, 2, 3)), null, false };
+            yield return new object[] { s_emptyDefault, s_emptyDefault, null, true };
+            yield return new object[] { s_emptyDefault, ImmutableArray.Create(1, 2, 3), null, false };
 
-            yield return new object[] { new StrongBox<IEnumerable<int>>(new int[0]), new StrongBox<object>(null), null, false }; // Array short-circuits because `other` is null
-            yield return new object[] { new StrongBox<IEnumerable<int>>(s_empty), new StrongBox<object>(s_empty), null, true }; // Array short-circuits because the arrays are reference-equal
-            yield return new object[] { new StrongBox<IEnumerable<int>>(new int[0]), new StrongBox<object>(new List<int>()), null, false }; // Array short-circuits because `other` is not an array
-            yield return new object[] { new StrongBox<IEnumerable<int>>(new int[0]), new StrongBox<object>(new int[1]), null, false }; // Array short-circuits because `other.Length` isn't equal
-            yield return new object[] { new StrongBox<IEnumerable<int>>(new int[0]), new StrongBox<object>(new int[0]), null, true }; // For zero-element arrays, Array doesn't have to use the comparer
+            yield return new object[] { new int[0], null, null, false }; // Array short-circuits because `other` is null
+            yield return new object[] { s_empty, s_empty, null, true }; // Array short-circuits because the arrays are reference-equal
+            yield return new object[] { new int[0], new List<int>(), null, false }; // Array short-circuits because `other` is not an array
+            yield return new object[] { new int[0], new int[1], null, false }; // Array short-circuits because `other.Length` isn't equal
+            yield return new object[] { new int[0], new int[0], null, true }; // For zero-element arrays, Array doesn't have to use the comparer
         }
 
         [Fact]
@@ -1983,15 +2050,31 @@ namespace System.Collections.Immutable.Tests
             });
         }
 
+        public static IEnumerable<object[]> IStructuralComparableCompareToDefaultAndNonImmutableArrayInvalidData()
+        {
+            yield return new object[] { new int[0] };
+            yield return new object[] { new int[1] };
+            yield return new object[] { new string[0] };
+            yield return new object[] { new string[1] };
+        }
+
+        [Theory]
+        [MemberData(nameof(IStructuralComparableCompareToDefaultAndNonImmutableArrayInvalidData))]
+        public void IStructuralComparableCompareToDefaultAndNonImmutableArrayInvalid(object other)
+        {
+            var comparers = SharedComparers<int>().OfType<IComparer>().Except(new IComparer[] { null });
+
+            Assert.All(comparers, comparer =>
+            {
+                AssertExtensions.Throws<ArgumentException>("other", () => ((IStructuralComparable)s_emptyDefault).CompareTo(other, comparer));
+            });
+        }
+
         [Theory]
         [MemberData(nameof(IStructuralComparableCompareToNullComparerArgumentInvalidData))]
         public void IStructuralComparableCompareToNullComparerArgumentInvalid(IEnumerable<int> source, object other)
         {
-            // Because of https://github.com/xunit/assert.xunit/pull/5 we cannot pass in a default ImmutableArray directly,
-            // so a null source is used as a sentinel value to represent that here. Once that change makes it into corefx,
-            // just pass in a default array from the MemberData.
-
-            var array = source?.ToImmutableArray() ?? s_emptyDefault;
+            var array = source.ToImmutableArray();
             AssertExtensions.Throws<ArgumentException>("other", () => ((IStructuralComparable)array).CompareTo(other, comparer: null));
 
             if (other is Array || IsImmutableArray(other))
@@ -2002,8 +2085,8 @@ namespace System.Collections.Immutable.Tests
 
         public static IEnumerable<object[]> IStructuralComparableCompareToNullComparerArgumentInvalidData()
         {
-            yield return new object[] { null, null };
-            yield return new object[] { null, ImmutableArray.Create(1, 2, 3) };
+            yield return new object[] { ImmutableArray.Create<int>(), null };
+            yield return new object[] { ImmutableArray.Create<int>(), ImmutableArray.Create(1, 2, 3) };
             yield return new object[] { new[] { 1, 2, 3 }, null };
         }
 
@@ -2130,11 +2213,10 @@ namespace System.Collections.Immutable.Tests
             yield return new object[] { new[] { 1, 2, 3, 4 }, 4 };
         }
 
-        [Theory]
-        [MemberData(nameof(BinarySearchData))]
-        public void BinarySearchDefaultInvalid(IEnumerable<int> source, int value)
+        [Fact]
+        public void BinarySearchDefaultInvalid()
         {
-            AssertExtensions.Throws<ArgumentNullException>("array", () => ImmutableArray.BinarySearch(s_emptyDefault, value));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => ImmutableArray.BinarySearch(s_emptyDefault, 42));
         }
 
         [Fact]
@@ -2152,7 +2234,7 @@ namespace System.Collections.Immutable.Tests
             // Note the point of this thread-safety test is *not* to test the thread-safety of the test itself.
             // This test has a known issue where the two threads will stomp on each others updates, but that's not the point.
             // The point is that ImmutableArray`1.Add should *never* throw. But if it reads its own T[] field more than once,
-            // it *can* throw because the field can be replaced with an array of another length. 
+            // it *can* throw because the field can be replaced with an array of another length.
             // In fact, much worse can happen where we corrupt data if we are for example copying data out of the array
             // in (for example) a CopyTo method and we read from the field more than once.
             // Also noteworthy: this method only tests the thread-safety of the Add method.
@@ -2170,15 +2252,12 @@ namespace System.Collections.Immutable.Tests
 
         [Theory]
         [MemberData(nameof(Int32EnumerableData))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttributesValid(IEnumerable<int> source)
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(source.ToImmutableArray());
         }
 
-
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttributesValid()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableArray.Create<int>());
@@ -2281,7 +2360,7 @@ namespace System.Collections.Immutable.Tests
             // due to the prohibition on internal framework Reflection.
             //
             // This alternate method is despicable but ImmutableArray`1 has a documented contract of being exactly one reference-type field in size
-            // (for example, ImmutableInterlocked depends on it.) 
+            // (for example, ImmutableInterlocked depends on it.)
             //
             // That leaves precious few candidates for which field is the "array" field...
             //

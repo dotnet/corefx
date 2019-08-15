@@ -40,8 +40,8 @@ namespace System.Linq.Tests
         public void SameResultsRepeatCallsStringQuery()
         {
             var q = from x1 in new[] { 55, 49, 9, -100, 24, 25, -1, 0 }
-                             from x2 in new[] { "!@#$%^", "C", "AAA", "", null, "Calling Twice", "SoS", String.Empty }
-                             where !String.IsNullOrEmpty(x2)
+                             from x2 in new[] { "!@#$%^", "C", "AAA", "", null, "Calling Twice", "SoS", string.Empty }
+                             where !string.IsNullOrEmpty(x2)
                              select new { a1 = x1, a2 = x2 };
 
             Assert.Equal(q.OrderBy(e => e.a1), q.OrderBy(e => e.a1));
@@ -421,6 +421,25 @@ namespace System.Linq.Tests
 
             Array.Sort(randomized);
             Assert.Equal(randomized, ordered);
+        }
+
+        [Theory]
+        [InlineData(new[] { 1 })]
+        [InlineData(new[] { 1, 2 })]
+        [InlineData(new[] { 2, 1 })]
+        [InlineData(new[] { 1, 2, 3, 4, 5 })]
+        [InlineData(new[] { 5, 4, 3, 2, 1 })]
+        [InlineData(new[] { 4, 3, 2, 1, 5, 9, 8, 7, 6 })]
+        [InlineData(new[] { 2, 4, 6, 8, 10, 5, 3, 7, 1, 9 })]
+        public void TakeOne(IEnumerable<int> source)
+        {
+            int count = 0;
+            foreach (int x in source.OrderBy(i => i).Take(1))
+            {
+                count++;
+                Assert.Equal(source.Min(), x);
+            }
+            Assert.Equal(1, count);
         }
     }
 }

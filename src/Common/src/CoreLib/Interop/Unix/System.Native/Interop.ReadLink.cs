@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Runtime.InteropServices;
 using System.Buffers;
 using System.Text;
@@ -12,7 +13,7 @@ internal static partial class Interop
     {
         /// <summary>
         /// Takes a path to a symbolic link and attempts to place the link target path into the buffer. If the buffer is too
-        /// small, the path will be truncated. No matter what, the buffer will not be null terminated. 
+        /// small, the path will be truncated. No matter what, the buffer will not be null terminated.
         /// </summary>
         /// <param name="path">The path to the symlink</param>
         /// <param name="buffer">The buffer to hold the output path</param>
@@ -30,7 +31,7 @@ internal static partial class Interop
         /// <returns>
         /// Returns the link to the target path on success; and null otherwise.
         /// </returns>
-        public static string ReadLink(string path)
+        public static string? ReadLink(string path)
         {
             int bufferSize = 256;
             do

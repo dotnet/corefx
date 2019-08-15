@@ -125,7 +125,6 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
-        [ActiveIssue(25498, TargetFrameworkMonikers.UapAot)]
         public void PreviewImports_ReleaseImports_ShouldNotBlockChanges()
         {
             var exportProvider = ExportProviderFactory.CreateRecomposable();
@@ -333,8 +332,8 @@ namespace System.ComponentModel.Composition
             Assert.Throws<ChangeRejectedException>(() =>
                 exportProvider.ReplaceExportValue("Value", 42));
 
-            Assert.Equal(null, importer.GetImport(import1));
-            Assert.Equal(null, importer.GetImport(import2));
+            Assert.Null(importer.GetImport(import1));
+            Assert.Null(importer.GetImport(import2));
 
             GC.KeepAlive(importer);
         }
@@ -360,12 +359,12 @@ namespace System.ComponentModel.Composition
             importer.ResetImport(import1);
             importer.ResetImport(import2);
 
-            // Only change Value1 
+            // Only change Value1
             exportProvider.ReplaceExportValue("Value1", 42);
 
             Assert.Equal(42, importer.GetImport(import1));
 
-            Assert.Equal(null, importer.GetImport(import2));
+            Assert.Null(importer.GetImport(import2));
 
             GC.KeepAlive(importer);
         }

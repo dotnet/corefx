@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
 {
-    public static class CryptoStreamTests
+    public static partial class CryptoStreamTests
     {
         [Fact]
         public static void Ctor()
@@ -132,8 +132,8 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
                 Assert.Equal(
                     LoremText + LoremText + LoremText + LoremText,
                     reader.ReadToEndAsync().GetAwaiter().GetResult());
-            }            
-            
+            }
+
             // Read/decrypt one byte at a time with ReadByte
             stream = new MemoryStream(stream.ToArray()); // CryptoStream.Dispose disposes the stream
             using (CryptoStream decryptStream = new CryptoStream(stream, decryptor, CryptoStreamMode.Read))
@@ -163,7 +163,7 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
         public static void Clear()
         {
             ICryptoTransform encryptor = new IdentityTransform(1, 1, true);
-            using (MemoryStream output = new MemoryStream())            
+            using (MemoryStream output = new MemoryStream())
             using (CryptoStream encryptStream = new CryptoStream(output, encryptor, CryptoStreamMode.Write))
             {
                 encryptStream.Clear();
@@ -215,7 +215,7 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
                     encryptStream.Dispose();
                 }
 
-                Assert.Equal(false, output.CanRead);
+                Assert.False(output.CanRead);
             }
 
 #if netcoreapp
@@ -226,7 +226,7 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
                     encryptStream.Dispose();
                 }
 
-                Assert.Equal(false, output.CanRead);
+                Assert.False(output.CanRead);
             }
 
             using (MemoryStream output = new MemoryStream())
@@ -236,7 +236,7 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
                     encryptStream.Dispose();
                 }
 
-                Assert.Equal(true, output.CanRead);
+                Assert.True(output.CanRead);
             }
 #endif
         }

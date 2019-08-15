@@ -15,13 +15,13 @@ namespace System.IO.Pipes
     public sealed partial class AnonymousPipeClientStream : PipeStream
     {
         [SuppressMessage("Microsoft.Naming", "CA1720:IdentifiersShouldNotContainTypeNames", MessageId = "string", Justification = "By design")]
-        public AnonymousPipeClientStream(String pipeHandleAsString)
+        public AnonymousPipeClientStream(string pipeHandleAsString)
             : this(PipeDirection.In, pipeHandleAsString)
         {
         }
 
         [SuppressMessage("Microsoft.Naming", "CA1720:IdentifiersShouldNotContainTypeNames", MessageId = "string", Justification = "By design")]
-        public AnonymousPipeClientStream(PipeDirection direction, String pipeHandleAsString)
+        public AnonymousPipeClientStream(PipeDirection direction, string pipeHandleAsString)
             : base(direction, 0)
         {
             if (direction == PipeDirection.InOut)
@@ -75,7 +75,7 @@ namespace System.IO.Pipes
             Debug.Assert(direction != PipeDirection.InOut, "anonymous pipes are unidirectional, caller should have verified before calling Init");
             Debug.Assert(safePipeHandle != null && !safePipeHandle.IsInvalid, "safePipeHandle must be valid");
             ValidateHandleIsPipe(safePipeHandle);
-            
+
             InitializeHandle(safePipeHandle, true, false);
             State = PipeState.Connected;
         }

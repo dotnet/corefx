@@ -39,7 +39,7 @@ namespace System.Xml.XmlDiff
         public virtual int LineNumber { get { return 0; } }
         public virtual int LinePosition { get { return 0; } }
 
-        public static PositionInfo GetPositionInfo(Object o)
+        public static PositionInfo GetPositionInfo(object o)
         {
             IXmlLineInfo lineInfo = o as IXmlLineInfo;
             if (lineInfo != null && lineInfo.HasLineInfo())
@@ -248,7 +248,7 @@ namespace System.Xml.XmlDiff
             {
                 XmlDiffAttribute current1 = elem1.FirstAttribute;
                 XmlDiffAttribute current2 = elem2.FirstAttribute;
-                //			NodePosition result = 0;
+                // NodePosition result = 0;
                 int nCompare = 0;
                 while (current1 != null && current2 != null && nCompare == 0)
                 {
@@ -737,7 +737,7 @@ namespace System.Xml.XmlDiff
                 }
             }
         }
-        public String GetAttribute(String localName, String namespaceURI)
+        public string GetAttribute(string localName, string namespaceURI)
         {
             if (_currentNode is XmlDiffElement)
             {
@@ -746,7 +746,7 @@ namespace System.Xml.XmlDiff
             return "";
         }
 
-        public String GetNamespace(String name)
+        public string GetNamespace(string name)
         {
             Debug.Assert(false, "GetNamespace is NYI");
             return "";
@@ -772,7 +772,7 @@ namespace System.Xml.XmlDiff
             return false;
         }
 
-        public bool MoveToAttribute(String localName, String namespaceURI)
+        public bool MoveToAttribute(string localName, string namespaceURI)
         {
             if (_currentNode is XmlDiffElement)
             {
@@ -834,12 +834,12 @@ namespace System.Xml.XmlDiff
             }
             return false;
         }
-        public bool MoveToId(String id)
+        public bool MoveToId(string id)
         {
             Debug.Assert(false, "MoveToId is NYI");
             return false;
         }
-        public bool MoveToNamespace(String name)
+        public bool MoveToNamespace(string name)
         {
             Debug.Assert(false, "MoveToNamespace is NYI");
             return false;
@@ -1620,4 +1620,3 @@ namespace System.Xml.XmlDiff
         public override void WriteContentTo(XmlWriter w) { }
     }
 }
-

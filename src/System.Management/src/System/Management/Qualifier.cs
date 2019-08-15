@@ -7,14 +7,14 @@ using System.Globalization;
 
 namespace System.Management
 {
-    //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//	
+    //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
     /// <summary>
     ///    <para> Contains information about a WMI qualifier.</para>
     /// </summary>
     /// <example>
     ///    <code lang='C#'>using System;
     /// using System.Management;
-    /// 
+    ///
     /// // This sample demonstrates how to enumerate qualifiers
     /// // of a ManagementClass object.
     /// class Sample_QualifierData
@@ -30,7 +30,7 @@ namespace System.Management
     ///    </code>
     ///    <code lang='VB'>Imports System
     /// Imports System.Management
-    /// 
+    ///
     /// ' This sample demonstrates how to enumerate qualifiers
     /// ' of a ManagementClass object.
     /// Class Sample_QualifierData
@@ -47,15 +47,15 @@ namespace System.Management
     //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
     public class QualifierData
     {
-        private ManagementBaseObject parent;  //need access to IWbemClassObject pointer to be able to refresh qualifiers
-        private string propertyOrMethodName; //remains null for object qualifiers
-        private string qualifierName;
-        private QualifierType qualifierType;
-        private Object qualifierValue;
+        private readonly ManagementBaseObject parent;  //need access to IWbemClassObject pointer to be able to refresh qualifiers
+        private readonly string propertyOrMethodName; //remains null for object qualifiers
+        private readonly string qualifierName;
+        private readonly QualifierType qualifierType;
+        private object qualifierValue;
         private int qualifierFlavor;
         private IWbemQualifierSetFreeThreaded qualifierSet;
 
-        internal QualifierData(ManagementBaseObject parent, string propName, string qualName, QualifierType type)		
+        internal QualifierData(ManagementBaseObject parent, string propName, string qualName, QualifierType type)
         {
             this.parent = parent;
             this.propertyOrMethodName = propName;
@@ -80,7 +80,7 @@ namespace System.Management
                 case QualifierType.MethodQualifier :
                     status = parent.wbemObject.GetMethodQualifierSet_(propertyOrMethodName, out qualifierSet);
                     break;
-                default :
+                default:
                     throw new ManagementException(ManagementStatus.Unexpected, null, null); //is this the best fit error ??
             }
 
@@ -106,7 +106,7 @@ namespace System.Management
             {
                 if (qualVal is Array)
                 {
-                    if ((qualVal is Int32[]) || (qualVal is Double[]) || (qualVal is String[]) || (qualVal is Boolean[]))
+                    if ((qualVal is int[]) || (qualVal is double[]) || (qualVal is string[]) || (qualVal is bool[]))
                         wmiValue = qualVal;
                     else
                     {
@@ -114,29 +114,29 @@ namespace System.Management
                         int length = valArray.Length;
                         Type elementType = (length > 0 ? valArray.GetValue(0).GetType() : null);
 
-                        if (elementType == typeof(Int32))
+                        if (elementType == typeof(int))
                         {
-                            wmiValue = new Int32 [length];
+                            wmiValue = new int [length];
                             for (int i = 0; i < length; i++)
-                                ((Int32[])(wmiValue))[i] = Convert.ToInt32(valArray.GetValue(i),(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(System.Int32)));
+                                ((int[])(wmiValue))[i] = Convert.ToInt32(valArray.GetValue(i),(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(int)));
                         }
-                        else if (elementType == typeof(Double))
+                        else if (elementType == typeof(double))
                         {
-                            wmiValue = new Double [length];
+                            wmiValue = new double [length];
                             for (int i = 0; i < length; i++)
-                                ((Double[])(wmiValue))[i] = Convert.ToDouble(valArray.GetValue(i),(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(System.Double)));
+                                ((double[])(wmiValue))[i] = Convert.ToDouble(valArray.GetValue(i),(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(double)));
                         }
-                        else if (elementType == typeof(String))
+                        else if (elementType == typeof(string))
                         {
-                            wmiValue = new String [length];
+                            wmiValue = new string [length];
                             for (int i = 0; i < length; i++)
-                                ((String[])(wmiValue))[i] = (valArray.GetValue(i)).ToString();
+                                ((string[])(wmiValue))[i] = (valArray.GetValue(i)).ToString();
                         }
-                        else if (elementType == typeof(Boolean))
+                        else if (elementType == typeof(bool))
                         {
-                            wmiValue = new Boolean [length];
+                            wmiValue = new bool [length];
                             for (int i = 0; i < length; i++)
-                                ((Boolean[])(wmiValue))[i] = Convert.ToBoolean(valArray.GetValue(i),(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(System.Boolean)));
+                                ((bool[])(wmiValue))[i] = Convert.ToBoolean(valArray.GetValue(i),(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(bool)));
                         }
                         else
                             wmiValue = valArray; //should this throw ?
@@ -156,7 +156,7 @@ namespace System.Management
         /// <value>
         ///    <para>The name of the qualifier.</para>
         /// </value>
-        public string Name 
+        public string Name
         {
             get { return qualifierName != null ? qualifierName : ""; }
         }
@@ -168,27 +168,27 @@ namespace System.Management
         ///    <para>The value of the qualifier.</para>
         /// </value>
         /// <remarks>
-        ///    <para> Qualifiers can only be of the following subset of CIM 
+        ///    <para> Qualifiers can only be of the following subset of CIM
         ///       types: <see langword='string'/>, <see langword='uint16'/>,
-        ///    <see langword='uint32'/>, <see langword='sint32'/>, <see langword='uint64'/>, 
-        ///    <see langword='sint64'/>, <see langword='real32'/>, <see langword='real64'/>, 
+        ///    <see langword='uint32'/>, <see langword='sint32'/>, <see langword='uint64'/>,
+        ///    <see langword='sint64'/>, <see langword='real32'/>, <see langword='real64'/>,
         ///    <see langword='bool'/>.
         ///       </para>
         /// </remarks>
-        public Object Value 
+        public object Value
         {
-            get { 
+            get {
                 RefreshQualifierInfo();
-                return ValueTypeSafety.GetSafeObject(qualifierValue); 
+                return ValueTypeSafety.GetSafeObject(qualifierValue);
             }
             set {
                 int status = (int)ManagementStatus.NoError;
 
                 RefreshQualifierInfo();
                 object newValue = MapQualValueToWmiValue(value);
-                    
-                status = qualifierSet.Put_(qualifierName, ref newValue, 
-                    qualifierFlavor & ~(int)tag_WBEM_FLAVOR_TYPE.WBEM_FLAVOR_MASK_ORIGIN);  
+
+                status = qualifierSet.Put_(qualifierName, ref newValue,
+                    qualifierFlavor & ~(int)tag_WBEM_FLAVOR_TYPE.WBEM_FLAVOR_MASK_ORIGIN);
 
                 if ((status & 0xfffff000) == 0x80041000)
                     ManagementException.ThrowWithExtendedInfo((ManagementStatus)status);
@@ -201,7 +201,7 @@ namespace System.Management
         ///    <para> Gets or sets a value indicating whether the qualifier is amended.</para>
         /// </summary>
         /// <value>
-        /// <para><see langword='true'/> if this qualifier is amended; 
+        /// <para><see langword='true'/> if this qualifier is amended;
         ///    otherwise, <see langword='false'/>.</para>
         /// </value>
         /// <remarks>
@@ -210,19 +210,19 @@ namespace System.Management
         ///       reside in separate namespaces in WMI and can be merged into the basic class
         ///       definition when retrieved.</para>
         /// </remarks>
-        public bool IsAmended 
+        public bool IsAmended
         {
-            get { 
-                RefreshQualifierInfo(); 
+            get {
+                RefreshQualifierInfo();
                 return ((int)tag_WBEM_FLAVOR_TYPE.WBEM_FLAVOR_MASK_AMENDED ==
                     (qualifierFlavor & (int)tag_WBEM_FLAVOR_TYPE.WBEM_FLAVOR_AMENDED));
             }
-            set 
+            set
             {
                 int status = (int)ManagementStatus.NoError;
 
                 RefreshQualifierInfo ();
-                // Mask out origin bits 
+                // Mask out origin bits
                 int flavor = qualifierFlavor & ~(int)tag_WBEM_FLAVOR_TYPE.WBEM_FLAVOR_MASK_ORIGIN;
 
                 if (value)
@@ -240,14 +240,14 @@ namespace System.Management
         }
 
         /// <summary>
-        ///    <para>Gets or sets a value indicating whether the qualifier has been defined locally on 
+        ///    <para>Gets or sets a value indicating whether the qualifier has been defined locally on
         ///       this class or has been propagated from a base class.</para>
         /// </summary>
         /// <value>
-        /// <para><see langword='true'/> if the qualifier has been defined 
+        /// <para><see langword='true'/> if the qualifier has been defined
         ///    locally on this class; otherwise, <see langword='false'/>. </para>
         /// </value>
-        public bool IsLocal 
+        public bool IsLocal
         {
             get {
                 RefreshQualifierInfo();
@@ -257,14 +257,14 @@ namespace System.Management
         }
 
         /// <summary>
-        ///    <para>Gets or sets a value indicating whether the qualifier should be propagated to instances of the 
+        ///    <para>Gets or sets a value indicating whether the qualifier should be propagated to instances of the
         ///       class.</para>
         /// </summary>
         /// <value>
-        /// <para><see langword='true'/> if this qualifier should be 
+        /// <para><see langword='true'/> if this qualifier should be
         ///    propagated to instances of the class; otherwise, <see langword='false'/>.</para>
         /// </value>
-        public bool PropagatesToInstance 
+        public bool PropagatesToInstance
         {
             get {
                 RefreshQualifierInfo();
@@ -275,7 +275,7 @@ namespace System.Management
                 int status = (int)ManagementStatus.NoError;
 
                 RefreshQualifierInfo ();
-                // Mask out origin bits 
+                // Mask out origin bits
                 int flavor = qualifierFlavor & ~(int)tag_WBEM_FLAVOR_TYPE.WBEM_FLAVOR_MASK_ORIGIN;
 
                 if (value)
@@ -293,14 +293,14 @@ namespace System.Management
         }
 
         /// <summary>
-        ///    <para>Gets or sets a value indicating whether the qualifier should be propagated to 
+        ///    <para>Gets or sets a value indicating whether the qualifier should be propagated to
         ///       subclasses of the class.</para>
         /// </summary>
         /// <value>
-        /// <para><see langword='true'/> if the qualifier should be 
+        /// <para><see langword='true'/> if the qualifier should be
         ///    propagated to subclasses of this class; otherwise, <see langword='false'/>.</para>
         /// </value>
-        public bool PropagatesToSubclass 
+        public bool PropagatesToSubclass
         {
             get {
                 RefreshQualifierInfo();
@@ -311,7 +311,7 @@ namespace System.Management
                 int status = (int)ManagementStatus.NoError;
 
                 RefreshQualifierInfo ();
-                // Mask out origin bits 
+                // Mask out origin bits
                 int flavor = qualifierFlavor & ~(int)tag_WBEM_FLAVOR_TYPE.WBEM_FLAVOR_MASK_ORIGIN;
 
                 if (value)
@@ -329,27 +329,27 @@ namespace System.Management
         }
 
         /// <summary>
-        ///    <para>Gets or sets a value indicating whether the value of the qualifier can be 
+        ///    <para>Gets or sets a value indicating whether the value of the qualifier can be
         ///       overridden when propagated.</para>
         /// </summary>
         /// <value>
-        /// <para><see langword='true'/> if the value of the qualifier 
+        /// <para><see langword='true'/> if the value of the qualifier
         ///    can be overridden when propagated; otherwise, <see langword='false'/>.</para>
         /// </value>
-        public bool IsOverridable 
+        public bool IsOverridable
         {
             get {
                 RefreshQualifierInfo();
-                return ((int)tag_WBEM_FLAVOR_TYPE.WBEM_FLAVOR_OVERRIDABLE == 
+                return ((int)tag_WBEM_FLAVOR_TYPE.WBEM_FLAVOR_OVERRIDABLE ==
                     (qualifierFlavor & (int)tag_WBEM_FLAVOR_TYPE.WBEM_FLAVOR_MASK_PERMISSIONS));
             }
             set {
                 int status = (int)ManagementStatus.NoError;
 
                 RefreshQualifierInfo ();
-                // Mask out origin bits 
+                // Mask out origin bits
                 int flavor = qualifierFlavor & ~(int)tag_WBEM_FLAVOR_TYPE.WBEM_FLAVOR_MASK_ORIGIN;
-                    
+
                 if (value)
                     flavor &= ~(int)tag_WBEM_FLAVOR_TYPE.WBEM_FLAVOR_NOT_OVERRIDABLE;
                 else

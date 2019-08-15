@@ -22,13 +22,41 @@ namespace System.IO.Pipelines.Tests
             Task task1 = Await(awaitable);
             Task task2 = Await(awaitable);
 
-            Assert.Equal(true, task1.IsCompleted);
-            Assert.Equal(true, task1.IsFaulted);
+            Assert.True(task1.IsCompleted);
+            Assert.True(task1.IsFaulted);
             Assert.Equal("Concurrent reads or writes are not supported.", task1.Exception.InnerExceptions[0].Message);
 
-            Assert.Equal(true, task2.IsCompleted);
-            Assert.Equal(true, task2.IsFaulted);
+            Assert.True(task2.IsCompleted);
+            Assert.True(task2.IsFaulted);
             Assert.Equal("Concurrent reads or writes are not supported.", task2.Exception.InnerExceptions[0].Message);
+        }
+
+        [Fact]
+        public async Task CompletingWithExceptionDoesNotAffectState()
+        {
+            Pipe.Reader.Complete();
+            Pipe.Reader.Complete(new Exception());
+
+            var result = await Pipe.Writer.FlushAsync();
+            Assert.True(result.IsCompleted);
+        }
+
+        [Fact]
+        public async Task CompletingWithExceptionDoesNotAffectFailedState()
+        {
+            Pipe.Reader.Complete(new InvalidOperationException());
+            Pipe.Reader.Complete(new Exception());
+
+            await Assert.ThrowsAsync<InvalidOperationException>(async () => await Pipe.Writer.FlushAsync());
+        }
+
+        [Fact]
+        public async Task CompletingWithoutExceptionDoesNotAffectState()
+        {
+            Pipe.Reader.Complete(new InvalidOperationException());
+            Pipe.Reader.Complete();
+
+            await Assert.ThrowsAsync<InvalidOperationException>(async () => await Pipe.Writer.FlushAsync());
         }
     }
 }

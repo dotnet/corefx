@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading;
 using Microsoft.Internal.Collections;
@@ -28,15 +27,15 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         /// <remarks>
         ///     <para>
-        ///         The <see cref="AggregateExportProvider"/> will consult the providers in the order they have been specfied when 
-        ///         executing <see cref="ExportProvider.GetExports(ImportDefinition,AtomicComposition)"/>. 
+        ///         The <see cref="AggregateExportProvider"/> will consult the providers in the order they have been specfied when
+        ///         executing <see cref="ExportProvider.GetExports(ImportDefinition,AtomicComposition)"/>.
         ///     </para>
         ///     <para>
-        ///         The <see cref="AggregateExportProvider"/> does not take ownership of the specified providers. 
+        ///         The <see cref="AggregateExportProvider"/> does not take ownership of the specified providers.
         ///         That is, it will not try to dispose of any of them when it gets disposed.
         ///     </para>
         /// </remarks>
-        public AggregateExportProvider(params ExportProvider[] providers) 
+        public AggregateExportProvider(params ExportProvider[] providers)
         {
             // NOTE : we optimize for the array case here, because the collection of providers is typically tiny
             // Arrays are much more compact to store and much faster to create and enumerate
@@ -49,7 +48,7 @@ namespace System.ComponentModel.Composition.Hosting
                     ExportProvider provider = providers[i];
                     if (provider == null)
                     {
-                        throw ExceptionBuilder.CreateContainsNullElement("providers");
+                        throw ExceptionBuilder.CreateContainsNullElement(nameof(providers));
                     }
 
                     copiedProviders[i] = provider;
@@ -60,7 +59,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
             else
             {
-                copiedProviders = new ExportProvider[] { };
+                copiedProviders = Array.Empty<ExportProvider>();
             }
 
             _providers = copiedProviders;
@@ -73,11 +72,11 @@ namespace System.ComponentModel.Composition.Hosting
         /// <param name="providers">The prioritized list of export providers. The providers are consulted in order in which they are supplied.</param>
         /// <remarks>
         ///     <para>
-        ///         The <see cref="AggregateExportProvider"/> will consult the providers in the order they have been specfied when 
-        ///         executing <see cref="ExportProvider.GetExports(ImportDefinition,AtomicComposition)"/>. 
+        ///         The <see cref="AggregateExportProvider"/> will consult the providers in the order they have been specfied when
+        ///         executing <see cref="ExportProvider.GetExports(ImportDefinition,AtomicComposition)"/>.
         ///     </para>
         ///     <para>
-        ///         The <see cref="AggregateExportProvider"/> does not take ownership of the specified providers. 
+        ///         The <see cref="AggregateExportProvider"/> does not take ownership of the specified providers.
         ///         That is, it will not try to dispose of any of them when it gets disposed.
         ///     </para>
         /// </remarks>
@@ -103,10 +102,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             if (disposing)
             {
-                // NOTE : According to http://msdn.microsoft.com/en-us/library/4bw5ewxy.aspx, the warning is bogus when used with Interlocked API.
-#pragma warning disable 420
                 if (Interlocked.CompareExchange(ref _isDisposed, 1, 0) == 0)
-#pragma warning restore 420
                 {
                     foreach (ExportProvider provider in _providers)
                     {
@@ -132,7 +128,7 @@ namespace System.ComponentModel.Composition.Hosting
             get
             {
                 ThrowIfDisposed();
-                Contract.Ensures(Contract.Result<ReadOnlyCollection<ExportProvider>>() != null);
+                Debug.Assert(_readOnlyProviders != null);
 
                 return _readOnlyProviders;
             }
@@ -150,7 +146,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// empty <see cref="IEnumerable{T}"/>.
         /// </result>
         /// <remarks>
-        /// 	<note type="inheritinfo">
+        /// <note type="inheritinfo">
         /// The implementers should not treat the cardinality-related mismatches as errors, and are not
         /// expected to throw exceptions in those cases.
         /// For instance, if the import requests exactly one export and the provider has no matching exports or more than one,
@@ -177,7 +173,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 IEnumerable<Export> allExports = null;
 
-                // if asked for "one or less", the prioriry is at play - the first provider that agrees to return the value 
+                // if asked for "one or less", the prioriry is at play - the first provider that agrees to return the value
                 // which best complies with the request, wins.
                 foreach (ExportProvider provider in _providers)
                 {
@@ -187,7 +183,7 @@ namespace System.ComponentModel.Composition.Hosting
                     if (cardinalityCheckResult && anyExports)
                     {
                         // NOTE : if the provider returned nothing, we need to proceed, even if it indicated that the
-                        // cardinality is correct - when asked for "one or less", the provider might - correctly - 
+                        // cardinality is correct - when asked for "one or less", the provider might - correctly -
                         // return an empty sequence, but we shouldn't be satisfied with that as providers down the list
                         // might have a value we are interested in.
                         return exports;

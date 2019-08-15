@@ -119,6 +119,22 @@ namespace System.Security.Cryptography
             _publicOnly = (parameters.X == null);
         }
 
+        public override void ImportEncryptedPkcs8PrivateKey(
+            ReadOnlySpan<byte> passwordBytes,
+            ReadOnlySpan<byte> source,
+            out int bytesRead)
+        {
+            _impl.ImportEncryptedPkcs8PrivateKey(passwordBytes, source, out bytesRead);
+        }
+
+        public override void ImportEncryptedPkcs8PrivateKey(
+            ReadOnlySpan<char> password,
+            ReadOnlySpan<byte> source,
+            out int bytesRead)
+        {
+            _impl.ImportEncryptedPkcs8PrivateKey(password, source, out bytesRead);
+        }
+
         public override string KeyExchangeAlgorithm => _impl.KeyExchangeAlgorithm;
 
         public override int KeySize
@@ -196,10 +212,10 @@ namespace System.Security.Cryptography
             if (PublicOnly)
                 throw new CryptographicException(SR.Cryptography_CSP_NoPrivateKey);
             if (rgbHash.Length != SHA1_HASHSIZE)
-                throw new CryptographicException(string.Format(SR.Cryptography_InvalidHashSize, "SHA1", SHA1_HASHSIZE));
+                throw new CryptographicException(SR.Format(SR.Cryptography_InvalidHashSize, "SHA1", SHA1_HASHSIZE));
 
             // Only SHA1 allowed; the default value is SHA1
-            if (str != null && string.Compare(str, "SHA1", StringComparison.OrdinalIgnoreCase) != 0)
+            if (str != null && !string.Equals(str, "SHA1", StringComparison.OrdinalIgnoreCase))
                 throw new CryptographicException(SR.Cryptography_UnknownHashAlgorithm, str);
 
             return CreateSignature(rgbHash);
@@ -214,11 +230,11 @@ namespace System.Security.Cryptography
                 throw new ArgumentNullException(nameof(rgbHash));
             if (rgbSignature == null)
                 throw new ArgumentNullException(nameof(rgbSignature));
-            
+
             // For compat with Windows, no check for rgbHash.Length != SHA1_HASHSIZE
 
             // Only SHA1 allowed; the default value is SHA1
-            if (str != null && string.Compare(str, "SHA1", StringComparison.OrdinalIgnoreCase) != 0)
+            if (str != null && !string.Equals(str, "SHA1", StringComparison.OrdinalIgnoreCase))
                 throw new CryptographicException(SR.Cryptography_UnknownHashAlgorithm, str);
 
             return _impl.VerifySignature(rgbHash, rgbSignature);

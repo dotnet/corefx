@@ -22,7 +22,7 @@ namespace System.Net.WebSockets
         private static readonly Action<object> s_OnCancel = new Action<object>(OnCancel);
         private readonly HttpRequestStream _inputStream;
         private readonly HttpResponseStream _outputStream;
-        private HttpListenerContext _context;
+        private readonly HttpListenerContext _context;
         private bool _inOpaqueMode;
         private WebSocketBase _webSocket;
         private HttpListenerAsyncEventArgs _writeEventArgs;
@@ -197,7 +197,7 @@ namespace System.Net.WebSockets
 
         // return value indicates sync vs async completion
         // false: sync completion
-        // true: async completion
+        // true: async completion or error
         private unsafe bool ReadAsyncFast(HttpListenerAsyncEventArgs eventArgs)
         {
             if (NetEventSource.IsEnabled)
@@ -209,7 +209,7 @@ namespace System.Net.WebSockets
             eventArgs.StartOperationReceive();
 
             uint statusCode = 0;
-            bool completedAsynchronously = false;
+            bool completedAsynchronouslyOrWithError = false;
             try
             {
                 Debug.Assert(eventArgs.Buffer != null, "'BufferList' is not supported for read operations.");
@@ -275,14 +275,14 @@ namespace System.Net.WebSockets
                 else if (statusCode == Interop.HttpApi.ERROR_SUCCESS &&
                     HttpListener.SkipIOCPCallbackOnSuccess)
                 {
-                    // IO operation completed synchronously. No IO completion port callback is used because 
+                    // IO operation completed synchronously. No IO completion port callback is used because
                     // it was disabled in SwitchToOpaqueMode()
                     eventArgs.FinishOperationSuccess((int)bytesReturned, true);
-                    completedAsynchronously = false;
+                    completedAsynchronouslyOrWithError = false;
                 }
                 else
                 {
-                    completedAsynchronously = true;
+                    completedAsynchronouslyOrWithError = true;
                 }
             }
             catch (Exception e)
@@ -291,17 +291,17 @@ namespace System.Net.WebSockets
                 _outputStream.SetClosedFlag();
                 _outputStream.InternalHttpContext.Abort();
 
-                throw;
+                completedAsynchronouslyOrWithError = true;
             }
             finally
             {
                 if (NetEventSource.IsEnabled)
                 {
-                    NetEventSource.Exit(this, completedAsynchronously);
+                    NetEventSource.Exit(this, completedAsynchronouslyOrWithError);
                 }
             }
 
-            return completedAsynchronously;
+            return completedAsynchronouslyOrWithError;
         }
 
         public override int ReadByte()
@@ -472,7 +472,7 @@ namespace System.Net.WebSockets
 
         // return value indicates sync vs async completion
         // false: sync completion
-        // true: async completion
+        // true: async completion or with error
         private unsafe bool WriteAsyncFast(HttpListenerAsyncEventArgs eventArgs)
         {
             if (NetEventSource.IsEnabled)
@@ -486,7 +486,7 @@ namespace System.Net.WebSockets
             eventArgs.StartOperationSend();
 
             uint statusCode;
-            bool completedAsynchronously = false;
+            bool completedAsynchronouslyOrWithError = false;
             try
             {
                 if (_outputStream.Closed ||
@@ -533,11 +533,11 @@ namespace System.Net.WebSockets
                 {
                     // IO operation completed synchronously - callback won't be called to signal completion.
                     eventArgs.FinishOperationSuccess((int)bytesSent, true);
-                    completedAsynchronously = false;
+                    completedAsynchronouslyOrWithError = false;
                 }
                 else
                 {
-                    completedAsynchronously = true;
+                    completedAsynchronouslyOrWithError = true;
                 }
             }
             catch (Exception e)
@@ -546,17 +546,17 @@ namespace System.Net.WebSockets
                 _outputStream.SetClosedFlag();
                 _outputStream.InternalHttpContext.Abort();
 
-                throw;
+                completedAsynchronouslyOrWithError = true;
             }
             finally
             {
                 if (NetEventSource.IsEnabled)
                 {
-                    NetEventSource.Exit(this, completedAsynchronously);
+                    NetEventSource.Exit(this, completedAsynchronouslyOrWithError);
                 }
             }
 
-            return completedAsynchronously;
+            return completedAsynchronouslyOrWithError;
         }
 
         public override void WriteByte(byte value)
@@ -887,7 +887,7 @@ namespace System.Net.WebSockets
 
             // BufferList property.
             // Mutually exclusive with Buffer.
-            // Setting this property with an existing non-null Buffer will cause an assert.    
+            // Setting this property with an existing non-null Buffer will cause an assert.
             public IList<ArraySegment<byte>> BufferList
             {
                 get { return _bufferList; }
@@ -1052,7 +1052,7 @@ namespace System.Net.WebSockets
                         throw new ObjectDisposedException(GetType().FullName);
                     }
 
-                    Debug.Assert(false, "Only one outstanding async operation is allowed per HttpListenerAsyncEventArgs instance.");
+                    Debug.Fail("Only one outstanding async operation is allowed per HttpListenerAsyncEventArgs instance.");
                     // Only one at a time.
                     throw new InvalidOperationException();
                 }
@@ -1106,7 +1106,7 @@ namespace System.Net.WebSockets
                 Debug.Assert(_buffer == null || _bufferList == null, "Either 'm_Buffer' or 'm_BufferList' MUST be NULL.");
                 Debug.Assert(_shouldCloseOutput || _buffer != null || _bufferList != null, "Either 'm_Buffer' or 'm_BufferList' MUST NOT be NULL.");
 
-                // The underlying byte[] m_Buffer or each m_BufferList[].Array are pinned already 
+                // The underlying byte[] m_Buffer or each m_BufferList[].Array are pinned already
                 if (_buffer != null)
                 {
                     UpdateDataChunk(0, _buffer, _offset, _count);
@@ -1151,7 +1151,7 @@ namespace System.Net.WebSockets
             }
 
             // Method to mark this object as no longer "in-use".
-            // Will also execute a Dispose deferred because I/O was in progress.  
+            // Will also execute a Dispose deferred because I/O was in progress.
             internal void Complete()
             {
                 FreeOverlapped(false);
@@ -1159,7 +1159,7 @@ namespace System.Net.WebSockets
                 Interlocked.Exchange(ref _operating, Free);
 
                 // Check for deferred Dispose().
-                // The deferred Dispose is not guaranteed if Dispose is called while an operation is in progress. 
+                // The deferred Dispose is not guaranteed if Dispose is called while an operation is in progress.
                 // The m_DisposeCalled variable is not managed in a thread-safe manner on purpose for performance.
                 if (_disposeCalled)
                 {

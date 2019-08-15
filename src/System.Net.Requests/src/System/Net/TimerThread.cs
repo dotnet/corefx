@@ -290,7 +290,7 @@ namespace System.Net
             private TimerState _timerState;
             private Callback _callback;
             private object _context;
-            private object _queueLock;
+            private readonly object _queueLock;
             private TimerNode _next;
             private TimerNode _prev;
 
@@ -557,7 +557,7 @@ namespace System.Net
                                 int newNow = Environment.TickCount;
                                 int waitDuration = haveNextTick ?
                                     (int)(IsTickBetween(now, nextTick, newNow) ?
-                                        Math.Min(unchecked((uint)(nextTick - newNow)), (uint)(Int32.MaxValue - TickCountResolution)) + TickCountResolution :
+                                        Math.Min(unchecked((uint)(nextTick - newNow)), (uint)(int.MaxValue - TickCountResolution)) + TickCountResolution :
                                         0) :
                                     ThreadIdleTimeoutMilliseconds;
 

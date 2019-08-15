@@ -31,7 +31,7 @@ namespace System.Linq.Tests
         public void Range_ToArray_ProduceCorrectResult()
         {
             var array = Enumerable.Range(1, 100).ToArray();
-            Assert.Equal(array.Length, 100);
+            Assert.Equal(100, array.Length);
             for (var i = 0; i < array.Length; i++)
                 Assert.Equal(i + 1, array[i]);
         }
@@ -40,7 +40,7 @@ namespace System.Linq.Tests
         public void Range_ToList_ProduceCorrectResult()
         {
             var list = Enumerable.Range(1, 100).ToList();
-            Assert.Equal(list.Count, 100);
+            Assert.Equal(100, list.Count);
             for (var i = 0; i < list.Count; i++)
                 Assert.Equal(i + 1, list[i]);
         }
@@ -51,9 +51,9 @@ namespace System.Linq.Tests
             var array = Enumerable.Range(1, 0).ToArray();
             var array2 = Enumerable.Range(int.MinValue, 0).ToArray();
             var array3 = Enumerable.Range(int.MaxValue, 0).ToArray();
-            Assert.Equal(array.Length, 0);
-            Assert.Equal(array2.Length, 0);
-            Assert.Equal(array3.Length, 0);
+            Assert.Equal(0, array.Length);
+            Assert.Equal(0, array2.Length);
+            Assert.Equal(0, array3.Length);
         }
 
         [Fact]
@@ -68,7 +68,7 @@ namespace System.Linq.Tests
         {
             AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => Enumerable.Range(1000, int.MaxValue));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => Enumerable.Range(int.MaxValue, 1000));
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => Enumerable.Range(Int32.MaxValue - 10, 20));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => Enumerable.Range(int.MaxValue - 10, 20));
         }
 
         [Fact]
@@ -106,13 +106,13 @@ namespace System.Linq.Tests
         [Fact]
         public void Range_ToInt32MaxValue()
         {
-            int from = Int32.MaxValue - 3;
+            int from = int.MaxValue - 3;
             int count = 4;
             var rangeEnumerable = Enumerable.Range(from, count);
 
             Assert.Equal(count, rangeEnumerable.Count());
 
-            int[] expected = { Int32.MaxValue - 3, Int32.MaxValue - 2, Int32.MaxValue - 1, Int32.MaxValue };
+            int[] expected = { int.MaxValue - 3, int.MaxValue - 2, int.MaxValue - 1, int.MaxValue };
             Assert.Equal(expected, rangeEnumerable);
         }
 
@@ -213,14 +213,14 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Core optimizes Enumerable.Range().Last(). Without this optimization, this test takes a long time. See https://github.com/dotnet/corefx/pull/2401.")]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Netcoreapp, ".NET Core optimizes Enumerable.Range().Last(). Without this optimization, this test takes a long time. See https://github.com/dotnet/corefx/pull/2401.")]
         public void Last()
         {
             Assert.Equal(1000000056, Enumerable.Range(57, 1000000000).Last());
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Core optimizes Enumerable.Range().LastOrDefault(). Without this optimization, this test takes a long time. See https://github.com/dotnet/corefx/pull/2401.")]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Netcoreapp, ".NET Core optimizes Enumerable.Range().LastOrDefault(). Without this optimization, this test takes a long time. See https://github.com/dotnet/corefx/pull/2401.")]
         public void LastOrDefault()
         {
             Assert.Equal(int.MaxValue - 101, Enumerable.Range(-100, int.MaxValue).LastOrDefault());

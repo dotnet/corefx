@@ -23,8 +23,8 @@ namespace System.Drawing
         /// </summary>
         public static readonly Size Empty = new Size();
 
-        private int width; // Do not rename (binary serialization) 
-        private int height; // Do not rename (binary serialization) 
+        private int width; // Do not rename (binary serialization)
+        private int height; // Do not rename (binary serialization)
 
         /**
          * Create a new Size object from a point
@@ -218,7 +218,7 @@ namespace System.Drawing
         /// <summary>
         ///    <para>
         ///       Tests to see whether the specified object is a
-        ///    <see cref='System.Drawing.Size'/> 
+        ///    <see cref='System.Drawing.Size'/>
         ///    with the same dimensions as this <see cref='System.Drawing.Size'/>.
         /// </para>
         /// </summary>
@@ -245,7 +245,7 @@ namespace System.Drawing
         /// Multiplies <see cref="Size"/> by an <see cref="int"/> producing <see cref="Size"/>.
         /// </summary>
         /// <param name="size">Multiplicand of type <see cref="Size"/>.</param>
-        /// <param name="multiplier">Multiplier of type <see cref='int'>.</param>
+        /// <param name="multiplier">Multiplier of type <see cref='int'/>.</param>
         /// <returns>Product of type <see cref="Size"/>.</returns>
         private static Size Multiply(Size size, int multiplier) =>
             new Size(unchecked(size.width * multiplier), unchecked(size.height * multiplier));

@@ -40,7 +40,7 @@ namespace System.Xml.Tests
         [Theory]
         [InlineData("empty")]
         [InlineData("full")]
-        public void SetXmlNameTableTo_Empty_Full(String nameTableStatus)
+        public void SetXmlNameTableTo_Empty_Full(string nameTableStatus)
         {
             XmlSchemaValidator val;
             ObservedNameTable nt = new ObservedNameTable();
@@ -56,13 +56,13 @@ namespace System.Xml.Tests
             }
 
             val = new XmlSchemaValidator(nt, sch, new XmlNamespaceManager(new NameTable()), AllFlags);
-            Assert.NotEqual(val, null);
+            Assert.NotNull(val);
 
             val.Initialize();
             val.ValidateElement("root", "", info);
 
             Assert.True(nt.IsAddCalled);
-            Assert.Equal(nt.IsGetCalled, false);
+            Assert.False(nt.IsGetCalled);
 
             return;
         }
@@ -89,7 +89,7 @@ namespace System.Xml.Tests
         [InlineData("empty")]
         [InlineData("notcompiled")]
         [InlineData("compiled")]
-        public void SetSchemaSetTo_Empty_NotCompiled_Compiled(String schemaSetStatus)
+        public void SetSchemaSetTo_Empty_NotCompiled_Compiled(string schemaSetStatus)
         {
             XmlSchemaValidator val;
             XmlSchemaSet sch = new XmlSchemaSet();
@@ -102,7 +102,7 @@ namespace System.Xml.Tests
             }
 
             val = new XmlSchemaValidator(new NameTable(), sch, new XmlNamespaceManager(new NameTable()), AllFlags);
-            Assert.NotEqual(val, null);
+            Assert.NotNull(val);
 
             val.Initialize();
             val.ValidateElement("elem1", "", null);

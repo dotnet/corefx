@@ -92,7 +92,7 @@ namespace System.Data.Tests
 
             _dataSet.Tables.Add(_parentTable);
 
-            // Create three new DataRow objects and add 
+            // Create three new DataRow objects and add
             // them to the DataTable
             for (int i = 0; i <= 2; i++)
             {
@@ -282,7 +282,7 @@ namespace System.Data.Tests
             Assert.Equal(ds, table.DataSet);
             Assert.Equal(3, table.Columns.Count);
             Assert.Equal(0, table.Rows.Count);
-            Assert.Equal(false, table.CaseSensitive);
+            Assert.False(table.CaseSensitive);
             Assert.Equal(tableName, table.TableName);
             Assert.Equal(2, table.Constraints.Count);
             Assert.Equal("", table.Prefix);
@@ -300,8 +300,8 @@ namespace System.Data.Tests
             //Check properties of each column
             //First Column
             DataColumn col = table.Columns[0];
-            Assert.Equal(false, col.AllowDBNull);
-            Assert.Equal(false, col.AutoIncrement);
+            Assert.False(col.AllowDBNull);
+            Assert.False(col.AutoIncrement);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
             Assert.Equal("Element", col.ColumnMapping.ToString());
@@ -309,18 +309,18 @@ namespace System.Data.Tests
             Assert.Equal("id", col.ColumnName);
             Assert.Equal(typeof(int), col.DataType);
             Assert.Equal(string.Empty, col.DefaultValue.ToString());
-            Assert.Equal(false, col.DesignMode);
+            Assert.False(col.DesignMode);
             Assert.Equal("System.Data.PropertyCollection", col.ExtendedProperties.ToString());
             Assert.Equal(-1, col.MaxLength);
             Assert.Equal(0, col.Ordinal);
             Assert.Equal(string.Empty, col.Prefix);
             Assert.Equal(tableName, col.Table.ToString());
-            Assert.Equal(true, col.Unique);
+            Assert.True(col.Unique);
 
             //Second Column
             col = table.Columns[1];
-            Assert.Equal(true, col.AllowDBNull);
-            Assert.Equal(false, col.AutoIncrement);
+            Assert.True(col.AllowDBNull);
+            Assert.False(col.AutoIncrement);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
             Assert.Equal("Element", col.ColumnMapping.ToString());
@@ -328,18 +328,18 @@ namespace System.Data.Tests
             Assert.Equal("ParentItem", col.ColumnName);
             Assert.Equal(typeof(string), col.DataType);
             Assert.Equal("", col.DefaultValue.ToString());
-            Assert.Equal(false, col.DesignMode);
+            Assert.False(col.DesignMode);
             Assert.Equal("System.Data.PropertyCollection", col.ExtendedProperties.ToString());
             Assert.Equal(-1, col.MaxLength);
             Assert.Equal(1, col.Ordinal);
             Assert.Equal("", col.Prefix);
             Assert.Equal(tableName, col.Table.ToString());
-            Assert.Equal(false, col.Unique);
+            Assert.False(col.Unique);
 
             //Third Column
             col = table.Columns[2];
-            Assert.Equal(false, col.AllowDBNull);
-            Assert.Equal(false, col.AutoIncrement);
+            Assert.False(col.AllowDBNull);
+            Assert.False(col.AutoIncrement);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
             Assert.Equal("Element", col.ColumnMapping.ToString());
@@ -347,13 +347,13 @@ namespace System.Data.Tests
             Assert.Equal("DepartmentID", col.ColumnName);
             Assert.Equal(typeof(int), col.DataType);
             Assert.Equal(string.Empty, col.DefaultValue.ToString());
-            Assert.Equal(false, col.DesignMode);
+            Assert.False(col.DesignMode);
             Assert.Equal("System.Data.PropertyCollection", col.ExtendedProperties.ToString());
             Assert.Equal(-1, col.MaxLength);
             Assert.Equal(2, col.Ordinal);
             Assert.Equal("", col.Prefix);
             Assert.Equal(tableName, col.Table.ToString());
-            Assert.Equal(false, col.Unique);
+            Assert.False(col.Unique);
         }
 
         private void VerifyParentTableSchema(DataTable table, string tableName, DataSet ds)
@@ -363,7 +363,7 @@ namespace System.Data.Tests
             Assert.Equal(ds.DataSetName, table.DataSet.DataSetName);
             Assert.Equal(3, table.Columns.Count);
             Assert.Equal(0, table.Rows.Count);
-            Assert.Equal(false, table.CaseSensitive);
+            Assert.False(table.CaseSensitive);
             Assert.Equal("ParentTable", table.TableName);
             Assert.Equal(2, table.Constraints.Count);
             Assert.Equal(string.Empty, table.Prefix);
@@ -401,8 +401,8 @@ namespace System.Data.Tests
             //Check properties of each column
             //First Column
             DataColumn col = table.Columns[0];
-            Assert.Equal(false, col.AllowDBNull);
-            Assert.Equal(false, col.AutoIncrement);
+            Assert.False(col.AllowDBNull);
+            Assert.False(col.AutoIncrement);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
             Assert.Equal("Element", col.ColumnMapping.ToString());
@@ -410,18 +410,18 @@ namespace System.Data.Tests
             Assert.Equal("id", col.ColumnName);
             Assert.Equal(typeof(int), col.DataType);
             Assert.Equal(string.Empty, col.DefaultValue.ToString());
-            Assert.Equal(false, col.DesignMode);
+            Assert.False(col.DesignMode);
             Assert.Equal("System.Data.PropertyCollection", col.ExtendedProperties.ToString());
             Assert.Equal(-1, col.MaxLength);
             Assert.Equal(0, col.Ordinal);
             Assert.Equal(string.Empty, col.Prefix);
             Assert.Equal("ParentTable", col.Table.ToString());
-            Assert.Equal(true, col.Unique);
+            Assert.True(col.Unique);
 
             //Second Column
             col = table.Columns[1];
-            Assert.Equal(true, col.AllowDBNull);
-            Assert.Equal(false, col.AutoIncrement);
+            Assert.True(col.AllowDBNull);
+            Assert.False(col.AutoIncrement);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
             Assert.Equal("Element", col.ColumnMapping.ToString());
@@ -429,18 +429,18 @@ namespace System.Data.Tests
             Assert.Equal("ParentItem", col.ColumnName);
             Assert.Equal(typeof(string), col.DataType);
             Assert.Equal(string.Empty, col.DefaultValue.ToString());
-            Assert.Equal(false, col.DesignMode);
+            Assert.False(col.DesignMode);
             Assert.Equal("System.Data.PropertyCollection", col.ExtendedProperties.ToString());
             Assert.Equal(-1, col.MaxLength);
             Assert.Equal(1, col.Ordinal);
             Assert.Equal(string.Empty, col.Prefix);
             Assert.Equal("ParentTable", col.Table.ToString());
-            Assert.Equal(false, col.Unique);
+            Assert.False(col.Unique);
 
             //Third Column
             col = table.Columns[2];
-            Assert.Equal(false, col.AllowDBNull);
-            Assert.Equal(false, col.AutoIncrement);
+            Assert.False(col.AllowDBNull);
+            Assert.False(col.AutoIncrement);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
             Assert.Equal("Element", col.ColumnMapping.ToString());
@@ -448,13 +448,13 @@ namespace System.Data.Tests
             Assert.Equal("DepartmentID", col.ColumnName);
             Assert.Equal(typeof(int), col.DataType);
             Assert.Equal(string.Empty, col.DefaultValue.ToString());
-            Assert.Equal(false, col.DesignMode);
+            Assert.False(col.DesignMode);
             Assert.Equal("System.Data.PropertyCollection", col.ExtendedProperties.ToString());
             Assert.Equal(-1, col.MaxLength);
             Assert.Equal(2, col.Ordinal);
             Assert.Equal(string.Empty, col.Prefix);
             Assert.Equal("ParentTable", col.Table.ToString());
-            Assert.Equal(false, col.Unique);
+            Assert.False(col.Unique);
         }
 
         [Fact]
@@ -551,7 +551,7 @@ namespace System.Data.Tests
             Assert.Null(table.DataSet);
             Assert.Equal(3, table.Columns.Count);
             Assert.Equal(0, table.Rows.Count);
-            Assert.Equal(false, table.CaseSensitive);
+            Assert.False(table.CaseSensitive);
             Assert.Equal("ChildTable", table.TableName);
             Assert.Equal(string.Empty, table.Prefix);
             Assert.Equal(1, table.Constraints.Count);
@@ -563,26 +563,26 @@ namespace System.Data.Tests
 
             //First Column
             DataColumn col = table.Columns[0];
-            Assert.Equal(true, col.AllowDBNull);
-            Assert.Equal(true, col.AutoIncrement);
+            Assert.True(col.AllowDBNull);
+            Assert.True(col.AutoIncrement);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
             Assert.Equal("Element", col.ColumnMapping.ToString());
             Assert.Equal("ChildID", col.ColumnName);
             Assert.Equal(typeof(int), col.DataType);
             Assert.Equal(string.Empty, col.DefaultValue.ToString());
-            Assert.Equal(false, col.DesignMode);
+            Assert.False(col.DesignMode);
             Assert.Equal("System.Data.PropertyCollection", col.ExtendedProperties.ToString());
             Assert.Equal(-1, col.MaxLength);
             Assert.Equal(0, col.Ordinal);
             Assert.Equal(string.Empty, col.Prefix);
             Assert.Equal("ChildTable", col.Table.ToString());
-            Assert.Equal(true, col.Unique);
+            Assert.True(col.Unique);
 
             //Second Column
             col = table.Columns[1];
-            Assert.Equal(true, col.AllowDBNull);
-            Assert.Equal(false, col.AutoIncrement);
+            Assert.True(col.AllowDBNull);
+            Assert.False(col.AutoIncrement);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
             Assert.Equal("Element", col.ColumnMapping.ToString());
@@ -590,18 +590,18 @@ namespace System.Data.Tests
             Assert.Equal("ChildItem", col.ColumnName);
             Assert.Equal(typeof(string), col.DataType);
             Assert.Equal(string.Empty, col.DefaultValue.ToString());
-            Assert.Equal(false, col.DesignMode);
+            Assert.False(col.DesignMode);
             Assert.Equal("System.Data.PropertyCollection", col.ExtendedProperties.ToString());
             Assert.Equal(-1, col.MaxLength);
             Assert.Equal(1, col.Ordinal);
             Assert.Equal(string.Empty, col.Prefix);
             Assert.Equal("ChildTable", col.Table.ToString());
-            Assert.Equal(false, col.Unique);
+            Assert.False(col.Unique);
 
             //Third Column
             col = table.Columns[2];
-            Assert.Equal(true, col.AllowDBNull);
-            Assert.Equal(false, col.AutoIncrement);
+            Assert.True(col.AllowDBNull);
+            Assert.False(col.AutoIncrement);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
             Assert.Equal("Element", col.ColumnMapping.ToString());
@@ -609,13 +609,13 @@ namespace System.Data.Tests
             Assert.Equal("ParentID", col.ColumnName);
             Assert.Equal(typeof(int), col.DataType);
             Assert.Equal(string.Empty, col.DefaultValue.ToString());
-            Assert.Equal(false, col.DesignMode);
+            Assert.False(col.DesignMode);
             Assert.Equal("System.Data.PropertyCollection", col.ExtendedProperties.ToString());
             Assert.Equal(-1, col.MaxLength);
             Assert.Equal(2, col.Ordinal);
             Assert.Equal(string.Empty, col.Prefix);
             Assert.Equal("ChildTable", col.Table.ToString());
-            Assert.Equal(false, col.Unique);
+            Assert.False(col.Unique);
         }
 
         [Fact]
@@ -651,7 +651,7 @@ namespace System.Data.Tests
                     // \p{Pf} any kind of closing quote https://www.compart.com/en/unicode/category/Pf
                     // \p{Po} any kind of punctuation character that is not a dash, bracket, quote or connector https://www.compart.com/en/unicode/category/Po
                     Assert.Matches(@"[\p{Pi}\p{Po}]" + "Table1" + @"[\p{Pf}\p{Po}]", ex.Message);
-                    
+
                     Assert.Null(ex.ParamName);
                 }
             }
@@ -709,7 +709,7 @@ namespace System.Data.Tests
                 _parentTable.WriteXmlSchema(stream);
             }
 
-            //Create a table and define the full schema 
+            //Create a table and define the full schema
             DataTable table = new DataTable();
             table.Columns.Add(new DataColumn(_parentTable.Columns[0].ColumnName, typeof(int)));
             table.Columns.Add(new DataColumn(_parentTable.Columns[1].ColumnName, typeof(string)));

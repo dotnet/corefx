@@ -13,8 +13,8 @@ namespace System.Security.Cryptography.Xml
 {
     internal class CanonicalXml
     {
-        private CanonicalXmlDocument _c14nDoc;
-        private C14NAncestralNamespaceContextManager _ancMgr;
+        private readonly CanonicalXmlDocument _c14nDoc;
+        private readonly C14NAncestralNamespaceContextManager _ancMgr;
 
         // private static string defaultXPathWithoutComments = "(//. | //@* | //namespace::*)[not(self::comment())]";
         // private static string defaultXPathWithoutComments = "(//. | //@* | //namespace::*)";
@@ -51,7 +51,7 @@ namespace System.Security.Cryptography.Xml
 
             XmlDocument doc = Utils.GetOwnerDocument(nodeList);
             if (doc == null)
-                throw new ArgumentException("nodeList");
+                throw new ArgumentException(nameof(nodeList));
 
             _c14nDoc = new CanonicalXmlDocument(false, includeComments);
             _c14nDoc.XmlResolver = resolver;

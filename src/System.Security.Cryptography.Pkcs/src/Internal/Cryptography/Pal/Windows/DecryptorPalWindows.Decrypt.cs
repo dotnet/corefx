@@ -17,8 +17,62 @@ namespace Internal.Cryptography.Pal.Windows
 {
     internal sealed partial class DecryptorPalWindows : DecryptorPal
     {
-        public sealed override ContentInfo TryDecrypt(RecipientInfo recipientInfo, X509Certificate2 cert, X509Certificate2Collection originatorCerts, X509Certificate2Collection extraStore, out Exception exception)
+        public unsafe sealed override ContentInfo TryDecrypt(
+            RecipientInfo recipientInfo,
+            X509Certificate2 cert,
+            AsymmetricAlgorithm privateKey,
+            X509Certificate2Collection originatorCerts,
+            X509Certificate2Collection extraStore,
+            out Exception exception)
         {
+            Debug.Assert((cert != null) ^ (privateKey != null));
+
+            if (privateKey != null)
+            {
+                RSA key = privateKey as RSA;
+
+                if (key == null)
+                {
+                    exception = new CryptographicException(SR.Cryptography_Cms_Ktri_RSARequired);
+                    return null;
+                }
+
+                ContentInfo contentInfo = _hCryptMsg.GetContentInfo();
+                byte[] cek = AnyOS.ManagedPkcsPal.ManagedKeyTransPal.DecryptCekCore(
+                    cert,
+                    key,
+                    recipientInfo.EncryptedKey,
+                    recipientInfo.KeyEncryptionAlgorithm.Oid.Value,
+                    recipientInfo.KeyEncryptionAlgorithm.Parameters,
+                    out exception);
+
+                // Pin CEK to prevent it from getting copied during heap compaction.
+                fixed (byte* pinnedCek = cek)
+                {
+                    try
+                    {
+                        if (exception != null)
+                        {
+                            return null;
+                        }
+
+                        return AnyOS.ManagedPkcsPal.ManagedDecryptorPal.TryDecryptCore(
+                            cek,
+                            contentInfo.ContentType.Value,
+                            contentInfo.Content,
+                            _contentEncryptionAlgorithm,
+                            out exception);
+                    }
+                    finally
+                    {
+                        if (cek != null)
+                        {
+                            Array.Clear(cek, 0, cek.Length);
+                        }
+                    }
+                }
+            }
+
             Debug.Assert(recipientInfo != null);
             Debug.Assert(cert != null);
             Debug.Assert(originatorCerts != null);
@@ -52,7 +106,7 @@ namespace Internal.Cryptography.Pal.Windows
                         break;
 
                     default:
-                        // Since only the framework can construct RecipientInfo's, we're at fault if we get here. So it's okay to assert and throw rather than 
+                        // Since only the framework can construct RecipientInfo's, we're at fault if we get here. So it's okay to assert and throw rather than
                         // returning to the caller.
                         Debug.Fail($"Unexpected RecipientInfoType: {type}");
                         throw new NotSupportedException();
@@ -147,8 +201,8 @@ namespace Internal.Cryptography.Pal.Windows
                             case CMsgKeyAgreeOriginatorChoice.CMSG_KEY_AGREE_ORIGINATOR_CERT:
                                 {
                                     X509Certificate2Collection candidateCerts = new X509Certificate2Collection();
-                                    candidateCerts.AddRange(Helpers.GetStoreCertificates(StoreName.AddressBook, StoreLocation.CurrentUser, openExistingOnly: true));
-                                    candidateCerts.AddRange(Helpers.GetStoreCertificates(StoreName.AddressBook, StoreLocation.LocalMachine, openExistingOnly: true));
+                                    candidateCerts.AddRange(PkcsHelpers.GetStoreCertificates(StoreName.AddressBook, StoreLocation.CurrentUser, openExistingOnly: true));
+                                    candidateCerts.AddRange(PkcsHelpers.GetStoreCertificates(StoreName.AddressBook, StoreLocation.LocalMachine, openExistingOnly: true));
                                     candidateCerts.AddRange(originatorCerts);
                                     candidateCerts.AddRange(extraStore);
                                     SubjectIdentifier originatorId = pKeyAgreeRecipientInfo->OriginatorCertId.ToSubjectIdentifier();
@@ -161,7 +215,7 @@ namespace Internal.Cryptography.Pal.Windows
                                         decryptPara.OriginatorPublicKey = pOriginatorCertContext->pCertInfo->SubjectPublicKeyInfo.PublicKey;
 
                                         // Do not factor this call out of the switch statement as leaving this "using" block will free up
-                                        // native memory that decryptPara points to. 
+                                        // native memory that decryptPara points to.
                                         return TryExecuteDecryptAgree(ref decryptPara);
                                     }
                                 }

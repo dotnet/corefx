@@ -1,60 +1,19 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <!-- Enabling the interpreter for RC1 in all builds, see https://github.com/dotnet/corefx/issues/4033 -->
     <FeatureInterpret>true</FeatureInterpret>
-  </PropertyGroup>
-  <PropertyGroup>
     <ProjectGuid>{4B4AA59B-89F9-4A34-B3C3-C97EF531EE00}</ProjectGuid>
-    <IsInterpreting Condition="'$(TargetGroup)' == 'uapaot'">true</IsInterpreting>
+    <IsInterpreting>false</IsInterpreting>
     <DefineConstants Condition=" '$(IsInterpreting)' != 'true' ">$(DefineConstants);FEATURE_COMPILE</DefineConstants>
     <DefineConstants Condition=" '$(FeatureInterpret)' == 'true' ">$(DefineConstants);FEATURE_INTERPRET</DefineConstants>
-    <IncludeDefaultReferences>false</IncludeDefaultReferences>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
-    <TargetingPackExclusions Include="System.Linq.Expressions" />
+    <DefaultReferenceExclusions Include="System.Linq.Expressions" />
     <ReferenceFromRuntime Include="System.Linq.Expressions" />
   </ItemGroup>
   <ItemGroup>
-    <ReferenceFromRuntime Include="System.Private.CoreLib" />
-    <ReferenceFromRuntime Include="CoreFx.Private.TestUtilities" />
-    <ReferenceFromRuntime Include="xunit.core" />
-    <ReferenceFromRuntime Include="Xunit.NetCore.Extensions" />
-    <ReferenceFromRuntime Include="xunit.assert" />
-    <ReferenceFromRuntime Include="xunit.abstractions" />
-    <ReferenceFromRuntime Include="xunit.performance.core" />
-    <ReferenceFromRuntime Include="xunit.performance.api" />
-    <ReferenceFromRuntime Include="System.Runtime" />
-    <ReferenceFromRuntime Include="System.Collections" />
-    <ReferenceFromRuntime Include="System.Reflection.Primitives" />
-    <ReferenceFromRuntime Include="Microsoft.CSharp" />
-    <ReferenceFromRuntime Include="System.Runtime.Extensions" />
-    <ReferenceFromRuntime Include="System.Private.Uri" />
-    <ReferenceFromRuntime Include="System.Text.RegularExpressions" />
-    <ReferenceFromRuntime Include="System.Diagnostics.Debug" />
-    <ReferenceFromRuntime Include="System.ObjectModel" />
-    <ReferenceFromRuntime Include="System.Threading.Thread" />
-    <ReferenceFromRuntime Include="System.Threading.Tasks" />
-    <ReferenceFromRuntime Include="System.Linq" />
-    <ReferenceFromRuntime Include="System.Linq.Queryable" />
-    <ReferenceFromRuntime Include="System.Reflection" />
-    <ReferenceFromRuntime Include="System.IO.FileSystem" />
-    <ReferenceFromRuntime Include="System.Runtime.InteropServices.RuntimeInformation" />
-    <ReferenceFromRuntime Include="System.Runtime.InteropServices" />
-    <ReferenceFromRuntime Include="System.Private.Interop" Condition="'$(TargetGroup)' == 'uapaot'" />
-    <ReferenceFromRuntime Include="netstandard" />
-  </ItemGroup>
-  <ItemGroup>
-    <AdditionalCodeCoverageAssemblies Include="Microsoft.CSharp" />
+    <AssembliesBeingTested Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CompilerTests.cs" />
@@ -282,17 +241,12 @@
     <Compile Include="ILReader\PrivateReflectionHelpers.cs" />
     <Compile Include="ILReader\LocalsSignatureParser.cs" />
     <Compile Include="ILReader\SigParser.cs" />
-  </ItemGroup>
-  <!-- DebuggerAttribute tests require internal framework Reflection and will not work on AoT platforms.
-       The proper way to test these is via the debugger expression evaluator, not Reflection. -->
-  <ItemGroup Condition="'$(TargetGroup)'!='uapaot'">
     <Compile Include="DebugViewTests.cs" />
     <Compile Include="DebuggerTypeProxy\ExpressionDebuggerTypeProxyTests.cs" />
     <Compile Include="Dynamic\BindingRestrictionsProxyTests.cs" />
     <Compile Include="Dynamic\ExpandoObjectProxyTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ReferenceFromRuntime Include="xunit.execution.dotnet" />
+    <PackageReference Include="xunit.extensibility.execution" Version="$(XUnitPackageVersion)" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

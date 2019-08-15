@@ -15,8 +15,8 @@ namespace System.Xml
 {
     public class XmlBinaryWriterSession
     {
-        private PriorityDictionary<string, int> _strings;
-        private PriorityDictionary<IXmlDictionary, IntArray> _maps;
+        private readonly PriorityDictionary<string, int> _strings;
+        private readonly PriorityDictionary<IXmlDictionary, IntArray> _maps;
         private int _nextKey;
 
         public XmlBinaryWriterSession()
@@ -39,7 +39,7 @@ namespace System.Xml
                 if (key != -1)
                 {
                     // If the key is already set, then something is wrong
-                    throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(SR.Format(SR.XmlKeyAlreadyExists)));
+                    throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(SR.XmlKeyAlreadyExists));
                 }
 
                 key = Add(value.Value);
@@ -105,7 +105,7 @@ namespace System.Xml
         private class PriorityDictionary<K, V> where K : class
         {
             private Dictionary<K, V> _dictionary;
-            private Entry[] _list;
+            private readonly Entry[] _list;
             private int _listCount;
             private int _now;
 

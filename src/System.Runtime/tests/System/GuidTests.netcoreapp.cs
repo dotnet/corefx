@@ -41,17 +41,18 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData("Y")]
-        [InlineData("XX")]
+        [MemberData(nameof(InvalidFormat_TestData))]
         public static void TryFormat_InvalidFormat_ThrowsFormatException(string format)
         {
             Assert.Throws<FormatException>(() => s_testGuid.TryFormat(new Span<char>(), out int charsWritten, format));
+            Assert.Throws<FormatException>(() => s_testGuid.TryFormat(new Span<char>(), out int charsWritten, format.ToUpperInvariant()));
         }
 
         [Theory]
         [MemberData(nameof(ToString_TestData))]
         public static void TryFormat_LengthTooSmall_ReturnsFalse(Guid guid, string format, string expected)
         {
+            _ = expected;
             Assert.False(guid.TryFormat(new Span<char>(new char[guid.ToString(format).Length - 1]), out int charsWritten, format));
             Assert.Equal(0, charsWritten);
         }
@@ -60,6 +61,7 @@ namespace System.Tests
         [MemberData(nameof(ToString_TestData))]
         public static void TryFormat_CharsWritten_EqualsZero_WhenSpanTooSmall(Guid guid, string format, string expected)
         {
+            _ = expected;
             Assert.False(guid.TryFormat(new Span<char>(new char[guid.ToString(format).Length - 1]), out int charsWritten, format));
             Assert.Equal(0, charsWritten);
         }

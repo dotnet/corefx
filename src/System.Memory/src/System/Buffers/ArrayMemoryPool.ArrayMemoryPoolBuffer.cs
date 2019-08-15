@@ -2,21 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Runtime.InteropServices;
-
-#if !netstandard
-using Internal.Runtime.CompilerServices;
-#else
-using System.Runtime.CompilerServices;
-#endif
-
 namespace System.Buffers
 {
     internal sealed partial class ArrayMemoryPool<T> : MemoryPool<T>
     {
         private sealed class ArrayMemoryPoolBuffer : IMemoryOwner<T>
         {
-            private T[] _array;
+            private T[]? _array;
 
             public ArrayMemoryPoolBuffer(int size)
             {
@@ -27,7 +19,7 @@ namespace System.Buffers
             {
                 get
                 {
-                    T[] array = _array;
+                    T[]? array = _array;
                     if (array == null)
                     {
                         ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
@@ -39,7 +31,7 @@ namespace System.Buffers
 
             public void Dispose()
             {
-                T[] array = _array;
+                T[]? array = _array;
                 if (array != null)
                 {
                     _array = null;

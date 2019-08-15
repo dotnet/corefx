@@ -8,9 +8,8 @@ Building CoreFX on FreeBSD, Linux and OS X
 4. Run the build script `./build.sh`
 
 Calling the script `build.sh` builds both the native and managed code.
-Only use it when the parameters that you are passing to the script apply for both components. Otherwise, use the scripts `build-native.sh` and `build-managed.sh` respectively.
 
-For more information about the different options when building, run `build.sh -?` and look at examples in the [developer-guide](../project-docs/developer-guide.md).
+For more information about the different options when building, run `build.sh --help` and look at examples in the [developer-guide](../project-docs/developer-guide.md).
 
 ## Minimum Hardware Requirements
 - 2GB RAM
@@ -52,17 +51,33 @@ For Ubuntu 14.04, install the following packages:
 `sudo apt-get install libunwind8 libicu52 curl`
 
 For Ubuntu 16.04 LTS / Bash on Ubuntu on Windows you may need to replace libicu52 with libicu55.
-Ubuntu 16.10 and Ubuntu 17.04 will require libicu57. 
+Ubuntu 16.10 and Ubuntu 17.04 will require libicu57.
 
 `sudo apt-get install libunwind8 libicu55 curl`
 
-Ubuntu 18 will also need compatibility OpenSSL 1.0.x
+For Ubuntu 18.04, you will also need to replace libicu52 with libicu60 and install libssl1.0-dev_1.0.2n-1ubuntu5.1_amd64.deb with dpkg-deb.
 
-`sudo apt-get install libunwind8 libicu60 libssl1.0-dev curl`
+```sh
+sudo apt-get install libunwind8 libicu60 curl
+apt-get download libssl1.0-dev
+sudo dpkg-deb -X libssl1.0-dev_1.0.2n-1ubuntu5.1_amd64.deb /
+```
 
 In addition to the above packages, the runtime versions of the packages listed
 in the native section should also be installed (this happens automatically on
 most systems when you install the development packages).
+
+### Windows Subsystem For Linux
+
+Generally building and testing should work fine on Windows Subsystem for Linux (WSL) and it can be convenient if you primarily work on Windows and want to run tests sometimes on Linux. 
+
+There is one caveat: you must set the LANG in your shell to something other than the default. For example,
+```sh
+export LANG=en_US.UTF-8
+```
+Otherwise you may get errors like `PackagingException: File not found: '/home/dan/git/corefx/LICENSE.TXT'`. More info in [this issue](https://github.com/dotnet/corefx/issues/38608). It is possible this may occur on other distros, if LANG is set as above.
+
+We have not tested on WSL2 yet. If you try it out, we'd welcome an update.
 
 ### macOS
 
@@ -106,25 +121,6 @@ ln -s /usr/local/opt/openssl/lib/pkgconfig/libssl.pc /usr/local/lib/pkgconfig/
 ln -s /usr/local/opt/openssl/lib/pkgconfig/openssl.pc /usr/local/lib/pkgconfig/
 ```
 
-Alternatively, to avoid modifying /usr/local/ you can invoke cmake with the `OPENSSL_ROOT_DIR` env var set. The value to be passed in the directory where openssl is installed. Use `brew info openssl` to determine it. For example:
-
-```
-$brew info openssl
-openssl: stable 1.0.2l (bottled) [keg-only]
-SSL/TLS cryptography library
-https://openssl.org/
-/usr/local/Cellar/openssl/1.0.1f (1,229 files, 10.8MB)
-  Poured from bottle on 2014-01-20 at 19:25:30
-/usr/local/Cellar/openssl/1.0.1g (1,229 files, 10.6MB)
-  Poured from bottle on 2014-04-07 at 11:26:41
-```
-
-With the above example, we'd pick the latest version `1.0.1g` and invoke cmake like the following:
-
-```
-OPENSSL_ROOT_DIR="/usr/local/Cellar/openssl/1.0.1g cmake
-```
-
 ### Known Issues
 If you see errors along the lines of `SendFailure (Error writing headers)` you may need to import trusted root certificates:
 
@@ -132,4 +128,3 @@ If you see errors along the lines of `SendFailure (Error writing headers)` you m
 mozroots --import --sync
 ```
 
-Bash on Ubuntu on Windows issues are tracked by: [#11057](https://github.com/dotnet/corefx/issues/11057)

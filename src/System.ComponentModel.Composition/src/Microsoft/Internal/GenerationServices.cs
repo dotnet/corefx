@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -18,19 +19,19 @@ namespace Microsoft.Internal
 
         // typeofs are pretty expensive, so we cache them statically
         private static readonly Type TypeType = typeof(System.Type);
-        private static readonly Type StringType = typeof(System.String);
-        private static readonly Type CharType = typeof(System.Char);
-        private static readonly Type BooleanType = typeof(System.Boolean);
-        private static readonly Type ByteType = typeof(System.Byte);
-        private static readonly Type SByteType = typeof(System.SByte);
-        private static readonly Type Int16Type = typeof(System.Int16);
-        private static readonly Type UInt16Type = typeof(System.UInt16);
-        private static readonly Type Int32Type = typeof(System.Int32);
-        private static readonly Type UInt32Type = typeof(System.UInt32);
-        private static readonly Type Int64Type = typeof(System.Int64);
-        private static readonly Type UInt64Type = typeof(System.UInt64);
-        private static readonly Type DoubleType = typeof(System.Double);
-        private static readonly Type SingleType = typeof(System.Single);
+        private static readonly Type StringType = typeof(string);
+        private static readonly Type CharType = typeof(char);
+        private static readonly Type BooleanType = typeof(bool);
+        private static readonly Type ByteType = typeof(byte);
+        private static readonly Type SByteType = typeof(sbyte);
+        private static readonly Type Int16Type = typeof(short);
+        private static readonly Type UInt16Type = typeof(ushort);
+        private static readonly Type Int32Type = typeof(int);
+        private static readonly Type UInt32Type = typeof(uint);
+        private static readonly Type Int64Type = typeof(long);
+        private static readonly Type UInt64Type = typeof(ulong);
+        private static readonly Type DoubleType = typeof(double);
+        private static readonly Type SingleType = typeof(float);
         private static readonly Type IEnumerableTypeofT = typeof(System.Collections.Generic.IEnumerable<>);
         private static readonly Type IEnumerableType = typeof(System.Collections.IEnumerable);
 
@@ -65,13 +66,10 @@ namespace Microsoft.Internal
         /// 7. Delegates on static functions or any of the above
         /// Everything else cannot be represented as literals
         /// <param name="ilGenerator"></param>
-        /// <param name="item"></param>
-        /// <param name="key"></param>
         /// <param name="value"></param>
-        /// <returns></returns>
         public static void LoadValue(this ILGenerator ilGenerator, object value)
         {
-            Assumes.NotNull(ilGenerator);
+            Debug.Assert(ilGenerator != null);
 
             //
             // Get nulls out of the way - they are basically typeless, so we just load null
@@ -130,7 +128,7 @@ namespace Microsoft.Internal
             else if (valueType == GenerationServices.UInt32Type)
             {
                 // NOTE : This one is a bit tricky. Ldc.I4 takes an Int32 as an argument, although it really treats it as a 32bit number
-                // That said, some UInt32 values are larger that Int32.MaxValue, so the Convert call above will fail, which is why 
+                // That said, some UInt32 values are larger that Int32.MaxValue, so the Convert call above will fail, which is why
                 // we need to treat this case individually and cast to uint, and then - unchecked - to int.
                 ilGenerator.LoadInt(unchecked((int)((uint)rawValue)));
             }
@@ -156,7 +154,7 @@ namespace Microsoft.Internal
             else
             {
                 throw new InvalidOperationException(
-                    string.Format(CultureInfo.CurrentCulture, SR.InvalidMetadataValue, value.GetType().FullName));
+                    SR.Format(SR.InvalidMetadataValue, value.GetType().FullName));
             }
         }
 
@@ -165,13 +163,24 @@ namespace Microsoft.Internal
         /// <param name="dictionary"></param>
         /// <param name="key"></param>
         /// <param name="value"></param>
-        /// <returns></returns>
         public static void AddItemToLocalDictionary(this ILGenerator ilGenerator, LocalBuilder dictionary, object key, object value)
         {
-            Assumes.NotNull(ilGenerator);
-            Assumes.NotNull(dictionary);
-            Assumes.NotNull(key);
-            Assumes.NotNull(value);
+            Debug.Assert(ilGenerator != null);
+
+            if (dictionary == null)
+            {
+                throw new ArgumentNullException(nameof(dictionary));
+            }
+
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
 
             ilGenerator.Emit(OpCodes.Ldloc, dictionary);
             ilGenerator.LoadValue(key);
@@ -184,13 +193,24 @@ namespace Microsoft.Internal
         /// <param name="dictionary"></param>
         /// <param name="key"></param>
         /// <param name="value"></param>
-        /// <returns></returns>
         public static void AddLocalToLocalDictionary(this ILGenerator ilGenerator, LocalBuilder dictionary, object key, LocalBuilder value)
         {
-            Assumes.NotNull(ilGenerator);
-            Assumes.NotNull(dictionary);
-            Assumes.NotNull(key);
-            Assumes.NotNull(value);
+            Debug.Assert(ilGenerator != null);
+
+            if (dictionary == null)
+            {
+                throw new ArgumentNullException(nameof(dictionary));
+            }
+
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
 
             ilGenerator.Emit(OpCodes.Ldloc, dictionary);
             ilGenerator.LoadValue(key);
@@ -200,15 +220,21 @@ namespace Microsoft.Internal
 
         /// Generates the code to get the type of an object and store it in a local
         /// <param name="ilGenerator"></param>
-        /// <param name="dictionary"></param>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
+        /// <param name="exception"></param>
+        /// <param name="dataStore"></param>
         public static void GetExceptionDataAndStoreInLocal(this ILGenerator ilGenerator, LocalBuilder exception, LocalBuilder dataStore)
         {
-            Assumes.NotNull(ilGenerator);
-            Assumes.NotNull(exception);
-            Assumes.NotNull(dataStore);
+            Debug.Assert(ilGenerator != null);
+
+            if (exception == null)
+            {
+                throw new ArgumentNullException(nameof(exception));
+            }
+
+            if (dataStore == null)
+            {
+                throw new ArgumentNullException(nameof(dataStore));
+            }
 
             ilGenerator.Emit(OpCodes.Ldloc, exception);
             ilGenerator.Emit(OpCodes.Callvirt, ExceptionGetData);
@@ -217,8 +243,12 @@ namespace Microsoft.Internal
 
         private static void LoadEnumerable(this ILGenerator ilGenerator, IEnumerable enumerable)
         {
-            Assumes.NotNull(ilGenerator);
-            Assumes.NotNull(enumerable);
+            Debug.Assert(ilGenerator != null);
+
+            if (enumerable == null)
+            {
+                throw new ArgumentNullException(nameof(enumerable));
+            }
 
             // We load enumerable as an array - this is the most compact and efficient way of representing it
             Type elementType = null;
@@ -281,7 +311,8 @@ namespace Microsoft.Internal
 
         private static void LoadString(this ILGenerator ilGenerator, string s)
         {
-            Assumes.NotNull(ilGenerator);
+            Debug.Assert(ilGenerator != null);
+
             if (s == null)
             {
                 ilGenerator.LoadNull();
@@ -294,31 +325,36 @@ namespace Microsoft.Internal
 
         private static void LoadInt(this ILGenerator ilGenerator, int value)
         {
-            Assumes.NotNull(ilGenerator);
+            Debug.Assert(ilGenerator != null);
+
             ilGenerator.Emit(OpCodes.Ldc_I4, value);
         }
 
         private static void LoadLong(this ILGenerator ilGenerator, long value)
         {
-            Assumes.NotNull(ilGenerator);
+            Debug.Assert(ilGenerator != null);
+
             ilGenerator.Emit(OpCodes.Ldc_I8, value);
         }
 
         private static void LoadFloat(this ILGenerator ilGenerator, float value)
         {
-            Assumes.NotNull(ilGenerator);
+            Debug.Assert(ilGenerator != null);
+
             ilGenerator.Emit(OpCodes.Ldc_R4, value);
         }
 
         private static void LoadDouble(this ILGenerator ilGenerator, double value)
         {
-            Assumes.NotNull(ilGenerator);
+            Debug.Assert(ilGenerator != null);
+
             ilGenerator.Emit(OpCodes.Ldc_R8, value);
         }
 
         private static void LoadTypeOf(this ILGenerator ilGenerator, Type type)
         {
-            Assumes.NotNull(ilGenerator);
+            Debug.Assert(ilGenerator != null);
+
             //typeofs() translate into ldtoken and Type::GetTypeFromHandle call
             ilGenerator.Emit(OpCodes.Ldtoken, type);
             ilGenerator.EmitCall(OpCodes.Call, GenerationServices._typeGetTypeFromHandleMethod, null);

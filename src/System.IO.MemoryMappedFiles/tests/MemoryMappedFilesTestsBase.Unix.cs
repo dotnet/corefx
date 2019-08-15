@@ -13,7 +13,7 @@ namespace System.IO.MemoryMappedFiles.Tests
     public abstract partial class MemoryMappedFilesTestBase : FileCleanupTestBase
     {
         /// <summary>Gets the system's page size.</summary>
-        protected static Lazy<int> s_pageSize = new Lazy<int>(() => 
+        protected static Lazy<int> s_pageSize = new Lazy<int>(() =>
         {
             int pageSize;
             const int _SC_PAGESIZE_FreeBSD = 47;
@@ -25,7 +25,7 @@ namespace System.IO.MemoryMappedFiles.Tests
                 RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD")) ? _SC_PAGESIZE_FreeBSD :
                 RuntimeInformation.IsOSPlatform(OSPlatform.Create("NETBSD")) ? _SC_PAGESIZE_NetBSD :
                 _SC_PAGESIZE_Linux);
-            Assert.InRange(pageSize, 1, Int32.MaxValue);
+            Assert.InRange(pageSize, 1, int.MaxValue);
             return pageSize;
         });
 

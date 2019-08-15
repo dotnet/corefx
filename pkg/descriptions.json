@@ -1,10 +1,5 @@
 [
   {
-    "Name": "CoreFx.Private.TestUtilities",
-    "Description": "Private package, which provides testing utility classes. The package is meant to be used when running CoreFX tests on a runtime.",
-    "CommonTypes": []
-  },
-  {
     "Name": "RuntimePackage",
     "Description": "Internal implementation package not meant for direct consumption.  Please do not reference directly.",
     "CommonTypes": []
@@ -28,6 +23,13 @@
       "Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo",
       "Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags",
       "Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags"
+    ]
+  },
+  {
+    "Name": "Microsoft.Bcl.HashCode",
+    "Description": "Provides the HashCode type for .NET Standard 2.0. This package is not required starting with .NET Standard 2.1 and .NET Core 3.0.",
+    "CommonTypes": [
+      "System.HashCode"
     ]
   },
   {
@@ -64,6 +66,11 @@
     "CommonTypes": []
   },
   {
+    "Name": "Microsoft.NETCore.Platforms.Future",
+    "Description": "Provides runtime information required to resolve target framework, platform, and runtime specific implementations of .NETCore packages.  This package represents future platforms not yet supported in .NETCore stable release and is subject to change.",
+    "CommonTypes": []
+  },
+  {
     "Name": "Microsoft.NETCore.Portable.Compatibility",
     "Description": "Enables compatibility with portable libraries targeting previous .NET releases like .NET Framework 4.0 and Silverlight.\nThis package supports retargeting references to classic reference assemblies (mscorlib.dll, system.dll, etc) to new contract assemblies (System.Runtime.dll, System.IO, etc).  It does this in a pay-for-play way to prevent consuming assemblies from having to reference all of the contracts that happen to overlap with mscorlib.  As such, when using this package you may encounter errors like\n\terror CS0012: The type 'WebRequest' is defined in an assembly that is not referenced. You must add a reference to assembly 'System.Net.Requests, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.\nTo resolve these errors install the package with the same name as the missing assembly.",
     "CommonTypes": []
@@ -86,11 +93,6 @@
   {
     "Name": "Microsoft.NETCore.Runtime.CoreCLR",
     "Description": "The .NET Core runtime, called CoreCLR, and the base library, called mscorlib. It includes the garbage collector, JIT compiler, base .NET data types and many low-level classes.",
-    "CommonTypes": []
-  },
-  {
-    "Name": "Microsoft.NETCore.Runtime.Native",
-    "Description": "Support libraries for the .NET Core runtime used by .NETNative.",
     "CommonTypes": []
   },
   {
@@ -144,6 +146,11 @@
     "CommonTypes": []
   },
   {
+    "Name": "Microsoft.Private.CoreFx.OOB",
+    "Description": "Package used to represent out-of-band packages that are not included in NetCoreApp.",
+    "CommonTypes": []
+  },
+  {
     "Name": "Microsoft.Private.CoreFx.UAP",
     "Description": "Package used to represent the portions of UAP that come from CoreFx.",
     "CommonTypes": []
@@ -159,12 +166,7 @@
     "CommonTypes": []
   },
   {
-    "Name": "Microsoft.TargetingPack.Private.NETNative",
-    "Description": "Contains a private targeting pack which contains only the System.Private.* libraries that ship with the .NET Native ILC toolchain. Used for producing platform specific libraries such as facades.",
-    "CommonTypes": []
-  },
-  {
-    "Name": "Microsoft.VisualBasic",
+    "Name": "Microsoft.VisualBasic.Core",
     "Description": "Provides types that support the Visual Basic runtime",
     "CommonTypes": [
       "Microsoft.VisualBasic.Strings",
@@ -373,6 +375,18 @@
     ]
   },
   {
+    "Name": "System.ComponentModel.Composition.Registration",
+    "Description": "This namespace provides classes that constitute the core of the Managed Extensibility Framework, or MEF.",
+    "CommonTypes": [
+      "System.ComponentModel.Composition.Registration.RegistrationBuilder",
+      "System.ComponentModel.Composition.Registration.PartBuilder",
+      "System.ComponentModel.Composition.Registration.PartBuilder<T>",
+      "System.ComponentModel.Composition.Registration.ParameterImportBuilder",
+      "System.ComponentModel.Composition.Registration.ImportBuilder",
+      "System.ComponentModel.Composition.Registration.ExportBuilder"
+    ]
+  },
+  {
     "Name": "System.ComponentModel.EventBasedAsync",
     "Description": "Provides support classes and delegates for the event-based asynchronous pattern. Developers should prefer the classes in the System.Threading.Tasks package.",
     "CommonTypes": [
@@ -521,6 +535,20 @@
         "System.Data.Odbc.OdbcParameter",
         "System.Data.Odbc.OdbcParameterCollection",
         "System.Data.Odbc.OdbcTransaction"
+    ]
+  },
+  {
+    "Name": "System.Data.OleDb",
+    "Description": "Provides a collection of classes for OLEDB.",
+    "CommonTypes": [
+        "System.Data.OleDb.OleDbCommand",
+        "System.Data.OleDb.OleDbCommandBuilder",
+        "System.Data.OleDb.OleDbConnection",
+        "System.Data.OleDb.OleDbDataAdapter",
+        "System.Data.OleDb.OleDbDataReader",
+        "System.Data.OleDb.OleDbParameter",
+        "System.Data.OleDb.OleDbParameterCollection",
+        "System.Data.OleDb.OleDbTransaction"
     ]
   },
   {
@@ -1020,8 +1048,18 @@
         "System.ReadOnlyMemory",
         "System.Buffers.MemoryPool",
         "System.Buffers.ReadOnlySequence",
+        "System.Buffers.SequenceReader",
         "System.Buffers.Text.Utf8Parser",
         "System.Buffers.Text.Utf8Formatter"
+    ]
+  },
+  {
+    "Name": "Microsoft.Bcl.AsyncInterfaces",
+    "Description": "Provides the IAsyncEnumerable<T> and IAsyncDisposable interfaces and helper types for .NET Standard 2.0. This package is not required starting with .NET Standard 2.1 and .NET Core 3.0.",
+    "CommonTypes": [
+      "System.IAsyncDisposable",
+      "System.Collections.Generic.IAsyncEnumerable",
+      "System.Collections.Generic.IAsyncEnumerator"
     ]
   },
   {
@@ -1218,18 +1256,13 @@
     ]
   },
   {
-    "Name": "System.Numerics.Vectors",
-    "Description": "Provides hardware-accelerated numeric types, suitable for high-performance processing and graphics applications.",
+    "Name": "System.Numerics.Tensors",
+    "Description": "Tensor class which represents and extends multi-dimensional arrays.",
     "CommonTypes": [
-      "System.Numerics.Matrix3x2",
-      "System.Numerics.Matrix4x4",
-      "System.Numerics.Plane",
-      "System.Numerics.Quaternion",
-      "System.Numerics.Vector2",
-      "System.Numerics.Vector3",
-      "System.Numerics.Vector4",
-      "System.Numerics.Vector",
-      "System.Numerics.Vector<T>"
+      "System.Numerics.Tensors.Tensor<T>",
+      "System.Numerics.Tensors.CompressedSparseTensor<T>",
+      "System.Numerics.Tensors.DenseTensor<T>",
+      "System.Numerics.Tensors.SparseTensor<T>"
     ]
   },
   {
@@ -1360,6 +1393,14 @@
     ]
   },
   {
+    "Name": "System.Reflection.MetadataLoadContext",
+    "Description": "Provides read-only reflection on assemblies in an isolated context with support for assemblies that have different architectures and runtimes.",
+    "CommonTypes": [
+        "System.Reflection.MetadataLoadContext",
+        "System.Reflection.MetadataAssemblyResolver"
+    ]
+  },
+  {
     "Name": "System.Reflection.Primitives",
     "Description": "Provides common enumerations for reflection-based libraries.",
     "CommonTypes": [
@@ -1391,6 +1432,14 @@
       "System.Resources.NeutralResourcesLanguageAttribute",
       "System.Resources.SatelliteContractVersionAttribute",
       "System.Resources.MissingManifestResourceException"
+    ]
+  }, 
+  {
+    "Name": "System.Resources.Extensions",
+    "Description": "Provides classes which read and write resources in a format that supports non-primitive objects.",
+    "CommonTypes": [
+        "System.Resources.Extensions.DeserializingResourceReader",
+        "System.Resources.Extensions.PreserializedResourceWriter"
     ]
   },
   {
@@ -1489,6 +1538,13 @@
     ]
   },
   {
+    "Name": "System.Runtime.Intrinsics.Experimental",
+    "Description": "Provides APIs for accessing processor specific instructions.",
+    "CommonTypes": [
+        "System.Runtime.Intrinsics.Arm.Arm64"
+    ]
+  },
+  {
     "Name": "System.Runtime.Handles",
     "Description": "Provides base classes, including System.Runtime.InteropServices.CriticalHandle and System.Runtime.InteropServices.SafeHandle, for types that represent operating system handles.",
     "CommonTypes": [
@@ -1526,14 +1582,6 @@
       "System.Runtime.InteropServices.WindowsRuntime.ReadOnlyArrayAttribute",
       "System.Runtime.InteropServices.WindowsRuntime.WriteOnlyArrayAttribute",
       "System.Runtime.InteropServices.WindowsRuntime.ReturnValueNameAttribute"
-    ]
-  },
-  {
-    "Name": "System.Runtime.Intrinsics.Experimental",
-    "Description": "Provides APIs to processor specific instructions.",
-    "CommonTypes": [
-        "System.Runtime.Intrinsics.Vector128<>",
-        "System.Runtime.Intrinsics.Vector256<>"
     ]
   },
   {
@@ -1941,6 +1989,17 @@
     ]
   },
   {
+    "Name": "System.Text.Json",
+    "Description": "Provides high-performance and low-allocating types that serialize objects to JavaScript Object Notation (JSON) text and deserialize JSON text to objects, with UTF-8 support built-in. Also provides types to read and write JSON text encoded as UTF-8, and to create an in-memory document object model (DOM), that is read-only, for random access of the JSON elements within a structured view of the data.",
+    "CommonTypes": [
+      "System.Text.Json.JsonSerializer",
+      "System.Text.Json.JsonDocument",
+      "System.Text.Json.JsonElement",
+      "System.Text.Json.Utf8JsonWriter",
+      "System.Text.Json.Utf8JsonReader"
+    ]
+  },
+  {
     "Name": "System.Text.RegularExpressions",
     "Description": "Provides the System.Text.RegularExpressions.Regex class, an implementation of a regular expression engine.",
     "CommonTypes": [
@@ -2086,6 +2145,14 @@
     ]
   },
   {
+    "Name": "System.Utf8String.Experimental",
+    "Description": "Provides types for representation of UTF-8 string data.",
+    "CommonTypes": [
+        "System.Char8",
+        "System.Utf8String"
+    ]
+  },
+  {
     "Name": "System.ValueTuple",
     "Description": "Provides the System.ValueTuple structs, which implement the underlying types for tuples in C# and Visual Basic.",
     "CommonTypes": [
@@ -2105,6 +2172,14 @@
     "Description": "Provides the System.Web.HttpUtility class for encoding and decoding various web formats.",
     "CommonTypes": [
       "System.Web.HttpUtility"
+    ]
+  },
+  {
+    "Name": "System.Windows.Extensions",
+    "Description": "Provides miscellaneous Windows-specific types",
+    "CommonTypes":[
+      "System.Security.Cryptography.X509Certificates.X509Certificate2UI",
+      "System.Security.Cryptography.X509Certificates.X509SelectionFlag"
     ]
   },
   {
@@ -2231,5 +2306,10 @@
     "CommonTypes": [
       "System.Xml.XPath.XmlDocumentExtensions"
     ]
+  },
+  {
+    "Name": "Microsoft.IO.Redist",
+    "Description": "Downlevel support package for System.IO classes.",
+    "CommonTypes": []
   }
 ]

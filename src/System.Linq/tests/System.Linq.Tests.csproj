@@ -1,24 +1,16 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{7C70BB15-870B-4946-8098-625DACD645A6}</ProjectGuid>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp'">
+  <ItemGroup>
     <Compile Include="AppendPrependTests.cs" />
     <Compile Include="SkipLastTests.cs" />
     <Compile Include="TakeLastTests.cs" />
     <Compile Include="OrderByTests.cs" />
     <Compile Include="ToHashSetTests.cs" />
     <Compile Include="SelectManyTests.netcoreapp.cs" />
-  </ItemGroup>
-  <ItemGroup>
+    <Compile Include="ZipTests.netcoreapp.cs" />
     <Compile Include="AggregateTests.cs" />
     <Compile Include="AllTests.cs" />
     <Compile Include="AnyTests.cs" />
@@ -79,10 +71,6 @@
     <Compile Include="$(CommonTestPath)\System\Linq\SkipTakeData.cs">
       <Link>Common\System\Linq\SkipTakeData.cs</Link>
     </Compile>
-  </ItemGroup>
-  <!-- DebuggerAttribute tests require internal framework Reflection and will not work on AoT platforms.
-       The proper way to test these is via the debugger expression evaluator, not Reflection. -->
-  <ItemGroup Condition="'$(TargetGroup)'!='uapaot'">
     <Compile Include="$(CommonTestPath)\System\Diagnostics\DebuggerAttributes.cs">
       <Link>Common\System\Diagnostics\DebuggerAttributes.cs</Link>
     </Compile>
@@ -90,8 +78,4 @@
     <Compile Include="ToLookupTests.DebuggerAttributes.cs" />
     <Compile Include="EnumerableDebugViewTests.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
-  </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

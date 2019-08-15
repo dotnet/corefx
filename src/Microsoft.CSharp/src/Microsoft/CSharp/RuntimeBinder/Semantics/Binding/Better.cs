@@ -139,7 +139,7 @@ LAgain:
                     switch (type1.TypeKind)
                     {
                         default:
-                            Debug.Assert(false, "Bad kind in CompareTypes");
+                            Debug.Fail("Bad kind in CompareTypes");
                             break;
                         case TypeKind.TK_TypeParameterType:
                             break;
@@ -188,7 +188,7 @@ LAgain:
         }
 
         ////////////////////////////////////////////////////////////////////////////////
-        // We need to rearange the method parameters so that the type of any specified named argument
+        // We need to rearrange the method parameters so that the type of any specified named argument
         // appears in the same place as the named argument. Consider the example below:
         //    Foo(int x = 4, string y = "", long l = 4)
         //    Foo(string y = "", string x="", long l = 5)
@@ -221,7 +221,7 @@ LAgain:
             CType[] typeList = new CType[pta.Count];
             MethodOrPropertySymbol methProp = GroupToArgsBinder.FindMostDerivedMethod(mpwi.MethProp(), type);
 
-            // We initialize the new type array with the parameters for the method. 
+            // We initialize the new type array with the parameters for the method.
             for (int iParam = 0; iParam < pta.Count; iParam++)
             {
                 typeList[iParam] = pta[iParam];
@@ -375,7 +375,7 @@ LAgain:
                 }
 
                 // Here, if both methods needed to use optionals to fill in the signatures,
-                // then we are ambiguous. Otherwise, take the one that didn't need any 
+                // then we are ambiguous. Otherwise, take the one that didn't need any
                 // optionals.
 
                 if (pta1.Count == carg)
@@ -475,7 +475,7 @@ LAgain:
         }
 
         ////////////////////////////////////////////////////////////////////////////////
-        // Determine best method for overload resolution. Returns null if no best 
+        // Determine best method for overload resolution. Returns null if no best
         // method, in which case two tying methods are returned for error reporting.
         private CandidateFunctionMember FindBestMethod(
             List<CandidateFunctionMember> list,

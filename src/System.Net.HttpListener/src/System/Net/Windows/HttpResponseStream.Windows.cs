@@ -49,7 +49,7 @@ namespace System.Net
         }
 
         private void WriteCore(byte[] buffer, int offset, int size)
-        {            
+        {
             Interop.HttpApi.HTTP_FLAGS flags = ComputeLeftToWrite();
             if (size == 0 && _leftToWrite != 0)
             {
@@ -305,7 +305,7 @@ namespace System.Net
             }
 
             uint statusCode = 0;
-            if ((_httpContext.Response.BoundaryType == BoundaryType.Chunked || _httpContext.Response.BoundaryType == BoundaryType.None) && (String.Compare(_httpContext.Request.HttpMethod, "HEAD", StringComparison.OrdinalIgnoreCase) != 0))
+            if ((_httpContext.Response.BoundaryType == BoundaryType.Chunked || _httpContext.Response.BoundaryType == BoundaryType.None) && !string.Equals(_httpContext.Request.HttpMethod, "HEAD", StringComparison.OrdinalIgnoreCase))
             {
                 if (_httpContext.Response.BoundaryType == BoundaryType.None)
                 {

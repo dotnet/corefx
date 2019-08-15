@@ -69,7 +69,7 @@ namespace System.Diagnostics.TraceSourceTests
             return new WeakReference(new TraceSource("TestTraceSource"));
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public void PruneTest()
         {
             var strongTrace = new TraceSource("TestTraceSource");
@@ -202,17 +202,17 @@ namespace System.Diagnostics.TraceSourceTests
         }
 
         public TraceSourceTestsBase()
-        {            
+        {
             Trace.AutoFlush = AutoFlush;
             Trace.UseGlobalLock = UseGlobalLock;
         }
-        
+
         // properties are overridden to define different "modes" of execution
         internal virtual bool UseGlobalLock
         {
             get
             {
-                // ThreadSafeListener is only meaningful when not using a global lock, 
+                // ThreadSafeListener is only meaningful when not using a global lock,
                 // so UseGlobalLock will be auto-disabled in that mode.
                 return true && !ThreadSafeListener;
             }
@@ -283,7 +283,7 @@ namespace System.Diagnostics.TraceSourceTests
             var trace = new TraceSource("TestTraceSource", SourceLevels.All);
             var listener = GetTraceListener();
             trace.Listeners.Add(listener);
-            trace.TraceData(TraceEventType.Verbose, 0, new Object());
+            trace.TraceData(TraceEventType.Verbose, 0, new object());
             Assert.Equal(1, listener.GetCallCount(Method.TraceData));
             var flushExpected = AutoFlush ? 1 : 0;
             Assert.Equal(flushExpected, listener.GetCallCount(Method.Flush));
@@ -295,7 +295,7 @@ namespace System.Diagnostics.TraceSourceTests
             var trace = new TraceSource("TestTraceSource", SourceLevels.All);
             var listener = GetTraceListener();
             trace.Listeners.Add(listener);
-            trace.TraceData(TraceEventType.Verbose, 0, new Object[0]);
+            trace.TraceData(TraceEventType.Verbose, 0, new object[0]);
             Assert.Equal(1, listener.GetCallCount(Method.TraceData));
             var flushExpected = AutoFlush ? 1 : 0;
             Assert.Equal(flushExpected, listener.GetCallCount(Method.Flush));

@@ -48,8 +48,8 @@ internal static partial class Interop
         /// <remarks>For *nix systems, the CLR maps ANSI to UTF-8, so be explicit about that</remarks>
         [DllImport(Interop.Libraries.CoreFoundationLibrary, CharSet = CharSet.Ansi)]
         private static extern SafeCreateHandle CFStringCreateWithCString(
-            IntPtr allocator, 
-            string str, 
+            IntPtr allocator,
+            string str,
             CFStringBuiltInEncodings encoding);
 
         /// <summary>
@@ -115,19 +115,19 @@ internal static partial class Interop
 
         /// <summary>
         /// You should retain a Core Foundation object when you receive it from elsewhere
-        /// (that is, you did not create or copy it) and you want it to persist. If you 
+        /// (that is, you did not create or copy it) and you want it to persist. If you
         /// retain a Core Foundation object you are responsible for releasing it
         /// </summary>
         /// <param name="ptr">The CFType object to retain. This value must not be NULL</param>
-        /// <returns>The input value</param>
+        /// <returns>The input value</returns>
         [DllImport(Interop.Libraries.CoreFoundationLibrary)]
-        internal extern static IntPtr CFRetain(IntPtr ptr);
+        internal static extern IntPtr CFRetain(IntPtr ptr);
 
         /// <summary>
         /// Decrements the reference count on the specified object and, if the ref count hits 0, cleans up the object.
         /// </summary>
         /// <param name="ptr">The pointer on which to decrement the reference count.</param>
         [DllImport(Interop.Libraries.CoreFoundationLibrary)]
-        internal extern static void CFRelease(IntPtr ptr);
+        internal static extern void CFRelease(IntPtr ptr);
     }
 }

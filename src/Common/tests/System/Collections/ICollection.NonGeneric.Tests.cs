@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Text;
 using Xunit;
 
@@ -85,13 +84,6 @@ namespace System.Collections.Tests
         protected virtual bool ICollection_NonGeneric_HasNullSyncRoot => false;
 
         /// <summary>
-        /// Used for the ICollection_NonGeneric_SyncRootType_MatchesExcepted test. Most SyncRoots are created
-        /// using System.Threading.Interlocked.CompareExchange(ref _syncRoot, new Object(), null)
-        /// so we should test that the SyncRoot is the type we expect.
-        /// </summary>
-        protected virtual Type ICollection_NonGeneric_SyncRootType => typeof(object);
-
-        /// <summary>
         /// Used for the ICollection_NonGeneric_CopyTo_IndexLargerThanArrayCount_ThrowsArgumentException tests. Some
         /// implementations throw a different exception type (e.g. ArgumentOutOfRangeException).
         /// </summary>
@@ -107,7 +99,7 @@ namespace System.Collections.Tests
 
         #region IEnumerable Helper Methods
 
-        protected override IEnumerable<ModifyEnumerable> ModifyEnumerables => new List<ModifyEnumerable>();
+        protected override IEnumerable<ModifyEnumerable> GetModifyEnumerables(ModifyOperation operations) => new List<ModifyEnumerable>();
 
         protected override IEnumerable NonGenericIEnumerableFactory(int count) => NonGenericICollectionFactory(count);
 
@@ -148,22 +140,6 @@ namespace System.Collections.Tests
             {
                 Assert.Equal(ICollection_NonGeneric_HasNullSyncRoot, collection.SyncRoot == null);
                 Assert.Same(collection.SyncRoot, collection.SyncRoot);
-
-                if (!ICollection_NonGeneric_HasNullSyncRoot)
-                {
-                    Assert.IsType(ICollection_NonGeneric_SyncRootType, collection.SyncRoot);
-
-                    if (ICollection_NonGeneric_SyncRootType == collection.GetType())
-                    {
-                        // If we expect the SyncRoot to be the same type as the collection, 
-                        // the SyncRoot should be the same as the collection (e.g. HybridDictionary)
-                        Assert.Same(collection, collection.SyncRoot);
-                    }
-                    else
-                    {
-                        Assert.NotSame(collection, collection.SyncRoot);
-                    }
-                }
             }
             else
             {
@@ -208,19 +184,18 @@ namespace System.Collections.Tests
             }
         }
 
+#pragma warning disable xUnit1013 // xunit analyzer bug https://github.com/xunit/xunit/issues/1973
         [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNonZeroLowerBoundArraySupported))]
         [MemberData(nameof(ValidCollectionSizes))]
         public virtual void ICollection_NonGeneric_CopyTo_NonZeroLowerBound(int count)
         {
-            if (!PlatformDetection.IsNonZeroLowerBoundArraySupported)
-                return;
-
             ICollection collection = NonGenericICollectionFactory(count);
             Array arr = Array.CreateInstance(typeof(object), new int[1] { count }, new int[1] { 2 });
             Assert.Equal(1, arr.Rank);
             Assert.Equal(2, arr.GetLowerBound(0));
             Assert.Throws(ICollection_NonGeneric_CopyTo_NonZeroLowerBound_ThrowType, () => collection.CopyTo(arr, 0));
         }
+#pragma warning restore xUnit1013
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]

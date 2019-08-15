@@ -102,7 +102,7 @@ namespace System.Data.ProviderBase
         //-------------------
 
         // Indicator for infinite timeout when starting a timer
-        internal static readonly long InfiniteTimeout = 0;
+        internal const long InfiniteTimeout = 0;
 
         // Is this timer in an expired state?
         internal bool IsExpired
@@ -127,7 +127,7 @@ namespace System.Data.ProviderBase
         {
             get
             {
-                return (_isInfiniteTimeout) ? Int64.MaxValue : _timerExpire;
+                return (_isInfiniteTimeout) ? long.MaxValue : _timerExpire;
             }
         }
 
@@ -167,4 +167,3 @@ namespace System.Data.ProviderBase
         }
     }
 }
-

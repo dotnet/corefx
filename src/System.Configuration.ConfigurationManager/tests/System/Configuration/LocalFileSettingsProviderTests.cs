@@ -15,7 +15,8 @@ namespace System.ConfigurationTests
             ["SettingsKey"] = "SettingsKeyFoo"
         };
 
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotNetNativeRunningAsConsoleApp))]
+        [ActiveIssue(37364)]
+        [Fact]
         public void GetPropertyValues_NotStoredProperty_ValueEqualsNull()
         {
             var property = new SettingsProperty("PropertyName");
@@ -27,10 +28,11 @@ namespace System.ConfigurationTests
             SettingsPropertyValueCollection propertyValues = localFileSettingsProvider.GetPropertyValues(_testContext, properties);
 
             Assert.Equal(1, propertyValues.Count);
-            Assert.Equal(null, propertyValues["PropertyName"].PropertyValue);
+            Assert.Null(propertyValues["PropertyName"].PropertyValue);
         }
 
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotNetNativeRunningAsConsoleApp))]
+        [ActiveIssue(37364)]
+        [Fact]
         public void GetPropertyValues_NotStoredConnectionStringProperty_ValueEqualsEmptyString()
         {
             var property = new SettingsProperty("PropertyName");

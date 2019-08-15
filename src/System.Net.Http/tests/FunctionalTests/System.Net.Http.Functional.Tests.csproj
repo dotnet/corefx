@@ -1,28 +1,21 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{C85CF035-7804-41FF-9557-48B7C948B58D}</ProjectGuid>
-    <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
     <DefineConstants Condition="'$(TargetsWindows)'=='true'">$(DefineConstants);TargetsWindows</DefineConstants>
+    <DefineConstants>$(DefineConstants);SYSNETHTTP_NO_OPENSSL</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs" Condition="'$(TargetsUnix)' == 'true'">
       <Link>Common\Interop\Unix\System.Net.Http.Native\Interop.VersionInfo.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Http.Native\Interop.VersionInfo.cs" Condition="'$(TargetsUnix)' == 'true'">
       <Link>Common\Interop\Unix\System.Net.Http.Native\Interop.VersionInfo.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Security.Native\Interop.NetSecurityNative.IsNtlmInstalled.cs" Condition="'$(TargetsUnix)' == 'true'">
+      <Link>Common\Interop\Unix\System.Net.Security.Native\Interop.NetSecurityNative.IsNtlmInstalled.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Buffers\NativeMemoryManager.cs">
       <Link>Common\System\Buffers\NativeMemoryManager.cs</Link>
@@ -51,6 +44,12 @@
     <Compile Include="$(CommonTestPath)\System\Net\Capability.Security.cs">
       <Link>Common\System\Net\Capability.Security.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Capability.Security.Windows.cs" Condition="'$(TargetsWindows)' == 'true'">
+      <Link>Common\System\Net\Capability.Security.Windows.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Capability.Security.Unix.cs" Condition="'$(TargetsUnix)' == 'true'">
+      <Link>Common\System\Net\Capability.Security.Unix.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Configuration.cs">
       <Link>Common\System\Net\Configuration.cs</Link>
     </Compile>
@@ -66,14 +65,23 @@
     <Compile Include="$(CommonTestPath)\System\Net\VerboseTestLogging.cs">
       <Link>Common\System\Net\VerboseTestLogging.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Http\LoopbackProxyServer.cs">
+      <Link>Common\System\Net\Http\LoopbackProxyServer.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Http\LoopbackServer.cs">
       <Link>Common\System\Net\Http\LoopbackServer.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Http\LoopbackServer.AuthenticationHelpers.cs">
       <Link>Common\System\Net\Http\LoopbackServer.AuthenticationHelpers.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Http\GenericLoopbackServer.cs">
+      <Link>Common\System\Net\Http\GenericLoopbackServer.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\Threading\TrackingSynchronizationContext.cs">
       <Link>Common\System\Threading\TrackingSynchronizationContext.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Threading\Tasks\GetStateMachineData.cs">
+      <Link>Common\System\Threading\Tasks\GetStateMachineData.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Threading\Tasks\TaskTimeoutExtensions.cs">
       <Link>Common\System\Threading\Tasks\TaskTimeoutExtensions.cs</Link>
@@ -85,15 +93,21 @@
     <Compile Include="DelegatingHandlerTest.cs" />
     <Compile Include="FakeDiagnosticSourceListenerObserver.cs" />
     <Compile Include="FormUrlEncodedContentTest.cs" />
-    <Compile Include="HttpClientHandlerTest.Authentication.cs" />
+    <Compile Include="ByteAtATimeContent.cs" />
     <Compile Include="HttpClientHandlerTest.cs" />
+    <Compile Include="HttpClientHandlerTest.Asynchrony.cs" />
+    <Compile Include="HttpClientHandlerTest.Authentication.cs" />
+    <Compile Include="HttpClientHandlerTest.AutoRedirect.cs" />
     <Compile Include="HttpClientHandlerTest.Cancellation.cs" />
     <Compile Include="HttpClientHandlerTest.ClientCertificates.cs" />
-    <Compile Include="HttpClientHandlerTest.Asynchrony.cs" />
+    <Compile Include="HttpClientHandlerTest.Cookies.cs" />
     <Compile Include="HttpClientHandlerTest.DefaultProxyCredentials.cs" />
-    <Compile Include="HttpClientHandlerTest.ResponseDrain.cs" />
+    <Compile Include="HttpClientHandlerTest.Finalization.cs" />
+    <Compile Include="HttpClientHandlerTest.Headers.cs" />
     <Compile Include="HttpClientHandlerTest.MaxConnectionsPerServer.cs" />
     <Compile Include="HttpClientHandlerTest.MaxResponseHeadersLength.cs" />
+    <Compile Include="HttpClientHandlerTest.Proxy.cs" />
+    <Compile Include="HttpClientHandlerTest.ResponseDrain.cs" />
     <Compile Include="HttpClientHandlerTest.ServerCertificates.cs" />
     <Compile Include="HttpClientHandlerTest.ServerCertificates.Unix.cs" Condition="'$(TargetsUnix)' == 'true'" />
     <Compile Include="HttpClientHandlerTest.ServerCertificates.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
@@ -101,21 +115,18 @@
     <Compile Include="HttpClientHandlerTest.SslProtocols.Unix.cs" Condition="'$(TargetsUnix)' == 'true'" />
     <Compile Include="HttpClientHandlerTest.SslProtocols.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="DiagnosticsTests.cs" />
-    <Compile Include="HttpClientTestBase.cs" />
+    <Compile Include="HttpClientHandlerTestBase.cs" />
     <Compile Include="HttpClientTest.cs" />
     <Compile Include="HttpClientEKUTest.cs" />
-    <Compile Include="HttpClientMiniStressTest.cs" />
     <Compile Include="HttpClient.SelectedSitesTest.cs" />
     <Compile Include="HttpContentTest.cs" />
     <Compile Include="HttpMessageInvokerTest.cs" />
     <Compile Include="HttpMethodTest.cs" />
-    <Compile Include="HttpCookieProtocolTests.cs" />
     <Compile Include="HttpRetryProtocolTests.cs" />
     <Compile Include="IdnaProtocolTests.cs" />
     <Compile Include="HttpProtocolTests.cs" />
     <Compile Include="HttpRequestMessageTest.cs" />
     <Compile Include="HttpResponseMessageTest.cs" />
-    <Compile Include="LoopbackGetRequestHttpProxy.cs" />
     <Compile Include="MessageProcessingHandlerTest.cs" />
     <Compile Include="MultipartContentTest.cs" />
     <Compile Include="MultipartFormDataContentTest.cs" />
@@ -129,18 +140,39 @@
     <Compile Include="SyncBlockingContent.cs" />
     <Compile Include="TestHelper.cs" />
     <Compile Include="DefaultCredentialsTest.cs" />
+    <Compile Include="ThrowingContent.cs" />
+    <Compile Include="Watchdog.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="CustomContent.netcore.cs" />
+    <Compile Include="HPackTest.cs" />
+    <Compile Include="HttpClientTest.netcoreapp.cs" />
+    <Compile Include="HttpClientHandlerTest.Http1.cs" />
+    <Compile Include="HttpClientHandlerTest.Http2.cs" />
     <Compile Include="HttpClientHandlerTest.AcceptAllCerts.cs" />
     <Compile Include="HttpClientHandlerTest.Decompression.cs" />
-    <Compile Include="HttpClientTest.netcoreapp.cs" />
+    <Compile Include="HttpClientMiniStressTest.cs" />
     <Compile Include="HttpMethodTest.netcoreapp.cs" />
+    <Compile Include="NtAuthTests.cs" />
     <Compile Include="ReadOnlyMemoryContentTest.cs" />
     <Compile Include="SocketsHttpHandlerTest.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
-    <Compile Include="$(CommonTestPath)\System\IO\StreamSpanExtensions.netstandard.cs">
-      <Link>Common\System\IO\StreamSpanExtensions.netstandard.cs</Link>
+    <Compile Include="$(CommonTestPath)\System\Net\Http\Http2Frames.cs">
+      <Link>Common\System\Net\Http\Http2Frames.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Http\HPackEncoder.cs">
+      <Link>Common\System\Net\Http\HPackEncoder.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Http\Http2LoopbackServer.cs">
+      <Link>Common\System\Net\Http\Http2LoopbackServer.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Http\Http2LoopbackConnection.cs">
+      <Link>Common\System\Net\Http\Http2LoopbackConnection.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Http\HuffmanDecoder.cs">
+      <Link>Common\System\Net\Http\HuffmanDecoder.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Http\HuffmanEncoder.cs">
+      <Link>Common\System\Net\Http\HuffmanEncoder.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
@@ -149,26 +181,14 @@
     <Compile Include="MultiInterfaceReadOnlyStream.cs" />
     <Compile Include="MultiInterfaceStreamContent.cs" />
     <Compile Include="PostScenarioUWPTest.cs" />
+    <Compile Include="XUnitAssemblyAttributes.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
-      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
-      <Name>RemoteExecutorConsoleApp</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <SupplementalTestData Include="$(PackagesDir)system.net.testdata\1.0.0-prerelease\content\**\*.*" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetsOSX)'=='true'">
-    <TestCommandLines Include="ulimit -Sn 4096" />
+    <PackageReference Include="System.Net.TestData" Version="$(SystemNetTestDataPackageVersion)" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="SelectedSitesTest.txt">
       <Link>SelectedSitesTest.txt</Link>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -1,24 +1,20 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 
-#if !netstandard
 using Internal.Runtime.CompilerServices;
-#endif
 
-#if netstandard
-using nuint = System.NUInt;
-#else
+#pragma warning disable SA1121 // explicitly using type aliases instead of built-in types
 #if BIT64
 using nuint = System.UInt64;
 #else
 using nuint = System.UInt32;
 #endif // BIT64
-#endif // netstandard
 
 namespace System
 {
@@ -27,154 +23,6 @@ namespace System
     /// </summary>
     public static partial class MemoryExtensions
     {
-        /// <summary>
-        /// Removes all leading and trailing white-space characters from the span.
-        /// </summary>
-        public static ReadOnlySpan<char> Trim(this ReadOnlySpan<char> span)
-        {
-            return span.TrimStart().TrimEnd();
-        }
-
-        /// <summary>
-        /// Removes all leading white-space characters from the span.
-        /// </summary>
-        public static ReadOnlySpan<char> TrimStart(this ReadOnlySpan<char> span)
-        {
-            int start = 0;
-            for (; start < span.Length; start++)
-            {
-                if (!char.IsWhiteSpace(span[start]))
-                    break;
-            }
-            return span.Slice(start);
-        }
-
-        /// <summary>
-        /// Removes all trailing white-space characters from the span.
-        /// </summary>
-        public static ReadOnlySpan<char> TrimEnd(this ReadOnlySpan<char> span)
-        {
-            int end = span.Length - 1;
-            for (; end >= 0; end--)
-            {
-                if (!char.IsWhiteSpace(span[end]))
-                    break;
-            }
-            return span.Slice(0, end + 1);
-        }
-
-        /// <summary>
-        /// Removes all leading and trailing occurrences of a specified character.
-        /// </summary>
-        /// <param name="span">The source span from which the character is removed.</param>
-        /// <param name="trimChar">The specified character to look for and remove.</param>
-        public static ReadOnlySpan<char> Trim(this ReadOnlySpan<char> span, char trimChar)
-        {
-            return span.TrimStart(trimChar).TrimEnd(trimChar);
-        }
-
-        /// <summary>
-        /// Removes all leading occurrences of a specified character.
-        /// </summary>
-        /// <param name="span">The source span from which the character is removed.</param>
-        /// <param name="trimChar">The specified character to look for and remove.</param>
-        public static ReadOnlySpan<char> TrimStart(this ReadOnlySpan<char> span, char trimChar)
-        {
-            int start = 0;
-            for (; start < span.Length; start++)
-            {
-                if (span[start] != trimChar)
-                    break;
-            }
-            return span.Slice(start);
-        }
-
-        /// <summary>
-        /// Removes all trailing occurrences of a specified character.
-        /// </summary>
-        /// <param name="span">The source span from which the character is removed.</param>
-        /// <param name="trimChar">The specified character to look for and remove.</param>
-        public static ReadOnlySpan<char> TrimEnd(this ReadOnlySpan<char> span, char trimChar)
-        {
-            int end = span.Length - 1;
-            for (; end >= 0; end--)
-            {
-                if (span[end] != trimChar)
-                    break;
-            }
-            return span.Slice(0, end + 1);
-        }
-
-        /// <summary>
-        /// Removes all leading and trailing occurrences of a set of characters specified 
-        /// in a readonly span from the span.
-        /// </summary>
-        /// <param name="span">The source span from which the characters are removed.</param>
-        /// <param name="trimChars">The span which contains the set of characters to remove.</param>
-        /// <remarks>If <paramref name="trimChars"/> is empty, white-space characters are removed instead.</remarks>
-        public static ReadOnlySpan<char> Trim(this ReadOnlySpan<char> span, ReadOnlySpan<char> trimChars)
-        {
-            return span.TrimStart(trimChars).TrimEnd(trimChars);
-        }
-
-        /// <summary>
-        /// Removes all leading occurrences of a set of characters specified 
-        /// in a readonly span from the span.
-        /// </summary>
-        /// <param name="span">The source span from which the characters are removed.</param>
-        /// <param name="trimChars">The span which contains the set of characters to remove.</param>
-        /// <remarks>If <paramref name="trimChars"/> is empty, white-space characters are removed instead.</remarks>
-        public static ReadOnlySpan<char> TrimStart(this ReadOnlySpan<char> span, ReadOnlySpan<char> trimChars)
-        {
-            if (trimChars.IsEmpty)
-            {
-                return span.TrimStart();
-            }
-
-            int start = 0;
-            for (; start < span.Length; start++)
-            {
-                for (int i = 0; i < trimChars.Length; i++)
-                {
-                    if (span[start] == trimChars[i])
-                        goto Next;
-                }
-                break;
-            Next:
-                ;
-            }
-            return span.Slice(start);
-        }
-
-        /// <summary>
-        /// Removes all trailing occurrences of a set of characters specified 
-        /// in a readonly span from the span.
-        /// </summary>
-        /// <param name="span">The source span from which the characters are removed.</param>
-        /// <param name="trimChars">The span which contains the set of characters to remove.</param>
-        /// <remarks>If <paramref name="trimChars"/> is empty, white-space characters are removed instead.</remarks>
-        public static ReadOnlySpan<char> TrimEnd(this ReadOnlySpan<char> span, ReadOnlySpan<char> trimChars)
-        {
-            if (trimChars.IsEmpty)
-            {
-                return span.TrimEnd();
-            }
-
-            int end = span.Length - 1;
-            for (; end >= 0; end--)
-            {
-                for (int i = 0; i < trimChars.Length; i++)
-                {
-                    if (span[end] == trimChars[i])
-                        goto Next;
-                }
-                break;
-            Next:
-                ;
-            }
-            return span.Slice(0, end + 1);
-        }
-
         /// <summary>
         /// Indicates whether the specified span contains only white-space characters.
         /// </summary>
@@ -189,80 +37,166 @@ namespace System
         }
 
         /// <summary>
-        /// Searches for the specified value and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). 
+        /// Searches for the specified value and returns true if found. If not found, returns false. Values are compared using IEquatable{T}.Equals(T).
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value">The value to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Contains<T>(this Span<T> span, T value)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
+            where T : IEquatable<T>
+#nullable restore
+        {
+            if (RuntimeHelpers.IsBitwiseEquatable<T>())
+            {
+                if (Unsafe.SizeOf<T>() == sizeof(byte))
+                    return SpanHelpers.Contains(
+                        ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                        Unsafe.As<T, byte>(ref value),
+                        span.Length);
+
+                if (Unsafe.SizeOf<T>() == sizeof(char))
+                    return SpanHelpers.Contains(
+                        ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                        Unsafe.As<T, char>(ref value),
+                        span.Length);
+            }
+
+            return SpanHelpers.Contains(ref MemoryMarshal.GetReference(span), value, span.Length);
+        }
+
+        /// <summary>
+        /// Searches for the specified value and returns true if found. If not found, returns false. Values are compared using IEquatable{T}.Equals(T).
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value">The value to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Contains<T>(this ReadOnlySpan<T> span, T value)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
+            where T : IEquatable<T>
+#nullable restore
+        {
+            if (RuntimeHelpers.IsBitwiseEquatable<T>())
+            {
+                if (Unsafe.SizeOf<T>() == sizeof(byte))
+                    return SpanHelpers.Contains(
+                        ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                        Unsafe.As<T, byte>(ref value),
+                        span.Length);
+
+                if (Unsafe.SizeOf<T>() == sizeof(char))
+                    return SpanHelpers.Contains(
+                        ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                        Unsafe.As<T, char>(ref value),
+                        span.Length);
+            }
+
+            return SpanHelpers.Contains(ref MemoryMarshal.GetReference(span), value, span.Length);
+        }
+
+        /// <summary>
+        /// Searches for the specified value and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T).
         /// </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value">The value to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int IndexOf<T>(this Span<T> span, T value)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
-            if (typeof(T) == typeof(byte))
-                return SpanHelpers.IndexOf(
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
-                    Unsafe.As<T, byte>(ref value),
-                    span.Length);
-            if (typeof(T) == typeof(char))
-                return SpanHelpers.IndexOf(
-                    ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
-                    Unsafe.As<T, char>(ref value),
-                    span.Length);
+            if (RuntimeHelpers.IsBitwiseEquatable<T>())
+            {
+                if (Unsafe.SizeOf<T>() == sizeof(byte))
+                    return SpanHelpers.IndexOf(
+                        ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                        Unsafe.As<T, byte>(ref value),
+                        span.Length);
+
+                if (Unsafe.SizeOf<T>() == sizeof(char))
+                    return SpanHelpers.IndexOf(
+                        ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                        Unsafe.As<T, char>(ref value),
+                        span.Length);
+            }
 
             return SpanHelpers.IndexOf(ref MemoryMarshal.GetReference(span), value, span.Length);
         }
 
         /// <summary>
-        /// Searches for the specified sequence and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). 
+        /// Searches for the specified sequence and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T).
         /// </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value">The sequence to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int IndexOf<T>(this Span<T> span, ReadOnlySpan<T> value)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
-            if (typeof(T) == typeof(byte))
-                return SpanHelpers.IndexOf(
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
-                    span.Length,
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
-                    value.Length);
+            if (RuntimeHelpers.IsBitwiseEquatable<T>())
+            {
+                if (Unsafe.SizeOf<T>() == sizeof(byte))
+                    return SpanHelpers.IndexOf(
+                        ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                        span.Length,
+                        ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
+                        value.Length);
+
+                if (Unsafe.SizeOf<T>() == sizeof(char))
+                    return SpanHelpers.IndexOf(
+                        ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                        span.Length,
+                        ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(value)),
+                        value.Length);
+            }
 
             return SpanHelpers.IndexOf(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(value), value.Length);
         }
 
         /// <summary>
-        /// Searches for the specified value and returns the index of its last occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). 
+        /// Searches for the specified value and returns the index of its last occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T).
         /// </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value">The value to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int LastIndexOf<T>(this Span<T> span, T value)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
-            if (typeof(T) == typeof(byte))
-                return SpanHelpers.LastIndexOf(
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
-                    Unsafe.As<T, byte>(ref value),
-                    span.Length);
-            if (typeof(T) == typeof(char))
-                return SpanHelpers.LastIndexOf(
-                    ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
-                    Unsafe.As<T, char>(ref value),
-                    span.Length);
+            if (RuntimeHelpers.IsBitwiseEquatable<T>())
+            {
+                if (Unsafe.SizeOf<T>() == sizeof(byte))
+                    return SpanHelpers.LastIndexOf(
+                        ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                        Unsafe.As<T, byte>(ref value),
+                        span.Length);
+
+                if (Unsafe.SizeOf<T>() == sizeof(char))
+                    return SpanHelpers.LastIndexOf(
+                        ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                        Unsafe.As<T, char>(ref value),
+                        span.Length);
+            }
 
             return SpanHelpers.LastIndexOf<T>(ref MemoryMarshal.GetReference(span), value, span.Length);
         }
 
         /// <summary>
-        /// Searches for the specified sequence and returns the index of its last occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). 
+        /// Searches for the specified sequence and returns the index of its last occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T).
         /// </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value">The sequence to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int LastIndexOf<T>(this Span<T> span, ReadOnlySpan<T> value)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
-            if (typeof(T) == typeof(byte))
+            if (Unsafe.SizeOf<T>() == sizeof(byte) && RuntimeHelpers.IsBitwiseEquatable<T>())
                 return SpanHelpers.LastIndexOf(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     span.Length,
@@ -273,30 +207,38 @@ namespace System
         }
 
         /// <summary>
-        /// Determines whether two sequences are equal by comparing the elements using IEquatable{T}.Equals(T). 
+        /// Determines whether two sequences are equal by comparing the elements using IEquatable{T}.Equals(T).
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool SequenceEqual<T>(this Span<T> span, ReadOnlySpan<T> other)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             int length = span.Length;
 
-            if (default(T) != null && IsTypeComparableAsBytes<T>(out nuint size))
+            if (RuntimeHelpers.IsBitwiseEquatable<T>())
+            {
+                nuint size = (nuint)Unsafe.SizeOf<T>();
                 return length == other.Length &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(other)),
                     ((nuint)length) * size);  // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking.
+            }
 
             return length == other.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(span), ref MemoryMarshal.GetReference(other), length);
         }
 
         /// <summary>
-        /// Determines the relative order of the sequences being compared by comparing the elements using IComparable{T}.CompareTo(T). 
+        /// Determines the relative order of the sequences being compared by comparing the elements using IComparable{T}.CompareTo(T).
         /// </summary>
         public static int SequenceCompareTo<T>(this Span<T> span, ReadOnlySpan<T> other)
             where T : IComparable<T>
         {
+            // Can't use IsBitwiseEquatable<T>() below because that only tells us about
+            // equality checks, not about CompareTo checks.
+
             if (typeof(T) == typeof(byte))
                 return SpanHelpers.SequenceCompareTo(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
@@ -315,80 +257,106 @@ namespace System
         }
 
         /// <summary>
-        /// Searches for the specified value and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). 
+        /// Searches for the specified value and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T).
         /// </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value">The value to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int IndexOf<T>(this ReadOnlySpan<T> span, T value)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
-            if (typeof(T) == typeof(byte))
-                return SpanHelpers.IndexOf(
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
-                    Unsafe.As<T, byte>(ref value),
-                    span.Length);
-            if (typeof(T) == typeof(char))
-                return SpanHelpers.IndexOf(
-                    ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
-                    Unsafe.As<T, char>(ref value),
-                    span.Length);
+            if (RuntimeHelpers.IsBitwiseEquatable<T>())
+            {
+                if (Unsafe.SizeOf<T>() == sizeof(byte))
+                    return SpanHelpers.IndexOf(
+                        ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                        Unsafe.As<T, byte>(ref value),
+                        span.Length);
+
+                if (Unsafe.SizeOf<T>() == sizeof(char))
+                    return SpanHelpers.IndexOf(
+                        ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                        Unsafe.As<T, char>(ref value),
+                        span.Length);
+            }
 
             return SpanHelpers.IndexOf(ref MemoryMarshal.GetReference(span), value, span.Length);
         }
 
         /// <summary>
-        /// Searches for the specified sequence and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). 
+        /// Searches for the specified sequence and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T).
         /// </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value">The sequence to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int IndexOf<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
-            if (typeof(T) == typeof(byte))
-                return SpanHelpers.IndexOf(
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
-                    span.Length,
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
-                    value.Length);
+            if (RuntimeHelpers.IsBitwiseEquatable<T>())
+            {
+                if (Unsafe.SizeOf<T>() == sizeof(byte))
+                    return SpanHelpers.IndexOf(
+                        ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                        span.Length,
+                        ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
+                        value.Length);
+
+                if (Unsafe.SizeOf<T>() == sizeof(char))
+                    return SpanHelpers.IndexOf(
+                        ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                        span.Length,
+                        ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(value)),
+                        value.Length);
+            }
 
             return SpanHelpers.IndexOf(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(value), value.Length);
         }
 
         /// <summary>
-        /// Searches for the specified value and returns the index of its last occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). 
+        /// Searches for the specified value and returns the index of its last occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T).
         /// </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value">The value to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int LastIndexOf<T>(this ReadOnlySpan<T> span, T value)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
-            if (typeof(T) == typeof(byte))
-                return SpanHelpers.LastIndexOf(
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
-                    Unsafe.As<T, byte>(ref value),
-                    span.Length);
-            if (typeof(T) == typeof(char))
-                return SpanHelpers.LastIndexOf(
-                    ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
-                    Unsafe.As<T, char>(ref value),
-                    span.Length);
+            if (RuntimeHelpers.IsBitwiseEquatable<T>())
+            {
+                if (Unsafe.SizeOf<T>() == sizeof(byte))
+                    return SpanHelpers.LastIndexOf(
+                            ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                            Unsafe.As<T, byte>(ref value),
+                            span.Length);
+
+                if (Unsafe.SizeOf<T>() == sizeof(char))
+                    return SpanHelpers.LastIndexOf(
+                        ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                        Unsafe.As<T, char>(ref value),
+                        span.Length);
+            }
 
             return SpanHelpers.LastIndexOf<T>(ref MemoryMarshal.GetReference(span), value, span.Length);
         }
 
         /// <summary>
-        /// Searches for the specified sequence and returns the index of its last occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). 
+        /// Searches for the specified sequence and returns the index of its last occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T).
         /// </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value">The sequence to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int LastIndexOf<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
-            if (typeof(T) == typeof(byte))
+            if (Unsafe.SizeOf<T>() == sizeof(byte) && RuntimeHelpers.IsBitwiseEquatable<T>())
                 return SpanHelpers.LastIndexOf(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     span.Length,
@@ -406,14 +374,26 @@ namespace System
         /// <param name="value1">One of the values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int IndexOfAny<T>(this Span<T> span, T value0, T value1)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
-            if (typeof(T) == typeof(byte))
-                return SpanHelpers.IndexOfAny(
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
-                    Unsafe.As<T, byte>(ref value0),
-                    Unsafe.As<T, byte>(ref value1),
-                    span.Length);
+            if (RuntimeHelpers.IsBitwiseEquatable<T>())
+            {
+                if (Unsafe.SizeOf<T>() == sizeof(byte))
+                    return SpanHelpers.IndexOfAny(
+                        ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                        Unsafe.As<T, byte>(ref value0),
+                        Unsafe.As<T, byte>(ref value1),
+                        span.Length);
+
+                if (Unsafe.SizeOf<T>() == sizeof(char))
+                    return SpanHelpers.IndexOfAny(
+                        ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                        Unsafe.As<T, char>(ref value0),
+                        Unsafe.As<T, char>(ref value1),
+                        span.Length);
+            }
 
             return SpanHelpers.IndexOfAny(ref MemoryMarshal.GetReference(span), value0, value1, span.Length);
         }
@@ -427,34 +407,130 @@ namespace System
         /// <param name="value2">One of the values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int IndexOfAny<T>(this Span<T> span, T value0, T value1, T value2)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
-            if (typeof(T) == typeof(byte))
-                return SpanHelpers.IndexOfAny(
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
-                    Unsafe.As<T, byte>(ref value0),
-                    Unsafe.As<T, byte>(ref value1),
-                    Unsafe.As<T, byte>(ref value2),
-                    span.Length);
+            if (RuntimeHelpers.IsBitwiseEquatable<T>())
+            {
+                if (Unsafe.SizeOf<T>() == sizeof(byte))
+                    return SpanHelpers.IndexOfAny(
+                        ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                        Unsafe.As<T, byte>(ref value0),
+                        Unsafe.As<T, byte>(ref value1),
+                        Unsafe.As<T, byte>(ref value2),
+                        span.Length);
+
+                if (Unsafe.SizeOf<T>() == sizeof(char))
+                    return SpanHelpers.IndexOfAny(
+                        ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                        Unsafe.As<T, char>(ref value0),
+                        Unsafe.As<T, char>(ref value1),
+                        Unsafe.As<T, char>(ref value2),
+                        span.Length);
+            }
 
             return SpanHelpers.IndexOfAny(ref MemoryMarshal.GetReference(span), value0, value1, value2, span.Length);
         }
 
         /// <summary>
-        /// Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1. 
+        /// Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1.
         /// </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="values">The set of values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int IndexOfAny<T>(this Span<T> span, ReadOnlySpan<T> values)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
-            if (typeof(T) == typeof(byte))
-                return SpanHelpers.IndexOfAny(
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
-                    span.Length,
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(values)),
-                    values.Length);
+            if (RuntimeHelpers.IsBitwiseEquatable<T>())
+            {
+                if (Unsafe.SizeOf<T>() == sizeof(byte))
+                {
+                    ref byte valueRef = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(values));
+                    if (values.Length == 2)
+                    {
+                        return SpanHelpers.IndexOfAny(
+                            ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                            valueRef,
+                            Unsafe.Add(ref valueRef, 1),
+                            span.Length);
+                    }
+                    else if (values.Length == 3)
+                    {
+                        return SpanHelpers.IndexOfAny(
+                            ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                            valueRef,
+                            Unsafe.Add(ref valueRef, 1),
+                            Unsafe.Add(ref valueRef, 2),
+                            span.Length);
+                    }
+                    else
+                    {
+                        return SpanHelpers.IndexOfAny(
+                            ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                            span.Length,
+                            ref valueRef,
+                            values.Length);
+                    }
+                }
+
+                if (Unsafe.SizeOf<T>() == sizeof(char))
+                {
+                    ref var valueRef = ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(values));
+                    if (values.Length == 5)
+                    {
+                        // Length 5 is a common length for FileSystemName expression (", <, >, *, ?) and in preference to 2 as it has an explicit overload
+                        return SpanHelpers.IndexOfAny(
+                            ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                            valueRef,
+                            Unsafe.Add(ref valueRef, 1),
+                            Unsafe.Add(ref valueRef, 2),
+                            Unsafe.Add(ref valueRef, 3),
+                            Unsafe.Add(ref valueRef, 4),
+                            span.Length);
+                    }
+                    else if (values.Length == 2)
+                    {
+                        // Length 2 is a common length for simple wildcards (*, ?),  directory separators (/, \), quotes (", '), brackets, etc
+                        return SpanHelpers.IndexOfAny(
+                            ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                            valueRef,
+                            Unsafe.Add(ref valueRef, 1),
+                            span.Length);
+                    }
+                    else if (values.Length == 4)
+                    {
+                        // Length 4 before 3 as 3 has an explicit overload
+                        return SpanHelpers.IndexOfAny(
+                            ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                            valueRef,
+                            Unsafe.Add(ref valueRef, 1),
+                            Unsafe.Add(ref valueRef, 2),
+                            Unsafe.Add(ref valueRef, 3),
+                            span.Length);
+                    }
+                    else if (values.Length == 3)
+                    {
+                        return SpanHelpers.IndexOfAny(
+                            ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                            valueRef,
+                            Unsafe.Add(ref valueRef, 1),
+                            Unsafe.Add(ref valueRef, 2),
+                            span.Length);
+                    }
+                    else if (values.Length == 1)
+                    {
+                        // Length 1 last, as ctoring a ReadOnlySpan to call this overload for a single value
+                        // is already throwing away a bunch of performance vs just calling IndexOf
+                        return SpanHelpers.IndexOf(
+                            ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                            valueRef,
+                            span.Length);
+                    }
+                }
+            }
 
             return SpanHelpers.IndexOfAny(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(values), values.Length);
         }
@@ -467,20 +543,32 @@ namespace System
         /// <param name="value1">One of the values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int IndexOfAny<T>(this ReadOnlySpan<T> span, T value0, T value1)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
-            if (typeof(T) == typeof(byte))
-                return SpanHelpers.IndexOfAny(
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
-                    Unsafe.As<T, byte>(ref value0),
-                    Unsafe.As<T, byte>(ref value1),
-                    span.Length);
+            if (RuntimeHelpers.IsBitwiseEquatable<T>())
+            {
+                if (Unsafe.SizeOf<T>() == sizeof(byte))
+                    return SpanHelpers.IndexOfAny(
+                        ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                        Unsafe.As<T, byte>(ref value0),
+                        Unsafe.As<T, byte>(ref value1),
+                        span.Length);
+
+                if (Unsafe.SizeOf<T>() == sizeof(char))
+                    return SpanHelpers.IndexOfAny(
+                        ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                        Unsafe.As<T, char>(ref value0),
+                        Unsafe.As<T, char>(ref value1),
+                        span.Length);
+            }
 
             return SpanHelpers.IndexOfAny(ref MemoryMarshal.GetReference(span), value0, value1, span.Length);
         }
 
         /// <summary>
-        /// Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1. 
+        /// Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1.
         /// </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value0">One of the values to search for.</param>
@@ -488,34 +576,130 @@ namespace System
         /// <param name="value2">One of the values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int IndexOfAny<T>(this ReadOnlySpan<T> span, T value0, T value1, T value2)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
-            if (typeof(T) == typeof(byte))
-                return SpanHelpers.IndexOfAny(
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
-                    Unsafe.As<T, byte>(ref value0),
-                    Unsafe.As<T, byte>(ref value1),
-                    Unsafe.As<T, byte>(ref value2),
-                    span.Length);
+            if (RuntimeHelpers.IsBitwiseEquatable<T>())
+            {
+                if (Unsafe.SizeOf<T>() == sizeof(byte))
+                    return SpanHelpers.IndexOfAny(
+                        ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                        Unsafe.As<T, byte>(ref value0),
+                        Unsafe.As<T, byte>(ref value1),
+                        Unsafe.As<T, byte>(ref value2),
+                        span.Length);
+
+                if (Unsafe.SizeOf<T>() == sizeof(char))
+                    return SpanHelpers.IndexOfAny(
+                        ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                        Unsafe.As<T, char>(ref value0),
+                        Unsafe.As<T, char>(ref value1),
+                        Unsafe.As<T, char>(ref value2),
+                        span.Length);
+            }
 
             return SpanHelpers.IndexOfAny(ref MemoryMarshal.GetReference(span), value0, value1, value2, span.Length);
         }
 
         /// <summary>
-        /// Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1. 
+        /// Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1.
         /// </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="values">The set of values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int IndexOfAny<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> values)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
-            if (typeof(T) == typeof(byte))
-                return SpanHelpers.IndexOfAny(
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
-                    span.Length,
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(values)),
-                    values.Length);
+            if (RuntimeHelpers.IsBitwiseEquatable<T>())
+            {
+                if (Unsafe.SizeOf<T>() == sizeof(byte))
+                {
+                    ref byte valueRef = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(values));
+                    if (values.Length == 2)
+                    {
+                        return SpanHelpers.IndexOfAny(
+                            ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                            valueRef,
+                            Unsafe.Add(ref valueRef, 1),
+                            span.Length);
+                    }
+                    else if (values.Length == 3)
+                    {
+                        return SpanHelpers.IndexOfAny(
+                            ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                            valueRef,
+                            Unsafe.Add(ref valueRef, 1),
+                            Unsafe.Add(ref valueRef, 2),
+                            span.Length);
+                    }
+                    else
+                    {
+                        return SpanHelpers.IndexOfAny(
+                            ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                            span.Length,
+                            ref valueRef,
+                            values.Length);
+                    }
+                }
+
+                if (Unsafe.SizeOf<T>() == sizeof(char))
+                {
+                    ref var valueRef = ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(values));
+                    if (values.Length == 5)
+                    {
+                        // Length 5 is a common length for FileSystemName expression (", <, >, *, ?) and in preference to 2 as it has an explicit overload
+                        return SpanHelpers.IndexOfAny(
+                            ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                            valueRef,
+                            Unsafe.Add(ref valueRef, 1),
+                            Unsafe.Add(ref valueRef, 2),
+                            Unsafe.Add(ref valueRef, 3),
+                            Unsafe.Add(ref valueRef, 4),
+                            span.Length);
+                    }
+                    else if (values.Length == 2)
+                    {
+                        // Length 2 is a common length for simple wildcards (*, ?),  directory separators (/, \), quotes (", '), brackets, etc
+                        return SpanHelpers.IndexOfAny(
+                            ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                            valueRef,
+                            Unsafe.Add(ref valueRef, 1),
+                            span.Length);
+                    }
+                    else if (values.Length == 4)
+                    {
+                        // Length 4 before 3 as 3 has an explicit overload
+                        return SpanHelpers.IndexOfAny(
+                            ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                            valueRef,
+                            Unsafe.Add(ref valueRef, 1),
+                            Unsafe.Add(ref valueRef, 2),
+                            Unsafe.Add(ref valueRef, 3),
+                            span.Length);
+                    }
+                    else if (values.Length == 3)
+                    {
+                        return SpanHelpers.IndexOfAny(
+                            ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                            valueRef,
+                            Unsafe.Add(ref valueRef, 1),
+                            Unsafe.Add(ref valueRef, 2),
+                            span.Length);
+                    }
+                    else if (values.Length == 1)
+                    {
+                        // Length 1 last, as ctoring a ReadOnlySpan to call this overload for a single value
+                        // is already throwing away a bunch of performance vs just calling IndexOf
+                        return SpanHelpers.IndexOf(
+                            ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                            valueRef,
+                            span.Length);
+                    }
+                }
+            }
 
             return SpanHelpers.IndexOfAny(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(values), values.Length);
         }
@@ -528,9 +712,11 @@ namespace System
         /// <param name="value1">One of the values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int LastIndexOfAny<T>(this Span<T> span, T value0, T value1)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
-            if (typeof(T) == typeof(byte))
+            if (Unsafe.SizeOf<T>() == sizeof(byte) && RuntimeHelpers.IsBitwiseEquatable<T>())
                 return SpanHelpers.LastIndexOfAny(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value0),
@@ -549,9 +735,11 @@ namespace System
         /// <param name="value2">One of the values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int LastIndexOfAny<T>(this Span<T> span, T value0, T value1, T value2)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
-            if (typeof(T) == typeof(byte))
+            if (Unsafe.SizeOf<T>() == sizeof(byte) && RuntimeHelpers.IsBitwiseEquatable<T>())
                 return SpanHelpers.LastIndexOfAny(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value0),
@@ -563,15 +751,17 @@ namespace System
         }
 
         /// <summary>
-        /// Searches for the last index of any of the specified values similar to calling LastIndexOf several times with the logical OR operator. If not found, returns -1. 
+        /// Searches for the last index of any of the specified values similar to calling LastIndexOf several times with the logical OR operator. If not found, returns -1.
         /// </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="values">The set of values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int LastIndexOfAny<T>(this Span<T> span, ReadOnlySpan<T> values)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
-            if (typeof(T) == typeof(byte))
+            if (Unsafe.SizeOf<T>() == sizeof(byte) && RuntimeHelpers.IsBitwiseEquatable<T>())
                 return SpanHelpers.LastIndexOfAny(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     span.Length,
@@ -589,9 +779,11 @@ namespace System
         /// <param name="value1">One of the values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int LastIndexOfAny<T>(this ReadOnlySpan<T> span, T value0, T value1)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
-            if (typeof(T) == typeof(byte))
+            if (Unsafe.SizeOf<T>() == sizeof(byte) && RuntimeHelpers.IsBitwiseEquatable<T>())
                 return SpanHelpers.LastIndexOfAny(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value0),
@@ -602,7 +794,7 @@ namespace System
         }
 
         /// <summary>
-        /// Searches for the last index of any of the specified values similar to calling LastIndexOf several times with the logical OR operator. If not found, returns -1. 
+        /// Searches for the last index of any of the specified values similar to calling LastIndexOf several times with the logical OR operator. If not found, returns -1.
         /// </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value0">One of the values to search for.</param>
@@ -610,9 +802,11 @@ namespace System
         /// <param name="value2">One of the values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int LastIndexOfAny<T>(this ReadOnlySpan<T> span, T value0, T value1, T value2)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
-            if (typeof(T) == typeof(byte))
+            if (Unsafe.SizeOf<T>() == sizeof(byte) && RuntimeHelpers.IsBitwiseEquatable<T>())
                 return SpanHelpers.LastIndexOfAny(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value0),
@@ -624,15 +818,17 @@ namespace System
         }
 
         /// <summary>
-        /// Searches for the last index of any of the specified values similar to calling LastIndexOf several times with the logical OR operator. If not found, returns -1. 
+        /// Searches for the last index of any of the specified values similar to calling LastIndexOf several times with the logical OR operator. If not found, returns -1.
         /// </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="values">The set of values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int LastIndexOfAny<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> values)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
-            if (typeof(T) == typeof(byte))
+            if (Unsafe.SizeOf<T>() == sizeof(byte) && RuntimeHelpers.IsBitwiseEquatable<T>())
                 return SpanHelpers.LastIndexOfAny(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     span.Length,
@@ -643,30 +839,38 @@ namespace System
         }
 
         /// <summary>
-        /// Determines whether two sequences are equal by comparing the elements using IEquatable{T}.Equals(T). 
+        /// Determines whether two sequences are equal by comparing the elements using IEquatable{T}.Equals(T).
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool SequenceEqual<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> other)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             int length = span.Length;
-            if (default(T) != null && IsTypeComparableAsBytes<T>(out nuint size))
+            if (RuntimeHelpers.IsBitwiseEquatable<T>())
+            {
+                nuint size = (nuint)Unsafe.SizeOf<T>();
                 return length == other.Length &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(other)),
                     ((nuint)length) * size);  // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking.
+            }
 
             return length == other.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(span), ref MemoryMarshal.GetReference(other), length);
         }
 
         /// <summary>
-        /// Determines the relative order of the sequences being compared by comparing the elements using IComparable{T}.CompareTo(T). 
+        /// Determines the relative order of the sequences being compared by comparing the elements using IComparable{T}.CompareTo(T).
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int SequenceCompareTo<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> other)
             where T : IComparable<T>
         {
+            // Can't use IsBitwiseEquatable<T>() below because that only tells us about
+            // equality checks, not about CompareTo checks.
+
             if (typeof(T) == typeof(byte))
                 return SpanHelpers.SequenceCompareTo(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
@@ -689,15 +893,20 @@ namespace System
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool StartsWith<T>(this Span<T> span, ReadOnlySpan<T> value)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             int valueLength = value.Length;
-            if (default(T) != null && IsTypeComparableAsBytes<T>(out nuint size))
+            if (RuntimeHelpers.IsBitwiseEquatable<T>())
+            {
+                nuint size = (nuint)Unsafe.SizeOf<T>();
                 return valueLength <= span.Length &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
                     ((nuint)valueLength) * size);  // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking.
+            }
 
             return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(span), ref MemoryMarshal.GetReference(value), valueLength);
         }
@@ -707,15 +916,20 @@ namespace System
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool StartsWith<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             int valueLength = value.Length;
-            if (default(T) != null && IsTypeComparableAsBytes<T>(out nuint size))
+            if (RuntimeHelpers.IsBitwiseEquatable<T>())
+            {
+                nuint size = (nuint)Unsafe.SizeOf<T>();
                 return valueLength <= span.Length &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
                     ((nuint)valueLength) * size);  // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking.
+            }
 
             return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(span), ref MemoryMarshal.GetReference(value), valueLength);
         }
@@ -725,16 +939,21 @@ namespace System
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool EndsWith<T>(this Span<T> span, ReadOnlySpan<T> value)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             int spanLength = span.Length;
             int valueLength = value.Length;
-            if (default(T) != null && IsTypeComparableAsBytes<T>(out nuint size))
+            if (RuntimeHelpers.IsBitwiseEquatable<T>())
+            {
+                nuint size = (nuint)Unsafe.SizeOf<T>();
                 return valueLength <= spanLength &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref Unsafe.Add(ref MemoryMarshal.GetReference(span), spanLength - valueLength)),
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
                     ((nuint)valueLength) * size);  // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking.
+            }
 
             return valueLength <= spanLength &&
                 SpanHelpers.SequenceEqual(
@@ -748,22 +967,49 @@ namespace System
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool EndsWith<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             int spanLength = span.Length;
             int valueLength = value.Length;
-            if (default(T) != null && IsTypeComparableAsBytes<T>(out nuint size))
+            if (RuntimeHelpers.IsBitwiseEquatable<T>())
+            {
+                nuint size = (nuint)Unsafe.SizeOf<T>();
                 return valueLength <= spanLength &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref Unsafe.Add(ref MemoryMarshal.GetReference(span), spanLength - valueLength)),
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
                     ((nuint)valueLength) * size);  // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking.
+            }
 
             return valueLength <= spanLength &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.Add(ref MemoryMarshal.GetReference(span), spanLength - valueLength),
                     ref MemoryMarshal.GetReference(value),
                     valueLength);
+        }
+
+        /// <summary>
+        /// Returns an enumeration of <see cref="Rune"/> from the provided span.
+        /// </summary>
+        /// <remarks>
+        /// Invalid sequences will be represented in the enumeration by <see cref="Rune.ReplacementChar"/>.
+        /// </remarks>
+        public static SpanRuneEnumerator EnumerateRunes(this ReadOnlySpan<char> span)
+        {
+            return new SpanRuneEnumerator(span);
+        }
+
+        /// <summary>
+        /// Returns an enumeration of <see cref="Rune"/> from the provided span.
+        /// </summary>
+        /// <remarks>
+        /// Invalid sequences will be represented in the enumeration by <see cref="Rune.ReplacementChar"/>.
+        /// </remarks>
+        public static SpanRuneEnumerator EnumerateRunes(this Span<char> span)
+        {
+            return new SpanRuneEnumerator(span);
         }
 
         /// <summary>
@@ -792,7 +1038,7 @@ namespace System
         /// Creates a new span over the target array.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<T> AsSpan<T>(this T[] array)
+        public static Span<T> AsSpan<T>(this T[]? array)
         {
             return new Span<T>(array);
         }
@@ -807,10 +1053,10 @@ namespace System
         /// <remarks>Returns default when <paramref name="array"/> is null.</remarks>
         /// <exception cref="System.ArrayTypeMismatchException">Thrown when <paramref name="array"/> is covariant and array's type is not exactly T[].</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">
-        /// Thrown when the specified <paramref name="start"/> or end index is not in the range (&lt;0 or &gt;=Length).
+        /// Thrown when the specified <paramref name="start"/> or end index is not in the range (&lt;0 or &gt;Length).
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<T> AsSpan<T>(this T[] array, int start, int length)
+        public static Span<T> AsSpan<T>(this T[]? array, int start, int length)
         {
             return new Span<T>(array, start, length);
         }
@@ -833,15 +1079,28 @@ namespace System
         /// <remarks>Returns default when <paramref name="segment"/> is null.</remarks>
         /// <exception cref="System.ArrayTypeMismatchException">Thrown when <paramref name="segment"/> is covariant and array's type is not exactly T[].</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">
-        /// Thrown when the specified <paramref name="start"/> or end index is not in the range (&lt;0 or &gt;=segment.Count).
+        /// Thrown when the specified <paramref name="start"/> or end index is not in the range (&lt;0 or &gt;segment.Count).
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<T> AsSpan<T>(this ArraySegment<T> segment, int start)
         {
-            if (((uint)start) > segment.Count)
+            if (((uint)start) > (uint)segment.Count)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
             return new Span<T>(segment.Array, segment.Offset + start, segment.Count - start);
+        }
+
+        /// <summary>
+        /// Creates a new Span over the portion of the target array beginning
+        /// at 'startIndex' and ending at the end of the segment.
+        /// </summary>
+        /// <param name="segment">The target array.</param>
+        /// <param name="startIndex">The index at which to begin the Span.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Span<T> AsSpan<T>(this ArraySegment<T> segment, Index startIndex)
+        {
+            int actualIndex = startIndex.GetOffset(segment.Count);
+            return AsSpan(segment, actualIndex);
         }
 
         /// <summary>
@@ -854,23 +1113,35 @@ namespace System
         /// <remarks>Returns default when <paramref name="segment"/> is null.</remarks>
         /// <exception cref="System.ArrayTypeMismatchException">Thrown when <paramref name="segment"/> is covariant and array's type is not exactly T[].</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">
-        /// Thrown when the specified <paramref name="start"/> or end index is not in the range (&lt;0 or &gt;=segment.Count).
+        /// Thrown when the specified <paramref name="start"/> or end index is not in the range (&lt;0 or &gt;segment.Count).
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<T> AsSpan<T>(this ArraySegment<T> segment, int start, int length)
         {
-            if (((uint)start) > segment.Count)
+            if (((uint)start) > (uint)segment.Count)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
-            if (((uint)length) > segment.Count - start)
+            if (((uint)length) > (uint)(segment.Count - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.length);
 
             return new Span<T>(segment.Array, segment.Offset + start, length);
         }
 
         /// <summary>
+        /// Creates a new Span over the portion of the target array using the range start and end indexes
+        /// </summary>
+        /// <param name="segment">The target array.</param>
+        /// <param name="range">The range which has start and end indexes to use for slicing the array.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Span<T> AsSpan<T>(this ArraySegment<T> segment, Range range)
+        {
+            (int start, int length) = range.GetOffsetAndLength(segment.Count);
+            return new Span<T>(segment.Array, segment.Offset + start, length);
+        }
+
+        /// <summary>
         /// Creates a new memory over the target array.
         /// </summary>
-        public static Memory<T> AsMemory<T>(this T[] array) => new Memory<T>(array);
+        public static Memory<T> AsMemory<T>(this T[]? array) => new Memory<T>(array);
 
         /// <summary>
         /// Creates a new memory over the portion of the target array beginning
@@ -881,9 +1152,27 @@ namespace System
         /// <remarks>Returns default when <paramref name="array"/> is null.</remarks>
         /// <exception cref="System.ArrayTypeMismatchException">Thrown when <paramref name="array"/> is covariant and array's type is not exactly T[].</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">
-        /// Thrown when the specified <paramref name="start"/> or end index is not in the range (&lt;0 or &gt;=array.Length).
+        /// Thrown when the specified <paramref name="start"/> or end index is not in the range (&lt;0 or &gt;array.Length).
         /// </exception>
-        public static Memory<T> AsMemory<T>(this T[] array, int start) => new Memory<T>(array, start);
+        public static Memory<T> AsMemory<T>(this T[]? array, int start) => new Memory<T>(array, start);
+
+        /// <summary>
+        /// Creates a new memory over the portion of the target array starting from
+        /// 'startIndex' to the end of the array.
+        /// </summary>
+        public static Memory<T> AsMemory<T>(this T[]? array, Index startIndex)
+        {
+            if (array == null)
+            {
+                if (!startIndex.Equals(Index.Start))
+                    ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
+
+                return default;
+            }
+
+            int actualIndex = startIndex.GetOffset(array.Length);
+            return new Memory<T>(array, actualIndex);
+        }
 
         /// <summary>
         /// Creates a new memory over the portion of the target array beginning
@@ -895,9 +1184,29 @@ namespace System
         /// <remarks>Returns default when <paramref name="array"/> is null.</remarks>
         /// <exception cref="System.ArrayTypeMismatchException">Thrown when <paramref name="array"/> is covariant and array's type is not exactly T[].</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">
-        /// Thrown when the specified <paramref name="start"/> or end index is not in the range (&lt;0 or &gt;=Length).
+        /// Thrown when the specified <paramref name="start"/> or end index is not in the range (&lt;0 or &gt;Length).
         /// </exception>
-        public static Memory<T> AsMemory<T>(this T[] array, int start, int length) => new Memory<T>(array, start, length);
+        public static Memory<T> AsMemory<T>(this T[]? array, int start, int length) => new Memory<T>(array, start, length);
+
+        /// <summary>
+        /// Creates a new memory over the portion of the target array beginning at inclusive start index of the range
+        /// and ending at the exclusive end index of the range.
+        /// </summary>
+        public static Memory<T> AsMemory<T>(this T[]? array, Range range)
+        {
+            if (array == null)
+            {
+                Index startIndex = range.Start;
+                Index endIndex = range.End;
+                if (!startIndex.Equals(Index.Start) || !endIndex.Equals(Index.Start))
+                    ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
+
+                return default;
+            }
+
+            (int start, int length) = range.GetOffsetAndLength(array.Length);
+            return new Memory<T>(array, start, length);
+        }
 
         /// <summary>
         /// Creates a new memory over the portion of the target array.
@@ -913,11 +1222,11 @@ namespace System
         /// <remarks>Returns default when <paramref name="segment"/> is null.</remarks>
         /// <exception cref="System.ArrayTypeMismatchException">Thrown when <paramref name="segment"/> is covariant and array's type is not exactly T[].</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">
-        /// Thrown when the specified <paramref name="start"/> or end index is not in the range (&lt;0 or &gt;=segment.Count).
+        /// Thrown when the specified <paramref name="start"/> or end index is not in the range (&lt;0 or &gt;segment.Count).
         /// </exception>
         public static Memory<T> AsMemory<T>(this ArraySegment<T> segment, int start)
         {
-            if (((uint)start) > segment.Count)
+            if (((uint)start) > (uint)segment.Count)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
             return new Memory<T>(segment.Array, segment.Offset + start, segment.Count - start);
@@ -933,13 +1242,13 @@ namespace System
         /// <remarks>Returns default when <paramref name="segment"/> is null.</remarks>
         /// <exception cref="System.ArrayTypeMismatchException">Thrown when <paramref name="segment"/> is covariant and array's type is not exactly T[].</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">
-        /// Thrown when the specified <paramref name="start"/> or end index is not in the range (&lt;0 or &gt;=segment.Count).
+        /// Thrown when the specified <paramref name="start"/> or end index is not in the range (&lt;0 or &gt;segment.Count).
         /// </exception>
         public static Memory<T> AsMemory<T>(this ArraySegment<T> segment, int start, int length)
         {
-            if (((uint)start) > segment.Count)
+            if (((uint)start) > (uint)segment.Count)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
-            if (((uint)length) > segment.Count - start)
+            if (((uint)length) > (uint)(segment.Count - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.length);
 
             return new Memory<T>(segment.Array, segment.Offset + start, length);
@@ -949,7 +1258,7 @@ namespace System
         /// Copies the contents of the array into the span. If the source
         /// and destinations overlap, this method behaves as if the original values in
         /// a temporary location before the destination is overwritten.
-        /// 
+        ///
         ///<param name="source">The array to copy items from.</param>
         /// <param name="destination">The span to copy items into.</param>
         /// <exception cref="System.ArgumentException">
@@ -957,7 +1266,7 @@ namespace System
         /// </exception>
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyTo<T>(this T[] source, Span<T> destination)
+        public static void CopyTo<T>(this T[]? source, Span<T> destination)
         {
             new ReadOnlySpan<T>(source).CopyTo(destination);
         }
@@ -966,7 +1275,7 @@ namespace System
         /// Copies the contents of the array into the memory. If the source
         /// and destinations overlap, this method behaves as if the original values are in
         /// a temporary location before the destination is overwritten.
-        /// 
+        ///
         ///<param name="source">The array to copy items from.</param>
         /// <param name="destination">The memory to copy items into.</param>
         /// <exception cref="System.ArgumentException">
@@ -974,7 +1283,7 @@ namespace System
         /// </exception>
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyTo<T>(this T[] source, Memory<T> destination)
+        public static void CopyTo<T>(this T[]? source, Memory<T> destination)
         {
             source.CopyTo(destination.Span);
         }
@@ -1023,7 +1332,7 @@ namespace System
         //
         //  The second problem is solved by making all addresses relative to the
         //  start of the first sequence and performing all operations in
-        //  unsigned integer arithmetic modulo 2³².
+        //  unsigned integer arithmetic modulo 2^32.
         //
         //  Example
         //  -------
@@ -1039,7 +1348,7 @@ namespace System
         //  address space as follows:
         //
         //      [----------------------------------------------)                            normal address space
-        //      0                                             2³²
+        //      0                                             2^32
         //                            [------------------)                                  first sequence
         //                            xRef            xRef + xLength
         //              [--------------------------)     .                                  second sequence
@@ -1050,7 +1359,7 @@ namespace System
         //                            .            .     .
         //                            .            .     .
         //                            [----------------------------------------------)      relative address space
-        //                            0            .     .                          2³²
+        //                            0            .     .                          2^32
         //                            [------------------)             :                    first sequence
         //                            x1           .     x2            :
         //                            -------------)                   [-------------       second sequence
@@ -1065,47 +1374,47 @@ namespace System
         //      nuint x2 = xLength
         //      nuint y1 = (nuint)Unsafe.ByteOffset(xRef, yRef)
         //      nuint y2 = y1 + yLength
-        //  
+        //
         //  xRef relative to xRef is 0.
-        //  
+        //
         //  x2 is simply x1 + xLength. This cannot overflow.
-        //  
+        //
         //  yRef relative to xRef is (yRef - xRef). If (yRef - xRef) is
         //  negative, casting it to an unsigned 32-bit integer turns it into
-        //  (yRef - xRef + 2³²). So, in the example above, y1 moves to the right
+        //  (yRef - xRef + 2^32). So, in the example above, y1 moves to the right
         //  of x2.
-        //  
+        //
         //  y2 is simply y1 + yLength. Note that this can overflow, as in the
         //  example above, which must be avoided.
         //
         //  The two sequences do *not* overlap if y is entirely in the space
         //  right of x in the relative address space. (It can't be left of it!)
         //
-        //          (y1 >= x2) && (y2 <= 2³²)
+        //          (y1 >= x2) && (y2 <= 2^32)
         //
         //  Inversely, they do overlap if
         //
-        //          (y1 < x2) || (y2 > 2³²)
+        //          (y1 < x2) || (y2 > 2^32)
         //
         //  After substituting x2 and y2 with their respective definition:
         //
-        //      == (y1 < xLength) || (y1 + yLength > 2³²)
+        //      == (y1 < xLength) || (y1 + yLength > 2^32)
         //
         //  Since yLength can't be greater than the size of the address space,
         //  the overflow can be avoided as follows:
         //
-        //      == (y1 < xLength) || (y1 > 2³² - yLength)
+        //      == (y1 < xLength) || (y1 > 2^32 - yLength)
         //
-        //  However, 2³² cannot be stored in an unsigned 32-bit integer, so one
+        //  However, 2^32 cannot be stored in an unsigned 32-bit integer, so one
         //  more change is needed to keep doing everything with unsigned 32-bit
         //  integers:
         //
         //      == (y1 < xLength) || (y1 > -yLength)
-        //  
+        //
         //  Due to modulo arithmetic, this gives exactly same result *except* if
-        //  yLength is zero, since 2³² - 0 is 0 and not 2³². So the case
+        //  yLength is zero, since 2^32 - 0 is 0 and not 2^32. So the case
         //  y.IsEmpty must be handled separately first.
-        //  
+        //
 
         /// <summary>
         /// Determines whether two sequences overlap in memory.
@@ -1215,7 +1524,7 @@ namespace System
         /// of the index of the next element that is larger than <paramref name="comparable"/> or, if there is
         /// no larger element, the bitwise complement of <see cref="Span{T}.Length"/>.
         /// </returns>
-        /// <exception cref="T:System.ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// <paramref name = "comparable" /> is <see langword="null"/> .
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1239,7 +1548,7 @@ namespace System
         /// of the index of the next element that is larger than <paramref name="comparable"/> or, if there is
         /// no larger element, the bitwise complement of <see cref="Span{T}.Length"/>.
         /// </returns>
-        /// <exception cref="T:System.ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// <paramref name = "comparable" /> is <see langword="null"/> .
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1265,7 +1574,7 @@ namespace System
         /// of the index of the next element that is larger than <paramref name="value"/> or, if there is
         /// no larger element, the bitwise complement of <see cref="Span{T}.Length"/>.
         /// </returns>
-        /// <exception cref="T:System.ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// <paramref name = "comparer" /> is <see langword="null"/> .
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1289,7 +1598,7 @@ namespace System
         /// of the index of the next element that is larger than <paramref name="comparable"/> or, if there is
         /// no larger element, the bitwise complement of <see cref="ReadOnlySpan{T}.Length"/>.
         /// </returns>
-        /// <exception cref="T:System.ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// <paramref name = "comparable" /> is <see langword="null"/> .
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1313,7 +1622,7 @@ namespace System
         /// of the index of the next element that is larger than <paramref name="comparable"/> or, if there is
         /// no larger element, the bitwise complement of <see cref="ReadOnlySpan{T}.Length"/>.
         /// </returns>
-        /// <exception cref="T:System.ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// <paramref name = "comparable" /> is <see langword="null"/> .
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1339,7 +1648,7 @@ namespace System
         /// of the index of the next element that is larger than <paramref name="value"/> or, if there is
         /// no larger element, the bitwise complement of <see cref="ReadOnlySpan{T}.Length"/>.
         /// </returns>
-        /// <exception cref="T:System.ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// <paramref name = "comparer" /> is <see langword="null"/> .
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1353,37 +1662,6 @@ namespace System
             var comparable = new SpanHelpers.ComparerComparable<T, TComparer>(
                 value, comparer);
             return BinarySearch(span, comparable);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsTypeComparableAsBytes<T>(out nuint size)
-        {
-            if (typeof(T) == typeof(byte) || typeof(T) == typeof(sbyte))
-            {
-                size = (nuint)sizeof(byte);
-                return true;
-            }
-
-            if (typeof(T) == typeof(char) || typeof(T) == typeof(short) || typeof(T) == typeof(ushort))
-            {
-                size = (nuint)sizeof(char);
-                return true;
-            }
-
-            if (typeof(T) == typeof(int) || typeof(T) == typeof(uint))
-            {
-                size = (nuint)sizeof(int);
-                return true;
-            }
-
-            if (typeof(T) == typeof(long) || typeof(T) == typeof(ulong))
-            {
-                size = (nuint)sizeof(long);
-                return true;
-            }
-
-            size = default;
-            return false;
         }
     }
 }

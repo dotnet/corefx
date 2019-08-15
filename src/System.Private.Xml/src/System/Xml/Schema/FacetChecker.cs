@@ -16,22 +16,21 @@ namespace System.Xml.Schema
     using System.Threading;
     using System.Globalization;
 
-    /// <include file='doc\XmlSchemaFacet.uex' path='docs/doc[@for="XmlSchemaFacet"]/*' />
     internal abstract class FacetsChecker
     {
         private struct FacetsCompiler
         {
-            private DatatypeImplementation _datatype;
-            private RestrictionFacets _derivedRestriction;
+            private readonly DatatypeImplementation _datatype;
+            private readonly RestrictionFacets _derivedRestriction;
 
-            private RestrictionFlags _baseFlags;
-            private RestrictionFlags _baseFixedFlags;
-            private RestrictionFlags _validRestrictionFlags;
+            private readonly RestrictionFlags _baseFlags;
+            private readonly RestrictionFlags _baseFixedFlags;
+            private readonly RestrictionFlags _validRestrictionFlags;
 
             //Helpers
-            private XmlSchemaDatatype _nonNegativeInt;
-            private XmlSchemaDatatype _builtInType;
-            private XmlTypeCode _builtInEnum;
+            private readonly XmlSchemaDatatype _nonNegativeInt;
+            private readonly XmlSchemaDatatype _builtInType;
+            private readonly XmlTypeCode _builtInEnum;
 
             private bool _firstPattern;
             private StringBuilder _regStr;
@@ -360,7 +359,7 @@ namespace System.Xml.Schema
                     {
                         _regStr.Append(")");
                         string tempStr = _regStr.ToString();
-                        if (tempStr.IndexOf('|') != -1)
+                        if (tempStr.Contains('|'))
                         { // ordinal compare
                             _regStr.Insert(0, "(");
                             _regStr.Append(")");
@@ -462,7 +461,7 @@ namespace System.Xml.Schema
                         break;
 
                     default:
-                        Debug.Assert(false);
+                        Debug.Fail($"Unexpected facet type {facet.FacetType}");
                         break;
                 }
             }
@@ -506,7 +505,7 @@ namespace System.Xml.Schema
                         throw new XmlSchemaException(SR.Sch_MinLengthGtMaxLength, string.Empty);
                     }
                 }
-                
+
                 if (
                     (_derivedRestriction.Flags & RestrictionFlags.MinInclusive) != 0 &&
                     (_derivedRestriction.Flags & RestrictionFlags.MaxInclusive) != 0
@@ -792,15 +791,15 @@ namespace System.Xml.Schema
         {
             return null;
         }
-        internal virtual Exception CheckValueFacets(Int64 value, XmlSchemaDatatype datatype)
+        internal virtual Exception CheckValueFacets(long value, XmlSchemaDatatype datatype)
         {
             return null;
         }
-        internal virtual Exception CheckValueFacets(Int32 value, XmlSchemaDatatype datatype)
+        internal virtual Exception CheckValueFacets(int value, XmlSchemaDatatype datatype)
         {
             return null;
         }
-        internal virtual Exception CheckValueFacets(Int16 value, XmlSchemaDatatype datatype)
+        internal virtual Exception CheckValueFacets(short value, XmlSchemaDatatype datatype)
         {
             return null;
         }
@@ -989,9 +988,8 @@ namespace System.Xml.Schema
 
     internal class Numeric10FacetsChecker : FacetsChecker
     {
-        private static readonly char[] s_signs = new char[] { '+', '-' };
-        private decimal _maxValue;
-        private decimal _minValue;
+        private readonly decimal _maxValue;
+        private readonly decimal _minValue;
 
         internal Numeric10FacetsChecker(decimal minVal, decimal maxVal)
         {
@@ -1062,18 +1060,18 @@ namespace System.Xml.Schema
             return null;
         }
 
-        internal override Exception CheckValueFacets(Int64 value, XmlSchemaDatatype datatype)
+        internal override Exception CheckValueFacets(long value, XmlSchemaDatatype datatype)
         {
             decimal decimalValue = (decimal)value;
             return CheckValueFacets(decimalValue, datatype);
         }
 
-        internal override Exception CheckValueFacets(Int32 value, XmlSchemaDatatype datatype)
+        internal override Exception CheckValueFacets(int value, XmlSchemaDatatype datatype)
         {
             decimal decimalValue = (decimal)value;
             return CheckValueFacets(decimalValue, datatype);
         }
-        internal override Exception CheckValueFacets(Int16 value, XmlSchemaDatatype datatype)
+        internal override Exception CheckValueFacets(short value, XmlSchemaDatatype datatype)
         {
             decimal decimalValue = (decimal)value;
             return CheckValueFacets(decimalValue, datatype);
@@ -1100,9 +1098,9 @@ namespace System.Xml.Schema
             int powerCnt = 0;
             if (value < 0)
             {
-                value = Decimal.Negate(value); //Need to compare maxValue allowed against the absolute value
+                value = decimal.Negate(value); //Need to compare maxValue allowed against the absolute value
             }
-            while (Decimal.Truncate(value) != value)
+            while (decimal.Truncate(value) != value)
             { //Till it has a fraction
                 value = value * 10;
                 powerCnt++;

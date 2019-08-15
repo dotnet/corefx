@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.IO.Pipelines.Tests
 {
-    public class PipeResetTests : IDisposable
+    public partial class PipeResetTests : IDisposable
     {
         public PipeResetTests()
         {
@@ -26,21 +26,6 @@ namespace System.IO.Pipelines.Tests
         private readonly TestMemoryPool _pool;
 
         private readonly Pipe _pipe;
-
-        [Fact]
-        public async Task LengthIsReseted()
-        {
-            var source = new byte[] { 1, 2, 3 };
-
-            await _pipe.Writer.WriteAsync(source);
-
-            _pipe.Reader.Complete();
-            _pipe.Writer.Complete();
-
-            _pipe.Reset();
-
-            Assert.Equal(0, _pipe.Length);
-        }
 
         [Fact]
         public async Task ReadsAndWritesAfterReset()
@@ -77,6 +62,17 @@ namespace System.IO.Pipelines.Tests
         {
             _pipe.Reader.Complete();
             Assert.Throws<InvalidOperationException>(() => _pipe.Reset());
+        }
+
+        [Fact]
+        public void ResetResetsReaderAwaitable()
+        {
+            _pipe.Reader.Complete();
+            _pipe.Writer.Complete();
+
+            _pipe.Reset();
+
+            Assert.False(_pipe.Reader.TryRead(out ReadResult result));
         }
     }
 }

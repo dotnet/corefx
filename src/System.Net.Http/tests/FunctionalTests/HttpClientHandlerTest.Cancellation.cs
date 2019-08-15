@@ -4,17 +4,26 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
+using System.DirectoryServices.Protocols;
 using System.IO;
+using System.Linq;
 using System.Net.Test.Common;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Microsoft.DotNet.XUnitExtensions;
+
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
-    public abstract class HttpClientHandler_Cancellation_Test : HttpClientTestBase
+    public abstract class HttpClientHandler_Cancellation_Test : HttpClientHandlerTestBase
     {
+        public HttpClientHandler_Cancellation_Test(ITestOutputHelper output) : base(output) { }
+
         [Theory]
         [InlineData(false, CancellationMode.Token)]
         [InlineData(true, CancellationMode.Token)]
@@ -26,8 +35,14 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
+            if (LoopbackServerFactory.IsHttp2 && chunkedTransfer)
+            {
+                // There is no chunked encoding in HTTP/2
+                return;
+            }
+
             var serverRelease = new TaskCompletionSource<bool>();
-            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            await LoopbackServerFactory.CreateClientAndServerAsync(async uri =>
             {
                 try
                 {
@@ -38,7 +53,8 @@ namespace System.Net.Http.Functional.Tests
 
                         var waitToSend = new TaskCompletionSource<bool>();
                         var contentSending = new TaskCompletionSource<bool>();
-                        var req = new HttpRequestMessage(HttpMethod.Post, uri) { Content = new ByteAtATimeContent(int.MaxValue, waitToSend.Task, contentSending) };
+                        var req = new HttpRequestMessage(HttpMethod.Post, uri) { Version = VersionFromUseHttp2 };
+                        req.Content = new ByteAtATimeContent(int.MaxValue, waitToSend.Task, contentSending, millisecondDelayBetweenBytes: 1);
                         req.Headers.TransferEncodingChunked = chunkedTransfer;
 
                         Task<HttpResponseMessage> resp = client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, cts.Token);
@@ -52,12 +68,19 @@ namespace System.Net.Http.Functional.Tests
                 {
                     serverRelease.SetResult(true);
                 }
-            }, server => server.AcceptConnectionAsync(connection => serverRelease.Task));
+            }, async server =>
+            {
+                try
+                {
+                    await server.AcceptConnectionAsync(connection => serverRelease.Task);
+                }
+                catch { };  // Ignore any closing errors since we did not really process anything.
+            });
         }
 
         [Theory]
-        [MemberData(nameof(TwoBoolsAndCancellationMode))]
-        public async Task GetAsync_CancelDuringResponseHeadersReceived_TaskCanceledQuickly(bool chunkedTransfer, bool connectionClose, CancellationMode mode)
+        [MemberData(nameof(OneBoolAndCancellationMode))]
+        public async Task GetAsync_CancelDuringResponseHeadersReceived_TaskCanceledQuickly(bool connectionClose, CancellationMode mode)
         {
             using (HttpClient client = CreateHttpClient())
             {
@@ -80,7 +103,7 @@ namespace System.Net.Http.Functional.Tests
 
                     await ValidateClientCancellationAsync(async () =>
                     {
-                        var req = new HttpRequestMessage(HttpMethod.Get, url);
+                        var req = new HttpRequestMessage(HttpMethod.Get, url) { Version = VersionFromUseHttp2 };
                         req.Headers.ConnectionClose = connectionClose;
 
                         Task<HttpResponseMessage> getResponse = client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, cts.Token);
@@ -98,6 +121,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Test needs to be rewritten to work on UAP due to WinRT differences")]
         [Theory]
         [MemberData(nameof(TwoBoolsAndCancellationMode))]
         public async Task GetAsync_CancelDuringResponseBodyReceived_Buffered_TaskCanceledQuickly(bool chunkedTransfer, bool connectionClose, CancellationMode mode)
@@ -127,7 +151,7 @@ namespace System.Net.Http.Functional.Tests
 
                     await ValidateClientCancellationAsync(async () =>
                     {
-                        var req = new HttpRequestMessage(HttpMethod.Get, url);
+                        var req = new HttpRequestMessage(HttpMethod.Get, url) { Version = VersionFromUseHttp2 };
                         req.Headers.ConnectionClose = connectionClose;
 
                         Task<HttpResponseMessage> getResponse = client.SendAsync(req, HttpCompletionOption.ResponseContentRead, cts.Token);
@@ -177,7 +201,7 @@ namespace System.Net.Http.Functional.Tests
                         await clientFinished.Task;
                     });
 
-                    var req = new HttpRequestMessage(HttpMethod.Get, url);
+                    var req = new HttpRequestMessage(HttpMethod.Get, url) { Version = VersionFromUseHttp2 };
                     req.Headers.ConnectionClose = connectionClose;
                     Task<HttpResponseMessage> getResponse = client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, cts.Token);
                     await ValidateClientCancellationAsync(async () =>
@@ -202,8 +226,8 @@ namespace System.Net.Http.Functional.Tests
 
         [Theory]
         [InlineData(CancellationMode.CancelPendingRequests, false)]
-        [InlineData(CancellationMode.DisposeHttpClient, true)]
-        [InlineData(CancellationMode.CancelPendingRequests, false)]
+        [InlineData(CancellationMode.DisposeHttpClient, false)]
+        [InlineData(CancellationMode.CancelPendingRequests, true)]
         [InlineData(CancellationMode.DisposeHttpClient, true)]
         public async Task GetAsync_CancelPendingRequests_DoesntCancelReadAsyncOnResponseStream(CancellationMode mode, bool copyToAsync)
         {
@@ -287,18 +311,20 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "WinRT stack can't set MaxConnectionsPerServer < 2")]
+        [ConditionalFact]
         public async Task MaxConnectionsPerServer_WaitingConnectionsAreCancelable()
         {
-            if (IsNetfxHandler)
+            if (IsNetfxHandler || IsCurlHandler)
             {
                 // Throws HttpRequestException wrapping a WebException for the canceled request
                 // instead of throwing an OperationCanceledException or a canceled WebException directly.
-                return;
+                // With CurlHandler, this test sometimes hangs.
+                throw new SkipTestException("Skipping on unstable platform handler");
             }
 
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (HttpClient client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 handler.MaxConnectionsPerServer = 1;
                 client.Timeout = Timeout.InfiniteTimeSpan;
@@ -340,6 +366,170 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [Fact]
+        public async Task SendAsync_Cancel_CancellationTokenPropagates()
+        {
+            TaskCompletionSource<bool> clientCanceled = new TaskCompletionSource<bool>();
+            await LoopbackServerFactory.CreateClientAndServerAsync(
+                async uri =>
+                {
+                    var cts = new CancellationTokenSource();
+                    cts.Cancel();
+
+                    using (HttpClient client = CreateHttpClient())
+                    {
+                        OperationCanceledException ex = null;
+                        try
+                        {
+                            await client.GetAsync(uri, cts.Token);
+                        }
+                        catch (OperationCanceledException e)
+                        {
+                            ex = e;
+                        }
+                        Assert.True(ex != null, "Expected OperationCancelledException, but no exception was thrown.");
+
+                        Assert.True(cts.Token.IsCancellationRequested, "cts token IsCancellationRequested");
+
+                        // .NET Framework has bug where it doesn't propagate token information.
+                        Assert.True(ex.CancellationToken.IsCancellationRequested, "exception token IsCancellationRequested");
+
+                        clientCanceled.SetResult(true);
+                    }
+                },
+                async server =>
+                {
+                    Task serverTask = server.HandleRequestAsync();
+                    await clientCanceled.Task;
+                });
+        }
+
+        public static IEnumerable<object[]> PostAsync_Cancel_CancellationTokenPassedToContent_MemberData()
+        {
+            // Note: For HTTP2, the actual token will be a linked token and will not be an exact match for the original token.
+            // Verify that it behaves as expected by cancelling it and validating that cancellation propagates.
+
+            // StreamContent
+            {
+                CancellationTokenSource tokenSource = new CancellationTokenSource();
+                var actualToken = new StrongBox<CancellationToken>();
+                bool called = false;
+                var content = new StreamContent(new DelegateStream(
+                    canReadFunc: () => true,
+                    readAsyncFunc: (buffer, offset, count, cancellationToken) =>
+                    {
+                        int result = 1;
+                        if (called)
+                        {
+                            result = 0;
+                            Assert.False(cancellationToken.IsCancellationRequested);
+                            tokenSource.Cancel();
+                            Assert.True(cancellationToken.IsCancellationRequested);
+                        }
+
+                        called = true;
+                        return Task.FromResult(result);
+                    }
+                ));
+                yield return new object[] { content, tokenSource };
+            }
+
+            // MultipartContent
+            {
+                CancellationTokenSource tokenSource = new CancellationTokenSource();
+                var actualToken = new StrongBox<CancellationToken>();
+                bool called = false;
+                var content = new MultipartContent();
+                content.Add(new StreamContent(new DelegateStream(
+                    canReadFunc: () => true,
+                    canSeekFunc: () => true,
+                    lengthFunc: () => 1,
+                    positionGetFunc: () => 0,
+                    positionSetFunc: _ => {},
+                    readAsyncFunc: (buffer, offset, count, cancellationToken) =>
+                    {
+                        int result = 1;
+                        if (called)
+                        {
+                            result = 0;
+                            Assert.False(cancellationToken.IsCancellationRequested);
+                            tokenSource.Cancel();
+                            Assert.True(cancellationToken.IsCancellationRequested);
+                        }
+
+                        called = true;
+                        return Task.FromResult(result);
+                    }
+                )));
+                yield return new object[] { content, tokenSource };
+            }
+
+            // MultipartFormDataContent
+            {
+                CancellationTokenSource tokenSource = new CancellationTokenSource();
+                var actualToken = new StrongBox<CancellationToken>();
+                bool called = false;
+                var content = new MultipartFormDataContent();
+                content.Add(new StreamContent(new DelegateStream(
+                    canReadFunc: () => true,
+                    canSeekFunc: () => true,
+                    lengthFunc: () => 1,
+                    positionGetFunc: () => 0,
+                    positionSetFunc: _ => {},
+                    readAsyncFunc: (buffer, offset, count, cancellationToken) =>
+                    {
+                        int result = 1;
+                        if (called)
+                        {
+                            result = 0;
+                            Assert.False(cancellationToken.IsCancellationRequested);
+                            tokenSource.Cancel();
+                            Assert.True(cancellationToken.IsCancellationRequested);
+                        }
+
+                        called = true;
+                        return Task.FromResult(result);
+                    }
+                )));
+                yield return new object[] { content, tokenSource };
+            }
+        }
+
+        [OuterLoop("Uses Task.Delay")]
+        [Theory]
+        [MemberData(nameof(PostAsync_Cancel_CancellationTokenPassedToContent_MemberData))]
+        public async Task PostAsync_Cancel_CancellationTokenPassedToContent(HttpContent content, CancellationTokenSource cancellationTokenSource)
+        {
+            if (IsUapHandler)
+            {
+                // HttpHandlerToFilter doesn't flow the token into the request body.
+                return;
+            }
+
+            await LoopbackServerFactory.CreateClientAndServerAsync(
+                async uri =>
+                {
+                    using (var invoker = new HttpMessageInvoker(CreateHttpClientHandler()))
+                    using (var req = new HttpRequestMessage(HttpMethod.Post, uri) { Content = content, Version = VersionFromUseHttp2 })
+                    try
+                    {
+                        using (HttpResponseMessage resp = await invoker.SendAsync(req, cancellationTokenSource.Token))
+                        {
+                            Assert.Equal("Hello World", await resp.Content.ReadAsStringAsync());
+                        }
+                    }
+                    catch (OperationCanceledException) { }
+                },
+                async server =>
+                {
+                    try
+                    {
+                        await server.HandleRequestAsync(content: "Hello World");
+                    }
+                    catch (Exception) { }
+                });
+        }
+
         private async Task ValidateClientCancellationAsync(Func<Task> clientBodyAsync)
         {
             var stopwatch = Stopwatch.StartNew();
@@ -362,7 +552,7 @@ namespace System.Net.Http.Functional.Tests
                     "Expected cancellation exception, got:" + Environment.NewLine + error);
             }
 
-            Assert.True(stopwatch.Elapsed < new TimeSpan(0, 0, 30), $"Elapsed time {stopwatch.Elapsed} should be less than 30 seconds, was {stopwatch.Elapsed.TotalSeconds}");
+            Assert.True(stopwatch.Elapsed < new TimeSpan(0, 0, 60), $"Elapsed time {stopwatch.Elapsed} should be less than 60 seconds, was {stopwatch.Elapsed.TotalSeconds}");
         }
 
         private static void Cancel(CancellationMode mode, HttpClient client, CancellationTokenSource cts)
@@ -393,6 +583,11 @@ namespace System.Net.Http.Functional.Tests
 
         private static readonly bool[] s_bools = new[] { true, false };
 
+        public static IEnumerable<object[]> OneBoolAndCancellationMode() =>
+            from first in s_bools
+            from mode in new[] { CancellationMode.Token, CancellationMode.CancelPendingRequests, CancellationMode.DisposeHttpClient, CancellationMode.Token | CancellationMode.CancelPendingRequests }
+            select new object[] { first, mode };
+
         public static IEnumerable<object[]> TwoBoolsAndCancellationMode() =>
             from first in s_bools
             from second in s_bools
@@ -404,39 +599,5 @@ namespace System.Net.Http.Functional.Tests
             from second in s_bools
             from third in s_bools
             select new object[] { first, second, third };
-
-        private sealed class ByteAtATimeContent : HttpContent
-        {
-            private readonly Task _waitToSend;
-            private readonly TaskCompletionSource<bool> _startedSend;
-            private readonly int _length;
-
-            public ByteAtATimeContent(int length, Task waitToSend, TaskCompletionSource<bool> startedSend)
-            {
-                _length = length;
-                _waitToSend = waitToSend;
-                _startedSend = startedSend;
-            }
-
-            protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context)
-            {
-                await _waitToSend;
-                _startedSend.SetResult(true);
-
-                var buffer = new byte[1] { 42 };
-                for (int i = 0; i < _length; i++)
-                {
-                    await stream.WriteAsync(buffer);
-                    await stream.FlushAsync();
-                    await Task.Delay(1);
-                }
-            }
-
-            protected override bool TryComputeLength(out long length)
-            {
-                length = _length;
-                return true;
-            }
-        }
     }
 }

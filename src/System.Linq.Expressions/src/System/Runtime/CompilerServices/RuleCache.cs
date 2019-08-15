@@ -17,7 +17,7 @@ namespace System.Runtime.CompilerServices
     public class RuleCache<T> where T : class
     {
         private T[] _rules = Array.Empty<T>();
-        private readonly Object _cacheLock = new Object();
+        private readonly object _cacheLock = new object();
 
         private const int MaxRules = 128;
 
@@ -73,24 +73,6 @@ namespace System.Runtime.CompilerServices
                 _rules = AddOrInsert(_rules, newRule);
             }
         }
-
-        internal void ReplaceRule(T oldRule, T newRule)
-        {
-            // need a lock to make sure we are replacing the right rule
-            lock (_cacheLock)
-            {
-                int i = Array.IndexOf(_rules, oldRule);
-                if (i >= 0)
-                {
-                    _rules[i] = newRule;
-                    return; // DONE
-                }
-
-                // could not find it.
-                _rules = AddOrInsert(_rules, newRule);
-            }
-        }
-
 
         // Adds to end or inserts items at InsertPosition
         private const int InsertPosition = MaxRules / 2;

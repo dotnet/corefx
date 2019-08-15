@@ -10,7 +10,7 @@ namespace System.Configuration
     {
         private SettingsPropertyCollection _properties = null;
         private SettingsProviderCollection _providers = null;
-        private SettingsPropertyValueCollection _propertyValues = null;
+        private readonly SettingsPropertyValueCollection _propertyValues = null;
         private SettingsContext _context = null;
         private bool _isSynchronized = false;
 
@@ -54,17 +54,17 @@ namespace System.Configuration
         private object GetPropertyValueByName(string propertyName)
         {
             if (Properties == null || _propertyValues == null || Properties.Count == 0)
-                throw new SettingsPropertyNotFoundException(string.Format(SR.SettingsPropertyNotFound, propertyName));
+                throw new SettingsPropertyNotFoundException(SR.Format(SR.SettingsPropertyNotFound, propertyName));
             SettingsProperty pp = Properties[propertyName];
             if (pp == null)
-                throw new SettingsPropertyNotFoundException(string.Format(SR.SettingsPropertyNotFound, propertyName));
+                throw new SettingsPropertyNotFoundException(SR.Format(SR.SettingsPropertyNotFound, propertyName));
             SettingsPropertyValue p = _propertyValues[propertyName];
             if (p == null)
             {
                 GetPropertiesFromProvider(pp.Provider);
                 p = _propertyValues[propertyName];
                 if (p == null)
-                    throw new SettingsPropertyNotFoundException(string.Format(SR.SettingsPropertyNotFound, propertyName));
+                    throw new SettingsPropertyNotFoundException(SR.Format(SR.SettingsPropertyNotFound, propertyName));
             }
             return p.PropertyValue;
         }
@@ -72,17 +72,17 @@ namespace System.Configuration
         private void SetPropertyValueByName(string propertyName, object propertyValue)
         {
             if (Properties == null || _propertyValues == null || Properties.Count == 0)
-                throw new SettingsPropertyNotFoundException(string.Format(SR.SettingsPropertyNotFound, propertyName));
+                throw new SettingsPropertyNotFoundException(SR.Format(SR.SettingsPropertyNotFound, propertyName));
 
             SettingsProperty pp = Properties[propertyName];
             if (pp == null)
-                throw new SettingsPropertyNotFoundException(string.Format(SR.SettingsPropertyNotFound, propertyName));
+                throw new SettingsPropertyNotFoundException(SR.Format(SR.SettingsPropertyNotFound, propertyName));
 
             if (pp.IsReadOnly)
-                throw new SettingsPropertyIsReadOnlyException(string.Format(SR.SettingsPropertyReadOnly, propertyName));
+                throw new SettingsPropertyIsReadOnlyException(SR.Format(SR.SettingsPropertyReadOnly, propertyName));
 
             if (propertyValue != null && !pp.PropertyType.IsInstanceOfType(propertyValue))
-                throw new SettingsPropertyWrongTypeException(string.Format(SR.SettingsPropertyWrongType, propertyName));
+                throw new SettingsPropertyWrongTypeException(SR.Format(SR.SettingsPropertyWrongType, propertyName));
 
             SettingsPropertyValue p = _propertyValues[propertyName];
             if (p == null)
@@ -90,7 +90,7 @@ namespace System.Configuration
                 GetPropertiesFromProvider(pp.Provider);
                 p = _propertyValues[propertyName];
                 if (p == null)
-                    throw new SettingsPropertyNotFoundException(string.Format(SR.SettingsPropertyNotFound, propertyName));
+                    throw new SettingsPropertyNotFoundException(SR.Format(SR.SettingsPropertyNotFound, propertyName));
             }
 
             p.PropertyValue = propertyValue;
@@ -145,10 +145,10 @@ namespace System.Configuration
                 pp.IsDirty = false;
         }
 
-        virtual public SettingsPropertyCollection Properties { get { return _properties; } }
-        virtual public SettingsProviderCollection Providers { get { return _providers; } }
-        virtual public SettingsPropertyValueCollection PropertyValues { get { return _propertyValues; } }
-        virtual public SettingsContext Context { get { return _context; } }
+        public virtual SettingsPropertyCollection Properties { get { return _properties; } }
+        public virtual SettingsProviderCollection Providers { get { return _providers; } }
+        public virtual SettingsPropertyValueCollection PropertyValues { get { return _propertyValues; } }
+        public virtual SettingsContext Context { get { return _context; } }
 
         private void GetPropertiesFromProvider(SettingsProvider provider)
         {

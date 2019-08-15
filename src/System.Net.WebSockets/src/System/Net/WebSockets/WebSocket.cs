@@ -40,19 +40,17 @@ namespace System.Net.WebSockets
                 WebSocketReceiveResult r = await ReceiveAsync(arraySegment, cancellationToken).ConfigureAwait(false);
                 return new ValueWebSocketReceiveResult(r.Count, r.MessageType, r.EndOfMessage);
             }
-            else
+
+            byte[] array = ArrayPool<byte>.Shared.Rent(buffer.Length);
+            try
             {
-                byte[] array = ArrayPool<byte>.Shared.Rent(buffer.Length);
-                try
-                {
-                    WebSocketReceiveResult r = await ReceiveAsync(new ArraySegment<byte>(array, 0, buffer.Length), cancellationToken).ConfigureAwait(false);
-                    new Span<byte>(array, 0, r.Count).CopyTo(buffer.Span);
-                    return new ValueWebSocketReceiveResult(r.Count, r.MessageType, r.EndOfMessage);
-                }
-                finally
-                {
-                    ArrayPool<byte>.Shared.Return(array);
-                }
+                WebSocketReceiveResult r = await ReceiveAsync(new ArraySegment<byte>(array, 0, buffer.Length), cancellationToken).ConfigureAwait(false);
+                new Span<byte>(array, 0, r.Count).CopyTo(buffer.Span);
+                return new ValueWebSocketReceiveResult(r.Count, r.MessageType, r.EndOfMessage);
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(array);
             }
         }
 
@@ -102,10 +100,10 @@ namespace System.Net.WebSockets
                 validStatesText = string.Join(", ", validStates);
             }
 
-            throw new WebSocketException(SR.Format(SR.net_WebSockets_InvalidState, state, validStatesText));
+            throw new WebSocketException(WebSocketError.InvalidState, SR.Format(SR.net_WebSockets_InvalidState, state, validStatesText));
         }
 
-        protected static bool IsStateTerminal(WebSocketState state) => 
+        protected static bool IsStateTerminal(WebSocketState state) =>
             state == WebSocketState.Closed || state == WebSocketState.Aborted;
 
         public static ArraySegment<byte> CreateClientBuffer(int receiveBufferSize, int sendBufferSize)

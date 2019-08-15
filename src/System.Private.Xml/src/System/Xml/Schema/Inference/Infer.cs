@@ -13,11 +13,9 @@ using System.Globalization;
 
 
 namespace System.Xml.Schema
-
 {
-    /// <include file='doc\Infer.uex' path='docs/doc[@for="Infer"]/*' />
     /// <summary>
-    /// Infer class serves for infering XML Schema from given XML instance document.
+    /// Infer class serves for inferring XML Schema from given XML instance document.
     /// </summary>
     public sealed class XmlSchemaInference
     {
@@ -110,63 +108,57 @@ namespace System.Xml.Schema
         private XmlSchema _rootSchema = null; //(XmlSchema) xsc[TargetNamespace];
         private XmlSchemaSet _schemaSet;
         private XmlReader _xtr;
-        private NameTable _nametable;
+        private readonly NameTable _nametable;
         private string _targetNamespace;
-        private XmlNamespaceManager _namespaceManager;
+        private readonly XmlNamespaceManager _namespaceManager;
         //private Hashtable schemas;    //contains collection of schemas before they get added to the XmlSchemaSet xsc
         //private bool bRefine = false; //indicates if we are going to infer or refine schema when InferSchema is called
-        private ArrayList _schemaList;
+        private readonly ArrayList _schemaList;
         private InferenceOption _occurrence = InferenceOption.Restricted;
         private InferenceOption _typeInference = InferenceOption.Restricted;
 
-        /*  internal struct ReplaceList 
+        /*  internal struct ReplaceList
           {
               internal XmlSchemaObjectCollection col;
               internal int position;
 
-              internal ReplaceList(XmlSchemaObjectCollection col, int position) 
+              internal ReplaceList(XmlSchemaObjectCollection col, int position)
               {
                   this.col = col;
                   this.position = position;
               }
           }*/
 
-        /// <include file='doc\Infer.uex' path='docs/doc[@for="InferenceOption"]/*' />
         public enum InferenceOption
         {
-            /// <include file='doc\Infer.uex' path='docs/doc[@for="InferenceOption.Restricted"]/*' />
             Restricted,
-            /// <include file='doc\Infer.uex' path='docs/doc[@for="InferenceOption.Relaxed"]/*' />
             Relaxed
         };
 
-        /// <include file='doc\Infer.uex' path='docs/doc[@for="Infer.Occurrence"]/*' />
         public InferenceOption Occurrence
         {
-            set
-            {
-                _occurrence = value;
-            }
             get
             {
                 return _occurrence;
             }
-        }
-
-        /// <include file='doc\Infer.uex' path='docs/doc[@for="Infer.TypeInference"]/*' />
-        public InferenceOption TypeInference
-        {
             set
             {
-                _typeInference = value;
+                _occurrence = value;
             }
+        }
+
+        public InferenceOption TypeInference
+        {
             get
             {
                 return _typeInference;
             }
+            set
+            {
+                _typeInference = value;
+            }
         }
 
-        /// <include file='doc\Infer.uex' path='docs/doc[@for="Infer.Infer"]/*' />
         public XmlSchemaInference()
         {
             _nametable = new NameTable();
@@ -175,13 +167,11 @@ namespace System.Xml.Schema
             _schemaList = new ArrayList();
         }
 
-        /// <include file='doc\Infer.uex' path='docs/doc[@for="Infer.InferSchema"]/*' />
         public XmlSchemaSet InferSchema(XmlReader instanceDocument)
         {
             return InferSchema1(instanceDocument, new XmlSchemaSet(_nametable));
         }
 
-        /// <include file='doc\Infer.uex' path='docs/doc[@for="Infer.InferSchema1"]/*' />
         public XmlSchemaSet InferSchema(XmlReader instanceDocument, XmlSchemaSet schemas)
         {
             if (schemas == null)
@@ -190,6 +180,7 @@ namespace System.Xml.Schema
             }
             return InferSchema1(instanceDocument, schemas);
         }
+
         internal XmlSchemaSet InferSchema1(XmlReader instanceDocument, XmlSchemaSet schemas)
         {
             if (instanceDocument == null)
@@ -236,15 +227,15 @@ namespace System.Xml.Schema
                     InferElement(xse, false, _rootSchema);
                 }
 
-                /*  foreach (ReplaceList listItem in schemaList) 
+                /*  foreach (ReplaceList listItem in schemaList)
                   {
-                      if (listItem.position < listItem.col.Count) 
+                      if (listItem.position < listItem.col.Count)
                       {
                           XmlSchemaElement particle = listItem.col[listItem.position] as XmlSchemaElement;
-                          if (particle != null && (particle.RefName.Namespace == XmlSchema.Namespace)) 
+                          if (particle != null && (particle.RefName.Namespace == XmlSchema.Namespace))
                           {
                               XmlSchemaAny any = new XmlSchemaAny();
-                              if (particle.MaxOccurs != 1) 
+                              if (particle.MaxOccurs != 1)
                               {
                                   any.MaxOccurs = particle.MaxOccurs;
                               }
@@ -259,11 +250,11 @@ namespace System.Xml.Schema
                           }
                       }
                   }*/
-                foreach (String prefix in _namespaceManager)
+                foreach (string prefix in _namespaceManager)
                 {
                     if (!prefix.Equals("xml") && !prefix.Equals("xmlns"))
                     {
-                        String ns = _namespaceManager.LookupNamespace(_nametable.Get(prefix));
+                        string ns = _namespaceManager.LookupNamespace(_nametable.Get(prefix));
                         if (ns.Length != 0)
                         { //Do not add xmlns=""
                             _rootSchema.Namespaces.Add(prefix, ns);
@@ -296,10 +287,10 @@ namespace System.Xml.Schema
             bool add = true;
 
             Debug.Assert(compiledAttributes != null); //AttributeUses is never null
-                                                      // First we need to look into the already compiled attributes 
+                                                      // First we need to look into the already compiled attributes
                                                       //   (they come from the schemaset which we got on input)
                                                       // If there are none or we don't find it there, then we must search the list of attributes
-                                                      //   where we are going to add a new one (if it doesn't exist). 
+                                                      //   where we are going to add a new one (if it doesn't exist).
                                                       //   This is necessary to avoid adding duplicate attribute declarations.
             ICollection searchCollectionPrimary, searchCollectionSecondary;
             if (compiledAttributes.Count > 0)
@@ -360,7 +351,7 @@ namespace System.Xml.Schema
                         xs.TargetNamespace = childURI;
                     //schemas.Add(childURI, xs);
                     _schemaSet.Add(xs);
-                    if (prefix.Length != 0 && String.Compare(prefix, "xml", StringComparison.OrdinalIgnoreCase) != 0)
+                    if (prefix.Length != 0 && !string.Equals(prefix, "xml", StringComparison.OrdinalIgnoreCase))
                         _namespaceManager.AddNamespace(prefix, childURI);
                 }
                 else
@@ -516,7 +507,7 @@ namespace System.Xml.Schema
             XmlSchemaElement returnedElement = xse; //this value will change to elementReference if childURI!= parentURI
             XmlSchema xs = null;
             bool bCreatingNewType = true;
-            if (childURI == String.Empty)
+            if (childURI == string.Empty)
             {
                 childURI = null;
             }
@@ -624,7 +615,7 @@ namespace System.Xml.Schema
                         addLocation.Insert(positionWithinCollection, elementReference);
                     }
                     returnedElement = elementReference;
-                    /* if (childURI == XmlSchema.Namespace) 
+                    /* if (childURI == XmlSchema.Namespace)
                      {
                          schemaList.Add(new ReplaceList(addLocation, positionWithinCollection));
                      }*/
@@ -643,7 +634,7 @@ namespace System.Xml.Schema
         /// </summary>
         /// <param name="xse">XmlSchemaElement corresponding to the element just read by the xtr XmlTextReader</param>
         /// <param name="bCreatingNewType">true if the type is newly created, false if the type already existed and matches the current element name</param>
-        /// <param name="nsContext">namespaceURI of the parent element. Used to distinguish if ref= should be used when parent is in different ns than child.</param>
+        /// <param name="parentSchema">namespaceURI of the parent element. Used to distinguish if ref= should be used when parent is in different ns than child.</param>
         internal void InferElement(XmlSchemaElement xse, bool bCreatingNewType, XmlSchema parentSchema)
         {
             bool bEmptyElement = _xtr.IsEmptyElement;
@@ -917,7 +908,7 @@ namespace System.Xml.Schema
                     { //untill now the element was empty or SimpleType - it now becomes complex type
                         ct = new XmlSchemaComplexType();
                         xse.SchemaType = ct;
-                        if (!xse.SchemaTypeName.IsEmpty) //BUGBUG, This assumption is wrong 
+                        if (!xse.SchemaTypeName.IsEmpty) //BUGBUG, This assumption is wrong
                         {
                             ct.IsMixed = true;
                             xse.SchemaTypeName = XmlQualifiedName.Empty;
@@ -1045,7 +1036,6 @@ namespace System.Xml.Schema
         /// <param name="xtr">text reader positioned to the current element</param>
         /// <param name="ct">complex type with Sequence or Choice Particle</param>
         /// <param name="lastUsedSeqItem">ordinal number in the sequence to indicate current sequence position</param>
-        /// <param name="itemsMadeOptional">hashtable of elements with minOccurs changed to 0 in order to satisfy sequence requirements. These elements will be rolled back if Sequence becomes Sequence of Choice.</param>
         /// <param name="bParticleChanged">This indicates to the caller if Sequence was changed to Choice</param>
         internal XmlSchemaElement FindMatchingElement(bool bCreatingNewType, XmlReader xtr, XmlSchemaComplexType ct, ref int lastUsedSeqItem, ref bool bParticleChanged, XmlSchema parentSchema, bool setMaxoccurs)
         {
@@ -1747,7 +1737,7 @@ namespace System.Xml.Schema
                     return ST_double;
 
                 default:
-                    Debug.Assert(false, "Expected type not matched");
+                    Debug.Fail("Expected type not matched");
                     return ST_string;
             }
             /*          if (currentType == null)
@@ -1782,7 +1772,7 @@ namespace System.Xml.Schema
                         return TF_float | TF_double | TF_string;
                     else
                         return TF_string;
-                //else 
+                //else
                 case 'I':       //try to match "INF"
                 INF:
                     if (s.Substring(i) == "INF")
@@ -2393,7 +2383,7 @@ namespace System.Xml.Schema
                 return TF_time | TF_string;
             else
             {
-                Debug.Assert(false, "Expected date, time or dateTime");
+                Debug.Fail("Expected date, time or dateTime");
                 return TF_string;
             }
         }
@@ -2422,11 +2412,11 @@ namespace System.Xml.Schema
             newElement.SourceUri = copyElement.SourceUri;
             newElement.SubstitutionGroup = copyElement.SubstitutionGroup;
             newElement.UnhandledAttributes = copyElement.UnhandledAttributes;
-            if (copyElement.MinOccurs != Decimal.One && this.Occurrence == InferenceOption.Relaxed)
+            if (copyElement.MinOccurs != decimal.One && this.Occurrence == InferenceOption.Relaxed)
             {
                 newElement.MinOccurs = copyElement.MinOccurs;
             }
-            if (copyElement.MaxOccurs != Decimal.One)
+            if (copyElement.MaxOccurs != decimal.One)
             {
                 newElement.MaxOccurs = copyElement.MaxOccurs;
             }

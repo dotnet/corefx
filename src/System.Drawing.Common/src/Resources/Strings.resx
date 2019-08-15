@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -221,6 +220,9 @@
   </data>
   <data name="GraphicsBufferQueryFail" xml:space="preserve">
     <value>Screen-compatible bitmap cannot be created. The screen bitmap format cannot be determined.</value>
+  </data>
+  <data name="IconInvalidMaskLength" xml:space="preserve">
+    <value>'{0}' data length expected {1}, read {2}</value>
   </data>
   <data name="ToolboxItemLocked" xml:space="preserve">
     <value>Toolbox item cannot be modified.</value>

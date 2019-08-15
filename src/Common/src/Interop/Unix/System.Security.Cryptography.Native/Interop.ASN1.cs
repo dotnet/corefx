@@ -35,7 +35,7 @@ internal static partial class Interop
         // Returns shared pointers, should not be tracked as a SafeHandle.
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_ObjNid2Obj")]
         internal static extern IntPtr ObjNid2Obj(int nid);
-        
+
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_Asn1ObjectFree")]
         internal static extern void Asn1ObjectFree(IntPtr o);
 
@@ -44,9 +44,6 @@ internal static partial class Interop
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_Asn1BitStringFree")]
         internal static extern void Asn1BitStringFree(IntPtr o);
-
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_DecodeAsn1OctetString")]
-        internal static extern SafeAsn1OctetStringHandle DecodeAsn1OctetString(byte[] buf, int len);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_Asn1OctetStringNew")]
         internal static extern SafeAsn1OctetStringHandle Asn1OctetStringNew();
@@ -60,22 +57,6 @@ internal static partial class Interop
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_Asn1StringFree")]
         internal static extern void Asn1StringFree(IntPtr o);
-
-        internal static string GetOidValue(SafeSharedAsn1ObjectHandle asn1Object)
-        {
-            Debug.Assert(asn1Object != null);
-
-            bool added = false;
-            asn1Object.DangerousAddRef(ref added);
-            try
-            {
-                return GetOidValue(asn1Object.DangerousGetHandle());
-            }
-            finally
-            {
-                asn1Object.DangerousRelease();
-            }
-        }
 
         internal static unsafe string GetOidValue(IntPtr asn1ObjectPtr)
         {
@@ -124,17 +105,6 @@ internal static partial class Interop
 
                 return Marshal.PtrToStringAnsi((IntPtr)buf, bytesNeeded);
             }
-        }
-    }
-}
-
-namespace Microsoft.Win32.SafeHandles
-{
-    internal class SafeSharedAsn1ObjectHandle : SafeInteriorHandle
-    {
-        private SafeSharedAsn1ObjectHandle() :
-            base(IntPtr.Zero, ownsHandle: true)
-        {
         }
     }
 }

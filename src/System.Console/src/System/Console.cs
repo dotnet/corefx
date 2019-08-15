@@ -11,7 +11,16 @@ namespace System
 {
     public static class Console
     {
-        private const int DefaultConsoleBufferSize = 256; // default size of buffer used in stream readers/writers
+        // Unlike many other buffer sizes throughout .NET, which often only affect performance, this buffer size has a
+        // functional impact on interactive console apps, where the size of the buffer passed to ReadFile/Console impacts
+        // how many characters the cmd window will allow to be typed as part of a single line. It also does affect perf,
+        // in particular when input is redirected and data may be consumed from a larger source. This 4K default size is the
+        // same as is currently used by most other environments/languages tried.
+        internal const int ReadBufferSize = 4096;
+        // There's no visible functional impact to the write buffer size, and as we auto flush on every write,
+        // there's little benefit to having a large buffer.  So we use a smaller buffer size to reduce working set.
+        private const int WriteBufferSize = 256;
+
         private static object InternalSyncObject = new object(); // for synchronizing changing of Console's static fields
         private static TextReader s_in;
         private static TextWriter s_out, s_error;
@@ -44,8 +53,8 @@ namespace System
 
                     Volatile.Write(ref s_inputEncoding, (Encoding)value.Clone());
 
-                    // We need to reinitialize Console.In in the next call to s_in
-                    // This will discard the current StreamReader, potentially 
+                    // We need to reinitialize 'Console.In' in the next call to s_in
+                    // This will discard the current StreamReader, potentially
                     // losing buffered data.
                     Volatile.Write(ref s_in, null);
                 }
@@ -67,8 +76,8 @@ namespace System
                     // Set the terminal console encoding.
                     ConsolePal.SetConsoleOutputEncoding(value);
 
-                    // Before changing the code page we need to flush the data 
-                    // if Out hasn't been redirected. Also, have the next call to  
+                    // Before changing the code page we need to flush the data
+                    // if Out hasn't been redirected. Also, have the next call to
                     // s_out reinitialize the console code page.
                     if (Volatile.Read(ref s_out) != null && !s_isOutTextWriterRedirected)
                     {
@@ -115,12 +124,12 @@ namespace System
 
         private static TextWriter CreateOutputWriter(Stream outputStream)
         {
-            return SyncTextWriter.GetSynchronizedTextWriter(outputStream == Stream.Null ?
+            return TextWriter.Synchronized(outputStream == Stream.Null ?
                 StreamWriter.Null :
                 new StreamWriter(
                     stream: outputStream,
-                    encoding: new ConsoleEncoding(OutputEncoding), // This ensures no prefix is written to the stream.
-                    bufferSize: DefaultConsoleBufferSize,
+                    encoding: OutputEncoding.RemovePreamble(), // This ensures no prefix is written to the stream.
+                    bufferSize: WriteBufferSize,
                     leaveOpen: true) { AutoFlush = true });
         }
 
@@ -408,7 +417,7 @@ namespace System
         public static void SetOut(TextWriter newOut)
         {
             CheckNonNull(newOut, nameof(newOut));
-            newOut = SyncTextWriter.GetSynchronizedTextWriter(newOut);
+            newOut = TextWriter.Synchronized(newOut);
             Volatile.Write(ref s_isOutTextWriterRedirected, true);
 
             lock (InternalSyncObject)
@@ -420,7 +429,7 @@ namespace System
         public static void SetError(TextWriter newError)
         {
             CheckNonNull(newError, nameof(newError));
-            newError = SyncTextWriter.GetSynchronizedTextWriter(newError);
+            newError = TextWriter.Synchronized(newError);
             Volatile.Write(ref s_isErrorTextWriterRedirected, true);
 
             lock (InternalSyncObject)
@@ -436,10 +445,10 @@ namespace System
         }
 
         //
-        // Give a hint to the code generator to not inline the common console methods. The console methods are 
+        // Give a hint to the code generator to not inline the common console methods. The console methods are
         // not performance critical. It is unnecessary code bloat to have them inlined.
         //
-        // Moreover, simple repros for codegen bugs are often console-based. It is tedious to manually filter out 
+        // Moreover, simple repros for codegen bugs are often console-based. It is tedious to manually filter out
         // the inlined console writelines from them.
         //
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
@@ -449,7 +458,7 @@ namespace System
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static String ReadLine()
+        public static string ReadLine()
         {
             return In.ReadLine();
         }
@@ -529,37 +538,37 @@ namespace System
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void WriteLine(Object value)
+        public static void WriteLine(object value)
         {
             Out.WriteLine(value);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void WriteLine(String value)
+        public static void WriteLine(string value)
         {
             Out.WriteLine(value);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void WriteLine(String format, Object arg0)
+        public static void WriteLine(string format, object arg0)
         {
             Out.WriteLine(format, arg0);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void WriteLine(String format, Object arg0, Object arg1)
+        public static void WriteLine(string format, object arg0, object arg1)
         {
             Out.WriteLine(format, arg0, arg1);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void WriteLine(String format, Object arg0, Object arg1, Object arg2)
+        public static void WriteLine(string format, object arg0, object arg1, object arg2)
         {
             Out.WriteLine(format, arg0, arg1, arg2);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void WriteLine(String format, params Object[] arg)
+        public static void WriteLine(string format, params object[] arg)
         {
             if (arg == null)                       // avoid ArgumentNullException from String.Format
                 Out.WriteLine(format, null, null); // faster than Out.WriteLine(format, (Object)arg);
@@ -568,25 +577,25 @@ namespace System
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void Write(String format, Object arg0)
+        public static void Write(string format, object arg0)
         {
             Out.Write(format, arg0);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void Write(String format, Object arg0, Object arg1)
+        public static void Write(string format, object arg0, object arg1)
         {
             Out.Write(format, arg0, arg1);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void Write(String format, Object arg0, Object arg1, Object arg2)
+        public static void Write(string format, object arg0, object arg1, object arg2)
         {
             Out.Write(format, arg0, arg1, arg2);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void Write(String format, params Object[] arg)
+        public static void Write(string format, params object[] arg)
         {
             if (arg == null)                   // avoid ArgumentNullException from String.Format
                 Out.Write(format, null, null); // faster than Out.Write(format, (Object)arg);
@@ -663,13 +672,13 @@ namespace System
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void Write(Object value)
+        public static void Write(object value)
         {
             Out.Write(value);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void Write(String value)
+        public static void Write(string value)
         {
             Out.Write(value);
         }

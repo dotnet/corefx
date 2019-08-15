@@ -3,11 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Threading.Tests
 {
-    public class EventWaitHandleTests : RemoteExecutorTestBase
+    public class EventWaitHandleTests
     {
         [Theory]
         [InlineData(false, EventResetMode.AutoReset)]
@@ -23,14 +24,19 @@ namespace System.Threading.Tests
         [Fact]
         public void Ctor_InvalidMode()
         {
-            AssertExtensions.Throws<ArgumentException>(null, () => new EventWaitHandle(true, (EventResetMode)12345));
+            AssertExtensions.Throws<ArgumentException>("mode", null, () => new EventWaitHandle(true, (EventResetMode)12345));
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]  // names aren't supported on Unix
-        [Fact]
-        public void Ctor_InvalidNames()
+        [Theory]
+        [MemberData(nameof(GetValidNames))]
+        public void Ctor_ValidNames(string name)
         {
-            AssertExtensions.Throws<ArgumentException>("name", null, () => new EventWaitHandle(true, EventResetMode.AutoReset, new string('a', 1000)));
+            bool createdNew;
+            using (var ewh = new EventWaitHandle(true, EventResetMode.AutoReset, name, out createdNew))
+            {
+                Assert.True(createdNew);
+            }
         }
 
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // names aren't supported on Unix
@@ -52,10 +58,10 @@ namespace System.Threading.Tests
         {
             string name = Guid.NewGuid().ToString("N");
             bool createdNew;
-            using (var ewh = new EventWaitHandle(false, EventResetMode.AutoReset, name, out createdNew))
+            using (var ewh = new EventWaitHandle(initialState, mode, name, out createdNew))
             {
                 Assert.True(createdNew);
-                using (new EventWaitHandle(false, EventResetMode.AutoReset, name, out createdNew))
+                using (new EventWaitHandle(initialState, mode, name, out createdNew))
                 {
                     Assert.False(createdNew);
                 }
@@ -101,11 +107,10 @@ namespace System.Threading.Tests
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]  // OpenExisting not supported on Unix
-        [Fact]
-        public void OpenExisting_Windows()
+        [Theory]
+        [MemberData(nameof(GetValidNames))]
+        public void OpenExisting_Windows(string name)
         {
-            string name = Guid.NewGuid().ToString("N");
-
             EventWaitHandle resultHandle;
             Assert.False(EventWaitHandle.TryOpenExisting(name, out resultHandle));
             Assert.Null(resultHandle);
@@ -146,7 +151,6 @@ namespace System.Threading.Tests
         {
             AssertExtensions.Throws<ArgumentNullException>("name", () => EventWaitHandle.OpenExisting(null));
             AssertExtensions.Throws<ArgumentException>("name", null, () => EventWaitHandle.OpenExisting(string.Empty));
-            AssertExtensions.Throws<ArgumentException>("name", null, () => EventWaitHandle.OpenExisting(new string('a', 10000)));
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]  // OpenExisting not supported on Unix
@@ -176,7 +180,6 @@ namespace System.Threading.Tests
         [Theory]
         [InlineData(EventResetMode.ManualReset)]
         [InlineData(EventResetMode.AutoReset)]
-        [ActiveIssue(21275, TargetFrameworkMonikers.Uap)]
         public void PingPong(EventResetMode mode)
         {
             // Create names for the two events
@@ -186,12 +189,12 @@ namespace System.Threading.Tests
             // Create the two events and the other process with which to synchronize
             using (var inbound = new EventWaitHandle(true, mode, inboundName))
             using (var outbound = new EventWaitHandle(false, mode, outboundName))
-            using (var remote = RemoteInvoke(PingPong_OtherProcess, mode.ToString(), outboundName, inboundName))
+            using (var remote = RemoteExecutor.Invoke(PingPong_OtherProcess, mode.ToString(), outboundName, inboundName))
             {
                 // Repeatedly wait for one event and then set the other
                 for (int i = 0; i < 10; i++)
                 {
-                    Assert.True(inbound.WaitOne(FailWaitTimeoutMilliseconds));
+                    Assert.True(inbound.WaitOne(RemoteExecutor.FailWaitTimeoutMilliseconds));
                     if (mode == EventResetMode.ManualReset)
                     {
                         inbound.Reset();
@@ -212,7 +215,7 @@ namespace System.Threading.Tests
                 // Repeatedly wait for one event and then set the other
                 for (int i = 0; i < 10; i++)
                 {
-                    Assert.True(inbound.WaitOne(FailWaitTimeoutMilliseconds));
+                    Assert.True(inbound.WaitOne(RemoteExecutor.FailWaitTimeoutMilliseconds));
                     if (mode == EventResetMode.ManualReset)
                     {
                         inbound.Reset();
@@ -221,8 +224,15 @@ namespace System.Threading.Tests
                 }
             }
 
-            return SuccessExitCode;
+            return RemoteExecutor.SuccessExitCode;
         }
 
+        public static TheoryData<string> GetValidNames()
+        {
+            var names  =  new TheoryData<string>() { Guid.NewGuid().ToString("N") };
+            names.Add(Guid.NewGuid().ToString("N") + new string('a', 1000));
+
+            return names;
+        }
     }
 }

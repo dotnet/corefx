@@ -141,7 +141,7 @@ namespace System.Xml.Xsl.IlGen
 
         private static ConstructorInfo GetConstructor(Type className)
         {
-            ConstructorInfo constrInfo = className.GetConstructor(new Type[] { });
+            ConstructorInfo constrInfo = className.GetConstructor(Array.Empty<Type>());
             Debug.Assert(constrInfo != null, "Constructor " + className + " cannot be null.");
             return constrInfo;
         }
@@ -397,25 +397,22 @@ namespace System.Xml.Xsl.IlGen
         // Miscellaneous
         public static readonly MethodInfo GetTypeFromHandle = GetMethod(typeof(Type), "GetTypeFromHandle");
         public static readonly MethodInfo InitializeArray = GetMethod(typeof(System.Runtime.CompilerServices.RuntimeHelpers), "InitializeArray");
-        public static readonly Dictionary<Type, XmlILStorageMethods> StorageMethods;
-
-        static XmlILMethods()
+        public static readonly Dictionary<Type, XmlILStorageMethods> StorageMethods = new Dictionary<Type, XmlILStorageMethods>(13)
         {
-            StorageMethods = new Dictionary<Type, XmlILStorageMethods>();
-            StorageMethods[typeof(string)] = new XmlILStorageMethods(typeof(string));
-            StorageMethods[typeof(bool)] = new XmlILStorageMethods(typeof(bool));
-            StorageMethods[typeof(int)] = new XmlILStorageMethods(typeof(int));
-            StorageMethods[typeof(long)] = new XmlILStorageMethods(typeof(long));
-            StorageMethods[typeof(decimal)] = new XmlILStorageMethods(typeof(decimal));
-            StorageMethods[typeof(double)] = new XmlILStorageMethods(typeof(double));
-            StorageMethods[typeof(float)] = new XmlILStorageMethods(typeof(float));
-            StorageMethods[typeof(DateTime)] = new XmlILStorageMethods(typeof(DateTime));
-            StorageMethods[typeof(byte[])] = new XmlILStorageMethods(typeof(byte[]));
-            StorageMethods[typeof(XmlQualifiedName)] = new XmlILStorageMethods(typeof(XmlQualifiedName));
-            StorageMethods[typeof(TimeSpan)] = new XmlILStorageMethods(typeof(TimeSpan));
-            StorageMethods[typeof(XPathItem)] = new XmlILStorageMethods(typeof(XPathItem));
-            StorageMethods[typeof(XPathNavigator)] = new XmlILStorageMethods(typeof(XPathNavigator));
-        }
+            { typeof(string), new XmlILStorageMethods(typeof(string)) },
+            { typeof(bool), new XmlILStorageMethods(typeof(bool)) },
+            { typeof(int), new XmlILStorageMethods(typeof(int)) },
+            { typeof(long), new XmlILStorageMethods(typeof(long)) },
+            { typeof(decimal), new XmlILStorageMethods(typeof(decimal)) },
+            { typeof(double), new XmlILStorageMethods(typeof(double)) },
+            { typeof(float), new XmlILStorageMethods(typeof(float)) },
+            { typeof(DateTime), new XmlILStorageMethods(typeof(DateTime)) },
+            { typeof(byte[]), new XmlILStorageMethods(typeof(byte[])) },
+            { typeof(XmlQualifiedName), new XmlILStorageMethods(typeof(XmlQualifiedName)) },
+            { typeof(TimeSpan), new XmlILStorageMethods(typeof(TimeSpan)) },
+            { typeof(XPathItem), new XmlILStorageMethods(typeof(XPathItem)) },
+            { typeof(XPathNavigator), new XmlILStorageMethods(typeof(XPathNavigator)) },
+        };
 
         public static MethodInfo GetMethod(Type className, string methName)
         {
@@ -455,9 +452,10 @@ namespace System.Xml.Xsl.IlGen
         private MethodBase _methInfo;
         private ILGenerator _ilgen;
         private LocalBuilder _locXOut;
-        private XmlILModule _module;
-        private bool _isDebug, _initWriters;
-        private StaticDataManager _staticData;
+        private readonly XmlILModule _module;
+        private readonly bool _isDebug;
+        private bool _initWriters;
+        private readonly StaticDataManager _staticData;
         private ISourceLineInfo _lastSourceInfo;
         private MethodInfo _methSyncToNav;
 
@@ -472,8 +470,8 @@ namespace System.Xml.Xsl.IlGen
         /// <summary>
         /// Cache metadata used during code-generation phase.
         /// </summary>
-        // SxS note: Using hardcoded "dump.il" is an SxS issue. Since we are doing this ONLY in debug builds 
-        // and only for tracing purposes and MakeVersionSafeName does not seem to be able to handle file 
+        // SxS note: Using hardcoded "dump.il" is an SxS issue. Since we are doing this ONLY in debug builds
+        // and only for tracing purposes and MakeVersionSafeName does not seem to be able to handle file
         // extensions correctly I decided to suppress the SxS message (as advised by SxS guys).
         public GenerateHelper(XmlILModule module, bool isDebug)
         {
@@ -490,8 +488,8 @@ namespace System.Xml.Xsl.IlGen
         /// <summary>
         /// Begin generating code within a new method.
         /// </summary>
-        // SxS note: Using hardcoded "dump.il" is an SxS issue. Since we are doing this ONLY in debug builds 
-        // and only for tracing purposes and MakeVersionSafeName does not seem to be able to handle file 
+        // SxS note: Using hardcoded "dump.il" is an SxS issue. Since we are doing this ONLY in debug builds
+        // and only for tracing purposes and MakeVersionSafeName does not seem to be able to handle file
         // extensions correctly I decided to suppress the SxS message (as advised by SxS guys).
         public void MethodBegin(MethodBase methInfo, ISourceLineInfo sourceInfo, bool initWriters)
         {
@@ -627,7 +625,7 @@ namespace System.Xml.Xsl.IlGen
                     case 6: opcode = OpCodes.Ldc_I4_6; break;
                     case 7: opcode = OpCodes.Ldc_I4_7; break;
                     case 8: opcode = OpCodes.Ldc_I4_8; break;
-                    default: Debug.Assert(false); return;
+                    default: Debug.Fail($"Unexpected int val {intVal}"); return;
                 }
                 Emit(opcode);
             }
@@ -890,7 +888,7 @@ namespace System.Xml.Xsl.IlGen
                     Call(XmlILMethods.StrCat4);
                     break;
                 default:
-                    Debug.Assert(false, "Shouldn't be called");
+                    Debug.Fail("Shouldn't be called");
                     break;
             }
         }
@@ -942,7 +940,7 @@ namespace System.Xml.Xsl.IlGen
             }
             else
             {
-                int[] bits = Decimal.GetBits(dec);
+                int[] bits = decimal.GetBits(dec);
 
                 LoadInteger(bits[0]);
                 LoadInteger(bits[1]);
@@ -978,7 +976,7 @@ namespace System.Xml.Xsl.IlGen
                         case QilNodeType.Divide: Emit(OpCodes.Div); break;
                         case QilNodeType.Modulo: Emit(OpCodes.Rem); break;
                         case QilNodeType.Negate: Emit(OpCodes.Neg); break;
-                        default: Debug.Assert(false, opType + " must be an arithmetic operation."); break;
+                        default: Debug.Fail($"{opType} must be an arithmetic operation."); break;
                     }
                     break;
 
@@ -991,14 +989,14 @@ namespace System.Xml.Xsl.IlGen
                         case QilNodeType.Divide: meth = XmlILMethods.DecDiv; break;
                         case QilNodeType.Modulo: meth = XmlILMethods.DecRem; break;
                         case QilNodeType.Negate: meth = XmlILMethods.DecNeg; break;
-                        default: Debug.Assert(false, opType + " must be an arithmetic operation."); break;
+                        default: Debug.Fail($"{opType} must be an arithmetic operation."); break;
                     }
 
                     Call(meth);
                     break;
 
                 default:
-                    Debug.Assert(false, "The " + opType + " arithmetic operation cannot be performed on values of type " + code + ".");
+                    Debug.Fail($"The {opType} arithmetic operation cannot be performed on values of type {code}.");
                     break;
             }
         }
@@ -1013,7 +1011,7 @@ namespace System.Xml.Xsl.IlGen
                 case XmlTypeCode.QName: meth = XmlILMethods.QNameEq; break;
                 case XmlTypeCode.Decimal: meth = XmlILMethods.DecEq; break;
                 default:
-                    Debug.Assert(false, "Type " + code + " does not support the equals operation.");
+                    Debug.Fail($"Type {code} does not support the equals operation.");
                     break;
             }
 
@@ -1029,7 +1027,7 @@ namespace System.Xml.Xsl.IlGen
                 case XmlTypeCode.String: meth = XmlILMethods.StrCmp; break;
                 case XmlTypeCode.Decimal: meth = XmlILMethods.DecCmp; break;
                 default:
-                    Debug.Assert(false, "Type " + code + " does not support the equals operation.");
+                    Debug.Fail($"Type {code} does not support the equals operation.");
                     break;
             }
 
@@ -1205,7 +1203,7 @@ namespace System.Xml.Xsl.IlGen
                     case GenerateNameType.TagNameAndMappings: meth = XmlILMethods.StartElemMapName; break;
                     case GenerateNameType.TagNameAndNamespace: meth = XmlILMethods.StartElemNmspName; break;
                     case GenerateNameType.QName: meth = XmlILMethods.StartElemQName; break;
-                    default: Debug.Assert(false, nameType + " is invalid here."); break;
+                    default: Debug.Fail($"{nameType} is invalid here."); break;
                 }
             }
             else
@@ -1215,7 +1213,7 @@ namespace System.Xml.Xsl.IlGen
                 {
                     case GenerateNameType.LiteralLocalName: meth = XmlILMethods.StartElemLocNameUn; break;
                     case GenerateNameType.LiteralName: meth = XmlILMethods.StartElemLitNameUn; break;
-                    default: Debug.Assert(false, nameType + " is invalid here."); break;
+                    default: Debug.Fail($"{nameType} is invalid here."); break;
                 }
             }
 
@@ -1239,7 +1237,7 @@ namespace System.Xml.Xsl.IlGen
                 {
                     case GenerateNameType.LiteralLocalName: meth = XmlILMethods.EndElemLocNameUn; break;
                     case GenerateNameType.LiteralName: meth = XmlILMethods.EndElemLitNameUn; break;
-                    default: Debug.Assert(false, nameType + " is invalid here."); break;
+                    default: Debug.Fail($"{nameType} is invalid here."); break;
                 }
             }
 
@@ -1268,7 +1266,7 @@ namespace System.Xml.Xsl.IlGen
                     case GenerateNameType.TagNameAndMappings: meth = XmlILMethods.StartAttrMapName; break;
                     case GenerateNameType.TagNameAndNamespace: meth = XmlILMethods.StartAttrNmspName; break;
                     case GenerateNameType.QName: meth = XmlILMethods.StartAttrQName; break;
-                    default: Debug.Assert(false, nameType + " is invalid here."); break;
+                    default: Debug.Fail($"{nameType} is invalid here."); break;
                 }
             }
             else
@@ -1278,7 +1276,7 @@ namespace System.Xml.Xsl.IlGen
                 {
                     case GenerateNameType.LiteralLocalName: meth = XmlILMethods.StartAttrLocNameUn; break;
                     case GenerateNameType.LiteralName: meth = XmlILMethods.StartAttrLitNameUn; break;
-                    default: Debug.Assert(false, nameType + " is invalid here."); break;
+                    default: Debug.Fail($"{nameType} is invalid here."); break;
                 }
             }
 
@@ -1438,11 +1436,11 @@ namespace System.Xml.Xsl.IlGen
                         break;
 
                     case XmlTypeCode.AnyAtomicType:
-                        Debug.Assert(false, "Heterogenous sort key is not allowed.");
+                        Debug.Fail("Heterogenous sort key is not allowed.");
                         return;
 
                     default:
-                        Debug.Assert(false, "Sorting over datatype " + keyType.TypeCode + " is not allowed.");
+                        Debug.Fail($"Sorting over datatype {keyType.TypeCode} is not allowed.");
                         break;
                 }
             }

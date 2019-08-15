@@ -1,7 +1,10 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.IO.Enumeration;
 using Xunit;
 
@@ -31,6 +34,24 @@ namespace System.IO.Tests
                 => DirectoryFinished = directory.ToString();
         }
 
+        private class LastError : FileSystemEnumerator<string>
+        {
+            public LastError(string directory)
+                : base(directory)
+            { }
+
+            public int Error { get; private set; }
+
+            protected override string TransformEntry(ref FileSystemEntry entry)
+                => entry.FileName.ToString();
+
+            protected override bool ContinueOnError(int error)
+            {
+                Error = error;
+                return true;
+            }
+        }
+
         [Fact]
         public void OpenErrorDoesNotHappenAgainOnMoveNext()
         {
@@ -45,6 +66,17 @@ namespace System.IO.Tests
 
                 // Since we didn't start, the directory shouldn't finish.
                 Assert.Null(ie.DirectoryFinished);
+            }
+        }
+
+        [Fact]
+        public void NotFoundErrorIsExpected()
+        {
+            // Make sure we're returning the native error as expected (and not the PAL error on Unix)
+            using (LastError le = new LastError(Path.GetRandomFileName()))
+            {
+                // Conveniently ERROR_FILE_NOT_FOUND and ENOENT are both 0x2
+                Assert.Equal(2, le.Error);
             }
         }
 
@@ -67,5 +99,39 @@ namespace System.IO.Tests
                 Assert.Equal(info.FullName, ie.DirectoryFinished);
             }
         }
+
+    [Fact]
+    public void VariableLengthFileNames_AllCreatableFilesAreEnumerable()
+    {
+        DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());
+        var names = new List<string>();
+
+        for (int length = 1; length < 10_000; length++) // arbitrarily large limit for the test
+        {
+            string name = new string('a', length);
+            try { File.Create(Path.Join(testDirectory.FullName, name)).Dispose(); }
+            catch { break; }
+            names.Add(name);
+        }
+        Assert.InRange(names.Count, 1, int.MaxValue);
+        Assert.Equal(names.OrderBy(n => n), Directory.GetFiles(testDirectory.FullName).Select(n => Path.GetFileName(n)).OrderBy(n => n));
+    }
+
+    [Fact]
+    public void VariableLengthDirectoryNames_AllCreatableDirectoriesAreEnumerable()
+    {
+        DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());
+        var names = new List<string>();
+
+        for (int length = 1; length < 10_000; length++) // arbitrarily large limit for the test
+        {
+            string name = new string('a', length);
+            try { Directory.CreateDirectory(Path.Join(testDirectory.FullName, name)); }
+            catch { break; }
+            names.Add(name);
+        }
+        Assert.InRange(names.Count, 1, int.MaxValue);
+        Assert.Equal(names.OrderBy(n => n), Directory.GetDirectories(testDirectory.FullName).Select(n => Path.GetFileName(n)).OrderBy(n => n));
+    }
     }
 }

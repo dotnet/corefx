@@ -2,21 +2,33 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Text;
-using System.Diagnostics;
 
 namespace System.Reflection
 {
     internal sealed class SignatureConstructedGenericType : SignatureType
     {
-        internal SignatureConstructedGenericType(Type genericTypeDefinition, Type[] genericTypeArguments)
+        // The exception-visible name "typeArguments" is chosen to match the parameter name to Type.MakeGenericType() since that's the
+        // intended user of this constructor.
+        internal SignatureConstructedGenericType(Type genericTypeDefinition, Type[] typeArguments)
         {
-            Debug.Assert(genericTypeDefinition != null && genericTypeArguments != null);
+            if (genericTypeDefinition is null)
+                throw new ArgumentNullException(nameof(genericTypeDefinition));
+
+            if (typeArguments is null)
+                throw new ArgumentNullException(nameof(typeArguments));
+
+            typeArguments = (Type[])(typeArguments.Clone());
+            for (int i = 0; i < typeArguments.Length; i++)
+            {
+                if (typeArguments[i] is null)
+                    throw new ArgumentNullException(nameof(typeArguments));
+            }
+
             _genericTypeDefinition = genericTypeDefinition;
-            _genericTypeArguments = (Type[])(genericTypeArguments.Clone());
+            _genericTypeArguments = typeArguments;
         }
-    
+
         public sealed override bool IsTypeDefinition => false;
         public sealed override bool IsGenericTypeDefinition => false;
         protected sealed override bool HasElementTypeImpl() => false;
@@ -42,17 +54,16 @@ namespace System.Reflection
                 return false;
             }
         }
-    
-        internal sealed override SignatureType ElementType => null;
+
+        internal sealed override SignatureType? ElementType => null;
         public sealed override int GetArrayRank() => throw new ArgumentException(SR.Argument_HasToBeArrayClass);
         public sealed override Type GetGenericTypeDefinition() => _genericTypeDefinition;
         public sealed override Type[] GetGenericArguments() => GenericTypeArguments;
         public sealed override Type[] GenericTypeArguments => (Type[])(_genericTypeArguments.Clone());
         public sealed override int GenericParameterPosition => throw new InvalidOperationException(SR.Arg_NotGenericParameter);
-    
         public sealed override string Name => _genericTypeDefinition.Name;
-        public sealed override string Namespace => _genericTypeDefinition.Namespace;
-    
+        public sealed override string? Namespace => _genericTypeDefinition.Namespace;
+
         public sealed override string ToString()
         {
             StringBuilder sb = new StringBuilder();
@@ -67,7 +78,7 @@ namespace System.Reflection
             sb.Append(']');
             return sb.ToString();
         }
-    
+
         private readonly Type _genericTypeDefinition;
         private readonly Type[] _genericTypeArguments;
     }

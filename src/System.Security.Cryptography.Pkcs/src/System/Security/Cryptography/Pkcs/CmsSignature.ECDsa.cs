@@ -37,7 +37,7 @@ namespace System.Security.Cryptography.Pkcs
             }
 
             internal override bool VerifySignature(
-#if netcoreapp
+#if netcoreapp || netstandard21
                 ReadOnlySpan<byte> valueHash,
                 ReadOnlyMemory<byte> signature,
 #else
@@ -65,12 +65,16 @@ namespace System.Security.Cryptography.Pkcs
                     return false;
                 }
 
-                // 2 * KeySizeBytes => 2 * KeySizeBits / 8 => KeySizeBits / 4
-                int bufSize = key.KeySize / 4;
+                int bufSize;
+                checked
+                {
+                    // fieldSize = ceil(KeySizeBits / 8);
+                    int fieldSize = (key.KeySize + 7) / 8;
+                    bufSize = 2 * fieldSize;
+                }
 
-#if netcoreapp
-                ArrayPool<byte> pool = ArrayPool<byte>.Shared;
-                byte[] rented = pool.Rent(bufSize);
+#if netcoreapp || netstandard21
+                byte[] rented = CryptoPool.Rent(bufSize);
                 Span<byte> ieee = new Span<byte>(rented, 0, bufSize);
 
                 try
@@ -84,18 +88,17 @@ namespace System.Security.Cryptography.Pkcs
                     }
 
                     return key.VerifyHash(valueHash, ieee);
-#if netcoreapp
+#if netcoreapp || netstandard21
                 }
                 finally
                 {
-                    ieee.Clear();
-                    pool.Return(rented);
+                    CryptoPool.Return(rented, bufSize);
                 }
 #endif
             }
 
             protected override bool Sign(
-#if netcoreapp
+#if netcoreapp || netstandard21
                 ReadOnlySpan<byte> dataHash,
 #else
                 byte[] dataHash,
@@ -135,11 +138,16 @@ namespace System.Security.Cryptography.Pkcs
 
                 signatureAlgorithm = new Oid(oidValue, oidValue);
 
-#if netcoreapp
-                ArrayPool<byte> pool = ArrayPool<byte>.Shared;
-                // The signature size is twice the KeySize.
-                // 2 * KeySizeInBytes => 2 * KeySizeInBits / 8 => KeySizeInBits / 4
-                byte[] rented = pool.Rent(key.KeySize / 4);
+#if netcoreapp || netstandard21
+                int bufSize;
+                checked
+                {
+                    // fieldSize = ceil(KeySizeBits / 8);
+                    int fieldSize = (key.KeySize + 7) / 8;
+                    bufSize = 2 * fieldSize;
+                }
+
+                byte[] rented = CryptoPool.Rent(bufSize);
                 int bytesWritten = 0;
 
                 try
@@ -161,13 +169,12 @@ namespace System.Security.Cryptography.Pkcs
                 }
                 finally
                 {
-                    Array.Clear(rented, 0, bytesWritten);
-                    pool.Return(rented);
+                    CryptoPool.Return(rented, bytesWritten);
                 }
 #endif
 
                 signatureValue = DsaIeeeToDer(key.SignHash(
-#if netcoreapp
+#if netcoreapp || netstandard21
                     dataHash.ToArray()
 #else
                     dataHash

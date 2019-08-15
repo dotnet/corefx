@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
@@ -31,9 +32,9 @@ namespace System.Diagnostics
             {
                 Interop.procfs.ParsedStat parsedStat;
                 if (Interop.procfs.TryReadStatFile(pid, out parsedStat, reusableReader) &&
-                    string.Equals(processName, parsedStat.comm, StringComparison.OrdinalIgnoreCase))
+                    string.Equals(processName, Process.GetUntruncatedProcessName(ref parsedStat), StringComparison.OrdinalIgnoreCase))
                 {
-                    ProcessInfo processInfo = ProcessManager.CreateProcessInfo(parsedStat, reusableReader);
+                    ProcessInfo processInfo = ProcessManager.CreateProcessInfo(ref parsedStat, reusableReader, processName);
                     processes.Add(new Process(machineName, false, processInfo.ProcessId, processInfo));
                 }
             }
@@ -89,7 +90,7 @@ namespace System.Diagnostics
                     int btimeEnd = text.IndexOf('\n', btimeStart);
                     if (btimeEnd > btimeStart)
                     {
-                        if (Int64.TryParse(text.AsSpan(btimeStart, btimeEnd - btimeStart), out long bootTimeSeconds))
+                        if (long.TryParse(text.AsSpan(btimeStart, btimeEnd - btimeStart), out long bootTimeSeconds))
                         {
                             return DateTime.UnixEpoch + TimeSpan.FromSeconds(bootTimeSeconds);
                         }
@@ -99,6 +100,10 @@ namespace System.Diagnostics
                 return DateTime.UtcNow;
             }
         }
+
+        /// <summary>Gets the parent process ID</summary>
+        private int ParentProcessId =>
+            GetStat().ppid;
 
         /// <summary>Gets execution path</summary>
         private string GetPathToOpenFile()
@@ -145,6 +150,11 @@ namespace System.Diagnostics
         {
             if (_processInfo.HandleCount <= 0 && _haveProcessId)
             {
+                // Don't get information for a PID that exited and has possibly been recycled.
+                if (GetHasExited(refresh: false))
+                {
+                    return;
+                }
                 string path = Interop.procfs.GetFileDescriptorDirectoryPathForProcess(_processId);
                 if (Directory.Exists(path))
                 {
@@ -166,7 +176,7 @@ namespace System.Diagnostics
         {
             get
             {
-                EnsureState(State.HaveId);
+                EnsureState(State.HaveNonExitedId);
 
                 IntPtr set;
                 if (Interop.Sys.SchedGetAffinity(_processId, out set) != 0)
@@ -178,7 +188,7 @@ namespace System.Diagnostics
             }
             set
             {
-                EnsureState(State.HaveId);
+                EnsureState(State.HaveNonExitedId);
 
                 if (Interop.Sys.SchedSetAffinity(_processId, ref value) != 0)
                 {
@@ -193,7 +203,14 @@ namespace System.Diagnostics
         private void GetWorkingSetLimits(out IntPtr minWorkingSet, out IntPtr maxWorkingSet)
         {
             minWorkingSet = IntPtr.Zero; // no defined limit available
-            ulong rsslim = GetStat().rsslim;
+
+            // For max working set, try to respect container limits by reading
+            // from cgroup, but if it's unavailable, fall back to reading from procfs.
+            EnsureState(State.HaveNonExitedId);
+            if (!Interop.cgroups.TryGetMemoryLimit(out ulong rsslim))
+            {
+                rsslim = GetStat().rsslim;
+            }
 
             // rsslim is a ulong, but maxWorkingSet is an IntPtr, so we need to cap rsslim
             // at the max size of IntPtr.  This often happens when there is no configured
@@ -240,6 +257,102 @@ namespace System.Diagnostics
             return Interop.Sys.ReadLink(exeFilePath);
         }
 
+        /// <summary>Gets the name that was used to start the process, or null if it could not be retrieved.</summary>
+        /// <param name="stat">The stat for the target process.</param>
+        internal static string GetUntruncatedProcessName(ref Interop.procfs.ParsedStat stat)
+        {
+            string cmdLineFilePath = Interop.procfs.GetCmdLinePathForProcess(stat.pid);
+
+            byte[] rentedArray = null;
+            try
+            {
+                // bufferSize == 1 used to avoid unnecessary buffer in FileStream
+                using (var fs = new FileStream(cmdLineFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 1, useAsync: false))
+                {
+                    Span<byte> buffer = stackalloc byte[512];
+                    int bytesRead = 0;
+                    while (true)
+                    {
+                        // Resize buffer if it was too small.
+                        if (bytesRead == buffer.Length)
+                        {
+                            uint newLength = (uint)buffer.Length * 2;
+
+                            byte[] tmp = ArrayPool<byte>.Shared.Rent((int)newLength);
+                            buffer.CopyTo(tmp);
+                            byte[] toReturn = rentedArray;
+                            buffer = rentedArray = tmp;
+                            if (toReturn != null)
+                            {
+                                ArrayPool<byte>.Shared.Return(toReturn);
+                            }
+                        }
+
+                        Debug.Assert(bytesRead < buffer.Length);
+                        int n = fs.Read(buffer.Slice(bytesRead));
+                        bytesRead += n;
+
+                        // cmdline contains the argv array separated by '\0' bytes.
+                        // stat.comm contains a possibly truncated version of the process name.
+                        // When the program is a native executable, the process name will be in argv[0].
+                        // When the program is a script, argv[0] contains the interpreter, and argv[1] contains the script name.
+                        Span<byte> argRemainder = buffer.Slice(0, bytesRead);
+                        int argEnd = argRemainder.IndexOf((byte)'\0');
+                        if (argEnd != -1)
+                        {
+                            // Check if argv[0] has the process name.
+                            string name = GetUntruncatedNameFromArg(argRemainder.Slice(0, argEnd), prefix: stat.comm);
+                            if (name != null)
+                            {
+                                return name;
+                            }
+
+                            // Check if argv[1] has the process name.
+                            argRemainder = argRemainder.Slice(argEnd + 1);
+                            argEnd = argRemainder.IndexOf((byte)'\0');
+                            if (argEnd != -1)
+                            {
+                                name = GetUntruncatedNameFromArg(argRemainder.Slice(0, argEnd), prefix: stat.comm);
+                                return name ?? stat.comm;
+                            }
+                        }
+
+                        if (n == 0)
+                        {
+                            return stat.comm;
+                        }
+                    }
+                }
+            }
+            catch (IOException)
+            {
+                return stat.comm;
+            }
+            finally
+            {
+                if (rentedArray != null)
+                {
+                    ArrayPool<byte>.Shared.Return(rentedArray);
+                }
+            }
+
+            string GetUntruncatedNameFromArg(Span<byte> arg, string prefix)
+            {
+                // Strip directory names from arg.
+                int nameStart = arg.LastIndexOf((byte)'/') + 1;
+                string argString = Encoding.UTF8.GetString(arg.Slice(nameStart));
+
+                if (argString.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                {
+                    return argString;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
         // ----------------------------------
         // ---- Unix PAL layer ends here ----
         // ----------------------------------
@@ -247,7 +360,7 @@ namespace System.Diagnostics
         /// <summary>Reads the stats information for this process from the procfs file system.</summary>
         private Interop.procfs.ParsedStat GetStat()
         {
-            EnsureState(State.HaveId);
+            EnsureState(State.HaveNonExitedId);
             Interop.procfs.ParsedStat stat;
             if (!Interop.procfs.TryReadStatFile(_processId, out stat, new ReusableTextReader()))
             {

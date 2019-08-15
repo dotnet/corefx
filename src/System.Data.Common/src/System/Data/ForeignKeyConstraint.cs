@@ -345,7 +345,7 @@ namespace System.Data
                     }
                 default:
                     {
-                        Debug.Assert(false, "Unknown Rule value");
+                        Debug.Fail("Unknown Rule value");
                         break;
                     }
             }
@@ -479,7 +479,7 @@ namespace System.Data
                     }
                 default:
                     {
-                        Debug.Assert(false, "Unknown Rule value");
+                        Debug.Fail("Unknown Rule value");
                         break;
                     }
             }
@@ -542,7 +542,7 @@ namespace System.Data
                 }
                 else
                 {
-                    Debug.Assert(false, "attempt to cascade unknown action: " + action.ToString());
+                    Debug.Fail("attempt to cascade unknown action: " + action.ToString());
                 }
             }
             finally
@@ -683,7 +683,7 @@ namespace System.Data
             }
             else
             {
-                iDest = destination.Tables.IndexOf(Table.TableName, Table.Namespace, false); // pass false for last param 
+                iDest = destination.Tables.IndexOf(Table.TableName, Table.Namespace, false); // pass false for last param
                 // to be backward compatable, otherwise meay cause new exception
             }
 
@@ -699,7 +699,7 @@ namespace System.Data
             }
             else
             {
-                iDest = destination.Tables.IndexOf(RelatedTable.TableName, RelatedTable.Namespace, false);// pass false for last param 
+                iDest = destination.Tables.IndexOf(RelatedTable.TableName, RelatedTable.Namespace, false);// pass false for last param
             }
             if (iDest < 0)
             {

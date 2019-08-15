@@ -17,8 +17,8 @@ namespace System.IO
     // there are methods on the Stream class to read bytes.
     // A subclass must minimally implement the Peek() and Read() methods.
     //
-    // This class is intended for character input, not bytes.  
-    // There are methods on the Stream class for reading bytes. 
+    // This class is intended for character input, not bytes.
+    // There are methods on the Stream class for reading bytes.
     public abstract partial class TextReader : MarshalByRefObject, IDisposable
     {
         public static readonly TextReader Null = new NullTextReader();
@@ -45,7 +45,7 @@ namespace System.IO
         // the input stream. The current position of the TextReader is not changed by
         // this operation. The returned value is -1 if no further characters are
         // available.
-        // 
+        //
         // This default method simply returns -1.
         //
         public virtual int Peek()
@@ -55,7 +55,7 @@ namespace System.IO
 
         // Reads the next character from the input stream. The returned value is
         // -1 if no further characters are available.
-        // 
+        //
         // This default method simply returns -1.
         //
         public virtual int Read()
@@ -94,7 +94,7 @@ namespace System.IO
                 if (ch == -1) break;
                 buffer[index + n] = (char)ch;
             }
-            
+
             return n;
         }
 
@@ -109,7 +109,7 @@ namespace System.IO
             try
             {
                 int numRead = Read(array, 0, buffer.Length);
-                if ((uint)numRead > buffer.Length)
+                if ((uint)numRead > (uint)buffer.Length)
                 {
                     throw new IOException(SR.IO_InvalidReadLength);
                 }
@@ -122,7 +122,7 @@ namespace System.IO
             }
         }
 
-        // Reads all characters from the current position to the end of the 
+        // Reads all characters from the current position to the end of the
         // TextReader, and returns them as one string.
         public virtual string ReadToEnd()
         {
@@ -138,7 +138,7 @@ namespace System.IO
 
         // Blocking version of read.  Returns only when count
         // characters have been read or the end of the file was reached.
-        // 
+        //
         public virtual int ReadBlock(char[] buffer, int index, int count)
         {
             int i, n = 0;
@@ -159,7 +159,7 @@ namespace System.IO
             try
             {
                 int numRead = ReadBlock(array, 0, buffer.Length);
-                if ((uint)numRead > buffer.Length)
+                if ((uint)numRead > (uint)buffer.Length)
                 {
                     throw new IOException(SR.IO_InvalidReadLength);
                 }
@@ -178,7 +178,7 @@ namespace System.IO
         // contain the terminating carriage return and/or line feed. The returned
         // value is null if the end of the input stream has been reached.
         //
-        public virtual string ReadLine()
+        public virtual string? ReadLine()
         {
             StringBuilder sb = new StringBuilder();
             while (true)
@@ -205,16 +205,16 @@ namespace System.IO
         }
 
         #region Task based Async APIs
-        public virtual Task<string> ReadLineAsync()
+        public virtual Task<string?> ReadLineAsync()
         {
-            return Task<String>.Factory.StartNew(state =>
+            return Task<string?>.Factory.StartNew(state =>
             {
-                return ((TextReader)state).ReadLine();
+                return ((TextReader)state!).ReadLine();
             },
             this, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
         }
 
-        public async virtual Task<string> ReadToEndAsync()
+        public virtual async Task<string> ReadToEndAsync()
         {
             var sb = new StringBuilder(4096);
             char[] chars = ArrayPool<char>.Shared.Rent(4096);
@@ -251,12 +251,12 @@ namespace System.IO
             return ReadAsyncInternal(new Memory<char>(buffer, index, count), default).AsTask();
         }
 
-        public virtual ValueTask<int> ReadAsync(Memory<char> buffer, CancellationToken cancellationToken = default(CancellationToken)) =>
+        public virtual ValueTask<int> ReadAsync(Memory<char> buffer, CancellationToken cancellationToken = default) =>
             new ValueTask<int>(MemoryMarshal.TryGetArray(buffer, out ArraySegment<char> array) ?
-                ReadAsync(array.Array, array.Offset, array.Count) :
+                ReadAsync(array.Array!, array.Offset, array.Count) :
                 Task<int>.Factory.StartNew(state =>
                 {
-                    var t = (Tuple<TextReader, Memory<char>>)state;
+                    var t = (Tuple<TextReader, Memory<char>>)state!;
                     return t.Item1.Read(t.Item2.Span);
                 }, Tuple.Create(this, buffer), cancellationToken, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default));
 
@@ -265,7 +265,7 @@ namespace System.IO
             var tuple = new Tuple<TextReader, Memory<char>>(this, buffer);
             return new ValueTask<int>(Task<int>.Factory.StartNew(state =>
             {
-                var t = (Tuple<TextReader, Memory<char>>)state;
+                var t = (Tuple<TextReader, Memory<char>>)state!;
                 return t.Item1.Read(t.Item2.Span);
             },
             tuple, cancellationToken, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default));
@@ -289,12 +289,12 @@ namespace System.IO
             return ReadBlockAsyncInternal(new Memory<char>(buffer, index, count), default).AsTask();
         }
 
-        public virtual ValueTask<int> ReadBlockAsync(Memory<char> buffer, CancellationToken cancellationToken = default(CancellationToken)) =>
+        public virtual ValueTask<int> ReadBlockAsync(Memory<char> buffer, CancellationToken cancellationToken = default) =>
             new ValueTask<int>(MemoryMarshal.TryGetArray(buffer, out ArraySegment<char> array) ?
-                ReadBlockAsync(array.Array, array.Offset, array.Count) :
+                ReadBlockAsync(array.Array!, array.Offset, array.Count) :
                 Task<int>.Factory.StartNew(state =>
                 {
-                    var t = (Tuple<TextReader, Memory<char>>)state;
+                    var t = (Tuple<TextReader, Memory<char>>)state!;
                     return t.Item1.ReadBlock(t.Item2.Span);
                 }, Tuple.Create(this, buffer), cancellationToken, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default));
 
@@ -320,7 +320,7 @@ namespace System.IO
                 return 0;
             }
 
-            public override string ReadLine()
+            public override string? ReadLine()
             {
                 return null;
             }
@@ -367,7 +367,7 @@ namespace System.IO
             public override int ReadBlock(char[] buffer, int index, int count) => _in.ReadBlock(buffer, index, count);
 
             [MethodImpl(MethodImplOptions.Synchronized)]
-            public override string ReadLine() => _in.ReadLine();
+            public override string? ReadLine() => _in.ReadLine();
 
             [MethodImpl(MethodImplOptions.Synchronized)]
             public override string ReadToEnd() => _in.ReadToEnd();
@@ -377,7 +377,7 @@ namespace System.IO
             //
 
             [MethodImpl(MethodImplOptions.Synchronized)]
-            public override Task<string> ReadLineAsync() => Task.FromResult(ReadLine());
+            public override Task<string?> ReadLineAsync() => Task.FromResult(ReadLine());
 
             [MethodImpl(MethodImplOptions.Synchronized)]
             public override Task<string> ReadToEndAsync() => Task.FromResult(ReadToEnd());

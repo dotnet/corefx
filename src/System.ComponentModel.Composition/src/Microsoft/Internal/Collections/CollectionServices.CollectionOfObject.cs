@@ -12,7 +12,15 @@ namespace Microsoft.Internal.Collections
     {
         public static ICollection<object> GetCollectionWrapper(Type itemType, object collectionObject)
         {
-            Assumes.NotNull(itemType, collectionObject);
+            if (itemType == null)
+            {
+                throw new ArgumentNullException(nameof(itemType));
+            }
+
+            if (collectionObject == null)
+            {
+                throw new ArgumentNullException(nameof(collectionObject));
+            }
 
             var underlyingItemType = itemType.UnderlyingSystemType;
 
@@ -21,7 +29,7 @@ namespace Microsoft.Internal.Collections
                 return (ICollection<object>)collectionObject;
             }
 
-            // Most common .Net collections implement IList as well so for those
+            // Most common .NET collections implement IList as well so for those
             // cases we can optimize the wrapping instead of using reflection to create
             // a generic type.
             if (typeof(IList).IsAssignableFrom(collectionObject.GetType()))
@@ -55,17 +63,17 @@ namespace Microsoft.Internal.Collections
 
             public bool Contains(object item)
             {
-                return Assumes.NotReachable<bool>();
+                throw new NotImplementedException();
             }
 
             public void CopyTo(object[] array, int arrayIndex)
             {
-                Assumes.NotReachable<object>();
+                throw new NotImplementedException();
             }
 
             public int Count
             {
-                get { return Assumes.NotReachable<int>(); }
+                get { throw new NotImplementedException(); }
             }
 
             public bool IsReadOnly
@@ -75,17 +83,17 @@ namespace Microsoft.Internal.Collections
 
             public bool Remove(object item)
             {
-                return Assumes.NotReachable<bool>();
+                throw new NotImplementedException();
             }
 
             public IEnumerator<object> GetEnumerator()
             {
-                return Assumes.NotReachable<IEnumerator<object>>();
+                throw new NotImplementedException();
             }
 
             IEnumerator IEnumerable.GetEnumerator()
             {
-                return Assumes.NotReachable<IEnumerator>();
+                throw new NotImplementedException();
             }
         }
 
@@ -110,17 +118,17 @@ namespace Microsoft.Internal.Collections
 
             public bool Contains(object item)
             {
-                return Assumes.NotReachable<bool>();
+                throw new NotImplementedException();
             }
 
             public void CopyTo(object[] array, int arrayIndex)
             {
-                Assumes.NotReachable<object>();
+                throw new NotImplementedException();
             }
 
             public int Count
             {
-                get { return Assumes.NotReachable<int>(); }
+                get { throw new NotImplementedException(); }
             }
 
             public bool IsReadOnly
@@ -130,17 +138,17 @@ namespace Microsoft.Internal.Collections
 
             public bool Remove(object item)
             {
-                return Assumes.NotReachable<bool>();
+                throw new NotImplementedException();
             }
 
             public IEnumerator<object> GetEnumerator()
             {
-                return Assumes.NotReachable<IEnumerator<object>>();
+                throw new NotImplementedException();
             }
 
             IEnumerator IEnumerable.GetEnumerator()
             {
-                return Assumes.NotReachable<IEnumerator>();
+                throw new NotImplementedException();
             }
         }
     }

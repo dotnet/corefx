@@ -13,7 +13,7 @@ namespace System.Linq.Tests
         public void SameResultsRepeatCallsIntQuery()
         {
             var q = from x in new[] { 9999, 0, 888, -1, 66, -777, 1, 2, -12345 }
-                    where x > Int32.MinValue
+                    where x > int.MinValue
                     select x;
 
             Assert.Equal(q.Min(), q.Min());
@@ -22,8 +22,8 @@ namespace System.Linq.Tests
         [Fact]
         public void SameResultsRepeatCallsStringQuery()
         {
-            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", String.Empty }
-                    where !String.IsNullOrEmpty(x)
+            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", string.Empty }
+                    where !string.IsNullOrEmpty(x)
                     select x;
 
             Assert.Equal(q.Min(), q.Min());
@@ -44,7 +44,7 @@ namespace System.Linq.Tests
             yield return new object[] { new int[] { 6, 9, 10, 0, -5 }, -5 };
             yield return new object[] { new int[] { 6, 0, 9, 0, 10, 0 }, 0 };
         }
-        
+
         [Theory]
         [MemberData(nameof(Min_Int_TestData))]
         public void Min_Int(IEnumerable<int> source, int expected)
@@ -127,10 +127,7 @@ namespace System.Linq.Tests
             // as nothing can be less than float.NaN. See https://github.com/dotnet/corefx/pull/2426.
             // Without this optimization, we would iterate through int.MaxValue elements, which takes
             // a long time.
-            if (!PlatformDetection.IsFullFramework)
-            {
-                yield return new object[] { Enumerable.Repeat(float.NaN, int.MaxValue), float.NaN };
-            }
+            yield return new object[] { Enumerable.Repeat(float.NaN, int.MaxValue), float.NaN };
             yield return new object[] { Enumerable.Repeat(float.NaN, 3), float.NaN };
 
             // Normally NaN < anything is false, as is anything < NaN
@@ -183,10 +180,7 @@ namespace System.Linq.Tests
             // as nothing can be less than double.NaN. See https://github.com/dotnet/corefx/pull/2426.
             // Without this optimization, we would iterate through int.MaxValue elements, which takes
             // a long time.
-            if (!PlatformDetection.IsFullFramework)
-            {
-                yield return new object[] { Enumerable.Repeat(double.NaN, int.MaxValue), double.NaN };
-            }
+            yield return new object[] { Enumerable.Repeat(double.NaN, int.MaxValue), double.NaN };
             yield return new object[] { Enumerable.Repeat(double.NaN, 3), double.NaN };
 
             yield return new object[] { new double[] { double.NaN, 6.8, 9.4, 10, 0, -5.6 }, double.NaN };
@@ -360,10 +354,7 @@ namespace System.Linq.Tests
             // as nothing can be less than float.NaN. See https://github.com/dotnet/corefx/pull/2426.
             // Without this optimization, we would iterate through int.MaxValue elements, which takes
             // a long time.
-            if (!PlatformDetection.IsFullFramework)
-            {
-                yield return new object[] { Enumerable.Repeat((float?)float.NaN, int.MaxValue), float.NaN };
-            }
+            yield return new object[] { Enumerable.Repeat((float?)float.NaN, int.MaxValue), float.NaN };
             yield return new object[] { Enumerable.Repeat((float?)float.NaN, 3), float.NaN };
         }
 
@@ -410,10 +401,7 @@ namespace System.Linq.Tests
             // as nothing can be less than double.NaN. See https://github.com/dotnet/corefx/pull/2426.
             // Without this optimization, we would iterate through int.MaxValue elements, which takes
             // a long time.
-            if (!PlatformDetection.IsFullFramework)
-            {
-                yield return new object[] { Enumerable.Repeat((double?)double.NaN, int.MaxValue), double.NaN };
-            }
+            yield return new object[] { Enumerable.Repeat((double?)double.NaN, int.MaxValue), double.NaN };
             yield return new object[] { Enumerable.Repeat((double?)double.NaN, 3), double.NaN };
         }
 
@@ -462,7 +450,7 @@ namespace System.Linq.Tests
             AssertExtensions.Throws<ArgumentNullException>("source", () => ((IEnumerable<decimal?>)null).Min());
             AssertExtensions.Throws<ArgumentNullException>("source", () => ((IEnumerable<decimal?>)null).Min(x => x));
         }
-        
+
         public static IEnumerable<object[]> Min_DateTime_TestData()
         {
             yield return new object[] { Enumerable.Range(1, 10).Select(i => new DateTime(2000, 1, i)).ToArray(), new DateTime(2000, 1, 1) };
@@ -537,7 +525,7 @@ namespace System.Linq.Tests
             AssertExtensions.Throws<ArgumentNullException>("source", () => ((IEnumerable<string>)null).Min());
             AssertExtensions.Throws<ArgumentNullException>("source", () => ((IEnumerable<string>)null).Min(x => x));
         }
-        
+
         [Fact]
         public void Min_Int_WithSelectorAccessingProperty()
         {
@@ -549,7 +537,7 @@ namespace System.Linq.Tests
             };
             Assert.Equal(-105, source.Min(e => e.num));
         }
-        
+
         [Fact]
         public void Min_Int_NullSelector_ThrowsArgumentNullException()
         {
@@ -569,7 +557,7 @@ namespace System.Linq.Tests
 
             Assert.Equal(long.MinValue, source.Min(e => e.num));
         }
-        
+
         [Fact]
         public void Min_Long_NullSelector_ThrowsArgumentNullException()
         {
@@ -691,7 +679,7 @@ namespace System.Linq.Tests
             Func<float?, float?> selector = null;
             AssertExtensions.Throws<ArgumentNullException>("selector", () => Enumerable.Empty<float?>().Min(selector));
         }
-        
+
         [Fact]
         public void Min_NullableDouble_WithSelectorAccessingProperty()
         {
@@ -722,21 +710,21 @@ namespace System.Linq.Tests
             };
             Assert.Equal(10.5m, source.Min(e => e.num));
         }
-        
+
         [Fact]
         public void Min_NullableDecimal_NullSelector_ThrowsArgumentNullException()
         {
             Func<decimal?, decimal?> selector = null;
             AssertExtensions.Throws<ArgumentNullException>("selector", () => Enumerable.Empty<decimal?>().Min(selector));
         }
-                
+
         [Fact]
         public void Min_DateTime_NullSelector_ThrowsArgumentNullException()
         {
             Func<DateTime, DateTime> selector = null;
             AssertExtensions.Throws<ArgumentNullException>("selector", () => Enumerable.Empty<DateTime>().Min(selector));
         }
-        
+
         [Fact]
         public void Min_String_WithSelectorAccessingProperty()
         {
@@ -748,7 +736,7 @@ namespace System.Linq.Tests
             };
             Assert.Equal("Bob", source.Min(e => e.name));
         }
-        
+
         [Fact]
         public void Min_String_NullSelector_ThrowsArgumentNullException()
         {

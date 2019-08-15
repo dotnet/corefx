@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -115,11 +115,11 @@ namespace System.Configuration
                     }
                     else
                     {
-                        //No value found and no default specified 
+                        //No value found and no default specified
                         value.PropertyValue = string.Empty;
                     }
 
-                    value.IsDirty = false; //reset IsDirty so that it is correct when SetPropertyValues is called 
+                    value.IsDirty = false; //reset IsDirty so that it is correct when SetPropertyValues is called
                     values.Add(value);
                     continue;
                 }
@@ -155,11 +155,11 @@ namespace System.Configuration
                 }
                 else
                 {
-                    //No value found and no default specified 
+                    //No value found and no default specified
                     value.PropertyValue = null;
                 }
 
-                value.IsDirty = false; //reset IsDirty so that it is correct when SetPropertyValues is called 
+                value.IsDirty = false; //reset IsDirty so that it is correct when SetPropertyValues is called
                 values.Add(value);
             }
 
@@ -200,13 +200,13 @@ namespace System.Configuration
                     }
                     else
                     {
-                        // This is an app-scoped or connection string setting that has been written to. 
+                        // This is an app-scoped or connection string setting that has been written to.
                         // We don't support saving these.
                     }
                 }
             }
 
-            // Semi-hack: If there are roamable settings, let's write them before local settings so if a handler 
+            // Semi-hack: If there are roamable settings, let's write them before local settings so if a handler
             // declaration is necessary, it goes in the roaming config file in preference to the local config file.
             if (roamingUserSettings.Count > 0)
             {
@@ -220,7 +220,7 @@ namespace System.Configuration
         }
 
         /// <summary>
-        ///     Implementation of IClientSettingsProvider.Reset. Resets user scoped settings to the values 
+        ///     Implementation of IClientSettingsProvider.Reset. Resets user scoped settings to the values
         ///     in app.exe.config, does nothing for app scoped settings.
         /// </summary>
         public void Reset(SettingsContext context)
@@ -384,14 +384,14 @@ namespace System.Configuration
 
             if (!string.IsNullOrEmpty(key))
             {
-                sectionName = string.Format(CultureInfo.InvariantCulture, "{0}.{1}", sectionName, key);
+                sectionName = sectionName + "." + key;
             }
 
             return XmlConvert.EncodeLocalName(sectionName);
         }
 
         /// <summary>
-        /// Retrieves the values of settings from the given config file (as opposed to using 
+        /// Retrieves the values of settings from the given config file (as opposed to using
         /// the configuration for the current context)
         /// </summary>
         private SettingsPropertyValueCollection GetSettingValuesFromFile(string configFileName, string sectionName, bool userScoped, SettingsPropertyCollection properties)
@@ -446,11 +446,11 @@ namespace System.Configuration
 
             if (isUser && isApp)
             {
-                throw new ConfigurationErrorsException(string.Format(SR.BothScopeAttributes, setting.Name));
+                throw new ConfigurationErrorsException(SR.Format(SR.BothScopeAttributes, setting.Name));
             }
             else if (!(isUser || isApp))
             {
-                throw new ConfigurationErrorsException(string.Format(SR.NoScopeAttributes, setting.Name));
+                throw new ConfigurationErrorsException(SR.Format(SR.NoScopeAttributes, setting.Name));
             }
 
             return isUser;
@@ -459,7 +459,7 @@ namespace System.Configuration
         private XmlNode SerializeToXmlElement(SettingsProperty setting, SettingsPropertyValue value)
         {
             XmlDocument doc = new XmlDocument();
-            XmlElement valueXml = doc.CreateElement("value");
+            XmlElement valueXml = doc.CreateElement(nameof(value));
 
             string serializedValue = value.SerializedValue as string;
 
@@ -509,7 +509,7 @@ namespace System.Configuration
 
         /// <summary>
         /// Private version of upgrade that uses isRoaming to determine which config file to use.
-        /// </summary> 
+        /// </summary>
         private void Upgrade(SettingsContext context, SettingsPropertyCollection properties, bool isRoaming)
         {
             string prevConfig = GetPreviousConfigFileName(isRoaming);
@@ -533,8 +533,8 @@ namespace System.Configuration
 
         private class XmlEscaper
         {
-            private XmlDocument document;
-            private XmlElement tempElement;
+            private readonly XmlDocument document;
+            private readonly XmlElement tempElement;
 
             internal XmlEscaper()
             {

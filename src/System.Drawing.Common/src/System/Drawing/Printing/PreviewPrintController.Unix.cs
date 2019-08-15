@@ -19,10 +19,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -40,8 +40,8 @@ namespace System.Drawing.Printing
 {
     public class PreviewPrintController : PrintController
     {
-        bool useantialias;
-        ArrayList pageInfoList;
+        private bool useantialias;
+        private ArrayList pageInfoList;
 
         public PreviewPrintController()
         {
@@ -52,12 +52,10 @@ namespace System.Drawing.Printing
             get { return true; }
         }
 
-        [MonoTODO]
         public override void OnEndPage(PrintDocument document, PrintPageEventArgs e)
         {
         }
 
-        [MonoTODO]
         public override void OnStartPrint(PrintDocument document, PrintEventArgs e)
         {
             if (!document.PrinterSettings.IsValid)
@@ -70,12 +68,10 @@ namespace System.Drawing.Printing
             pageInfoList.Clear();
         }
 
-        [MonoTODO]
         public override void OnEndPrint(PrintDocument document, PrintEventArgs e)
         {
         }
 
-        [MonoTODO]
         public override Graphics OnStartPage(PrintDocument document, PrintPageEventArgs e)
         {
             Image image = new Bitmap(e.PageSettings.PaperSize.Width, e.PageSettings.PaperSize.Height);

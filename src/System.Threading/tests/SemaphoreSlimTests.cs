@@ -67,7 +67,7 @@ namespace System.Threading.Tests
             // Invalid timeout
             RunSemaphoreSlimTest1_Wait(10, 10, -10, true, typeof(ArgumentOutOfRangeException));
             RunSemaphoreSlimTest1_Wait
-               (10, 10, new TimeSpan(0, 0, Int32.MaxValue), true, typeof(ArgumentOutOfRangeException));
+               (10, 10, new TimeSpan(0, 0, int.MaxValue), true, typeof(ArgumentOutOfRangeException));
         }
 
         [Fact]
@@ -94,7 +94,7 @@ namespace System.Threading.Tests
             // Invalid timeout
             RunSemaphoreSlimTest1_WaitAsync(10, 10, -10, true, typeof(ArgumentOutOfRangeException));
             RunSemaphoreSlimTest1_WaitAsync
-               (10, 10, new TimeSpan(0, 0, Int32.MaxValue), true, typeof(ArgumentOutOfRangeException));
+               (10, 10, new TimeSpan(0, 0, int.MaxValue), true, typeof(ArgumentOutOfRangeException));
             RunSemaphoreSlimTest1_WaitAsync2();
         }
 
@@ -530,7 +530,7 @@ namespace System.Threading.Tests
         [InlineData(5, 1000, 50, 50, 50, 0, 5, 500)]
         [InlineData(0, 1000, 50, 25, 25, 25, 0, 500)]
         [InlineData(0, 1000, 50, 0, 0, 50, 0, 100)]
-        private static void RunSemaphoreSlimTest8_ConcWaitAsyncAndRelease(int initial, int maximum,
+        public static void RunSemaphoreSlimTest8_ConcWaitAsyncAndRelease(int initial, int maximum,
             int waitThreads, int releaseThreads, int succeededWait, int failedWait, int finalCount, int timeout)
         {
             SemaphoreSlim semaphore = new SemaphoreSlim(initial, maximum);

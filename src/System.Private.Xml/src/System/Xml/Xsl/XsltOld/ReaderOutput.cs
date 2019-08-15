@@ -2,21 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Globalization;
+using System.Diagnostics;
+using System.IO;
+using System.Text;
+using System.Collections;
+
 namespace System.Xml.Xsl.XsltOld
 {
-    using System;
-    using System.Globalization;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Text;
-    using System.Xml;
-    using System.Xml.XPath;
-    using System.Collections;
-
-    internal class ReaderOutput : XmlReader, RecordOutput
+    internal sealed class ReaderOutput : XmlReader, IRecordOutput
     {
         private Processor _processor;
-        private XmlNameTable _nameTable;
+        private readonly XmlNameTable _nameTable;
 
         // Main node + Fields Collection
         private RecordBuilder _builder;
@@ -37,9 +34,9 @@ namespace System.Xml.Xsl.XsltOld
         private bool _haveRecord;
 
         // Static default record
-        private static BuilderInfo s_DefaultInfo = new BuilderInfo();
+        private static readonly BuilderInfo s_DefaultInfo = new BuilderInfo();
 
-        private XmlEncoder _encoder = new XmlEncoder();
+        private readonly XmlEncoder _encoder = new XmlEncoder();
         private XmlCharType _xmlCharType = XmlCharType.Instance;
 
         internal ReaderOutput(Processor processor)
@@ -464,7 +461,7 @@ namespace System.Xml.Xsl.XsltOld
                 }
                 else if (NodeType == XmlNodeType.Attribute)
                 {
-                    return _encoder.AtributeInnerXml(Value);
+                    return _encoder.AttributeInnerXml(Value);
                 }
                 else
                 {
@@ -506,7 +503,7 @@ namespace System.Xml.Xsl.XsltOld
                 }
                 else if (NodeType == XmlNodeType.Attribute)
                 {
-                    return _encoder.AtributeOuterXml(Name, Value);
+                    return _encoder.AttributeOuterXml(Name, Value);
                 }
                 else
                 {
@@ -629,7 +626,7 @@ namespace System.Xml.Xsl.XsltOld
             return (BuilderInfo)_attributeList[attrib];
         }
 
-        private bool FindAttribute(String localName, String namespaceURI, out int attrIndex)
+        private bool FindAttribute(string localName, string namespaceURI, out int attrIndex)
         {
             if (namespaceURI == null)
             {
@@ -656,7 +653,7 @@ namespace System.Xml.Xsl.XsltOld
             return false;
         }
 
-        private bool FindAttribute(String name, out int attrIndex)
+        private bool FindAttribute(string name, out int attrIndex)
         {
             if (name == null)
             {
@@ -707,7 +704,7 @@ namespace System.Xml.Xsl.XsltOld
                 _encoder = new XmlTextEncoder(new StringWriter(_buffer, CultureInfo.InvariantCulture));
             }
 
-            public string AtributeInnerXml(string value)
+            public string AttributeInnerXml(string value)
             {
                 if (_encoder == null) Init();
                 _buffer.Length = 0;       // clean buffer
@@ -717,7 +714,7 @@ namespace System.Xml.Xsl.XsltOld
                 return _buffer.ToString();
             }
 
-            public string AtributeOuterXml(string name, string value)
+            public string AttributeOuterXml(string name, string value)
             {
                 if (_encoder == null) Init();
                 _buffer.Length = 0;       // clean buffer

@@ -87,7 +87,7 @@ namespace System.Xml.Xsl.Runtime
     [EditorBrowsable(EditorBrowsableState.Never)]
     public sealed class XsltLibrary
     {
-        private XmlQueryRuntime _runtime;
+        private readonly XmlQueryRuntime _runtime;
         private HybridDictionary _functionsAvail;
         private Dictionary<XmlQualifiedName, DecimalFormat> _decimalFormats;
         private List<DecimalFormatter> _decimalFormatters;
@@ -252,11 +252,11 @@ namespace System.Xml.Xsl.Runtime
                     {
                         if (errorHelper != null)
                         {
-                            errorHelper.ReportError(SR.Xslt_InvalidAttrValue, "lang", lang);
+                            errorHelper.ReportError(SR.Xslt_InvalidAttrValue, nameof(lang), lang);
                         }
                         else
                         {
-                            throw new XslTransformException(SR.Xslt_InvalidAttrValue, "lang", lang);
+                            throw new XslTransformException(SR.Xslt_InvalidAttrValue, nameof(lang), lang);
                         }
                     }
                 }

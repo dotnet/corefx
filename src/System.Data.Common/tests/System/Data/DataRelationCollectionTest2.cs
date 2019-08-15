@@ -2,7 +2,7 @@
 // See the LICENSE file in the project root for more information.
 
 // Copyright (c) 2004 Mainsoft Co.
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
 // "Software"), to deal in the Software without restriction, including
@@ -10,10 +10,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -149,10 +149,10 @@ namespace System.Data.Tests
         {
             DataSet ds = getDataSet();
             ds.Relations.Add(ds.Tables[0].Columns["ParentId"], ds.Tables[1].Columns["ParentId"]);
-            Assert.Equal(true, ds.Relations.CanRemove(ds.Relations[0]));
-            Assert.Equal(true, ds.Tables[0].ChildRelations.CanRemove(ds.Tables[0].ChildRelations[0]));
-            Assert.Equal(true, ds.Tables[1].ParentRelations.CanRemove(ds.Tables[1].ParentRelations[0]));
-            Assert.Equal(false, ds.Relations.CanRemove(null));
+            Assert.True(ds.Relations.CanRemove(ds.Relations[0]));
+            Assert.True(ds.Tables[0].ChildRelations.CanRemove(ds.Tables[0].ChildRelations[0]));
+            Assert.True(ds.Tables[1].ParentRelations.CanRemove(ds.Tables[1].ParentRelations[0]));
+            Assert.False(ds.Relations.CanRemove(null));
         }
         [Fact]
         public void CanRemove_DataRelation()
@@ -163,7 +163,7 @@ namespace System.Data.Tests
             DataRelation rel = new DataRelation("rel1",
                 ds.Tables[0].Columns["ParentId"], ds.Tables[1].Columns["ParentId"]);
 
-            Assert.Equal(false, ds1.Relations.CanRemove(rel));
+            Assert.False(ds1.Relations.CanRemove(rel));
         }
 
         [Fact]
@@ -204,9 +204,9 @@ namespace System.Data.Tests
             DataSet ds = getDataSet();
             ds.Relations.Add("rel1", ds.Tables[0].Columns["ParentId"], ds.Tables[1].Columns["ParentId"]);
 
-            Assert.Equal(true, ds.Relations.Contains("rel1"));
-            Assert.Equal(false, ds.Relations.Contains("RelL"));
-            Assert.Equal(false, ds.Relations.Contains("rel2"));
+            Assert.True(ds.Relations.Contains("rel1"));
+            Assert.False(ds.Relations.Contains("RelL"));
+            Assert.False(ds.Relations.Contains("rel2"));
         }
 
         [Fact]
@@ -317,7 +317,7 @@ namespace System.Data.Tests
         [Fact]
         public void Add_DataColumn1()
         {
-            DataSet ds = DataProvider.CreateForigenConstraint();
+            DataSet ds = DataProvider.CreateForeignConstraint();
             int originalRelationsCount = ds.Relations.Count;
 
             DataRelation rel = new DataRelation("rel1", ds.Tables[0].Columns["ParentId"]
@@ -438,7 +438,7 @@ namespace System.Data.Tests
             ds.Relations.Add(rel1);
             ds.Relations.Add(rel2);
 
-            Assert.Equal(ds.Relations.Count, 2);
+            Assert.Equal(2, ds.Relations.Count);
 
             ds.Relations.CollectionChanged += new CollectionChangeEventHandler(Relations_CollectionChanged);
             //Perform remove

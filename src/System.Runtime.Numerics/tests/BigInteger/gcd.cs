@@ -128,7 +128,7 @@ namespace System.Numerics.Tests
             // Check some identities
             // (x+y)+z = (y+z)+x
 
-            VerifyIdentityString( 
+            VerifyIdentityString(
                 Int64.MaxValue.ToString() + " " + Int32.MaxValue.ToString() + " bGCD " + Int16.MaxValue.ToString() + " bGCD",
                 Int32.MaxValue.ToString() + " " + Int16.MaxValue.ToString() + " bGCD " + Int64.MaxValue.ToString() + " bGCD"
             );
@@ -160,7 +160,7 @@ namespace System.Numerics.Tests
 
             StackCalc sc2 = new StackCalc(opstring2);
             while (sc2.DoNextOperation())
-            {	
+            {
                 //Run the full calculation
                 sc2.DoNextOperation();
             }
@@ -178,7 +178,7 @@ namespace System.Numerics.Tests
             return MyBigIntImp.GetRandomByteArray(random, size);
         }
 
-        private static String Print(byte[] bytes)
+        private static string Print(byte[] bytes)
         {
             return MyBigIntImp.Print(bytes);
         }

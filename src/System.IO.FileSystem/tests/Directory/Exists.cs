@@ -262,21 +262,8 @@ namespace System.IO.Tests
         }
 
         [Theory,
-            MemberData(nameof(ControlWhiteSpace))]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)] // e.g. NetFX only
-        public void ControlWhiteSpaceExists(string component)
-        {
-            DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
-
-            string path = testDir.FullName + component;
-            Assert.True(Exists(path), "directory with control whitespace should exist");
-        }
-
-        [Theory,
             MemberData(nameof(NonControlWhiteSpace))]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // not NetFX
         public void NonControlWhiteSpaceExists(string component)
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath() + component);
@@ -379,7 +366,7 @@ namespace System.IO.Tests
         // eg. Create a new volume, bitlocker it, and lock it. This new volume is no longer accessible
         // and any attempt to access this drive will return false.
         // We just care that we can access an accessible drive directly, we don't care which one.
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotInAppContainer))] // Can't read root in appcontainer
         [PlatformSpecific(TestPlatforms.Windows)] // drive labels
         public void DriveAsPath()
         {
@@ -392,7 +379,9 @@ namespace System.IO.Tests
         public void ExtendedDriveAsPath()
         {
             Assert.False(Exists(IOInputs.ExtendedPrefix + IOServices.GetNonExistentDrive()));
-            Assert.Contains(IOServices.GetReadyDrives(), drive => Exists(IOInputs.ExtendedPrefix + drive));
+
+            if (PlatformDetection.IsNotInAppContainer)
+                Assert.Contains(IOServices.GetReadyDrives(), drive => Exists(IOInputs.ExtendedPrefix + drive));
         }
 
         [Fact]

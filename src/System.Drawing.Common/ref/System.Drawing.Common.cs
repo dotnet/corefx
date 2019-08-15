@@ -25,11 +25,11 @@ namespace System.Drawing
         public System.Drawing.Bitmap Clone(System.Drawing.RectangleF rect, System.Drawing.Imaging.PixelFormat format) { throw null; }
         public static System.Drawing.Bitmap FromHicon(System.IntPtr hicon) { throw null; }
         public static System.Drawing.Bitmap FromResource(System.IntPtr hinstance, string bitmapName) { throw null; }
-        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
         public System.IntPtr GetHbitmap() { throw null; }
-        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
         public System.IntPtr GetHbitmap(System.Drawing.Color background) { throw null; }
-        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
         public System.IntPtr GetHicon() { throw null; }
         public System.Drawing.Color GetPixel(int x, int y) { throw null; }
         public System.Drawing.Imaging.BitmapData LockBits(System.Drawing.Rectangle rect, System.Drawing.Imaging.ImageLockMode flags, System.Drawing.Imaging.PixelFormat format) { throw null; }
@@ -40,12 +40,12 @@ namespace System.Drawing
         public void SetResolution(float xDpi, float yDpi) { }
         public void UnlockBits(System.Drawing.Imaging.BitmapData bitmapdata) { }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(1))]
+    [System.AttributeUsageAttribute(System.AttributeTargets.Assembly)]
     public partial class BitmapSuffixInSameAssemblyAttribute : System.Attribute
     {
         public BitmapSuffixInSameAssemblyAttribute() { }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(1))]
+    [System.AttributeUsageAttribute(System.AttributeTargets.Assembly)]
     public partial class BitmapSuffixInSatelliteAssemblyAttribute : System.Attribute
     {
         public BitmapSuffixInSatelliteAssemblyAttribute() { }
@@ -229,7 +229,7 @@ namespace System.Drawing
     }
     public partial struct CharacterRange
     {
-        private int _dummy;
+        private int _dummyPrimitive;
         public CharacterRange(int First, int Length) { throw null; }
         public int First { get { throw null; } set { } }
         public int Length { get { throw null; } set { } }
@@ -238,47 +238,41 @@ namespace System.Drawing
         public static bool operator ==(System.Drawing.CharacterRange cr1, System.Drawing.CharacterRange cr2) { throw null; }
         public static bool operator !=(System.Drawing.CharacterRange cr1, System.Drawing.CharacterRange cr2) { throw null; }
     }
-    public static partial class ColorTranslator
-    {
-        public static System.Drawing.Color FromHtml(string htmlColor) { throw null; }
-        public static System.Drawing.Color FromOle(int oleColor) { throw null; }
-        public static System.Drawing.Color FromWin32(int win32Color) { throw null; }
-        public static string ToHtml(System.Drawing.Color c) { throw null; }
-        public static int ToOle(System.Drawing.Color c) { throw null; }
-        public static int ToWin32(System.Drawing.Color c) { throw null; }
-    }
     public enum ContentAlignment
     {
-        BottomCenter = 512,
-        BottomLeft = 256,
-        BottomRight = 1024,
-        MiddleCenter = 32,
-        MiddleLeft = 16,
-        MiddleRight = 64,
-        TopCenter = 2,
         TopLeft = 1,
+        TopCenter = 2,
         TopRight = 4,
+        MiddleLeft = 16,
+        MiddleCenter = 32,
+        MiddleRight = 64,
+        BottomLeft = 256,
+        BottomCenter = 512,
+        BottomRight = 1024,
     }
     public enum CopyPixelOperation
     {
-        Blackness = 66,
-        CaptureBlt = 1073741824,
-        DestinationInvert = 5570569,
-        MergeCopy = 12583114,
-        MergePaint = 12255782,
         NoMirrorBitmap = -2147483648,
-        NotSourceCopy = 3342344,
+        Blackness = 66,
         NotSourceErase = 1114278,
-        PatCopy = 15728673,
-        PatInvert = 5898313,
-        PatPaint = 16452105,
-        SourceAnd = 8913094,
-        SourceCopy = 13369376,
+        NotSourceCopy = 3342344,
         SourceErase = 4457256,
+        DestinationInvert = 5570569,
+        PatInvert = 5898313,
         SourceInvert = 6684742,
+        SourceAnd = 8913094,
+        MergePaint = 12255782,
+        MergeCopy = 12583114,
+        SourceCopy = 13369376,
         SourcePaint = 15597702,
+        PatCopy = 15728673,
+        PatPaint = 16452105,
         Whiteness = 16711778,
+        CaptureBlt = 1073741824,
     }
+#if netcoreapp
+    [System.ComponentModel.TypeConverterAttribute("System.Drawing.FontConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
+#endif
     public sealed partial class Font : System.MarshalByRefObject, System.ICloneable, System.IDisposable, System.Runtime.Serialization.ISerializable
     {
         public Font(System.Drawing.Font prototype, System.Drawing.FontStyle newStyle) { }
@@ -294,34 +288,34 @@ namespace System.Drawing
         public Font(string familyName, float emSize, System.Drawing.FontStyle style, System.Drawing.GraphicsUnit unit, byte gdiCharSet) { }
         public Font(string familyName, float emSize, System.Drawing.FontStyle style, System.Drawing.GraphicsUnit unit, byte gdiCharSet, bool gdiVerticalFont) { }
         public Font(string familyName, float emSize, System.Drawing.GraphicsUnit unit) { }
-        [System.ComponentModel.DesignerSerializationVisibilityAttribute((System.ComponentModel.DesignerSerializationVisibility)(0))]
+        [System.ComponentModel.DesignerSerializationVisibilityAttribute(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public bool Bold { get { throw null; } }
         [System.ComponentModel.BrowsableAttribute(false)]
         public System.Drawing.FontFamily FontFamily { get { throw null; } }
-        [System.ComponentModel.DesignerSerializationVisibilityAttribute((System.ComponentModel.DesignerSerializationVisibility)(0))]
+        [System.ComponentModel.DesignerSerializationVisibilityAttribute(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public byte GdiCharSet { get { throw null; } }
-        [System.ComponentModel.DesignerSerializationVisibilityAttribute((System.ComponentModel.DesignerSerializationVisibility)(0))]
+        [System.ComponentModel.DesignerSerializationVisibilityAttribute(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public bool GdiVerticalFont { get { throw null; } }
         [System.ComponentModel.BrowsableAttribute(false)]
         public int Height { get { throw null; } }
         [System.ComponentModel.BrowsableAttribute(false)]
         public bool IsSystemFont { get { throw null; } }
-        [System.ComponentModel.DesignerSerializationVisibilityAttribute((System.ComponentModel.DesignerSerializationVisibility)(0))]
+        [System.ComponentModel.DesignerSerializationVisibilityAttribute(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public bool Italic { get { throw null; } }
-        [System.ComponentModel.DesignerSerializationVisibilityAttribute((System.ComponentModel.DesignerSerializationVisibility)(0))]
+        [System.ComponentModel.DesignerSerializationVisibilityAttribute(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public string Name { get { throw null; } }
         [System.ComponentModel.BrowsableAttribute(false)]
         public string OriginalFontName { get { throw null; } }
         public float Size { get { throw null; } }
         [System.ComponentModel.BrowsableAttribute(false)]
         public float SizeInPoints { get { throw null; } }
-        [System.ComponentModel.DesignerSerializationVisibilityAttribute((System.ComponentModel.DesignerSerializationVisibility)(0))]
+        [System.ComponentModel.DesignerSerializationVisibilityAttribute(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public bool Strikeout { get { throw null; } }
         [System.ComponentModel.BrowsableAttribute(false)]
         public System.Drawing.FontStyle Style { get { throw null; } }
         [System.ComponentModel.BrowsableAttribute(false)]
         public string SystemFontName { get { throw null; } }
-        [System.ComponentModel.DesignerSerializationVisibilityAttribute((System.ComponentModel.DesignerSerializationVisibility)(0))]
+        [System.ComponentModel.DesignerSerializationVisibilityAttribute(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public bool Underline { get { throw null; } }
         public System.Drawing.GraphicsUnit Unit { get { throw null; } }
         public object Clone() { throw null; }
@@ -369,11 +363,11 @@ namespace System.Drawing
     [System.FlagsAttribute]
     public enum FontStyle
     {
+        Regular = 0,
         Bold = 1,
         Italic = 2,
-        Regular = 0,
-        Strikeout = 8,
         Underline = 4,
+        Strikeout = 8,
     }
     public sealed partial class Graphics : System.MarshalByRefObject, System.Drawing.IDeviceContext, System.IDisposable
     {
@@ -559,18 +553,18 @@ namespace System.Drawing
         ~Graphics() { }
         public void Flush() { }
         public void Flush(System.Drawing.Drawing2D.FlushIntention intention) { }
-        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
         public static System.Drawing.Graphics FromHdc(System.IntPtr hdc) { throw null; }
-        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
         public static System.Drawing.Graphics FromHdc(System.IntPtr hdc, System.IntPtr hdevice) { throw null; }
-        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
         public static System.Drawing.Graphics FromHdcInternal(System.IntPtr hdc) { throw null; }
-        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
         public static System.Drawing.Graphics FromHwnd(System.IntPtr hwnd) { throw null; }
-        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
         public static System.Drawing.Graphics FromHwndInternal(System.IntPtr hwnd) { throw null; }
         public static System.Drawing.Graphics FromImage(System.Drawing.Image image) { throw null; }
-        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         public object GetContextInfo() { throw null; }
         public static System.IntPtr GetHalftonePalette() { throw null; }
         public System.IntPtr GetHdc() { throw null; }
@@ -597,9 +591,9 @@ namespace System.Drawing
         public void MultiplyTransform(System.Drawing.Drawing2D.Matrix matrix) { }
         public void MultiplyTransform(System.Drawing.Drawing2D.Matrix matrix, System.Drawing.Drawing2D.MatrixOrder order) { }
         public void ReleaseHdc() { }
-        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
         public void ReleaseHdc(System.IntPtr hdc) { }
-        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         public void ReleaseHdcInternal(System.IntPtr hdc) { }
         public void ResetClip() { }
         public void ResetTransform() { }
@@ -629,14 +623,17 @@ namespace System.Drawing
     }
     public enum GraphicsUnit
     {
+        World = 0,
         Display = 1,
-        Document = 5,
-        Inch = 4,
-        Millimeter = 6,
         Pixel = 2,
         Point = 3,
-        World = 0,
+        Inch = 4,
+        Document = 5,
+        Millimeter = 6,
     }
+#if netcoreapp
+    [System.ComponentModel.TypeConverterAttribute("System.Drawing.IconConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
+#endif
     public sealed partial class Icon : System.MarshalByRefObject, System.ICloneable, System.IDisposable, System.Runtime.Serialization.ISerializable
     {
         public Icon(System.Drawing.Icon original, System.Drawing.Size size) { }
@@ -671,6 +668,9 @@ namespace System.Drawing
         void ReleaseHdc();
     }
     [System.ComponentModel.ImmutableObjectAttribute(true)]
+#if netcoreapp
+    [System.ComponentModel.TypeConverterAttribute("System.Drawing.ImageConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
+#endif
     public abstract partial class Image : System.MarshalByRefObject, System.ICloneable, System.IDisposable, System.Runtime.Serialization.ISerializable
     {
         internal Image() { }
@@ -680,7 +680,7 @@ namespace System.Drawing
         public System.Guid[] FrameDimensionsList { get { throw null; } }
         [System.ComponentModel.BrowsableAttribute(false)]
         [System.ComponentModel.DefaultValueAttribute(false)]
-        [System.ComponentModel.DesignerSerializationVisibilityAttribute((System.ComponentModel.DesignerSerializationVisibility)(0))]
+        [System.ComponentModel.DesignerSerializationVisibilityAttribute(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public int Height { get { throw null; } }
         public float HorizontalResolution { get { throw null; } }
         [System.ComponentModel.BrowsableAttribute(false)]
@@ -699,7 +699,7 @@ namespace System.Drawing
         public float VerticalResolution { get { throw null; } }
         [System.ComponentModel.BrowsableAttribute(false)]
         [System.ComponentModel.DefaultValueAttribute(false)]
-        [System.ComponentModel.DesignerSerializationVisibilityAttribute((System.ComponentModel.DesignerSerializationVisibility)(0))]
+        [System.ComponentModel.DesignerSerializationVisibilityAttribute(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public int Width { get { throw null; } }
         public object Clone() { throw null; }
         public void Dispose() { }
@@ -987,22 +987,22 @@ namespace System.Drawing
     }
     public enum RotateFlipType
     {
-        Rotate180FlipNone = 2,
-        Rotate180FlipX = 6,
         Rotate180FlipXY = 0,
-        Rotate180FlipY = 4,
-        Rotate270FlipNone = 3,
-        Rotate270FlipX = 7,
-        Rotate270FlipXY = 1,
-        Rotate270FlipY = 5,
-        Rotate90FlipNone = 1,
-        Rotate90FlipX = 5,
-        Rotate90FlipXY = 3,
-        Rotate90FlipY = 7,
         RotateNoneFlipNone = 0,
-        RotateNoneFlipX = 4,
+        Rotate270FlipXY = 1,
+        Rotate90FlipNone = 1,
+        Rotate180FlipNone = 2,
         RotateNoneFlipXY = 2,
+        Rotate270FlipNone = 3,
+        Rotate90FlipXY = 3,
+        Rotate180FlipY = 4,
+        RotateNoneFlipX = 4,
+        Rotate270FlipY = 5,
+        Rotate90FlipX = 5,
+        Rotate180FlipX = 6,
         RotateNoneFlipY = 6,
+        Rotate270FlipX = 7,
+        Rotate90FlipY = 7,
     }
     public sealed partial class SolidBrush : System.Drawing.Brush
     {
@@ -1013,16 +1013,16 @@ namespace System.Drawing
     }
     public enum StringAlignment
     {
+        Near = 0,
         Center = 1,
         Far = 2,
-        Near = 0,
     }
     public enum StringDigitSubstitute
     {
-        National = 2,
-        None = 1,
-        Traditional = 3,
         User = 0,
+        None = 1,
+        National = 2,
+        Traditional = 3,
     }
     public sealed partial class StringFormat : System.MarshalByRefObject, System.ICloneable, System.IDisposable
     {
@@ -1053,33 +1053,33 @@ namespace System.Drawing
     {
         DirectionRightToLeft = 1,
         DirectionVertical = 2,
-        DisplayFormatControl = 32,
         FitBlackBox = 4,
-        LineLimit = 8192,
-        MeasureTrailingSpaces = 2048,
-        NoClip = 16384,
+        DisplayFormatControl = 32,
         NoFontFallback = 1024,
+        MeasureTrailingSpaces = 2048,
         NoWrap = 4096,
+        LineLimit = 8192,
+        NoClip = 16384,
     }
     public enum StringTrimming
     {
-        Character = 1,
-        EllipsisCharacter = 3,
-        EllipsisPath = 5,
-        EllipsisWord = 4,
         None = 0,
+        Character = 1,
         Word = 2,
+        EllipsisCharacter = 3,
+        EllipsisWord = 4,
+        EllipsisPath = 5,
     }
     public enum StringUnit
     {
+        World = 0,
         Display = 1,
-        Document = 5,
-        Em = 32,
-        Inch = 4,
-        Millimeter = 6,
         Pixel = 2,
         Point = 3,
-        World = 0,
+        Inch = 4,
+        Document = 5,
+        Millimeter = 6,
+        Em = 32,
     }
     public static partial class SystemBrushes
     {
@@ -1117,42 +1117,6 @@ namespace System.Drawing
         public static System.Drawing.Brush WindowFrame { get { throw null; } }
         public static System.Drawing.Brush WindowText { get { throw null; } }
         public static System.Drawing.Brush FromSystemColor(System.Drawing.Color c) { throw null; }
-    }
-    public static partial class SystemColors
-    {
-        public static System.Drawing.Color ActiveBorder { get { throw null; } }
-        public static System.Drawing.Color ActiveCaption { get { throw null; } }
-        public static System.Drawing.Color ActiveCaptionText { get { throw null; } }
-        public static System.Drawing.Color AppWorkspace { get { throw null; } }
-        public static System.Drawing.Color ButtonFace { get { throw null; } }
-        public static System.Drawing.Color ButtonHighlight { get { throw null; } }
-        public static System.Drawing.Color ButtonShadow { get { throw null; } }
-        public static System.Drawing.Color Control { get { throw null; } }
-        public static System.Drawing.Color ControlDark { get { throw null; } }
-        public static System.Drawing.Color ControlDarkDark { get { throw null; } }
-        public static System.Drawing.Color ControlLight { get { throw null; } }
-        public static System.Drawing.Color ControlLightLight { get { throw null; } }
-        public static System.Drawing.Color ControlText { get { throw null; } }
-        public static System.Drawing.Color Desktop { get { throw null; } }
-        public static System.Drawing.Color GradientActiveCaption { get { throw null; } }
-        public static System.Drawing.Color GradientInactiveCaption { get { throw null; } }
-        public static System.Drawing.Color GrayText { get { throw null; } }
-        public static System.Drawing.Color Highlight { get { throw null; } }
-        public static System.Drawing.Color HighlightText { get { throw null; } }
-        public static System.Drawing.Color HotTrack { get { throw null; } }
-        public static System.Drawing.Color InactiveBorder { get { throw null; } }
-        public static System.Drawing.Color InactiveCaption { get { throw null; } }
-        public static System.Drawing.Color InactiveCaptionText { get { throw null; } }
-        public static System.Drawing.Color Info { get { throw null; } }
-        public static System.Drawing.Color InfoText { get { throw null; } }
-        public static System.Drawing.Color Menu { get { throw null; } }
-        public static System.Drawing.Color MenuBar { get { throw null; } }
-        public static System.Drawing.Color MenuHighlight { get { throw null; } }
-        public static System.Drawing.Color MenuText { get { throw null; } }
-        public static System.Drawing.Color ScrollBar { get { throw null; } }
-        public static System.Drawing.Color Window { get { throw null; } }
-        public static System.Drawing.Color WindowFrame { get { throw null; } }
-        public static System.Drawing.Color WindowText { get { throw null; } }
     }
     public static partial class SystemFonts
     {
@@ -1240,7 +1204,7 @@ namespace System.Drawing
         public void TranslateTransform(float dx, float dy) { }
         public void TranslateTransform(float dx, float dy, System.Drawing.Drawing2D.MatrixOrder order) { }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(4))]
+    [System.AttributeUsageAttribute(System.AttributeTargets.Class)]
     public partial class ToolboxBitmapAttribute : System.Attribute
     {
         public static readonly System.Drawing.ToolboxBitmapAttribute Default;
@@ -1296,32 +1260,32 @@ namespace System.Drawing.Drawing2D
     }
     public enum CombineMode
     {
-        Complement = 5,
-        Exclude = 4,
-        Intersect = 1,
         Replace = 0,
+        Intersect = 1,
         Union = 2,
         Xor = 3,
+        Exclude = 4,
+        Complement = 5,
     }
     public enum CompositingMode
     {
-        SourceCopy = 1,
         SourceOver = 0,
+        SourceCopy = 1,
     }
     public enum CompositingQuality
     {
-        AssumeLinear = 4,
-        Default = 0,
-        GammaCorrected = 3,
-        HighQuality = 2,
-        HighSpeed = 1,
         Invalid = -1,
+        Default = 0,
+        HighSpeed = 1,
+        HighQuality = 2,
+        GammaCorrected = 3,
+        AssumeLinear = 4,
     }
     public enum CoordinateSpace
     {
-        Device = 2,
-        Page = 1,
         World = 0,
+        Page = 1,
+        Device = 2,
     }
     public partial class CustomLineCap : System.MarshalByRefObject, System.ICloneable, System.IDisposable
     {
@@ -1347,12 +1311,12 @@ namespace System.Drawing.Drawing2D
     }
     public enum DashStyle
     {
-        Custom = 5,
+        Solid = 0,
         Dash = 1,
+        Dot = 2,
         DashDot = 3,
         DashDotDot = 4,
-        Dot = 2,
-        Solid = 0,
+        Custom = 5,
     }
     public enum FillMode
     {
@@ -1499,36 +1463,15 @@ namespace System.Drawing.Drawing2D
     }
     public enum HatchStyle
     {
+        Horizontal = 0,
+        Min = 0,
+        Vertical = 1,
+        ForwardDiagonal = 2,
         BackwardDiagonal = 3,
         Cross = 4,
-        DarkDownwardDiagonal = 20,
-        DarkHorizontal = 29,
-        DarkUpwardDiagonal = 21,
-        DarkVertical = 28,
-        DashedDownwardDiagonal = 30,
-        DashedHorizontal = 32,
-        DashedUpwardDiagonal = 31,
-        DashedVertical = 33,
-        DiagonalBrick = 38,
-        DiagonalCross = 5,
-        Divot = 42,
-        DottedDiamond = 44,
-        DottedGrid = 43,
-        ForwardDiagonal = 2,
-        Horizontal = 0,
-        HorizontalBrick = 39,
-        LargeCheckerBoard = 50,
-        LargeConfetti = 35,
         LargeGrid = 4,
-        LightDownwardDiagonal = 18,
-        LightHorizontal = 25,
-        LightUpwardDiagonal = 19,
-        LightVertical = 24,
         Max = 4,
-        Min = 0,
-        NarrowHorizontal = 27,
-        NarrowVertical = 26,
-        OutlinedDiamond = 51,
+        DiagonalCross = 5,
         Percent05 = 6,
         Percent10 = 7,
         Percent20 = 8,
@@ -1541,32 +1484,53 @@ namespace System.Drawing.Drawing2D
         Percent75 = 15,
         Percent80 = 16,
         Percent90 = 17,
-        Plaid = 41,
-        Shingle = 45,
-        SmallCheckerBoard = 49,
-        SmallConfetti = 34,
-        SmallGrid = 48,
-        SolidDiamond = 52,
-        Sphere = 47,
-        Trellis = 46,
-        Vertical = 1,
-        Wave = 37,
-        Weave = 40,
+        LightDownwardDiagonal = 18,
+        LightUpwardDiagonal = 19,
+        DarkDownwardDiagonal = 20,
+        DarkUpwardDiagonal = 21,
         WideDownwardDiagonal = 22,
         WideUpwardDiagonal = 23,
+        LightVertical = 24,
+        LightHorizontal = 25,
+        NarrowVertical = 26,
+        NarrowHorizontal = 27,
+        DarkVertical = 28,
+        DarkHorizontal = 29,
+        DashedDownwardDiagonal = 30,
+        DashedUpwardDiagonal = 31,
+        DashedHorizontal = 32,
+        DashedVertical = 33,
+        SmallConfetti = 34,
+        LargeConfetti = 35,
         ZigZag = 36,
+        Wave = 37,
+        DiagonalBrick = 38,
+        HorizontalBrick = 39,
+        Weave = 40,
+        Plaid = 41,
+        Divot = 42,
+        DottedGrid = 43,
+        DottedDiamond = 44,
+        Shingle = 45,
+        Trellis = 46,
+        Sphere = 47,
+        SmallGrid = 48,
+        SmallCheckerBoard = 49,
+        LargeCheckerBoard = 50,
+        OutlinedDiamond = 51,
+        SolidDiamond = 52,
     }
     public enum InterpolationMode
     {
-        Bicubic = 4,
-        Bilinear = 3,
-        Default = 0,
-        High = 2,
-        HighQualityBicubic = 7,
-        HighQualityBilinear = 6,
         Invalid = -1,
+        Default = 0,
         Low = 1,
+        High = 2,
+        Bilinear = 3,
+        Bicubic = 4,
         NearestNeighbor = 5,
+        HighQualityBilinear = 6,
+        HighQualityBicubic = 7,
     }
     public sealed partial class LinearGradientBrush : System.Drawing.Brush
     {
@@ -1602,31 +1566,31 @@ namespace System.Drawing.Drawing2D
     }
     public enum LinearGradientMode
     {
-        BackwardDiagonal = 3,
-        ForwardDiagonal = 2,
         Horizontal = 0,
         Vertical = 1,
+        ForwardDiagonal = 2,
+        BackwardDiagonal = 3,
     }
     public enum LineCap
     {
-        AnchorMask = 240,
-        ArrowAnchor = 20,
-        Custom = 255,
-        DiamondAnchor = 19,
         Flat = 0,
-        NoAnchor = 16,
-        Round = 2,
-        RoundAnchor = 18,
         Square = 1,
-        SquareAnchor = 17,
+        Round = 2,
         Triangle = 3,
+        NoAnchor = 16,
+        SquareAnchor = 17,
+        RoundAnchor = 18,
+        DiamondAnchor = 19,
+        ArrowAnchor = 20,
+        AnchorMask = 240,
+        Custom = 255,
     }
     public enum LineJoin
     {
-        Bevel = 1,
         Miter = 0,
-        MiterClipped = 3,
+        Bevel = 1,
         Round = 2,
+        MiterClipped = 3,
     }
     public sealed partial class Matrix : System.MarshalByRefObject, System.IDisposable
     {
@@ -1666,8 +1630,8 @@ namespace System.Drawing.Drawing2D
     }
     public enum MatrixOrder
     {
-        Append = 1,
         Prepend = 0,
+        Append = 1,
     }
     public sealed partial class PathData
     {
@@ -1708,46 +1672,46 @@ namespace System.Drawing.Drawing2D
     }
     public enum PathPointType
     {
+        Start = 0,
+        Line = 1,
         Bezier = 3,
         Bezier3 = 3,
-        CloseSubpath = 128,
-        DashMode = 16,
-        Line = 1,
-        PathMarker = 32,
         PathTypeMask = 7,
-        Start = 0,
+        DashMode = 16,
+        PathMarker = 32,
+        CloseSubpath = 128,
     }
     public enum PenAlignment
     {
         Center = 0,
         Inset = 1,
-        Left = 3,
         Outset = 2,
+        Left = 3,
         Right = 4,
     }
     public enum PenType
     {
-        HatchFill = 1,
-        LinearGradient = 4,
-        PathGradient = 3,
         SolidColor = 0,
+        HatchFill = 1,
         TextureFill = 2,
+        PathGradient = 3,
+        LinearGradient = 4,
     }
     public enum PixelOffsetMode
     {
-        Default = 0,
-        Half = 4,
-        HighQuality = 2,
-        HighSpeed = 1,
         Invalid = -1,
+        Default = 0,
+        HighSpeed = 1,
+        HighQuality = 2,
         None = 3,
+        Half = 4,
     }
     public enum QualityMode
     {
-        Default = 0,
-        High = 2,
         Invalid = -1,
+        Default = 0,
         Low = 1,
+        High = 2,
     }
     public sealed partial class RegionData
     {
@@ -1756,25 +1720,25 @@ namespace System.Drawing.Drawing2D
     }
     public enum SmoothingMode
     {
-        AntiAlias = 4,
-        Default = 0,
-        HighQuality = 2,
-        HighSpeed = 1,
         Invalid = -1,
+        Default = 0,
+        HighSpeed = 1,
+        HighQuality = 2,
         None = 3,
+        AntiAlias = 4,
     }
     public enum WarpMode
     {
-        Bilinear = 1,
         Perspective = 0,
+        Bilinear = 1,
     }
     public enum WrapMode
     {
-        Clamp = 4,
         Tile = 0,
         TileFlipX = 1,
-        TileFlipXY = 3,
         TileFlipY = 2,
+        TileFlipXY = 3,
+        Clamp = 4,
     }
 }
 namespace System.Drawing.Imaging
@@ -1791,21 +1755,21 @@ namespace System.Drawing.Imaging
     }
     public enum ColorAdjustType
     {
-        Any = 6,
+        Default = 0,
         Bitmap = 1,
         Brush = 2,
-        Count = 5,
-        Default = 0,
         Pen = 3,
         Text = 4,
+        Count = 5,
+        Any = 6,
     }
     public enum ColorChannelFlag
     {
         ColorChannelC = 0,
-        ColorChannelK = 3,
-        ColorChannelLast = 4,
         ColorChannelM = 1,
         ColorChannelY = 2,
+        ColorChannelK = 3,
+        ColorChannelLast = 4,
     }
     public sealed partial class ColorMap
     {
@@ -1815,8 +1779,8 @@ namespace System.Drawing.Imaging
     }
     public enum ColorMapType
     {
-        Brush = 1,
         Default = 0,
+        Brush = 1,
     }
     public sealed partial class ColorMatrix
     {
@@ -1852,9 +1816,9 @@ namespace System.Drawing.Imaging
     }
     public enum ColorMatrixFlag
     {
-        AltGrays = 2,
         Default = 0,
         SkipGrays = 1,
+        AltGrays = 2,
     }
     public enum ColorMode
     {
@@ -1869,265 +1833,265 @@ namespace System.Drawing.Imaging
     }
     public enum EmfPlusRecordType
     {
-        BeginContainer = 16423,
-        BeginContainerNoParams = 16424,
-        Clear = 16393,
-        Comment = 16387,
-        DrawArc = 16402,
-        DrawBeziers = 16409,
-        DrawClosedCurve = 16407,
-        DrawCurve = 16408,
-        DrawDriverString = 16438,
-        DrawEllipse = 16399,
-        DrawImage = 16410,
-        DrawImagePoints = 16411,
-        DrawLines = 16397,
-        DrawPath = 16405,
-        DrawPie = 16401,
-        DrawRects = 16395,
-        DrawString = 16412,
-        EmfAbortPath = 68,
-        EmfAlphaBlend = 114,
-        EmfAngleArc = 41,
-        EmfArcTo = 55,
-        EmfBeginPath = 59,
-        EmfBitBlt = 76,
-        EmfChord = 46,
-        EmfCloseFigure = 61,
-        EmfColorCorrectPalette = 111,
-        EmfColorMatchToTargetW = 121,
-        EmfCreateBrushIndirect = 39,
-        EmfCreateColorSpace = 99,
-        EmfCreateColorSpaceW = 122,
-        EmfCreateDibPatternBrushPt = 94,
-        EmfCreateMonoBrush = 93,
-        EmfCreatePalette = 49,
-        EmfCreatePen = 38,
-        EmfDeleteColorSpace = 101,
-        EmfDeleteObject = 40,
-        EmfDrawEscape = 105,
-        EmfEllipse = 42,
-        EmfEndPath = 60,
-        EmfEof = 14,
-        EmfExcludeClipRect = 29,
-        EmfExtCreateFontIndirect = 82,
-        EmfExtCreatePen = 95,
-        EmfExtEscape = 106,
-        EmfExtFloodFill = 53,
-        EmfExtSelectClipRgn = 75,
-        EmfExtTextOutA = 83,
-        EmfExtTextOutW = 84,
-        EmfFillPath = 62,
-        EmfFillRgn = 71,
-        EmfFlattenPath = 65,
-        EmfForceUfiMapping = 109,
-        EmfFrameRgn = 72,
-        EmfGdiComment = 70,
-        EmfGlsBoundedRecord = 103,
-        EmfGlsRecord = 102,
-        EmfGradientFill = 118,
         EmfHeader = 1,
-        EmfIntersectClipRect = 30,
-        EmfInvertRgn = 73,
-        EmfLineTo = 54,
-        EmfMaskBlt = 78,
-        EmfMax = 122,
         EmfMin = 1,
-        EmfModifyWorldTransform = 36,
-        EmfMoveToEx = 27,
-        EmfNamedEscpae = 110,
-        EmfOffsetClipRgn = 26,
-        EmfPaintRgn = 74,
-        EmfPie = 47,
-        EmfPixelFormat = 104,
-        EmfPlgBlt = 79,
-        EmfPlusRecordBase = 16384,
         EmfPolyBezier = 2,
-        EmfPolyBezier16 = 85,
-        EmfPolyBezierTo = 5,
-        EmfPolyBezierTo16 = 88,
-        EmfPolyDraw = 56,
-        EmfPolyDraw16 = 92,
         EmfPolygon = 3,
-        EmfPolygon16 = 86,
         EmfPolyline = 4,
-        EmfPolyline16 = 87,
+        EmfPolyBezierTo = 5,
         EmfPolyLineTo = 6,
-        EmfPolylineTo16 = 89,
-        EmfPolyPolygon = 8,
-        EmfPolyPolygon16 = 91,
         EmfPolyPolyline = 7,
-        EmfPolyPolyline16 = 90,
-        EmfPolyTextOutA = 96,
-        EmfPolyTextOutW = 97,
-        EmfRealizePalette = 52,
-        EmfRectangle = 43,
-        EmfReserved069 = 69,
-        EmfReserved117 = 117,
-        EmfResizePalette = 51,
-        EmfRestoreDC = 34,
-        EmfRoundArc = 45,
-        EmfRoundRect = 44,
-        EmfSaveDC = 33,
-        EmfScaleViewportExtEx = 31,
-        EmfScaleWindowExtEx = 32,
-        EmfSelectClipPath = 67,
-        EmfSelectObject = 37,
-        EmfSelectPalette = 48,
-        EmfSetArcDirection = 57,
-        EmfSetBkColor = 25,
-        EmfSetBkMode = 18,
+        EmfPolyPolygon = 8,
+        EmfSetWindowExtEx = 9,
+        EmfSetWindowOrgEx = 10,
+        EmfSetViewportExtEx = 11,
+        EmfSetViewportOrgEx = 12,
         EmfSetBrushOrgEx = 13,
-        EmfSetColorAdjustment = 23,
-        EmfSetColorSpace = 100,
-        EmfSetDIBitsToDevice = 80,
-        EmfSetIcmMode = 98,
-        EmfSetIcmProfileA = 112,
-        EmfSetIcmProfileW = 113,
-        EmfSetLayout = 115,
-        EmfSetLinkedUfis = 119,
-        EmfSetMapMode = 17,
-        EmfSetMapperFlags = 16,
-        EmfSetMetaRgn = 28,
-        EmfSetMiterLimit = 58,
-        EmfSetPaletteEntries = 50,
+        EmfEof = 14,
         EmfSetPixelV = 15,
+        EmfSetMapperFlags = 16,
+        EmfSetMapMode = 17,
+        EmfSetBkMode = 18,
         EmfSetPolyFillMode = 19,
         EmfSetROP2 = 20,
         EmfSetStretchBltMode = 21,
         EmfSetTextAlign = 22,
+        EmfSetColorAdjustment = 23,
         EmfSetTextColor = 24,
-        EmfSetTextJustification = 120,
-        EmfSetViewportExtEx = 11,
-        EmfSetViewportOrgEx = 12,
-        EmfSetWindowExtEx = 9,
-        EmfSetWindowOrgEx = 10,
+        EmfSetBkColor = 25,
+        EmfOffsetClipRgn = 26,
+        EmfMoveToEx = 27,
+        EmfSetMetaRgn = 28,
+        EmfExcludeClipRect = 29,
+        EmfIntersectClipRect = 30,
+        EmfScaleViewportExtEx = 31,
+        EmfScaleWindowExtEx = 32,
+        EmfSaveDC = 33,
+        EmfRestoreDC = 34,
         EmfSetWorldTransform = 35,
-        EmfSmallTextOut = 108,
-        EmfStartDoc = 107,
-        EmfStretchBlt = 77,
-        EmfStretchDIBits = 81,
+        EmfModifyWorldTransform = 36,
+        EmfSelectObject = 37,
+        EmfCreatePen = 38,
+        EmfCreateBrushIndirect = 39,
+        EmfDeleteObject = 40,
+        EmfAngleArc = 41,
+        EmfEllipse = 42,
+        EmfRectangle = 43,
+        EmfRoundRect = 44,
+        EmfRoundArc = 45,
+        EmfChord = 46,
+        EmfPie = 47,
+        EmfSelectPalette = 48,
+        EmfCreatePalette = 49,
+        EmfSetPaletteEntries = 50,
+        EmfResizePalette = 51,
+        EmfRealizePalette = 52,
+        EmfExtFloodFill = 53,
+        EmfLineTo = 54,
+        EmfArcTo = 55,
+        EmfPolyDraw = 56,
+        EmfSetArcDirection = 57,
+        EmfSetMiterLimit = 58,
+        EmfBeginPath = 59,
+        EmfEndPath = 60,
+        EmfCloseFigure = 61,
+        EmfFillPath = 62,
         EmfStrokeAndFillPath = 63,
         EmfStrokePath = 64,
-        EmfTransparentBlt = 116,
+        EmfFlattenPath = 65,
         EmfWidenPath = 66,
-        EndContainer = 16425,
-        EndOfFile = 16386,
-        FillClosedCurve = 16406,
-        FillEllipse = 16398,
-        FillPath = 16404,
-        FillPie = 16400,
-        FillPolygon = 16396,
-        FillRects = 16394,
-        FillRegion = 16403,
-        GetDC = 16388,
-        Header = 16385,
+        EmfSelectClipPath = 67,
+        EmfAbortPath = 68,
+        EmfReserved069 = 69,
+        EmfGdiComment = 70,
+        EmfFillRgn = 71,
+        EmfFrameRgn = 72,
+        EmfInvertRgn = 73,
+        EmfPaintRgn = 74,
+        EmfExtSelectClipRgn = 75,
+        EmfBitBlt = 76,
+        EmfStretchBlt = 77,
+        EmfMaskBlt = 78,
+        EmfPlgBlt = 79,
+        EmfSetDIBitsToDevice = 80,
+        EmfStretchDIBits = 81,
+        EmfExtCreateFontIndirect = 82,
+        EmfExtTextOutA = 83,
+        EmfExtTextOutW = 84,
+        EmfPolyBezier16 = 85,
+        EmfPolygon16 = 86,
+        EmfPolyline16 = 87,
+        EmfPolyBezierTo16 = 88,
+        EmfPolylineTo16 = 89,
+        EmfPolyPolyline16 = 90,
+        EmfPolyPolygon16 = 91,
+        EmfPolyDraw16 = 92,
+        EmfCreateMonoBrush = 93,
+        EmfCreateDibPatternBrushPt = 94,
+        EmfExtCreatePen = 95,
+        EmfPolyTextOutA = 96,
+        EmfPolyTextOutW = 97,
+        EmfSetIcmMode = 98,
+        EmfCreateColorSpace = 99,
+        EmfSetColorSpace = 100,
+        EmfDeleteColorSpace = 101,
+        EmfGlsRecord = 102,
+        EmfGlsBoundedRecord = 103,
+        EmfPixelFormat = 104,
+        EmfDrawEscape = 105,
+        EmfExtEscape = 106,
+        EmfStartDoc = 107,
+        EmfSmallTextOut = 108,
+        EmfForceUfiMapping = 109,
+        EmfNamedEscpae = 110,
+        EmfColorCorrectPalette = 111,
+        EmfSetIcmProfileA = 112,
+        EmfSetIcmProfileW = 113,
+        EmfAlphaBlend = 114,
+        EmfSetLayout = 115,
+        EmfTransparentBlt = 116,
+        EmfReserved117 = 117,
+        EmfGradientFill = 118,
+        EmfSetLinkedUfis = 119,
+        EmfSetTextJustification = 120,
+        EmfColorMatchToTargetW = 121,
+        EmfCreateColorSpaceW = 122,
+        EmfMax = 122,
+        EmfPlusRecordBase = 16384,
         Invalid = 16384,
-        Max = 16438,
+        Header = 16385,
         Min = 16385,
-        MultiFormatEnd = 16391,
-        MultiFormatSection = 16390,
+        EndOfFile = 16386,
+        Comment = 16387,
+        GetDC = 16388,
         MultiFormatStart = 16389,
-        MultiplyWorldTransform = 16428,
+        MultiFormatSection = 16390,
+        MultiFormatEnd = 16391,
         Object = 16392,
-        OffsetClip = 16437,
-        ResetClip = 16433,
-        ResetWorldTransform = 16427,
-        Restore = 16422,
-        RotateWorldTransform = 16431,
-        Save = 16421,
-        ScaleWorldTransform = 16430,
+        Clear = 16393,
+        FillRects = 16394,
+        DrawRects = 16395,
+        FillPolygon = 16396,
+        DrawLines = 16397,
+        FillEllipse = 16398,
+        DrawEllipse = 16399,
+        FillPie = 16400,
+        DrawPie = 16401,
+        DrawArc = 16402,
+        FillRegion = 16403,
+        FillPath = 16404,
+        DrawPath = 16405,
+        FillClosedCurve = 16406,
+        DrawClosedCurve = 16407,
+        DrawCurve = 16408,
+        DrawBeziers = 16409,
+        DrawImage = 16410,
+        DrawImagePoints = 16411,
+        DrawString = 16412,
+        SetRenderingOrigin = 16413,
         SetAntiAliasMode = 16414,
-        SetClipPath = 16435,
-        SetClipRect = 16434,
-        SetClipRegion = 16436,
+        SetTextRenderingHint = 16415,
+        SetTextContrast = 16416,
+        SetInterpolationMode = 16417,
+        SetPixelOffsetMode = 16418,
         SetCompositingMode = 16419,
         SetCompositingQuality = 16420,
-        SetInterpolationMode = 16417,
-        SetPageTransform = 16432,
-        SetPixelOffsetMode = 16418,
-        SetRenderingOrigin = 16413,
-        SetTextContrast = 16416,
-        SetTextRenderingHint = 16415,
+        Save = 16421,
+        Restore = 16422,
+        BeginContainer = 16423,
+        BeginContainerNoParams = 16424,
+        EndContainer = 16425,
         SetWorldTransform = 16426,
-        Total = 16439,
+        ResetWorldTransform = 16427,
+        MultiplyWorldTransform = 16428,
         TranslateWorldTransform = 16429,
-        WmfAnimatePalette = 66614,
-        WmfArc = 67607,
-        WmfBitBlt = 67874,
-        WmfChord = 67632,
-        WmfCreateBrushIndirect = 66300,
-        WmfCreateFontIndirect = 66299,
+        ScaleWorldTransform = 16430,
+        RotateWorldTransform = 16431,
+        SetPageTransform = 16432,
+        ResetClip = 16433,
+        SetClipRect = 16434,
+        SetClipPath = 16435,
+        SetClipRegion = 16436,
+        OffsetClip = 16437,
+        DrawDriverString = 16438,
+        Max = 16438,
+        Total = 16439,
+        WmfRecordBase = 65536,
+        WmfSaveDC = 65566,
+        WmfRealizePalette = 65589,
+        WmfSetPalEntries = 65591,
         WmfCreatePalette = 65783,
-        WmfCreatePatternBrush = 66041,
-        WmfCreatePenIndirect = 66298,
-        WmfCreateRegion = 67327,
-        WmfDeleteObject = 66032,
-        WmfDibBitBlt = 67904,
-        WmfDibCreatePatternBrush = 65858,
-        WmfDibStretchBlt = 68417,
-        WmfEllipse = 66584,
-        WmfEscape = 67110,
-        WmfExcludeClipRect = 66581,
-        WmfExtFloodFill = 66888,
-        WmfExtTextOut = 68146,
-        WmfFillRegion = 66088,
-        WmfFloodFill = 66585,
-        WmfFrameRegion = 66601,
-        WmfIntersectClipRect = 66582,
+        WmfSetBkMode = 65794,
+        WmfSetMapMode = 65795,
+        WmfSetROP2 = 65796,
+        WmfSetRelAbs = 65797,
+        WmfSetPolyFillMode = 65798,
+        WmfSetStretchBltMode = 65799,
+        WmfSetTextCharExtra = 65800,
+        WmfRestoreDC = 65831,
         WmfInvertRegion = 65834,
+        WmfPaintRegion = 65835,
+        WmfSelectClipRegion = 65836,
+        WmfSelectObject = 65837,
+        WmfSetTextAlign = 65838,
+        WmfResizePalette = 65849,
+        WmfDibCreatePatternBrush = 65858,
+        WmfSetLayout = 65865,
+        WmfDeleteObject = 66032,
+        WmfCreatePatternBrush = 66041,
+        WmfSetBkColor = 66049,
+        WmfSetTextColor = 66057,
+        WmfSetTextJustification = 66058,
+        WmfSetWindowOrg = 66059,
+        WmfSetWindowExt = 66060,
+        WmfSetViewportOrg = 66061,
+        WmfSetViewportExt = 66062,
+        WmfOffsetWindowOrg = 66063,
+        WmfOffsetViewportOrg = 66065,
         WmfLineTo = 66067,
         WmfMoveTo = 66068,
         WmfOffsetCilpRgn = 66080,
-        WmfOffsetViewportOrg = 66065,
-        WmfOffsetWindowOrg = 66063,
-        WmfPaintRegion = 65835,
-        WmfPatBlt = 67101,
-        WmfPie = 67610,
+        WmfFillRegion = 66088,
+        WmfSetMapperFlags = 66097,
+        WmfSelectPalette = 66100,
+        WmfCreatePenIndirect = 66298,
+        WmfCreateFontIndirect = 66299,
+        WmfCreateBrushIndirect = 66300,
         WmfPolygon = 66340,
         WmfPolyline = 66341,
-        WmfPolyPolygon = 66872,
-        WmfRealizePalette = 65589,
-        WmfRecordBase = 65536,
-        WmfRectangle = 66587,
-        WmfResizePalette = 65849,
-        WmfRestoreDC = 65831,
-        WmfRoundRect = 67100,
-        WmfSaveDC = 65566,
-        WmfScaleViewportExt = 66578,
         WmfScaleWindowExt = 66576,
-        WmfSelectClipRegion = 65836,
-        WmfSelectObject = 65837,
-        WmfSelectPalette = 66100,
-        WmfSetBkColor = 66049,
-        WmfSetBkMode = 65794,
-        WmfSetDibToDev = 68915,
-        WmfSetLayout = 65865,
-        WmfSetMapMode = 65795,
-        WmfSetMapperFlags = 66097,
-        WmfSetPalEntries = 65591,
+        WmfScaleViewportExt = 66578,
+        WmfExcludeClipRect = 66581,
+        WmfIntersectClipRect = 66582,
+        WmfEllipse = 66584,
+        WmfFloodFill = 66585,
+        WmfRectangle = 66587,
         WmfSetPixel = 66591,
-        WmfSetPolyFillMode = 65798,
-        WmfSetRelAbs = 65797,
-        WmfSetROP2 = 65796,
-        WmfSetStretchBltMode = 65799,
-        WmfSetTextAlign = 65838,
-        WmfSetTextCharExtra = 65800,
-        WmfSetTextColor = 66057,
-        WmfSetTextJustification = 66058,
-        WmfSetViewportExt = 66062,
-        WmfSetViewportOrg = 66061,
-        WmfSetWindowExt = 66060,
-        WmfSetWindowOrg = 66059,
-        WmfStretchBlt = 68387,
-        WmfStretchDib = 69443,
+        WmfFrameRegion = 66601,
+        WmfAnimatePalette = 66614,
         WmfTextOut = 66849,
+        WmfPolyPolygon = 66872,
+        WmfExtFloodFill = 66888,
+        WmfRoundRect = 67100,
+        WmfPatBlt = 67101,
+        WmfEscape = 67110,
+        WmfCreateRegion = 67327,
+        WmfArc = 67607,
+        WmfPie = 67610,
+        WmfChord = 67632,
+        WmfBitBlt = 67874,
+        WmfDibBitBlt = 67904,
+        WmfExtTextOut = 68146,
+        WmfStretchBlt = 68387,
+        WmfDibStretchBlt = 68417,
+        WmfSetDibToDev = 68915,
+        WmfStretchDib = 69443,
     }
     public enum EmfType
     {
         EmfOnly = 3,
-        EmfPlusDual = 5,
         EmfPlusOnly = 4,
+        EmfPlusDual = 5,
     }
     public sealed partial class Encoder
     {
@@ -2154,7 +2118,7 @@ namespace System.Drawing.Imaging
         public EncoderParameter(System.Drawing.Imaging.Encoder encoder, short[] value) { }
         public EncoderParameter(System.Drawing.Imaging.Encoder encoder, int numberValues, System.Drawing.Imaging.EncoderParameterValueType type, System.IntPtr value) { }
         public EncoderParameter(System.Drawing.Imaging.Encoder encoder, int numerator, int denominator) { }
-        [System.ObsoleteAttribute("This constructor has been deprecated. Use EncoderParameter(Encoder encoder, int numberValues, EncoderParameterValueType type, IntPtr value) instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [System.ObsoleteAttribute("This constructor has been deprecated. Use EncoderParameter(Encoder encoder, int numberValues, EncoderParameterValueType type, IntPtr value) instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public EncoderParameter(System.Drawing.Imaging.Encoder encoder, int NumberOfValues, int Type, int Value) { }
         public EncoderParameter(System.Drawing.Imaging.Encoder encoder, int numerator1, int demoninator1, int numerator2, int demoninator2) { }
         public EncoderParameter(System.Drawing.Imaging.Encoder encoder, int[] numerator, int[] denominator) { }
@@ -2180,41 +2144,41 @@ namespace System.Drawing.Imaging
     }
     public enum EncoderParameterValueType
     {
-        ValueTypeAscii = 2,
         ValueTypeByte = 1,
-        ValueTypeLong = 4,
-        ValueTypeLongRange = 6,
-        ValueTypeRational = 5,
-        ValueTypeRationalRange = 8,
+        ValueTypeAscii = 2,
         ValueTypeShort = 3,
+        ValueTypeLong = 4,
+        ValueTypeRational = 5,
+        ValueTypeLongRange = 6,
         ValueTypeUndefined = 7,
+        ValueTypeRationalRange = 8
     }
     public enum EncoderValue
     {
         ColorTypeCMYK = 0,
         ColorTypeYCCK = 1,
+        CompressionLZW = 2,
         CompressionCCITT3 = 3,
         CompressionCCITT4 = 4,
-        CompressionLZW = 2,
-        CompressionNone = 6,
         CompressionRle = 5,
-        Flush = 20,
-        FrameDimensionPage = 23,
-        FrameDimensionResolution = 22,
-        FrameDimensionTime = 21,
-        LastFrame = 19,
-        MultiFrame = 18,
-        RenderNonProgressive = 12,
-        RenderProgressive = 11,
+        CompressionNone = 6,
         ScanMethodInterlaced = 7,
         ScanMethodNonInterlaced = 8,
-        TransformFlipHorizontal = 16,
-        TransformFlipVertical = 17,
-        TransformRotate180 = 14,
-        TransformRotate270 = 15,
-        TransformRotate90 = 13,
         VersionGif87 = 9,
         VersionGif89 = 10,
+        RenderProgressive = 11,
+        RenderNonProgressive = 12,
+        TransformRotate90 = 13,
+        TransformRotate180 = 14,
+        TransformRotate270 = 15,
+        TransformFlipHorizontal = 16,
+        TransformFlipVertical = 17,
+        MultiFrame = 18,
+        LastFrame = 19,
+        Flush = 20,
+        FrameDimensionTime = 21,
+        FrameDimensionResolution = 22,
+        FrameDimensionPage = 23,
     }
     public sealed partial class FrameDimension
     {
@@ -2279,13 +2243,13 @@ namespace System.Drawing.Imaging
     [System.FlagsAttribute]
     public enum ImageCodecFlags
     {
-        BlockingDecode = 32,
-        Builtin = 65536,
-        Decoder = 2,
         Encoder = 1,
-        SeekableEncode = 16,
+        Decoder = 2,
         SupportBitmap = 4,
         SupportVector = 8,
+        SeekableEncode = 16,
+        BlockingDecode = 32,
+        Builtin = 65536,
         System = 131072,
         User = 262144,
     }
@@ -2311,21 +2275,24 @@ namespace System.Drawing.Imaging
     [System.FlagsAttribute]
     public enum ImageFlags
     {
-        Caching = 131072,
+        None = 0,
+        Scalable = 1,
+        HasAlpha = 2,
+        HasTranslucent = 4,
+        PartiallyScalable = 8,
+        ColorSpaceRgb = 16,
         ColorSpaceCmyk = 32,
         ColorSpaceGray = 64,
-        ColorSpaceRgb = 16,
         ColorSpaceYcbcr = 128,
         ColorSpaceYcck = 256,
-        HasAlpha = 2,
         HasRealDpi = 4096,
         HasRealPixelSize = 8192,
-        HasTranslucent = 4,
-        None = 0,
-        PartiallyScalable = 8,
         ReadOnly = 65536,
-        Scalable = 1,
+        Caching = 131072,
     }
+#if netcoreapp
+    [System.ComponentModel.TypeConverterAttribute("System.Drawing.ImageFormatConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
+#endif
     public sealed partial class ImageFormat
     {
         public ImageFormat(System.Guid guid) { }
@@ -2347,9 +2314,9 @@ namespace System.Drawing.Imaging
     public enum ImageLockMode
     {
         ReadOnly = 1,
+        WriteOnly = 2,
         ReadWrite = 3,
         UserInputBuffer = 4,
-        WriteOnly = 2,
     }
     public sealed partial class Metafile : System.Drawing.Image
     {
@@ -2402,12 +2369,12 @@ namespace System.Drawing.Imaging
     }
     public enum MetafileFrameUnit
     {
-        Document = 5,
-        GdiCompatible = 7,
-        Inch = 4,
-        Millimeter = 6,
         Pixel = 2,
         Point = 3,
+        Inch = 4,
+        Document = 5,
+        Millimeter = 6,
+        GdiCompatible = 7,
     }
     public sealed partial class MetafileHeader
     {
@@ -2433,12 +2400,12 @@ namespace System.Drawing.Imaging
     }
     public enum MetafileType
     {
-        Emf = 3,
-        EmfPlusDual = 5,
-        EmfPlusOnly = 4,
         Invalid = 0,
         Wmf = 1,
         WmfPlaceable = 2,
+        Emf = 3,
+        EmfPlusOnly = 4,
+        EmfPlusDual = 5,
     }
     public sealed partial class MetaHeader
     {
@@ -2454,35 +2421,35 @@ namespace System.Drawing.Imaging
     [System.FlagsAttribute]
     public enum PaletteFlags
     {
+        HasAlpha = 1,
         GrayScale = 2,
         Halftone = 4,
-        HasAlpha = 1,
     }
     public enum PixelFormat
     {
-        Alpha = 262144,
-        Canonical = 2097152,
         DontCare = 0,
-        Extended = 1048576,
-        Format16bppArgb1555 = 397319,
-        Format16bppGrayScale = 1052676,
+        Undefined = 0,
+        Max = 15,
+        Indexed = 65536,
+        Gdi = 131072,
         Format16bppRgb555 = 135173,
         Format16bppRgb565 = 135174,
-        Format1bppIndexed = 196865,
         Format24bppRgb = 137224,
-        Format32bppArgb = 2498570,
-        Format32bppPArgb = 925707,
         Format32bppRgb = 139273,
-        Format48bppRgb = 1060876,
+        Format1bppIndexed = 196865,
         Format4bppIndexed = 197634,
-        Format64bppArgb = 3424269,
-        Format64bppPArgb = 1851406,
         Format8bppIndexed = 198659,
-        Gdi = 131072,
-        Indexed = 65536,
-        Max = 15,
+        Alpha = 262144,
+        Format16bppArgb1555 = 397319,
         PAlpha = 524288,
-        Undefined = 0,
+        Format32bppPArgb = 925707,
+        Extended = 1048576,
+        Format16bppGrayScale = 1052676,
+        Format48bppRgb = 1060876,
+        Format64bppPArgb = 1851406,
+        Canonical = 2097152,
+        Format32bppArgb = 2498570,
+        Format64bppArgb = 3424269,
     }
     public delegate void PlayRecordCallback(System.Drawing.Imaging.EmfPlusRecordType recordType, int flags, int dataSize, System.IntPtr recordData);
     public sealed partial class PropertyItem
@@ -2512,9 +2479,9 @@ namespace System.Drawing.Printing
     public enum Duplex
     {
         Default = -1,
-        Horizontal = 3,
         Simplex = 1,
         Vertical = 2,
+        Horizontal = 3,
     }
     public partial class InvalidPrinterException : System.SystemException
     {
@@ -2522,6 +2489,9 @@ namespace System.Drawing.Printing
         protected InvalidPrinterException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
+#if netcoreapp
+    [System.ComponentModel.TypeConverterAttribute("System.Drawing.Printing.MarginsConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
+#endif
     public partial class Margins : System.ICloneable
     {
         public Margins() { }
@@ -2559,123 +2529,123 @@ namespace System.Drawing.Printing
     }
     public enum PaperKind
     {
-        A2 = 66,
-        A3 = 8,
-        A3Extra = 63,
-        A3ExtraTransverse = 68,
-        A3Rotated = 76,
-        A3Transverse = 67,
-        A4 = 9,
-        A4Extra = 53,
-        A4Plus = 60,
-        A4Rotated = 77,
-        A4Small = 10,
-        A4Transverse = 55,
-        A5 = 11,
-        A5Extra = 64,
-        A5Rotated = 78,
-        A5Transverse = 61,
-        A6 = 70,
-        A6Rotated = 83,
-        APlus = 57,
-        B4 = 12,
-        B4Envelope = 33,
-        B4JisRotated = 79,
-        B5 = 13,
-        B5Envelope = 34,
-        B5Extra = 65,
-        B5JisRotated = 80,
-        B5Transverse = 62,
-        B6Envelope = 35,
-        B6Jis = 88,
-        B6JisRotated = 89,
-        BPlus = 58,
-        C3Envelope = 29,
-        C4Envelope = 30,
-        C5Envelope = 28,
-        C65Envelope = 32,
-        C6Envelope = 31,
-        CSheet = 24,
         Custom = 0,
-        DLEnvelope = 27,
-        DSheet = 25,
-        ESheet = 26,
-        Executive = 7,
-        Folio = 14,
-        GermanLegalFanfold = 41,
-        GermanStandardFanfold = 40,
-        InviteEnvelope = 47,
-        IsoB4 = 42,
-        ItalyEnvelope = 36,
-        JapaneseDoublePostcard = 69,
-        JapaneseDoublePostcardRotated = 82,
-        JapaneseEnvelopeChouNumber3 = 73,
-        JapaneseEnvelopeChouNumber3Rotated = 86,
-        JapaneseEnvelopeChouNumber4 = 74,
-        JapaneseEnvelopeChouNumber4Rotated = 87,
-        JapaneseEnvelopeKakuNumber2 = 71,
-        JapaneseEnvelopeKakuNumber2Rotated = 84,
-        JapaneseEnvelopeKakuNumber3 = 72,
-        JapaneseEnvelopeKakuNumber3Rotated = 85,
-        JapaneseEnvelopeYouNumber4 = 91,
-        JapaneseEnvelopeYouNumber4Rotated = 92,
-        JapanesePostcard = 43,
-        JapanesePostcardRotated = 81,
+        Letter = 1,
+        LetterSmall = 2,
+        Tabloid = 3,
         Ledger = 4,
         Legal = 5,
-        LegalExtra = 51,
-        Letter = 1,
-        LetterExtra = 50,
-        LetterExtraTransverse = 56,
-        LetterPlus = 59,
-        LetterRotated = 75,
-        LetterSmall = 2,
-        LetterTransverse = 54,
-        MonarchEnvelope = 37,
+        Statement = 6,
+        Executive = 7,
+        A3 = 8,
+        A4 = 9,
+        A4Small = 10,
+        A5 = 11,
+        B4 = 12,
+        B5 = 13,
+        Folio = 14,
+        Quarto = 15,
+        Standard10x14 = 16,
+        Standard11x17 = 17,
         Note = 18,
+        Number9Envelope = 19,
         Number10Envelope = 20,
         Number11Envelope = 21,
         Number12Envelope = 22,
         Number14Envelope = 23,
-        Number9Envelope = 19,
+        CSheet = 24,
+        DSheet = 25,
+        ESheet = 26,
+        DLEnvelope = 27,
+        C5Envelope = 28,
+        C3Envelope = 29,
+        C4Envelope = 30,
+        C6Envelope = 31,
+        C65Envelope = 32,
+        B4Envelope = 33,
+        B5Envelope = 34,
+        B6Envelope = 35,
+        ItalyEnvelope = 36,
+        MonarchEnvelope = 37,
         PersonalEnvelope = 38,
+        USStandardFanfold = 39,
+        GermanStandardFanfold = 40,
+        GermanLegalFanfold = 41,
+        IsoB4 = 42,
+        JapanesePostcard = 43,
+        Standard9x11 = 44,
+        Standard10x11 = 45,
+        Standard15x11 = 46,
+        InviteEnvelope = 47,
+        LetterExtra = 50,
+        LegalExtra = 51,
+        TabloidExtra = 52,
+        A4Extra = 53,
+        LetterTransverse = 54,
+        A4Transverse = 55,
+        LetterExtraTransverse = 56,
+        APlus = 57,
+        BPlus = 58,
+        LetterPlus = 59,
+        A4Plus = 60,
+        A5Transverse = 61,
+        B5Transverse = 62,
+        A3Extra = 63,
+        A5Extra = 64,
+        B5Extra = 65,
+        A2 = 66,
+        A3Transverse = 67,
+        A3ExtraTransverse = 68,
+        JapaneseDoublePostcard = 69,
+        A6 = 70,
+        JapaneseEnvelopeKakuNumber2 = 71,
+        JapaneseEnvelopeKakuNumber3 = 72,
+        JapaneseEnvelopeChouNumber3 = 73,
+        JapaneseEnvelopeChouNumber4 = 74,
+        LetterRotated = 75,
+        A3Rotated = 76,
+        A4Rotated = 77,
+        A5Rotated = 78,
+        B4JisRotated = 79,
+        B5JisRotated = 80,
+        JapanesePostcardRotated = 81,
+        JapaneseDoublePostcardRotated = 82,
+        A6Rotated = 83,
+        JapaneseEnvelopeKakuNumber2Rotated = 84,
+        JapaneseEnvelopeKakuNumber3Rotated = 85,
+        JapaneseEnvelopeChouNumber3Rotated = 86,
+        JapaneseEnvelopeChouNumber4Rotated = 87,
+        B6Jis = 88,
+        B6JisRotated = 89,
+        Standard12x11 = 90,
+        JapaneseEnvelopeYouNumber4 = 91,
+        JapaneseEnvelopeYouNumber4Rotated = 92,
         Prc16K = 93,
-        Prc16KRotated = 106,
         Prc32K = 94,
         Prc32KBig = 95,
-        Prc32KBigRotated = 108,
-        Prc32KRotated = 107,
         PrcEnvelopeNumber1 = 96,
-        PrcEnvelopeNumber10 = 105,
-        PrcEnvelopeNumber10Rotated = 118,
-        PrcEnvelopeNumber1Rotated = 109,
         PrcEnvelopeNumber2 = 97,
-        PrcEnvelopeNumber2Rotated = 110,
         PrcEnvelopeNumber3 = 98,
-        PrcEnvelopeNumber3Rotated = 111,
         PrcEnvelopeNumber4 = 99,
-        PrcEnvelopeNumber4Rotated = 112,
         PrcEnvelopeNumber5 = 100,
-        PrcEnvelopeNumber5Rotated = 113,
         PrcEnvelopeNumber6 = 101,
-        PrcEnvelopeNumber6Rotated = 114,
         PrcEnvelopeNumber7 = 102,
-        PrcEnvelopeNumber7Rotated = 115,
         PrcEnvelopeNumber8 = 103,
-        PrcEnvelopeNumber8Rotated = 116,
         PrcEnvelopeNumber9 = 104,
+        PrcEnvelopeNumber10 = 105,
+        Prc16KRotated = 106,
+        Prc32KRotated = 107,
+        Prc32KBigRotated = 108,
+        PrcEnvelopeNumber1Rotated = 109,
+        PrcEnvelopeNumber2Rotated = 110,
+        PrcEnvelopeNumber3Rotated = 111,
+        PrcEnvelopeNumber4Rotated = 112,
+        PrcEnvelopeNumber5Rotated = 113,
+        PrcEnvelopeNumber6Rotated = 114,
+        PrcEnvelopeNumber7Rotated = 115,
+        PrcEnvelopeNumber8Rotated = 116,
         PrcEnvelopeNumber9Rotated = 117,
-        Quarto = 15,
-        Standard10x11 = 45,
-        Standard10x14 = 16,
-        Standard11x17 = 17,
-        Standard12x11 = 90,
-        Standard15x11 = 46,
-        Standard9x11 = 44,
-        Statement = 6,
-        Tabloid = 3,
-        TabloidExtra = 52,
-        USStandardFanfold = 39,
+        PrcEnvelopeNumber10Rotated = 118,
     }
     public partial class PaperSize
     {
@@ -2698,20 +2668,20 @@ namespace System.Drawing.Printing
     }
     public enum PaperSourceKind
     {
-        AutomaticFeed = 7,
-        Cassette = 14,
-        Custom = 257,
-        Envelope = 5,
-        FormSource = 15,
-        LargeCapacity = 11,
-        LargeFormat = 10,
-        Lower = 2,
-        Manual = 4,
-        ManualFeed = 6,
-        Middle = 3,
-        SmallFormat = 9,
-        TractorFeed = 8,
         Upper = 1,
+        Lower = 2,
+        Middle = 3,
+        Manual = 4,
+        Envelope = 5,
+        ManualFeed = 6,
+        AutomaticFeed = 7,
+        TractorFeed = 8,
+        SmallFormat = 9,
+        LargeFormat = 10,
+        LargeCapacity = 11,
+        Cassette = 14,
+        FormSource = 15,
+        Custom = 257,
     }
     public sealed partial class PreviewPageInfo
     {
@@ -2749,17 +2719,17 @@ namespace System.Drawing.Printing
     {
         public PrintDocument() { }
         [System.ComponentModel.BrowsableAttribute(false)]
-        [System.ComponentModel.DesignerSerializationVisibilityAttribute((System.ComponentModel.DesignerSerializationVisibility)(0))]
+        [System.ComponentModel.DesignerSerializationVisibilityAttribute(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public System.Drawing.Printing.PageSettings DefaultPageSettings { get { throw null; } set { } }
         [System.ComponentModel.DefaultValueAttribute("document")]
         public string DocumentName { get { throw null; } set { } }
         [System.ComponentModel.DefaultValueAttribute(false)]
         public bool OriginAtMargins { get { throw null; } set { } }
         [System.ComponentModel.BrowsableAttribute(false)]
-        [System.ComponentModel.DesignerSerializationVisibilityAttribute((System.ComponentModel.DesignerSerializationVisibility)(0))]
+        [System.ComponentModel.DesignerSerializationVisibilityAttribute(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public System.Drawing.Printing.PrintController PrintController { get { throw null; } set { } }
         [System.ComponentModel.BrowsableAttribute(false)]
-        [System.ComponentModel.DesignerSerializationVisibilityAttribute((System.ComponentModel.DesignerSerializationVisibility)(0))]
+        [System.ComponentModel.DesignerSerializationVisibilityAttribute(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public System.Drawing.Printing.PrinterSettings PrinterSettings { get { throw null; } set { } }
         public event System.Drawing.Printing.PrintEventHandler BeginPrint { add { } remove { } }
         public event System.Drawing.Printing.PrintEventHandler EndPrint { add { } remove { } }
@@ -2782,11 +2752,11 @@ namespace System.Drawing.Printing
     }
     public enum PrinterResolutionKind
     {
-        Custom = 0,
-        Draft = -1,
         High = -4,
-        Low = -2,
         Medium = -3,
+        Low = -2,
+        Draft = -1,
+        Custom = 0,
     }
     public partial class PrinterSettings : System.ICloneable
     {
@@ -2835,7 +2805,7 @@ namespace System.Drawing.Printing
             int System.Collections.ICollection.Count { get { throw null; } }
             bool System.Collections.ICollection.IsSynchronized { get { throw null; } }
             object System.Collections.ICollection.SyncRoot { get { throw null; } }
-            [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+            [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
             public int Add(System.Drawing.Printing.PaperSize paperSize) { throw null; }
             public void CopyTo(System.Drawing.Printing.PaperSize[] paperSizes, int index) { }
             public System.Collections.IEnumerator GetEnumerator() { throw null; }
@@ -2850,7 +2820,7 @@ namespace System.Drawing.Printing
             int System.Collections.ICollection.Count { get { throw null; } }
             bool System.Collections.ICollection.IsSynchronized { get { throw null; } }
             object System.Collections.ICollection.SyncRoot { get { throw null; } }
-            [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+            [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
             public int Add(System.Drawing.Printing.PaperSource paperSource) { throw null; }
             public void CopyTo(System.Drawing.Printing.PaperSource[] paperSources, int index) { }
             public System.Collections.IEnumerator GetEnumerator() { throw null; }
@@ -2865,7 +2835,7 @@ namespace System.Drawing.Printing
             int System.Collections.ICollection.Count { get { throw null; } }
             bool System.Collections.ICollection.IsSynchronized { get { throw null; } }
             object System.Collections.ICollection.SyncRoot { get { throw null; } }
-            [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+            [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
             public int Add(System.Drawing.Printing.PrinterResolution printerResolution) { throw null; }
             public void CopyTo(System.Drawing.Printing.PrinterResolution[] printerResolutions, int index) { }
             public System.Collections.IEnumerator GetEnumerator() { throw null; }
@@ -2880,7 +2850,7 @@ namespace System.Drawing.Printing
             int System.Collections.ICollection.Count { get { throw null; } }
             bool System.Collections.ICollection.IsSynchronized { get { throw null; } }
             object System.Collections.ICollection.SyncRoot { get { throw null; } }
-            [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+            [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
             public int Add(string value) { throw null; }
             public void CopyTo(string[] strings, int index) { }
             public System.Collections.IEnumerator GetEnumerator() { throw null; }
@@ -2891,9 +2861,9 @@ namespace System.Drawing.Printing
     public enum PrinterUnit
     {
         Display = 0,
+        ThousandthsOfAnInch = 1,
         HundredthsOfAMillimeter = 2,
         TenthsOfAMillimeter = 3,
-        ThousandthsOfAnInch = 1,
     }
     public sealed partial class PrinterUnitConvert
     {
@@ -2925,9 +2895,9 @@ namespace System.Drawing.Printing
     public enum PrintRange
     {
         AllPages = 0,
-        CurrentPage = 4194304,
         Selection = 1,
         SomePages = 2,
+        CurrentPage = 4194304,
     }
     public partial class QueryPageSettingsEventArgs : System.Drawing.Printing.PrintEventArgs
     {
@@ -2956,15 +2926,15 @@ namespace System.Drawing.Text
     }
     public enum GenericFontFamilies
     {
-        Monospace = 2,
-        SansSerif = 1,
         Serif = 0,
+        SansSerif = 1,
+        Monospace = 2,
     }
     public enum HotkeyPrefix
     {
-        Hide = 2,
         None = 0,
         Show = 1,
+        Hide = 2,
     }
     public sealed partial class InstalledFontCollection : System.Drawing.Text.FontCollection
     {
@@ -2979,172 +2949,11 @@ namespace System.Drawing.Text
     }
     public enum TextRenderingHint
     {
-        AntiAlias = 4,
-        AntiAliasGridFit = 3,
-        ClearTypeGridFit = 5,
-        SingleBitPerPixel = 2,
-        SingleBitPerPixelGridFit = 1,
         SystemDefault = 0,
+        SingleBitPerPixelGridFit = 1,
+        SingleBitPerPixel = 2,
+        AntiAliasGridFit = 3,
+        AntiAlias = 4,
+        ClearTypeGridFit = 5,
     }
 }
-
-// Removed stuff:
-/*
-namespace System.Drawing.Design
-{
-    public delegate System.Drawing.Design.ToolboxItem ToolboxItemCreatorCallback(object serializedObject, string format);
-    public partial class PropertyValueUIItem
-    {
-        public PropertyValueUIItem(System.Drawing.Image uiItemImage, System.Drawing.Design.PropertyValueUIItemInvokeHandler handler, string tooltip) { }
-        public virtual System.Drawing.Image Image { get { throw null; } }
-        public virtual System.Drawing.Design.PropertyValueUIItemInvokeHandler InvokeHandler { get { throw null; } }
-        public virtual string ToolTip { get { throw null; } }
-        public virtual void Reset() { }
-    }
-    public partial interface IPropertyValueUIService
-    {
-        event System.EventHandler PropertyUIValueItemsChanged;
-        void AddPropertyValueUIHandler(System.Drawing.Design.PropertyValueUIHandler newHandler);
-        System.Drawing.Design.PropertyValueUIItem[] GetPropertyUIValueItems(System.ComponentModel.ITypeDescriptorContext context, System.ComponentModel.PropertyDescriptor propDesc);
-        void NotifyPropertyValueUIItemsChanged();
-        void RemovePropertyValueUIHandler(System.Drawing.Design.PropertyValueUIHandler newHandler);
-    }
-    public partial class PaintValueEventArgs : System.EventArgs
-    {
-        public PaintValueEventArgs(System.ComponentModel.ITypeDescriptorContext context, object value, System.Drawing.Graphics graphics, System.Drawing.Rectangle bounds) { }
-        public System.Drawing.Rectangle Bounds { get { throw null; } }
-        public System.ComponentModel.ITypeDescriptorContext Context { get { throw null; } }
-        public System.Drawing.Graphics Graphics { get { throw null; } }
-        public object Value { get { throw null; } }
-    }
-    public delegate void PropertyValueUIHandler(System.ComponentModel.ITypeDescriptorContext context, System.ComponentModel.PropertyDescriptor propDesc, System.Collections.ArrayList valueUIItemList);
-    public delegate void PropertyValueUIItemInvokeHandler(System.ComponentModel.ITypeDescriptorContext context, System.ComponentModel.PropertyDescriptor descriptor, System.Drawing.Design.PropertyValueUIItem invokedItem);
-    public partial class UITypeEditor
-    {
-        public UITypeEditor() { }
-        public virtual bool IsDropDownResizable { get { throw null; } }
-        public virtual object EditValue(System.ComponentModel.ITypeDescriptorContext context, System.IServiceProvider provider, object value) { throw null; }
-        public object EditValue(System.IServiceProvider provider, object value) { throw null; }
-        public System.Drawing.Design.UITypeEditorEditStyle GetEditStyle() { throw null; }
-        public virtual System.Drawing.Design.UITypeEditorEditStyle GetEditStyle(System.ComponentModel.ITypeDescriptorContext context) { throw null; }
-        public bool GetPaintValueSupported() { throw null; }
-        public virtual bool GetPaintValueSupported(System.ComponentModel.ITypeDescriptorContext context) { throw null; }
-        public virtual void PaintValue(System.Drawing.Design.PaintValueEventArgs e) { }
-        public void PaintValue(object value, System.Drawing.Graphics canvas, System.Drawing.Rectangle rectangle) { }
-    }
-    public enum UITypeEditorEditStyle
-    {
-        DropDown = 3,
-        Modal = 2,
-        None = 1,
-    }
-    [System.Runtime.InteropServices.GuidAttribute("4BACD258-DE64-4048-BC4E-FEDBEF9ACB76")]
-    [System.Runtime.InteropServices.InterfaceTypeAttribute((System.Runtime.InteropServices.ComInterfaceType)(1))]
-    public partial interface IToolboxService
-    {
-        System.Drawing.Design.CategoryNameCollection CategoryNames { get; }
-        string SelectedCategory { get; set; }
-        void AddCreator(System.Drawing.Design.ToolboxItemCreatorCallback creator, string format);
-        void AddCreator(System.Drawing.Design.ToolboxItemCreatorCallback creator, string format, System.ComponentModel.Design.IDesignerHost host);
-        void AddLinkedToolboxItem(System.Drawing.Design.ToolboxItem toolboxItem, System.ComponentModel.Design.IDesignerHost host);
-        void AddLinkedToolboxItem(System.Drawing.Design.ToolboxItem toolboxItem, string category, System.ComponentModel.Design.IDesignerHost host);
-        void AddToolboxItem(System.Drawing.Design.ToolboxItem toolboxItem);
-        void AddToolboxItem(System.Drawing.Design.ToolboxItem toolboxItem, string category);
-        System.Drawing.Design.ToolboxItem DeserializeToolboxItem(object serializedObject);
-        System.Drawing.Design.ToolboxItem DeserializeToolboxItem(object serializedObject, System.ComponentModel.Design.IDesignerHost host);
-        System.Drawing.Design.ToolboxItem GetSelectedToolboxItem();
-        System.Drawing.Design.ToolboxItem GetSelectedToolboxItem(System.ComponentModel.Design.IDesignerHost host);
-        System.Drawing.Design.ToolboxItemCollection GetToolboxItems();
-        System.Drawing.Design.ToolboxItemCollection GetToolboxItems(System.ComponentModel.Design.IDesignerHost host);
-        System.Drawing.Design.ToolboxItemCollection GetToolboxItems(string category);
-        System.Drawing.Design.ToolboxItemCollection GetToolboxItems(string category, System.ComponentModel.Design.IDesignerHost host);
-        bool IsSupported(object serializedObject, System.Collections.ICollection filterAttributes);
-        bool IsSupported(object serializedObject, System.ComponentModel.Design.IDesignerHost host);
-        bool IsToolboxItem(object serializedObject);
-        bool IsToolboxItem(object serializedObject, System.ComponentModel.Design.IDesignerHost host);
-        void Refresh();
-        void RemoveCreator(string format);
-        void RemoveCreator(string format, System.ComponentModel.Design.IDesignerHost host);
-        void RemoveToolboxItem(System.Drawing.Design.ToolboxItem toolboxItem);
-        void RemoveToolboxItem(System.Drawing.Design.ToolboxItem toolboxItem, string category);
-        void SelectedToolboxItemUsed();
-        object SerializeToolboxItem(System.Drawing.Design.ToolboxItem toolboxItem);
-        bool SetCursor();
-        void SetSelectedToolboxItem(System.Drawing.Design.ToolboxItem toolboxItem);
-    }
-    public partial class ToolboxItem : System.Runtime.Serialization.ISerializable
-    {
-        public ToolboxItem() { }
-        public ToolboxItem(System.Type toolType) { }
-        public System.Reflection.AssemblyName AssemblyName { get { throw null; } set { } }
-        public System.Drawing.Bitmap Bitmap { get { throw null; } set { } }
-        public string Company { get { throw null; } set { } }
-        public virtual string ComponentType { get { throw null; } }
-        public System.Reflection.AssemblyName[] DependentAssemblies { get { throw null; } set { } }
-        public string Description { get { throw null; } set { } }
-        public string DisplayName { get { throw null; } set { } }
-        public System.Collections.ICollection Filter { get { throw null; } set { } }
-        public bool IsTransient { get { throw null; } set { } }
-        public virtual bool Locked { get { throw null; } }
-        public System.Drawing.Bitmap OriginalBitmap { get { throw null; } set { } }
-        public System.Collections.IDictionary Properties { get { throw null; } }
-        public string TypeName { get { throw null; } set { } }
-        public virtual string Version { get { throw null; } }
-        public event System.Drawing.Design.ToolboxComponentsCreatedEventHandler ComponentsCreated { add { } remove { } }
-        public event System.Drawing.Design.ToolboxComponentsCreatingEventHandler ComponentsCreating { add { } remove { } }
-        protected void CheckUnlocked() { }
-        public System.ComponentModel.IComponent[] CreateComponents() { throw null; }
-        public System.ComponentModel.IComponent[] CreateComponents(System.ComponentModel.Design.IDesignerHost host) { throw null; }
-        public System.ComponentModel.IComponent[] CreateComponents(System.ComponentModel.Design.IDesignerHost host, System.Collections.IDictionary defaultValues) { throw null; }
-        protected virtual System.ComponentModel.IComponent[] CreateComponentsCore(System.ComponentModel.Design.IDesignerHost host) { throw null; }
-        protected virtual System.ComponentModel.IComponent[] CreateComponentsCore(System.ComponentModel.Design.IDesignerHost host, System.Collections.IDictionary defaultValues) { throw null; }
-        protected virtual void Deserialize(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-        public override bool Equals(object obj) { throw null; }
-        protected virtual object FilterPropertyValue(string propertyName, object value) { throw null; }
-        public override int GetHashCode() { throw null; }
-        public System.Type GetType(System.ComponentModel.Design.IDesignerHost host) { throw null; }
-        protected virtual System.Type GetType(System.ComponentModel.Design.IDesignerHost host, System.Reflection.AssemblyName assemblyName, string typeName, bool reference) { throw null; }
-        public virtual void Initialize(System.Type type) { }
-        public virtual void Lock() { }
-        protected virtual void OnComponentsCreated(System.Drawing.Design.ToolboxComponentsCreatedEventArgs args) { }
-        protected virtual void OnComponentsCreating(System.Drawing.Design.ToolboxComponentsCreatingEventArgs args) { }
-        protected virtual void Serialize(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-        void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-        public override string ToString() { throw null; }
-        protected void ValidatePropertyType(string propertyName, object value, System.Type expectedType, bool allowNull) { }
-        protected virtual object ValidatePropertyValue(string propertyName, object value) { throw null; }
-    }
-    public partial interface IToolboxItemProvider
-    {
-        System.Drawing.Design.ToolboxItemCollection Items { get; }
-    }
-    public partial interface IToolboxUser
-    {
-        bool GetToolSupported(System.Drawing.Design.ToolboxItem tool);
-        void ToolPicked(System.Drawing.Design.ToolboxItem tool);
-    }
-    public sealed partial class ToolboxItemCollection : System.Collections.ReadOnlyCollectionBase
-    {
-        public ToolboxItemCollection(System.Drawing.Design.ToolboxItemCollection value) { }
-        public ToolboxItemCollection(System.Drawing.Design.ToolboxItem[] value) { }
-        public System.Drawing.Design.ToolboxItem this[int index] { get { throw null; } }
-        public bool Contains(System.Drawing.Design.ToolboxItem value) { throw null; }
-        public void CopyTo(System.Drawing.Design.ToolboxItem[] array, int index) { }
-        public int IndexOf(System.Drawing.Design.ToolboxItem value) { throw null; }
-    }
-    public partial class ToolboxComponentsCreatedEventArgs : System.EventArgs
-    {
-        public ToolboxComponentsCreatedEventArgs(System.ComponentModel.IComponent[] components) { }
-        public System.ComponentModel.IComponent[] Components { get { throw null; } }
-    }
-    public delegate void ToolboxComponentsCreatedEventHandler(object sender, System.Drawing.Design.ToolboxComponentsCreatedEventArgs e);
-    public partial class ToolboxComponentsCreatingEventArgs : System.EventArgs
-    {
-        public ToolboxComponentsCreatingEventArgs(System.ComponentModel.Design.IDesignerHost host) { }
-        public System.ComponentModel.Design.IDesignerHost DesignerHost { get { throw null; } }
-    }
-    public delegate void ToolboxComponentsCreatingEventHandler(object sender, System.Drawing.Design.ToolboxComponentsCreatingEventArgs e);
-
-}
-
-*/

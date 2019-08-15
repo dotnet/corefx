@@ -43,7 +43,7 @@ namespace CoreXml.Test.XLinq
         public static string pXsltCopyStylesheet = "XsltCtest.xsl";
         public static string pValidXDR = "XdrFile.xml";
 
-        //Reader constants        
+        //Reader constants
         public const string ST_TEST_NAME = "ISDEFAULT";
         public const string ST_ENTTEST_NAME = "ENTITY1";
         public const string ST_MARKUP_TEST_NAME = "CHARS2";
@@ -63,7 +63,7 @@ namespace CoreXml.Test.XLinq
         public const string ST_D1_VALUE = "d1value";
         public const string ST_GEN_ENT_VALUE = "e1foo";
 
-        //Writer helpers      
+        //Writer helpers
         public XmlWriter CreateWriter()
         {
             XDocument doc = new XDocument();
@@ -553,7 +553,7 @@ namespace CoreXml.Test.XLinq
             TextWriter tw = new StreamWriter(FilePathUtil.getStream(strFileName), encode);
 
             tw.WriteLine("<root>");
-            tw.Write("�");
+            tw.Write("\uFFFD");
             tw.WriteLine("</root>");
 
             tw.Flush();
@@ -975,7 +975,7 @@ namespace CoreXml.Test.XLinq
         {
             TextWriter tw = new StreamWriter(FilePathUtil.getStream(strFileName));
 
-            string str = new String('Z', (1 << 20) - 1);
+            string str = new string('Z', (1 << 20) - 1);
             tw.Write(str);
             tw.Flush();
             tw.Dispose();
@@ -1017,7 +1017,7 @@ namespace CoreXml.Test.XLinq
             w.WriteEndElement();
 
             w.WriteStartElement("ElemEmpty");
-            w.WriteString(String.Empty);
+            w.WriteString(string.Empty);
             w.WriteEndElement();
 
             w.WriteStartElement("ElemNum");
@@ -1081,7 +1081,7 @@ namespace CoreXml.Test.XLinq
             w.Flush();
 
             w.WriteStartElement("ElemEmpty");
-            w.WriteString(String.Empty);
+            w.WriteString(string.Empty);
             w.WriteEndElement();
 
             w.WriteStartElement("ElemNum");
@@ -1113,7 +1113,7 @@ namespace CoreXml.Test.XLinq
         {
             TextWriter tw = new StreamWriter(FilePathUtil.getStream(strFileName));
 
-            string str = new String('Z', (1 << 20) - 1);
+            string str = new string('Z', (1 << 20) - 1);
             tw.WriteLine("<Root>");
             tw.Write("<");
             tw.Write(str);
@@ -1246,7 +1246,7 @@ namespace CoreXml.Test.XLinq
 
                 if (r.NodeType == XmlNodeType.ProcessingInstruction && r.NodeType == XmlNodeType.XmlDeclaration)
                 {
-                    if (String.Compare(r.Name, 0, ST_XML, 0, 3) != 0)
+                    if (string.Compare(r.Name, 0, ST_XML, 0, 3) != 0)
                         return true;
                 }
 
@@ -1267,7 +1267,7 @@ namespace CoreXml.Test.XLinq
         }
     }
 
-    // Class Signatures used for verifying names 
+    // Class Signatures used for verifying names
     public class Signatures
     {
         private string[] _stringsExpected;

@@ -34,8 +34,8 @@ namespace Windows.UI.Xaml
     [StructLayout(LayoutKind.Sequential)]
     public struct GridLength
     {
-        private double _unitValue;
-        private GridUnitType _unitType;
+        private readonly double _unitValue;
+        private readonly GridUnitType _unitType;
 
         private const double Default = 1.0;
         private static readonly GridLength s_auto = new GridLength(Default, GridUnitType.Auto);
@@ -87,7 +87,7 @@ namespace Windows.UI.Xaml
                     || gl1.Value != gl2.Value);
         }
 
-        override public bool Equals(object oCompare)
+        public override bool Equals(object oCompare)
         {
             if (oCompare is GridLength)
             {

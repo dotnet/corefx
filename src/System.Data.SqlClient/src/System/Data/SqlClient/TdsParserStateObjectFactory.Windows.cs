@@ -8,18 +8,22 @@ namespace System.Data.SqlClient
 {
     internal sealed class TdsParserStateObjectFactory
     {
-
-        private const string UseLegacyNetworkingOnWindows = "System.Data.SqlClient.UseLegacyNetworkingOnWindows";
-
         public static readonly TdsParserStateObjectFactory Singleton = new TdsParserStateObjectFactory();
-
 
         // Temporary disabling App Context switching for managed SNI.
         // If the appcontext switch is set then Use Managed SNI based on the value. Otherwise Managed SNI should always be used.
+        //private const string UseLegacyNetworkingOnWindows = "System.Data.SqlClient.UseLegacyNetworkingOnWindows";
         //private static bool shouldUseLegacyNetorking;
         //public static bool UseManagedSNI { get; } = AppContext.TryGetSwitch(UseLegacyNetworkingOnWindows, out shouldUseLegacyNetorking) ? !shouldUseLegacyNetorking : true;
 
+#if DEBUG
+        private static readonly Lazy<bool> useManagedSNIOnWindows = new Lazy<bool>(
+            () => bool.TrueString.Equals(Environment.GetEnvironmentVariable("System.Data.SqlClient.UseManagedSNIOnWindows"), StringComparison.InvariantCultureIgnoreCase)
+        );
+        public static bool UseManagedSNI => useManagedSNIOnWindows.Value;
+#else
         public static bool UseManagedSNI { get; } = false;
+#endif
 
         public EncryptionOptions EncryptionOptions
         {

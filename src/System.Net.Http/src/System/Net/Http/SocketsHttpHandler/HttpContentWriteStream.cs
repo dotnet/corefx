@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,25 +19,22 @@ namespace System.Net.Http
             public sealed override bool CanRead => false;
             public sealed override bool CanWrite => true;
 
-            public sealed override void Flush() => FlushAsync().GetAwaiter().GetResult();
+            public sealed override void Flush() =>
+                _connection?.Flush();
 
-            public sealed override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
-
-            public sealed override void Write(byte[] buffer, int offset, int count) =>
-                WriteAsync(buffer, offset, count, CancellationToken.None).GetAwaiter().GetResult();
-
-            // The token here is ignored because it's coming from SendAsync and the only operations
-            // here are those that are already covered by the token having been registered with
-            // to close the connection.
-
-            public sealed override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken ignored)
+            public sealed override Task FlushAsync(CancellationToken ignored)
             {
-                ValidateBufferArgs(buffer, offset, count);
-                return WriteAsync(new ReadOnlyMemory<byte>(buffer, offset, count), ignored).AsTask();
+                HttpConnection connection = _connection;
+                return connection != null ?
+                    connection.FlushAsync().AsTask() :
+                    default;
             }
 
-            public sealed override Task FlushAsync(CancellationToken ignored) =>
-                _connection.FlushAsync().AsTask();
+            public sealed override int Read(Span<byte> buffer) => throw new NotSupportedException();
+
+            public sealed override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+            public sealed override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken) => throw new NotSupportedException();
 
             public abstract Task FinishAsync();
         }

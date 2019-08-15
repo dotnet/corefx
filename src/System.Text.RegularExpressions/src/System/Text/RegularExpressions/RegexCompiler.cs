@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -25,36 +25,36 @@ namespace System.Text.RegularExpressions
      */
     internal abstract class RegexCompiler
     {
-        // fields that never change (making them saves about 6% overall running time)
-        private static FieldInfo s_textbegF;
-        private static FieldInfo s_textendF;
-        private static FieldInfo s_textstartF;
-        private static FieldInfo s_textposF;
-        private static FieldInfo s_textF;
-        private static FieldInfo s_trackposF;
-        private static FieldInfo s_trackF;
-        private static FieldInfo s_stackposF;
-        private static FieldInfo s_stackF;
-        private static FieldInfo s_trackcountF;
+        // fields that never change
+        private static readonly FieldInfo s_textbegF = RegexRunnerField("runtextbeg");
+        private static readonly FieldInfo s_textendF = RegexRunnerField("runtextend");
+        private static readonly FieldInfo s_textstartF = RegexRunnerField("runtextstart");
+        private static readonly FieldInfo s_textposF = RegexRunnerField("runtextpos");
+        private static readonly FieldInfo s_textF = RegexRunnerField("runtext");
+        private static readonly FieldInfo s_trackposF = RegexRunnerField("runtrackpos");
+        private static readonly FieldInfo s_trackF = RegexRunnerField("runtrack");
+        private static readonly FieldInfo s_stackposF = RegexRunnerField("runstackpos");
+        private static readonly FieldInfo s_stackF = RegexRunnerField("runstack");
+        private static readonly FieldInfo s_trackcountF = RegexRunnerField("runtrackcount");
 
-        private static MethodInfo s_ensurestorageM;
-        private static MethodInfo s_captureM;
-        private static MethodInfo s_transferM;
-        private static MethodInfo s_uncaptureM;
-        private static MethodInfo s_ismatchedM;
-        private static MethodInfo s_matchlengthM;
-        private static MethodInfo s_matchindexM;
-        private static MethodInfo s_isboundaryM;
-        private static MethodInfo s_isECMABoundaryM;
-        private static MethodInfo s_chartolowerM;
-        private static MethodInfo s_getcharM;
-        private static MethodInfo s_crawlposM;
-        private static MethodInfo s_charInSetM;
-        private static MethodInfo s_getCurrentCulture;
-        private static MethodInfo s_getInvariantCulture;
-        private static MethodInfo s_checkTimeoutM;
+        private static readonly MethodInfo s_ensurestorageM = RegexRunnerMethod("EnsureStorage");
+        private static readonly MethodInfo s_captureM = RegexRunnerMethod("Capture");
+        private static readonly MethodInfo s_transferM = RegexRunnerMethod("TransferCapture");
+        private static readonly MethodInfo s_uncaptureM = RegexRunnerMethod("Uncapture");
+        private static readonly MethodInfo s_ismatchedM = RegexRunnerMethod("IsMatched");
+        private static readonly MethodInfo s_matchlengthM = RegexRunnerMethod("MatchLength");
+        private static readonly MethodInfo s_matchindexM = RegexRunnerMethod("MatchIndex");
+        private static readonly MethodInfo s_isboundaryM = RegexRunnerMethod("IsBoundary");
+        private static readonly MethodInfo s_isECMABoundaryM = RegexRunnerMethod("IsECMABoundary");
+        private static readonly MethodInfo s_chartolowerM = typeof(char).GetMethod("ToLower", new Type[] { typeof(char), typeof(CultureInfo) });
+        private static readonly MethodInfo s_getcharM = typeof(string).GetMethod("get_Chars", new Type[] { typeof(int) });
+        private static readonly MethodInfo s_crawlposM = RegexRunnerMethod("Crawlpos");
+        private static readonly MethodInfo s_charInSetM = RegexRunnerMethod("CharInClass");
+        private static readonly MethodInfo s_getCurrentCulture = typeof(CultureInfo).GetMethod("get_CurrentCulture");
+        private static readonly MethodInfo s_getInvariantCulture = typeof(CultureInfo).GetMethod("get_InvariantCulture");
+        private static readonly MethodInfo s_checkTimeoutM = RegexRunnerMethod("CheckTimeout");
 #if DEBUG
-        private static MethodInfo s_dumpstateM;
+        private static readonly MethodInfo s_dumpstateM = RegexRunnerMethod("DumpState");
 #endif
 
         protected ILGenerator _ilg;
@@ -72,6 +72,8 @@ namespace System.Text.RegularExpressions
         private LocalBuilder _tempV;
         private LocalBuilder _temp2V;
         private LocalBuilder _temp3V;
+        private LocalBuilder _cultureV;      // current culture is cached in local variable to prevent many thread local storage accesses for CultureInfo.CurrentCulture
+        private LocalBuilder _loopV;         // counter for setrep and setloop
 
         protected RegexCode _code;              // the RegexCode object (used for debugging only)
         protected int[] _codes;             // the RegexCodes being translated
@@ -101,7 +103,6 @@ namespace System.Text.RegularExpressions
         // indices for unique code fragments
         private const int Stackpop = 0;    // pop one
         private const int Stackpop2 = 1;    // pop two
-        private const int Stackpop3 = 2;    // pop three
         private const int Capback = 3;    // uncapture
         private const int Capback2 = 4;    // uncapture 2
         private const int Branchmarkback2 = 5;    // back2 part of branchmark
@@ -110,44 +111,7 @@ namespace System.Text.RegularExpressions
         private const int Lazybranchcountback2 = 8;    // back2 part of lazybranchcount
         private const int Forejumpback = 9;    // back part of forejump
         private const int Uniquecount = 10;
-
-        static RegexCompiler()
-        {
-            // fields
-            s_textbegF = RegexRunnerField("runtextbeg");
-            s_textendF = RegexRunnerField("runtextend");
-            s_textstartF = RegexRunnerField("runtextstart");
-            s_textposF = RegexRunnerField("runtextpos");
-            s_textF = RegexRunnerField("runtext");
-            s_trackposF = RegexRunnerField("runtrackpos");
-            s_trackF = RegexRunnerField("runtrack");
-            s_stackposF = RegexRunnerField("runstackpos");
-            s_stackF = RegexRunnerField("runstack");
-            s_trackcountF = RegexRunnerField("runtrackcount");
-
-            // methods
-            s_ensurestorageM = RegexRunnerMethod("EnsureStorage");
-            s_captureM = RegexRunnerMethod("Capture");
-            s_transferM = RegexRunnerMethod("TransferCapture");
-            s_uncaptureM = RegexRunnerMethod("Uncapture");
-            s_ismatchedM = RegexRunnerMethod("IsMatched");
-            s_matchlengthM = RegexRunnerMethod("MatchLength");
-            s_matchindexM = RegexRunnerMethod("MatchIndex");
-            s_isboundaryM = RegexRunnerMethod("IsBoundary");
-            s_charInSetM = RegexRunnerMethod("CharInClass");
-            s_isECMABoundaryM = RegexRunnerMethod("IsECMABoundary");
-            s_crawlposM = RegexRunnerMethod("Crawlpos");
-            s_checkTimeoutM = RegexRunnerMethod("CheckTimeout");
-
-            s_chartolowerM = typeof(char).GetMethod("ToLower", new Type[] { typeof(char), typeof(CultureInfo) });
-            s_getcharM = typeof(string).GetMethod("get_Chars", new Type[] { typeof(int) });
-            s_getCurrentCulture = typeof(CultureInfo).GetMethod("get_CurrentCulture");
-            s_getInvariantCulture = typeof(CultureInfo).GetMethod("get_InvariantCulture");
-                
-#if DEBUG
-            s_dumpstateM = RegexRunnerMethod("DumpState");
-#endif
-        }
+        private const int LoopTimeoutCheckCount = 2048; // A conservative value to guarantee the correct timeout handling.
 
         private static FieldInfo RegexRunnerField(string fieldname)
         {
@@ -159,8 +123,8 @@ namespace System.Text.RegularExpressions
             return typeof(RegexRunner).GetMethod(methname, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
         }
 
-        /* 
-         * Entry point to dynamically compile a regular expression.  The expression is compiled to 
+        /*
+         * Entry point to dynamically compile a regular expression.  The expression is compiled to
          * an in-memory assembly.
          */
         internal static RegexRunnerFactory Compile(RegexCode code, RegexOptions options)
@@ -303,14 +267,14 @@ namespace System.Text.RegularExpressions
          * True if we need to do the backtrack logic for the current operation
          */
         private bool IsBack() {
-            return(_regexopcode & RegexCode.Back) != 0;
+            return (_regexopcode & RegexCode.Back) != 0;
         }
 
         /*
          * True if we need to do the second-backtrack logic for the current operation
          */
         private bool IsBack2() {
-            return(_regexopcode & RegexCode.Back2) != 0;
+            return (_regexopcode & RegexCode.Back2) != 0;
         }
 #endif
 
@@ -365,6 +329,22 @@ namespace System.Text.RegularExpressions
         private void Ret()
         {
             _ilg.Emit(OpCodes.Ret);
+        }
+
+        /*
+         * A macro for _ilg.Emit(OpCodes.Rem)
+         */
+        private void Rem()
+        {
+            _ilg.Emit(OpCodes.Rem);
+        }
+
+        /*
+         * A macro for _ilg.Emit(OpCodes.Ceq)
+         */
+        private void Ceq()
+        {
+            _ilg.Emit(OpCodes.Ceq);
         }
 
         /*
@@ -961,14 +941,20 @@ namespace System.Text.RegularExpressions
             _ilg.Emit(OpCodes.Br, AdvanceLabel());
         }
 
-        private void CallToLower()
+        private void InitLocalCultureInfo()
         {
             if ((_options & RegexOptions.CultureInvariant) != 0)
                 Call(s_getInvariantCulture);
             else
                 Call(s_getCurrentCulture);
 
-            Call(s_chartolowerM);
+            Stloc(_cultureV);
+        }
+
+        private void CallToLower()
+        {
+             Ldloc(_cultureV);
+             Call(s_chartolowerM);
         }
 
         /*
@@ -1027,14 +1013,13 @@ namespace System.Text.RegularExpressions
          */
         private void GenerateMiddleSection()
         {
-            Label l1 = DefineLabel();
             Label[] table;
             int i;
 
             // Backtrack switch
             MarkLabel(_backtrack);
 
-            // first call EnsureStorage 
+            // first call EnsureStorage
             Mvlocfld(_trackposV, s_trackposF);
             Mvlocfld(_stackposV, s_stackposF);
             Ldthis();
@@ -1089,6 +1074,9 @@ namespace System.Text.RegularExpressions
             _textV = DeclareString();
             _tempV = DeclareInt();
             _temp2V = DeclareInt();
+            _cultureV = DeclareCultureInfo();
+
+            InitLocalCultureInfo();
 
             if (0 != (_anchors & (RegexFCD.Beginning | RegexFCD.Start | RegexFCD.EndZ | RegexFCD.End)))
             {
@@ -1238,7 +1226,6 @@ namespace System.Text.RegularExpressions
                 Label lAdvance = DefineLabel();
                 Label lFail = DefineLabel();
                 Label lStart = DefineLabel();
-                Label lOutOfRange = DefineLabel();
                 Label lPartialMatch = DefineLabel();
 
 
@@ -1409,7 +1396,6 @@ namespace System.Text.RegularExpressions
             else
             {
                 LocalBuilder cV = _temp2V;
-                LocalBuilder chV = _tempV;
                 Label l1 = DefineLabel();
                 Label l2 = DefineLabel();
                 Label l3 = DefineLabel();
@@ -1480,7 +1466,7 @@ namespace System.Text.RegularExpressions
 
                 /*          // CURRENTLY DISABLED
                             // If for some reason we have a prefix we didn't use, use it now.
-                
+
                             if (_bmPrefix != null) {
                                 if (!_code._rightToLeft) {
                                     Ldthisfld(_textendF);
@@ -1493,7 +1479,7 @@ namespace System.Text.RegularExpressions
                                 Sub();
                                 Ldc(_bmPrefix._pattern.Length - 1);
                                 BltFar(l5);
-                                
+
                                 for (int i = 1; i < _bmPrefix._pattern.Length; i++) {
                                     Ldloc(_textV);
                                     Ldloc(_textposV);
@@ -1553,6 +1539,14 @@ namespace System.Text.RegularExpressions
         }
 
         /*
+         * Declares a local CultureInfo
+         */
+        private LocalBuilder DeclareCultureInfo()
+        {
+            return _ilg.DeclareLocal(typeof(CultureInfo));
+        }
+
+        /*
          * Declares a local int array
          */
         private LocalBuilder DeclareIntArray()
@@ -1584,9 +1578,11 @@ namespace System.Text.RegularExpressions
             _tempV = DeclareInt();
             _temp2V = DeclareInt();
             _temp3V = DeclareInt();
+            _loopV = DeclareInt();
             _textbegV = DeclareInt();
             _textendV = DeclareInt();
             _textstartV = DeclareInt();
+            _cultureV = DeclareCultureInfo();
 
             // clear some tables
 
@@ -1600,6 +1596,9 @@ namespace System.Text.RegularExpressions
 
             // emit the code!
 
+            // cache CultureInfo in local variable which saves excessive thread local storage accesses
+            InitLocalCultureInfo();
+
             GenerateForwardSection();
             GenerateMiddleSection();
             GenerateBacktrackSection();
@@ -1609,7 +1608,7 @@ namespace System.Text.RegularExpressions
         /*
          * Some simple debugging stuff
          */
-        private static MethodInfo s_debugWriteLine = typeof(Debug).GetMethod("WriteLine", new Type[] {typeof(string)});
+        private static readonly MethodInfo s_debugWriteLine = typeof(Debug).GetMethod("WriteLine", new Type[] {typeof(string)});
 
         /*
          * Debug only: emit code to print out a message
@@ -1830,7 +1829,7 @@ namespace System.Text.RegularExpressions
 
                 case RegexCode.Branchmark:
                     //: Stackframe(1);
-                    //: 
+                    //:
                     //: if (Textpos() != Stacked(0))
                     //: {                                   // Nonempty match -> loop now
                     //:     Track(Stacked(0), Textpos());   // Save old mark, textpos
@@ -1897,13 +1896,13 @@ namespace System.Text.RegularExpressions
                 case RegexCode.Lazybranchmark:
                     //: StackPop();
                     //: int oldMarkPos = StackPeek();
-                    //: 
+                    //:
                     //: if (Textpos() != oldMarkPos) {         // Nonempty match -> next loop
                     //: {                                   // Nonempty match -> next loop
                     //:     if (oldMarkPos != -1)
                     //:         Track(Stacked(0), Textpos());   // Save old mark, textpos
                     //:     else
-                    //:         TrackPush(Textpos(), Textpos());   
+                    //:         TrackPush(Textpos(), Textpos());
                     //: }
                     //: else
                     //: {                                   // Empty match -> no loop
@@ -1940,7 +1939,7 @@ namespace System.Text.RegularExpressions
                         Br(AdvanceLabel());                 // Advance (near)
                                                             // else
                         MarkLabel(l1);
-                        ReadyPushStack();                   // push the current textPos on the stack. 
+                        ReadyPushStack();                   // push the current textPos on the stack.
                                                             // May be ignored by 'back2' or used by a true empty match.
                         Ldloc(mark);
 
@@ -2011,7 +2010,7 @@ namespace System.Text.RegularExpressions
                     //: Stackframe(2);
                     //: int mark = Stacked(0);
                     //: int count = Stacked(1);
-                    //: 
+                    //:
                     //: if (count >= Operand(1) || Textpos() == mark && count >= 0)
                     //: {                                   // Max loops or empty match -> straight now
                     //:     Track2(mark, count);            // Save old mark, count
@@ -2139,8 +2138,6 @@ namespace System.Text.RegularExpressions
                         LocalBuilder count = _tempV;
                         LocalBuilder mark = _temp2V;
                         Label l1 = DefineLabel();
-                        Label l2 = DefineLabel();
-                        Label l3 = _labels[NextCodepos()];
 
                         PopStack();
                         Stloc(count);                           // count -> temp
@@ -2765,6 +2762,7 @@ namespace System.Text.RegularExpressions
 
                         if (Code() == RegexCode.Setrep)
                         {
+                            EmitTimeoutCheck();
                             Ldstr(_strings[Operand(0)]);
                             Call(s_charInSetM);
 
@@ -2874,6 +2872,7 @@ namespace System.Text.RegularExpressions
 
                         if (Code() == RegexCode.Setloop)
                         {
+                            EmitTimeoutCheck();
                             Ldstr(_strings[Operand(0)]);
                             Call(s_charInSetM);
 
@@ -3082,6 +3081,29 @@ namespace System.Text.RegularExpressions
                 default:
                     throw new NotImplementedException(SR.UnimplementedState);
             }
+        }
+
+        private void EmitTimeoutCheck()
+        {
+            Label label = DefineLabel();
+
+            // Increment counter for each loop iteration.
+            Ldloc(_loopV);
+            Ldc(1);
+            Add();
+            Stloc(_loopV);
+
+            // Emit code to check the timeout every 2000th-iteration.
+            Ldloc(_loopV);
+            Ldc(LoopTimeoutCheckCount);
+            Rem();
+            Ldc(0);
+            Ceq();
+            Brfalse(label);
+            Ldthis();
+            Callvirt(s_checkTimeoutM);
+
+            MarkLabel(label);
         }
     }
 }

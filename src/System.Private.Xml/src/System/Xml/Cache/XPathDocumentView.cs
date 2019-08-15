@@ -14,7 +14,6 @@ using System.Diagnostics;
 
 namespace System.Xml.XPath.DataBinding
 {
-    /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView"]/*' />
     public sealed class XPathDocumentView : IBindingList, ITypedList {
         ArrayList rows;
         Shape rowShape;
@@ -27,13 +26,11 @@ namespace System.Xml.XPath.DataBinding
         //
         // Constructors
         //
-        
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.XPathDocumentView"]/*' />
-        public XPathDocumentView(XPathDocument document) 
+
+        public XPathDocumentView(XPathDocument document)
             : this(document, (IXmlNamespaceResolver)null) {
         }
-        
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.XPathDocumentView1"]/*' />
+
         public XPathDocumentView(XPathDocument document, IXmlNamespaceResolver namespaceResolver) {
             if (null == document)
                 throw new ArgumentNullException(nameof(document));
@@ -47,24 +44,21 @@ namespace System.Xml.XPath.DataBinding
             Debug.Assert(XPathNodeType.Root == this.ndRoot.NodeType);
             XPathNode nd = this.ndRoot.Child;
             while (null != nd) {
-                if (XPathNodeType.Element == nd.NodeType) 
+                if (XPathNodeType.Element == nd.NodeType)
                     rows.Add(nd);
                 nd = nd.Sibling;
             }
             DeriveShapeFromRows();
         }
-            
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.XPathDocumentView2"]/*' />
+
         public XPathDocumentView(XPathDocument document, string xpath)
             : this(document, xpath, null, true) {
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.XPathDocumentView3"]/*' />
         public XPathDocumentView(XPathDocument document, string xpath, IXmlNamespaceResolver namespaceResolver)
             : this(document, xpath, namespaceResolver, false) {
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.XPathDocumentView4"]/*' />
         public XPathDocumentView(XPathDocument document, string xpath, IXmlNamespaceResolver namespaceResolver, bool showPrefixes) {
             if (null == document)
                 throw new ArgumentNullException(nameof(document));
@@ -88,42 +82,35 @@ namespace System.Xml.XPath.DataBinding
             this.ndRoot = root;
         }
 
-        // 
+        //
         // public properties
-        
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.Document"]/*' />
+
         public XPathDocument Document { get { return this.document; } }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.XPath"]/*' />
         public String XPath { get { return xpath; } }
 
         //
         // IEnumerable Implementation
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.GetEnumerator"]/*' />
         public IEnumerator GetEnumerator() {
             return new RowEnumerator(this);
         }
 
         //
         // ICollection implementation
-        
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.Count"]/*' />
+
         public int Count {
             get { return this.rows.Count; }
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.IsSynchronized"]/*' />
         public bool IsSynchronized {
             get {  return false ; }
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.SyncRoot"]/*' />
         public object SyncRoot {
             get { return null; }
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.CopyTo"]/*' />
         public void CopyTo(Array array, int index) {
             object o;
             ArrayList rows = this.rows;
@@ -132,10 +119,6 @@ namespace System.Xml.XPath.DataBinding
             rows.CopyTo(array, index);
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.CopyTo2"]/*' />
-        /// <devdoc>
-        ///    <para>strongly typed version of CopyTo, demanded by Fxcop.</para>
-        /// </devdoc>
         public void CopyTo(XPathNodeView[] array, int index) {
             object o;
             ArrayList rows = this.rows;
@@ -147,54 +130,44 @@ namespace System.Xml.XPath.DataBinding
         //
         // IList Implementation
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.IsReadOnly"]/*' />
         bool IList.IsReadOnly {
             get { return true; }
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.IsFixedSize"]/*' />
         bool IList.IsFixedSize {
             get { return true; }
-        }        
+        }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.Contains"]/*' />
         bool IList.Contains(object value) {
             return this.rows.Contains(value);
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.Remove"]/*' />
-        void IList.Remove(object value) {            
+        void IList.Remove(object value) {
             throw new NotSupportedException("IList.Remove");
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.RemoveAt"]/*' />
-        void IList.RemoveAt(int index) {            
+        void IList.RemoveAt(int index) {
             throw new NotSupportedException("IList.RemoveAt");
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.Clear"]/*' />
         void IList.Clear() {
             throw new NotSupportedException("IList.Clear");
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.Add"]/*' />
         int IList.Add(object value) {
             throw new NotSupportedException("IList.Add");
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.Insert"]/*' />
         void IList.Insert(int index, object value) {
             throw new NotSupportedException("IList.Insert");
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.IndexOf"]/*' />
         int IList.IndexOf( object value )  {
             return this.rows.IndexOf(value);
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.this"]/*' />
         object IList.this[int index] {
-            get { 
+            get {
                 object val = this.rows[index];
                 if (val is XPathNodeView)
                     return val;
@@ -202,57 +175,33 @@ namespace System.Xml.XPath.DataBinding
                 this.rows[index] = xiv;
                 return xiv;
             }
-            set { 
+            set {
                 throw new NotSupportedException("IList.this[]");
             }
         }
-        
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.Contains2"]/*' />
-        /// <devdoc>
-        ///    <para>strongly typed version of Contains, demanded by Fxcop.</para>
-        /// </devdoc>
+
         public bool Contains(XPathNodeView value) {
             return this.rows.Contains(value);
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.Add2"]/*' />
-        /// <devdoc>
-        ///    <para>strongly typed version of Add, demanded by Fxcop.</para>
-        /// </devdoc>
         public int Add(XPathNodeView value) {
             throw new NotSupportedException("IList.Add");
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.Insert2"]/*' />
-        /// <devdoc>
-        ///    <para>strongly typed version of Insert, demanded by Fxcop.</para>
-        /// </devdoc>
         public void Insert(int index, XPathNodeView value) {
             throw new NotSupportedException("IList.Insert");
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.IndexOf2"]/*' />
-        /// <devdoc>
-        ///    <para>strongly typed version of IndexOf, demanded by Fxcop.</para>
-        /// </devdoc>
         public int IndexOf(XPathNodeView value)  {
             return this.rows.IndexOf(value);
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.Remove2"]/*' />
-        /// <devdoc>
-        ///    <para>strongly typed version of Remove, demanded by Fxcop.</para>
-        /// </devdoc>
-        public void Remove(XPathNodeView value) {            
+        public void Remove(XPathNodeView value) {
             throw new NotSupportedException("IList.Remove");
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.Item"]/*' />
-        /// <devdoc>
-        ///    <para>strongly typed version of Item, demanded by Fxcop.</para>
-        /// </devdoc>
         public XPathNodeView this[int index] {
-            get { 
+            get {
                 object val = this.rows[index];
                 XPathNodeView nodeView;
                 nodeView = val as XPathNodeView;
@@ -263,7 +212,7 @@ namespace System.Xml.XPath.DataBinding
                 this.rows[index] = nodeView;
                 return nodeView;
             }
-            set { 
+            set {
                 throw new NotSupportedException("IList.this[]");
             }
         }
@@ -271,37 +220,30 @@ namespace System.Xml.XPath.DataBinding
         //
         // IBindingList Implementation
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.AllowEdit"]/*' />
         public bool AllowEdit {
             get { return false; }
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.AllowAdd"]/*' />
         public bool AllowAdd {
             get { return false; }
-        }  
+        }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.AllowRemove"]/*' />
         public bool AllowRemove {
             get { return false; }
-        }          
+        }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.AllowNew"]/*' />
         public bool AllowNew {
             get { return false; }
-        }  
+        }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.AddNew"]/*' />
         public object AddNew() {
             throw new NotSupportedException("IBindingList.AddNew");
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.SupportsChangeNotification"]/*' />
         public bool SupportsChangeNotification {
             get { return false; }
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.ListChanged"]/*' />
         public event ListChangedEventHandler ListChanged {
             add {
                 throw new NotSupportedException("IBindingList.ListChanged");
@@ -311,52 +253,42 @@ namespace System.Xml.XPath.DataBinding
             }
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.SupportsSearching"]/*' />
         public bool SupportsSearching {
             get { return false; }
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.SupportsSorting"]/*' />
         public bool SupportsSorting {
             get { return false; }
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.IsSorted"]/*' />
         public bool IsSorted {
             get { return false; }
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.SortProperty"]/*' />
         public PropertyDescriptor SortProperty {
             get { throw new NotSupportedException("IBindingList.SortProperty"); }
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.SortDirection"]/*' />
         public ListSortDirection SortDirection {
             get { throw new NotSupportedException("IBindingList.SortDirection"); }
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.AddIndex"]/*' />
         public void AddIndex( PropertyDescriptor descriptor ) {
             throw new NotSupportedException("IBindingList.AddIndex");
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.ApplySort"]/*' />
         public void ApplySort( PropertyDescriptor descriptor, ListSortDirection direction ) {
             throw new NotSupportedException("IBindingList.ApplySort");
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.Find"]/*' />
         public int Find(PropertyDescriptor propertyDescriptor, object key) {
             throw new NotSupportedException("IBindingList.Find");
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.RemoveIndex"]/*' />
         public void RemoveIndex(PropertyDescriptor propertyDescriptor) {
             throw new NotSupportedException("IBindingList.RemoveIndex");
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.RemoveSort"]/*' />
         public void RemoveSort() {
             throw new NotSupportedException("IBindingList.RemoveSort");
         }
@@ -365,9 +297,8 @@ namespace System.Xml.XPath.DataBinding
         //
         // ITypedList Implementation
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.GetListName"]/*' />
-        public string GetListName(PropertyDescriptor[] listAccessors) {            
-            if( listAccessors == null ) {
+        public string GetListName(PropertyDescriptor[] listAccessors) {
+            if ( listAccessors == null ) {
                 return this.rowShape.Name;
             }
             else {
@@ -375,10 +306,9 @@ namespace System.Xml.XPath.DataBinding
             }
         }
 
-        /// <include file='doc\XPathDocumentView.uex' path='docs/doc[@for="XPathDocumentView.GetItemProperties"]/*' />
         public PropertyDescriptorCollection GetItemProperties(PropertyDescriptor[] listAccessors) {
             Shape shape = null;
-            if( listAccessors == null ) {
+            if ( listAccessors == null ) {
                 shape = this.rowShape;
             }
             else {
@@ -648,8 +578,8 @@ namespace System.Xml.XPath.DataBinding
 
 
         // This is the limited grammar we support
-        //  Path ::= '/ ' ( Step '/')* ( QName | '@' QName ) 
-        //  Step ::= '.' | QName 
+        //  Path ::= '/ ' ( Step '/')* ( QName | '@' QName )
+        //  Step ::= '.' | QName
         // This is encoded as an array of XPathStep structs
         struct XPathStep {
             internal XmlQualifiedName name;
@@ -733,7 +663,7 @@ namespace System.Xml.XPath.DataBinding
             return this.document.NameTable.Add(nm);
         }
 
-        
+
         //
         // Helper classes
         //
@@ -760,12 +690,12 @@ namespace System.Xml.XPath.DataBinding
 
             public XPathNode Node { get { return this.node; } }
             public object Particle { get { return this.currentParticle; } }
-            
+
             public bool Next() {
                 if (null != this.node) {
                     this.node = TreeNavigationHelper.GetContentSibling(this.node, XPathNodeType.Element);
                     if (node != null)
-                        Advance();                    
+                        Advance();
                     return null != this.node;
                 }
                 return false;

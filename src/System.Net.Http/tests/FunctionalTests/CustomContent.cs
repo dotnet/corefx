@@ -2,42 +2,43 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.IO;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace System.Net.Http.Functional.Tests
 {
-    public sealed class CustomContent : StreamContent
+    internal partial class CustomContent : HttpContent
     {
-        private long _length;
+        private readonly Stream _stream;
 
-        public static CustomContent Create(string data, bool rewindable)
-        {
-            byte[] bytes = Encoding.UTF8.GetBytes(data);
-            Stream stream = new CustomStream(bytes, rewindable);
-            
-            return new CustomContent(stream, bytes.Length);
-        }
+        public CustomContent(Stream stream) => _stream = stream;
 
-        private CustomContent(Stream stream, long length) : base(stream)
-        {
-            _length = length;
-        }
+        protected override Task<Stream> CreateContentReadStreamAsync() =>
+            Task.FromResult(_stream);
 
-        public long Length
+        protected override Task SerializeToStreamAsync(Stream stream, TransportContext context) =>
+            _stream.CopyToAsync(stream);
+
+        protected override bool TryComputeLength(out long length)
         {
-            get
+            if (_stream.CanSeek)
             {
-                return _length;
+                length = _stream.Length;
+                return true;
+            }
+            else
+            {
+                length = 0;
+                return false;
             }
         }
 
-        private class CustomStream : Stream
+        internal class CustomStream : Stream
         {
             private byte[] _buffer;
             private long _position;
             private bool _rewindable;
+            internal Exception _failException;
 
             public CustomStream(byte[] buffer, bool rewindable)
             {
@@ -45,7 +46,7 @@ namespace System.Net.Http.Functional.Tests
                 _position = 0;
                 _rewindable = rewindable;
             }
-        
+
             public override bool CanRead
             {
                 get { return true; }
@@ -104,6 +105,11 @@ namespace System.Net.Http.Functional.Tests
             {
                 int bytesRead = 0;
 
+                if (_failException != null)
+                {
+                    throw _failException;
+                }
+
                 for (int i = 0; i < count; i++)
                 {
                     if (_position >= _buffer.Length)
@@ -154,6 +160,11 @@ namespace System.Net.Http.Functional.Tests
             public override void Write(byte[] buffer, int offset, int count)
             {
                 throw new NotSupportedException("CustomStream.Write");
+            }
+
+            public void SetException(Exception e)
+            {
+                _failException = e;
             }
         }
     }

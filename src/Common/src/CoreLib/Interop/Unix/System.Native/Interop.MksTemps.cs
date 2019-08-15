@@ -11,7 +11,7 @@ internal static partial class Interop
     {
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_MksTemps", SetLastError = true)]
         internal static extern IntPtr MksTemps(
-            byte[] template, 
+            byte[] template,
             int suffixlen);
     }
 }

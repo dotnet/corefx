@@ -16,7 +16,7 @@ namespace System.IO.Enumeration
                 _directoryHandle,
                 Interop.Kernel32.FILE_INFO_BY_HANDLE_CLASS.FileFullDirectoryInfo,
                 _buffer,
-                (uint)_buffer.Length))
+                (uint)_bufferLength))
             {
                 int error = Marshal.GetLastWin32Error();
                 switch (error)
@@ -43,7 +43,7 @@ namespace System.IO.Enumeration
         {
             // We don't have access to any APIs that allow us to pass in a base handle in UAP,
             // just call our "normal" handle open.
-            return CreateDirectoryHandle(fullPath);
+            return CreateDirectoryHandle(fullPath, ignoreNotFound: true);
         }
     }
 }

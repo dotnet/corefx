@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -8,6 +8,7 @@ using Xunit;
 
 namespace System.Net.Tests
 {
+    [ConditionalClass(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // httpsys component missing in Nano.
     public class HttpListenerTimeoutManagerTests
     {
         [Theory]
@@ -47,6 +48,7 @@ namespace System.Net.Tests
         }
     }
 
+    [ConditionalClass(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // httpsys component missing in Nano.
     [PlatformSpecific(TestPlatforms.Windows)]
     public class HttpListenerTimeoutManagerWindowsTests : IDisposable
     {
@@ -288,7 +290,7 @@ namespace System.Net.Tests
         [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
         public void MinSendBytesPerSecond_SetNoStart_GetReturnsNewValue()
         {
-            // Set the MinSendBytesPerSecond timeout without calling Start and make sure that native layer 
+            // Set the MinSendBytesPerSecond timeout without calling Start and make sure that native layer
             // return new value.
             _listener.TimeoutManager.MinSendBytesPerSecond = 10 * 1024 * 1024;
             uint rate = GetServerTimeout(_listener, HTTP_TIMEOUT_TYPE.MinSendRate);
@@ -299,7 +301,7 @@ namespace System.Net.Tests
         [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
         public void MinSendBytesPerSecond_SetAfterStart_GetReturnsNewValue()
         {
-            // Set the MinSendBytesPerSecond timeout after calling Start and make sure that native 
+            // Set the MinSendBytesPerSecond timeout after calling Start and make sure that native
             // layer return new value.
             _listener.Start();
             _listener.TimeoutManager.MinSendBytesPerSecond = 10 * 1024 * 1024;
@@ -320,7 +322,7 @@ namespace System.Net.Tests
         [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
         public void MinSendBytesPerSecond_SetAfterStop_GetReturnsNewValue()
         {
-            // Set the MinSendBytesPerSecond timeout after calling Stop and make sure that native 
+            // Set the MinSendBytesPerSecond timeout after calling Stop and make sure that native
             // layer return new value.
             _listener.Start();
             _listener.Stop();
@@ -336,7 +338,7 @@ namespace System.Net.Tests
             uint[] timeouts = new uint[6];
 
             // We need url group id which is private so we get it using reflection.
-            string urlGroupIdName = PlatformDetection.IsFullFramework ? "m_UrlGroupId" : "_urlGroupId";
+            string urlGroupIdName = "_urlGroupId";
             FieldInfo info = typeof(HttpListener).GetField(urlGroupIdName, BindingFlags.Instance | BindingFlags.NonPublic);
             ulong urlGroupId = (ulong)info.GetValue(_listener);
 

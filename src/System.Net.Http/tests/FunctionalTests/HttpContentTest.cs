@@ -4,6 +4,8 @@
 
 using System.IO;
 using System.Net.Http.Headers;
+using System.Net.Sockets;
+using System.Net.Test.Common;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -95,9 +97,9 @@ namespace System.Net.Http.Functional.Tests
         public void CopyToAsync_MockContentReturnsNull_ThrowsInvalidOperationException()
         {
             // return 'null' when CopyToAsync() is called.
-            var content = new MockContent(MockOptions.ReturnNullInCopyToAsync); 
+            var content = new MockContent(MockOptions.ReturnNullInCopyToAsync);
             var m = new MemoryStream();
-            
+
             // The HttpContent derived class (MockContent in our case) must return a Task object when WriteToAsync()
             // is called. If not, HttpContent will throw.
             Assert.Throws<InvalidOperationException>(() => { content.CopyToAsync(m); });
@@ -114,7 +116,7 @@ namespace System.Net.Http.Functional.Tests
             var destination = new MemoryStream();
             await content.CopyToAsync(destination);
 
-            // Our MockContent should not be called for the CopyTo() operation since the buffered stream should be 
+            // Our MockContent should not be called for the CopyTo() operation since the buffered stream should be
             // used.
             Assert.Equal(1, content.SerializeToStreamAsyncCount);
             Assert.Equal(data.Length, destination.Length);
@@ -136,15 +138,15 @@ namespace System.Net.Http.Functional.Tests
             await content.LoadIntoBufferAsync();
 
             Assert.Equal(content.GetMockData().Length, content.Headers.ContentLength);
-            
+
             // Called once to determine the size of the buffer.
-            Assert.Equal(1, content.TryComputeLengthCount); 
+            Assert.Equal(1, content.TryComputeLengthCount);
         }
 
         [Fact]
         public void TryComputeLength_ThrowCustomExceptionInOverriddenMethod_ExceptionBubblesUpToCaller()
         {
-            var content = new MockContent(MockOptions.ThrowInTryComputeLength); 
+            var content = new MockContent(MockOptions.ThrowInTryComputeLength);
 
             var m = new MemoryStream();
             Assert.Throws<MockException>(() => content.Headers.ContentLength);
@@ -196,7 +198,7 @@ namespace System.Net.Http.Functional.Tests
             Assert.Equal(1, content.CreateContentReadStreamCount);
 
             // Note that ContentReadStream returns always the same stream. If the user gets the stream, buffers content,
-            // and gets the stream again, the same instance is returned. Returning a different instance could be 
+            // and gets the stream again, the same instance is returned. Returning a different instance could be
             // confusing, even though there shouldn't be any real world scenario for retrieving the read stream both
             // before and after buffering content.
             Assert.Equal(before, after);
@@ -390,7 +392,7 @@ namespace System.Net.Http.Functional.Tests
             Task t = content.LoadIntoBufferAsync(content.GetMockData().Length - 1);
             await Assert.ThrowsAsync<HttpRequestException>(() => t);
         }
-        
+
         [Fact]
         public async Task ReadAsStringAsync_EmptyContent_EmptyString()
         {
@@ -399,15 +401,17 @@ namespace System.Net.Http.Functional.Tests
             Assert.Equal(string.Empty, actualContent);
         }
 
-        [Fact]
-        public async Task ReadAsStringAsync_SetInvalidCharset_ThrowsInvalidOperationException()
+        [Theory]
+        [InlineData("invalid")]
+        [InlineData("\"\"")]
+        public async Task ReadAsStringAsync_SetInvalidCharset_ThrowsInvalidOperationException(string charset)
         {
             string sourceString = "some string";
             byte[] contentBytes = Encoding.UTF8.GetBytes(sourceString);
 
             var content = new MockContent(contentBytes);
             content.Headers.ContentType = new MediaTypeHeaderValue("text/plain");
-            content.Headers.ContentType.CharSet = "invalid";
+            content.Headers.ContentType.CharSet = charset;
 
             // This will throw because we have an invalid charset.
             Task t = content.ReadAsStringAsync();
@@ -417,14 +421,51 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task ReadAsStringAsync_SetNoCharset_DefaultCharsetUsed()
         {
-            // Use content with umlaut characters.
-            string sourceString = "ÄäüÜ"; // c4 e4 fc dc
+            // Assorted latin letters with diaeresis
+            string sourceString = "\u00C4\u00E4\u00FC\u00DC";
             Encoding defaultEncoding = Encoding.GetEncoding("utf-8");
             byte[] contentBytes = defaultEncoding.GetBytes(sourceString);
 
             var content = new MockContent(contentBytes);
 
             // Reading the string should consider the charset of the 'Content-Type' header.
+            string result = await content.ReadAsStringAsync();
+
+            Assert.Equal(sourceString, result);
+        }
+
+        [Fact]
+        public async Task ReadAsStringAsync_SetQuotedCharset_ParsesContent()
+        {
+            string sourceString = "some string";
+            byte[] contentBytes = Encoding.UTF8.GetBytes(sourceString);
+
+            var content = new MockContent(contentBytes);
+            content.Headers.ContentType = new MediaTypeHeaderValue("text/plain");
+            content.Headers.ContentType.CharSet = "\"utf-8\"";
+
+            string result = await content.ReadAsStringAsync();
+
+            Assert.Equal(sourceString, result);
+        }
+
+        [Theory]
+        [InlineData("\"\"invalid")]
+        [InlineData("invalid\"\"")]
+        [InlineData("\"\"invalid\"\"")]
+        [InlineData("\"invalid")]
+        [InlineData("invalid\"")]
+        public async Task ReadAsStringAsync_SetInvalidContentTypeHeader_DefaultCharsetUsed(string charset)
+        {
+            // Assorted latin letters with diaeresis
+            string sourceString = "\u00C4\u00E4\u00FC\u00DC";
+
+            // Because the Content-Type header is invalid, we expect to default to UTF-8.
+            byte[] contentBytes = Encoding.UTF8.GetBytes(sourceString);
+            var content = new MockContent(contentBytes);
+
+            Assert.True(content.Headers.TryAddWithoutValidation("Content-Type", $"text/plain;charset={charset}"));
+
             string result = await content.ReadAsStringAsync();
 
             Assert.Equal(sourceString, result);
@@ -452,9 +493,9 @@ namespace System.Net.Http.Functional.Tests
             Assert.Throws<ObjectDisposedException>(() => { content.ReadAsStreamAsync(); });
             Assert.Throws<ObjectDisposedException>(() => { content.LoadIntoBufferAsync(); });
 
-            // Note that we don't throw when users access the Headers property. This is useful e.g. to be able to 
+            // Note that we don't throw when users access the Headers property. This is useful e.g. to be able to
             // read the headers of a content, even though the content is already disposed. Note that the .NET guidelines
-            // only require members to throw ObjectDisposedExcpetion for members "that cannot be used after the object 
+            // only require members to throw ObjectDisposedExcpetion for members "that cannot be used after the object
             // has been disposed of".
             _output.WriteLine(content.Headers.ToString());
         }
@@ -496,7 +537,7 @@ namespace System.Net.Http.Functional.Tests
             private byte[] _mockData;
             private MockOptions _options;
             private Exception _customException;
-            
+
             public int TryComputeLengthCount { get; private set; }
             public int SerializeToStreamAsyncCount { get; private set; }
             public int CreateContentReadStreamCount { get; private set; }
@@ -509,7 +550,7 @@ namespace System.Net.Http.Functional.Tests
 
             public MockContent()
                 : this((byte[])null, MockOptions.None)
-            { 
+            {
             }
 
             public MockContent(byte[] mockData)
@@ -519,7 +560,7 @@ namespace System.Net.Http.Functional.Tests
 
             public MockContent(MockOptions options)
                 : this((byte[])null, options)
-            { 
+            {
             }
 
             public MockContent(Exception customException, MockOptions options)
@@ -633,7 +674,7 @@ namespace System.Net.Http.Functional.Tests
                 base.Dispose(disposing);
             }
         }
-        
+
         #endregion
     }
 }

@@ -155,6 +155,11 @@ namespace System.Net.Tests
             yield return Tuple.Create("%1g", "%1g");
             yield return Tuple.Create("%G1", "%G1");
             yield return Tuple.Create("%1G", "%1G");
+
+            // The "Baz" portion of "http://example.net/Baz" has been double-encoded - one iteration of UrlDecode() should produce a once-encoded string.
+            yield return Tuple.Create("http://example.net/%2542%2561%257A", "http://example.net/%42%61%7A");
+            // The second iteration should return the original string
+            yield return Tuple.Create("http://example.net/%42%61%7A", "http://example.net/Baz");
         }
 
         public static IEnumerable<Tuple<string, string>> UrlEncode_SharedTestData()
@@ -173,7 +178,7 @@ namespace System.Net.Tests
             yield return Tuple.Create("    ", "++++");
             yield return Tuple.Create("++++", "%2B%2B%2B%2B");
 
-            // Tests for stray surrogate chars (all should be encoded as U+FFFD)            
+            // Tests for stray surrogate chars (all should be encoded as U+FFFD)
             yield return Tuple.Create("\uD800", "%EF%BF%BD"); // High surrogate
             yield return Tuple.Create("\uDC00", "%EF%BF%BD"); // Low surrogate
 
@@ -319,7 +324,7 @@ namespace System.Net.Tests
         {
             AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => WebUtility.UrlDecodeToBytes(new byte[byteCount], offset, count));
         }
-        
+
         public static IEnumerable<object[]> UrlEncodeToBytes_TestData()
         {
             foreach (var tuple in UrlEncode_SharedTestData())
@@ -419,7 +424,7 @@ namespace System.Net.Tests
             string actual = Encoding.UTF8.GetString(encoded);
             Assert.Equal(expected, actual);
         }
-        
+
         [Fact]
         public static void UrlEncodeToBytes_NoEncodingNeeded_ReturnsNewClonedArray()
         {
@@ -458,7 +463,7 @@ namespace System.Net.Tests
         [MemberData(nameof(HtmlDecode_TestData))]
         public static void HtmlDecode_TextWriterOutput(string value, string expected)
         {
-            if(value == null)
+            if (value == null)
                 expected = string.Empty;
             StringWriter output = new StringWriter(CultureInfo.InvariantCulture);
             WebUtility.HtmlDecode(value, output);
@@ -469,7 +474,7 @@ namespace System.Net.Tests
         [MemberData(nameof(HtmlEncode_TestData))]
         public static void HtmlEncode_TextWriterOutput(string value, string expected)
         {
-            if(value == null)
+            if (value == null)
                 expected = string.Empty;
             StringWriter output = new StringWriter(CultureInfo.InvariantCulture);
             WebUtility.HtmlEncode(value, output);

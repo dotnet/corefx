@@ -26,23 +26,29 @@ namespace System.ComponentModel.Composition
 
         internal static bool IsDefaultMetadataViewType(Type metadataViewType)
         {
-            Assumes.NotNull(metadataViewType);
+            if (metadataViewType == null)
+            {
+                throw new ArgumentNullException(nameof(metadataViewType));
+            }
 
             // Consider all types that IDictionary<string, object> derives from, such
-            // as ICollection<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>> 
+            // as ICollection<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>
             // and IEnumerable, as default metadata view
             return metadataViewType.IsAssignableFrom(DefaultMetadataViewType);
         }
 
         internal static bool IsDictionaryConstructorViewType(Type metadataViewType)
         {
-            Assumes.NotNull(metadataViewType);
+            if (metadataViewType == null)
+            {
+                throw new ArgumentNullException(nameof(metadataViewType));
+            }
 
             // Does the view type have a constructor that is a Dictionary<string, object>
             return metadataViewType.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
                                                     Type.DefaultBinder,
                                                     new Type[] { typeof(IDictionary<string, object>) },
-                                                    new ParameterModifier[0]) != null;
+                                                    Array.Empty<ParameterModifier>()) != null;
         }
 
         internal static Func<Export, object> CreateStronglyTypedLazyFactory(Type exportType, Type metadataViewType)
@@ -56,7 +62,12 @@ namespace System.ComponentModel.Composition
             {
                 genericMethod = _createStronglyTypedLazyOfT.MakeGenericMethod(exportType ?? ExportServices.DefaultExportedValueType);
             }
-            Assumes.NotNull(genericMethod);
+
+            if (genericMethod == null)
+            {
+                throw new ArgumentNullException(nameof(genericMethod));
+            }
+
             return (Func<Export, object>)Delegate.CreateDelegate(typeof(Func<Export, object>), genericMethod);
         }
 
@@ -65,7 +76,10 @@ namespace System.ComponentModel.Composition
             MethodInfo genericMethod = _createSemiStronglyTypedLazy.MakeGenericMethod(
                 exportType ?? ExportServices.DefaultExportedValueType,
                 metadataViewType ?? ExportServices.DefaultMetadataViewType);
-            Assumes.NotNull(genericMethod);
+            if (genericMethod == null)
+            {
+                throw new ArgumentNullException(nameof(genericMethod));
+            }
             return (Func<Export, Lazy<object, object>>)Delegate.CreateDelegate(typeof(Func<Export, Lazy<object, object>>), genericMethod);
         }
 
@@ -141,7 +155,7 @@ namespace System.ComponentModel.Composition
             bool succeeded = ContractServices.TryCast(typeof(T), exportedValue, out typedExportedValue);
             if (!succeeded)
             {
-                throw new CompositionContractMismatchException(string.Format(CultureInfo.CurrentCulture,
+                throw new CompositionContractMismatchException(SR.Format(
                     SR.ContractMismatch_ExportedValueCannotBeCastToT,
                     element.DisplayName,
                     typeof(T)));
@@ -176,7 +190,10 @@ namespace System.ComponentModel.Composition
                     break;
 
                 default:
-                    Assumes.IsTrue(actualCardinality == EnumerableCardinality.One);
+                    if (actualCardinality != EnumerableCardinality.One)
+                    {
+                        throw new Exception(SR.Diagnostic_InternalExceptionMessage);
+                    }
                     break;
 
             }

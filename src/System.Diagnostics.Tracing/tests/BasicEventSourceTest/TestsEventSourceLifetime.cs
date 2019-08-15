@@ -25,7 +25,6 @@ namespace BasicEventSourceTests
         /// </summary>
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // non-Windows EventSources don't have lifetime
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Test requires private reflection.")]
         public void Test_EventSource_Lifetime()
         {
             TestUtilities.CheckNoEventSourcesRunning("Start");
@@ -40,8 +39,8 @@ namespace BasicEventSourceTests
             GC.WaitForPendingFinalizers();
             GC.Collect();
 
-            Assert.Equal(null, wrEventSource.Target);
-            Assert.Equal(null, wrProvider.Target);
+            Assert.Null(wrEventSource.Target);
+            Assert.Null(wrProvider.Target);
             TestUtilities.CheckNoEventSourcesRunning("Stop");
         }
 
@@ -50,6 +49,10 @@ namespace BasicEventSourceTests
             using (var es = new LifetimeTestEventSource())
             {
                 FieldInfo field = es.GetType().GetTypeInfo().BaseType.GetField("m_provider", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                if (field == null)
+                {
+                    field = es.GetType().GetTypeInfo().BaseType.GetField("m_etwProvider", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                }
                 object provider = field.GetValue(es);
                 wrProvider.Target = provider;
                 wrEventSource.Target = es;

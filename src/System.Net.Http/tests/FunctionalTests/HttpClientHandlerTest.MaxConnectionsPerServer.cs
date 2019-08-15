@@ -9,16 +9,18 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "dotnet/corefx #20010")]
-    public abstract class HttpClientHandler_MaxConnectionsPerServer_Test : HttpClientTestBase
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP connection management behavior is different due to WinRT")]
+    public abstract class HttpClientHandler_MaxConnectionsPerServer_Test : HttpClientHandlerTestBase
     {
+        public HttpClientHandler_MaxConnectionsPerServer_Test(ITestOutputHelper output) : base(output) { }
+
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "MaxConnectionsPerServer either returns two or int.MaxValue depending if ctor of HttpClientHandlerTest executed first. Disabling cause of random xunit execution order.")]
         public void Default_ExpectedValue()
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
@@ -47,15 +49,7 @@ namespace System.Net.Http.Functional.Tests
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
             {
-                try
-                {
-                    handler.MaxConnectionsPerServer = validValue;
-                }
-                catch (PlatformNotSupportedException)
-                {
-                    // Some older libcurls used in some of our Linux CI systems don't support this
-                    Assert.True(RuntimeInformation.IsOSPlatform(OSPlatform.Linux));
-                }
+                handler.MaxConnectionsPerServer = validValue;
             }
         }
 
@@ -67,10 +61,11 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(3, 2, false)]
         [InlineData(3, 2, true)]
         [InlineData(3, 5, false)]
+        [OuterLoop("Uses external servers")]
         public async Task GetAsync_MaxLimited_ConcurrentCallsStillSucceed(int maxConnections, int numRequests, bool secure)
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 handler.MaxConnectionsPerServer = maxConnections;
                 await Task.WhenAll(
@@ -92,7 +87,7 @@ namespace System.Net.Http.Functional.Tests
             await LoopbackServer.CreateServerAsync(async (server, uri) =>
             {
                 using (HttpClientHandler handler = CreateHttpClientHandler())
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     handler.MaxConnectionsPerServer = 1;
 

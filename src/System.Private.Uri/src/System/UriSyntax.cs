@@ -5,7 +5,7 @@
 // This file utilizes partial class feature and contains
 // only internal implementation of UriParser type
 
-using System.Collections.Generic;
+using System.Collections;
 using System.Diagnostics;
 
 namespace System
@@ -47,7 +47,7 @@ namespace System
         CanonicalizeAsFilePath = 0x1000000, // remove/convert sequences /.../ /x../ /x./ dangerous for a DOS path
         UnEscapeDotsAndSlashes = 0x2000000, // additionally unescape dots and slashes before doing path compression
         AllowIdn = 0x4000000,    // IDN host conversion allowed
-        AllowIriParsing = 0x10000000,   // Iri parsing. String is normalized, bidi control 
+        AllowIriParsing = 0x10000000,   // Iri parsing. String is normalized, bidi control
                                         // characters are removed, unicode char limits are checked etc.
 
         //      KeepTailLWS             = 0x8000000,
@@ -58,47 +58,54 @@ namespace System
     //
     public abstract partial class UriParser
     {
-        private static readonly Dictionary<string, UriParser> s_table;
-        private static Dictionary<string, UriParser> s_tempTable;
+        // These are always available without paying hashtable lookup cost
+        // Note: see UpdateStaticSyntaxReference()
+        internal static readonly UriParser HttpUri = new BuiltInUriParser("http", 80, HttpSyntaxFlags);
+        internal static readonly UriParser HttpsUri = new BuiltInUriParser("https", 443, HttpUri._flags);
+        internal static readonly UriParser WsUri = new BuiltInUriParser("ws", 80, HttpSyntaxFlags);
+        internal static readonly UriParser WssUri = new BuiltInUriParser("wss", 443, HttpSyntaxFlags);
+        internal static readonly UriParser FtpUri = new BuiltInUriParser("ftp", 21, FtpSyntaxFlags);
+        internal static readonly UriParser FileUri = new BuiltInUriParser("file", NoDefaultPort, FileSyntaxFlags);
+        internal static readonly UriParser UnixFileUri = new BuiltInUriParser("file", NoDefaultPort, UnixFileSyntaxFlags);
+        internal static readonly UriParser GopherUri = new BuiltInUriParser("gopher", 70, GopherSyntaxFlags);
+        internal static readonly UriParser NntpUri = new BuiltInUriParser("nntp", 119, NntpSyntaxFlags);
+        internal static readonly UriParser NewsUri = new BuiltInUriParser("news", NoDefaultPort, NewsSyntaxFlags);
+        internal static readonly UriParser MailToUri = new BuiltInUriParser("mailto", 25, MailtoSyntaxFlags);
+        internal static readonly UriParser UuidUri = new BuiltInUriParser("uuid", NoDefaultPort, NewsUri._flags);
+        internal static readonly UriParser TelnetUri = new BuiltInUriParser("telnet", 23, TelnetSyntaxFlags);
+        internal static readonly UriParser LdapUri = new BuiltInUriParser("ldap", 389, LdapSyntaxFlags);
+        internal static readonly UriParser NetTcpUri = new BuiltInUriParser("net.tcp", 808, NetTcpSyntaxFlags);
+        internal static readonly UriParser NetPipeUri = new BuiltInUriParser("net.pipe", NoDefaultPort, NetPipeSyntaxFlags);
+        internal static readonly UriParser VsMacrosUri = new BuiltInUriParser("vsmacros", NoDefaultPort, VsmacrosSyntaxFlags);
+
+        private static readonly Hashtable s_table = new Hashtable(16) // Hashtable used instead of Dictionary<> for lock-free reads
+        {
+            { HttpUri.SchemeName, HttpUri }, // HTTP
+            { HttpsUri.SchemeName, HttpsUri }, // HTTPS cloned from HTTP
+            { WsUri.SchemeName, WsUri }, // WebSockets
+            { WssUri.SchemeName, WssUri }, // Secure WebSockets
+            { FtpUri.SchemeName, FtpUri }, //FTP
+            { FileUri.SchemeName, FileUri }, //FILE
+            { GopherUri.SchemeName, GopherUri }, //GOPHER
+            { NntpUri.SchemeName, NntpUri }, //NNTP
+            { NewsUri.SchemeName, NewsUri }, //NEWS
+            { MailToUri.SchemeName, MailToUri }, //MAILTO
+            { UuidUri.SchemeName, UuidUri }, //UUID cloned from NEWS
+            { TelnetUri.SchemeName, TelnetUri }, //TELNET
+            { LdapUri.SchemeName, LdapUri }, //LDAP
+            { NetTcpUri.SchemeName, NetTcpUri },
+            { NetPipeUri.SchemeName, NetPipeUri },
+            { VsMacrosUri.SchemeName, VsMacrosUri }, //VSMACROS
+        };
+        private static Hashtable s_tempTable = new Hashtable(c_InitialTableSize); // Hashtable used instead of Dictionary<> for lock-free reads
 
         private UriSyntaxFlags _flags;
-
-        // Some flags (specified in c_UpdatableFlags) besides being set in the ctor, can also be set at a later
-        // point. Such "updatable" flags can be set using SetUpdatableFlags(); if this method is called,
-        // the value specified in the ctor is ignored (i.e. for all c_UpdatableFlags the value in m_Flags is
-        // ignored), and the new value is used (i.e. for all c_UpdatableFlags the value in m_UpdatableFlags is used).
-        private volatile UriSyntaxFlags _updatableFlags;
-        private volatile bool _updatableFlagsUsed;
-
-        // The following flags can be updated at any time.
-        private const UriSyntaxFlags c_UpdatableFlags = UriSyntaxFlags.UnEscapeDotsAndSlashes;
 
         private int _port;
         private string _scheme;
 
         internal const int NoDefaultPort = -1;
         private const int c_InitialTableSize = 25;
-
-        // These are always available without paying hashtable lookup cost
-        // Note: see UpdateStaticSyntaxReference()
-        internal static UriParser HttpUri;
-        internal static UriParser HttpsUri;
-        internal static UriParser WsUri;
-        internal static UriParser WssUri;
-        internal static UriParser FtpUri;
-        internal static UriParser FileUri;
-        internal static UriParser UnixFileUri;
-        internal static UriParser GopherUri;
-        internal static UriParser NntpUri;
-        internal static UriParser NewsUri;
-        internal static UriParser MailToUri;
-        internal static UriParser UuidUri;
-        internal static UriParser TelnetUri;
-        internal static UriParser LdapUri;
-        internal static UriParser NetTcpUri;
-        internal static UriParser NetPipeUri;
-
-        internal static UriParser VsMacrosUri;
 
         internal static bool DontEnableStrictRFC3986ReservedCharacterSets
         {
@@ -118,65 +125,6 @@ namespace System
             {
                 return false;
             }
-        }
-
-        static UriParser()
-        {
-            s_table = new Dictionary<string, UriParser>(c_InitialTableSize);
-            s_tempTable = new Dictionary<string, UriParser>(c_InitialTableSize);
-
-            //Now we will call for the instance constructors that will interrupt this static one.
-
-            // Below we simulate calls into FetchSyntax() but avoid using lock() and other things redundant for a .cctor
-
-            HttpUri = new BuiltInUriParser("http", 80, HttpSyntaxFlags);
-            s_table[HttpUri.SchemeName] = HttpUri;                   //HTTP
-
-            HttpsUri = new BuiltInUriParser("https", 443, HttpUri._flags);
-            s_table[HttpsUri.SchemeName] = HttpsUri;                  //HTTPS cloned from HTTP
-
-            WsUri = new BuiltInUriParser("ws", 80, HttpSyntaxFlags);
-            s_table[WsUri.SchemeName] = WsUri;                   // WebSockets
-
-            WssUri = new BuiltInUriParser("wss", 443, HttpSyntaxFlags);
-            s_table[WssUri.SchemeName] = WssUri;                  // Secure WebSockets
-
-            FtpUri = new BuiltInUriParser("ftp", 21, FtpSyntaxFlags);
-            s_table[FtpUri.SchemeName] = FtpUri;                    //FTP
-
-            FileUri = new BuiltInUriParser("file", NoDefaultPort, s_fileSyntaxFlags);
-            UnixFileUri = new BuiltInUriParser("file", NoDefaultPort, s_unixFileSyntaxFlags);
-            s_table[FileUri.SchemeName] = FileUri;                   //FILE
-
-            GopherUri = new BuiltInUriParser("gopher", 70, GopherSyntaxFlags);
-            s_table[GopherUri.SchemeName] = GopherUri;                 //GOPHER
-
-            NntpUri = new BuiltInUriParser("nntp", 119, NntpSyntaxFlags);
-            s_table[NntpUri.SchemeName] = NntpUri;                   //NNTP
-
-            NewsUri = new BuiltInUriParser("news", NoDefaultPort, NewsSyntaxFlags);
-            s_table[NewsUri.SchemeName] = NewsUri;                   //NEWS
-
-            MailToUri = new BuiltInUriParser("mailto", 25, MailtoSyntaxFlags);
-            s_table[MailToUri.SchemeName] = MailToUri;                 //MAILTO
-
-            UuidUri = new BuiltInUriParser("uuid", NoDefaultPort, NewsUri._flags);
-            s_table[UuidUri.SchemeName] = UuidUri;                   //UUID cloned from NEWS
-
-            TelnetUri = new BuiltInUriParser("telnet", 23, TelnetSyntaxFlags);
-            s_table[TelnetUri.SchemeName] = TelnetUri;                 //TELNET
-
-            LdapUri = new BuiltInUriParser("ldap", 389, LdapSyntaxFlags);
-            s_table[LdapUri.SchemeName] = LdapUri;                   //LDAP
-
-            NetTcpUri = new BuiltInUriParser("net.tcp", 808, NetTcpSyntaxFlags);
-            s_table[NetTcpUri.SchemeName] = NetTcpUri;
-
-            NetPipeUri = new BuiltInUriParser("net.pipe", NoDefaultPort, NetPipeSyntaxFlags);
-            s_table[NetPipeUri.SchemeName] = NetPipeUri;
-
-            VsMacrosUri = new BuiltInUriParser("vsmacros", NoDefaultPort, VsmacrosSyntaxFlags);
-            s_table[VsMacrosUri.SchemeName] = VsMacrosUri;               //VSMACROS
         }
 
         private class BuiltInUriParser : UriParser
@@ -220,26 +168,7 @@ namespace System
 
         private bool IsFullMatch(UriSyntaxFlags flags, UriSyntaxFlags expected)
         {
-            // Return true, if masking the current set of flags with 'flags' equals 'expected'.
-            // Definition 'current set of flags': 
-            // a) if updatable flags were never set: m_Flags
-            // b) if updatable flags were set: set union between all flags in m_Flags which are not updatable
-            //    (i.e. not part of c_UpdatableFlags) and all flags in m_UpdatableFlags
-
-            UriSyntaxFlags mergedFlags;
-
-            // if none of the flags in 'flags' is an updatable flag, we ignore m_UpdatableFlags
-            if (((flags & c_UpdatableFlags) == 0) || !_updatableFlagsUsed)
-            {
-                mergedFlags = _flags;
-            }
-            else
-            {
-                // mask m_Flags to only use the flags not in c_UpdatableFlags
-                mergedFlags = (_flags & (~c_UpdatableFlags)) | _updatableFlags;
-            }
-
-            return (mergedFlags & flags) == expected;
+            return (_flags & flags) == expected;
         }
 
         //
@@ -255,44 +184,42 @@ namespace System
         {
             if (syntax.SchemeName.Length != 0)
                 throw new InvalidOperationException(SR.Format(SR.net_uri_NeedFreshParser, syntax.SchemeName));
- 
+
             lock (s_table)
             {
                 syntax._flags &= ~UriSyntaxFlags.V1_UnknownUri;
-                UriParser oldSyntax = null;
-                s_table.TryGetValue(lwrCaseSchemeName, out oldSyntax);
+                UriParser? oldSyntax = (UriParser?)s_table[lwrCaseSchemeName];
                 if (oldSyntax != null)
                     throw new InvalidOperationException(SR.Format(SR.net_uri_AlreadyRegistered, oldSyntax.SchemeName));
-                
-                s_tempTable.TryGetValue(syntax.SchemeName, out oldSyntax);
+
+                oldSyntax = (UriParser?)s_tempTable[syntax.SchemeName];
                 if (oldSyntax != null)
                 {
                     // optimization on schemeName, will try to keep the first reference
                     lwrCaseSchemeName = oldSyntax._scheme;
                     s_tempTable.Remove(lwrCaseSchemeName);
                 }
- 
+
                 syntax.OnRegister(lwrCaseSchemeName, defaultPort);
                 syntax._scheme = lwrCaseSchemeName;
                 syntax.CheckSetIsSimpleFlag();
                 syntax._port = defaultPort;
- 
+
                 s_table[syntax.SchemeName] = syntax;
             }
-        } 
+        }
 
         private const int c_MaxCapacity = 512;
         //schemeStr must be in lower case!
         internal static UriParser FindOrFetchAsUnknownV1Syntax(string lwrCaseScheme)
         {
             // check may be other thread just added one
-            UriParser syntax = null;
-            s_table.TryGetValue(lwrCaseScheme, out syntax);
+            UriParser? syntax = (UriParser?)s_table[lwrCaseScheme];
             if (syntax != null)
             {
                 return syntax;
             }
-            s_tempTable.TryGetValue(lwrCaseScheme, out syntax);
+            syntax = (UriParser?)s_tempTable[lwrCaseScheme];
             if (syntax != null)
             {
                 return syntax;
@@ -301,7 +228,7 @@ namespace System
             {
                 if (s_tempTable.Count >= c_MaxCapacity)
                 {
-                    s_tempTable = new Dictionary<string, UriParser>(c_InitialTableSize);
+                    s_tempTable = new Hashtable(c_InitialTableSize);
                 }
                 syntax = new BuiltInUriParser(lwrCaseScheme, NoDefaultPort, UnknownV1SyntaxFlags);
                 s_tempTable[lwrCaseScheme] = syntax;
@@ -309,16 +236,8 @@ namespace System
             }
         }
 
-        internal static UriParser GetSyntax(string lwrCaseScheme)
-        {
-            UriParser ret = null;
-            s_table.TryGetValue(lwrCaseScheme, out ret);
-            if (ret == null)
-            {
-                s_tempTable.TryGetValue(lwrCaseScheme, out ret);
-            }
-            return ret;
-        }
+        internal static UriParser? GetSyntax(string lwrCaseScheme) =>
+            (UriParser?)(s_table[lwrCaseScheme] ?? s_tempTable[lwrCaseScheme]);
 
         //
         // Builtin and User Simple syntaxes do not need custom validation/parsing (i.e. virtual method calls),
@@ -334,15 +253,15 @@ namespace System
         internal void CheckSetIsSimpleFlag()
         {
             Type type  = this.GetType();
- 
-            if (    type == typeof(GenericUriParser)     
-                ||  type == typeof(HttpStyleUriParser)   
-                ||  type == typeof(FtpStyleUriParser)   
-                ||  type == typeof(FileStyleUriParser)   
-                ||  type == typeof(NewsStyleUriParser)   
-                ||  type == typeof(GopherStyleUriParser) 
-                ||  type == typeof(NetPipeStyleUriParser) 
-                ||  type == typeof(NetTcpStyleUriParser) 
+
+            if (    type == typeof(GenericUriParser)
+                ||  type == typeof(HttpStyleUriParser)
+                ||  type == typeof(FtpStyleUriParser)
+                ||  type == typeof(FileStyleUriParser)
+                ||  type == typeof(NewsStyleUriParser)
+                ||  type == typeof(GopherStyleUriParser)
+                ||  type == typeof(NetPipeStyleUriParser)
+                ||  type == typeof(NetTcpStyleUriParser)
                 ||  type == typeof(LdapStyleUriParser)
                 )
             {
@@ -351,22 +270,7 @@ namespace System
         }
 
         //
-        // This method is used to update flags. The scenario where this is needed is when the user specifies
-        // flags in the config file. The config file is read after UriParser instances were created.
-        //
-        internal void SetUpdatableFlags(UriSyntaxFlags flags)
-        {
-            Debug.Assert(!_updatableFlagsUsed,
-                "SetUpdatableFlags() already called. It can only be called once per parser.");
-            Debug.Assert((flags & (~c_UpdatableFlags)) == 0, "Only updatable flags can be set.");
-
-            // No locks necessary. Reordering won't happen due to volatile.
-            _updatableFlags = flags;
-            _updatableFlagsUsed = true;
-        }
-
-        //
-        // These are simple internal wrappers that will call virtual protected methods
+        // These are simple internal wrappers that will call protected virtual methods
         // (to avoid "protected internal" signatures in the public docs)
         //
         internal UriParser InternalOnNewUri()
@@ -381,12 +285,12 @@ namespace System
             return effectiveParser;
         }
 
-        internal void InternalValidate(Uri thisUri, out UriFormatException parsingError)
+        internal void InternalValidate(Uri thisUri, out UriFormatException? parsingError)
         {
             InitializeAndValidate(thisUri, out parsingError);
         }
 
-        internal string InternalResolve(Uri thisBaseUri, Uri uriLink, out UriFormatException parsingError)
+        internal string? InternalResolve(Uri thisBaseUri, Uri uriLink, out UriFormatException? parsingError)
         {
             return Resolve(thisBaseUri, uriLink, out parsingError);
         }
@@ -468,7 +372,7 @@ namespace System
                                         UriSyntaxFlags.AllowIdn |
                                         UriSyntaxFlags.AllowIriParsing;
 
-        private static readonly UriSyntaxFlags s_fileSyntaxFlags =
+        private const UriSyntaxFlags FileSyntaxFlags =
                                         UriSyntaxFlags.MustHaveAuthority |
                                         //
                                         UriSyntaxFlags.AllowEmptyHost |
@@ -491,8 +395,8 @@ namespace System
                                         UriSyntaxFlags.AllowIdn |
                                         UriSyntaxFlags.AllowIriParsing;
 
-        private static readonly UriSyntaxFlags s_unixFileSyntaxFlags =
-                                        s_fileSyntaxFlags & ~UriSyntaxFlags.ConvertPathSlashes;
+        private const UriSyntaxFlags UnixFileSyntaxFlags =
+                                        FileSyntaxFlags & ~UriSyntaxFlags.ConvertPathSlashes;
 
         private const UriSyntaxFlags VsmacrosSyntaxFlags =
                                         UriSyntaxFlags.MustHaveAuthority |

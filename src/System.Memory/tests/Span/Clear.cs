@@ -66,7 +66,7 @@ namespace System.SpanTests
         }
 
         [Fact]
-        public unsafe static void ClearByteUnalignedFixed()
+        public static unsafe void ClearByteUnalignedFixed()
         {
             const byte initial = 5;
             const int length = 32;
@@ -227,7 +227,7 @@ namespace System.SpanTests
         [Fact]
         public static void ClearEnumType()
         {
-            TestEnum[] actual = { TestEnum.e0, TestEnum.e1, TestEnum.e2 };
+            TestEnum[] actual = { TestEnum.E0, TestEnum.E1, TestEnum.E2 };
             TestEnum[] expected = { default, default, default };
 
             var span = new Span<TestEnum>(actual);
@@ -259,7 +259,7 @@ namespace System.SpanTests
         [Fact]
         [OuterLoop]
         [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
-        unsafe static void ClearLongerThanUintMaxValueBytes()
+        static unsafe void ClearLongerThanUintMaxValueBytes()
         {
             if (sizeof(IntPtr) == sizeof(long))
             {

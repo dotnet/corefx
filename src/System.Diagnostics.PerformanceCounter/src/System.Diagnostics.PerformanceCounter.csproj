@@ -1,25 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{9758106C-5D4E-475D-B5E7-B7ABC46B1DDA}</ProjectGuid>
     <RootNamespace>System.Diagnostics.PerformanceCounter</RootNamespace>
     <AssemblyName>System.Diagnostics.PerformanceCounter</AssemblyName>
-    <DefineConstants>$(DefineConstants);FEATURE_REGISTRY</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netfx'">true</IsPartialFacadeAssembly>
+    <IsPartialFacadeAssembly Condition="'$(TargetsNetFx)' == 'true'">true</IsPartialFacadeAssembly>
     <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetGroup)' == 'netstandard'">SR.PlatformNotSupported_PerfCounters</GeneratePlatformNotSupportedAssemblyMessage>
     <UWPCompatible>false</UWPCompatible>
+    <Configurations>net461-Debug;net461-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netcoreapp2.0-Windows_NT-Debug;netcoreapp2.0-Windows_NT-Release;netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp2.0-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp2.0-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup Condition="$(TargetGroup.StartsWith('netcoreapp'))">
     <Compile Include="System\Diagnostics\DiagnosticsConfiguration.cs" />
     <Compile Include="System\Diagnostics\CounterCreationData.cs" />
@@ -40,13 +30,34 @@
     <Compile Include="System\Diagnostics\PerformanceCounterLib.cs" />
     <Compile Include="System\Diagnostics\PerformanceCounterManager.cs" />
     <Compile Include="System\Diagnostics\PerformanceCounterType.cs" />
+    <Compile Include="System\Diagnostics\PerformanceDataRegistryKey.cs" />
     <Compile Include="System\Diagnostics\SharedPerformanceCounter.cs" />
-    <Compile Include="System\Diagnostics\SharedUtils.cs" />
     <Compile Include="System\Diagnostics\SystemDiagnosticsSection.cs" />
     <Compile Include="System\Diagnostics\TraceInternal.cs" />
     <Compile Include="misc\EnvironmentHelpers.cs" />
+    <Compile Include="System\Diagnostics\PerformanceData\CounterSet.cs" />
+    <Compile Include="System\Diagnostics\PerformanceData\CounterSetInstance.cs" />
+    <Compile Include="System\Diagnostics\PerformanceData\CounterSetInstanceCounterDataSet.cs" />
+    <Compile Include="System\Diagnostics\PerformanceData\CounterSetInstanceType.cs" />
+    <Compile Include="System\Diagnostics\PerformanceData\CounterType.cs" />
+    <Compile Include="System\Diagnostics\PerformanceData\PerfProviderCollection.cs" />
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Interop.BOOL.cs">
       <Link>Common\CoreLib\Interop\Windows\Interop.BOOL.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.FormatMessage.cs">
+      <Link>Common\CoreLib\Interop\Windows\Interop.FormatMessage.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Advapi32\Interop.RegCloseKey.cs">
+      <Link>Common\CoreLib\Interop\Windows\Interop.RegCloseKey.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Advapi32\Interop.RegQueryValueEx.cs">
+      <Link>Common\CoreLib\Interop\Windows\Advapi32\Interop.RegQueryValueEx.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\Microsoft\Win32\SafeHandles\SafeRegistryHandle.cs">
+      <Link>Common\CoreLib\Microsoft\Win32\SafeHandles\SafeRegistryHandle.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\Microsoft\Win32\SafeHandles\SafeRegistryHandle.Windows.cs">
+      <Link>Common\CoreLib\Microsoft\Win32\SafeHandles\SafeRegistryHandle.Windows.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Errors.cs">
       <Link>Common\Interop\Windows\Interop.Errors.cs</Link>
@@ -54,92 +65,101 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.ConvertStringSecurityDescriptorToSecurityDescriptor.cs">
-      <Link>Common\Interop\Windows\advapi32\Interop.ConvertStringSecurityDescriptorToSecurityDescriptor.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.ConvertStringSecurityDescriptorToSecurityDescriptor.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.ConvertStringSecurityDescriptorToSecurityDescriptor.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.GetTokenInformation.cs">
-      <Link>Common\Interop\Windows\advapi32\Interop.GetTokenInformation.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.GetTokenInformation.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.GetTokenInformation.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.PERF_INFO.cs">
-      <Link>Common\Interop\Windows\advapi32\Interop.PERF_INFO.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.PERF_INFO.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.PERF_INFO.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.ProcessOptions.cs">
-      <Link>Common\Interop\Windows\advapi32\Interop.ProcessOptions.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.ProcessOptions.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.ProcessOptions.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.TOKEN_INFORMATION_CLASS.cs">
-      <Link>Common\Interop\Windows\advapi32\Interop.TOKEN_INFORMATION_CLASS.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.RegConnectRegistry.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.RegConnectRegistry.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CreateFileMapping.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.CreateFileMapping.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.TOKEN_INFORMATION_CLASS.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.TOKEN_INFORMATION_CLASS.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.DuplicateHandle_SafeProcessHandle.cs">
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.Constants.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.Constants.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.CreateFileMapping.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.CreateFileMapping.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.DuplicateHandle_SafeProcessHandle.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.DuplicateHandle.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FreeLibrary.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.FreeLibrary.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.FreeLibrary.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.FreeLibrary.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetComputerName.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.GetComputerName.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.GetComputerName.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.GetComputerName.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetCurrentProcess_SafeProcessHandle.cs">
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.GetCurrentProcess_SafeProcessHandle.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.GetCurrentProcess.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetCurrentProcessId.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.GetCurrentProcessId.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.GetCurrentProcessId.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.GetCurrentProcessId.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetProcessTimes.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.GetProcessTimes.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.GetProcessTimes.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.GetProcessTimes.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.HandleOptions.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.HandleOptions.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.HandleOptions.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.HandleOptions.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.LoadLibrary.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.LoadLibrary.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.LoadLibrary.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.LoadLibrary.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.LocalAlloc.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.LocalAlloc.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.LocalAlloc.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.LocalAlloc.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.LocalAlloc.Constants.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.LocalAlloc.Constants.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.LocalAlloc.Constants.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.LocalAlloc.Constants.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.LocalFree.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.LocalFree.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.LocalFree.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.LocalFree.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.MapViewOfFile.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.MapViewOfFile.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.MapViewOfFile.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.MapViewOfFile.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.MemOptions.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.MemOptions.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.MemOptions.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.MemOptions.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.MEMORY_BASIC_INFO.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.MEMORY_BASIC_INFO.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.MEMORY_BASIC_INFO.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.MEMORY_BASIC_INFO.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.OpenFileMapping.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.OpenFileMapping.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.OpenFileMapping.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.OpenFileMapping.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.OpenProcess.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.OpenProcess.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.OpenProcess.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.OpenProcess.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.PerformanceCounterOptions.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.PerformanceCounterOptions.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.PerformanceCounterOptions.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.PerformanceCounterOptions.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.ProcessWaitHandle.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.ProcessWaitHandle.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.ProcessWaitHandle.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.ProcessWaitHandle.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\kernel32\Interop.SECURITY_ATTRIBUTES.cs">
-      <Link>Common\CoreLib\Interop\Windows\kernel32\Interop.SECURITY_ATTRIBUTES.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.SECURITY_ATTRIBUTES.cs">
+      <Link>Common\CoreLib\Interop\Windows\Kernel32\Interop.SECURITY_ATTRIBUTES.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.UnmapViewOfFile.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.UnmapViewOfFile.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.UnmapViewOfFile.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.UnmapViewOfFile.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.VirtualQuery.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.VirtualQuery.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.VirtualQuery.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.VirtualQuery.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.WaitForSingleObject.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.WaitForSingleObject.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.WaitForSingleObject.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.WaitForSingleObject.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\perfcounter\Interop.FormatFromRawValue.cs">
-      <Link>Common\Interop\Windows\perfcounter\Interop.FormatFromRawValue.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\PerfCounter\Interop.FormatFromRawValue.cs">
+      <Link>Common\Interop\Windows\PerfCounter\Interop.FormatFromRawValue.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\PerfCounter\Interop.PerformanceData.cs">
+      <Link>Common\Interop\Windows\PerfCounter\Interop.PerformanceData.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeLocalAllocHandle.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeLocalAllocHandle.cs</Link>
@@ -147,14 +167,22 @@
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeLocalMemHandle.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeLocalMemHandle.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafePerfProviderHandle.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafePerfProviderHandle.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Diagnostics\NetFrameworkUtils.cs">
+      <Link>Common\System\Diagnostics\NetFrameworkUtils.cs</Link>
+    </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
+    <Reference Include="System.Core" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
+  <ItemGroup Condition="'$(TargetsNetFx)' != 'true'">
     <Reference Include="Microsoft.Win32.Registry" />
     <Reference Include="Microsoft.Win32.Primitives" />
+    <Reference Include="System.Buffers" />
     <Reference Include="System.Collections" />
     <Reference Include="System.Collections.NonGeneric" />
     <Reference Include="System.ComponentModel.Primitives" />
@@ -176,5 +204,4 @@
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Thread" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -1,27 +1,16 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{1D422B1D-D7C4-41B9-862D-EB3D98DF37DE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.Net.Http</AssemblyName>
     <WindowsRID>win</WindowsRID>
     <!-- Suppress warnings for type conflicts between SR in partial facade and mscorlib -->
-    <NoWarn>$(NoWarn);0436</NoWarn>
+    <NoWarn>$(NoWarn);0436;CS1573</NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>$(DefineConstants);HTTP_DLL</DefineConstants>
-    <ILLinkClearInitLocals>true</ILLinkClearInitLocals>
+    <Configurations>netcoreapp-OSX-Debug;netcoreapp-OSX-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-OSX-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-OSX-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(TargetGroup)' == 'uap'">
-    <DefineConstants>$(DefineConstants);uap</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetsOSX)' == 'true' ">
@@ -100,6 +89,11 @@
     <Compile Include="System\Net\Http\Headers\UriHeaderParser.cs" />
     <Compile Include="System\Net\Http\Headers\ViaHeaderValue.cs" />
     <Compile Include="System\Net\Http\Headers\WarningHeaderValue.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\HeaderField.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\HPackEncoder.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\IntegerEncoder.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\StaticTable.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\SystemProxyInfo.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\IO\StreamHelpers.CopyValidation.cs">
       <Link>Common\CoreLib\System\IO\StreamHelpers.CopyValidation.cs</Link>
     </Compile>
@@ -118,9 +112,19 @@
     <Compile Include="$(CommonPath)\System\Net\Logging\NetEventSource.Common.cs">
       <Link>Common\System\Net\Logging\NetEventSource.Common.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Net\HttpDateParser.cs">
+      <Link>Common\System\Net\HttpDateParser.cs</Link>
+    </Compile>
   </ItemGroup>
   <!-- SocketsHttpHandler implementation -->
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\DynamicTable.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\HPackDecoder.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\HPackDecodingException.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\Huffman.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\HuffmanDecodingException.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\IntegerDecoder.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\ArrayBuffer.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\AuthenticationHelper.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\AuthenticationHelper.Digest.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\AuthenticationHelper.NtAuth.cs" />
@@ -132,25 +136,39 @@
     <Compile Include="System\Net\Http\SocketsHttpHandler\ContentLengthReadStream.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\ContentLengthWriteStream.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\CookieHelper.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\CreditManager.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\DecompressionHandler.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\EmptyReadStream.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\ExposedSocketNetworkStream.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\Http2Connection.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\Http2ConnectionException.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\Http2ProtocolErrorCode.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\Http2ProtocolException.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\Http2Stream.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\Http2StreamException.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HttpAuthenticatedConnectionHandler.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HttpBaseStream.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HttpConnection.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HttpConnectionBase.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HttpConnectionHandler.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HttpConnectionKind.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HttpConnectionPool.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HttpConnectionPoolManager.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HttpConnectionResponseContent.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HttpConnectionSettings.cs" />
-    <Compile Include="System\Net\Http\SocketsHttpHandler\HttpContentDuplexStream.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HttpContentReadStream.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HttpContentStream.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HttpContentWriteStream.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\IHttpTrace.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\SocketsHttpHandler.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\RawConnectionStream.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\RedirectHandler.cs" />
-    <Compile Include="$(CommonPath)\System\Collections\Concurrent\ConcurrentQueue_Segment.cs">
-      <Link>Common\System\Collections\Concurrent\ConcurrentQueue_Segment.cs</Link>
+    <Compile Include="System\Net\Http\SocketsHttpHandler\TaskCompletionSourceWithCancellation.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\Collections\Concurrent\ConcurrentQueueSegment.cs">
+      <Link>Common\CoreLib\System\Collections\Concurrent\ConcurrentQueueSegment.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Internal\Padding.cs">
+      <Link>Common\Internal\Padding.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\NTAuthentication.Common.cs">
       <Link>Common\System\Net\NTAuthentication.Common.cs</Link>
@@ -166,12 +184,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\SecurityStatusPal.cs">
       <Link>Common\System\Net\SecurityStatusPal.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\Security\SecurityBuffer.cs">
-      <Link>Common\System\Net\Security\SecurityBuffer.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\Security\SecurityBufferType.cs">
-      <Link>Common\System\Net\Security\SecurityBufferType.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\Security\SSPIHandleCache.cs">
       <Link>Common\System\Net\Security\SSPIHandleCache.cs</Link>
@@ -209,8 +221,8 @@
   </ItemGroup>
   <!-- SocketsHttpHandler platform parts -->
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' And '$(TargetGroup)' == 'netcoreapp'">
-    <Compile Include="System\Net\Http\SocketsHttpHandler\SystemProxyInfo.Unix.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HttpEnvironmentProxy.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HttpEnvironmentProxy.Unix.cs" />
     <Compile Include="$(CommonPath)\System\Net\ContextAwareResult.Unix.cs">
       <Link>Common\System\Net\ContextAwareResult.Unix.cs</Link>
     </Compile>
@@ -235,8 +247,14 @@
     <Compile Include="$(CommonPath)\System\Net\Security\Unix\SafeFreeNegoCredentials.cs">
       <Link>Common\System\Net\Security\Unix\SafeFreeNegoCredentials.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Net\Security\Unix\SecChannelBindings.cs">
+      <Link>Common\System\Net\Security\Unix\SecChannelBindings.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Security.Native\Interop.NetSecurityNative.cs">
       <Link>Common\Interop\Unix\System.Net.Security.Native\Interop.NetSecurityNative.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Security.Native\Interop.NetSecurityNative.IsNtlmInstalled.cs">
+      <Link>Common\Interop\Unix\System.Net.Security.Native\Interop.NetSecurityNative.IsNtlmInstalled.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Security.Native\Interop.GssBuffer.cs">
       <Link>Common\Interop\Unix\System.Net.Security.Native\Interop.GssBuffer.cs</Link>
@@ -245,11 +263,64 @@
       <Link>Common\System\Net\Security\Unix\SafeDeleteNegoContext.cs</Link>
     </Compile>
   </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' And '$(TargetsOSX)' != 'true' And '$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HttpNoProxy.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\SystemProxyInfo.Unix.cs" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsOSX)' == 'true' And '$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="System\Net\Http\SocketsHttpHandler\SystemProxyInfo.OSX.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\MacProxy.cs" />
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.CoreFoundation.cs">
+      <Link>Common\Interop\OSX\Interop.CoreFoundation.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.CoreFoundation.CFArray.cs">
+      <Link>Common\Interop\OSX\Interop.CoreFoundation.CFArray.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.CoreFoundation.CFData.cs">
+      <Link>Common\Interop\OSX\Interop.CoreFoundation.CFData.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.CoreFoundation.CFDictionary.cs">
+      <Link>Common\Interop\OSX\Interop.CoreFoundation.CFDictionary.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.CoreFoundation.CFProxy.cs">
+      <Link>Common\Interop\OSX\Interop.CoreFoundation.CFProxy.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.CoreFoundation.CFUrl.cs">
+      <Link>Common\Interop\OSX\Interop.CoreFoundation.CFUrl.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.CoreFoundation.CFString.cs">
+      <Link>Common\Interop\OSX\Interop.CoreFoundation.CFString.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.CoreFoundation.CFNumber.cs">
+      <Link>Common\Interop\OSX\Interop.CoreFoundation.CFString.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.CoreFoundation.CFError.cs">
+      <Link>Common\Interop\OSX\Interop.CoreFoundation.CFError.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.RunLoop.cs">
+      <Link>Common\Interop\OSX\Interop.RunLoop.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.Libraries.cs">
+      <Link>Common\Interop\OSX\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeCreateHandle.OSX.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafeCreateHandle.OSX.cs</Link>
+    </Compile>
+  </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' == 'netcoreapp'">
     <Compile Include="System\Net\Http\SocketsHttpHandler\SystemProxyInfo.Windows.cs" />
-    <Compile Include="System\Net\Http\SocketsHttpHandler\HttpSystemProxy.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HttpEnvironmentProxy.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HttpEnvironmentProxy.Windows.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HttpNoProxy.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HttpWindowsProxy.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\SChannel\Interop.SecPkgContext_ApplicationProtocol.cs">
       <Link>Common\Interop\Windows\SChannel\Interop.SecPkgContext_ApplicationProtocol.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\Security\SecurityBuffer.Windows.cs">
+      <Link>Common\System\Net\Security\SecurityBuffer.Windows.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\Security\SecurityBufferType.Windows.cs">
+      <Link>Common\System\Net\Security\SecurityBufferType.Windows.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\Security\SecurityContextTokenHandle.cs">
       <Link>Common\System\Net\Security\SecurityContextTokenHandle.cs</Link>
@@ -269,8 +340,8 @@
     <Compile Include="$(CommonPath)\System\Net\Security\NetEventSource.Security.Windows.cs">
       <Link>Common\System\Net\Security\NetEventSource.Security.Windows.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\sspicli\SecPkgContext_Bindings.cs">
-      <Link>Common\Interop\Windows\sspicli\SecPkgContext_Bindings.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\SecPkgContext_Bindings.cs">
+      <Link>Common\Interop\Windows\SspiCli\SecPkgContext_Bindings.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\SChannel\Interop.SECURITY_STATUS.cs">
       <Link>Common\Interop\Windows\SChannel\Interop.SECURITY_STATUS.cs</Link>
@@ -278,50 +349,53 @@
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.CloseHandle.cs">
       <Link>Common\CoreLib\Interop\Windows\Kernel32\Interop.CloseHandle.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\sspicli\SecPkgContext_StreamSizes.cs">
-      <Link>Common\Interop\Windows\sspicli\SecPkgContext_StreamSizes.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\SecPkgContext_StreamSizes.cs">
+      <Link>Common\Interop\Windows\SspiCli\SecPkgContext_StreamSizes.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\sspicli\SecPkgContext_NegotiationInfoW.cs">
-      <Link>Common\Interop\Windows\sspicli\SecPkgContext_NegotiationInfoW.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\SecPkgContext_NegotiationInfoW.cs">
+      <Link>Common\Interop\Windows\SspiCli\SecPkgContext_NegotiationInfoW.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\sspicli\NegotiationInfoClass.cs">
-      <Link>Common\Interop\Windows\sspicli\NegotiationInfoClass.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\NegotiationInfoClass.cs">
+      <Link>Common\Interop\Windows\SspiCli\NegotiationInfoClass.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\SChannel\SecPkgContext_ConnectionInfo.cs">
       <Link>Common\Interop\Windows\SChannel\SecPkgContext_ConnectionInfo.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\sspicli\SSPISecureChannelType.cs">
-      <Link>Common\Interop\Windows\sspicli\SSPISecureChannelType.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\SChannel\SecPkgContext_CipherInfo.cs">
+      <Link>Common\Interop\Windows\SChannel\SecPkgContext_CipherInfo.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\sspicli\SSPIInterface.cs">
-      <Link>Common\Interop\Windows\sspicli\SSPIInterface.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\SSPISecureChannelType.cs">
+      <Link>Common\Interop\Windows\SspiCli\SSPISecureChannelType.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\sspicli\SSPIAuthType.cs">
-      <Link>Common\Interop\Windows\sspicli\SSPIAuthType.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\ISSPIInterface.cs">
+      <Link>Common\Interop\Windows\SspiCli\ISSPIInterface.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\sspicli\SecurityPackageInfoClass.cs">
-      <Link>Common\Interop\Windows\sspicli\SecurityPackageInfoClass.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\SSPIAuthType.cs">
+      <Link>Common\Interop\Windows\SspiCli\SSPIAuthType.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\sspicli\SecurityPackageInfo.cs">
-      <Link>Common\Interop\Windows\sspicli\SecurityPackageInfo.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\SecurityPackageInfoClass.cs">
+      <Link>Common\Interop\Windows\SspiCli\SecurityPackageInfoClass.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\sspicli\SecPkgContext_Sizes.cs">
-      <Link>Common\Interop\Windows\sspicli\SecPkgContext_Sizes.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\SecurityPackageInfo.cs">
+      <Link>Common\Interop\Windows\SspiCli\SecurityPackageInfo.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\sspicli\SafeDeleteContext.cs">
-      <Link>Common\Interop\Windows\sspicli\SafeDeleteContext.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\SecPkgContext_Sizes.cs">
+      <Link>Common\Interop\Windows\SspiCli\SecPkgContext_Sizes.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\sspicli\GlobalSSPI.cs">
-      <Link>Common\Interop\Windows\sspicli\GlobalSSPI.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\SafeDeleteContext.cs">
+      <Link>Common\Interop\Windows\SspiCli\SafeDeleteContext.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\sspicli\Interop.SSPI.cs">
-      <Link>Common\Interop\Windows\sspicli\Interop.SSPI.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\GlobalSSPI.cs">
+      <Link>Common\Interop\Windows\SspiCli\GlobalSSPI.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\sspicli\SecuritySafeHandles.cs">
-      <Link>Common\Interop\Windows\sspicli\SecuritySafeHandles.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\Interop.SSPI.cs">
+      <Link>Common\Interop\Windows\SspiCli\Interop.SSPI.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\sspicli\SSPIWrapper.cs">
-      <Link>Common\Interop\Windows\sspicli\SSPIWrapper.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\SecuritySafeHandles.cs">
+      <Link>Common\Interop\Windows\SspiCli\SecuritySafeHandles.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\SSPIWrapper.cs">
+      <Link>Common\Interop\Windows\SspiCli\SSPIWrapper.cs</Link>
     </Compile>
   </ItemGroup>
   <!-- Common -->
@@ -497,6 +571,9 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.Crypto.cs">
       <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.Crypto.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.OpenSslVersion.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.OpenSslVersion.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.Ssl.cs">
       <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.Ssl.cs</Link>
     </Compile>
@@ -526,9 +603,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeX509Handles.Unix.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeX509Handles.Unix.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeX509NameHandle.Unix.cs">
-      <Link>Common\Microsoft\Win32\SafeHandles\SafeX509NameHandle.Unix.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\X509ExtensionSafeHandles.Unix.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\X509ExtensionSafeHandles.Unix.cs</Link>
@@ -587,7 +661,11 @@
     <Compile Include="uap\System\Net\CookieHelper.cs" />
     <Compile Include="uap\System\Net\HttpHandlerToFilter.cs" />
     <Compile Include="System\Net\Http\HttpClientHandler.Core.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\SystemProxyInfo.uap.cs" />
     <Compile Include="uap\System\Net\HttpClientHandler.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Reference Include="System.Net.NameResolution" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'uap'">
     <Reference Include="Microsoft.Win32.Primitives" />
@@ -615,7 +693,6 @@
     <Reference Include="System.Security.Cryptography.Algorithms" />
     <Reference Include="System.Security.Cryptography.Csp" />
     <Reference Include="System.Security.Cryptography.Encoding" />
-    <Reference Include="System.Security.Cryptography.OpenSsl" />
     <Reference Include="System.Security.Cryptography.Primitives" />
     <Reference Include="System.Security.Cryptography.X509Certificates" />
     <Reference Include="System.Security.Principal.Windows" />
@@ -624,16 +701,20 @@
     <Reference Include="System.Text.RegularExpressions" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Thread" />
+    <Reference Include="System.Threading.ThreadPool" />
     <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Threading.Tasks.Extensions" />
     <Reference Include="System.Threading.Timer" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Reference Include="System.IO.Compression.Brotli" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
+    <Reference Include="System.Diagnostics.StackTrace" />
     <Reference Include="System.IO.FileSystem" />
     <Reference Include="System.Security.Cryptography.Algorithms" />
     <Reference Include="System.Security.Cryptography.Encoding" />
+    <Reference Include="System.Security.Cryptography.OpenSsl" />
     <Reference Include="System.Security.Cryptography.Primitives" />
   </ItemGroup>
-  <ItemGroup />
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

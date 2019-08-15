@@ -11,7 +11,7 @@ namespace System.Net
 {
     internal class NetworkStreamWrapper : Stream
     {
-        private TcpClient _client;
+        private readonly TcpClient _client;
         private NetworkStream _networkStream;
 
         internal NetworkStreamWrapper(TcpClient client)
@@ -175,7 +175,7 @@ namespace System.Net
             _client.Dispose();
         }
 
-        public override IAsyncResult BeginRead(byte[] buffer, int offset, int size, AsyncCallback callback, Object state)
+        public override IAsyncResult BeginRead(byte[] buffer, int offset, int size, AsyncCallback callback, object state)
         {
             return _networkStream.BeginRead(buffer, offset, size, callback, state);
         }
@@ -190,7 +190,7 @@ namespace System.Net
             return _networkStream.ReadAsync(buffer, offset, count, cancellationToken);
         }
 
-        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int size, AsyncCallback callback, Object state)
+        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int size, AsyncCallback callback, object state)
         {
             return _networkStream.BeginWrite(buffer, offset, size, callback, state);
         }
@@ -227,5 +227,3 @@ namespace System.Net
         }
     }
 } // System.Net
-
-

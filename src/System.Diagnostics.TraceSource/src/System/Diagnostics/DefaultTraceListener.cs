@@ -19,13 +19,12 @@ namespace System.Diagnostics
     /// </devdoc>
     public class DefaultTraceListener : TraceListener
     {
-        private const int InternalWriteSize = 16384;
-        private bool _assertUIEnabled; 
+        private bool _assertUIEnabled;
         private bool _settingsInitialized;
         private string _logFileName;
 
         /// <devdoc>
-        /// <para>Initializes a new instance of the <see cref='System.Diagnostics.DefaultTraceListener'/> class with 
+        /// <para>Initializes a new instance of the <see cref='System.Diagnostics.DefaultTraceListener'/> class with
         ///    Default as its <see cref='System.Diagnostics.TraceListener.Name'/>.</para>
         /// </devdoc>
         public DefaultTraceListener()
@@ -33,31 +32,31 @@ namespace System.Diagnostics
         {
         }
 
-        public bool AssertUiEnabled 
+        public bool AssertUiEnabled
         {
-            get 
-            { 
+            get
+            {
                 if (!_settingsInitialized) InitializeSettings();
-                return _assertUIEnabled; 
+                return _assertUIEnabled;
             }
-            set 
-            { 
+            set
+            {
                 if (!_settingsInitialized) InitializeSettings();
-                _assertUIEnabled = value; 
+                _assertUIEnabled = value;
             }
         }
 
-        public string LogFileName 
+        public string LogFileName
         {
-            get 
-            { 
+            get
+            {
                 if (!_settingsInitialized) InitializeSettings();
-                return _logFileName; 
+                return _logFileName;
             }
-            set 
-            { 
+            set
+            {
                 if (!_settingsInitialized) InitializeSettings();
-                _logFileName = value; 
+                _logFileName = value;
             }
         }
 
@@ -81,12 +80,24 @@ namespace System.Diagnostics
         /// </devdoc>
         public override void Fail(string message, string detailMessage)
         {
-            // UIAssert is not enabled.
-            WriteAssert(String.Empty, message, detailMessage);
+            string stackTrace;
+            try
+            {
+                stackTrace = new StackTrace(fNeedFileInfo:true).ToString();
+            }
+            catch
+            {
+                stackTrace = "";
+            }
+            WriteAssert(stackTrace, message, detailMessage);
+            if (AssertUiEnabled)
+            {
+                DebugProvider.FailCore(stackTrace, message, detailMessage, "Assertion Failed");
+            }
         }
 
-         private void InitializeSettings() 
-         {
+        private void InitializeSettings()
+        {
             // don't use the property setters here to avoid infinite recursion.
             _assertUIEnabled = DiagnosticsConfiguration.AssertUIEnabled;
             _logFileName = DiagnosticsConfiguration.LogFileName;
@@ -95,22 +106,17 @@ namespace System.Diagnostics
 
         private void WriteAssert(string stackTrace, string message, string detailMessage)
         {
-            string assertMessage = SR.DebugAssertBanner + Environment.NewLine
-                                            + SR.DebugAssertShortMessage + Environment.NewLine
-                                            + message + Environment.NewLine
-                                            + SR.DebugAssertLongMessage + Environment.NewLine +
-                                            detailMessage + Environment.NewLine
-                                            + stackTrace;
-            WriteLine(assertMessage);
-
-            // In case the debugger is attached we break the debugger.
-            if (Debugger.IsAttached)
-                Debugger.Break();
+            WriteLine(SR.DebugAssertBanner + Environment.NewLine
+                   + SR.DebugAssertShortMessage + Environment.NewLine
+                   + message + Environment.NewLine
+                   + SR.DebugAssertLongMessage + Environment.NewLine
+                   + detailMessage + Environment.NewLine
+                   + stackTrace);
         }
 
         /// <devdoc>
         ///    <para>
-        ///       Writes the output using <see cref="System.Diagnostics.Debug.Write"/>.
+        ///       Writes the output using <see cref="System.Diagnostics.Debug.Write(string)"/>.
         ///    </para>
         /// </devdoc>
         public override void Write(string message)
@@ -120,7 +126,7 @@ namespace System.Diagnostics
 
         /// <devdoc>
         ///    <para>
-        ///       Writes the output followed by a line terminator using <see cref="System.Diagnostics.Debug.Write"/>.
+        ///       Writes the output followed by a line terminator using <see cref="System.Diagnostics.Debug.Write(string)"/>.
         ///    </para>
         /// </devdoc>
         public override void WriteLine(string message)
@@ -130,37 +136,32 @@ namespace System.Diagnostics
 
         private void WriteLine(string message, bool useLogFile)
         {
-            if (NeedIndent) 
+            if (NeedIndent)
                 WriteIndent();
 
             // The concat is done here to enable a single call to Write
-            Write(message + Environment.NewLine, useLogFile); 
+            Write(message + Environment.NewLine, useLogFile);
             NeedIndent = true;
         }
 
         private void Write(string message, bool useLogFile)
         {
-            if (NeedIndent) 
-                WriteIndent();
+            if (message == null)
+            {
+                message = string.Empty;
+            }
 
-            // really huge messages mess up both VS and dbmon, so we chop it up into 
-            // reasonable chunks if it's too big
-            if (message == null || message.Length <= InternalWriteSize)
+            if (NeedIndent && message.Length != 0)
             {
-                Debug.Write(message);
+                WriteIndent();
             }
-            else
-            {
-                int offset;
-                for (offset = 0; offset < message.Length - InternalWriteSize; offset += InternalWriteSize)
-                {
-                    Debug.Write(message.Substring(offset, InternalWriteSize));
-                }
-                Debug.Write(message.Substring(offset));
-            }
+
+            DebugProvider.WriteCore(message);
 
             if (useLogFile && !string.IsNullOrEmpty(LogFileName))
+            {
                 WriteToLogFile(message);
+            }
         }
 
         private void WriteToLogFile(string message)
@@ -171,7 +172,7 @@ namespace System.Diagnostics
             }
             catch (Exception e)
             {
-                WriteLine(string.Format(SR.ExceptionOccurred, LogFileName, e.ToString()), useLogFile: false);
+                WriteLine(SR.Format(SR.ExceptionOccurred, LogFileName, e), useLogFile: false);
             }
         }
     }

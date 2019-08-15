@@ -14,11 +14,11 @@ namespace System.Xml.Tests
     public class CSameInstanceXslTransformTestCase : XsltApiTestCaseBase
     {
         // Variables from init string
-        protected string _strPath;					// Path of the data files
+        protected string _strPath;                    // Path of the data files
 
         // Other global variables
 #pragma warning disable 0618
-        public XslTransform xsltSameInstance;				// Used for same instance testing of XsltArgumentList
+        public XslTransform xsltSameInstance;         // Used for same instance testing of XsltArgumentList
 #pragma warning restore 0618
 
         protected int threadCount = 5;
@@ -30,7 +30,7 @@ namespace System.Xml.Tests
             Init(null);
         }
 
-        public new void Init(object objParam)
+        private new void Init(object objParam)
         {
 #pragma warning disable 0618
             xsltSameInstance = new XslTransform();
@@ -39,7 +39,7 @@ namespace System.Xml.Tests
             return;
         }
 
-        public virtual void Load(string _strXslFile, string _strXmlFile)
+        protected virtual void Load(string _strXslFile, string _strXmlFile)
         {
         }
 
@@ -79,8 +79,8 @@ namespace System.Xml.Tests
         [Theory]
         public void Variations(object param0, object param1)
         {
-            String xslFile = (String)param0;
-            String xmlFile = (String)param1;
+            string xslFile = (string)param0;
+            string xmlFile = (string)param1;
 
             Load(xslFile, xmlFile);
 
@@ -100,7 +100,7 @@ namespace System.Xml.Tests
     //[TestCase(Name = "Same instance testing: Transform() - READER")]
     public class SameInstanceXslTransformReader : CSameInstanceXslTransformTestCase
     {
-        private XPathDocument _xd;			// Loads XML file
+        private XPathDocument _xd;            // Loads XML file
 
         private ITestOutputHelper _output;
         public SameInstanceXslTransformReader(ITestOutputHelper output) : base(output)
@@ -108,7 +108,7 @@ namespace System.Xml.Tests
             _output = output;
         }
 
-        public override void Load(string _strXslFile, string _strXmlFile)
+        protected override void Load(string _strXslFile, string _strXmlFile)
         {
 #pragma warning disable 0618
             XmlValidatingReader xrData = new XmlValidatingReader(new XmlTextReader(Path.Combine(_strPath, _strXmlFile)));
@@ -140,7 +140,7 @@ namespace System.Xml.Tests
     //[TestCase(Name = "Same instance testing: Transform() - TEXTWRITER")]
     public class SameInstanceXslTransformWriter : CSameInstanceXslTransformTestCase
     {
-        private XPathDocument _xd;		// Loads XML file
+        private XPathDocument _xd;        // Loads XML file
 
         private ITestOutputHelper _output;
         public SameInstanceXslTransformWriter(ITestOutputHelper output) : base(output)
@@ -148,7 +148,7 @@ namespace System.Xml.Tests
             _output = output;
         }
 
-        public override void Load(string _strXslFile, string _strXmlFile)
+        protected override void Load(string _strXslFile, string _strXmlFile)
         {
 #pragma warning disable 0618
             XmlValidatingReader xrData = new XmlValidatingReader(new XmlTextReader(Path.Combine(_strPath, _strXmlFile)));

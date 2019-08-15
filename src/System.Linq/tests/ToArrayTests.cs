@@ -31,26 +31,20 @@ namespace System.Linq.Tests
         {
             int[] emptySourceArray = Array.Empty<int>();
 
-            // .NET Core returns the instance as an optimization.
-            // see https://github.com/dotnet/corefx/pull/2401.
-            Action<object, object> assertSame = (objA, objB) =>
-                Assert.Equal(!PlatformDetection.IsFullFramework, ReferenceEquals(objA, objB));
+            Assert.Same(emptySourceArray.ToArray(), emptySourceArray.ToArray());
 
+            Assert.Same(emptySourceArray.Select(i => i).ToArray(), emptySourceArray.Select(i => i).ToArray());
+            Assert.Same(emptySourceArray.ToList().Select(i => i).ToArray(), emptySourceArray.ToList().Select(i => i).ToArray());
+            Assert.Same(new Collection<int>(emptySourceArray).Select(i => i).ToArray(), new Collection<int>(emptySourceArray).Select(i => i).ToArray());
+            Assert.Same(emptySourceArray.OrderBy(i => i).ToArray(), emptySourceArray.OrderBy(i => i).ToArray());
 
-            assertSame(emptySourceArray.ToArray(), emptySourceArray.ToArray());
+            Assert.Same(Enumerable.Range(5, 0).ToArray(), Enumerable.Range(3, 0).ToArray());
+            Assert.Same(Enumerable.Range(5, 3).Take(0).ToArray(), Enumerable.Range(3, 0).ToArray());
+            Assert.Same(Enumerable.Range(5, 3).Skip(3).ToArray(), Enumerable.Range(3, 0).ToArray());
 
-            assertSame(emptySourceArray.Select(i => i).ToArray(), emptySourceArray.Select(i => i).ToArray());
-            assertSame(emptySourceArray.ToList().Select(i => i).ToArray(), emptySourceArray.ToList().Select(i => i).ToArray());
-            assertSame(new Collection<int>(emptySourceArray).Select(i => i).ToArray(), new Collection<int>(emptySourceArray).Select(i => i).ToArray());
-            assertSame(emptySourceArray.OrderBy(i => i).ToArray(), emptySourceArray.OrderBy(i => i).ToArray());
-
-            assertSame(Enumerable.Range(5, 0).ToArray(), Enumerable.Range(3, 0).ToArray());
-            assertSame(Enumerable.Range(5, 3).Take(0).ToArray(), Enumerable.Range(3, 0).ToArray());
-            assertSame(Enumerable.Range(5, 3).Skip(3).ToArray(), Enumerable.Range(3, 0).ToArray());
-
-            assertSame(Enumerable.Repeat(42, 0).ToArray(), Enumerable.Range(84, 0).ToArray());
-            assertSame(Enumerable.Repeat(42, 3).Take(0).ToArray(), Enumerable.Range(84, 3).Take(0).ToArray());
-            assertSame(Enumerable.Repeat(42, 3).Skip(3).ToArray(), Enumerable.Range(84, 3).Skip(3).ToArray());
+            Assert.Same(Enumerable.Repeat(42, 0).ToArray(), Enumerable.Range(84, 0).ToArray());
+            Assert.Same(Enumerable.Repeat(42, 3).Take(0).ToArray(), Enumerable.Range(84, 3).Take(0).ToArray());
+            Assert.Same(Enumerable.Repeat(42, 3).Skip(3).ToArray(), Enumerable.Range(84, 3).Skip(3).ToArray());
         }
 
 
@@ -169,7 +163,7 @@ namespace System.Linq.Tests
             var sourceList = new List<int>(sourceIntegers);
 
             Assert.Equal(convertedStrings, sourceList.Select(i => i.ToString()).ToArray());
-            
+
             Assert.Equal(sourceList, sourceList.Where(i => true).ToArray());
             Assert.Equal(Array.Empty<int>(), sourceList.Where(i => false).ToArray());
 
@@ -184,44 +178,44 @@ namespace System.Linq.Tests
         public void SameResultsRepeatCallsFromWhereOnIntQuery()
         {
             var q = from x in new[] { 9999, 0, 888, -1, 66, -777, 1, 2, -12345 }
-                    where x > Int32.MinValue
+                    where x > int.MinValue
                     select x;
 
             Assert.Equal(q.ToArray(), q.ToArray());
         }
-        
+
         [Fact]
         public void SameResultsRepeatCallsFromWhereOnStringQuery()
         {
-            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", String.Empty }
-                        where !String.IsNullOrEmpty(x)
+            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", string.Empty }
+                        where !string.IsNullOrEmpty(x)
                         select x;
 
             Assert.Equal(q.ToArray(), q.ToArray());
         }
-        
+
         [Fact]
         public void SameResultsButNotSameObject()
         {
             var qInt = from x in new[] { 9999, 0, 888, -1, 66, -777, 1, 2, -12345 }
-                    where x > Int32.MinValue
+                    where x > int.MinValue
                     select x;
 
-            var qString = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", String.Empty }
-                        where !String.IsNullOrEmpty(x)
+            var qString = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", string.Empty }
+                        where !string.IsNullOrEmpty(x)
                         select x;
 
             Assert.NotSame(qInt.ToArray(), qInt.ToArray());
             Assert.NotSame(qString.ToArray(), qString.ToArray());
         }
-        
+
         [Fact]
         public void EmptyArraysSameObject()
         {
             // .NET Core returns the instance as an optimization.
             // see https://github.com/dotnet/corefx/pull/2401.
-            Assert.Equal(!PlatformDetection.IsFullFramework, ReferenceEquals(Enumerable.Empty<int>().ToArray(), Enumerable.Empty<int>().ToArray()));
-            
+            Assert.True(ReferenceEquals(Enumerable.Empty<int>().ToArray(), Enumerable.Empty<int>().ToArray()));
+
             var array = new int[0];
             Assert.NotSame(array, array.ToArray());
         }
@@ -253,7 +247,7 @@ namespace System.Linq.Tests
         public void SourceNotICollectionAndIsEmpty()
         {
             IEnumerable<int> source = NumberRangeGuaranteedNotCollectionType(-4, 0);
-            
+
             Assert.Null(source as ICollection<int>);
 
             Assert.Empty(source.ToArray());
@@ -277,7 +271,7 @@ namespace System.Linq.Tests
             int?[] expected = { null, null, null, null, null };
 
             Assert.Null(source as ICollection<int>);
-    
+
             Assert.Equal(expected, source.ToArray());
         }
 
@@ -366,7 +360,7 @@ namespace System.Linq.Tests
             Third
         }
 
-        [Fact, SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET framework disallows copying assignable value types. See corefx#13816")]
+        [Fact]
         public void ToArray_Cast()
         {
             Enum0[] source = { Enum0.First, Enum0.Second, Enum0.Third };
@@ -391,14 +385,14 @@ namespace System.Linq.Tests
         {
             return SmallPowersOfTwo.Select(p => new object[] { p + 1 });
         }
-        
+
         private static IEnumerable<int> SmallPowersOfTwo
         {
             get
             {
                 // By N being "small" we mean that allocating an array of
                 // size N doesn't come close to the risk of causing an OOME
-                
+
                 const int MaxPower = 18;
 
                 for (int i = 0; i <= MaxPower; i++)

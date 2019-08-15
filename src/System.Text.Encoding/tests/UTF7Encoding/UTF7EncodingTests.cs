@@ -25,7 +25,7 @@ namespace System.Text.Tests
             VerifyUtf7Encoding(encoding, allowOptionals);
         }
 
-        public static void VerifyUtf7Encoding(UTF7Encoding encoding, bool allowOptionals)
+        private static void VerifyUtf7Encoding(UTF7Encoding encoding, bool allowOptionals)
         {
             Assert.Empty(encoding.GetPreamble());
 
@@ -41,7 +41,7 @@ namespace System.Text.Tests
             {
                 Assert.Equal(new byte[] { 43, 65, 67, 69, 45 }, encoding.GetBytes("!"));
             }
-            
+
         }
 
         public static IEnumerable<object[]> Encodings_TestData()
@@ -94,7 +94,7 @@ namespace System.Text.Tests
             UTF7Encoding encoding = new UTF7Encoding();
             yield return new object[] { encoding, encoding, true };
             yield return new object[] { new UTF7Encoding(), new UTF7Encoding(), true };
-            
+
             yield return new object[] { new UTF7Encoding(), new UTF7Encoding(true), false };
             yield return new object[] { new UTF7Encoding(), new UTF7Encoding(false), true };
 

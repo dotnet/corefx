@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -9,6 +9,7 @@ using Xunit;
 
 namespace System.Net.Tests
 {
+    [ConditionalClass(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // httpsys component missing in Nano.
     public class HttpListenerResponseCookiesTests : HttpListenerResponseTestBase
     {
         [Fact]
@@ -54,6 +55,15 @@ namespace System.Net.Tests
                     new Cookie("name", "value")
                 },
                 144, "Set-Cookie: name=value", null
+            };
+
+            yield return new object[]
+            {
+                new CookieCollection()
+                {
+                    new Cookie("foo bar", "value")
+                },
+                147, "Set-Cookie: foo bar=value", null
             };
 
             yield return new object[]
@@ -170,7 +180,7 @@ namespace System.Net.Tests
             Assert.Contains("\r\nSet-Cookie: name3=value3\r\n", clientResponse);
             Assert.DoesNotContain("Set-Cookie2", clientResponse);
         }
-  
+
         [Fact]
         public async Task Cookies_AddMultipleInHeader_ClientReceivesExpectedHeaders()
         {

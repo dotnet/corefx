@@ -86,28 +86,16 @@ namespace System.Net.NetworkInformation
 
         public override string ToString()
         {
-            StringBuilder addressString = new StringBuilder();
-
-            foreach (byte value in _address)
+            return string.Create(_address.Length * 2, _address, (span, addr) =>
             {
-                int tmp = (value >> 4) & 0x0F;
-
-                for (int i = 0; i < 2; i++)
+                int p = 0;
+                foreach (byte value in addr)
                 {
-                    if (tmp < 0x0A)
-                    {
-                        addressString.Append((char)(tmp + 0x30));
-                    }
-                    else
-                    {
-                        addressString.Append((char)(tmp + 0x37));
-                    }
-
-                    tmp = ((int)value & 0x0F);
+                    byte upper = (byte)(value >> 4), lower = (byte)(value & 0xF);
+                    span[p++] = (char)(upper + (upper < 10 ? '0' : 'A' - 10));
+                    span[p++] = (char)(lower + (lower < 10 ? '0' : 'A' - 10));
                 }
-            }
-
-            return addressString.ToString();
+            });
         }
 
         public byte[] GetAddressBytes()
@@ -127,16 +115,21 @@ namespace System.Net.NetworkInformation
             }
 
             // Has dashes?
-            if (address.IndexOf('-') >= 0)
+            if (address.Contains('-'))
             {
                 hasDashes = true;
                 buffer = new byte[(address.Length + 1) / 3];
+
+                if ((address.Length + 1) % 3 != 0)
+                {
+                    throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
+                }
             }
             else
             {
                 if (address.Length % 2 > 0)
                 {
-                    throw new FormatException(SR.net_bad_mac_address);
+                    throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
                 }
 
                 buffer = new byte[address.Length / 2];
@@ -164,18 +157,18 @@ namespace System.Net.NetworkInformation
                     }
                     else
                     {
-                        throw new FormatException(SR.net_bad_mac_address);
+                        throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
                     }
                 }
                 else
                 {
-                    throw new FormatException(SR.net_bad_mac_address);
+                    throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
                 }
 
-                //we had too many characters after the last dash
+                // we had too many characters after the last dash
                 if (hasDashes && validCount >= 2)
                 {
-                    throw new FormatException(SR.net_bad_mac_address);
+                    throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
                 }
 
                 if (validCount % 2 == 0)
@@ -190,10 +183,10 @@ namespace System.Net.NetworkInformation
                 validCount++;
             }
 
-            //we too few characters after the last dash
+            // we too few characters after the last dash
             if (validCount < 2)
             {
-                throw new FormatException(SR.net_bad_mac_address);
+                throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
             }
 
             return new PhysicalAddress(buffer);

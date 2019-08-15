@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 //
-//NOTE: 
+//NOTE:
 //Structures containing collection of another structures are defined without
 //embedded structure which will ensure proper marshalling in case collection
 //count is zero and there is no embedded structure. Marshalling code read the
@@ -20,7 +20,7 @@
 //Here it has been defined as (without embedded structure DS_REPL_CURSOR_3)
 //
 //internal sealed class DS_REPL_CURSORS_3
-//{  
+//{
 //    public int cNumCursors;
 //    public int dwEnumerationContext;
 //}
@@ -31,7 +31,6 @@ using System.Text;
 
 namespace System.DirectoryServices.ActiveDirectory
 {
-#pragma warning disable BCL0015 // CoreFxPort
 
     internal enum DS_REPL_INFO_TYPE
     {
@@ -115,7 +114,7 @@ namespace System.DirectoryServices.ActiveDirectory
     }
 
     /*
-    typedef enum 
+    typedef enum
     {
         DsRole_RoleStandaloneWorkstation,
         DsRole_RoleMemberWorkstation,
@@ -145,7 +144,7 @@ namespace System.DirectoryServices.ActiveDirectory
     }
 
     /*
-    typedef enum 
+    typedef enum
     {
         DsRolePrimaryDomainInfoBasic,
         DsRoleUpgradeStatus,
@@ -465,11 +464,11 @@ namespace System.DirectoryServices.ActiveDirectory
     internal sealed class LSA_OBJECT_ATTRIBUTES
     {
         internal int Length;
-        private IntPtr _rootDirectory;
-        private IntPtr _objectName;
+        private readonly IntPtr _rootDirectory;
+        private readonly IntPtr _objectName;
         internal int Attributes;
-        private IntPtr _securityDescriptor;
-        private IntPtr _securityQualityOfService;
+        private readonly IntPtr _securityDescriptor;
+        private readonly IntPtr _securityQualityOfService;
 
         public LSA_OBJECT_ATTRIBUTES()
         {
@@ -572,12 +571,12 @@ namespace System.DirectoryServices.ActiveDirectory
     }
 
     /*
-     typedef struct _DSROLE_PRIMARY_DOMAIN_INFO_BASIC {  
-     DSROLE_MACHINE_ROLE MachineRole;  
-     ULONG Flags;  
-     LPWSTR DomainNameFlat;  
-     LPWSTR DomainNameDns;  
-     LPWSTR DomainForestName;  
+     typedef struct _DSROLE_PRIMARY_DOMAIN_INFO_BASIC {
+     DSROLE_MACHINE_ROLE MachineRole;
+     ULONG Flags;
+     LPWSTR DomainNameFlat;
+     LPWSTR DomainNameDns;
+     LPWSTR DomainForestName;
      GUID DomainGuid;
      } DSROLE_PRIMARY_DOMAIN_INFO_BASIC,  *PDSROLE_PRIMARY_DOMAIN_INFO_BASIC;
      */
@@ -629,18 +628,6 @@ namespace System.DirectoryServices.ActiveDirectory
 
     internal class UnsafeNativeMethods
     {
-        public const int FORMAT_MESSAGE_ALLOCATE_BUFFER = 0x00000100,
-            FORMAT_MESSAGE_IGNORE_INSERTS = 0x00000200,
-            FORMAT_MESSAGE_FROM_STRING = 0x00000400,
-            FORMAT_MESSAGE_FROM_HMODULE = 0x00000800,
-            FORMAT_MESSAGE_FROM_SYSTEM = 0x00001000,
-            FORMAT_MESSAGE_ARGUMENT_ARRAY = 0x00002000,
-            FORMAT_MESSAGE_MAX_WIDTH_MASK = 0x000000FF;
-
-        [DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
-        public static extern int FormatMessageW(int dwFlags, int lpSource, int dwMessageId,
-                                                int dwLanguageId, StringBuilder lpBuffer, int nSize, int arguments);
-
         public delegate int DsReplicaConsistencyCheck([In]IntPtr handle, int taskID, int flags);
 
         public delegate int DsReplicaGetInfo2W(IntPtr handle, int type, [MarshalAs(UnmanagedType.LPWStr)] string objectPath, IntPtr sourceGUID, string attributeName, string value, int flag, int context, ref IntPtr info);
@@ -676,7 +663,7 @@ namespace System.DirectoryServices.ActiveDirectory
         public static extern int NetApiBufferFree(IntPtr buffer);
 
         [DllImport("Advapi32.dll", EntryPoint = "LogonUserW", CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern int LogonUserW(String lpszUsername, String lpszDomain, String lpszPassword, int dwLogonType, int dwLogonProvider, ref IntPtr phToken);
+        public static extern int LogonUserW(string lpszUsername, string lpszDomain, string lpszPassword, int dwLogonType, int dwLogonProvider, ref IntPtr phToken);
 
         [DllImport("Advapi32.dll", EntryPoint = "ImpersonateLoggedOnUser", SetLastError = true)]
         public static extern int ImpersonateLoggedOnUser(IntPtr hToken);
@@ -751,10 +738,10 @@ namespace System.DirectoryServices.ActiveDirectory
         public static extern IntPtr LoadLibrary(string name);
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-        public extern static uint FreeLibrary(IntPtr libName);
+        public static extern uint FreeLibrary(IntPtr libName);
 
         [DllImport("kernel32.dll", EntryPoint = "GetProcAddress", SetLastError = true, BestFitMapping = false)]
-        public extern static IntPtr GetProcAddress(LoadLibrarySafeHandle hModule, string entryPoint);
+        public static extern IntPtr GetProcAddress(LoadLibrarySafeHandle hModule, string entryPoint);
 
         /*
         DWORD DsRoleGetPrimaryDomainInformation(
@@ -797,7 +784,7 @@ namespace System.DirectoryServices.ActiveDirectory
         public static extern bool CopySid(int destinationLength, IntPtr pSidDestination, IntPtr pSidSource);
 
         [DllImport("advapi32.dll", SetLastError = true, CallingConvention = CallingConvention.StdCall, EntryPoint = "OpenThreadToken", CharSet = CharSet.Unicode)]
-        static extern public bool OpenThreadToken(
+        public static extern bool OpenThreadToken(
                                         IntPtr threadHandle,
                                         int desiredAccess,
                                         bool openAsSelf,
@@ -805,20 +792,20 @@ namespace System.DirectoryServices.ActiveDirectory
                                         );
 
         [DllImport("advapi32.dll", SetLastError = true, CallingConvention = CallingConvention.StdCall, EntryPoint = "OpenProcessToken", CharSet = CharSet.Unicode)]
-        static extern public bool OpenProcessToken(
+        public static extern bool OpenProcessToken(
                                         IntPtr processHandle,
                                         int desiredAccess,
                                         ref IntPtr tokenHandle
                                         );
 
         [DllImport("kernel32.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "GetCurrentThread", CharSet = CharSet.Unicode)]
-        static extern public IntPtr GetCurrentThread();
+        public static extern IntPtr GetCurrentThread();
 
         [DllImport("kernel32.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "GetCurrentProcess", CharSet = CharSet.Unicode)]
-        static extern public IntPtr GetCurrentProcess();
+        public static extern IntPtr GetCurrentProcess();
 
         [DllImport("advapi32.dll", SetLastError = true, CallingConvention = CallingConvention.StdCall, EntryPoint = "GetTokenInformation", CharSet = CharSet.Unicode)]
-        static extern public bool GetTokenInformation(
+        public static extern bool GetTokenInformation(
                                         IntPtr tokenHandle,
                                         int tokenInformationClass,
                                         IntPtr buffer,
@@ -827,14 +814,14 @@ namespace System.DirectoryServices.ActiveDirectory
                                         );
 
         [DllImport("advapi32.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "LsaOpenPolicy", CharSet = CharSet.Unicode)]
-        static extern public int LsaOpenPolicy(
+        public static extern int LsaOpenPolicy(
                                         IntPtr lsaUnicodeString,
                                         IntPtr lsaObjectAttributes,
                                         int desiredAccess,
                                         ref IntPtr policyHandle);
 
         [DllImport("advapi32.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "LsaQueryInformationPolicy", CharSet = CharSet.Unicode)]
-        static extern public int LsaQueryInformationPolicy(
+        public static extern int LsaQueryInformationPolicy(
                                         IntPtr policyHandle,
                                         int policyInformationClass,
                                         ref IntPtr buffer
@@ -859,4 +846,3 @@ namespace System.DirectoryServices.ActiveDirectory
             [In] IntPtr buffer);
     }
 }
-

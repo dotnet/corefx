@@ -9,6 +9,7 @@ using System.IO;
 using System.Globalization;
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace System.Xml.Serialization
 {
@@ -32,11 +33,18 @@ namespace System.Xml.Serialization
         {
             identifier = MakeValid(identifier);
             if (identifier.Length <= 2)
+            {
                 return CultureInfo.InvariantCulture.TextInfo.ToUpper(identifier);
+            }
             else if (char.IsLower(identifier[0]))
-                return char.ToUpperInvariant(identifier[0]) + identifier.Substring(1);
+            {
+                char upper = char.ToUpperInvariant(identifier[0]);
+                return string.Concat(MemoryMarshal.CreateReadOnlySpan(ref upper, 1), identifier.AsSpan(1));
+            }
             else
+            {
                 return identifier;
+            }
         }
 
         /// <devdoc>
@@ -46,11 +54,18 @@ namespace System.Xml.Serialization
         {
             identifier = MakeValid(identifier);
             if (identifier.Length <= 2)
+            {
                 return CultureInfo.InvariantCulture.TextInfo.ToLower(identifier);
+            }
             else if (char.IsUpper(identifier[0]))
-                return char.ToLower(identifier[0]) + identifier.Substring(1);
+            {
+                char lower = char.ToLower(identifier[0]);
+                return string.Concat(MemoryMarshal.CreateReadOnlySpan(ref lower, 1), identifier.AsSpan(1));
+            }
             else
+            {
                 return identifier;
+            }
         }
 
         /// <devdoc>
@@ -89,7 +104,7 @@ namespace System.Xml.Serialization
             // the given char is already a valid name character
 #if DEBUG
             // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
-            if (!IsValid(c)) throw new ArgumentException(SR.Format(SR.XmlInternalErrorDetails, "Invalid identifier character " + ((Int16)c).ToString(CultureInfo.InvariantCulture)), "c");
+            if (!IsValid(c)) throw new ArgumentException(SR.Format(SR.XmlInternalErrorDetails, "Invalid identifier character " + ((short)c).ToString(CultureInfo.InvariantCulture)), nameof(c));
 #endif
 
             // First char cannot be a number
@@ -102,7 +117,7 @@ namespace System.Xml.Serialization
         {
             UnicodeCategory uc = CharUnicodeInfo.GetUnicodeCategory(c);
             // each char must be Lu, Ll, Lt, Lm, Lo, Nd, Mn, Mc, Pc
-            // 
+            //
             switch (uc)
             {
                 case UnicodeCategory.UppercaseLetter:        // Lu
@@ -140,7 +155,7 @@ namespace System.Xml.Serialization
                 default:
 #if DEBUG
                     // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
-                    throw new ArgumentException(SR.Format(SR.XmlInternalErrorDetails, "Unhandled category " + uc), "c");
+                    throw new ArgumentException(SR.Format(SR.XmlInternalErrorDetails, "Unhandled category " + uc), nameof(c));
 #else
                 return false;
 #endif
@@ -176,7 +191,7 @@ namespace System.Xml.Serialization
             {
                 EscapeKeywords(name.Substring(0, nameEnd), sb);
                 sb.Append("<");
-                int arguments = Int32.Parse(name.Substring(nameEnd + 1), CultureInfo.InvariantCulture) + index;
+                int arguments = int.Parse(name.Substring(nameEnd + 1), CultureInfo.InvariantCulture) + index;
                 for (; index < arguments; index++)
                 {
                     sb.Append(GetCSharpName(parameters[index]));

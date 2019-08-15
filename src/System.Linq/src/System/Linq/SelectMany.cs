@@ -13,12 +13,12 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (selector == null)
             {
-                throw Error.ArgumentNull(nameof(selector));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.selector);
             }
 
             return new SelectManySingleSelectorIterator<TSource, TResult>(source, selector);
@@ -28,12 +28,12 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (selector == null)
             {
-                throw Error.ArgumentNull(nameof(selector));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.selector);
             }
 
             return SelectManyIterator(source, selector);
@@ -60,17 +60,17 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (collectionSelector == null)
             {
-                throw Error.ArgumentNull(nameof(collectionSelector));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.collectionSelector);
             }
 
             if (resultSelector == null)
             {
-                throw Error.ArgumentNull(nameof(resultSelector));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.resultSelector);
             }
 
             return SelectManyIterator(source, collectionSelector, resultSelector);
@@ -97,17 +97,17 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (collectionSelector == null)
             {
-                throw Error.ArgumentNull(nameof(collectionSelector));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.collectionSelector);
             }
 
             if (resultSelector == null)
             {
-                throw Error.ArgumentNull(nameof(resultSelector));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.resultSelector);
             }
 
             return SelectManyIterator(source, collectionSelector, resultSelector);
@@ -124,7 +124,7 @@ namespace System.Linq
             }
         }
 
-        private sealed class SelectManySingleSelectorIterator<TSource, TResult> : Iterator<TResult>, IIListProvider<TResult>
+        private sealed partial class SelectManySingleSelectorIterator<TSource, TResult> : Iterator<TResult>
         {
             private readonly IEnumerable<TSource> _source;
             private readonly Func<TSource, IEnumerable<TResult>> _selector;
@@ -160,26 +160,6 @@ namespace System.Linq
                 }
 
                 base.Dispose();
-            }
-
-            public int GetCount(bool onlyIfCheap)
-            {
-                if (onlyIfCheap)
-                {
-                    return -1;
-                }
-
-                int count = 0;
-
-                foreach (TSource element in _source)
-                {
-                    checked
-                    {
-                        count += _selector(element).Count();
-                    }
-                }
-
-                return count;
             }
 
             public override bool MoveNext()
@@ -220,46 +200,6 @@ namespace System.Linq
 
                 Dispose();
                 return false;
-            }
-
-            public TResult[] ToArray()
-            {
-                var builder = new SparseArrayBuilder<TResult>(initialize: true);
-                var deferredCopies = new ArrayBuilder<IEnumerable<TResult>>();
-
-                foreach (TSource element in _source)
-                {
-                    IEnumerable<TResult> enumerable = _selector(element);
-
-                    if (builder.ReserveOrAdd(enumerable))
-                    {
-                        deferredCopies.Add(enumerable);
-                    }
-                }
-
-                TResult[] array = builder.ToArray();
-
-                ArrayBuilder<Marker> markers = builder.Markers;
-                for (int i = 0; i < markers.Count; i++)
-                {
-                    Marker marker = markers[i];
-                    IEnumerable<TResult> enumerable = deferredCopies[i];
-                    EnumerableHelpers.Copy(enumerable, array, marker.Index, marker.Count);
-                }
-
-                return array;
-            }
-
-            public List<TResult> ToList()
-            {
-                var list = new List<TResult>();
-
-                foreach (TSource element in _source)
-                {
-                    list.AddRange(_selector(element));
-                }
-
-                return list;
             }
         }
     }

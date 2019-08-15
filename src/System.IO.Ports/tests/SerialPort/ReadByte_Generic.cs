@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Legacy.Support;
 using Xunit;
-using Xunit.NetCore.Extensions;
+using Microsoft.DotNet.XUnitExtensions;
 
 namespace System.IO.Ports.Tests
 {
@@ -96,7 +96,7 @@ namespace System.IO.Ports.Tests
                 Random rndGen = new Random(-55);
 
                 com.ReadTimeout = rndGen.Next(minRandomTimeout, maxRandomTimeout);
-                //		com.Encoding = new System.Text.UTF7Encoding();
+                //        com.Encoding = new System.Text.UTF7Encoding();
                 com.Encoding = Encoding.Unicode;
 
                 Debug.WriteLine("Verifying ReadTimeout={0} with successive call to read method and no data", com.ReadTimeout);
@@ -122,7 +122,7 @@ namespace System.IO.Ports.Tests
                 Debug.WriteLine("Verifying ReadTimeout={0} with successive call to read method and some data being received in the first call", com1.ReadTimeout);
                 com1.Open();
 
-                //Call WriteToCom1 asynchronously this will write to com1 some time before the following call 
+                //Call WriteToCom1 asynchronously this will write to com1 some time before the following call
                 //to a read method times out
                 t.Start();
                 try
@@ -158,22 +158,24 @@ namespace System.IO.Ports.Tests
             }
         }
 
+        [KnownFailure]
         [ConditionalFact(nameof(HasNullModem))]
         public void DefaultParityReplaceByte()
         {
             VerifyParityReplaceByte(-1, numRndByte - 2);
         }
 
+        [KnownFailure]
         [ConditionalFact(nameof(HasNullModem))]
         public void NoParityReplaceByte()
         {
             Random rndGen = new Random(-55);
 
-            //		if(!VerifyParityReplaceByte((int)'\0', rndGen.Next(0, numRndByte - 1), new System.Text.UTF7Encoding())){
+            //        if (!VerifyParityReplaceByte((int)'\0', rndGen.Next(0, numRndByte - 1), new System.Text.UTF7Encoding())){
             VerifyParityReplaceByte('\0', rndGen.Next(0, numRndByte - 1), new UTF32Encoding());
         }
 
-
+        [KnownFailure]
         [ConditionalFact(nameof(HasNullModem))]
         public void RNDParityReplaceByte()
         {
@@ -183,6 +185,7 @@ namespace System.IO.Ports.Tests
         }
 
 
+        [KnownFailure]
         [ConditionalFact(nameof(HasNullModem))]
         public void ParityErrorOnLastByte()
         {

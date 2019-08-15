@@ -111,7 +111,7 @@ namespace System.Runtime.CompilerServices.Tests
             dynamic e = new ExpandoObject();
             e.A = i;
 
-            var d = e as IDictionary<string, Object>;
+            var d = e as IDictionary<string, object>;
             d.Add(i.ToString(), i);
 
             return e;
@@ -122,7 +122,7 @@ namespace System.Runtime.CompilerServices.Tests
             public object obj;
             public object rule;
         }
-        
+
         private class TestClass01
         {
             public static void BindThings()

@@ -15,6 +15,7 @@ namespace System.Security.Cryptography
 
             protected override void Dispose(bool disposing)
             {
+                _keyBlob = null;
                 base.Dispose(disposing);
             }
 
@@ -30,7 +31,7 @@ namespace System.Security.Cryptography
 
             internal ECDiffieHellmanCngPublicKey(byte[] keyBlob, string curveName) : base(keyBlob)
             {
-                Debug.Assert(_curveName != null && keyBlob != null);
+                Debug.Assert(keyBlob != null);
 
                 _keyBlob = keyBlob;
                 _curveName = curveName;
@@ -48,6 +49,11 @@ namespace System.Security.Cryptography
             /// <returns>The key and explicit curve parameters used by the ECC object.</returns>
             public override ECParameters ExportExplicitParameters()
             {
+                if (_keyBlob == null)
+                {
+                    throw new ObjectDisposedException(nameof(ECDiffieHellmanPublicKey));
+                }
+
                 ECParameters ecparams = new ECParameters();
                 ECCng.ExportPrimeCurveParameters(ref ecparams, _keyBlob, includePrivateParameters: false);
                 return ecparams;
@@ -64,6 +70,11 @@ namespace System.Security.Cryptography
             /// <returns>The key and named curve parameters used by the ECC object.</returns>
             public override ECParameters ExportParameters()
             {
+                if (_keyBlob == null)
+                {
+                    throw new ObjectDisposedException(nameof(ECDiffieHellmanPublicKey));
+                }
+
                 if (string.IsNullOrEmpty(_curveName))
                 {
                     return ExportExplicitParameters();

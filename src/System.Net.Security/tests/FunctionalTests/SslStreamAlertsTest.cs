@@ -45,7 +45,7 @@ namespace System.Net.Security.Tests
                 Assert.IsType<Win32Exception>(exception.InnerException);
                 var win32ex = (Win32Exception)exception.InnerException;
 
-                // The Schannel HResults for each alert are documented here: 
+                // The Schannel HResults for each alert are documented here:
                 // https://msdn.microsoft.com/en-us/library/windows/desktop/dd721886(v=vs.85).aspx
                 Assert.Equal(SEC_E_CERT_UNKNOWN, unchecked((uint)win32ex.NativeErrorCode));
 
@@ -119,7 +119,7 @@ namespace System.Net.Security.Tests
                 Assert.Equal(0, bytesRead);
             }
         }
-        
+
         [Fact]
         public async Task SslStream_StreamToStream_DataAfterShutdown_Fail()
         {
@@ -140,11 +140,11 @@ namespace System.Net.Security.Tests
 
                 var buffer = new byte[1024];
 
-                Assert.Equal(true, client.CanWrite);
+                Assert.True(client.CanWrite);
 
                 await client.ShutdownAsync();
 
-                Assert.Equal(false, client.CanWrite);
+                Assert.False(client.CanWrite);
 
                 await Assert.ThrowsAsync<InvalidOperationException>(() => client.ShutdownAsync());
                 await Assert.ThrowsAsync<InvalidOperationException>(() => client.WriteAsync(buffer, 0, buffer.Length));

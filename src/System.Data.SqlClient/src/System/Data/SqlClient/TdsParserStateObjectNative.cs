@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -22,7 +22,7 @@ namespace System.Data.SqlClient
 
         private GCHandle _gcHandle;                                    // keeps this object alive until we're closed.
 
-        private Dictionary<IntPtr, SNIPacket> _pendingWritePackets = new Dictionary<IntPtr, SNIPacket>(); // Stores write packets that have been sent to SNI, but have not yet finished writing (i.e. we are waiting for SNI's callback)
+        private readonly Dictionary<IntPtr, SNIPacket> _pendingWritePackets = new Dictionary<IntPtr, SNIPacket>(); // Stores write packets that have been sent to SNI, but have not yet finished writing (i.e. we are waiting for SNI's callback)
 
         internal TdsParserStateObjectNative(TdsParser parser, TdsParserStateObject physicalConnection, bool async) :
             base(parser, physicalConnection, async)
@@ -31,11 +31,9 @@ namespace System.Data.SqlClient
 
         internal SNIHandle Handle => _sessionHandle;
 
-        internal override UInt32 Status => _sessionHandle != null ? _sessionHandle.Status : TdsEnums.SNI_UNINITIALIZED;
+        internal override uint Status => _sessionHandle != null ? _sessionHandle.Status : TdsEnums.SNI_UNINITIALIZED;
 
-        internal override object SessionHandle => _sessionHandle;
-
-        protected override object EmptyReadPacket => IntPtr.Zero;
+        internal override SessionHandle SessionHandle => SessionHandle.FromNativeHandle(_sessionHandle);
 
         protected override void CreateSessionHandle(TdsParserStateObject physicalConnection, bool async)
         {
@@ -77,16 +75,16 @@ namespace System.Data.SqlClient
 
             // Translate to SNI timeout values (Int32 milliseconds)
             long timeout;
-            if (Int64.MaxValue == timerExpire)
+            if (long.MaxValue == timerExpire)
             {
-                timeout = Int32.MaxValue;
+                timeout = int.MaxValue;
             }
             else
             {
                 timeout = ADP.TimerRemainingMilliseconds(timerExpire);
-                if (timeout > Int32.MaxValue)
+                if (timeout > int.MaxValue)
                 {
-                    timeout = Int32.MaxValue;
+                    timeout = int.MaxValue;
                 }
                 else if (0 > timeout)
                 {
@@ -97,21 +95,27 @@ namespace System.Data.SqlClient
             _sessionHandle = new SNIHandle(myInfo, serverName, spnBuffer, ignoreSniOpenTimeout, checked((int)timeout), out instanceName, flushCache, !async, fParallel);
         }
 
-        protected override uint SNIPacketGetData(object packet, byte[] _inBuff, ref uint dataSize) => SNINativeMethodWrapper.SNIPacketGetData((IntPtr)packet, _inBuff, ref dataSize);
-
-        protected override bool CheckPacket(object packet, TaskCompletionSource<object> source)
+        protected override uint SNIPacketGetData(PacketHandle packet, byte[] _inBuff, ref uint dataSize)
         {
-            IntPtr ptr = (IntPtr)(object)packet;
+            Debug.Assert(packet.Type == PacketHandle.NativePointerType, "unexpected packet type when requiring NativePointer");
+            return SNINativeMethodWrapper.SNIPacketGetData(packet.NativePointer, _inBuff, ref dataSize);
+        }
+
+        protected override bool CheckPacket(PacketHandle packet, TaskCompletionSource<object> source)
+        {
+            Debug.Assert(packet.Type == PacketHandle.NativePointerType, "unexpected packet type when requiring NativePointer");
+            IntPtr ptr = packet.NativePointer;
             return IntPtr.Zero == ptr || IntPtr.Zero != ptr && source != null;
         }
 
-        public void ReadAsyncCallback(IntPtr key, IntPtr packet, UInt32 error) => ReadAsyncCallback(key, packet, error);
+        public void ReadAsyncCallback(IntPtr key, IntPtr packet, uint error) => ReadAsyncCallback(key, packet, error);
 
-        public void WriteAsyncCallback(IntPtr key, IntPtr packet, UInt32 sniError) => WriteAsyncCallback(key, packet, sniError);
+        public void WriteAsyncCallback(IntPtr key, IntPtr packet, uint sniError) => WriteAsyncCallback(key, packet, sniError);
 
-        protected override void RemovePacketFromPendingList(object ptr)
+        protected override void RemovePacketFromPendingList(PacketHandle ptr)
         {
-            IntPtr pointer = (IntPtr)ptr;
+            Debug.Assert(ptr.Type == PacketHandle.NativePointerType, "unexpected packet type when requiring NativePointer");
+            IntPtr pointer = ptr.NativePointer;
 
             SNIPacket recoveredPacket;
 
@@ -125,7 +129,7 @@ namespace System.Data.SqlClient
 #if DEBUG
                 else
                 {
-                    Debug.Assert(false, "Removing a packet from the pending list that was never added to it");
+                    Debug.Fail("Removing a packet from the pending list that was never added to it");
                 }
 #endif
             }
@@ -148,7 +152,7 @@ namespace System.Data.SqlClient
             {
                 packetHandle?.Dispose();
                 asyncAttnPacket?.Dispose();
-                    
+
                 if (sessionHandle != null)
                 {
                     sessionHandle.Dispose();
@@ -169,7 +173,7 @@ namespace System.Data.SqlClient
 
         internal override bool IsFailedHandle() => _sessionHandle.Status != TdsEnums.SNI_SUCCESS;
 
-        internal override object ReadSyncOverAsync(int timeoutRemaining, out uint error)
+        internal override PacketHandle ReadSyncOverAsync(int timeoutRemaining, out uint error)
         {
             SNIHandle handle = Handle;
             if (handle == null)
@@ -178,12 +182,22 @@ namespace System.Data.SqlClient
             }
             IntPtr readPacketPtr = IntPtr.Zero;
             error = SNINativeMethodWrapper.SNIReadSyncOverAsync(handle, ref readPacketPtr, GetTimeoutRemaining());
-            return readPacketPtr;
+            return PacketHandle.FromNativePointer(readPacketPtr);
         }
 
-        internal override bool IsPacketEmpty(object readPacket) => IntPtr.Zero == (IntPtr)readPacket;
+        protected override PacketHandle EmptyReadPacket => PacketHandle.FromNativePointer(default);
 
-        internal override void ReleasePacket(object syncReadPacket) => SNINativeMethodWrapper.SNIPacketRelease((IntPtr)syncReadPacket);
+        internal override bool IsPacketEmpty(PacketHandle readPacket)
+        {
+            Debug.Assert(readPacket.Type == PacketHandle.NativePointerType || readPacket.Type == 0, "unexpected packet type when requiring NativePointer");
+            return IntPtr.Zero == readPacket.NativePointer;
+        }
+
+        internal override void ReleasePacket(PacketHandle syncReadPacket)
+        {
+            Debug.Assert(syncReadPacket.Type == PacketHandle.NativePointerType, "unexpected packet type when requiring NativePointer");
+            SNINativeMethodWrapper.SNIPacketRelease(syncReadPacket.NativePointer);
+        }
 
         internal override uint CheckConnection()
         {
@@ -191,27 +205,33 @@ namespace System.Data.SqlClient
             return handle == null ? TdsEnums.SNI_SUCCESS : SNINativeMethodWrapper.SNICheckConnection(handle);
         }
 
-        internal override object ReadAsync(out uint error, ref object handle)
+        internal override PacketHandle ReadAsync(SessionHandle handle, out uint error)
         {
+            Debug.Assert(handle.Type == SessionHandle.NativeHandleType, "unexpected handle type when requiring NativePointer");
             IntPtr readPacketPtr = IntPtr.Zero;
-            error = SNINativeMethodWrapper.SNIReadAsync((SNIHandle)handle, ref readPacketPtr);
-            return readPacketPtr;
+            error = SNINativeMethodWrapper.SNIReadAsync(handle.NativeHandle, ref readPacketPtr);
+            return PacketHandle.FromNativePointer(readPacketPtr);
         }
 
-        internal override object CreateAndSetAttentionPacket()
+        internal override PacketHandle CreateAndSetAttentionPacket()
         {
             SNIHandle handle = Handle;
             SNIPacket attnPacket = new SNIPacket(handle);
             _sniAsyncAttnPacket = attnPacket;
-            SetPacketData(attnPacket, SQL.AttentionHeader, TdsEnums.HEADER_LEN);
-            return attnPacket;
+            SetPacketData(PacketHandle.FromNativePacket(attnPacket), SQL.AttentionHeader, TdsEnums.HEADER_LEN);
+            return PacketHandle.FromNativePacket(attnPacket);
         }
 
-        internal override uint WritePacket(object packet, bool sync) => SNINativeMethodWrapper.SNIWritePacket(Handle, (SNIPacket)packet, sync);
-
-        internal override object AddPacketToPendingList(object packetToAdd)
+        internal override uint WritePacket(PacketHandle packet, bool sync)
         {
-            SNIPacket packet = (SNIPacket)packetToAdd;
+            Debug.Assert(packet.Type == PacketHandle.NativePacketType, "unexpected packet type when requiring NativePacket");
+            return SNINativeMethodWrapper.SNIWritePacket(Handle, packet.NativePacket, sync);
+        }
+
+        internal override PacketHandle AddPacketToPendingList(PacketHandle packetToAdd)
+        {
+            Debug.Assert(packetToAdd.Type == PacketHandle.NativePacketType, "unexpected packet type when requiring NativePacket");
+            SNIPacket packet = packetToAdd.NativePacket;
             Debug.Assert(packet == _sniPacket, "Adding a packet other than the current packet to the pending list");
             _sniPacket = null;
             IntPtr pointer = packet.DangerousGetHandle();
@@ -221,12 +241,20 @@ namespace System.Data.SqlClient
                 _pendingWritePackets.Add(pointer, packet);
             }
 
-            return pointer;
+            return PacketHandle.FromNativePointer(pointer);
         }
 
-        internal override bool IsValidPacket(object packetPointer) => (IntPtr)packetPointer != IntPtr.Zero;
+        internal override bool IsValidPacket(PacketHandle packetPointer)
+        {
+            Debug.Assert(packetPointer.Type == PacketHandle.NativePointerType || packetPointer.Type==PacketHandle.NativePacketType, "unexpected packet type when requiring NativePointer");
+            return (
+                (packetPointer.Type == PacketHandle.NativePointerType && packetPointer.NativePointer != IntPtr.Zero)
+                ||
+                (packetPointer.Type == PacketHandle.NativePacketType && packetPointer.NativePacket != null)
+            );
+        }
 
-        internal override object GetResetWritePacket()
+        internal override PacketHandle GetResetWritePacket(int dataSize)
         {
             if (_sniPacket != null)
             {
@@ -239,7 +267,7 @@ namespace System.Data.SqlClient
                     _sniPacket = _writePacketCache.Take(Handle);
                 }
             }
-            return _sniPacket;
+            return PacketHandle.FromNativePacket(_sniPacket);
         }
 
         internal override void ClearAllWritePackets()
@@ -256,16 +284,19 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal override void SetPacketData(object packet, byte[] buffer, int bytesUsed) 
-            => SNINativeMethodWrapper.SNIPacketSetData((SNIPacket)packet, buffer, bytesUsed);
+        internal override void SetPacketData(PacketHandle packet, byte[] buffer, int bytesUsed)
+        {
+            Debug.Assert(packet.Type == PacketHandle.NativePacketType, "unexpected packet type when requiring NativePacket");
+            SNINativeMethodWrapper.SNIPacketSetData(packet.NativePacket, buffer, bytesUsed);
+        }
 
-        internal override uint SniGetConnectionId(ref Guid clientConnectionId) 
+        internal override uint SniGetConnectionId(ref Guid clientConnectionId)
             => SNINativeMethodWrapper.SniGetConnectionId(Handle, ref clientConnectionId);
 
-        internal override uint DisabeSsl() 
+        internal override uint DisabeSsl()
             => SNINativeMethodWrapper.SNIRemoveProvider(Handle, SNINativeMethodWrapper.ProviderEnum.SSL_PROV);
 
-        internal override uint EnableMars(ref uint info) 
+        internal override uint EnableMars(ref uint info)
             => SNINativeMethodWrapper.SNIAddProvider(Handle, SNINativeMethodWrapper.ProviderEnum.SMUX_PROV, ref info);
 
         internal override uint EnableSsl(ref uint info)
@@ -274,14 +305,14 @@ namespace System.Data.SqlClient
             return SNINativeMethodWrapper.SNIAddProvider(Handle, SNINativeMethodWrapper.ProviderEnum.SSL_PROV, ref info);
         }
 
-        internal override uint SetConnectionBufferSize(ref uint unsignedPacketSize) 
+        internal override uint SetConnectionBufferSize(ref uint unsignedPacketSize)
             => SNINativeMethodWrapper.SNISetInfo(Handle, SNINativeMethodWrapper.QTypes.SNI_QUERY_CONN_BUFSIZE, ref unsignedPacketSize);
 
-        internal override uint GenerateSspiClientContext(byte[] receivedBuff, uint receivedLength, ref byte[] sendBuff, ref uint sendLength, byte[] _sniSpnBuffer) 
+        internal override uint GenerateSspiClientContext(byte[] receivedBuff, uint receivedLength, ref byte[] sendBuff, ref uint sendLength, byte[] _sniSpnBuffer)
             => SNINativeMethodWrapper.SNISecGenClientContext(Handle, receivedBuff, receivedLength, sendBuff, ref sendLength, _sniSpnBuffer);
-        
 
-        internal override uint WaitForSSLHandShakeToComplete() 
+
+        internal override uint WaitForSSLHandShakeToComplete()
             => SNINativeMethodWrapper.SNIWaitForSSLHandshakeToComplete(Handle, GetTimeoutRemaining());
 
         internal override void DisposePacketCache()
@@ -292,11 +323,11 @@ namespace System.Data.SqlClient
                 // Do not set _writePacketCache to null, just in case a WriteAsyncCallback completes after this point
             }
         }
-        
+
         internal sealed class WritePacketCache : IDisposable
         {
             private bool _disposed;
-            private Stack<SNIPacket> _packets;
+            private readonly Stack<SNIPacket> _packets;
 
             public WritePacketCache()
             {

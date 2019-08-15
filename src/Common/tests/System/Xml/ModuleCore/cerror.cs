@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Diagnostics;	//StackFrame
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -29,7 +29,7 @@ namespace OLEDB.Test.ModuleCore
         {
             set
             {
-                //Set the static Error interface...	
+                //Set the static Error interface...
                 s_rIError = value;
 
                 //Setup the standard c# Console to log to LTM instead...
@@ -61,7 +61,7 @@ namespace OLEDB.Test.ModuleCore
 
         internal static void Dispose()
         {
-            //Reset the info.  
+            //Reset the info.
             s_rIError = null;
             s_rITestConsole = null;
 
@@ -130,13 +130,13 @@ namespace OLEDB.Test.ModuleCore
         public static void Write(string text, params object[] args)
         {
             //Delegate
-            Write(String.Format(text, args));
+            Write(string.Format(text, args));
         }
 
         public static void WriteLine(string text, params object[] args)
         {
             //Delegate
-            WriteLine(String.Format(text, args));
+            WriteLine(string.Format(text, args));
         }
 
         public static void Write(char[] value)
@@ -215,7 +215,7 @@ namespace OLEDB.Test.ModuleCore
 
             //Compare not only compares but throws - so your test stops processing
             //This way processing stops upon the first error, so you don't have to check return
-            //values or validate values afterwards.  If you have other items to do, then use the 
+            //values or validate values afterwards.  If you have other items to do, then use the
             //CError.Equals instead of CError.Compare
             Console.WriteLine("ERROR: {0}", message);
             Console.WriteLine("Expected: {0}", expected);
@@ -230,7 +230,7 @@ namespace OLEDB.Test.ModuleCore
 
             //Compare not only compares but throws - so your test stops processing
             //This way processing stops upon the first error, so you don't have to check return
-            //values or validate values afterwards.  If you have other items to do, then use the 
+            //values or validate values afterwards.  If you have other items to do, then use the
             //CError.Equals instead of CError.Compare
             Console.WriteLine("expected1: " + expected1);
             Console.WriteLine("expected2: " + expected2);
@@ -343,12 +343,12 @@ namespace OLEDB.Test.ModuleCore
                 if (TestConsole != null)
                 {
                     //ITestConsole.Log
-                    TestConsole.Log(Common.Format(actual),			//actual
-                                        Common.Format(expected),		//expected
-                                        source,							//source
-                                        message,						//message
-                                        details,						//details
-                                        tagCONSOLEFLAGS.CONSOLE_TEXT,	//flags
+                    TestConsole.Log(Common.Format(actual),              //actual
+                                        Common.Format(expected),        //expected
+                                        source,                         //source
+                                        message,                        //message
+                                        details,                        //details
+                                        tagCONSOLEFLAGS.CONSOLE_TEXT,   //flags
                                         "fake_filename",
                                         999
                                     );
@@ -373,7 +373,7 @@ namespace OLEDB.Test.ModuleCore
             return false;
         }
 
-        private static String FixupXml(String value)
+        private static string FixupXml(string value)
         {
             bool escapeXmlStuff = false;
             if (value == null) return null;

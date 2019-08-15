@@ -54,7 +54,7 @@ namespace System.Net.Http.Functional.Tests
         public async Task Ctor_OneUnicodeEntry_Encoded()
         {
             var data = new Dictionary<string, string>();
-            data.Add("key", "valueク");
+            data.Add("key", "value\u30AF");
             var content = new FormUrlEncodedContent(data);
 
             Stream stream = await content.ReadAsStreamAsync();
@@ -108,7 +108,7 @@ namespace System.Net.Http.Functional.Tests
             Stream stream = await content.ReadAsStreamAsync();
             string result = new StreamReader(stream).ReadToEnd().ToLowerInvariant();
 
-            // Result of UrlEncode invoked in .Net 4.6
+            // Result of UrlEncode invoked in .NET Framework 4.6
             // string expectedResult = "key=" + HttpUtility.UrlEncode(testString).ToLowerInvariant();
             // HttpUtility is not part of ProjectK.
 

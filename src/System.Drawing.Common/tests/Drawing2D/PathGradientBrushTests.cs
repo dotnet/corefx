@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 //
 // Copyright (C) 2005-2006 Novell, Inc (http://www.novell.com)
@@ -37,7 +37,7 @@ namespace System.Drawing.Drawing2D.Tests
         private readonly RectangleF _defaultRectangle = new RectangleF(1, 2, 19, 28);
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Ctor_Points_ReturnsExpected()
         {
             using (PathGradientBrush bi = new PathGradientBrush(_defaultIntPoints))
@@ -60,7 +60,7 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(WrapMode_TestData))]
         public void Ctor_PointsWrapMode_ReturnsExpected(WrapMode wrapMode)
         {
@@ -74,14 +74,14 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Ctor_PointsNull_ThrowsArgumentNullException()
         {
             AssertExtensions.Throws<ArgumentNullException>("points", () => new PathGradientBrush((Point[])null));
             AssertExtensions.Throws<ArgumentNullException>("points", () => new PathGradientBrush((PointF[])null));
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(0)]
         [InlineData(1)]
         public void Ctor_PointsLengthLessThenTwo_ThrowsOutOfMemoryException(int pointsLength)
@@ -92,18 +92,18 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Throws<OutOfMemoryException>(() => new PathGradientBrush(new PointF[pointsLength], WrapMode.Clamp));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Ctor_InvalidWrapMode_ThrowsInvalidEnumArgumentException()
         {
-            Assert.ThrowsAny<ArgumentException>(() => 
+            Assert.ThrowsAny<ArgumentException>(() =>
                 new PathGradientBrush(_defaultIntPoints, (WrapMode)int.MaxValue));
 
-            Assert.ThrowsAny<ArgumentException>(() => 
+            Assert.ThrowsAny<ArgumentException>(() =>
                 new PathGradientBrush(_defaultFloatPoints, (WrapMode)int.MaxValue));
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Ctor_Path_ReturnsExpected()
         {
             using (GraphicsPath path = new GraphicsPath(_defaultFloatPoints, new byte[] { 0, 1 }))
@@ -114,13 +114,13 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Ctor_Path_ThrowsArgumentNullException()
         {
             AssertExtensions.Throws<ArgumentNullException>("path", () => new PathGradientBrush((GraphicsPath)null));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Ctor_PathWithLessThenTwoPoints_ThrowsOutOfMemoryException()
         {
             using (GraphicsPath path = new GraphicsPath())
@@ -132,7 +132,7 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Clone_ReturnsExpected()
         {
             using (GraphicsPath path = new GraphicsPath(_defaultFloatPoints, new byte[] { 0, 1 }))
@@ -144,7 +144,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Clone_Disposed_ThrowsArgumentException()
         {
             PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
@@ -153,7 +153,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.Clone());
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void CenterColor_ReturnsExpected()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
@@ -166,7 +166,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void CenterColor_Disposed_ThrowsArgumentException()
         {
             PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
@@ -176,7 +176,7 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void SurroundColors_ReturnsExpected()
         {
             Color[] expectedColors = new Color[2] { Color.FromArgb(255, 0, 0, 255), Color.FromArgb(255, 255, 0, 0) };
@@ -192,7 +192,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void SurroundColors_CannotChange()
         {
             Color[] colors = new Color[2] { Color.FromArgb(255, 0, 0, 255), Color.FromArgb(255, 255, 0, 0) };
@@ -208,7 +208,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void SurroundColors_Disposed_ThrowsArgumentException()
         {
             Color[] colors = new Color[2] { Color.FromArgb(255, 0, 0, 255), Color.FromArgb(255, 255, 0, 0) };
@@ -224,7 +224,7 @@ namespace System.Drawing.Drawing2D.Tests
             yield return new object[] { new Point[2] { new Point(1, 1), new Point(2, 2) }, new Color[3] };
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(SurroundColors_InvalidColorsLength_TestData))]
         public void SurroundColors_InvalidColorsLength_ThrowsArgumentException(Point[] points, Color[] colors)
         {
@@ -234,16 +234,16 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
-        public void SurroundColors_Null_ThrowsArgumentNullException()
+        [ConditionalFact(Helpers.IsDrawingSupported)]
+        public void SurroundColors_Null_ThrowsNullReferenceException()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
             {
-                AssertExtensions.Throws<ArgumentNullException>(null, () => brush.SurroundColors = null);
+                AssertExtensions.Throws<NullReferenceException>(() => brush.SurroundColors = null);
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void CenterPoint_ReturnsExpected()
         {
             PointF centralPoint = new PointF(float.MaxValue, float.MinValue);
@@ -263,7 +263,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void CenterPoint_Disposed_ThrowsArgumentException()
         {
             PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
@@ -281,7 +281,7 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Blend_FactorsPositions_TestData))]
         public void Blend_ReturnsExpected(float[] factors, float[] positions)
         {
@@ -305,7 +305,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Blend_CannotChange()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints, WrapMode.TileFlipXY))
@@ -321,7 +321,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Blend_Disposed_ThrowsArgumentException()
         {
             PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
@@ -339,7 +339,7 @@ namespace System.Drawing.Drawing2D.Tests
             yield return new object[] { new Blend() { Factors = new float[3], Positions = new float[3] { 1, 1, 1 } } };
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Blend_InvalidFactorsPositions_TestData))]
         public void Blend_InvalidFactorPositions_ThrowsArgumentException(Blend blend)
         {
@@ -349,7 +349,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Blend_InvalidFactorPositionsLengthMismatch_ThrowsArgumentOutOfRangeException()
         {
             Blend invalidBlend = new Blend() { Factors = new float[2], Positions = new float[1] };
@@ -360,7 +360,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Blend_Null_ThrowsNullReferenceException()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
@@ -371,17 +371,17 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Blend_NullBlendProperites_ThrowsArgumentNullException()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
             {
-                AssertExtensions.Throws<ArgumentNullException>("source", () => 
+                AssertExtensions.Throws<ArgumentNullException>("source", () =>
                     brush.Blend = new Blend() { Factors = new float[0], Positions = null });
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(1f)]
         [InlineData(0f)]
         [InlineData(0.5f)]
@@ -417,17 +417,11 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
-        [InlineData(1f, 1f)]
-        [InlineData(0f, 1f)]
-        [InlineData(0.5f, 1f)]
-        [InlineData(1f, 0f)]
-        [InlineData(0f, 0f)]
-        [InlineData(0.5f, 0f)]
-        [InlineData(1f, 0.5f)]
-        [InlineData(0f, 0.5f)]
-        [InlineData(0.5f, 0.5f)]
-        public void SetSigmaBellShape_FocusScale_Success(float focus, float scale)
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
+        [InlineData(1f)]
+        [InlineData(0f)]
+        [InlineData(0.5f)]
+        public void SetSigmaBellShape_FocusScale_Success(float focus)
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
             {
@@ -465,7 +459,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void SetSigmaBellShape_Disposed_ThrowsArgumentException()
         {
             PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
@@ -475,7 +469,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.SetSigmaBellShape(1f, 1f));
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(-1)]
         [InlineData(1.1f)]
         public void SetSigmaBellShape_InvalidFocus_ThrowsArgumentException(float focus)
@@ -487,7 +481,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(-1)]
         [InlineData(1.1f)]
         public void SetSigmaBellShape_InvalidScale_ThrowsArgumentException(float scale)
@@ -498,7 +492,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(1f)]
         [InlineData(0f)]
         [InlineData(0.5f)]
@@ -508,7 +502,7 @@ namespace System.Drawing.Drawing2D.Tests
 
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
             {
-                brush.SetBlendTriangularShape(focus);                
+                brush.SetBlendTriangularShape(focus);
                 Assert.True(brush.Transform.IsIdentity);
                 if (focus == 0f)
                 {
@@ -528,17 +522,11 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
-        [InlineData(1f, 1f)]
-        [InlineData(0f, 1f)]
-        [InlineData(0.5f, 1f)]
-        [InlineData(1f, 0f)]
-        [InlineData(0f, 0f)]
-        [InlineData(0.5f, 0f)]
-        [InlineData(1f, 0.5f)]
-        [InlineData(0f, 0.5f)]
-        [InlineData(0.5f, 0.5f)]
-        public void SetBlendTriangularShape_FocusScale_Success(float focus, float scale)
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
+        [InlineData(1f)]
+        [InlineData(0f)]
+        [InlineData(0.5f)]
+        public void SetBlendTriangularShape_FocusScale_Success(float focus)
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
             {
@@ -563,7 +551,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void SetBlendTriangularShape_Disposed_ThrowsArgumentException()
         {
             PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
@@ -573,7 +561,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.SetBlendTriangularShape(1f, 1f));
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(-1)]
         [InlineData(1.1f)]
         public void SetBlendTriangularShape_InvalidFocus_ThrowsArgumentException(float focus)
@@ -585,7 +573,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(-1)]
         [InlineData(1.1f)]
         public void SetBlendTriangularShape_InvalidScale_ThrowsArgumentException(float scale)
@@ -596,7 +584,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void InterpolationColors_ReturnsExpected()
         {
             Color[] expectedColors = new Color[2] { Color.FromArgb(255, 0, 0, 255), Color.FromArgb(255, 255, 0, 0) };
@@ -616,7 +604,7 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void InterpolationColors_CannotChange()
         {
             Color[] colors = new Color[2] { Color.FromArgb(255, 0, 0, 255), Color.FromArgb(255, 255, 0, 0) };
@@ -638,7 +626,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void InterpolationColors_Disposed_ThrowsArgumentException()
         {
             PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
@@ -647,7 +635,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.InterpolationColors);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void InterpolationColors_Null_ThrowsNullReferenceException()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
@@ -656,30 +644,30 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void InterpolationColors_NullColors_ThrowsNullReferenceException()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
             {
-                Assert.Throws<NullReferenceException>(() => 
+                Assert.Throws<NullReferenceException>(() =>
                     brush.InterpolationColors = new ColorBlend() { Colors = null, Positions = null });
 
-                Assert.Throws<NullReferenceException>(() => 
+                Assert.Throws<NullReferenceException>(() =>
                     brush.InterpolationColors = new ColorBlend() { Colors = null, Positions = new float[2] });
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void InterpolationColors_NullPoints_ArgumentNullException()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
             {
-                AssertExtensions.Throws<ArgumentNullException>("source", () => 
+                AssertExtensions.Throws<ArgumentNullException>("source", () =>
                     brush.InterpolationColors = new ColorBlend() { Colors = new Color[1], Positions = null });
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void InterpolationColors_Empty_ArgumentException()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
@@ -688,37 +676,37 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void InterpolationColors_EmptyColors_ArgumentException()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
             {
-                AssertExtensions.Throws<ArgumentException>(null, () => 
+                AssertExtensions.Throws<ArgumentException>(null, () =>
                     brush.InterpolationColors = new ColorBlend() { Colors = new Color[0], Positions = new float[0] });
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void InterpolationColors_PointsLengthGreaterThenColorsLength_ArgumentException()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
             {
-                AssertExtensions.Throws<ArgumentException>(null, () => 
+                AssertExtensions.Throws<ArgumentException>(null, () =>
                     brush.InterpolationColors = new ColorBlend() { Colors = new Color[1], Positions = new float[2] });
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void InterpolationColors_ColorsLengthGreaterThenPointsLength_ThrowsArgumentOutOfRangeException()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
             {
-                Assert.Throws<ArgumentOutOfRangeException>(() => 
+                Assert.Throws<ArgumentOutOfRangeException>(() =>
                     brush.InterpolationColors = new ColorBlend() { Colors = new Color[2], Positions = new float[1] });
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Transform_ReturnsExpected()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
@@ -731,7 +719,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Transform_EmptyMatrix_ReturnsExpected()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
@@ -742,7 +730,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Transform_Disposed_ThrowsArgumentException()
         {
             PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
@@ -751,7 +739,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.Transform);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Transform_Null_ArgumentNullException()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
@@ -760,7 +748,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Transform_NonInvertible_ArgumentException()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
@@ -770,7 +758,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void ResetTransform_Success()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
@@ -785,7 +773,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void ResetTransform_Disposed_ThrowsArgumentException()
         {
             PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
@@ -794,7 +782,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.ResetTransform());
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void MultiplyTransform_Matrix_Success()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
@@ -807,7 +795,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(MatrixOrder.Append)]
         [InlineData(MatrixOrder.Prepend)]
         public void MultiplyTransform_MatrixMatrixOrder_Success(MatrixOrder matrixOrder)
@@ -822,7 +810,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void MultiplyTransform_Disposed_ThrowsArgumentException()
         {
             using (Matrix matrix = new Matrix(1, 0, 0, 1, 1, 1))
@@ -834,7 +822,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void MultiplyTransform_NullMatrix_ThrowsArgumentNullException()
         {
             using (var brush = new PathGradientBrush(_defaultFloatPoints))
@@ -844,7 +832,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void MultiplyTransform_DisposedMatrix_Nop()
         {
             using (var brush = new PathGradientBrush(_defaultFloatPoints))
@@ -860,7 +848,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void MultiplyTransform_InvalidMatrixOrder_ArgumentException()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
@@ -870,18 +858,18 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void MultiplyTransform_NonInvertible_ArgumentException()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
             using (Matrix nonInvertible = new Matrix(123, 24, 82, 16, 47, 30))
-            {                
+            {
                 AssertExtensions.Throws<ArgumentException>(null, () => brush.MultiplyTransform(nonInvertible));
                 AssertExtensions.Throws<ArgumentException>(null, () => brush.MultiplyTransform(nonInvertible, MatrixOrder.Append));
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TranslateTransform_Offset_Success()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
@@ -893,7 +881,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(MatrixOrder.Append)]
         [InlineData(MatrixOrder.Prepend)]
         public void TranslateTransform_OffsetMatrixOrder_Success(MatrixOrder matrixOrder)
@@ -907,7 +895,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TranslateTransform_Disposed_ThrowsArgumentException()
         {
             PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
@@ -916,7 +904,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.TranslateTransform(20f, 30f, MatrixOrder.Append));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TranslateTransform_InvalidMatrixOrder_ArgumentException()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
@@ -925,7 +913,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void ScaleTransform_Scale_Success()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
@@ -945,11 +933,11 @@ namespace System.Drawing.Drawing2D.Tests
 
                 matrix.Scale(float.MinValue, float.MaxValue, MatrixOrder.Prepend);
                 brush.ScaleTransform(float.MinValue, float.MaxValue);
-                Assert.Equal(matrix, brush.Transform);                
+                Assert.Equal(matrix, brush.Transform);
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(MatrixOrder.Append)]
         [InlineData(MatrixOrder.Prepend)]
         public void ScaleTransform_ScaleMatrixOrder_Success(MatrixOrder matrixOrder)
@@ -963,7 +951,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void ScaleTransform_Disposed_ThrowsArgumentException()
         {
             PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
@@ -972,7 +960,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.ScaleTransform(0.25f, 2, MatrixOrder.Append));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void ScaleTransform_InvalidMatrixOrder_ArgumentException()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
@@ -981,7 +969,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void RotateTransform_Angle_Success()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
@@ -996,7 +984,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(MatrixOrder.Append)]
         [InlineData(MatrixOrder.Prepend)]
         public void RotateTransform_AngleMatrixOrder_Success(MatrixOrder matrixOrder)
@@ -1006,11 +994,11 @@ namespace System.Drawing.Drawing2D.Tests
             {
                 matrix.Rotate(45, matrixOrder);
                 brush.RotateTransform(45, matrixOrder);
-                Assert.Equal(matrix, brush.Transform);                
+                Assert.Equal(matrix, brush.Transform);
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void RotateTransform_Disposed_ThrowsArgumentException()
         {
             PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
@@ -1019,7 +1007,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.RotateTransform(45, MatrixOrder.Append));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void RotateTransform_InvalidMatrixOrder_ArgumentException()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
@@ -1028,7 +1016,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void FocusScales_ReturnsExpected()
         {
             var point = new PointF(2.5f, 3.4f);
@@ -1040,7 +1028,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void FocusScales_Disposed_ThrowsArgumentException()
         {
             PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
@@ -1049,7 +1037,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.FocusScales);
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(WrapMode_TestData))]
         public void WrapMode_ReturnsExpected(WrapMode wrapMode)
         {
@@ -1060,7 +1048,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void WrapMode_Disposed_ThrowsArgumentException()
         {
             PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints);
@@ -1069,7 +1057,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.WrapMode);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void WrapMode_Invalid_InvalidEnumArgumentException()
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))

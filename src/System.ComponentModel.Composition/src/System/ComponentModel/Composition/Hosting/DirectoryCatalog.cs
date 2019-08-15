@@ -4,11 +4,10 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel.Composition.Diagnostics;
+using System.Composition.Diagnostics;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -32,14 +31,14 @@ namespace System.ComponentModel.Composition.Hosting
         private string _fullPath;
         private string _searchPattern;
         private ReadOnlyCollection<string> _loadedFiles;
-        
+
         private readonly ReflectionContext _reflectionContext = null;
 
         /// <summary>
-        ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the *.dll files 
+        ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the *.dll files
         ///     in the given directory path.
         ///
-        ///     Possible exceptions that can be thrown are any that <see cref="Directory.GetFiles(string, string)"/> or 
+        ///     Possible exceptions that can be thrown are any that <see cref="Directory.GetFiles(string, string)"/> or
         ///     <see cref="Assembly.Load(AssemblyName)"/> can throw.
         /// </summary>
         /// <param name="path">
@@ -47,33 +46,33 @@ namespace System.ComponentModel.Composition.Hosting
         ///     The path needs to be absolute or relative to <see cref="AppDomain.BaseDirectory"/>
         /// </param>
         /// <exception cref="ArgumentException">
-        ///     If <paramref name="path"/> is a zero-length string, contains only white space, or 
+        ///     If <paramref name="path"/> is a zero-length string, contains only white space, or
         ///     contains one or more implementation-specific invalid characters.
         /// </exception>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="path"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
-        ///     The specified <paramref name="path"/> is invalid (for example, it is on an unmapped drive). 
+        ///     The specified <paramref name="path"/> is invalid (for example, it is on an unmapped drive).
         /// </exception>
         /// <exception cref="PathTooLongException">
-        ///     The specified <paramref name="path"/>, file name, or both exceed the system-defined maximum length. 
-        ///     For example, on Windows-based platforms, paths must be less than 248 characters and file names must 
-        ///     be less than 260 characters. 
+        ///     The specified <paramref name="path"/>, file name, or both exceed the system-defined maximum length.
+        ///     For example, on Windows-based platforms, paths must be less than 248 characters and file names must
+        ///     be less than 260 characters.
         /// </exception>
         /// <exception cref="UnauthorizedAccessException">
-        ///     The caller does not have the required permission. 
+        ///     The caller does not have the required permission.
         /// </exception>
         public DirectoryCatalog(string path)
             : this(path, "*.dll")
         {
         }
-        
+
         /// <summary>
-        ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the *.dll files 
+        ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the *.dll files
         ///     in the given directory path.
         ///
-        ///     Possible exceptions that can be thrown are any that <see cref="Directory.GetFiles(string, string)"/> or 
+        ///     Possible exceptions that can be thrown are any that <see cref="Directory.GetFiles(string, string)"/> or
         ///     <see cref="Assembly.Load(AssemblyName)"/> can throw.
         /// </summary>
         /// <param name="path">
@@ -81,11 +80,11 @@ namespace System.ComponentModel.Composition.Hosting
         ///     The path needs to be absolute or relative to <see cref="AppDomain.BaseDirectory"/>
         /// </param>
         /// <param name="reflectionContext">
-        ///     The <see cref="ReflectionContext"/> a context used by the catalog when 
+        ///     The <see cref="ReflectionContext"/> a context used by the catalog when
         ///     interpreting the types to inject attributes into the type definition.
         /// </param>
         /// <exception cref="ArgumentException">
-        ///     If <paramref name="path"/> is a zero-length string, contains only white space, or 
+        ///     If <paramref name="path"/> is a zero-length string, contains only white space, or
         ///     contains one or more implementation-specific invalid characters.
         /// </exception>
         /// <exception cref="ArgumentNullException">
@@ -93,15 +92,15 @@ namespace System.ComponentModel.Composition.Hosting
         ///     <paramref name="reflectionContext"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
-        ///     The specified <paramref name="path"/> is invalid (for example, it is on an unmapped drive). 
+        ///     The specified <paramref name="path"/> is invalid (for example, it is on an unmapped drive).
         /// </exception>
         /// <exception cref="PathTooLongException">
-        ///     The specified <paramref name="path"/>, file name, or both exceed the system-defined maximum length. 
-        ///     For example, on Windows-based platforms, paths must be less than 248 characters and file names must 
-        ///     be less than 260 characters. 
+        ///     The specified <paramref name="path"/>, file name, or both exceed the system-defined maximum length.
+        ///     For example, on Windows-based platforms, paths must be less than 248 characters and file names must
+        ///     be less than 260 characters.
         /// </exception>
         /// <exception cref="UnauthorizedAccessException">
-        ///     The caller does not have the required permission. 
+        ///     The caller does not have the required permission.
         /// </exception>
         public DirectoryCatalog(string path, ReflectionContext reflectionContext)
             : this(path, "*.dll", reflectionContext)
@@ -109,10 +108,10 @@ namespace System.ComponentModel.Composition.Hosting
         }
 
         /// <summary>
-        ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the *.dll files 
+        ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the *.dll files
         ///     in the given directory path.
         ///
-        ///     Possible exceptions that can be thrown are any that <see cref="Directory.GetFiles(string, string)"/> or 
+        ///     Possible exceptions that can be thrown are any that <see cref="Directory.GetFiles(string, string)"/> or
         ///     <see cref="Assembly.Load(AssemblyName)"/> can throw.
         /// </summary>
         /// <param name="path">
@@ -123,7 +122,7 @@ namespace System.ComponentModel.Composition.Hosting
         ///     The <see cref="ICompositionElement"/> CompositionElement used by Diagnostics to identify the source for parts.
         /// </param>
         /// <exception cref="ArgumentException">
-        ///     If <paramref name="path"/> is a zero-length string, contains only white space, or 
+        ///     If <paramref name="path"/> is a zero-length string, contains only white space, or
         ///     contains one or more implementation-specific invalid characters.
         /// </exception>
         /// <exception cref="ArgumentNullException">
@@ -131,26 +130,26 @@ namespace System.ComponentModel.Composition.Hosting
         ///     <paramref name="definitionOrigin"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
-        ///     The specified <paramref name="path"/> is invalid (for example, it is on an unmapped drive). 
+        ///     The specified <paramref name="path"/> is invalid (for example, it is on an unmapped drive).
         /// </exception>
         /// <exception cref="PathTooLongException">
-        ///     The specified <paramref name="path"/>, file name, or both exceed the system-defined maximum length. 
-        ///     For example, on Windows-based platforms, paths must be less than 248 characters and file names must 
-        ///     be less than 260 characters. 
+        ///     The specified <paramref name="path"/>, file name, or both exceed the system-defined maximum length.
+        ///     For example, on Windows-based platforms, paths must be less than 248 characters and file names must
+        ///     be less than 260 characters.
         /// </exception>
         /// <exception cref="UnauthorizedAccessException">
-        ///     The caller does not have the required permission. 
+        ///     The caller does not have the required permission.
         /// </exception>
-        public DirectoryCatalog(string path, ICompositionElement definitionOrigin) 
+        public DirectoryCatalog(string path, ICompositionElement definitionOrigin)
             : this(path, "*.dll", definitionOrigin)
         {
         }
-        
+
         /// <summary>
-        ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the given searchPattern 
+        ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the given searchPattern
         ///     over the files in the given directory path.
-        ///     
-        ///     Possible exceptions that can be thrown are any that <see cref="Directory.GetFiles(string, string)"/> or 
+        ///
+        ///     Possible exceptions that can be thrown are any that <see cref="Directory.GetFiles(string, string)"/> or
         ///     <see cref="Assembly.Load(AssemblyName)"/> can throw.
         /// </summary>
         /// <param name="path">
@@ -158,15 +157,15 @@ namespace System.ComponentModel.Composition.Hosting
         ///     The path needs to be absolute or relative to <see cref="AppDomain.BaseDirectory"/>
         /// </param>
         /// <param name="reflectionContext">
-        ///     The <see cref="ReflectionContext"/> a context used by the catalog when 
+        ///     The <see cref="ReflectionContext"/> a context used by the catalog when
         ///     interpreting the types to inject attributes into the type definition.
         /// </param>
         /// <param name="definitionOrigin">
         ///     The <see cref="ICompositionElement"/> CompositionElement used by Diagnostics to identify the source for parts.
         /// </param>
         /// <exception cref="ArgumentException">
-        ///     If <paramref name="path"/> is a zero-length string, contains only white space 
-        ///     does not contain a valid pattern. 
+        ///     If <paramref name="path"/> is a zero-length string, contains only white space
+        ///     does not contain a valid pattern.
         /// </exception>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="path"/> is <see langword="null"/> or
@@ -174,15 +173,15 @@ namespace System.ComponentModel.Composition.Hosting
         ///     <paramref name="definitionOrigin"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
-        ///     The specified <paramref name="path"/> is invalid (for example, it is on an unmapped drive). 
+        ///     The specified <paramref name="path"/> is invalid (for example, it is on an unmapped drive).
         /// </exception>
         /// <exception cref="PathTooLongException">
-        ///     The specified <paramref name="path"/>, file name, or both exceed the system-defined maximum length. 
-        ///     For example, on Windows-based platforms, paths must be less than 248 characters and file names must 
-        ///     be less than 260 characters. 
+        ///     The specified <paramref name="path"/>, file name, or both exceed the system-defined maximum length.
+        ///     For example, on Windows-based platforms, paths must be less than 248 characters and file names must
+        ///     be less than 260 characters.
         /// </exception>
         /// <exception cref="UnauthorizedAccessException">
-        ///     The caller does not have the required permission. 
+        ///     The caller does not have the required permission.
         /// </exception>
         public DirectoryCatalog(string path, ReflectionContext reflectionContext, ICompositionElement definitionOrigin)
             : this(path, "*.dll", reflectionContext, definitionOrigin)
@@ -190,10 +189,10 @@ namespace System.ComponentModel.Composition.Hosting
         }
 
         /// <summary>
-        ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the *.dll files 
+        ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the *.dll files
         ///     in the given directory path.
         ///
-        ///     Possible exceptions that can be thrown are any that <see cref="Directory.GetFiles(string, string)"/> or 
+        ///     Possible exceptions that can be thrown are any that <see cref="Directory.GetFiles(string, string)"/> or
         ///     <see cref="Assembly.Load(AssemblyName)"/> can throw.
         /// </summary>
         /// <param name="path">
@@ -204,38 +203,38 @@ namespace System.ComponentModel.Composition.Hosting
         ///     Any valid searchPattern that <see cref="Directory.GetFiles(string, string)"/> will accept.
         /// </param>
         /// <exception cref="ArgumentException">
-        ///     If <paramref name="path"/> is a zero-length string, contains only white space, or 
-        ///     contains one or more implementation-specific invalid characters. Or <paramref name="searchPattern"/> 
-        ///     does not contain a valid pattern. 
+        ///     If <paramref name="path"/> is a zero-length string, contains only white space, or
+        ///     contains one or more implementation-specific invalid characters. Or <paramref name="searchPattern"/>
+        ///     does not contain a valid pattern.
         /// </exception>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="path"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
-        ///     The specified <paramref name="path"/> is invalid (for example, it is on an unmapped drive). 
+        ///     The specified <paramref name="path"/> is invalid (for example, it is on an unmapped drive).
         /// </exception>
         /// <exception cref="PathTooLongException">
-        ///     The specified <paramref name="path"/>, file name, or both exceed the system-defined maximum length. 
-        ///     For example, on Windows-based platforms, paths must be less than 248 characters and file names must 
-        ///     be less than 260 characters. 
+        ///     The specified <paramref name="path"/>, file name, or both exceed the system-defined maximum length.
+        ///     For example, on Windows-based platforms, paths must be less than 248 characters and file names must
+        ///     be less than 260 characters.
         /// </exception>
         /// <exception cref="UnauthorizedAccessException">
-        ///     The caller does not have the required permission. 
+        ///     The caller does not have the required permission.
         /// </exception>
         public DirectoryCatalog(string path, string searchPattern)
         {
-            Requires.NotNullOrEmpty(path, "path");
-            Requires.NotNullOrEmpty(searchPattern, "searchPattern");
+            Requires.NotNullOrEmpty(path, nameof(path));
+            Requires.NotNullOrEmpty(searchPattern, nameof(searchPattern));
 
             _definitionOrigin = this;
             Initialize(path, searchPattern);
         }
 
         /// <summary>
-        ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the *.dll files 
+        ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the *.dll files
         ///     in the given directory path.
         ///
-        ///     Possible exceptions that can be thrown are any that <see cref="Directory.GetFiles(string, string)"/> or 
+        ///     Possible exceptions that can be thrown are any that <see cref="Directory.GetFiles(string, string)"/> or
         ///     <see cref="Assembly.Load(AssemblyName)"/> can throw.
         /// </summary>
         /// <param name="path">
@@ -246,40 +245,40 @@ namespace System.ComponentModel.Composition.Hosting
         ///     The <see cref="ICompositionElement"/> CompositionElement used by Diagnostics to identify the source for parts.
         /// </param>
         /// <exception cref="ArgumentException">
-        ///     If <paramref name="path"/> is a zero-length string, contains only white space, or 
-        ///     contains one or more implementation-specific invalid characters. Or <paramref name="searchPattern"/> 
-        ///     does not contain a valid pattern. 
+        ///     If <paramref name="path"/> is a zero-length string, contains only white space, or
+        ///     contains one or more implementation-specific invalid characters. Or <paramref name="searchPattern"/>
+        ///     does not contain a valid pattern.
         /// </exception>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="path"/> is <see langword="null"/>.
         ///     <paramref name="definitionOrigin"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
-        ///     The specified <paramref name="path"/> is invalid (for example, it is on an unmapped drive). 
+        ///     The specified <paramref name="path"/> is invalid (for example, it is on an unmapped drive).
         /// </exception>
         /// <exception cref="PathTooLongException">
-        ///     The specified <paramref name="path"/>, file name, or both exceed the system-defined maximum length. 
-        ///     For example, on Windows-based platforms, paths must be less than 248 characters and file names must 
-        ///     be less than 260 characters. 
+        ///     The specified <paramref name="path"/>, file name, or both exceed the system-defined maximum length.
+        ///     For example, on Windows-based platforms, paths must be less than 248 characters and file names must
+        ///     be less than 260 characters.
         /// </exception>
         /// <exception cref="UnauthorizedAccessException">
-        ///     The caller does not have the required permission. 
+        ///     The caller does not have the required permission.
         /// </exception>
         public DirectoryCatalog(string path, string searchPattern, ICompositionElement definitionOrigin)
         {
-            Requires.NotNullOrEmpty(path, "path");
-            Requires.NotNullOrEmpty(searchPattern, "searchPattern");
+            Requires.NotNullOrEmpty(path, nameof(path));
+            Requires.NotNullOrEmpty(searchPattern, nameof(searchPattern));
             Requires.NotNull(definitionOrigin, nameof(definitionOrigin));
 
             _definitionOrigin = definitionOrigin;
             Initialize(path, searchPattern);
         }
-        
+
         /// <summary>
-        ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the given searchPattern 
+        ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the given searchPattern
         ///     over the files in the given directory path.
-        ///     
-        ///     Possible exceptions that can be thrown are any that <see cref="Directory.GetFiles(string, string)"/> or 
+        ///
+        ///     Possible exceptions that can be thrown are any that <see cref="Directory.GetFiles(string, string)"/> or
         ///     <see cref="Assembly.Load(AssemblyName)"/> can throw.
         /// </summary>
         /// <param name="path">
@@ -290,35 +289,35 @@ namespace System.ComponentModel.Composition.Hosting
         ///     Any valid searchPattern that <see cref="Directory.GetFiles(string, string)"/> will accept.
         /// </param>
         /// <param name="reflectionContext">
-        ///     The <see cref="ReflectionContext"/> a context used by the catalog when 
+        ///     The <see cref="ReflectionContext"/> a context used by the catalog when
         ///     interpreting the types to inject attributes into the type definition.
         /// </param>
         /// <exception cref="ArgumentException">
-        ///     If <paramref name="path"/> is a zero-length string, contains only white space, or 
-        ///     contains one or more implementation-specific invalid characters. Or <paramref name="searchPattern"/> 
-        ///     does not contain a valid pattern. 
+        ///     If <paramref name="path"/> is a zero-length string, contains only white space, or
+        ///     contains one or more implementation-specific invalid characters. Or <paramref name="searchPattern"/>
+        ///     does not contain a valid pattern.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        ///     <paramref name="path"/> is <see langword="null"/> 
+        ///     <paramref name="path"/> is <see langword="null"/>
         ///     or <paramref name="searchPattern"/> is <see langword="null"/>.
         ///     or <paramref name="reflectionContext"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
-        ///     The specified <paramref name="path"/> is invalid (for example, it is on an unmapped drive). 
+        ///     The specified <paramref name="path"/> is invalid (for example, it is on an unmapped drive).
         /// </exception>
         /// <exception cref="PathTooLongException">
-        ///     The specified <paramref name="path"/>, file name, or both exceed the system-defined maximum length. 
-        ///     For example, on Windows-based platforms, paths must be less than 248 characters and file names must 
-        ///     be less than 260 characters. 
+        ///     The specified <paramref name="path"/>, file name, or both exceed the system-defined maximum length.
+        ///     For example, on Windows-based platforms, paths must be less than 248 characters and file names must
+        ///     be less than 260 characters.
         /// </exception>
         /// <exception cref="UnauthorizedAccessException">
-        ///     The caller does not have the required permission. 
+        ///     The caller does not have the required permission.
         /// </exception>
         public DirectoryCatalog(string path, string searchPattern, ReflectionContext reflectionContext)
         {
-            Requires.NotNullOrEmpty(path, "path");
-            Requires.NotNullOrEmpty(searchPattern, "searchPattern");
-            Requires.NotNull(reflectionContext, "reflectionContext");
+            Requires.NotNullOrEmpty(path, nameof(path));
+            Requires.NotNullOrEmpty(searchPattern, nameof(searchPattern));
+            Requires.NotNull(reflectionContext, nameof(reflectionContext));
 
             _reflectionContext = reflectionContext;
             _definitionOrigin = this;
@@ -326,10 +325,10 @@ namespace System.ComponentModel.Composition.Hosting
         }
 
         /// <summary>
-        ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the given searchPattern 
+        ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the given searchPattern
         ///     over the files in the given directory path.
-        ///     
-        ///     Possible exceptions that can be thrown are any that <see cref="Directory.GetFiles(string, string)"/> or 
+        ///
+        ///     Possible exceptions that can be thrown are any that <see cref="Directory.GetFiles(string, string)"/> or
         ///     <see cref="Assembly.Load(AssemblyName)"/> can throw.
         /// </summary>
         /// <param name="path">
@@ -340,40 +339,40 @@ namespace System.ComponentModel.Composition.Hosting
         ///     Any valid searchPattern that <see cref="Directory.GetFiles(string, string)"/> will accept.
         /// </param>
         /// <param name="reflectionContext">
-        ///     The <see cref="ReflectionContext"/> a context used by the catalog when 
+        ///     The <see cref="ReflectionContext"/> a context used by the catalog when
         ///     interpreting the types to inject attributes into the type definition.
         /// </param>
         /// <param name="definitionOrigin">
         ///     The <see cref="ICompositionElement"/> CompositionElement used by Diagnostics to identify the source for parts.
         /// </param>
         /// <exception cref="ArgumentException">
-        ///     If <paramref name="path"/> is a zero-length string, contains only white space, or 
-        ///     contains one or more implementation-specific invalid characters. Or <paramref name="searchPattern"/> 
-        ///     does not contain a valid pattern. 
+        ///     If <paramref name="path"/> is a zero-length string, contains only white space, or
+        ///     contains one or more implementation-specific invalid characters. Or <paramref name="searchPattern"/>
+        ///     does not contain a valid pattern.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        ///     <paramref name="path"/> is <see langword="null"/> 
+        ///     <paramref name="path"/> is <see langword="null"/>
         ///     or <paramref name="searchPattern"/> is <see langword="null"/>.
         ///     or <paramref name="reflectionContext"/> is <see langword="null"/>.
         ///     or <paramref name="definitionOrigin"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
-        ///     The specified <paramref name="path"/> is invalid (for example, it is on an unmapped drive). 
+        ///     The specified <paramref name="path"/> is invalid (for example, it is on an unmapped drive).
         /// </exception>
         /// <exception cref="PathTooLongException">
-        ///     The specified <paramref name="path"/>, file name, or both exceed the system-defined maximum length. 
-        ///     For example, on Windows-based platforms, paths must be less than 248 characters and file names must 
-        ///     be less than 260 characters. 
+        ///     The specified <paramref name="path"/>, file name, or both exceed the system-defined maximum length.
+        ///     For example, on Windows-based platforms, paths must be less than 248 characters and file names must
+        ///     be less than 260 characters.
         /// </exception>
         /// <exception cref="UnauthorizedAccessException">
-        ///     The caller does not have the required permission. 
+        ///     The caller does not have the required permission.
         /// </exception>
         public DirectoryCatalog(string path, string searchPattern, ReflectionContext reflectionContext, ICompositionElement definitionOrigin)
         {
-            Requires.NotNullOrEmpty(path, "path");
-            Requires.NotNullOrEmpty(searchPattern, "searchPattern");
-            Requires.NotNull(reflectionContext, "reflectionContext");
-            Requires.NotNull(definitionOrigin, "definitionOrigin");
+            Requires.NotNullOrEmpty(path, nameof(path));
+            Requires.NotNullOrEmpty(searchPattern, nameof(searchPattern));
+            Requires.NotNull(reflectionContext, nameof(reflectionContext));
+            Requires.NotNull(definitionOrigin, nameof(definitionOrigin));
 
             _reflectionContext = reflectionContext;
             _definitionOrigin = definitionOrigin;
@@ -381,14 +380,14 @@ namespace System.ComponentModel.Composition.Hosting
         }
 
         /// <summary>
-        ///     Translated absolute path of the path passed into the constructor of <see cref="DirectoryCatalog"/>. 
+        ///     Translated absolute path of the path passed into the constructor of <see cref="DirectoryCatalog"/>.
         /// </summary>
         public string FullPath
         {
             get
             {
-                Contract.Ensures(Contract.Result<string>() != null);
-                
+                Debug.Assert(_fullPath != null);
+
                 return _fullPath;
             }
         }
@@ -400,10 +399,9 @@ namespace System.ComponentModel.Composition.Hosting
         {
             get
             {
-                Contract.Ensures(Contract.Result<ReadOnlyCollection<string>>() != null);
-
                 using (new ReadLock(_thisLock))
                 {
+                    Debug.Assert(_loadedFiles != null);
                     return _loadedFiles;
                 }
             }
@@ -416,8 +414,8 @@ namespace System.ComponentModel.Composition.Hosting
         {
             get
             {
-                Contract.Ensures(Contract.Result<string>() != null);
-                
+                Debug.Assert(_path != null);
+
                 return _path;
             }
         }
@@ -502,13 +500,13 @@ namespace System.ComponentModel.Composition.Hosting
         ///     Returns the export definitions that match the constraint defined by the specified definition.
         /// </summary>
         /// <param name="definition">
-        ///     The <see cref="ImportDefinition"/> that defines the conditions of the 
+        ///     The <see cref="ImportDefinition"/> that defines the conditions of the
         ///     <see cref="ExportDefinition"/> objects to return.
         /// </param>
         /// <returns>
-        ///     An <see cref="IEnumerable{T}"/> of <see cref="Tuple{T1, T2}"/> containing the 
-        ///     <see cref="ExportDefinition"/> objects and their associated 
-        ///     <see cref="ComposablePartDefinition"/> for objects that match the constraint defined 
+        ///     An <see cref="IEnumerable{T}"/> of <see cref="Tuple{T1, T2}"/> containing the
+        ///     <see cref="ExportDefinition"/> objects and their associated
+        ///     <see cref="ComposablePartDefinition"/> for objects that match the constraint defined
         ///     by <paramref name="definition"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
@@ -559,11 +557,11 @@ namespace System.ComponentModel.Composition.Hosting
         /// <summary>
         ///     Refreshes the <see cref="ComposablePartDefinition"/>s with the latest files in the directory that match
         ///     the searchPattern. If any files have been added they will be added to the catalog and if any files were
-        ///     removed they will be removed from the catalog. For files that have been removed keep in mind that the 
+        ///     removed they will be removed from the catalog. For files that have been removed keep in mind that the
         ///     assembly cannot be unloaded from the process so <see cref="ComposablePartDefinition"/>s for those files
         ///     will simply be removed from the catalog.
-        /// 
-        ///     Possible exceptions that can be thrown are any that <see cref="Directory.GetFiles(string, string)"/> or 
+        ///
+        ///     Possible exceptions that can be thrown are any that <see cref="Directory.GetFiles(string, string)"/> or
         ///     <see cref="Assembly.Load(AssemblyName)"/> can throw.
         /// </summary>
         /// <exception cref="DirectoryNotFoundException">
@@ -572,7 +570,10 @@ namespace System.ComponentModel.Composition.Hosting
         public void Refresh()
         {
             ThrowIfDisposed();
-            Assumes.NotNull(_loadedFiles);
+            if (_loadedFiles == null)
+            {
+                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
+            }
 
             List<Tuple<string, AssemblyCatalog>> catalogsToAdd;
             List<Tuple<string, AssemblyCatalog>> catalogsToRemove;
@@ -654,7 +655,7 @@ namespace System.ComponentModel.Composition.Hosting
         ///     Returns a string representation of the directory catalog.
         /// </summary>
         /// <returns>
-        ///     A <see cref="String"/> containing the string representation of the <see cref="DirectoryCatalog"/>.
+        ///     A <see cref="string"/> containing the string representation of the <see cref="DirectoryCatalog"/>.
         /// </returns>
         public override string ToString()
         {
@@ -684,7 +685,7 @@ namespace System.ComponentModel.Composition.Hosting
                 exception = ex;
             }
             catch (ReflectionTypeLoadException ex)
-            {   // Dlls that have missing Managed dependencies are not loaded, but do not invalidate the Directory 
+            {   // Dlls that have missing Managed dependencies are not loaded, but do not invalidate the Directory
                 exception = ex;
             }
 
@@ -776,12 +777,12 @@ namespace System.ComponentModel.Composition.Hosting
                 throw ExceptionBuilder.CreateObjectDisposed(this);
             }
         }
-       
+
         /// <summary>
         ///     Gets the display name of the directory catalog.
         /// </summary>
         /// <value>
-        ///     A <see cref="String"/> containing a human-readable display name of the <see cref="DirectoryCatalog"/>.
+        ///     A <see cref="string"/> containing a human-readable display name of the <see cref="DirectoryCatalog"/>.
         /// </value>
         [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes")]
         string ICompositionElement.DisplayName

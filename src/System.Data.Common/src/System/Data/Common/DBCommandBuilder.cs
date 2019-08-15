@@ -26,15 +26,15 @@ namespace System.Data.Common
             private string _originalPrefix;
             private string _isNullPrefix;
 
-            private Regex _parameterNameParser;
-            private DbCommandBuilder _dbCommandBuilder;
-            private string[] _baseParameterNames;
-            private string[] _originalParameterNames;
-            private string[] _nullParameterNames;
-            private bool[] _isMutatedName;
-            private int _count;
+            private readonly Regex _parameterNameParser;
+            private readonly DbCommandBuilder _dbCommandBuilder;
+            private readonly string[] _baseParameterNames;
+            private readonly string[] _originalParameterNames;
+            private readonly string[] _nullParameterNames;
+            private readonly bool[] _isMutatedName;
+            private readonly int _count;
             private int _genericParameterCount;
-            private int _adjustedParameterNameMaxLength;
+            private readonly int _adjustedParameterNameMaxLength;
 
             internal ParameterNames(DbCommandBuilder dbCommandBuilder, DbSchemaRow[] schemaRows)
             {
@@ -80,7 +80,7 @@ namespace System.Data.Common
                     }
 
                     // Mutate name if it contains space(s)
-                    if (columnName.IndexOf(' ') >= 0)
+                    if (columnName.Contains(' '))
                     {
                         columnName = columnName.Replace(' ', '_');
                         isMutatedName = true;
@@ -197,7 +197,7 @@ namespace System.Data.Common
                                 // found duplicate name
                                 // the name unchanged name wins
                                 int iMutatedName = _isMutatedName[j] ? j : i;
-                                Debug.Assert(_isMutatedName[iMutatedName], string.Format(CultureInfo.InvariantCulture, "{0} expected to be a mutated name", _baseParameterNames[iMutatedName]));
+                                Debug.Assert(_isMutatedName[iMutatedName], $"{_baseParameterNames[iMutatedName]} expected to be a mutated name");
                                 _baseParameterNames[iMutatedName] = null;   // null out the culprit
                             }
                         }
@@ -215,7 +215,7 @@ namespace System.Data.Common
                 //    generate name based on current index
                 //    increment index
                 //    search name in base names
-                //   loop while name occures in base names
+                //   loop while name occurs in base names
                 //  end for
                 // end foreach
                 string name;
@@ -601,7 +601,7 @@ namespace System.Data.Common
                     }
                     else
                     {
-                        Debug.Assert(false, "Rowcount expected to be 1");
+                        Debug.Fail("Rowcount expected to be 1");
                         useColumnsForParameterNames = false;
                     }
                 }
@@ -1539,7 +1539,7 @@ namespace System.Data.Common
                         switch (stmtType)
                         {
                             case StatementType.Select:
-                                Debug.Assert(false, "how did we get here?");
+                                Debug.Fail("how did we get here?");
                                 return; // don't mess with it
                             case StatementType.Insert:
                                 command = InsertCommand;
@@ -1604,7 +1604,7 @@ namespace System.Data.Common
                     break;
 #if DEBUG
                 case StatementType.Select:
-                    Debug.Assert(false, "how did we get here?");
+                    Debug.Fail("how did we get here?");
                     goto default;
 #endif
                 default:
@@ -1633,4 +1633,3 @@ namespace System.Data.Common
         protected abstract void SetRowUpdatingHandler(DbDataAdapter adapter);
     }
 }
-

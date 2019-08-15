@@ -1,16 +1,13 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{0BFD6D9F-DF9E-4B17-8ED4-29437AE5B04A}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <NoWarn>67,168,219,414,162,184,458,464,78,169,114,693,108,1981,649,109,1066,3021,3026,3002,3014,3022,660,661,429</NoWarn>
+    <NoWarn>67,168,219,414,162,184,458,464,78,169,114,693,108,1981,649,109,1066,3021,3026,3002,3014,3022,660,661,429;xUnit1013</NoWarn>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Release|AnyCPU'" />
   <ItemGroup>
-    <AdditionalCodeCoverageAssemblies Include="Microsoft.CSharp" />
-    <AdditionalCodeCoverageAssemblies Include="System.Linq.Expressions" />
+    <AssembliesBeingTested Include="Microsoft.CSharp" />
+    <AssembliesBeingTested Include="System.Linq.Expressions" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CallInfoTests.cs" />
@@ -156,8 +153,4 @@
     <Compile Include="Common.cs" />
     <Compile Include="ErrorVerifier.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
-  </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -25,7 +25,7 @@ namespace System.Xml.Tests
         {
             LineNumber = lineNum;
             LinePosition = linePos;
-            FilePath = String.Empty;
+            FilePath = string.Empty;
         }
 
         public LineInfo(int lineNum, int linePos, string filePath)
@@ -261,20 +261,16 @@ namespace System.Xml.Tests
             _expectedMessage = _expectedMessage.ToLowerInvariant();
             _actualMessage = _actualMessage.ToLowerInvariant();
 
-
-            if (!PlatformDetection.IsNetNative) // .Net Native toolchain optimizes away Exception messages
+            if (Regex.Match(_actualMessage, _expectedMessage, RegexOptions.Singleline).ToString() != _actualMessage)
             {
-                if (Regex.Match(_actualMessage, _expectedMessage, RegexOptions.Singleline).ToString() != _actualMessage)
-                {
-                    // Unescape before printing the expected message string
-                    _expectedMessage = Regex.Unescape(_expectedMessage);
-                    _output.WriteLine("Mismatch in error message");
-                    _output.WriteLine("===== Expected Message =====\n" + _expectedMessage);
-                    _output.WriteLine("===== Expected Message Length =====\n" + _expectedMessage.Length);
-                    _output.WriteLine("===== Actual Message =====\n" + _actualMessage);
-                    _output.WriteLine("===== Actual Message Length =====\n" + _actualMessage.Length);
-                    throw new VerifyException("Mismatch in error message");
-                }
+                // Unescape before printing the expected message string
+                _expectedMessage = Regex.Unescape(_expectedMessage);
+                _output.WriteLine("Mismatch in error message");
+                _output.WriteLine("===== Expected Message =====\n" + _expectedMessage);
+                _output.WriteLine("===== Expected Message Length =====\n" + _expectedMessage.Length);
+                _output.WriteLine("===== Actual Message =====\n" + _actualMessage);
+                _output.WriteLine("===== Actual Message Length =====\n" + _actualMessage.Length);
+                throw new VerifyException("Mismatch in error message");
             }
         }
 
@@ -355,11 +351,11 @@ namespace System.Xml.Tests
                     var lineInfo = (IdsAndParams[1] as LineInfo);
 
                     // Xml_ErrorPosition = "Line {0}, position {1}."
-                    lineInfoMessage = String.IsNullOrEmpty(lineInfo.FilePath) ? _resources["Xml_ErrorPosition"].ToString() : _resources["Xml_ErrorFilePosition"].ToString();
+                    lineInfoMessage = string.IsNullOrEmpty(lineInfo.FilePath) ? _resources["Xml_ErrorPosition"].ToString() : _resources["Xml_ErrorFilePosition"].ToString();
 
                     var lineNumber = lineInfo.LineNumber.ToString();
                     var linePosition = lineInfo.LinePosition.ToString();
-                    lineInfoMessage = String.IsNullOrEmpty(lineInfo.FilePath) ? String.Format(lineInfoMessage, lineNumber, linePosition) : String.Format(lineInfoMessage, lineInfo.FilePath, lineNumber, linePosition);
+                    lineInfoMessage = string.IsNullOrEmpty(lineInfo.FilePath) ? string.Format(lineInfoMessage, lineNumber, linePosition) : string.Format(lineInfoMessage, lineInfo.FilePath, lineNumber, linePosition);
                 }
                 else
                     lineInfoMessage = ESCAPE_ANY;

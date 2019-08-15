@@ -15,13 +15,13 @@ namespace System.Xml
         }
 
         // Gets the name of the node.
-        public override String Name
+        public override string Name
         {
             get { return OwnerDocument.strCommentName; }
         }
 
         // Gets the name of the current node without the namespace prefix.
-        public override String LocalName
+        public override string LocalName
         {
             get { return OwnerDocument.strCommentName; }
         }
@@ -54,4 +54,3 @@ namespace System.Xml
         internal override XPathNodeType XPNodeType { get { return XPathNodeType.Comment; } }
     }
 }
-

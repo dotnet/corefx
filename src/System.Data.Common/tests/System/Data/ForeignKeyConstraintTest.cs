@@ -13,10 +13,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -138,7 +138,7 @@ namespace System.Data.Tests
             Assert.Equal(typeof(UniqueConstraint), Table.Constraints[0].GetType());
         }
 
-        // Tests ctor (string, DataColumn [], DataColumn [])	
+        // Tests ctor (string, DataColumn [], DataColumn [])
         [Fact]
         public void Ctor4()
         {
@@ -220,7 +220,7 @@ namespace System.Data.Tests
                 table2.Constraints.Add(fkc);
                 throw new ApplicationException("An Exception was expected");
             }
-            // LAMESPEC : spec says InvalidConstraintException but throws this
+            // spec says InvalidConstraintException but throws this
             catch (NullReferenceException)
             {
             }
@@ -228,7 +228,7 @@ namespace System.Data.Tests
 #if false // FIXME: Here this test crashes under MS.NET.
                         // OK - So AddRange() is the only way!
                         table2.Constraints.AddRange (constraints);
-			   // After AddRange(), Check the properties of ForeignKeyConstraint object
+               // After AddRange(), Check the properties of ForeignKeyConstraint object
                         Assert.True(fkc.RelatedColumns [0].ColumnName.Equals ("col1"));
                         Assert.True(fkc.RelatedColumns [1].ColumnName.Equals ("col2"));
                         Assert.True(fkc.RelatedColumns [2].ColumnName.Equals ("col3"));
@@ -251,7 +251,7 @@ namespace System.Data.Tests
             {
             }
             catch (InvalidConstraintException e)
-            { // Could not test on ms.net, as ms.net does not reach here so far.        
+            { // Could not test on ms.net, as ms.net does not reach here so far.
             }
 
 #if false // FIXME: Here this test crashes under MS.NET.

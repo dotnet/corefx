@@ -2,11 +2,20 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.IO;
 using System.Collections.Generic;
-using System.IO.Enumeration;
 using System.Linq;
 
+#if MS_IO_REDIST
+using Microsoft.IO.Enumeration;
+
+namespace Microsoft.IO
+#else
+using System.IO.Enumeration;
+
 namespace System.IO
+#endif
 {
     public static partial class Directory
     {
@@ -82,7 +91,7 @@ namespace System.IO
         {
             return File.GetCreationTimeUtc(path);
         }
- 
+
         public static void SetLastWriteTime(string path, DateTime lastWriteTime)
         {
             string fullPath = Path.GetFullPath(path);
@@ -168,7 +177,7 @@ namespace System.IO
             if (searchPattern == null)
                 throw new ArgumentNullException(nameof(searchPattern));
 
-            FileSystemEnumerableFactory.NormalizeInputs(ref path, ref searchPattern, options);
+            FileSystemEnumerableFactory.NormalizeInputs(ref path, ref searchPattern, options.MatchType);
 
             switch (searchTarget)
             {
@@ -222,7 +231,7 @@ namespace System.IO
                 throw new ArgumentNullException(nameof(path));
 
             string fullPath = Path.GetFullPath(path);
-            string root = fullPath.Substring(0, PathInternal.GetRootLength(fullPath));
+            string root = fullPath.Substring(0, PathInternal.GetRootLength(fullPath.AsSpan()));
 
             return root;
         }
@@ -230,7 +239,7 @@ namespace System.IO
         internal static string InternalGetDirectoryRoot(string path)
         {
             if (path == null) return null;
-            return path.Substring(0, PathInternal.GetRootLength(path));
+            return path.Substring(0, PathInternal.GetRootLength(path.AsSpan()));
         }
 
         public static string GetCurrentDirectory() => Environment.CurrentDirectory;
@@ -277,7 +286,7 @@ namespace System.IO
             // to make sure our cross platform behavior matches NetFX behavior.
             if (!FileSystem.DirectoryExists(fullsourceDirName) && !FileSystem.FileExists(fullsourceDirName))
                 throw new DirectoryNotFoundException(SR.Format(SR.IO_PathNotFound_Path, fullsourceDirName));
-            
+
             if (FileSystem.DirectoryExists(fulldestDirName))
                 throw new IOException(SR.Format(SR.IO_AlreadyExists_Name, fulldestDirName));
 
@@ -302,4 +311,3 @@ namespace System.IO
         }
     }
 }
-

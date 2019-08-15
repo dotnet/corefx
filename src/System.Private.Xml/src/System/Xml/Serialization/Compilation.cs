@@ -2,37 +2,26 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Reflection;
+using System.Reflection.Emit;
+using System.Collections;
+using System.IO;
+using System.Text;
+using System.Threading;
+using System.Security;
+using System.Globalization;
+using System.Collections.Generic;
+
 namespace System.Xml.Serialization
 {
-    using System.Configuration;
-    using System.Reflection;
-    using System.Reflection.Emit;
-    using System.Collections;
-    using System.IO;
-    using System;
-    using System.Text;
-    using System.Xml;
-    using System.Threading;
-    using System.Security;
-    using System.Xml.Serialization.Configuration;
-    using System.Diagnostics;
-    using System.Globalization;
-    using System.Runtime.Versioning;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Collections.Generic;
-    using System.Xml.Extensions;
-    using System.Linq;
-    using System.Xml.Serialization;
-
     internal class TempAssembly
     {
         internal const string GeneratedAssemblyNamespace = "Microsoft.Xml.Serialization.GeneratedAssembly";
-        private Assembly _assembly = null;
+        private readonly Assembly _assembly = null;
         private XmlSerializerImplementation _contract = null;
         private IDictionary _writerMethods;
         private IDictionary _readerMethods;
         private TempMethodDictionary _methods;
-        private Hashtable _assemblies = new Hashtable();
 
         internal class TempMethod
         {
@@ -57,7 +46,6 @@ namespace System.Xml.Serialization
 
         internal TempAssembly(XmlMapping[] xmlMappings, Type[] types, string defaultNamespace, string location)
         {
-#if !FEATURE_SERIALIZATION_UAPAOT
             bool containsSoapMapping = false;
             for (int i = 0; i < xmlMappings.Length; i++)
             {
@@ -94,7 +82,6 @@ namespace System.Xml.Serialization
             {
                 throw new PlatformNotSupportedException("Compiling JScript/CSharp scripts is not supported");
             }
-#endif
 
 #if DEBUG
             // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
@@ -160,10 +147,10 @@ namespace System.Xml.Serialization
             object[] attrs = type.GetCustomAttributes(typeof(System.Xml.Serialization.XmlSerializerAssemblyAttribute), false);
             if (attrs.Length == 0)
             {
-                // Guess serializer name: if parent assembly signed use strong name 
+                // Guess serializer name: if parent assembly signed use strong name
                 AssemblyName name = type.Assembly.GetName();
                 serializerName = Compiler.GetTempAssemblyName(name, defaultNamespace);
-                // use strong name 
+                // use strong name
                 name.Name = serializerName;
                 name.CodeBase = null;
                 name.CultureInfo = CultureInfo.InvariantCulture;
@@ -210,6 +197,12 @@ namespace System.Xml.Serialization
 
                     return null;
                 }
+
+                if (!IsSerializerVersionMatch(serializer, type, defaultNamespace))
+                {
+                    XmlSerializationEventSource.Log.XmlSerializerExpired(serializerName, type.FullName);
+                    return null;
+                }
             }
             else
             {
@@ -248,7 +241,20 @@ namespace System.Xml.Serialization
             return null;
         }
 
-#if !FEATURE_SERIALIZATION_UAPAOT
+        private static bool IsSerializerVersionMatch(Assembly serializer, Type type, string defaultNamespace)
+        {
+            if (serializer == null)
+                return false;
+            object[] attrs = serializer.GetCustomAttributes(typeof(XmlSerializerVersionAttribute), false);
+            if (attrs.Length != 1)
+                return false;
+
+            XmlSerializerVersionAttribute assemblyInfo = (XmlSerializerVersionAttribute)attrs[0];
+            if (assemblyInfo.ParentAssemblyId == GenerateAssemblyId(type) && assemblyInfo.Namespace == defaultNamespace)
+                return true;
+            return false;
+        }
+
         private static string GenerateAssemblyId(Type type)
         {
             Module[] modules = type.Assembly.GetModules();
@@ -406,7 +412,7 @@ namespace System.Xml.Serialization
                 writer.WriteLine("}");
 
                 string codecontent = compiler.Source.ToString();
-                Byte[] info = new UTF8Encoding(true).GetBytes(codecontent);
+                byte[] info = new UTF8Encoding(true).GetBytes(codecontent);
                 stream.Write(info, 0, info.Length);
                 stream.Flush();
                 return true;
@@ -432,10 +438,10 @@ namespace System.Xml.Serialization
             if (types != null && types.Length > 0 && types[0] != null)
             {
                 ConstructorInfo AssemblyVersionAttribute_ctor = typeof(AssemblyVersionAttribute).GetConstructor(
-                    new Type[] { typeof(String) }
+                    new Type[] { typeof(string) }
                     );
                 string assemblyVersion = types[0].Assembly.GetName().Version.ToString();
-                assemblyBuilder.SetCustomAttribute(new CustomAttributeBuilder(AssemblyVersionAttribute_ctor, new Object[] { assemblyVersion }));
+                assemblyBuilder.SetCustomAttribute(new CustomAttributeBuilder(AssemblyVersionAttribute_ctor, new object[] { assemblyVersion }));
             }
             CodeIdentifiers classes = new CodeIdentifiers();
             classes.AddUnique("XmlSerializationWriter", "XmlSerializationWriter");
@@ -494,7 +500,6 @@ namespace System.Xml.Serialization
 
             return writerType.Assembly;
         }
-#endif
 
         private static MethodInfo GetMethodFromType(Type type, string methodName)
         {
@@ -630,8 +635,8 @@ namespace System.Xml.Serialization
 
     internal class TempAssemblyCacheKey
     {
-        private string _ns;
-        private object _type;
+        private readonly string _ns;
+        private readonly object _type;
 
         internal TempAssemblyCacheKey(string ns, object type)
         {
@@ -675,8 +680,9 @@ namespace System.Xml.Serialization
                 TempAssembly tempAssembly;
                 if (_cache.TryGetValue(key, out tempAssembly) && tempAssembly == assembly)
                     return;
-                _cache = new Dictionary<TempAssemblyCacheKey, TempAssembly>(_cache); // clone
-                _cache[key] = assembly;
+                Dictionary<TempAssemblyCacheKey, TempAssembly> _copy = new Dictionary<TempAssemblyCacheKey, TempAssembly>(_cache); // clone
+                _copy[key] = assembly;
+                _cache = _copy;
             }
         }
     }
@@ -687,4 +693,3 @@ namespace System.Xml.Serialization
         internal const string InformationalVersion = "1.0.0.0";
     }
 }
-

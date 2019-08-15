@@ -685,7 +685,6 @@ namespace System.Net.Sockets.Tests
             });
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Optimized .NET Core CopyToAsync doesn't use Begin/EndRead, skipping code that throws ObjectDisposedException on netfx")]
         [Fact]
         public async Task CopyToAsync_DisposedSourceStream_ThrowsOnWindows_NoThrowOnUnix()
         {
@@ -701,7 +700,7 @@ namespace System.Net.Sockets.Tests
                 // socket is closed.  On Unix, it's completed as successful once or after
                 // the shutdown is issued, but depending on timing, if it's then closed
                 // before that takes effect, it may also complete as aborted.
-                bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows); 
+                bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
                 Assert.True(
                     (isWindows && e is IOException) ||
                     (!isWindows && (e == null || e is IOException)),

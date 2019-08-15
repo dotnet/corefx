@@ -6,9 +6,9 @@
 **
 ** Attribute: ReferenceAssemblyAttribute
 **
-** Purpose: Identifies an assembly as being a "reference 
+** Purpose: Identifies an assembly as being a "reference
 **    assembly", meaning it contains public surface area but
-**    no usable implementation.  Reference assemblies 
+**    no usable implementation.  Reference assemblies
 **    should be loadable for introspection, but not execution.
 **
 ============================================================*/
@@ -22,11 +22,11 @@ namespace System.Runtime.CompilerServices
         {
         }
 
-        public ReferenceAssemblyAttribute(String description)
+        public ReferenceAssemblyAttribute(string? description)
         {
             Description = description;
         }
 
-        public String Description { get; }
+        public string? Description { get; }
     }
 }

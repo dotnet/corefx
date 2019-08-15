@@ -39,8 +39,8 @@ namespace System.CodeDom.Compiler
 
         protected int Indent
         {
-            get { return _output.Indent; }
-            set { _output.Indent = value; }
+            get => _output.Indent;
+            set => _output.Indent = value;
         }
 
         protected abstract string NullToken { get; }
@@ -181,7 +181,7 @@ namespace System.CodeDom.Compiler
 
                 // Generate an extra new line at the end of the snippet.
                 // If the snippet is comment and this type only contains comments.
-                // The generated code will not compile. 
+                // The generated code will not compile.
                 Output.WriteLine();
             }
 
@@ -695,7 +695,7 @@ namespace System.CodeDom.Compiler
             }
             // Generate an extra new line at the end of the snippet.
             // If the snippet is comment and this type only contains comments.
-            // The generated code will not compile. 
+            // The generated code will not compile.
             if (hasSnippet)
             {
                 Output.WriteLine();
@@ -1147,10 +1147,7 @@ namespace System.CodeDom.Compiler
             OutputIdentifier(name);
         }
 
-        protected virtual void OutputIdentifier(string ident)
-        {
-            Output.Write(ident);
-        }
+        protected virtual void OutputIdentifier(string ident) => Output.Write(ident);
 
         protected virtual void OutputExpressionList(CodeExpressionCollection expressions)
         {
@@ -1394,7 +1391,7 @@ namespace System.CodeDom.Compiler
             }
             else
             {
-                throw new ArgumentException(SR.Format(SR.InvalidPrimitiveType, e.Value.GetType().ToString()));
+                throw new ArgumentException(SR.Format(SR.InvalidPrimitiveType, e.Value.GetType()));
             }
         }
 

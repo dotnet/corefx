@@ -100,7 +100,7 @@ namespace System.Xml.Xsl.Runtime
     /// </summary>
     internal class XmlEmptySortKey : XmlSortKey
     {
-        private bool _isEmptyGreatest;
+        private readonly bool _isEmptyGreatest;
 
         public XmlEmptySortKey(XmlCollation collation)
         {
@@ -138,7 +138,7 @@ namespace System.Xml.Xsl.Runtime
     /// </summary>
     internal class XmlDecimalSortKey : XmlSortKey
     {
-        private decimal _decVal;
+        private readonly decimal _decVal;
 
         public XmlDecimalSortKey(decimal value, XmlCollation collation)
         {
@@ -154,7 +154,7 @@ namespace System.Xml.Xsl.Runtime
             if (that == null)
                 return CompareToEmpty(obj);
 
-            cmp = Decimal.Compare(_decVal, that._decVal);
+            cmp = decimal.Compare(_decVal, that._decVal);
             if (cmp == 0)
                 return BreakSortingTie(that);
 
@@ -168,7 +168,7 @@ namespace System.Xml.Xsl.Runtime
     /// </summary>
     internal class XmlIntegerSortKey : XmlSortKey
     {
-        private long _longVal;
+        private readonly long _longVal;
 
         public XmlIntegerSortKey(long value, XmlCollation collation)
         {
@@ -196,7 +196,7 @@ namespace System.Xml.Xsl.Runtime
     /// </summary>
     internal class XmlIntSortKey : XmlSortKey
     {
-        private int _intVal;
+        private readonly int _intVal;
 
         public XmlIntSortKey(int value, XmlCollation collation)
         {
@@ -296,12 +296,12 @@ namespace System.Xml.Xsl.Runtime
     /// </summary>
     internal class XmlDoubleSortKey : XmlSortKey
     {
-        private double _dblVal;
-        private bool _isNaN;
+        private readonly double _dblVal;
+        private readonly bool _isNaN;
 
         public XmlDoubleSortKey(double value, XmlCollation collation)
         {
-            if (Double.IsNaN(value))
+            if (double.IsNaN(value))
             {
                 // Treat NaN as if it were the empty sequence
                 _isNaN = true;
@@ -310,7 +310,7 @@ namespace System.Xml.Xsl.Runtime
                 // Greatest, Descending: isEmptyGreatest = false
                 // Least, Ascending: isEmptyGreatest = false
                 // Least, Descending: isEmptyGreatest = true
-                _dblVal = (collation.EmptyGreatest != collation.DescendingOrder) ? Double.PositiveInfinity : Double.NegativeInfinity;
+                _dblVal = (collation.EmptyGreatest != collation.DescendingOrder) ? double.PositiveInfinity : double.NegativeInfinity;
             }
             else
             {
@@ -340,14 +340,14 @@ namespace System.Xml.Xsl.Runtime
                         return BreakSortingTie(that);
 
                     // NaN sorts before or after all non-NaN values
-                    Debug.Assert(_dblVal == Double.NegativeInfinity || _dblVal == Double.PositiveInfinity);
-                    return (_dblVal == Double.NegativeInfinity) ? -1 : 1;
+                    Debug.Assert(_dblVal == double.NegativeInfinity || _dblVal == double.PositiveInfinity);
+                    return (_dblVal == double.NegativeInfinity) ? -1 : 1;
                 }
                 else if (that._isNaN)
                 {
                     // NaN sorts before or after all non-NaN values
-                    Debug.Assert(that._dblVal == Double.NegativeInfinity || that._dblVal == Double.PositiveInfinity);
-                    return (that._dblVal == Double.NegativeInfinity) ? 1 : -1;
+                    Debug.Assert(that._dblVal == double.NegativeInfinity || that._dblVal == double.PositiveInfinity);
+                    return (that._dblVal == double.NegativeInfinity) ? 1 : -1;
                 }
 
                 return BreakSortingTie(that);

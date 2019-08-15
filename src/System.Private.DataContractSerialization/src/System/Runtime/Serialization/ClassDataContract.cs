@@ -13,12 +13,13 @@ namespace System.Runtime.Serialization
     using System.IO;
     using System.Globalization;
     using System.Reflection;
+    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Xml;
     using DataContractDictionary = System.Collections.Generic.Dictionary<System.Xml.XmlQualifiedName, DataContract>;
     using System.Linq;
 
-#if USE_REFEMIT || uapaot
+#if USE_REFEMIT
     public sealed class ClassDataContract : DataContract
 #else
     internal sealed class ClassDataContract : DataContract
@@ -35,13 +36,6 @@ namespace System.Runtime.Serialization
         private ClassDataContractCriticalHelper _helper;
 
         private bool _isScriptObject;
-
-#if uapaot
-        public ClassDataContract() : base(new ClassDataContractCriticalHelper())
-        {
-            InitClassDataContract();
-        }
-#endif
 
         internal ClassDataContract(Type type) : base(new ClassDataContractCriticalHelper(type))
         {
@@ -129,13 +123,11 @@ namespace System.Runtime.Serialization
             get { return _helper.ExtensionDataSetMethod; }
         }
 
-#if !uapaot
         public override DataContractDictionary KnownDataContracts
         {
             get
             { return _helper.KnownDataContracts; }
         }
-#endif
 
         public override bool IsISerializable
         {
@@ -149,14 +141,6 @@ namespace System.Runtime.Serialization
             { return _helper.IsNonAttributedType; }
         }
 
-#if uapaot
-        public bool HasDataContract
-        {
-            get
-            { return _helper.HasDataContract; }
-            set { _helper.HasDataContract = value; }
-        }
-#endif
         public bool HasExtensionData
         {
             get
@@ -242,29 +226,22 @@ namespace System.Runtime.Serialization
             return true;
         }
 
-#if uapaot
-        private XmlFormatClassWriterDelegate _xmlFormatWriterDelegate;
-        public XmlFormatClassWriterDelegate XmlFormatWriterDelegate
-#else
+        private XmlFormatClassWriterDelegate CreateXmlFormatWriterDelegate()
+        {
+            return new XmlFormatWriterGenerator().GenerateClassWriter(this);
+        }
+
         internal XmlFormatClassWriterDelegate XmlFormatWriterDelegate
-#endif
         {
             get
             {
-#if uapaot
-                if (DataContractSerializer.Option == SerializationOption.CodeGenOnly
-                || (DataContractSerializer.Option == SerializationOption.ReflectionAsBackup && _xmlFormatWriterDelegate != null))
-                {
-                    return _xmlFormatWriterDelegate;
-                }
-#endif
                 if (_helper.XmlFormatWriterDelegate == null)
                 {
                     lock (this)
                     {
                         if (_helper.XmlFormatWriterDelegate == null)
                         {
-                            XmlFormatClassWriterDelegate tempDelegate = new XmlFormatWriterGenerator().GenerateClassWriter(this);
+                            XmlFormatClassWriterDelegate tempDelegate = CreateXmlFormatWriterDelegate();
                             Interlocked.MemoryBarrier();
                             _helper.XmlFormatWriterDelegate = tempDelegate;
                         }
@@ -274,35 +251,25 @@ namespace System.Runtime.Serialization
             }
             set
             {
-#if uapaot
-                _xmlFormatWriterDelegate = value;
-#endif
             }
         }
 
-#if uapaot
-        private XmlFormatClassReaderDelegate _xmlFormatReaderDelegate;
-        public XmlFormatClassReaderDelegate XmlFormatReaderDelegate
-#else
+        private XmlFormatClassReaderDelegate CreateXmlFormatReaderDelegate()
+        {
+            return new XmlFormatReaderGenerator().GenerateClassReader(this);
+        }
+
         internal XmlFormatClassReaderDelegate XmlFormatReaderDelegate
-#endif
         {
             get
             {
-#if uapaot
-                if (DataContractSerializer.Option == SerializationOption.CodeGenOnly
-                || (DataContractSerializer.Option == SerializationOption.ReflectionAsBackup && _xmlFormatReaderDelegate != null))
-                {
-                    return _xmlFormatReaderDelegate;
-                }
-#endif
                 if (_helper.XmlFormatReaderDelegate == null)
                 {
                     lock (this)
                     {
                         if (_helper.XmlFormatReaderDelegate == null)
                         {
-                            XmlFormatClassReaderDelegate tempDelegate = new XmlFormatReaderGenerator().GenerateClassReader(this);
+                            XmlFormatClassReaderDelegate tempDelegate = CreateXmlFormatReaderDelegate();
                             Interlocked.MemoryBarrier();
                             _helper.XmlFormatReaderDelegate = tempDelegate;
                         }
@@ -312,9 +279,6 @@ namespace System.Runtime.Serialization
             }
             set
             {
-#if uapaot
-                _xmlFormatReaderDelegate = value;
-#endif
             }
         }
 
@@ -428,10 +392,10 @@ namespace System.Runtime.Serialization
 
         private static readonly Dictionary<string, string[]> s_knownSerializableTypeInfos = new Dictionary<string, string[]> {
             { "System.Collections.Generic.KeyValuePair`2", Array.Empty<string>() },
-            { "System.Collections.Generic.Queue`1", new [] { "_syncRoot" } },
-            { "System.Collections.Generic.Stack`1", new [] {"_syncRoot" } },
-            { "System.Collections.ObjectModel.ReadOnlyCollection`1", new [] {"_syncRoot" } },
-            { "System.Collections.ObjectModel.ReadOnlyDictionary`2", new [] {"_syncRoot", "_keys","_values" } },
+            { "System.Collections.Generic.Queue`1", new[] { "_syncRoot" } },
+            { "System.Collections.Generic.Stack`1", new[] {"_syncRoot" } },
+            { "System.Collections.ObjectModel.ReadOnlyCollection`1", new[] {"_syncRoot" } },
+            { "System.Collections.ObjectModel.ReadOnlyDictionary`2", new[] {"_syncRoot", "_keys","_values" } },
             { "System.Tuple`1", Array.Empty<string>() },
             { "System.Tuple`2", Array.Empty<string>() },
             { "System.Tuple`3", Array.Empty<string>() },
@@ -440,8 +404,8 @@ namespace System.Runtime.Serialization
             { "System.Tuple`6", Array.Empty<string>() },
             { "System.Tuple`7", Array.Empty<string>() },
             { "System.Tuple`8", Array.Empty<string>() },
-            { "System.Collections.Queue", new [] {"_syncRoot" } },
-            { "System.Collections.Stack", new [] {"_syncRoot" } },
+            { "System.Collections.Queue", new[] {"_syncRoot" } },
+            { "System.Collections.Stack", new[] {"_syncRoot" } },
             { "System.Globalization.CultureInfo", Array.Empty<string>() },
             { "System.Version", Array.Empty<string>() },
         };
@@ -733,7 +697,7 @@ namespace System.Runtime.Serialization
             /// </SecurityNote>
             private bool _hasDataContract;
             private bool _hasExtensionData;
-            private bool _isScriptObject;
+            private readonly bool _isScriptObject;
 
             private XmlDictionaryString[] _childElementNamespaces;
             private XmlFormatClassReaderDelegate _xmlFormatReaderDelegate;
@@ -780,22 +744,22 @@ namespace System.Runtime.Serialization
                     // while a pre-generated DataContract is incomplete.
                     //
                     // At this point in code, we're in the midlle of creating a new DataContract at runtime, so we need to make
-                    // sure that we create our own base type DataContract when the base type could potentially have SG generated 
-                    // DataContract. 
+                    // sure that we create our own base type DataContract when the base type could potentially have SG generated
+                    // DataContract.
                     //
                     // We wanted to enable the fix for the issue described above only when SG generated DataContracts are available.
-                    // Currently we don't have a good way of detecting usage of SG (either globally or per data contract). 
-                    // But since SG is currently only used by .NET Native, so we used the "#if uapaot" to target the fix for .Net
-                    // Native only.
-#if uapaot
-                    DataContract baseContract = DataContract.GetDataContractCreatedAtRuntime(baseType);
-#else
+                    // Currently we don't have a good way of detecting usage of SG (either globally or per data contract).
+
                     DataContract baseContract = DataContract.GetDataContract(baseType);
-#endif
                     if (baseContract is CollectionDataContract)
+                    {
                         this.BaseContract = ((CollectionDataContract)baseContract).SharedTypeContract as ClassDataContract;
+                    }
                     else
+                    {
                         this.BaseContract = baseContract as ClassDataContract;
+                    }
+
                     if (this.BaseContract != null && this.BaseContract.IsNonAttributedType && !_isNonAttributedType)
                     {
                         throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError
@@ -1150,8 +1114,8 @@ namespace System.Runtime.Serialization
                     int endIndex = i;
                     bool hasConflictingType = false;
                     while (endIndex < membersInHierarchy.Count - 1
-                        && String.CompareOrdinal(membersInHierarchy[endIndex].member.Name, membersInHierarchy[endIndex + 1].member.Name) == 0
-                        && String.CompareOrdinal(membersInHierarchy[endIndex].ns, membersInHierarchy[endIndex + 1].ns) == 0)
+                        && string.CompareOrdinal(membersInHierarchy[endIndex].member.Name, membersInHierarchy[endIndex + 1].member.Name) == 0
+                        && string.CompareOrdinal(membersInHierarchy[endIndex].ns, membersInHierarchy[endIndex + 1].ns) == 0)
                     {
                         membersInHierarchy[endIndex].member.ConflictingMember = membersInHierarchy[endIndex + 1].member;
                         if (!hasConflictingType)
@@ -1377,9 +1341,6 @@ namespace System.Runtime.Serialization
             internal bool HasDataContract
             {
                 get { return _hasDataContract; }
-#if uapaot
-                set { _hasDataContract = value; }
-#endif
             }
 
             internal bool HasExtensionData
@@ -1508,11 +1469,11 @@ namespace System.Runtime.Serialization
             {
                 public int Compare(Member x, Member y)
                 {
-                    int nsCompare = String.CompareOrdinal(x.ns, y.ns);
+                    int nsCompare = string.CompareOrdinal(x.ns, y.ns);
                     if (nsCompare != 0)
                         return nsCompare;
 
-                    int nameCompare = String.CompareOrdinal(x.member.Name, y.member.Name);
+                    int nameCompare = string.CompareOrdinal(x.member.Name, y.member.Name);
                     if (nameCompare != 0)
                         return nameCompare;
 
@@ -1561,13 +1522,12 @@ namespace System.Runtime.Serialization
                 if (orderCompare != 0)
                     return orderCompare;
 
-                return String.CompareOrdinal(x.Name, y.Name);
+                return string.CompareOrdinal(x.Name, y.Name);
             }
 
             internal static DataMemberComparer Singleton = new DataMemberComparer();
         }
 
-#if !uapaot
         /// <summary>
         ///  Get object type for Xml/JsonFormmatReaderGenerator
         /// </summary>
@@ -1583,8 +1543,6 @@ namespace System.Runtime.Serialization
                 return type;
             }
         }
-#endif
-
 
         internal ClassDataContract Clone()
         {

@@ -78,8 +78,8 @@ namespace System.Drawing.Primitives.Tests
         }
 
         [Theory]
-        [InlineData(-1)]
-        [InlineData(0)]
+        [InlineData((KnownColor)(-1))]
+        [InlineData((KnownColor)0)]
         [InlineData(KnownColor.MenuHighlight + 1)]
         public void FromOutOfRangeKnownColor(KnownColor known)
         {
@@ -102,13 +102,21 @@ namespace System.Drawing.Primitives.Tests
         }
 
         [Theory]
-        [InlineData(-1)]
-        [InlineData(0)]
+        [InlineData((KnownColor)(-1))]
+        [InlineData((KnownColor)0)]
         [InlineData(KnownColor.MenuHighlight + 1)]
         public void FromOutOfRangeKnownColorToKnownColor(KnownColor known)
         {
             Color color = Color.FromKnownColor(known);
             Assert.Equal((KnownColor)0, color.ToKnownColor());
+        }
+
+        [Fact]
+        public void IsSystemColor()
+        {
+            Assert.True(Color.FromName("ActiveBorder").IsSystemColor);
+            Assert.True(Color.FromName("WindowText").IsSystemColor);
+            Assert.False(Color.FromName("AliceBlue").IsSystemColor);
         }
 
         [Theory, MemberData(nameof(SystemColors))]
@@ -126,8 +134,8 @@ namespace System.Drawing.Primitives.Tests
         }
 
         [Theory]
-        [InlineData(-1)]
-        [InlineData(0)]
+        [InlineData((KnownColor)(-1))]
+        [InlineData((KnownColor)0)]
         [InlineData(KnownColor.MenuHighlight + 1)]
         public void IsSystemColorOutOfRangeKnown(KnownColor known)
         {
@@ -150,8 +158,8 @@ namespace System.Drawing.Primitives.Tests
         }
 
         [Theory]
-        [InlineData(-1)]
-        [InlineData(0)]
+        [InlineData((KnownColor)(-1))]
+        [InlineData((KnownColor)0)]
         [InlineData(KnownColor.MenuHighlight + 1)]
         public void IsKnownColorOutOfRangeKnown(KnownColor known)
         {

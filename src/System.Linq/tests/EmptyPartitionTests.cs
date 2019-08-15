@@ -27,25 +27,23 @@ namespace System.Linq.Tests
         {
             // .NET Core returns the instance as an optimization.
             // see https://github.com/dotnet/corefx/pull/2401.
-            Assert.Equal(!PlatformDetection.IsFullFramework, ReferenceEquals(GetEmptyPartition<int>(), GetEmptyPartition<int>()));
+            Assert.True(ReferenceEquals(GetEmptyPartition<int>(), GetEmptyPartition<int>()));
         }
 
         [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Netcoreapp, ".NET Core returns the instance as an optimization")]
         public void SkipSame()
         {
             IEnumerable<int> empty = GetEmptyPartition<int>();
-            // .NET Core returns the instance as an optimization.
-            // see https://github.com/dotnet/corefx/pull/2401.
-            Assert.Equal(!PlatformDetection.IsFullFramework, ReferenceEquals(empty, empty.Skip(2)));
+            Assert.Same(empty, empty.Skip(2));
         }
 
         [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Netcoreapp, ".NET Core returns the instance as an optimization")]
         public void TakeSame()
         {
             IEnumerable<int> empty = GetEmptyPartition<int>();
-            // .NET Core returns the instance as an optimization.
-            // see https://github.com/dotnet/corefx/pull/2401.
-            Assert.Equal(!PlatformDetection.IsFullFramework, ReferenceEquals(empty, empty.Take(2)));
+            Assert.Same(empty, empty.Take(2));
         }
 
         [Fact]
@@ -58,7 +56,7 @@ namespace System.Linq.Tests
         public void ElementAtOrDefaultIsDefault()
         {
             Assert.Equal(0, GetEmptyPartition<int>().ElementAtOrDefault(0));
-            Assert.Equal(null, GetEmptyPartition<string>().ElementAtOrDefault(0));
+            Assert.Null(GetEmptyPartition<string>().ElementAtOrDefault(0));
         }
 
         [Fact]
@@ -71,7 +69,7 @@ namespace System.Linq.Tests
         public void FirstOrDefaultIsDefault()
         {
             Assert.Equal(0, GetEmptyPartition<int>().FirstOrDefault());
-            Assert.Equal(null, GetEmptyPartition<string>().FirstOrDefault());
+            Assert.Null(GetEmptyPartition<string>().FirstOrDefault());
         }
 
         [Fact]
@@ -84,7 +82,7 @@ namespace System.Linq.Tests
         public void LastOrDefaultIsDefault()
         {
             Assert.Equal(0, GetEmptyPartition<int>().LastOrDefault());
-            Assert.Equal(null, GetEmptyPartition<string>().LastOrDefault());
+            Assert.Null(GetEmptyPartition<string>().LastOrDefault());
         }
 
         [Fact]
@@ -100,10 +98,12 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void CantResetEnumerator()
+        public void ResetIsNop()
         {
             IEnumerator<int> en = GetEmptyPartition<int>().GetEnumerator();
-            Assert.Throws<NotSupportedException>(() => en.Reset());
+            en.Reset();
+            en.Reset();
+            en.Reset();
         }
     }
 }

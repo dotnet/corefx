@@ -14,17 +14,17 @@ namespace System.Linq.Tests
         public void SameResultsRepeatCallsIntQuery()
         {
             var q = from x in new[] { 9999, 0, 888, -1, 66, -777, 1, 2, -12345 }
-                    where x > Int32.MinValue
+                    where x > int.MinValue
                     select x;
-                    
+
             Assert.Equal(q.TakeWhile(x => true), q.TakeWhile(x => true));
         }
 
         [Fact]
         public void SameResultsRepeatCallsStringQuery()
         {
-            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", String.Empty }
-                    where !String.IsNullOrEmpty(x)
+            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", string.Empty }
+                    where !string.IsNullOrEmpty(x)
                     select x;
 
             Assert.Equal(q.TakeWhile(x => true), q.TakeWhile(x => true));
@@ -121,7 +121,7 @@ namespace System.Linq.Tests
         public void IndexTakeWhileOverflowBeyondIntMaxValueElements()
         {
             var taken = new FastInfiniteEnumerator<int>().TakeWhile((e, i) => true);
-            
+
             using(var en = taken.GetEnumerator())
                 Assert.Throws<OverflowException>(() =>
                 {

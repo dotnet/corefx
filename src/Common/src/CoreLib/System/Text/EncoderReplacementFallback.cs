@@ -11,14 +11,14 @@ namespace System.Text
     public sealed class EncoderReplacementFallback : EncoderFallback
     {
         // Our variables
-        private String _strDefault;
+        private readonly string _strDefault;
 
         // Construction.  Default replacement fallback uses no best fit and ? replacement string
         public EncoderReplacementFallback() : this("?")
         {
         }
 
-        public EncoderReplacementFallback(String replacement)
+        public EncoderReplacementFallback(string replacement)
         {
             // Must not be null
             if (replacement == null)
@@ -29,10 +29,10 @@ namespace System.Text
             for (int i = 0; i < replacement.Length; i++)
             {
                 // Found a surrogate?
-                if (Char.IsSurrogate(replacement, i))
+                if (char.IsSurrogate(replacement, i))
                 {
                     // High or Low?
-                    if (Char.IsHighSurrogate(replacement, i))
+                    if (char.IsHighSurrogate(replacement, i))
                     {
                         // if already had a high one, stop
                         if (bFoundHigh)
@@ -63,7 +63,7 @@ namespace System.Text
             _strDefault = replacement;
         }
 
-        public String DefaultString
+        public string DefaultString
         {
             get
             {
@@ -85,14 +85,13 @@ namespace System.Text
             }
         }
 
-        public override bool Equals(Object value)
+        public override bool Equals(object? value)
         {
-            EncoderReplacementFallback that = value as EncoderReplacementFallback;
-            if (that != null)
+            if (value is EncoderReplacementFallback that)
             {
-                return (_strDefault == that._strDefault);
+                return _strDefault == that._strDefault;
             }
-            return (false);
+            return false;
         }
 
         public override int GetHashCode()
@@ -101,12 +100,10 @@ namespace System.Text
         }
     }
 
-
-
     public sealed class EncoderReplacementFallbackBuffer : EncoderFallbackBuffer
     {
         // Store our default string
-        private String _strDefault;
+        private readonly string _strDefault;
         private int _fallbackCount = -1;
         private int _fallbackIndex = -1;
 
@@ -127,7 +124,7 @@ namespace System.Text
                 // If we're recursive we may still have something in our buffer that makes this a surrogate
                 if (char.IsHighSurrogate(charUnknown) && _fallbackCount >= 0 &&
                     char.IsLowSurrogate(_strDefault[_fallbackIndex + 1]))
-                    ThrowLastCharRecursive(Char.ConvertToUtf32(charUnknown, _strDefault[_fallbackIndex + 1]));
+                    ThrowLastCharRecursive(char.ConvertToUtf32(charUnknown, _strDefault[_fallbackIndex + 1]));
 
                 // Nope, just one character
                 ThrowLastCharRecursive(unchecked((int)charUnknown));
@@ -144,18 +141,18 @@ namespace System.Text
         public override bool Fallback(char charUnknownHigh, char charUnknownLow, int index)
         {
             // Double check input surrogate pair
-            if (!Char.IsHighSurrogate(charUnknownHigh))
+            if (!char.IsHighSurrogate(charUnknownHigh))
                 throw new ArgumentOutOfRangeException(nameof(charUnknownHigh),
                     SR.Format(SR.ArgumentOutOfRange_Range, 0xD800, 0xDBFF));
 
-            if (!Char.IsLowSurrogate(charUnknownLow))
+            if (!char.IsLowSurrogate(charUnknownLow))
                 throw new ArgumentOutOfRangeException(nameof(charUnknownLow),
                     SR.Format(SR.ArgumentOutOfRange_Range, 0xDC00, 0xDFFF));
 
             // If we had a buffer already we're being recursive, throw, it's probably at the suspect
             // character in our array.
             if (_fallbackCount >= 1)
-                ThrowLastCharRecursive(Char.ConvertToUtf32(charUnknownHigh, charUnknownLow));
+                ThrowLastCharRecursive(char.ConvertToUtf32(charUnknownHigh, charUnknownLow));
 
             // Go ahead and get our fallback
             _fallbackCount = _strDefault.Length;
@@ -224,4 +221,3 @@ namespace System.Text
         }
     }
 }
-

@@ -36,7 +36,7 @@ namespace System.Net.WebSockets
         {
             _webSocket = webSocket;
         }
-        
+
         public async Task ConnectAsyncCore(Uri uri, CancellationToken cancellationToken, ClientWebSocketOptions options)
         {
             if (options.RemoteCertificateValidationCallback != null)
@@ -48,11 +48,11 @@ namespace System.Net.WebSockets
             {
                 await _webSocket.ConnectAsync(uri, cancellationToken, options).ConfigureAwait(false);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!(ex is OperationCanceledException && cancellationToken.IsCancellationRequested))
             {
                 WebErrorStatus status = RTWebSocketError.GetStatus(ex.HResult);
                 var inner = new Exception(status.ToString(), ex);
-                WebSocketException wex = new WebSocketException(SR.net_webstatus_ConnectFailure, inner);
+                WebSocketException wex = new WebSocketException(WebSocketError.Faulted, SR.net_webstatus_ConnectFailure, inner);
                 if (NetEventSource.IsEnabled) NetEventSource.Error(_webSocket, wex);
                 throw wex;
             }

@@ -22,8 +22,8 @@ namespace System.Xml.Tests
 
         public XmlSchema GetSchema(string ns, string a1, string a2)
         {
-            string xsd = String.Empty;
-            if (ns.Equals(String.Empty))
+            string xsd = string.Empty;
+            if (ns.Equals(string.Empty))
                 xsd = "<schema xmlns='http://www.w3.org/2001/XMLSchema'><attribute name='" + a1 + "'/><attribute name='" + a2 + "'/></schema>";
             else
                 xsd = "<schema xmlns='http://www.w3.org/2001/XMLSchema' targetNamespace='" + ns + "'><attribute name='" + a1 + "'/><attribute name='" + a2 + "'/></schema>";
@@ -34,8 +34,7 @@ namespace System.Xml.Tests
 
         //-----------------------------------------------------------------------------------
         //[Variation(Desc = "v1 - GlobalAttributes on empty collection", Priority = 0)]
-        [InlineData()]
-        [Theory]
+        [Fact]
         public void v1()
         {
             XmlSchemaSet sc = new XmlSchemaSet();

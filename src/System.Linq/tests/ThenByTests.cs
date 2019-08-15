@@ -27,8 +27,8 @@ namespace System.Linq.Tests
         public void SameResultsRepeatCallsStringQuery()
         {
             var q = from x1 in new[] { 55, 49, 9, -100, 24, 25, -1, 0 }
-                             from x2 in new[] { "!@#$%^", "C", "AAA", "", null, "Calling Twice", "SoS", String.Empty }
-                             where !String.IsNullOrEmpty(x2)
+                             from x2 in new[] { "!@#$%^", "C", "AAA", "", null, "Calling Twice", "SoS", string.Empty }
+                             where !string.IsNullOrEmpty(x2)
                              select new { a1 = x1, a2 = x2 };
 
             Assert.Equal(
@@ -114,10 +114,10 @@ namespace System.Linq.Tests
         [Fact]
         public void OrderIsStable()
         {
-            var source = @"Because I could not stop for Death —
-He kindly stopped for me —
-The Carriage held but just Ourselves —
-And Immortality.".Split(new[] { ' ', '\n', '\r', '—' }, StringSplitOptions.RemoveEmptyEntries);
+            var source = @"Because I could not stop for Death -
+He kindly stopped for me -
+The Carriage held but just Ourselves -
+And Immortality.".Split(new[] { ' ', '\n', '\r', '-' }, StringSplitOptions.RemoveEmptyEntries);
             var expected = new[]
             {
                 "me", "not", "for", "for", "but", "stop", "held", "just", "could", "kindly", "stopped",
@@ -130,10 +130,10 @@ And Immortality.".Split(new[] { ' ', '\n', '\r', '—' }, StringSplitOptions.Rem
         [Fact]
         public void RunOnce()
         {
-            var source = @"Because I could not stop for Death —
-He kindly stopped for me —
-The Carriage held but just Ourselves —
-And Immortality.".Split(new[] { ' ', '\n', '\r', '—' }, StringSplitOptions.RemoveEmptyEntries);
+            var source = @"Because I could not stop for Death -
+He kindly stopped for me -
+The Carriage held but just Ourselves -
+And Immortality.".Split(new[] { ' ', '\n', '\r', '-' }, StringSplitOptions.RemoveEmptyEntries);
             var expected = new[]
             {
                 "me", "not", "for", "for", "but", "stop", "held", "just", "could", "kindly", "stopped",

@@ -12,23 +12,23 @@ namespace System.Xml.Xsl.XsltOld
 
     internal class Stylesheet
     {
-        private ArrayList _imports = new ArrayList();
+        private readonly ArrayList _imports = new ArrayList();
         private Hashtable _modeManagers;
-        private Hashtable _templateNameTable = new Hashtable();
+        private readonly Hashtable _templateNameTable = new Hashtable();
         private Hashtable _attributeSetTable;
         private int _templateCount;
         //private ArrayList     preserveSpace;
         private Hashtable _queryKeyTable;
         private ArrayList _whitespaceList;
         private bool _whitespace;
-        private Hashtable _scriptObjectTypes = new Hashtable();
+        private readonly Hashtable _scriptObjectTypes = new Hashtable();
         private TemplateManager _templates;
 
 
         private class WhitespaceElement
         {
-            private int _key;
-            private double _priority;
+            private readonly int _key;
+            private readonly double _priority;
             private bool _preserveSpace;
 
             internal double Priority
@@ -63,7 +63,7 @@ namespace System.Xml.Xsl.XsltOld
         internal ArrayList Imports { get { return _imports; } }
         internal Hashtable AttributeSetTable { get { return _attributeSetTable; } }
 
-        internal void AddSpace(Compiler compiler, String query, double Priority, bool PreserveSpace)
+        internal void AddSpace(Compiler compiler, string query, double Priority, bool PreserveSpace)
         {
             WhitespaceElement elem;
             if (_queryKeyTable != null)

@@ -19,13 +19,13 @@ namespace System.Data.SqlClient.SNI
     /// <summary>
     /// TCP connection handle
     /// </summary>
-    internal class SNITCPHandle : SNIHandle
+    internal sealed class SNITCPHandle : SNIHandle
     {
         private readonly string _targetServer;
         private readonly object _callbackObject;
         private readonly Socket _socket;
         private NetworkStream _tcpStream;
-        
+
         private Stream _stream;
         private SslStream _sslStream;
         private SslOverTdsStream _sslOverTdsStream;
@@ -144,7 +144,7 @@ namespace System.Data.SqlClient.SNI
                 {
                     _socket = Connect(serverName, port, ts);
                 }
-                
+
                 if (_socket == null || !_socket.Connected)
                 {
                     if (_socket != null)
@@ -182,15 +182,15 @@ namespace System.Data.SqlClient.SNI
             IPAddress[] ipAddresses = Dns.GetHostAddresses(serverName);
             IPAddress serverIPv4 = null;
             IPAddress serverIPv6 = null;
-            foreach (IPAddress ipAdress in ipAddresses)
+            foreach (IPAddress ipAddress in ipAddresses)
             {
-                if (ipAdress.AddressFamily == AddressFamily.InterNetwork)
+                if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
                 {
-                    serverIPv4 = ipAdress;
+                    serverIPv4 = ipAddress;
                 }
-                else if (ipAdress.AddressFamily == AddressFamily.InterNetworkV6)
+                else if (ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
                 {
-                    serverIPv6 = ipAdress;
+                    serverIPv6 = ipAddress;
                 }
             }
             ipAddresses = new IPAddress[] { serverIPv4, serverIPv6 };
@@ -223,6 +223,8 @@ namespace System.Data.SqlClient.SNI
                     if (ipAddresses[i] != null)
                     {
                         sockets[i] = new Socket(ipAddresses[i].AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                        // enable keep-alive on socket
+                        SNITcpHandle.SetKeepAliveValues(ref sockets[i]);
                         sockets[i].Connect(ipAddresses[i], port);
                         if (sockets[i] != null) // sockets[i] can be null if cancel callback is executed during connect()
                         {
@@ -458,7 +460,7 @@ namespace System.Data.SqlClient.SNI
                         _socket.ReceiveTimeout = timeoutInMilliseconds;
                     }
                     else if (timeoutInMilliseconds == -1)
-                    {   // SqlCient internally represents infinite timeout by -1, and for TcpClient this is translated to a timeout of 0 
+                    {   // SqlCient internally represents infinite timeout by -1, and for TcpClient this is translated to a timeout of 0
                         _socket.ReceiveTimeout = 0;
                     }
                     else
@@ -468,7 +470,7 @@ namespace System.Data.SqlClient.SNI
                         return TdsEnums.SNI_WAIT_TIMEOUT;
                     }
 
-                    packet = new SNIPacket(_bufferSize);
+                    packet = new SNIPacket(headerSize: 0, dataSize: _bufferSize);
                     packet.ReadFromStream(_stream);
 
                     if (packet.Length == 0)
@@ -509,7 +511,6 @@ namespace System.Data.SqlClient.SNI
         /// </summary>
         /// <param name="receiveCallback">Receive callback</param>
         /// <param name="sendCallback">Send callback</param>
-        /// <summary>
         public override void SetAsyncCallbacks(SNIAsyncCallback receiveCallback, SNIAsyncCallback sendCallback)
         {
             _receiveCallback = receiveCallback;
@@ -539,7 +540,7 @@ namespace System.Data.SqlClient.SNI
         /// <returns>SNI error code</returns>
         public override uint ReceiveAsync(ref SNIPacket packet)
         {
-            packet = new SNIPacket(_bufferSize);
+            packet = new SNIPacket(headerSize: 0, dataSize: _bufferSize);
 
             try
             {
@@ -555,13 +556,22 @@ namespace System.Data.SqlClient.SNI
         /// <summary>
         /// Check SNI handle connection
         /// </summary>
-        /// <param name="handle"></param>
         /// <returns>SNI error status</returns>
         public override uint CheckConnection()
         {
             try
             {
-                if (!_socket.Connected || _socket.Poll(0, SelectMode.SelectError))
+                // _socket.Poll method with argument SelectMode.SelectRead returns
+                //      True : if Listen has been called and a connection is pending, or
+                //      True : if data is available for reading, or
+                //      True : if the connection has been closed, reset, or terminated, i.e no active connection.
+                //      False : otherwise.
+                // _socket.Available property returns the number of bytes of data available to read.
+                //
+                // Since _socket.Connected alone doesn't guarantee if the connection is still active, we use it in
+                // combination with _socket.Poll method and _socket.Available == 0 check. When both of them
+                // return true we can safely determine that the connection is no longer active.
+                if (!_socket.Connected || (_socket.Poll(100, SelectMode.SelectRead) && _socket.Available == 0))
                 {
                     return TdsEnums.SNI_ERROR;
                 }

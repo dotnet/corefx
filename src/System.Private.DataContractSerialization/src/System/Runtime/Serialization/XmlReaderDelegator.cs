@@ -10,7 +10,7 @@ using System.Xml.Serialization;
 
 namespace System.Runtime.Serialization
 {
-#if USE_REFEMIT || uapaot
+#if USE_REFEMIT
     public class XmlReaderDelegator
 #else
     internal class XmlReaderDelegator
@@ -55,7 +55,7 @@ namespace System.Runtime.Serialization
         internal string GetAttribute(int i)
         {
             if (isEndOfEmptyElement)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(i), SR.Format(SR.XmlElementAttributes)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(i), SR.XmlElementAttributes));
             return reader.GetAttribute(i);
         }
 
@@ -116,7 +116,7 @@ namespace System.Runtime.Serialization
             return -1;
         }
 
-#if USE_REFEMIT        
+#if USE_REFEMIT
         public bool IsStartElement()
 #else
         internal bool IsStartElement()
@@ -130,7 +130,7 @@ namespace System.Runtime.Serialization
             return !isEndOfEmptyElement && reader.IsStartElement(localname, ns);
         }
 
-#if USE_REFEMIT        
+#if USE_REFEMIT
         public bool IsStartElement(XmlDictionaryString localname, XmlDictionaryString ns)
 #else
         internal bool IsStartElement(XmlDictionaryString localname, XmlDictionaryString ns)
@@ -155,7 +155,7 @@ namespace System.Runtime.Serialization
         internal void MoveToAttribute(int i)
         {
             if (isEndOfEmptyElement)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(i), SR.Format(SR.XmlElementAttributes)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(i), SR.XmlElementAttributes));
             reader.MoveToAttribute(i);
         }
 
@@ -174,7 +174,7 @@ namespace System.Runtime.Serialization
             return isEndOfEmptyElement ? false : reader.MoveToNextAttribute();
         }
 
-#if USE_REFEMIT        
+#if USE_REFEMIT
         public XmlNodeType NodeType
 #else
         internal XmlNodeType NodeType
@@ -212,7 +212,7 @@ namespace System.Runtime.Serialization
             return isEndOfEmptyElement ? false : reader.ReadAttributeValue();
         }
 
-#if USE_REFEMIT        
+#if USE_REFEMIT
         public void ReadEndElement()
 #else
         internal void ReadEndElement()
@@ -397,7 +397,7 @@ namespace System.Runtime.Serialization
 
         internal string ReadContentAsString()
         {
-            return isEndOfEmptyElement ? String.Empty : reader.ReadContentAsString();
+            return isEndOfEmptyElement ? string.Empty : reader.ReadContentAsString();
         }
 
 #if USE_REFEMIT
@@ -646,55 +646,55 @@ namespace System.Runtime.Serialization
         [CLSCompliant(false)]
         public SByte ReadElementContentAsSignedByte()
 #else
-        internal SByte ReadElementContentAsSignedByte()
+        internal sbyte ReadElementContentAsSignedByte()
 #endif
         {
             return ToSByte(ReadElementContentAsInt());
         }
 
-        internal SByte ReadContentAsSignedByte()
+        internal sbyte ReadContentAsSignedByte()
         {
             return ToSByte(ReadContentAsInt());
         }
 
-        private SByte ToSByte(int value)
+        private sbyte ToSByte(int value)
         {
-            if (value < SByte.MinValue || value > SByte.MaxValue)
+            if (value < sbyte.MinValue || value > sbyte.MaxValue)
             {
                 ThrowConversionException(value.ToString(NumberFormatInfo.CurrentInfo), "SByte");
             }
-            return (SByte)value;
+            return (sbyte)value;
         }
 
 #if USE_REFEMIT
         [CLSCompliant(false)]
         public UInt32 ReadElementContentAsUnsignedInt()
 #else
-        internal UInt32 ReadElementContentAsUnsignedInt()
+        internal uint ReadElementContentAsUnsignedInt()
 #endif
         {
             return ToUInt32(ReadElementContentAsLong());
         }
 
-        internal UInt32 ReadContentAsUnsignedInt()
+        internal uint ReadContentAsUnsignedInt()
         {
             return ToUInt32(ReadContentAsLong());
         }
 
-        private UInt32 ToUInt32(long value)
+        private uint ToUInt32(long value)
         {
-            if (value < UInt32.MinValue || value > UInt32.MaxValue)
+            if (value < uint.MinValue || value > uint.MaxValue)
             {
                 ThrowConversionException(value.ToString(NumberFormatInfo.CurrentInfo), "UInt32");
             }
-            return (UInt32)value;
+            return (uint)value;
         }
 
 #if USE_REFEMIT
         [CLSCompliant(false)]
         public virtual UInt64 ReadElementContentAsUnsignedLong()
 #else
-        internal virtual UInt64 ReadElementContentAsUnsignedLong()
+        internal virtual ulong ReadElementContentAsUnsignedLong()
 #endif
         {
             if (isEndOfEmptyElement)
@@ -708,7 +708,7 @@ namespace System.Runtime.Serialization
             return XmlConverter.ToUInt64(str);
         }
 
-        internal virtual UInt64 ReadContentAsUnsignedLong()
+        internal virtual ulong ReadContentAsUnsignedLong()
         {
             string str = reader.ReadContentAsString();
 
@@ -722,24 +722,24 @@ namespace System.Runtime.Serialization
         [CLSCompliant(false)]
         public UInt16 ReadElementContentAsUnsignedShort()
 #else
-        internal UInt16 ReadElementContentAsUnsignedShort()
+        internal ushort ReadElementContentAsUnsignedShort()
 #endif
         {
             return ToUInt16(ReadElementContentAsInt());
         }
 
-        internal UInt16 ReadContentAsUnsignedShort()
+        internal ushort ReadContentAsUnsignedShort()
         {
             return ToUInt16(ReadContentAsInt());
         }
 
-        private UInt16 ToUInt16(int value)
+        private ushort ToUInt16(int value)
         {
-            if (value < UInt16.MinValue || value > UInt16.MaxValue)
+            if (value < ushort.MinValue || value > ushort.MaxValue)
             {
                 ThrowConversionException(value.ToString(NumberFormatInfo.CurrentInfo), "UInt16");
             }
-            return (UInt16)value;
+            return (ushort)value;
         }
 
 #if USE_REFEMIT
@@ -872,7 +872,7 @@ namespace System.Runtime.Serialization
         {
             string name, ns, prefix;
             if (str == null || str.Length == 0)
-                name = ns = String.Empty;
+                name = ns = string.Empty;
             else
                 XmlObjectSerializerReadContext.ParseQualifiedName(str, this, out name, out ns, out prefix);
             return new XmlQualifiedName(name, ns);
@@ -1102,7 +1102,7 @@ namespace System.Runtime.Serialization
         public bool TryReadDoubleArray(XmlObjectSerializerReadContext context,
 #else
         internal bool TryReadDoubleArray(XmlObjectSerializerReadContext context,
-#endif   
+#endif
             XmlDictionaryString itemName, XmlDictionaryString itemNamespace,
             int arrayLength, out double[] array)
         {
@@ -1234,4 +1234,3 @@ namespace System.Runtime.Serialization
         }
     }
 }
-

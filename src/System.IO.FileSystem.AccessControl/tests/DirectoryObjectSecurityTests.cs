@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information
 
@@ -18,6 +18,30 @@ namespace System.Security.AccessControl
         private const int ReadAccessMask = 0x01;
         private const int WriteAccessMask = 0x02;
         private const int ReadAttributeAccessMask = 0x80;
+
+        [Fact]
+        public void SetCustomDescriptor_Success()
+        {
+            // We didn't allow setting the security descriptor in core due to assembly refactoring.
+            // GetAccessRules() would throw a null ref after setting the descriptor. We now expose
+            // the descriptor as a protected property (instead of internal).
+            // https://github.com/dotnet/corefx/issues/34151
+
+            var customObjectSecurity = new CustomDirectoryObjectSecurity();
+
+            // DACL:SDDL_PROTECTED SDDL_AUTO_INHERITED
+            //  (SDDL_ACCESS_ALLOWED;SDDL_OBJECT_INHERIT SDDL_CONTAINER_INHERIT;access mask;;;SDDL_BUILTIN_USERS)
+            customObjectSecurity.SetSecurityDescriptorSddlForm("D:PAI(A;OICI;0x1200a9;;;BU)");
+            var rules = customObjectSecurity.GetAccessRules(true, true, typeof(SecurityIdentifier));
+
+            Assert.Equal(1, rules.Count);
+            CustomAccessRule rule = (CustomAccessRule)rules[0];
+            // Should be users group
+            Assert.Equal("S-1-5-32-545", rule.IdentityReference.Value);
+            Assert.Equal(AccessControlType.Allow, rule.AccessControlType);
+            Assert.Equal(InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit, rule.InheritanceFlags);
+            Assert.Equal(0x1200a9, rule.AccessMaskValue);
+        }
 
         [Fact]
         public void ObjectInitialization_DefaultConstructor_Success()
@@ -45,6 +69,7 @@ namespace System.Security.AccessControl
 
         [Fact]
         [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "System.DirectoryServices is not supported on this platform.")]
         public void GetAccessRules_InvalidTargetType()
         {
             var activeDirectorySecurity = new ActiveDirectorySecurity();
@@ -219,13 +244,11 @@ namespace System.Security.AccessControl
             Assert.NotNull(ruleCollection);
             List<CustomAuditRule> existingRules = ruleCollection.Cast<CustomAuditRule>().ToList();
             Assert.True(existingRules.Count > 0);
-            Assert.True(
-                existingRules.Any(
-                    x => x.AccessMaskValue == ReadAccessMask &&
-                    x.AuditFlags == AuditFlags.Success &&
-                    x.IdentityReference == Helpers.s_LocalSystemNTAccount
-                    )
-                );
+            Assert.Contains(existingRules, x =>
+                x.AccessMaskValue == ReadAccessMask &&
+                x.AuditFlags == AuditFlags.Success &&
+                x.IdentityReference == Helpers.s_LocalSystemNTAccount
+            );
         }
 
         [Fact]
@@ -307,7 +330,7 @@ namespace System.Security.AccessControl
             var descriptor = new CommonSecurityDescriptor(true, true, string.Empty);
             var customObjectSecurity = new CustomDirectoryObjectSecurity(descriptor);
             var objectTypeGuid = Guid.NewGuid();
-            
+
             var customAccessRuleReadWrite = new CustomAccessRule(
                 Helpers.s_LocalSystemNTAccount, ReadWriteAccessMask, true, InheritanceFlags.None,
                 PropagationFlags.None, objectTypeGuid, Guid.NewGuid(), AccessControlType.Allow
@@ -321,7 +344,7 @@ namespace System.Security.AccessControl
             customObjectSecurity.AddAccessRule(customAccessRuleReadWrite);
             bool result = customObjectSecurity.RemoveAccessRule(customAccessRuleWrite);
 
-            Assert.Equal(true, result);
+            Assert.True(result);
             AuthorizationRuleCollection ruleCollection = customObjectSecurity.GetAccessRules(true, true, typeof(System.Security.Principal.NTAccount));
 
             Assert.NotNull(ruleCollection);
@@ -378,7 +401,7 @@ namespace System.Security.AccessControl
             var descriptor = new CommonSecurityDescriptor(true, true, string.Empty);
             var customObjectSecurity = new CustomDirectoryObjectSecurity(descriptor);
             var objectTypeGuid = Guid.NewGuid();
-            
+
             var customAccessRuleReadWrite = new CustomAccessRule(
                 Helpers.s_LocalSystemNTAccount, ReadWriteAccessMask, true, InheritanceFlags.None,
                 PropagationFlags.None, objectTypeGuid, Guid.NewGuid(), AccessControlType.Allow
@@ -456,7 +479,7 @@ namespace System.Security.AccessControl
             Assert.False(existingRules.Contains(customAccessRuleSynchronize));
         }
 
-        [Fact]        
+        [Fact]
         public void RemoveAccessRuleAll_AccessControlType_Deny_ThrowException()
         {
             var descriptor = new CommonSecurityDescriptor(true, true, string.Empty);
@@ -799,11 +822,11 @@ namespace System.Security.AccessControl
 
             public override bool Equals(object value)
             {
-                if (Object.ReferenceEquals(null, value))
+                if (object.ReferenceEquals(null, value))
                 {
                     return false;
                 }
-                if (Object.ReferenceEquals(this, value))
+                if (object.ReferenceEquals(this, value))
                 {
                     return true;
                 }
@@ -856,11 +879,11 @@ namespace System.Security.AccessControl
 
             public override bool Equals(object value)
             {
-                if (Object.ReferenceEquals(null, value))
+                if (object.ReferenceEquals(null, value))
                 {
                     return false;
                 }
-                if (Object.ReferenceEquals(this, value))
+                if (object.ReferenceEquals(this, value))
                 {
                     return true;
                 }

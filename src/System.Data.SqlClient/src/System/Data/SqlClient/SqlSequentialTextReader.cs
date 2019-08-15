@@ -10,16 +10,16 @@ using System.Threading.Tasks;
 
 namespace System.Data.SqlClient
 {
-    sealed internal class SqlSequentialTextReader : System.IO.TextReader
+    internal sealed class SqlSequentialTextReader : System.IO.TextReader
     {
         private SqlDataReader _reader;  // The SqlDataReader that we are reading data from
-        private int _columnIndex;       // The index of out column in the table
-        private Encoding _encoding;     // Encoding for this character stream
-        private Decoder _decoder;       // Decoder based on the encoding (NOTE: Decoders are stateful as they are designed to process streams of data)
+        private readonly int _columnIndex;       // The index of out column in the table
+        private readonly Encoding _encoding;     // Encoding for this character stream
+        private readonly Decoder _decoder;       // Decoder based on the encoding (NOTE: Decoders are stateful as they are designed to process streams of data)
         private byte[] _leftOverBytes;  // Bytes leftover from the last Read() operation - this can be null if there were no bytes leftover (Possible optimization: re-use the same array?)
         private int _peekedChar;        // The last character that we peeked at (or -1 if we haven't peeked at anything)
         private Task _currentTask;      // The current async task
-        private CancellationTokenSource _disposalTokenSource;    // Used to indicate that a cancellation is requested due to disposal
+        private readonly CancellationTokenSource _disposalTokenSource;    // Used to indicate that a cancellation is requested due to disposal
 
         internal SqlSequentialTextReader(SqlDataReader reader, int columnIndex, Encoding encoding)
         {
@@ -58,7 +58,7 @@ namespace System.Data.SqlClient
                 _peekedChar = Read();
             }
 
-            Debug.Assert(_peekedChar == -1 || ((_peekedChar >= char.MinValue) && (_peekedChar <= char.MaxValue)), string.Format("Bad peeked character: {0}", _peekedChar));
+            Debug.Assert(_peekedChar == -1 || ((_peekedChar >= char.MinValue) && (_peekedChar <= char.MaxValue)), $"Bad peeked character: {_peekedChar}");
             return _peekedChar;
         }
 
@@ -92,7 +92,7 @@ namespace System.Data.SqlClient
                 }
             }
 
-            Debug.Assert(readChar == -1 || ((readChar >= char.MinValue) && (readChar <= char.MaxValue)), string.Format("Bad read character: {0}", readChar));
+            Debug.Assert(readChar == -1 || ((readChar >= char.MinValue) && (readChar <= char.MaxValue)), $"Bad read character: {readChar}");
             return readChar;
         }
 
@@ -114,7 +114,7 @@ namespace System.Data.SqlClient
             // Load in peeked char
             if ((charsNeeded > 0) && (HasPeekedChar))
             {
-                Debug.Assert((_peekedChar >= char.MinValue) && (_peekedChar <= char.MaxValue), string.Format("Bad peeked character: {0}", _peekedChar));
+                Debug.Assert((_peekedChar >= char.MinValue) && (_peekedChar <= char.MaxValue), $"Bad peeked character: {_peekedChar}");
                 buffer[index + charsRead] = (char)_peekedChar;
                 charsRead++;
                 charsNeeded--;
@@ -159,7 +159,7 @@ namespace System.Data.SqlClient
                             int peekedChar = _peekedChar;
                             if (peekedChar >= char.MinValue)
                             {
-                                Debug.Assert((_peekedChar >= char.MinValue) && (_peekedChar <= char.MaxValue), string.Format("Bad peeked character: {0}", _peekedChar));
+                                Debug.Assert((_peekedChar >= char.MinValue) && (_peekedChar <= char.MaxValue), $"Bad peeked character: {_peekedChar}");
                                 buffer[adjustedIndex] = (char)peekedChar;
                                 adjustedIndex++;
                                 charsRead++;
@@ -312,7 +312,7 @@ namespace System.Data.SqlClient
         private int InternalRead(char[] buffer, int index, int count)
         {
             Debug.Assert(buffer != null, "Null output buffer");
-            Debug.Assert((index >= 0) && (count >= 0) && (index + count <= buffer.Length), string.Format("Bad count: {0} or index: {1}", count, index));
+            Debug.Assert((index >= 0) && (count >= 0) && (index + count <= buffer.Length), $"Bad count: {count} or index: {index}");
             Debug.Assert(!IsClosed, "Can't read while textreader is closed");
 
             try
@@ -397,9 +397,9 @@ namespace System.Data.SqlClient
         private int DecodeBytesToChars(byte[] inBuffer, int inBufferCount, char[] outBuffer, int outBufferOffset, int outBufferCount)
         {
             Debug.Assert(inBuffer != null, "Null input buffer");
-            Debug.Assert((inBufferCount > 0) && (inBufferCount <= inBuffer.Length), string.Format("Bad inBufferCount: {0}", inBufferCount));
+            Debug.Assert((inBufferCount > 0) && (inBufferCount <= inBuffer.Length), $"Bad inBufferCount: {inBufferCount}");
             Debug.Assert(outBuffer != null, "Null output buffer");
-            Debug.Assert((outBufferOffset >= 0) && (outBufferCount > 0) && (outBufferOffset + outBufferCount <= outBuffer.Length), string.Format("Bad outBufferCount: {0} or outBufferOffset: {1}", outBufferCount, outBufferOffset));
+            Debug.Assert((outBufferOffset >= 0) && (outBufferCount > 0) && (outBufferOffset + outBufferCount <= outBuffer.Length), $"Bad outBufferCount: {outBufferCount} or outBufferOffset: {outBufferOffset}");
 
             int charsRead;
             int bytesUsed;
@@ -476,13 +476,13 @@ namespace System.Data.SqlClient
         }
     }
 
-    sealed internal class SqlUnicodeEncoding : UnicodeEncoding
+    internal sealed class SqlUnicodeEncoding : UnicodeEncoding
     {
-        private static SqlUnicodeEncoding s_singletonEncoding = new SqlUnicodeEncoding();
+        private static readonly SqlUnicodeEncoding s_singletonEncoding = new SqlUnicodeEncoding();
 
         private SqlUnicodeEncoding() : base(bigEndian: false, byteOrderMark: false, throwOnInvalidBytes: false)
         { }
-        
+
         public override Decoder GetDecoder()
         {
             return new SqlUnicodeDecoder();
@@ -499,7 +499,7 @@ namespace System.Data.SqlClient
             get { return s_singletonEncoding; }
         }
 
-        sealed private class SqlUnicodeDecoder : Decoder
+        private sealed class SqlUnicodeDecoder : Decoder
         {
             public override int GetCharCount(byte[] bytes, int index, int count)
             {

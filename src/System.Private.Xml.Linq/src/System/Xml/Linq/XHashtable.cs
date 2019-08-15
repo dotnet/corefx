@@ -28,7 +28,7 @@ namespace System.Xml.Linq
     ///    etc. to avoid locks.  Any changes to code which accesses these variables should be carefully reviewed and tested,
     ///    as it can be *very* tricky.  In particular, if you don't understand the CLR memory model or if you don't know
     ///    what a memory barrier is, DON'T attempt to modify this code.  A good discussion of these topics can be found at
-    ///    <![CDATA[http://discuss.develop.com/archives/wa.exe?A2=ind0203B&L=DOTNET&P=R375]]>. 
+    ///    <![CDATA[http://discuss.develop.com/archives/wa.exe?A2=ind0203B&L=DOTNET&P=R375]]>.
     ///
     /// 2. Because I am not sure if the CLR spec has changed since versions 1.0/1.1, I am assuming the weak memory model that
     ///    is described in the ECMA spec, in which normal writes can be reordered.  This means I must introduce more memory
@@ -62,8 +62,6 @@ namespace System.Xml.Linq
     internal sealed class XHashtable<TValue>
     {
         private XHashtableState _state;                          // SHARED STATE: Contains all XHashtable state, so it can be atomically swapped when resizes occur
-
-        private const int StartingHash = (5381 << 16) + 5381;   // Starting hash code value for string keys to be hashed
 
         /// <summary>
         /// Prototype of function which is called to extract a string key value from a hashed value.
@@ -132,10 +130,10 @@ namespace System.Xml.Linq
         /// </remarks>
         private sealed class XHashtableState
         {
-            private int[] _buckets;                  // Buckets contain indexes into entries array (bucket values are SHARED STATE)
-            private Entry[] _entries;                // Entries contain linked lists of buckets (next pointers are SHARED STATE)
+            private readonly int[] _buckets;                  // Buckets contain indexes into entries array (bucket values are SHARED STATE)
+            private readonly Entry[] _entries;                // Entries contain linked lists of buckets (next pointers are SHARED STATE)
             private int _numEntries;                 // SHARED STATE: Current number of entries (including orphaned entries)
-            private ExtractKeyDelegate _extractKey;  // Delegate called in order to extract string key embedded in hashed TValue
+            private readonly ExtractKeyDelegate _extractKey;  // Delegate called in order to extract string key embedded in hashed TValue
 
             private const int EndOfList = 0;        // End of linked list marker
             private const int FullList = -1;        // Indicates entries should not be added to end of linked list
@@ -397,22 +395,8 @@ namespace System.Xml.Linq
             /// </summary>
             private static int ComputeHashCode(string key, int index, int count)
             {
-                int hashCode = StartingHash;
-                int end = index + count;
                 Debug.Assert(key != null, "key should have been checked previously for null");
-
-                // Hash the key
-                for (int i = index; i < end; i++)
-                    unchecked
-                    {
-                        hashCode += (hashCode << 7) ^ key[i];
-                    }
-
-                // Mix up hash code a bit more and clear the sign bit.  This code was taken from NameTable.cs in System.Xml.
-                hashCode -= hashCode >> 17;
-                hashCode -= hashCode >> 11;
-                hashCode -= hashCode >> 5;
-                return hashCode & 0x7FFFFFFF;
+                return string.GetHashCode(key.AsSpan(index, count));
             }
 
             /// <summary>

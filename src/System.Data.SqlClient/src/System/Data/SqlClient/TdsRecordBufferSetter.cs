@@ -17,10 +17,10 @@ namespace System.Data.SqlClient
     {
         #region Fields (private)
 
-        private TdsValueSetter[] _fieldSetters;      // setters for individual fields
+        private readonly TdsValueSetter[] _fieldSetters;      // setters for individual fields
 
-        private TdsParserStateObject _stateObj;          // target to write to
-        private SmiMetaData _metaData;          // metadata describing value
+        private readonly TdsParserStateObject _stateObj;          // target to write to
+        private readonly SmiMetaData _metaData;          // metadata describing value
 #if DEBUG
         private const int ReadyForToken = -1;         // must call new/end element next
         private const int EndElementsCalled = -2;     // already called EndElements, can only call Close
@@ -77,14 +77,14 @@ namespace System.Data.SqlClient
         }
 
         //  valid for SqlDbType.Bit
-        public override void SetBoolean(SmiEventSink sink, int ordinal, Boolean value)
+        public override void SetBoolean(SmiEventSink sink, int ordinal, bool value)
         {
             CheckSettingColumn(ordinal);
             _fieldSetters[ordinal].SetBoolean(value);
         }
 
         //  valid for SqlDbType.TinyInt
-        public override void SetByte(SmiEventSink sink, int ordinal, Byte value)
+        public override void SetByte(SmiEventSink sink, int ordinal, byte value)
         {
             CheckSettingColumn(ordinal);
             _fieldSetters[ordinal].SetByte(value);
@@ -129,35 +129,35 @@ namespace System.Data.SqlClient
         }
 
         // valid for SqlDbType.SmallInt
-        public override void SetInt16(SmiEventSink sink, int ordinal, Int16 value)
+        public override void SetInt16(SmiEventSink sink, int ordinal, short value)
         {
             CheckSettingColumn(ordinal);
             _fieldSetters[ordinal].SetInt16(value);
         }
 
         // valid for SqlDbType.Int
-        public override void SetInt32(SmiEventSink sink, int ordinal, Int32 value)
+        public override void SetInt32(SmiEventSink sink, int ordinal, int value)
         {
             CheckSettingColumn(ordinal);
             _fieldSetters[ordinal].SetInt32(value);
         }
 
         // valid for SqlDbType.BigInt, SqlDbType.Money, SqlDbType.SmallMoney
-        public override void SetInt64(SmiEventSink sink, int ordinal, Int64 value)
+        public override void SetInt64(SmiEventSink sink, int ordinal, long value)
         {
             CheckSettingColumn(ordinal);
             _fieldSetters[ordinal].SetInt64(value);
         }
 
         // valid for SqlDbType.Real
-        public override void SetSingle(SmiEventSink sink, int ordinal, Single value)
+        public override void SetSingle(SmiEventSink sink, int ordinal, float value)
         {
             CheckSettingColumn(ordinal);
             _fieldSetters[ordinal].SetSingle(value);
         }
 
         // valid for SqlDbType.Float
-        public override void SetDouble(SmiEventSink sink, int ordinal, Double value)
+        public override void SetDouble(SmiEventSink sink, int ordinal, double value)
         {
             CheckSettingColumn(ordinal);
             _fieldSetters[ordinal].SetDouble(value);
@@ -269,7 +269,7 @@ namespace System.Data.SqlClient
                     return;
                 }
 
-                // Handle readyfortoken by using count of columns in the loop.            
+                // Handle readyfortoken by using count of columns in the loop.
                 targetColumn = _metaData.FieldMetaData.Count;
             }
 

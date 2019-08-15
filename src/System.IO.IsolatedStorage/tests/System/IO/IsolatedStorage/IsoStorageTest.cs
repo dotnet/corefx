@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -11,7 +11,6 @@ namespace System.IO.IsolatedStorage
     // We put the tests in the "Store collection" to get them to pick up the StoreTestsFixture. This will run the fixture
     // at the start and end of the collection, cleaning the test environment.
     [Collection("Store collection")]
-    [ActiveIssue(18940, TargetFrameworkMonikers.UapAot)]
     public class IsoStorageTest
     {
         public static IEnumerable<object[]> ValidScopes
@@ -94,7 +93,7 @@ namespace System.IO.IsolatedStorage
 
 /*
  *      Template for Store test method
- * 
+ *
         [Theory, MemberData(nameof(ValidStores))]
         public void ExampleTest(PresetScopes scope)
         {

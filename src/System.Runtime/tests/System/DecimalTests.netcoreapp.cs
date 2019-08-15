@@ -4,12 +4,21 @@
 
 using System.Collections.Generic;
 using System.Globalization;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Tests
 {
     public partial class DecimalTests
     {
+        [Theory]
+        [InlineData(MidpointRounding.ToEven - 1)]
+        [InlineData(MidpointRounding.ToPositiveInfinity + 1)]
+        public void Round_InvalidMidpointRounding_ThrowsArgumentException(MidpointRounding mode)
+        {
+            AssertExtensions.Throws<ArgumentException>("mode", () => decimal.Round(1, 2, mode));
+        }
+
         public static IEnumerable<object[]> Parse_ValidWithOffsetCount_TestData()
         {
             foreach (object[] inputs in Parse_Valid_TestData())
@@ -67,7 +76,7 @@ namespace System.Tests
         [Fact]
         public static void TryFormat()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
@@ -124,7 +133,7 @@ namespace System.Tests
                     }
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
     }

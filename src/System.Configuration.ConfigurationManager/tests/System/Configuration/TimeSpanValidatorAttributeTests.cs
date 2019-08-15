@@ -1,16 +1,16 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using System.Configuration;
 using System.Diagnostics;
 using System.Globalization;
-
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.ConfigurationTests
 {
-    public class TimeSpanValidatorAttributeTests : RemoteExecutorTestBase
+    public class TimeSpanValidatorAttributeTests
     {
         [Fact]
         public void MinValueString_GetString()
@@ -24,26 +24,26 @@ namespace System.ConfigurationTests
         public void MinValueString_SetValidTimeSpan()
         {
             TimeSpanValidatorAttribute attribute = new TimeSpanValidatorAttribute();
-            
+
             attribute.MinValueString = "05:55:55";
             string test = attribute.MinValueString;
-            Assert.Equal(test, "05:55:55");
+            Assert.Equal("05:55:55", test);
 
             attribute.MinValueString = "23:59:59";
             test = attribute.MinValueString;
-            Assert.Equal(test, "23:59:59");
+            Assert.Equal("23:59:59", test);
 
             attribute.MinValueString = "00:00:00";
             test = attribute.MinValueString;
-            Assert.Equal(test, "00:00:00");
+            Assert.Equal("00:00:00", test);
 
             attribute.MinValueString = "1:01:00:00";
             test = attribute.MinValueString;
-            Assert.Equal(test, "1.01:00:00");
+            Assert.Equal("1.01:00:00", test);
 
             attribute.MinValueString = "2:22:50:45.2563";
             test = attribute.MinValueString;
-            Assert.Equal(test, "2.22:50:45.2563000");
+            Assert.Equal("2.22:50:45.2563000", test);
         }
 
         [Fact]
@@ -53,23 +53,23 @@ namespace System.ConfigurationTests
 
             attribute.MaxValueString = "05:55:55";
             string test = attribute.MaxValueString;
-            Assert.Equal(test, "05:55:55");
+            Assert.Equal("05:55:55", test);
 
             attribute.MaxValueString = "23:59:59";
             test = attribute.MaxValueString;
-            Assert.Equal(test, "23:59:59");
+            Assert.Equal("23:59:59", test);
 
             attribute.MaxValueString = "00:00:00";
             test = attribute.MaxValueString;
-            Assert.Equal(test, "00:00:00");
+            Assert.Equal("00:00:00", test);
 
             attribute.MaxValueString = "1:01:00:00";
             test = attribute.MaxValueString;
-            Assert.Equal(test, "1.01:00:00");
+            Assert.Equal("1.01:00:00", test);
 
             attribute.MaxValueString = "2:22:50:45.2563";
             test = attribute.MaxValueString;
-            Assert.Equal(test, "2.22:50:45.2563000");
+            Assert.Equal("2.22:50:45.2563000", test);
         }
 
         [Fact]
@@ -114,10 +114,9 @@ namespace System.ConfigurationTests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Exception messages are different")]
         public void MinValueString_TooSmall()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
 
@@ -133,10 +132,9 @@ namespace System.ConfigurationTests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Exception messages are different")]
         public void MaxValueString_TooBig()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
 

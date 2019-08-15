@@ -393,14 +393,22 @@ namespace XDocumentTests.SDMSample
             // Test various values.
             XElement e1 = new XElement("x");
             XElement e2 = new XElement("x", "bogus");
-            XElement e3 = new XElement("x", "5e+500");
             XElement e4 = new XElement("x", "5.0");
 
             Assert.Throws<FormatException>(() => (float)e1);
             Assert.Throws<FormatException>(() => (float)e2);
-            Assert.Throws<OverflowException>(() => (float)e3);
 
             Assert.Equal(5.0f, (float)e4);
+        }
+
+        /// <summary>
+        /// Validates the explicit float conversion operator on XElement.
+        /// </summary>
+        [Fact]
+        public void ElementExplicitToFloat_NotNetFramework()
+        {
+            XElement e3 = new XElement("x", "5e+500");
+            Assert.Equal(float.PositiveInfinity, (float)e3);
         }
 
         /// <summary>
@@ -415,14 +423,22 @@ namespace XDocumentTests.SDMSample
             // Test various values.
             XElement e1 = new XElement("x");
             XElement e2 = new XElement("x", "bogus");
-            XElement e3 = new XElement("x", "5e+5000");
             XElement e4 = new XElement("x", "5.0");
 
             Assert.Throws<FormatException>(() => (double)e1);
             Assert.Throws<FormatException>(() => (double)e2);
-            Assert.Throws<OverflowException>(() => (double)e3);
 
             Assert.Equal(5.0, (double)e4);
+        }
+
+        /// <summary>
+        /// Validates the explicit double conversion operator on XElement.
+        /// </summary>
+        [Fact]
+        public void ElementExplicitToDouble_NotNetFramework()
+        {
+            XElement e3 = new XElement("x", "5e+5000");
+            Assert.Equal(double.PositiveInfinity, (double)e3);
         }
 
         /// <summary>
@@ -644,8 +660,8 @@ namespace XDocumentTests.SDMSample
             Assert.Null(e1.Attribute("foo"));
             Assert.Null(e2.Attribute("foo"));
 
-            Assert.Equal(e2.Attribute("a3").Name.ToString(), "a3");
-            Assert.Equal(e2.Attribute("a3").Value, "3");
+            Assert.Equal("a3", e2.Attribute("a3").Name.ToString());
+            Assert.Equal("3", e2.Attribute("a3").Value);
 
             Assert.Equal(new[] { "a1", "a2", "a3", "a4", "a5" }, e2.Attributes().Select(x => x.Name.ToString()));
             Assert.Equal(new[] { "1", "2", "3", "4", "5" }, e2.Attributes().Select(x => x.Value));
@@ -664,13 +680,13 @@ namespace XDocumentTests.SDMSample
 
             // Add of non-existent attribute
             e1.SetAttributeValue("foo", "foo-value");
-            Assert.Equal(e1.Attribute("foo").Name.ToString(), "foo");
-            Assert.Equal(e1.Attribute("foo").Value, "foo-value");
+            Assert.Equal("foo", e1.Attribute("foo").Name.ToString());
+            Assert.Equal("foo-value", e1.Attribute("foo").Value);
 
             // Overwriting of existing attribute
             e1.SetAttributeValue("foo", "noo-value");
-            Assert.Equal(e1.Attribute("foo").Name.ToString(), "foo");
-            Assert.Equal(e1.Attribute("foo").Value, "noo-value");
+            Assert.Equal("foo", e1.Attribute("foo").Name.ToString());
+            Assert.Equal("noo-value", e1.Attribute("foo").Value);
 
             // Effective removal of existing attribute
             e1.SetAttributeValue("foo", null);
@@ -933,7 +949,7 @@ namespace XDocumentTests.SDMSample
         }
 
         /// <summary>
-        /// Tests that an element appended as a child element during iteration of its new 
+        /// Tests that an element appended as a child element during iteration of its new
         /// parent's content is returned in iteration.
         /// </summary>
         [Fact]

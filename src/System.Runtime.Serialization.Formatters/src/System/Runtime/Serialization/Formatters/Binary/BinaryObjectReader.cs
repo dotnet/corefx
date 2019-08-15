@@ -87,45 +87,47 @@ namespace System.Runtime.Serialization.Formatters.Binary
 
             _isSimpleAssembly = (_formatterEnums._assemblyFormat == FormatterAssemblyStyle.Simple);
 
-
-            if (_fullDeserialization)
+            using (DeserializationToken token = SerializationInfo.StartDeserialization())
             {
-                // Reinitialize
-                _objectManager = new ObjectManager(_surrogates, _context, false, false);
-                _serObjectInfoInit = new SerObjectInfoInit();
+                if (_fullDeserialization)
+                {
+                    // Reinitialize
+                    _objectManager = new ObjectManager(_surrogates, _context);
+                    _serObjectInfoInit = new SerObjectInfoInit();
+                }
+
+                // Will call back to ParseObject, ParseHeader for each object found
+                serParser.Run();
+
+                if (_fullDeserialization)
+                {
+                    _objectManager.DoFixups();
+                }
+
+                if (TopObject == null)
+                {
+                    throw new SerializationException(SR.Serialization_TopObject);
+                }
+
+                //if TopObject has a surrogate then the actual object may be changed during special fixup
+                //So refresh it using topID.
+                if (HasSurrogate(TopObject.GetType()) && _topId != 0)//Not yet resolved
+                {
+                    TopObject = _objectManager.GetObject(_topId);
+                }
+
+                if (TopObject is IObjectReference)
+                {
+                    TopObject = ((IObjectReference)TopObject).GetRealObject(_context);
+                }
+
+                if (_fullDeserialization)
+                {
+                    _objectManager.RaiseDeserializationEvent(); // This will raise both IDeserialization and [OnDeserialized] events
+                }
+
+                return TopObject;
             }
-
-            // Will call back to ParseObject, ParseHeader for each object found
-            serParser.Run();
-
-            if (_fullDeserialization)
-            {
-                _objectManager.DoFixups();
-            }
-
-            if (TopObject == null)
-            {
-                throw new SerializationException(SR.Serialization_TopObject);
-            }
-
-            //if TopObject has a surrogate then the actual object may be changed during special fixup
-            //So refresh it using topID.
-            if (HasSurrogate(TopObject.GetType()) && _topId != 0)//Not yet resolved
-            {
-                TopObject = _objectManager.GetObject(_topId);
-            }
-
-            if (TopObject is IObjectReference)
-            {
-                TopObject = ((IObjectReference)TopObject).GetRealObject(_context);
-            }
-
-            if (_fullDeserialization)
-            {
-                _objectManager.RaiseDeserializationEvent(); // This will raise both IDeserialization and [OnDeserialized] events
-            }
-
-            return TopObject;
         }
         private bool HasSurrogate(Type t)
         {
@@ -137,7 +139,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
         {
             if (!t.IsSerializable && !HasSurrogate(t))
             {
-                throw new SerializationException(string.Format(CultureInfo.InvariantCulture, SR.Serialization_NonSerType, t.FullName, t.Assembly.FullName));
+                throw new SerializationException(SR.Format(CultureInfo.InvariantCulture, SR.Serialization_NonSerType, t.FullName, t.Assembly.FullName));
             }
         }
 
@@ -145,7 +147,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
         {
             _fullDeserialization = true;
             _stack = new SerStack("ObjectReader Object Stack");
-            _objectManager = new ObjectManager(_surrogates, _context, false, false);
+            _objectManager = new ObjectManager(_surrogates, _context);
             if (_formatterConverter == null)
             {
                 _formatterConverter = new FormatterConverter();
@@ -487,7 +489,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
             // indexMap 1 [0,0,1]
             // indexMap 2 [0,0,2]
             // indexMap 3 [0,0,3]
-            // indexMap 4 [0,1,0]       
+            // indexMap 4 [0,1,0]
             for (int irank = pr._rank - 1; irank > -1; irank--)
             {
                 // Find the current or lower dimension which can be incremented.
@@ -667,7 +669,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
                         }
                         else
                         {
-                            ((Array)objectPr._newObj).SetValue(var, objectPr._indexMap); // Primitive type   
+                            ((Array)objectPr._newObj).SetValue(var, objectPr._indexMap); // Primitive type
                         }
                     }
                 }
@@ -866,7 +868,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
                         }
                     }
                 }
-                // SerializationInfo is always needed for ISerialization                        
+                // SerializationInfo is always needed for ISerialization
                 si = pr._si;
 
                 if (bIsString)
@@ -992,7 +994,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
                     return null;
                 }
 
-                // before adding it to cache, let us do the security check 
+                // before adding it to cache, let us do the security check
                 CheckTypeForwardedTo(assm, type.Assembly, type);
 
                 entry = new TypeNAssembly();
@@ -1071,7 +1073,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
                         objectType = FormatterServices.GetTypeFromAssembly(sourceAssembly, name);
                     }
 
-                    // here let us do the security check 
+                    // here let us do the security check
                     if (objectType != null)
                     {
                         CheckTypeForwardedTo(sourceAssembly, objectType.Assembly, objectType);

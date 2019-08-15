@@ -68,12 +68,12 @@ namespace System.Xml
 
     internal class ValueHandle
     {
-        private XmlBufferReader _bufferReader;
+        private readonly XmlBufferReader _bufferReader;
         private ValueHandleType _type;
         private int _offset;
         private int _length;
         private static Base64Encoding s_base64Encoding;
-        private static string[] s_constStrings = {
+        private static readonly string[] s_constStrings = {
                                         "string",
                                         "number",
                                         "array",
@@ -214,7 +214,7 @@ namespace System.Xml
             }
         }
 
-        public Boolean ToBoolean()
+        public bool ToBoolean()
         {
             ValueHandleType type = _type;
             if (type == ValueHandleType.False)
@@ -318,7 +318,7 @@ namespace System.Xml
             return XmlConverter.ToUInt64(GetString());
         }
 
-        public Single ToSingle()
+        public float ToSingle()
         {
             ValueHandleType type = _type;
             if (type == ValueHandleType.Single)
@@ -327,9 +327,9 @@ namespace System.Xml
             {
                 double value = GetDouble();
 
-                if ((value >= Single.MinValue && value <= Single.MaxValue) || !double.IsFinite(value))
+                if ((value >= float.MinValue && value <= float.MaxValue) || !double.IsFinite(value))
                 {
-                    return (Single)value;
+                    return (float)value;
                 }
             }
             if (type == ValueHandleType.Zero)
@@ -345,7 +345,7 @@ namespace System.Xml
             return XmlConverter.ToSingle(GetString());
         }
 
-        public Double ToDouble()
+        public double ToDouble()
         {
             ValueHandleType type = _type;
             if (type == ValueHandleType.Double)
@@ -367,7 +367,7 @@ namespace System.Xml
             return XmlConverter.ToDouble(GetString());
         }
 
-        public Decimal ToDecimal()
+        public decimal ToDecimal()
         {
             ValueHandleType type = _type;
             if (type == ValueHandleType.Decimal)
@@ -759,21 +759,21 @@ namespace System.Xml
 
                         // We might have gotten zero characters though if < 4 bytes were requested because
                         // codepoints from U+0000 - U+FFFF can be up to 3 bytes in UTF-8, and represented as ONE char
-                        // codepoints from U+10000 - U+10FFFF (last Unicode codepoint representable in UTF-8) are represented by up to 4 bytes in UTF-8 
+                        // codepoints from U+10000 - U+10FFFF (last Unicode codepoint representable in UTF-8) are represented by up to 4 bytes in UTF-8
                         //                                    and represented as TWO chars (high+low surrogate)
                         // (e.g. 1 char requested, 1 char in the buffer represented in 3 bytes)
                         while (actualCharCount == 0)
                         {
                             // Note the by the time we arrive here, if actualByteCount == 3, the next decoder.GetChars() call will read the 4th byte
-                            // if we don't bail out since the while loop will advance actualByteCount only after reading the byte. 
+                            // if we don't bail out since the while loop will advance actualByteCount only after reading the byte.
                             if (actualByteCount >= 3 && charCount < 2)
                             {
-                                // If we reach here, it means that we're: 
-                                // - trying to decode more than 3 bytes and, 
-                                // - there is only one char left of charCount where we're stuffing decoded characters. 
-                                // In this case, we need to back off since decoding > 3 bytes in UTF-8 means that we will get 2 16-bit chars 
-                                // (a high surrogate and a low surrogate) - the Decoder will attempt to provide both at once 
-                                // and an ArgumentException will be thrown complaining that there's not enough space in the output char array.  
+                                // If we reach here, it means that we're:
+                                // - trying to decode more than 3 bytes and,
+                                // - there is only one char left of charCount where we're stuffing decoded characters.
+                                // In this case, we need to back off since decoding > 3 bytes in UTF-8 means that we will get 2 16-bit chars
+                                // (a high surrogate and a low surrogate) - the Decoder will attempt to provide both at once
+                                // and an ArgumentException will be thrown complaining that there's not enough space in the output char array.
 
                                 // actualByteCount = 0 when the while loop is broken out of; decoder goes out of scope so its state no longer matters
 

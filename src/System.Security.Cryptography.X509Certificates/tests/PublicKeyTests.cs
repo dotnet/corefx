@@ -85,7 +85,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Same(alg, pk.Key);
                 Assert.Equal(2048, alg.KeySize);
 
-                Assert.IsAssignableFrom(typeof(RSA), alg);
+                Assert.IsAssignableFrom<RSA>(alg);
                 VerifyKey_RSA( /* cert */ null, (RSA)alg);
             }
         }
@@ -100,7 +100,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Same(alg, pk.Key);
                 Assert.Equal(1024, alg.KeySize);
 
-                Assert.IsAssignableFrom(typeof(DSA), alg);
+                Assert.IsAssignableFrom<DSA>(alg);
                 VerifyKey_DSA((DSA)alg);
             }
         }
@@ -279,7 +279,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                         !expectedExponent.SequenceEqual(rsaParameters.Exponent))
                     {
                         Console.WriteLine("New key handle ExportParameters was not successful either");
-                    }    
+                    }
                 }
             }
 
@@ -312,6 +312,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         [Theory, MemberData(nameof(BrainpoolCurves))]
         public static void TestKey_ECDsabrainpool_PublicKey(byte[] curveData, byte[] notUsed)
         {
+            _ = notUsed;
             byte[] helloBytes = Encoding.ASCII.GetBytes("Hello");
 
             try
@@ -474,7 +475,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 }
             }
         }
-        
+
+#if !NO_DSA_AVAILABLE
         [Fact]
         public static void TestDSAPublicKey()
         {
@@ -524,6 +526,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Null(pubKey);
             }
         }
+#endif
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Uses P/Invokes

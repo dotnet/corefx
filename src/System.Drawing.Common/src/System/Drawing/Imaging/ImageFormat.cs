@@ -2,27 +2,30 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.ComponentModel;
+
 namespace System.Drawing.Imaging
 {
     /// <summary>
     /// Specifies the format of the image.
     /// </summary>
+#if netcoreapp
+    [TypeConverter("System.Drawing.ImageFormatConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
+#endif
     public sealed class ImageFormat
     {
         // Format IDs
         // private static ImageFormat undefined = new ImageFormat(new Guid("{b96b3ca9-0728-11d3-9d7b-0000f81ef32e}"));
-        private static ImageFormat s_memoryBMP = new ImageFormat(new Guid("{b96b3caa-0728-11d3-9d7b-0000f81ef32e}"));
-        private static ImageFormat s_bmp = new ImageFormat(new Guid("{b96b3cab-0728-11d3-9d7b-0000f81ef32e}"));
-        private static ImageFormat s_emf = new ImageFormat(new Guid("{b96b3cac-0728-11d3-9d7b-0000f81ef32e}"));
-        private static ImageFormat s_wmf = new ImageFormat(new Guid("{b96b3cad-0728-11d3-9d7b-0000f81ef32e}"));
-        private static ImageFormat s_jpeg = new ImageFormat(new Guid("{b96b3cae-0728-11d3-9d7b-0000f81ef32e}"));
-        private static ImageFormat s_png = new ImageFormat(new Guid("{b96b3caf-0728-11d3-9d7b-0000f81ef32e}"));
-        private static ImageFormat s_gif = new ImageFormat(new Guid("{b96b3cb0-0728-11d3-9d7b-0000f81ef32e}"));
-        private static ImageFormat s_tiff = new ImageFormat(new Guid("{b96b3cb1-0728-11d3-9d7b-0000f81ef32e}"));
-        private static ImageFormat s_exif = new ImageFormat(new Guid("{b96b3cb2-0728-11d3-9d7b-0000f81ef32e}"));
-        private static ImageFormat s_photoCD = new ImageFormat(new Guid("{b96b3cb3-0728-11d3-9d7b-0000f81ef32e}"));
-        private static ImageFormat s_flashPIX = new ImageFormat(new Guid("{b96b3cb4-0728-11d3-9d7b-0000f81ef32e}"));
-        private static ImageFormat s_icon = new ImageFormat(new Guid("{b96b3cb5-0728-11d3-9d7b-0000f81ef32e}"));
+        private static readonly ImageFormat s_memoryBMP = new ImageFormat(new Guid("{b96b3caa-0728-11d3-9d7b-0000f81ef32e}"));
+        private static readonly ImageFormat s_bmp = new ImageFormat(new Guid("{b96b3cab-0728-11d3-9d7b-0000f81ef32e}"));
+        private static readonly ImageFormat s_emf = new ImageFormat(new Guid("{b96b3cac-0728-11d3-9d7b-0000f81ef32e}"));
+        private static readonly ImageFormat s_wmf = new ImageFormat(new Guid("{b96b3cad-0728-11d3-9d7b-0000f81ef32e}"));
+        private static readonly ImageFormat s_jpeg = new ImageFormat(new Guid("{b96b3cae-0728-11d3-9d7b-0000f81ef32e}"));
+        private static readonly ImageFormat s_png = new ImageFormat(new Guid("{b96b3caf-0728-11d3-9d7b-0000f81ef32e}"));
+        private static readonly ImageFormat s_gif = new ImageFormat(new Guid("{b96b3cb0-0728-11d3-9d7b-0000f81ef32e}"));
+        private static readonly ImageFormat s_tiff = new ImageFormat(new Guid("{b96b3cb1-0728-11d3-9d7b-0000f81ef32e}"));
+        private static readonly ImageFormat s_exif = new ImageFormat(new Guid("{b96b3cb2-0728-11d3-9d7b-0000f81ef32e}"));
+        private static readonly ImageFormat s_icon = new ImageFormat(new Guid("{b96b3cb5-0728-11d3-9d7b-0000f81ef32e}"));
 
         private Guid _guid;
 
@@ -142,7 +145,7 @@ namespace System.Drawing.Imaging
             return _guid.GetHashCode();
         }
 
-#if !FEATURE_PAL        
+#if !FEATURE_PAL
         // Find any random encoder which supports this format
         internal ImageCodecInfo FindEncoder()
         {
@@ -161,16 +164,16 @@ namespace System.Drawing.Imaging
         /// </summary>
         public override string ToString()
         {
-            if (this == s_memoryBMP) return "MemoryBMP";
-            if (this == s_bmp) return "Bmp";
-            if (this == s_emf) return "Emf";
-            if (this == s_wmf) return "Wmf";
-            if (this == s_gif) return "Gif";
-            if (this == s_jpeg) return "Jpeg";
-            if (this == s_png) return "Png";
-            if (this == s_tiff) return "Tiff";
-            if (this == s_exif) return "Exif";
-            if (this == s_icon) return "Icon";
+            if (this.Guid == s_memoryBMP.Guid) return "MemoryBMP";
+            if (this.Guid == s_bmp.Guid) return "Bmp";
+            if (this.Guid == s_emf.Guid) return "Emf";
+            if (this.Guid == s_wmf.Guid) return "Wmf";
+            if (this.Guid == s_gif.Guid) return "Gif";
+            if (this.Guid == s_jpeg.Guid) return "Jpeg";
+            if (this.Guid == s_png.Guid) return "Png";
+            if (this.Guid == s_tiff.Guid) return "Tiff";
+            if (this.Guid == s_exif.Guid) return "Exif";
+            if (this.Guid == s_icon.Guid) return "Icon";
             return "[ImageFormat: " + _guid + "]";
         }
     }

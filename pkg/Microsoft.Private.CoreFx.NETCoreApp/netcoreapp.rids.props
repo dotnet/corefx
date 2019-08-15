@@ -1,10 +1,13 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project>
   <ItemGroup>
+    <OfficialBuildRID Include="freebsd-x64" />
     <OfficialBuildRID Include="linux-arm">
       <Platform>arm</Platform>
     </OfficialBuildRID>
     <OfficialBuildRID Include="linux-arm64">
+      <Platform>arm64</Platform>
+    </OfficialBuildRID>
+    <OfficialBuildRID Include="linux-musl-arm64">
       <Platform>arm64</Platform>
     </OfficialBuildRID>
     <OfficialBuildRID Include="linux-x64" />
@@ -26,6 +29,9 @@
          built during official builds, however we wish to include them
          in our runtime.json to enable others to provide them.  -->
     <OfficialBuildRID Include="tizen.4.0.0-armel">
+      <Platform>armel</Platform>
+    </OfficialBuildRID>
+    <OfficialBuildRID Include="tizen.5.0.0-armel">
       <Platform>armel</Platform>
     </OfficialBuildRID>
   </ItemGroup>

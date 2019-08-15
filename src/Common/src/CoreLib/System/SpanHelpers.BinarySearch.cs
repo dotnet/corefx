@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -6,9 +6,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-#if !netstandard
 using Internal.Runtime.CompilerServices;
-#endif
 
 namespace System
 {
@@ -26,7 +24,7 @@ namespace System
         }
 
         public static int BinarySearch<T, TComparable>(
-            ref T spanStart, int length, TComparable comparable) 
+            ref T spanStart, int length, TComparable comparable)
             where TComparable : IComparable<T>
         {
             int lo = 0;
@@ -35,10 +33,10 @@ namespace System
             while (lo <= hi)
             {
                 // PERF: `lo` or `hi` will never be negative inside the loop,
-                //       so computing median using uints is safe since we know 
+                //       so computing median using uints is safe since we know
                 //       `length <= int.MaxValue`, and indices are >= 0
-                //       and thus cannot overflow an uint. 
-                //       Saves one subtraction per loop compared to 
+                //       and thus cannot overflow an uint.
+                //       Saves one subtraction per loop compared to
                 //       `int i = lo + ((hi - lo) >> 1);`
                 int i = (int)(((uint)hi + (uint)lo) >> 1);
 
@@ -64,11 +62,11 @@ namespace System
         }
 
         // Helper to allow sharing all code via IComparable<T> inlineable
-        internal struct ComparerComparable<T, TComparer> : IComparable<T>
+        internal readonly struct ComparerComparable<T, TComparer> : IComparable<T>
             where TComparer : IComparer<T>
         {
-            readonly T _value;
-            readonly TComparer _comparer;
+            private readonly T _value;
+            private readonly TComparer _comparer;
 
             public ComparerComparable(T value, TComparer comparer)
             {

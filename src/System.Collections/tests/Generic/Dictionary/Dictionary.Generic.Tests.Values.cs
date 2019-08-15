@@ -13,7 +13,7 @@ namespace System.Collections.Tests
         protected override bool DefaultValueAllowed => true;
         protected override bool DuplicateValuesAllowed => true;
         protected override bool IsReadOnly => true;
-        protected override IEnumerable<ModifyEnumerable> ModifyEnumerables => new List<ModifyEnumerable>();
+        protected override IEnumerable<ModifyEnumerable> GetModifyEnumerables(ModifyOperation operations) => new List<ModifyEnumerable>();
 
         protected override ICollection<string> GenericICollectionFactory()
         {
@@ -40,9 +40,8 @@ namespace System.Collections.Tests
 
         protected override Type ICollection_Generic_CopyTo_IndexLargerThanArrayCount_ThrowType => typeof(ArgumentOutOfRangeException);
 
-        [Theory]
-        [MemberData(nameof(ValidCollectionSizes))]
-        public void Dictionary_Generic_ValueCollection_Constructor_NullDictionary(int count)
+        [Fact]
+        public void Dictionary_Generic_ValueCollection_Constructor_NullDictionary()
         {
             Assert.Throws<ArgumentNullException>(() => new Dictionary<string, string>.ValueCollection(null));
         }
@@ -66,7 +65,7 @@ namespace System.Collections.Tests
         protected override bool IsReadOnly => true;
         protected override bool Enumerator_Current_UndefinedOperation_Throws => true;
         protected override Type ICollection_NonGeneric_CopyTo_ArrayOfEnumType_ThrowType => typeof(ArgumentException);
-        protected override IEnumerable<ModifyEnumerable> ModifyEnumerables => new List<ModifyEnumerable>();
+        protected override IEnumerable<ModifyEnumerable> GetModifyEnumerables(ModifyOperation operations) => new List<ModifyEnumerable>();
         protected override bool SupportsSerialization => false;
 
         protected override Type ICollection_NonGeneric_CopyTo_IndexLargerThanArrayCount_ThrowType => typeof(ArgumentOutOfRangeException);

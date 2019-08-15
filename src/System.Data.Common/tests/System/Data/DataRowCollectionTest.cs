@@ -3,7 +3,7 @@
 
 // (C) Copyright 2002 Franklin Wise
 // (C) Copyright 2003 Martin Willemoes Hansen
-// 
+//
 
 //
 // Copyright (C) 2004 Novell, Inc (http://www.novell.com)
@@ -15,10 +15,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -206,8 +206,8 @@ namespace System.Data.Tests
             }
             catch (ArgumentException e)
             {
-                // LAMESPEC: MSDN says this exception is InvalidCastException
-                //				Assert.Equal (typeof (ArgumentException), e.GetType ());
+                // MSDN says this exception is InvalidCastException
+                //                Assert.Equal (typeof (ArgumentException), e.GetType ());
             }
 
             object[] obs1 = new object[5];
@@ -899,7 +899,7 @@ namespace System.Data.Tests
 
             try
             {
-                Assert.Equal(null, dt.Rows.Find(new object[] { null }));
+                Assert.Null(dt.Rows.Find(new object[] { null }));
             }
             catch (IndexOutOfRangeException)
             {
@@ -919,7 +919,7 @@ namespace System.Data.Tests
 
             try
             {
-                Assert.Equal(null, dt.Rows.Find((object)null));
+                Assert.Null(dt.Rows.Find((object)null));
             }
             catch (IndexOutOfRangeException)
             {

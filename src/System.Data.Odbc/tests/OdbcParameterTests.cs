@@ -228,7 +228,7 @@ namespace System.Data.Odbc.Tests
                             dataType = OdbcType.VarChar;
                             break;
                     }
-                    
+
                     command.Parameters.Add("@v1", dataType, procDataSize);
                     command.Parameters.Add("@v2", dataType, procDataSize);
                     command.Parameters.Add("@v3", OdbcType.Int);
@@ -243,8 +243,8 @@ namespace System.Data.Odbc.Tests
                     command.ExecuteNonQuery();
 
                     v2 = command.Parameters["@v2"].Value;
-                    v3 = Int32.Parse(command.Parameters["@v3"].Value.ToString());
-                    v4 = Int32.Parse(command.Parameters["@v4"].Value.ToString());
+                    v3 = int.Parse(command.Parameters["@v3"].Value.ToString());
+                    v4 = int.Parse(command.Parameters["@v4"].Value.ToString());
                 }
             }
 

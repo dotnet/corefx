@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -11,7 +11,7 @@ namespace System.Net.Test.Uri.IriTest
 {
     /// <summary>
     /// IriEscapeUnescape heap corruption and crash test.
-    /// These tests do not check for output correctness although they do validate that normalization is 
+    /// These tests do not check for output correctness although they do validate that normalization is
     /// locale-independent.
     /// </summary>
     public class IriEscapeUnescapeTest
@@ -201,7 +201,7 @@ namespace System.Net.Test.Uri.IriTest
                 for (int i = 0; i < components.Length; i++)
                 {
                     Assert.True(
-                        0 == String.CompareOrdinal(results_en[i], results_zh[i]),
+                        0 == string.CompareOrdinal(results_en[i], results_zh[i]),
                         "Detected locale differences when processing UriComponents." + components[i]);
                 }
             }
@@ -209,7 +209,7 @@ namespace System.Net.Test.Uri.IriTest
 
         private string EscapeUnescapeTestComponent(string uriInput, UriComponents component)
         {
-            string ret = null;
+            string? ret = null;
             HeapCheck hc = new HeapCheck(uriInput);
 
             unsafe
@@ -290,7 +290,7 @@ namespace System.Net.Test.Uri.IriTest
         [Fact]
         public void Iri_MatchUTF8Sequence_decoder_different_from_encoder()
         {
-            // Found by fuzzing: 
+            // Found by fuzzing:
             // Input string:                %98%C8%D4%F3%D4%A8%7A%CF%DE%41%16
             // Valid Unicode sequences:           %D4      %A8%7A      %41%16
 

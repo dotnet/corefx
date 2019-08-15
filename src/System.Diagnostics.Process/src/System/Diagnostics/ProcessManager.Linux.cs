@@ -117,21 +117,21 @@ namespace System.Diagnostics
 
             Interop.procfs.ParsedStat stat;
             return Interop.procfs.TryReadStatFile(pid, out stat, reusableReader) ?
-                CreateProcessInfo(stat, reusableReader) :
+                CreateProcessInfo(ref stat, reusableReader) :
                 null;
         }
 
         /// <summary>
         /// Creates a ProcessInfo from the data parsed from a /proc/pid/stat file and the associated tasks directory.
         /// </summary>
-        internal static ProcessInfo CreateProcessInfo(Interop.procfs.ParsedStat procFsStat, ReusableTextReader reusableReader)
+        internal static ProcessInfo CreateProcessInfo(ref Interop.procfs.ParsedStat procFsStat, ReusableTextReader reusableReader, string processName = null)
         {
             int pid = procFsStat.pid;
 
             var pi = new ProcessInfo()
             {
                 ProcessId = pid,
-                ProcessName = procFsStat.comm,
+                ProcessName = processName ?? Process.GetUntruncatedProcessName(ref procFsStat) ?? string.Empty,
                 BasePriority = (int)procFsStat.nice,
                 VirtualBytes = (long)procFsStat.vsize,
                 WorkingSet = procFsStat.rss * Environment.SystemPageSize,
@@ -174,7 +174,7 @@ namespace System.Diagnostics
             }
             catch (IOException)
             {
-                // Between the time that we get an ID and the time that we try to read the associated 
+                // Between the time that we get an ID and the time that we try to read the associated
                 // directories and files in procfs, the process could be gone.
             }
 

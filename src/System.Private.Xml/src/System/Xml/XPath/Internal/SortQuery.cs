@@ -14,9 +14,9 @@ namespace MS.Internal.Xml.XPath
 {
     internal sealed class SortQuery : Query
     {
-        private List<SortKey> _results;
-        private XPathSortComparer _comparer;
-        private Query _qyInput;
+        private readonly List<SortKey> _results;
+        private readonly XPathSortComparer _comparer;
+        private readonly Query _qyInput;
 
         public SortQuery(Query qyInput)
         {
@@ -50,7 +50,7 @@ namespace MS.Internal.Xml.XPath
 
         private void BuildResultsList()
         {
-            Int32 numSorts = _comparer.NumSorts;
+            int numSorts = _comparer.NumSorts;
 
             Debug.Assert(numSorts > 0, "Why was the sort query created?");
 
@@ -59,7 +59,7 @@ namespace MS.Internal.Xml.XPath
             {
                 SortKey key = new SortKey(numSorts, /*originalPosition:*/_results.Count, eNext.Clone());
 
-                for (Int32 j = 0; j < numSorts; j++)
+                for (int j = 0; j < numSorts; j++)
                 {
                     key[j] = _comparer.Expression(j).Evaluate(_qyInput);
                 }
@@ -116,10 +116,10 @@ namespace MS.Internal.Xml.XPath
 
     internal sealed class SortKey
     {
-        private Int32 _numKeys;
-        private object[] _keys;
-        private int _originalPosition;
-        private XPathNavigator _node;
+        private readonly int _numKeys;
+        private readonly object[] _keys;
+        private readonly int _originalPosition;
+        private readonly XPathNavigator _node;
 
         public SortKey(int numKeys, int originalPosition, XPathNavigator node)
         {

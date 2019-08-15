@@ -72,7 +72,7 @@ namespace System.DirectoryServices
         {
             if (value == null)
             {
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
             object[] oldValues = GetValue();
             object[] newValues = new object[oldValues.Length + value.Length];
@@ -87,7 +87,7 @@ namespace System.DirectoryServices
         {
             if (value == null)
             {
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
             object[] oldValues = GetValue();
             object[] newValues = new object[oldValues.Length + value.Count];
@@ -111,7 +111,7 @@ namespace System.DirectoryServices
         /// </devdoc>
         public bool Contains(string value) => IndexOf(value) != -1;
 
-        public void CopyTo(String[] stringArray, int index)
+        public void CopyTo(string[] stringArray, int index)
         {
             object[] values = GetValue();
             values.CopyTo(stringArray, index);
@@ -173,7 +173,7 @@ namespace System.DirectoryServices
         {
             object[] oldValues = GetValue();
             if (index >= oldValues.Length || index < 0)
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException(nameof(index));
 
             object[] newValues = new object[oldValues.Length - 1];
             for (int i = 0; i < index; i++)
@@ -221,7 +221,7 @@ namespace System.DirectoryServices
         // classes wrap an object and supply properties as methods.
         internal class FilterDelegateWrapper
         {
-            private UnsafeNativeMethods.IAdsContainer _obj;
+            private readonly UnsafeNativeMethods.IAdsContainer _obj;
             internal FilterDelegateWrapper(UnsafeNativeMethods.IAdsContainer wrapped)
             {
                 _obj = wrapped;

@@ -30,8 +30,8 @@ namespace System.ComponentModel.Composition.ReflectionModel
             Assert.Same(requiredMetadata, definition.RequiredMetadata);
             Assert.Same(metadata, definition.Metadata);
             Assert.Equal(CreationPolicy.NonShared, definition.RequiredCreationPolicy);
-            Assert.Equal(false, definition.IsRecomposable);
-            Assert.Equal(true, definition.IsPrerequisite);
+            Assert.False(definition.IsRecomposable);
+            Assert.True(definition.IsPrerequisite);
             Assert.Null(((ICompositionElement)definition).Origin);
             Assert.NotNull(((ICompositionElement)definition).DisplayName);
         }
@@ -99,12 +99,12 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             string contractName = AttributedModelServices.GetContractName(type);
 
-            return String.Format("{0} (Parameter=\"\", ContractName=\"{1}\")", definition.ImportingLazyParameter.Value.Member.GetDisplayName(), contractName);
+            return string.Format("{0} (Parameter=\"\", ContractName=\"{1}\")", definition.ImportingLazyParameter.Value.Member.GetDisplayName(), contractName);
         }
 
         private static string CreateDisplayNameExpectationFromParameterName(ReflectionParameterImportDefinition definition, string name)
         {
-            return String.Format("{0} (Parameter=\"{1}\", ContractName=\"System.String\")", definition.ImportingLazyParameter.Value.Member.GetDisplayName(), name);
+            return string.Format("{0} (Parameter=\"{1}\", ContractName=\"System.String\")", definition.ImportingLazyParameter.Value.Member.GetDisplayName(), name);
         }
 
         private static ReflectionParameterImportDefinition CreateReflectionParameterImportDefinition(Type parameterType)

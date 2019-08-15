@@ -2,16 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+using System.Text;
+using System.Collections;
+using System.Globalization;
+
 namespace System.Xml.Xsl.XsltOld
 {
-    using System;
-    using System.Diagnostics;
-    using System.Xml;
-    using System.Text;
-    using System.Collections;
-    using System.Globalization;
-
-    internal abstract class SequentialOutput : RecordOutput
+    internal abstract class SequentialOutput : IRecordOutput
     {
         private const char s_Colon = ':';
         private const char s_GreaterThan = '>';
@@ -37,7 +35,6 @@ namespace System.Xml.Xsl.XsltOld
         private const string s_EncodingStart = " encoding=\"";
         private const string s_Public = "PUBLIC ";
         private const string s_System = "SYSTEM ";
-        private const string s_Html = "html";
         private const string s_QuoteSpace = "\" ";
         private const string s_CDataSplit = "]]]]><![CDATA[>";
 
@@ -50,14 +47,14 @@ namespace System.Xml.Xsl.XsltOld
 
         private const string s_EndOfLine = "\r\n";
 
-        private static char[] s_TextValueFind = new char[] { s_Ampersand, s_GreaterThan, s_LessThan };
-        private static string[] s_TextValueReplace = new string[] { s_EnAmpersand, s_EnGreaterThan, s_EnLessThan };
+        private static readonly char[] s_TextValueFind = new char[] { s_Ampersand, s_GreaterThan, s_LessThan };
+        private static readonly string[] s_TextValueReplace = new string[] { s_EnAmpersand, s_EnGreaterThan, s_EnLessThan };
 
-        private static char[] s_XmlAttributeValueFind = new char[] { s_Ampersand, s_GreaterThan, s_LessThan, s_Quote, s_NewLine, s_Return };
-        private static string[] s_XmlAttributeValueReplace = new string[] { s_EnAmpersand, s_EnGreaterThan, s_EnLessThan, s_EnQuote, s_EnNewLine, s_EnReturn };
+        private static readonly char[] s_XmlAttributeValueFind = new char[] { s_Ampersand, s_GreaterThan, s_LessThan, s_Quote, s_NewLine, s_Return };
+        private static readonly string[] s_XmlAttributeValueReplace = new string[] { s_EnAmpersand, s_EnGreaterThan, s_EnLessThan, s_EnQuote, s_EnNewLine, s_EnReturn };
 
         // Instance members
-        private Processor _processor;
+        private readonly Processor _processor;
         protected Encoding encoding;
         private ArrayList _outputCache;
         private bool _firstLine = true;
@@ -316,7 +313,6 @@ namespace System.Xml.Xsl.XsltOld
 
         private void WriteEndElement(RecordBuilder record)
         {
-            BuilderInfo node = record.MainNode;
             HtmlElementProps htmlProps = record.Manager.CurrentElementScope.HtmlElementProps;
 
             if (htmlProps != null && htmlProps.Empty)
@@ -369,7 +365,7 @@ namespace System.Xml.Xsl.XsltOld
             switch (node.NodeType)
             {
                 case XmlNodeType.Element:
-                    if (node.NamespaceURI.Length == 0 && String.Compare("html", node.LocalName, StringComparison.OrdinalIgnoreCase) == 0)
+                    if (node.NamespaceURI.Length == 0 && string.Equals("html", node.LocalName, StringComparison.OrdinalIgnoreCase))
                     {
                         method = XsltOutput.OutputMethod.Html;
                     }
@@ -718,9 +714,9 @@ namespace System.Xml.Xsl.XsltOld
                 }
                 Write(s_Space);
                 WriteName(attribute.Prefix, attribute.LocalName);
-                if (abr && 0 == string.Compare(attribute.LocalName, attrValue, StringComparison.OrdinalIgnoreCase))
+                if (abr && string.Equals(attribute.LocalName, attrValue, StringComparison.OrdinalIgnoreCase))
                 {
-                    // Since the name of the attribute = the value of the attribute, 
+                    // Since the name of the attribute = the value of the attribute,
                     // this is a boolean attribute whose value should be suppressed
                     continue;
                 }

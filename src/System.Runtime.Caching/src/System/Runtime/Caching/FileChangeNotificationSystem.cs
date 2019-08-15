@@ -8,14 +8,13 @@ using System.Runtime.Caching.Resources;
 using System.Collections;
 using System.IO;
 using System.Security;
-using System.Security.Permissions;
 
 namespace System.Runtime.Caching
 {
     internal sealed class FileChangeNotificationSystem : IFileChangeNotificationSystem
     {
-        private Hashtable _dirMonitors;
-        private object _lock;
+        private readonly Hashtable _dirMonitors;
+        private readonly object _lock;
 
         internal class DirectoryMonitor
         {
@@ -24,19 +23,19 @@ namespace System.Runtime.Caching
 
         internal class FileChangeEventTarget
         {
-            private string _fileName;
-            private OnChangedCallback _onChangedCallback;
-            private FileSystemEventHandler _changedHandler;
-            private ErrorEventHandler _errorHandler;
-            private RenamedEventHandler _renamedHandler;
+            private readonly string _fileName;
+            private readonly OnChangedCallback _onChangedCallback;
+            private readonly FileSystemEventHandler _changedHandler;
+            private readonly ErrorEventHandler _errorHandler;
+            private readonly RenamedEventHandler _renamedHandler;
 
             private static bool EqualsIgnoreCase(string s1, string s2)
             {
-                if (String.IsNullOrEmpty(s1) && String.IsNullOrEmpty(s2))
+                if (string.IsNullOrEmpty(s1) && string.IsNullOrEmpty(s2))
                 {
                     return true;
                 }
-                if (String.IsNullOrEmpty(s1) || String.IsNullOrEmpty(s2))
+                if (string.IsNullOrEmpty(s1) || string.IsNullOrEmpty(s2))
                 {
                     return false;
                 }
@@ -47,7 +46,7 @@ namespace System.Runtime.Caching
                 return 0 == string.Compare(s1, 0, s2, 0, s2.Length, StringComparison.OrdinalIgnoreCase);
             }
 
-            private void OnChanged(Object sender, FileSystemEventArgs e)
+            private void OnChanged(object sender, FileSystemEventArgs e)
             {
                 if (EqualsIgnoreCase(_fileName, e.Name))
                 {
@@ -55,12 +54,12 @@ namespace System.Runtime.Caching
                 }
             }
 
-            private void OnError(Object sender, ErrorEventArgs e)
+            private void OnError(object sender, ErrorEventArgs e)
             {
                 _onChangedCallback(null);
             }
 
-            private void OnRenamed(Object sender, RenamedEventArgs e)
+            private void OnRenamed(object sender, RenamedEventArgs e)
             {
                 if (EqualsIgnoreCase(_fileName, e.Name) || EqualsIgnoreCase(_fileName, e.OldName))
                 {
@@ -88,15 +87,15 @@ namespace System.Runtime.Caching
             _lock = new object();
         }
 
-        void IFileChangeNotificationSystem.StartMonitoring(string filePath, OnChangedCallback onChangedCallback, out Object state, out DateTimeOffset lastWriteTime, out long fileSize)
+        void IFileChangeNotificationSystem.StartMonitoring(string filePath, OnChangedCallback onChangedCallback, out object state, out DateTimeOffset lastWriteTime, out long fileSize)
         {
             if (filePath == null)
             {
-                throw new ArgumentNullException("filePath");
+                throw new ArgumentNullException(nameof(filePath));
             }
             if (onChangedCallback == null)
             {
-                throw new ArgumentNullException("onChangedCallback");
+                throw new ArgumentNullException(nameof(onChangedCallback));
             }
             FileInfo fileInfo = new FileInfo(filePath);
             string dir = Path.GetDirectoryName(filePath);
@@ -138,20 +137,20 @@ namespace System.Runtime.Caching
             fileSize = (fileInfo.Exists) ? fileInfo.Length : -1;
         }
 
-        void IFileChangeNotificationSystem.StopMonitoring(string filePath, Object state)
+        void IFileChangeNotificationSystem.StopMonitoring(string filePath, object state)
         {
             if (filePath == null)
             {
-                throw new ArgumentNullException("filePath");
+                throw new ArgumentNullException(nameof(filePath));
             }
             if (state == null)
             {
-                throw new ArgumentNullException("state");
+                throw new ArgumentNullException(nameof(state));
             }
             FileChangeEventTarget target = state as FileChangeEventTarget;
             if (target == null)
             {
-                throw new ArgumentException(SR.Invalid_state, "state");
+                throw new ArgumentException(SR.Invalid_state, nameof(state));
             }
             string dir = Path.GetDirectoryName(filePath);
             DirectoryMonitor dirMon = _dirMonitors[dir] as DirectoryMonitor;

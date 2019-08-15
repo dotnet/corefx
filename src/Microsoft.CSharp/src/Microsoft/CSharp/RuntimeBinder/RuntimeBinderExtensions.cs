@@ -28,11 +28,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 return mi1 == null && mi2 == null;
             }
 
-#if UNSUPPORTEDAPI
-            if (mi1 == mi2 || (mi1.DeclaringType.IsGenericallyEqual(mi2.DeclaringType) && mi1.MetadataToken == mi2.MetadataToken))
-#else
             if (mi1.Equals(mi2))
-#endif
             {
                 return true;
             }
@@ -299,18 +295,14 @@ namespace Microsoft.CSharp.RuntimeBinder
                 // fallback to "IsEquivalentTo"
                 Func<MemberInfo, MemberInfo, bool> fallbackMemberEquivalence = (m1param, m2param) => m1param.IsEquivalentTo(m2param);
 
-                // fallback must work 
+                // fallback must work
                 s_MemberEquivalence = fallbackMemberEquivalence;
                 return fallbackMemberEquivalence(m1, m2);
             };
 
         public static bool HasSameMetadataDefinitionAs(this MemberInfo mi1, MemberInfo mi2)
         {
-#if UNSUPPORTEDAPI
-            return (mi1.MetadataToken == mi2.MetadataToken) && (mi1.Module == mi2.Module));
-#else
             return mi1.Module.Equals(mi2.Module) && s_MemberEquivalence(mi1, mi2);
-#endif
         }
 
         public static string GetIndexerName(this Type type)

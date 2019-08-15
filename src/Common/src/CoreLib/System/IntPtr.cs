@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Runtime.Versioning;
 
+#pragma warning disable SA1121 // explicitly using type aliases instead of built-in types
 #if BIT64
 using nint = System.Int64;
 #else
@@ -17,13 +18,13 @@ namespace System
 {
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public struct IntPtr : IEquatable<IntPtr>, ISerializable
+    public readonly struct IntPtr : IEquatable<IntPtr>, ISerializable
     {
-        // WARNING: We allow diagnostic tools to directly inspect this member (_value). 
-        // See https://github.com/dotnet/corert/blob/master/Documentation/design-docs/diagnostics/diagnostics-tools-contract.md for more details. 
-        // Please do not change the type, the name, or the semantic usage of this member without understanding the implication for tools. 
+        // WARNING: We allow diagnostic tools to directly inspect this member (_value).
+        // See https://github.com/dotnet/corert/blob/master/Documentation/design-docs/diagnostics/diagnostics-tools-contract.md for more details.
+        // Please do not change the type, the name, or the semantic usage of this member without understanding the implication for tools.
         // Get in touch with the diagnostics team if you have questions.
-        private unsafe void* _value; // Do not rename (binary serialization)
+        private readonly unsafe void* _value; // Do not rename (binary serialization)
 
         [Intrinsic]
         public static readonly IntPtr Zero;
@@ -72,7 +73,7 @@ namespace System
             info.AddValue("value", ToInt64());
         }
 
-        public unsafe override bool Equals(Object obj)
+        public override unsafe bool Equals(object? obj)
         {
             if (obj is IntPtr)
             {
@@ -86,7 +87,7 @@ namespace System
             return _value == other._value;
         }
 
-        public unsafe override int GetHashCode()
+        public override unsafe int GetHashCode()
         {
 #if BIT64
             long l = (long)_value;
@@ -222,7 +223,7 @@ namespace System
             return _value;
         }
 
-        public unsafe override string ToString()
+        public override unsafe string ToString()
         {
             return ((nint)_value).ToString(CultureInfo.InvariantCulture);
         }

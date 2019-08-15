@@ -14,7 +14,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Security;
 using System.Threading.Tasks.Dataflow.Internal;
 
@@ -66,7 +65,6 @@ namespace System.Threading.Tasks.Dataflow
         {
             // Validate arguments
             if (dataflowBlockOptions == null) throw new ArgumentNullException(nameof(dataflowBlockOptions));
-            Contract.EndContractBlock();
 
             // Store the option
             _cloningFunction = cloningFunction;
@@ -77,13 +75,13 @@ namespace System.Threading.Tasks.Dataflow
             // subsequent usage of the block may run through code paths that try to take this lock.
             _targetRegistry = new TargetRegistry<T>(this);
 
-            // If a cancelable CancellationToken has been passed in, 
+            // If a cancelable CancellationToken has been passed in,
             // we need to initialize the completion task's TCS now.
             if (dataflowBlockOptions.CancellationToken.CanBeCanceled)
             {
                 _lazyCompletionTaskSource = new TaskCompletionSource<VoidResult>();
 
-                // If we've already had cancellation requested, do as little work as we have to 
+                // If we've already had cancellation requested, do as little work as we have to
                 // in order to be done.
                 if (dataflowBlockOptions.CancellationToken.IsCancellationRequested)
                 {
@@ -173,7 +171,7 @@ namespace System.Threading.Tasks.Dataflow
         private void CompleteBlock(IList<Exception> exceptions)
         {
             // Do not invoke the CompletionTaskSource property if there is a chance that _lazyCompletionTaskSource
-            // has not been initialized yet and we may have to complete normally, because that would defeat the 
+            // has not been initialized yet and we may have to complete normally, because that would defeat the
             // sole purpose of the TCS being lazily initialized.
 
             Debug.Assert(_lazyCompletionTaskSource == null || !_lazyCompletionTaskSource.Task.IsCompleted, "The task completion source must not be completed. This must be the only thread that ever completes the block.");
@@ -192,9 +190,9 @@ namespace System.Threading.Tasks.Dataflow
             }
             else
             {
-                // Safely try to initialize the completion task's TCS with a cached completed TCS. 
+                // Safely try to initialize the completion task's TCS with a cached completed TCS.
                 // If our attempt succeeds (CompareExchange returns null), we have nothing more to do.
-                // If the completion task's TCS was already initialized (CompareExchange returns non-null), 
+                // If the completion task's TCS was already initialized (CompareExchange returns non-null),
                 // we have to complete that TCS instance.
                 if (Interlocked.CompareExchange(ref _lazyCompletionTaskSource, Common.CompletedVoidResultTaskCompletionSource, null) != null)
                 {
@@ -217,7 +215,6 @@ namespace System.Threading.Tasks.Dataflow
         void IDataflowBlock.Fault(Exception exception)
         {
             if (exception == null) throw new ArgumentNullException(nameof(exception));
-            Contract.EndContractBlock();
 
             CompleteCore(exception, storeExceptionEvenIfAlreadyCompleting: false);
         }
@@ -232,7 +229,6 @@ namespace System.Threading.Tasks.Dataflow
         {
             Debug.Assert(exception != null || !storeExceptionEvenIfAlreadyCompleting,
                             "When storeExceptionEvenIfAlreadyCompleting is set to true, an exception must be provided.");
-            Contract.EndContractBlock();
 
             bool thisThreadReservedCompletion = false;
             lock (ValueLock)
@@ -245,8 +241,8 @@ namespace System.Threading.Tasks.Dataflow
 
                 // Reserve Completion.
                 // If storeExceptionEvenIfAlreadyCompleting is true, we are here to fault the block,
-                // because we couldn't launch the offer-and-complete task. 
-                // We have to retry to just complete. We do that by pretending completion wasn't reserved. 
+                // because we couldn't launch the offer-and-complete task.
+                // We have to retry to just complete. We do that by pretending completion wasn't reserved.
                 if (!_completionReserved || storeExceptionEvenIfAlreadyCompleting) thisThreadReservedCompletion = _completionReserved = true;
             }
 
@@ -266,7 +262,7 @@ namespace System.Threading.Tasks.Dataflow
         }
 
         /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="TryReceive"]/*' />
-        public Boolean TryReceive(Predicate<T> filter, out T item)
+        public bool TryReceive(Predicate<T> filter, out T item)
         {
             // No need to take the outgoing lock, as we don't need to synchronize with other
             // targets, and _value only ever goes from null to non-null, not the other way around.
@@ -288,7 +284,7 @@ namespace System.Threading.Tasks.Dataflow
         }
 
         /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="TryReceiveAll"]/*' />
-        Boolean IReceivableSourceBlock<T>.TryReceiveAll(out IList<T> items)
+        bool IReceivableSourceBlock<T>.TryReceiveAll(out IList<T> items)
         {
             // Try to receive the one item this block may have.
             // If we can, give back an array of one item. Otherwise,
@@ -313,7 +309,6 @@ namespace System.Threading.Tasks.Dataflow
             // Validate arguments
             if (target == null) throw new ArgumentNullException(nameof(target));
             if (linkOptions == null) throw new ArgumentNullException(nameof(linkOptions));
-            Contract.EndContractBlock();
 
             bool hasValue;
             bool isCompleted;
@@ -348,12 +343,11 @@ namespace System.Threading.Tasks.Dataflow
         public Task Completion { get { return CompletionTaskSource.Task; } }
 
         /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Targets/Member[@name="OfferMessage"]/*' />
-        DataflowMessageStatus ITargetBlock<T>.OfferMessage(DataflowMessageHeader messageHeader, T messageValue, ISourceBlock<T> source, Boolean consumeToAccept)
+        DataflowMessageStatus ITargetBlock<T>.OfferMessage(DataflowMessageHeader messageHeader, T messageValue, ISourceBlock<T> source, bool consumeToAccept)
         {
             // Validate arguments
             if (!messageHeader.IsValid) throw new ArgumentException(SR.Argument_InvalidMessageHeader, nameof(messageHeader));
             if (source == null && consumeToAccept) throw new ArgumentException(SR.Argument_CantConsumeFromANullSource, nameof(consumeToAccept));
-            Contract.EndContractBlock();
 
             bool thisThreadReservedCompletion = false;
             lock (ValueLock)
@@ -382,19 +376,18 @@ namespace System.Threading.Tasks.Dataflow
             }
 
             // Since this call to OfferMessage succeeded (and only one can ever), complete the block
-            // (but asynchronously so as not to block the Post call while offering to 
+            // (but asynchronously so as not to block the Post call while offering to
             // targets, running synchronous continuations off of the completion task, etc.)
             if (thisThreadReservedCompletion) CompleteBlockAsync(exceptions: null);
             return DataflowMessageStatus.Accepted;
         }
 
         /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="ConsumeMessage"]/*' />
-        T ISourceBlock<T>.ConsumeMessage(DataflowMessageHeader messageHeader, ITargetBlock<T> target, out Boolean messageConsumed)
+        T ISourceBlock<T>.ConsumeMessage(DataflowMessageHeader messageHeader, ITargetBlock<T> target, out bool messageConsumed)
         {
             // Validate arguments
             if (!messageHeader.IsValid) throw new ArgumentException(SR.Argument_InvalidMessageHeader, nameof(messageHeader));
             if (target == null) throw new ArgumentNullException(nameof(target));
-            Contract.EndContractBlock();
 
             // As long as the message being requested is the one we have, allow it to be consumed,
             // but make a copy using the provided cloning function.
@@ -411,12 +404,11 @@ namespace System.Threading.Tasks.Dataflow
         }
 
         /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="ReserveMessage"]/*' />
-        Boolean ISourceBlock<T>.ReserveMessage(DataflowMessageHeader messageHeader, ITargetBlock<T> target)
+        bool ISourceBlock<T>.ReserveMessage(DataflowMessageHeader messageHeader, ITargetBlock<T> target)
         {
             // Validate arguments
             if (!messageHeader.IsValid) throw new ArgumentException(SR.Argument_InvalidMessageHeader, nameof(messageHeader));
             if (target == null) throw new ArgumentNullException(nameof(target));
-            Contract.EndContractBlock();
 
             // As long as the message is the one we have, it can be "reserved."
             // Reservations on a WriteOnceBlock are not exclusive, because
@@ -430,7 +422,6 @@ namespace System.Threading.Tasks.Dataflow
             // Validate arguments
             if (!messageHeader.IsValid) throw new ArgumentException(SR.Argument_InvalidMessageHeader, nameof(messageHeader));
             if (target == null) throw new ArgumentNullException(nameof(target));
-            Contract.EndContractBlock();
 
             // As long as the message is the one we have, everything's fine.
             if (_header.Id != messageHeader.Id) throw new InvalidOperationException(SR.InvalidOperation_MessageNotReservedByTarget);

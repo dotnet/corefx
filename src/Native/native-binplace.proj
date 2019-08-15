@@ -1,20 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+<Project DefaultTargets="Build">
   <PropertyGroup>
     <BuildConfigurations>
       netcoreapp;
       uap;
-      uapaot;
       netstandard;
       netfx;
     </BuildConfigurations>
   </PropertyGroup>
-  <Import Project="..\dir.props" />
+  <Import Project="..\Directory.Build.props" />
   <Target Name="Build" DependsOnTargets="BinPlace" />
   <Target Name="Clean" />
   <Target Name="Rebuild" DependsOnTargets="Clean;Build" />
 
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
 
   <Target Name="GetBinPlaceItems">
     <ItemGroup>

@@ -1,14 +1,10 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{4B93E684-0630-45F4-8F63-6C7788C9892F}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="BitmapTests.cs" />
     <Compile Include="BrushTests.cs" />
@@ -23,10 +19,12 @@
     <Compile Include="Drawing2D\GraphicsPathIteratorTests.cs" />
     <Compile Include="Drawing2D\GraphicsPathTests.cs" />
     <Compile Include="Drawing2D\PathGradientBrushTests.cs" />
+    <Compile Include="DrawingTest.cs" />
     <Compile Include="FontTests.cs" />
     <Compile Include="FontFamilyTests.cs" />
     <Compile Include="GraphicsTests.cs" />
-    <Compile Include="Helpers.cs" />
+    <Compile Include="Graphics_DrawBezierTests.cs" />
+    <Compile Include="Graphics_DrawLineTests.cs" />
     <Compile Include="IconTests.cs" />
     <Compile Include="ImageTests.cs" />
     <Compile Include="Imaging\ImageAttributesTests.cs" />
@@ -73,8 +71,17 @@
     <Compile Include="Drawing2D\MatrixTests.cs" />
     <Compile Include="Text\InstalledFontCollectionTests.cs" />
     <Compile Include="Text\PrivateFontCollectionTests.cs" />
+    <Compile Include="Printing\MarginsTests.cs" />
+    <Compile Include="Printing\PrinterResolutionTests.cs" />
+    <Compile Include="Printing\PageSettingsTests.cs" />
+    <Compile Include="Printing\PaperSizeTests.cs" />
+    <Compile Include="Printing\PaperSourceTests.cs" />
+    <Compile Include="Printing\PrinterUnitConvertTests.cs" />
     <Compile Include="$(CommonTestPath)\System\Diagnostics\DebuggerAttributes.cs">
       <Link>Common\System\Diagnostics\DebuggerAttributes.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Drawing\Helpers.cs">
+      <Link>Common\System\Drawing\Helpers.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\ThreadCultureChange.cs">
       <Link>Common\System\ThreadCultureChange.cs</Link>
@@ -84,33 +91,21 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <SupplementalTestData Include="$(PackagesDir)system.drawing.common.testdata\1.0.6\content\**\*.*">
-      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
-    </SupplementalTestData>
-    <EmbeddedResource Include="$(PackagesDir)system.drawing.common.testdata\1.0.6\content\bitmaps\48x48_multiple_entries_4bit.ico">
+    <PackageReference Include="System.Drawing.Common.TestData" Version="$(SystemDrawingCommonTestDataPackageVersion)" GeneratePathProperty="true" />    
+    <EmbeddedResource Include="$(PkgSystem_Drawing_Common_TestData)\contentFiles\any\any\bitmaps\48x48_multiple_entries_4bit.ico">
       <LogicalName>System.Drawing.Tests.48x48_multiple_entries_4bit.ico</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="$(PackagesDir)system.drawing.common.testdata\1.0.6\content\bitmaps\bitmap_173x183_indexed_8bit.bmp">
+    <EmbeddedResource Include="$(PkgSystem_Drawing_Common_TestData)\contentFiles\any\any\bitmaps\bitmap_173x183_indexed_8bit.bmp">
       <LogicalName>System.Drawing.Tests.bitmap_173x183_indexed_8bit.bmp</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="$(PackagesDir)system.drawing.common.testdata\1.0.6\content\bitmaps\empty.file">
+    <EmbeddedResource Include="$(PkgSystem_Drawing_Common_TestData)\contentFiles\any\any\bitmaps\empty.file">
       <LogicalName>System.Drawing.Tests.empty.file</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="$(PackagesDir)system.drawing.common.testdata\1.0.6\content\bitmaps\invalid.ico">
+    <EmbeddedResource Include="$(PkgSystem_Drawing_Common_TestData)\contentFiles\any\any\bitmaps\invalid.ico">
       <LogicalName>System.Drawing.Tests.invalid.ico</LogicalName>
     </EmbeddedResource>
-    <Compile Include="Printing\MarginsTests.cs" />
-    <Compile Include="Printing\PrinterResolutionTests.cs" />
-    <Compile Include="Printing\PageSettingsTests.cs" />
-    <Compile Include="Printing\PaperSizeTests.cs" />
-    <Compile Include="Printing\PaperSourceTests.cs" />
-    <Compile Include="Printing\PrinterUnitConvertTests.cs" />
+    <EmbeddedResource Include="$(PkgSystem_Drawing_Common_TestData)\contentFiles\any\any\bitmaps\256x256_one_entry_32bit.ico">
+      <LogicalName>System.Drawing.Tests.Icon_toolboxBitmapAttributeTest</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
-      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
-      <Name>RemoteExecutorConsoleApp</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

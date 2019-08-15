@@ -11,7 +11,8 @@ namespace System.Globalization.Tests
         [Fact]
         public void TwoDigitYearMax_Get()
         {
-            Assert.Equal(4362, new KoreanCalendar().TwoDigitYearMax);
+            var calendar = new KoreanCalendar();
+            Assert.True(calendar.TwoDigitYearMax == 4362 || calendar.TwoDigitYearMax == 4382, $"Unexpected calendar.TwoDigitYearMax {calendar.TwoDigitYearMax}");
         }
 
         [Theory]

@@ -4,6 +4,7 @@
 
 using Internal.Cryptography;
 using System.Diagnostics;
+
 using static Interop.BCrypt;
 using static Interop.NCrypt;
 using KeyBlobMagicNumber = Interop.BCrypt.KeyBlobMagicNumber;
@@ -58,6 +59,115 @@ namespace System.Security.Cryptography
                 ImportKeyBlob(blob, hasPrivateKey);
             }
 
+            public override void ImportEncryptedPkcs8PrivateKey(
+                ReadOnlySpan<byte> passwordBytes,
+                ReadOnlySpan<byte> source,
+                out int bytesRead)
+            {
+                ThrowIfDisposed();
+                base.ImportEncryptedPkcs8PrivateKey(passwordBytes, source, out bytesRead);
+            }
+
+            public override void ImportEncryptedPkcs8PrivateKey(
+                ReadOnlySpan<char> password,
+                ReadOnlySpan<byte> source,
+                out int bytesRead)
+            {
+                ThrowIfDisposed();
+                base.ImportEncryptedPkcs8PrivateKey(password, source, out bytesRead);
+            }
+
+            public override byte[] ExportEncryptedPkcs8PrivateKey(
+                ReadOnlySpan<byte> passwordBytes,
+                PbeParameters pbeParameters)
+            {
+                if (pbeParameters == null)
+                    throw new ArgumentNullException(nameof(pbeParameters));
+
+                return CngPkcs8.ExportEncryptedPkcs8PrivateKey(
+                    this,
+                    passwordBytes,
+                    pbeParameters);
+            }
+
+            public override byte[] ExportEncryptedPkcs8PrivateKey(
+                ReadOnlySpan<char> password,
+                PbeParameters pbeParameters)
+            {
+                if (pbeParameters == null)
+                {
+                    throw new ArgumentNullException(nameof(pbeParameters));
+                }
+
+                PasswordBasedEncryption.ValidatePbeParameters(
+                    pbeParameters,
+                    password,
+                    ReadOnlySpan<byte>.Empty);
+
+                if (CngPkcs8.IsPlatformScheme(pbeParameters))
+                {
+                    return ExportEncryptedPkcs8(password, pbeParameters.IterationCount);
+                }
+
+                return CngPkcs8.ExportEncryptedPkcs8PrivateKey(
+                    this,
+                    password,
+                    pbeParameters);
+            }
+
+            public override bool TryExportEncryptedPkcs8PrivateKey(
+                ReadOnlySpan<byte> passwordBytes,
+                PbeParameters pbeParameters,
+                Span<byte> destination,
+                out int bytesWritten)
+            {
+                if (pbeParameters == null)
+                    throw new ArgumentNullException(nameof(pbeParameters));
+
+                PasswordBasedEncryption.ValidatePbeParameters(
+                    pbeParameters,
+                    ReadOnlySpan<char>.Empty,
+                    passwordBytes);
+
+                return CngPkcs8.TryExportEncryptedPkcs8PrivateKey(
+                    this,
+                    passwordBytes,
+                    pbeParameters,
+                    destination,
+                    out bytesWritten);
+            }
+
+            public override bool TryExportEncryptedPkcs8PrivateKey(
+                ReadOnlySpan<char> password,
+                PbeParameters pbeParameters,
+                Span<byte> destination,
+                out int bytesWritten)
+            {
+                if (pbeParameters == null)
+                    throw new ArgumentNullException(nameof(pbeParameters));
+
+                PasswordBasedEncryption.ValidatePbeParameters(
+                    pbeParameters,
+                    password,
+                    ReadOnlySpan<byte>.Empty);
+
+                if (CngPkcs8.IsPlatformScheme(pbeParameters))
+                {
+                    return TryExportEncryptedPkcs8(
+                        password,
+                        pbeParameters.IterationCount,
+                        destination,
+                        out bytesWritten);
+                }
+
+                return CngPkcs8.TryExportEncryptedPkcs8PrivateKey(
+                    this,
+                    password,
+                    pbeParameters,
+                    destination,
+                    out bytesWritten);
+            }
+
             private static void GenerateV1DsaBlob(out byte[] blob, DSAParameters parameters, int cbKey, bool includePrivate)
             {
                 // We need to build a key blob structured as follows:
@@ -71,7 +181,7 @@ namespace System.Security.Cryptography
 
                 unsafe
                 {
-                    int blobSize = 
+                    int blobSize =
                         sizeof(BCRYPT_DSA_KEY_BLOB) +
                         cbKey +
                         cbKey +
@@ -162,13 +272,13 @@ namespace System.Security.Cryptography
                         pBcryptBlob->Magic = includePrivateParameters ? KeyBlobMagicNumber.BCRYPT_DSA_PRIVATE_MAGIC_V2 : KeyBlobMagicNumber.BCRYPT_DSA_PUBLIC_MAGIC_V2;
                         pBcryptBlob->cbKey = cbKey;
 
-                        // For some reason, Windows bakes the hash algorithm into the key itself. Furthermore, it demands that the Q length match the 
-                        // length of the named hash algorithm's output - otherwise, the Import fails. So we have to give it the hash algorithm that matches 
+                        // For some reason, Windows bakes the hash algorithm into the key itself. Furthermore, it demands that the Q length match the
+                        // length of the named hash algorithm's output - otherwise, the Import fails. So we have to give it the hash algorithm that matches
                         // the Q length - and if there is no matching hash algorithm, we throw up our hands and throw a PlatformNotSupported.
                         //
-                        // Note that this has no bearing on the hash algorithm you pass to SignData(). The class library (not Windows) hashes that according 
-                        // to the hash algorithm passed to SignData() and presents the hash result to NCryptSignHash(), truncating the hash to the Q length 
-                        // if necessary (and as demanded by the NIST spec.) Windows will be no wiser and we'll get the result we want. 
+                        // Note that this has no bearing on the hash algorithm you pass to SignData(). The class library (not Windows) hashes that according
+                        // to the hash algorithm passed to SignData() and presents the hash result to NCryptSignHash(), truncating the hash to the Q length
+                        // if necessary (and as demanded by the NIST spec.) Windows will be no wiser and we'll get the result we want.
                         HASHALGORITHM_ENUM hashAlgorithm;
                         switch (parameters.Q.Length)
                         {

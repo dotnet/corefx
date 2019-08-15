@@ -15,41 +15,74 @@ using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 using Microsoft.Win32.SafeHandles;
 
 using static Interop.Crypt32;
+using System.Security.Cryptography.Asn1;
 
 namespace Internal.Cryptography.Pal.Windows
 {
     internal sealed partial class PkcsPalWindows : PkcsPal
     {
-        public sealed override byte[] Encrypt(CmsRecipientCollection recipients, ContentInfo contentInfo, AlgorithmIdentifier contentEncryptionAlgorithm, X509Certificate2Collection originatorCerts, CryptographicAttributeObjectCollection unprotectedAttributes)
+        public sealed unsafe override byte[] Encrypt(CmsRecipientCollection recipients, ContentInfo contentInfo, AlgorithmIdentifier contentEncryptionAlgorithm, X509Certificate2Collection originatorCerts, CryptographicAttributeObjectCollection unprotectedAttributes)
         {
             using (SafeCryptMsgHandle hCryptMsg = EncodeHelpers.CreateCryptMsgHandleToEncode(recipients, contentInfo.ContentType, contentEncryptionAlgorithm, originatorCerts, unprotectedAttributes))
             {
                 byte[] encodedContent;
                 if (contentInfo.ContentType.Value.Equals(Oids.Pkcs7Data, StringComparison.OrdinalIgnoreCase))
                 {
-                    unsafe
-                    {
-                        byte[] content = contentInfo.Content;
-                        fixed (byte* pContent = content)
-                        {
-                            DATA_BLOB blob = new DATA_BLOB((IntPtr)pContent, (uint)(content.Length));
-                            encodedContent = Interop.Crypt32.CryptEncodeObjectToByteArray(CryptDecodeObjectStructType.X509_OCTET_STRING, &blob);
-                        }
-                    }
+                    encodedContent = PkcsHelpers.EncodeOctetString(contentInfo.Content);
                 }
                 else
                 {
                     encodedContent = contentInfo.Content;
+
+                    if (encodedContent.Length > 0)
+                    {
+                        // Windows will throw if it encounters indefinite length encoding.
+                        // Let's reencode if that is the case
+                        ReencodeIfUsingIndefiniteLengthEncodingOnOuterStructure(ref encodedContent);
+                    }
                 }
 
                 if (encodedContent.Length > 0)
                 {
-                    if (!Interop.Crypt32.CryptMsgUpdate(hCryptMsg, encodedContent, encodedContent.Length, fFinal: true))
-                        throw Marshal.GetLastWin32Error().ToCryptographicException();
+                    // Pin to avoid copy during heap compaction
+                    fixed (byte* pinnedContent = encodedContent)
+                    {
+                        try
+                        {
+                            if (!Interop.Crypt32.CryptMsgUpdate(hCryptMsg, encodedContent, encodedContent.Length, fFinal: true))
+                                throw Marshal.GetLastWin32Error().ToCryptographicException();
+                        }
+                        finally
+                        {
+                            if (!object.ReferenceEquals(encodedContent, contentInfo.Content))
+                            {
+                                Array.Clear(encodedContent, 0, encodedContent.Length);
+                            }
+                        }
+                    }
                 }
 
                 byte[] encodedMessage = hCryptMsg.GetMsgParamAsByteArray(CryptMsgParamType.CMSG_CONTENT_PARAM);
                 return encodedMessage;
+            }
+        }
+
+        private static void ReencodeIfUsingIndefiniteLengthEncodingOnOuterStructure(ref byte[] encodedContent)
+        {
+            AsnReader reader = new AsnReader(encodedContent, AsnEncodingRules.BER);
+            Asn1Tag tag = reader.ReadTagAndLength(out int? contentsLength, out int _);
+
+            if (contentsLength != null)
+            {
+                // definite length, do nothing
+                return;
+            }
+
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.BER))
+            {
+                // Tag doesn't matter here as we won't write it into the document
+                writer.WriteOctetString(reader.PeekContentBytes().Span);
+                encodedContent = writer.Encode();
             }
         }
 
@@ -63,12 +96,12 @@ namespace Internal.Cryptography.Pal.Windows
             {
                 using (HeapBlockRetainer hb = new HeapBlockRetainer())
                 {
-                    // Deep copy the CmsRecipients (and especially their underlying X509Certificate2 objects). This will prevent malicious callers from altering them or disposing them while we're performing 
+                    // Deep copy the CmsRecipients (and especially their underlying X509Certificate2 objects). This will prevent malicious callers from altering them or disposing them while we're performing
                     // unsafe memory crawling inside them.
                     recipients = recipients.DeepCopy();
 
                     // We must keep all the certificates inside recipients alive until the call to CryptMsgOpenToEncode() finishes. The CMSG_ENVELOPED_ENCODE_INFO* structure we passed to it
-                    // contains direct pointers to memory owned by the CERT_INFO memory block whose lifetime is that of the certificate. 
+                    // contains direct pointers to memory owned by the CERT_INFO memory block whose lifetime is that of the certificate.
                     hb.KeepAlive(recipients);
                     unsafe
                     {
@@ -83,7 +116,7 @@ namespace Internal.Cryptography.Pal.Windows
             }
 
             //
-            // This returns an allocated native memory block. Its lifetime (and that of any allocated subblocks it may point to) is that of "hb". 
+            // This returns an allocated native memory block. Its lifetime (and that of any allocated subblocks it may point to) is that of "hb".
             //
             private static unsafe CMSG_ENVELOPED_ENCODE_INFO* CreateCmsEnvelopedEncodeInfo(CmsRecipientCollection recipients, AlgorithmIdentifier contentEncryptionAlgorithm, X509Certificate2Collection originatorCerts, CryptographicAttributeObjectCollection unprotectedAttributes, HeapBlockRetainer hb)
             {
@@ -94,8 +127,8 @@ namespace Internal.Cryptography.Pal.Windows
                 string algorithmOidValue = contentEncryptionAlgorithm.Oid.Value;
                 pEnvelopedEncodeInfo->ContentEncryptionAlgorithm.pszObjId = hb.AllocAsciiString(algorithmOidValue);
 
-                // Desktop compat: Though it seems like we could copy over the contents of contentEncryptionAlgorithm.Parameters, that property is for retrieving information from decoded Cms's only, and it 
-                // massages the raw data so it wouldn't be usable here anyway. To hammer home that fact, the EncryptedCms constructer rather rudely forces contentEncryptionAlgorithm.Parameters to be the empty array.
+                // Desktop compat: Though it seems like we could copy over the contents of contentEncryptionAlgorithm.Parameters, that property is for retrieving information from decoded Cms's only, and it
+                // massages the raw data so it wouldn't be usable here anyway. To hammer home that fact, the EncryptedCms constructor rather rudely forces contentEncryptionAlgorithm.Parameters to be the empty array.
                 pEnvelopedEncodeInfo->ContentEncryptionAlgorithm.Parameters.cbData = 0;
                 pEnvelopedEncodeInfo->ContentEncryptionAlgorithm.Parameters.pbData = IntPtr.Zero;
 
@@ -162,40 +195,26 @@ namespace Internal.Cryptography.Pal.Windows
             }
 
             //
-            // This returns an allocated native memory block. Its lifetime (and that of any allocated subblocks it may point to) is that of "hb". 
+            // This returns an allocated native memory block. Its lifetime (and that of any allocated subblocks it may point to) is that of "hb".
             //
             private static CMSG_RECIPIENT_ENCODE_INFO EncodeRecipientInfo(CmsRecipient recipient, AlgorithmIdentifier contentEncryptionAlgorithm, HeapBlockRetainer hb)
             {
-                CMsgCmsRecipientChoice recipientChoice;
-                string keyAlgorithmOid = recipient.Certificate.GetKeyAlgorithm();
-                AlgId algId = keyAlgorithmOid.ToAlgId();
-                switch (algId)
-                {
-                    case AlgId.CALG_RSA_KEYX:
-                        recipientChoice = CMsgCmsRecipientChoice.CMSG_KEY_TRANS_RECIPIENT;
-                        break;
-
-                    case AlgId.CALG_DH_SF:
-                    case AlgId.CALG_DH_EPHEM:
-                        recipientChoice = CMsgCmsRecipientChoice.CMSG_KEY_AGREE_RECIPIENT;
-                        break;
-
-                    default:
-                        throw ErrorCode.CRYPT_E_UNKNOWN_ALGO.ToCryptographicException();
-                }
-
                 CMSG_RECIPIENT_ENCODE_INFO recipientEncodeInfo;
-                recipientEncodeInfo.dwRecipientChoice = recipientChoice;
 
                 unsafe
                 {
-                    switch (recipientChoice)
+                    switch (recipient.Certificate.GetKeyAlgorithm())
                     {
-                        case CMsgCmsRecipientChoice.CMSG_KEY_TRANS_RECIPIENT:
+                        case Oids.Rsa:
+                        case Oids.RsaOaep:
+                            recipientEncodeInfo.dwRecipientChoice = CMsgCmsRecipientChoice.CMSG_KEY_TRANS_RECIPIENT;
                             recipientEncodeInfo.pCmsRecipientEncodeInfo = (IntPtr)EncodeKeyTransRecipientInfo(recipient, hb);
                             break;
 
-                        case CMsgCmsRecipientChoice.CMSG_KEY_AGREE_RECIPIENT:
+                        case Oids.Esdh:
+                        case Oids.DiffieHellman:
+                        case Oids.DiffieHellmanPkcs3:
+                            recipientEncodeInfo.dwRecipientChoice = CMsgCmsRecipientChoice.CMSG_KEY_AGREE_RECIPIENT;
                             recipientEncodeInfo.pCmsRecipientEncodeInfo = (IntPtr)EncodeKeyAgreeRecipientInfo(recipient, contentEncryptionAlgorithm, hb);
                             break;
 
@@ -207,11 +226,11 @@ namespace Internal.Cryptography.Pal.Windows
             }
 
             //
-            // This returns an allocated native memory block. Its lifetime (and that of any allocated subblocks it may point to) is that of "hb". 
+            // This returns an allocated native memory block. Its lifetime (and that of any allocated subblocks it may point to) is that of "hb".
             //
             private static unsafe CMSG_KEY_TRANS_RECIPIENT_ENCODE_INFO* EncodeKeyTransRecipientInfo(CmsRecipient recipient, HeapBlockRetainer hb)
             {
-                // "recipient" is a deep-cloned CmsRecipient object whose lifetime this class controls. Because of this, we can pull out the CERT_CONTEXT* and CERT_INFO* pointers 
+                // "recipient" is a deep-cloned CmsRecipient object whose lifetime this class controls. Because of this, we can pull out the CERT_CONTEXT* and CERT_INFO* pointers
                 // and embed pointers to them in the memory block we return. Yes, this code is scary.
                 //
                 // (The use of SafeCertContextHandle here is about using a consistent pattern to get the CERT_CONTEXT (rather than the ugly (CERT_CONTEXT*)(recipient.Certificate.Handle) pattern.)
@@ -225,8 +244,63 @@ namespace Internal.Cryptography.Pal.Windows
 
                     pEncodeInfo->cbSize = sizeof(CMSG_KEY_TRANS_RECIPIENT_ENCODE_INFO);
 
-                    CRYPT_ALGORITHM_IDENTIFIER algId = pCertInfo->SubjectPublicKeyInfo.Algorithm;
-                    pEncodeInfo->KeyEncryptionAlgorithm = algId;
+                    RSAEncryptionPadding padding = recipient.RSAEncryptionPadding;
+
+                    if (padding is null)
+                    {
+                        if (recipient.Certificate.GetKeyAlgorithm() == Oids.RsaOaep)
+                        {
+                            byte[] parameters = recipient.Certificate.GetKeyAlgorithmParameters();
+
+                            if (parameters == null || parameters.Length == 0)
+                            {
+                                padding = RSAEncryptionPadding.OaepSHA1;
+                            }
+                            else if (!PkcsHelpers.TryGetRsaOaepEncryptionPadding(parameters, out padding, out _))
+                            {
+                                throw ErrorCode.CRYPT_E_UNKNOWN_ALGO.ToCryptographicException();
+                            }
+                        }
+                        else
+                        {
+                            padding = RSAEncryptionPadding.Pkcs1;
+                        }
+                    }
+
+                    if (padding == RSAEncryptionPadding.Pkcs1)
+                    {
+                        pEncodeInfo->KeyEncryptionAlgorithm.pszObjId = hb.AllocAsciiString(Oids.Rsa);
+                        pEncodeInfo->KeyEncryptionAlgorithm.Parameters.cbData = (uint)s_rsaPkcsParameters.Length;
+                        pEncodeInfo->KeyEncryptionAlgorithm.Parameters.pbData = hb.AllocBytes(s_rsaPkcsParameters);
+                    }
+                    else if (padding == RSAEncryptionPadding.OaepSHA1)
+                    {
+                        pEncodeInfo->KeyEncryptionAlgorithm.pszObjId = hb.AllocAsciiString(Oids.RsaOaep);
+                        pEncodeInfo->KeyEncryptionAlgorithm.Parameters.cbData = (uint)s_rsaOaepSha1Parameters.Length;
+                        pEncodeInfo->KeyEncryptionAlgorithm.Parameters.pbData = hb.AllocBytes(s_rsaOaepSha1Parameters);
+                    }
+                    else if (padding == RSAEncryptionPadding.OaepSHA256)
+                    {
+                        pEncodeInfo->KeyEncryptionAlgorithm.pszObjId = hb.AllocAsciiString(Oids.RsaOaep);
+                        pEncodeInfo->KeyEncryptionAlgorithm.Parameters.cbData = (uint)s_rsaOaepSha256Parameters.Length;
+                        pEncodeInfo->KeyEncryptionAlgorithm.Parameters.pbData = hb.AllocBytes(s_rsaOaepSha256Parameters);
+                    }
+                    else if (padding == RSAEncryptionPadding.OaepSHA384)
+                    {
+                        pEncodeInfo->KeyEncryptionAlgorithm.pszObjId = hb.AllocAsciiString(Oids.RsaOaep);
+                        pEncodeInfo->KeyEncryptionAlgorithm.Parameters.cbData = (uint)s_rsaOaepSha384Parameters.Length;
+                        pEncodeInfo->KeyEncryptionAlgorithm.Parameters.pbData = hb.AllocBytes(s_rsaOaepSha384Parameters);
+                    }
+                    else if (padding == RSAEncryptionPadding.OaepSHA512)
+                    {
+                        pEncodeInfo->KeyEncryptionAlgorithm.pszObjId = hb.AllocAsciiString(Oids.RsaOaep);
+                        pEncodeInfo->KeyEncryptionAlgorithm.Parameters.cbData = (uint)s_rsaOaepSha512Parameters.Length;
+                        pEncodeInfo->KeyEncryptionAlgorithm.Parameters.pbData = hb.AllocBytes(s_rsaOaepSha512Parameters);
+                    }
+                    else
+                    {
+                        throw ErrorCode.CRYPT_E_UNKNOWN_ALGO.ToCryptographicException();
+                    }
 
                     pEncodeInfo->pvKeyEncryptionAuxInfo = IntPtr.Zero;
                     pEncodeInfo->hCryptProv = IntPtr.Zero;
@@ -240,7 +314,7 @@ namespace Internal.Cryptography.Pal.Windows
             }
 
             //
-            // This returns an allocated native memory block. Its lifetime (and that of any allocated subblocks it may point to) is that of "hb". 
+            // This returns an allocated native memory block. Its lifetime (and that of any allocated subblocks it may point to) is that of "hb".
             //
             private static unsafe CMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO* EncodeKeyAgreeRecipientInfo(CmsRecipient recipient, AlgorithmIdentifier contentEncryptionAlgorithm, HeapBlockRetainer hb)
             {
@@ -302,7 +376,7 @@ namespace Internal.Cryptography.Pal.Windows
             }
 
             //
-            // This returns an allocated native memory block. Its lifetime (and that of any allocated subblocks it may point to) is that of "hb". 
+            // This returns an allocated native memory block. Its lifetime (and that of any allocated subblocks it may point to) is that of "hb".
             //
             private static unsafe CERT_ID EncodeRecipientId(CmsRecipient recipient, SafeCertContextHandle hCertContext, CERT_CONTEXT* pCertContext, CERT_INFO* pCertInfo, HeapBlockRetainer hb)
             {
@@ -339,7 +413,7 @@ namespace Internal.Cryptography.Pal.Windows
             }
 
             //
-            // This returns an allocated native memory block. Its lifetime (and that of any allocated subblocks it may point to) is that of "hb". 
+            // This returns an allocated native memory block. Its lifetime (and that of any allocated subblocks it may point to) is that of "hb".
             //
             private static IntPtr GenerateEncryptionAuxInfoIfNeeded(AlgorithmIdentifier contentEncryptionAlgorithm, HeapBlockRetainer hb)
             {

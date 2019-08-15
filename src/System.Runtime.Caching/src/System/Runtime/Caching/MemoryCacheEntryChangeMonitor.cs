@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
+using System.Diagnostics;
 
 namespace System.Runtime.Caching
 {
@@ -17,9 +18,9 @@ namespace System.Runtime.Caching
         // use UTC minimum DateTime for error free conversions to DateTimeOffset
         private static readonly DateTime s_DATETIME_MINVALUE_UTC = new DateTime(0, DateTimeKind.Utc);
         private const int MAX_CHAR_COUNT_OF_LONG_CONVERTED_TO_HEXADECIMAL_STRING = 16;
-        private ReadOnlyCollection<String> _keys;
-        private String _regionName;
-        private String _uniqueId;
+        private readonly ReadOnlyCollection<string> _keys;
+        private readonly string _regionName;
+        private string _uniqueId;
         private DateTimeOffset _lastModified;
         private List<MemoryCacheEntry> _dependencies;
 
@@ -134,9 +135,9 @@ namespace System.Runtime.Caching
         public override DateTimeOffset LastModified { get { return _lastModified; } }
         internal List<MemoryCacheEntry> Dependencies { get { return _dependencies; } }
 
-        internal MemoryCacheEntryChangeMonitor(ReadOnlyCollection<String> keys, String regionName, MemoryCache cache)
+        internal MemoryCacheEntryChangeMonitor(ReadOnlyCollection<string> keys, string regionName, MemoryCache cache)
         {
-            Dbg.Assert(keys != null && keys.Count > 0, "keys != null && keys.Count > 0");
+            Debug.Assert(keys != null && keys.Count > 0, "keys != null && keys.Count > 0");
             _keys = keys;
             _regionName = regionName;
             InitDisposableMembers(cache);

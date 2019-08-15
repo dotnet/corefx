@@ -7,11 +7,13 @@ using System.Globalization;
 namespace System.Numerics
 {
     /// <summary>
-    /// A structure encapsulating a four-dimensional vector (x,y,z,w), 
+    /// A structure encapsulating a four-dimensional vector (x,y,z,w),
     /// which is used to efficiently rotate an object about the (x,y,z) vector by the angle theta, where w = cos(theta/2).
     /// </summary>
     public struct Quaternion : IEquatable<Quaternion>
     {
+        private const float SlerpEpsilon = 1e-6f;
+
         /// <summary>
         /// Specifies the X-value of the vector component of the Quaternion.
         /// </summary>
@@ -30,7 +32,7 @@ namespace System.Numerics
         public float W;
 
         /// <summary>
-        /// Returns a Quaternion representing no rotation. 
+        /// Returns a Quaternion representing no rotation.
         /// </summary>
         public static Quaternion Identity
         {
@@ -40,7 +42,7 @@ namespace System.Numerics
         /// <summary>
         /// Returns whether the Quaternion is the identity Quaternion.
         /// </summary>
-        public bool IsIdentity
+        public readonly bool IsIdentity
         {
             get { return X == 0f && Y == 0f && Z == 0f && W == 1f; }
         }
@@ -77,7 +79,7 @@ namespace System.Numerics
         /// Calculates the length of the Quaternion.
         /// </summary>
         /// <returns>The computed length of the Quaternion.</returns>
-        public float Length()
+        public readonly float Length()
         {
             float ls = X * X + Y * Y + Z * Z + W * W;
 
@@ -88,7 +90,7 @@ namespace System.Numerics
         /// Calculates the length squared of the Quaternion. This operation is cheaper than Length().
         /// </summary>
         /// <returns>The length squared of the Quaternion.</returns>
-        public float LengthSquared()
+        public readonly float LengthSquared()
         {
             return X * X + Y * Y + Z * Z + W * W;
         }
@@ -290,8 +292,6 @@ namespace System.Numerics
         /// <returns>The interpolated Quaternion.</returns>
         public static Quaternion Slerp(Quaternion quaternion1, Quaternion quaternion2, float amount)
         {
-            const float epsilon = 1e-6f;
-
             float t = amount;
 
             float cosOmega = quaternion1.X * quaternion2.X + quaternion1.Y * quaternion2.Y +
@@ -307,7 +307,7 @@ namespace System.Numerics
 
             float s1, s2;
 
-            if (cosOmega > (1.0f - epsilon))
+            if (cosOmega > (1.0f - SlerpEpsilon))
             {
                 // Too close, do straight linear interpolation.
                 s1 = 1.0f - t;
@@ -748,7 +748,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="other">The Quaternion to compare this instance to.</param>
         /// <returns>True if the other Quaternion is equal to this instance; False otherwise.</returns>
-        public bool Equals(Quaternion other)
+        public readonly bool Equals(Quaternion other)
         {
             return (X == other.X &&
                     Y == other.Y &&
@@ -761,7 +761,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="obj">The Object to compare against.</param>
         /// <returns>True if the Object is equal to this Quaternion; False otherwise.</returns>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             if (obj is Quaternion)
             {
@@ -775,18 +775,16 @@ namespace System.Numerics
         /// Returns a String representing this Quaternion instance.
         /// </summary>
         /// <returns>The string representation.</returns>
-        public override string ToString()
+        public override readonly string ToString()
         {
-            CultureInfo ci = CultureInfo.CurrentCulture;
-
-            return String.Format(ci, "{{X:{0} Y:{1} Z:{2} W:{3}}}", X.ToString(ci), Y.ToString(ci), Z.ToString(ci), W.ToString(ci));
+            return string.Format(CultureInfo.CurrentCulture, "{{X:{0} Y:{1} Z:{2} W:{3}}}", X, Y, Z, W);
         }
 
         /// <summary>
         /// Returns the hash code for this instance.
         /// </summary>
         /// <returns>The hash code.</returns>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return unchecked(X.GetHashCode() + Y.GetHashCode() + Z.GetHashCode() + W.GetHashCode());
         }

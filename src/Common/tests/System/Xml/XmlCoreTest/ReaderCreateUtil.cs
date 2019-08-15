@@ -3,10 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 /// This class is primarily used to test buffer boundary integrity of readers.
-///	This class constructs a memory stream from the given buffer boundary length such that
-///	the required tag completely lies exactly on the start and end of buffer boundary.
+/// This class constructs a memory stream from the given buffer boundary length such that
+/// the required tag completely lies exactly on the start and end of buffer boundary.
 /// The class makes up the additional bytes by filling in whitespace if so.
-///	The first buffer length consists of the XML Decl and the Root Start (done by PrepareStream() )
+/// The first buffer length consists of the XML Decl and the Root Start (done by PrepareStream() )
 /// The next buffer length consists of the actual start and end text with the variable content stretched
 /// out to end at the buffer boundary.
 ///
@@ -22,15 +22,15 @@ namespace XmlCoreTest.Common
 
 
     /// <summary>
-    ///  This class contains helper methods for Readers.
-    ///	 ConvertToBinaryStream : Converts the given xml string to the binary equivalent of the string and returns it
-    ///		using a memory stream.
+    /// This class contains helper methods for Readers.
+    /// ConvertToBinaryStream : Converts the given xml string to the binary equivalent of the string and returns it
+    /// using a memory stream.
     /// Common usage pattern would be something like :
     /// XmlReader.Create( new MemoryStream(ReaderHelper.ConvertToBinaryStream("<elem>abc</elem>", true, false)), "baseUri", readerSettings );
     /// </summary>
     public static partial class ReaderHelper
     {
-        //All possible enum strings are listed here. 
+        //All possible enum strings are listed here.
         //Some of them are duplicates reader types for legacy readers.
         public enum ReaderType
         {
@@ -479,7 +479,7 @@ namespace XmlCoreTest.Common
             }
         }
 
-        public static XmlReader Create(String inputUri, XmlReaderSettings settings, XmlParserContext inputContext)
+        public static XmlReader Create(string inputUri, XmlReaderSettings settings, XmlParserContext inputContext)
         {
             if (AsyncUtil.IsAsyncEnabled)
             {
@@ -515,7 +515,7 @@ namespace XmlCoreTest.Common
             }
         }
 
-        public static XmlReader Create(Stream input, XmlReaderSettings settings, String baseUri)
+        public static XmlReader Create(Stream input, XmlReaderSettings settings, string baseUri)
         {
             if (AsyncUtil.IsAsyncEnabled)
             {
@@ -563,7 +563,7 @@ namespace XmlCoreTest.Common
             }
         }
 
-        public static XmlReader Create(TextReader input, XmlReaderSettings settings, String baseUri)
+        public static XmlReader Create(TextReader input, XmlReaderSettings settings, string baseUri)
         {
             if (AsyncUtil.IsAsyncEnabled)
             {

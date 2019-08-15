@@ -5,23 +5,27 @@
 namespace System.ComponentModel
 {
     /// <summary>
-    ///    <para> Specifies which methods are extender
-    ///       properties.</para>
+    /// Specifies which methods are extender properties.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public sealed class ProvidePropertyAttribute : Attribute
     {
         /// <summary>
-        /// <para>Initializes a new instance of the <see cref='System.ComponentModel.ProvidePropertyAttribute'/> class.</para>
+        /// Initializes a new instance of the <see cref='System.ComponentModel.ProvidePropertyAttribute'/> class.
         /// </summary>
         public ProvidePropertyAttribute(string propertyName, Type receiverType)
         {
+            if (receiverType == null)
+            {
+                throw new ArgumentNullException(nameof(receiverType));
+            }
+
             PropertyName = propertyName;
             ReceiverTypeName = receiverType.AssemblyQualifiedName;
         }
 
         /// <summary>
-        /// <para>Initializes a new instance of the <see cref='System.ComponentModel.ProvidePropertyAttribute'/> class.</para>
+        /// Initializes a new instance of the <see cref='System.ComponentModel.ProvidePropertyAttribute'/> class.
         /// </summary>
         public ProvidePropertyAttribute(string propertyName, string receiverTypeName)
         {
@@ -30,16 +34,12 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///    <para>
-        ///       Gets the name of a property that this class provides.
-        ///    </para>
+        /// Gets the name of a property that this class provides.
         /// </summary>
         public string PropertyName { get; }
 
         /// <summary>
-        ///    <para>
-        ///       Gets the name of the data type this property can extend
-        ///    </para>
+        /// Gets the name of the data type this property can extend
         /// </summary>
         public string ReceiverTypeName { get; }
 
@@ -50,18 +50,13 @@ namespace System.ComponentModel
                 return true;
             }
 
-            ProvidePropertyAttribute other = obj as ProvidePropertyAttribute;
-
-            return (other != null) && other.PropertyName == PropertyName && other.ReceiverTypeName == ReceiverTypeName;
+            return obj is ProvidePropertyAttribute other
+                && other.PropertyName == PropertyName
+                && other.ReceiverTypeName == ReceiverTypeName;
         }
 
-        public override int GetHashCode()
-        {
-            return PropertyName.GetHashCode() ^ ReceiverTypeName.GetHashCode();
-        }
+        public override int GetHashCode() => HashCode.Combine(PropertyName, ReceiverTypeName);
 
-        public override object TypeId => base.GetType().FullName + PropertyName;
+        public override object TypeId => GetType().FullName + PropertyName;
     }
 }
-
-

@@ -13,7 +13,7 @@ namespace System.Configuration
 
         // Deliberately not being explicit about the versions to make
         // things simpler for consumers of System.Configuration.
-        private static string[] s_implicitAssemblies =
+        private static readonly string[] s_implicitAssemblies =
         {
             // Historically we would find types in System.dll here.
             // This is because Configuration used to live in System.dll
@@ -50,7 +50,7 @@ namespace System.Configuration
 
             // Don't bother to look around if we've already got something that
             // is clearly not a simple type name.
-            if (string.IsNullOrEmpty(typeString) || typeString.IndexOf(',') != -1)
+            if (string.IsNullOrEmpty(typeString) || typeString.IndexOf(',') != -1) // string.Contains(char) is .NetCore2.1+ specific
                 return null;
 
             // Ignore all exceptions, otherwise callers will get unexpected
@@ -81,7 +81,7 @@ namespace System.Configuration
             return null;
         }
 
-        // Get the type specified by typeString. If it fails, try to retrieve it 
+        // Get the type specified by typeString. If it fails, try to retrieve it
         // as a type from System.dll. If that fails,  return null or throw the original
         // exception as indicated by throwOnError.
         internal static Type GetType(string typeString, bool throwOnError)
@@ -108,7 +108,7 @@ namespace System.Configuration
             return type;
         }
 
-        // Ask the host to get the type specified by typeString. If it fails, try to retrieve it 
+        // Ask the host to get the type specified by typeString. If it fails, try to retrieve it
         // as a type from System.dll. If that fails, return null or throw the original
         // exception as indicated by throwOnError.
         internal static Type GetType(IInternalConfigHost host, string typeString, bool throwOnError)
@@ -158,7 +158,7 @@ namespace System.Configuration
             ConstructorInfo ctor = type.GetConstructor(BindingFlags, null, CallingConventions.HasThis, Type.EmptyTypes,
                 null);
             if ((ctor == null) && throwOnError)
-                throw new TypeLoadException(string.Format(SR.TypeNotPublic, type.AssemblyQualifiedName));
+                throw new TypeLoadException(SR.Format(SR.TypeNotPublic, type.AssemblyQualifiedName));
 
             return ctor;
         }
@@ -171,7 +171,7 @@ namespace System.Configuration
             if (throwOnError)
             {
                 throw new TypeLoadException(
-                    string.Format(SR.Config_type_doesnt_inherit_from_type, type.FullName, baseType.FullName));
+                    SR.Format(SR.Config_type_doesnt_inherit_from_type, type.FullName, baseType.FullName));
             }
 
             return null;

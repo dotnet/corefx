@@ -11,12 +11,12 @@ namespace System
 {
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public abstract class StringComparer : IComparer, IEqualityComparer, IComparer<string>, IEqualityComparer<string>
+    public abstract class StringComparer : IComparer, IEqualityComparer, IComparer<string?>, IEqualityComparer<string?>
     {
         private static readonly CultureAwareComparer s_invariantCulture = new CultureAwareComparer(CultureInfo.InvariantCulture, CompareOptions.None);
         private static readonly CultureAwareComparer s_invariantCultureIgnoreCase = new CultureAwareComparer(CultureInfo.InvariantCulture, CompareOptions.IgnoreCase);
         private static readonly OrdinalCaseSensitiveComparer s_ordinal = new OrdinalCaseSensitiveComparer();
-        private static readonly OrdinalIgnoreCaseComparer s_ordinalIgnoreCase = new OrdinalIgnoreCaseComparer();        
+        private static readonly OrdinalIgnoreCaseComparer s_ordinalIgnoreCase = new OrdinalIgnoreCaseComparer();
 
         public static StringComparer InvariantCulture
         {
@@ -69,23 +69,16 @@ namespace System
         // Convert a StringComparison to a StringComparer
         public static StringComparer FromComparison(StringComparison comparisonType)
         {
-            switch (comparisonType)
+            return comparisonType switch
             {
-                case StringComparison.CurrentCulture:
-                    return CurrentCulture;
-                case StringComparison.CurrentCultureIgnoreCase:
-                    return CurrentCultureIgnoreCase;
-                case StringComparison.InvariantCulture:
-                    return InvariantCulture;
-                case StringComparison.InvariantCultureIgnoreCase:
-                    return InvariantCultureIgnoreCase;
-                case StringComparison.Ordinal:
-                    return Ordinal;
-                case StringComparison.OrdinalIgnoreCase:
-                    return OrdinalIgnoreCase;
-                default:
-                    throw new ArgumentException(SR.NotSupported_StringComparison, nameof(comparisonType));
-            }
+                StringComparison.CurrentCulture => CurrentCulture,
+                StringComparison.CurrentCultureIgnoreCase => CurrentCultureIgnoreCase,
+                StringComparison.InvariantCulture => InvariantCulture,
+                StringComparison.InvariantCultureIgnoreCase => InvariantCultureIgnoreCase,
+                StringComparison.Ordinal => Ordinal,
+                StringComparison.OrdinalIgnoreCase => OrdinalIgnoreCase,
+                _ => throw new ArgumentException(SR.NotSupported_StringComparison, nameof(comparisonType)),
+            };
         }
 
         public static StringComparer Create(CultureInfo culture, bool ignoreCase)
@@ -94,7 +87,7 @@ namespace System
             {
                 throw new ArgumentNullException(nameof(culture));
             }
-            
+
             return new CultureAwareComparer(culture, ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None);
         }
 
@@ -108,24 +101,21 @@ namespace System
             return new CultureAwareComparer(culture, options);
         }
 
-        public int Compare(object x, object y)
+        public int Compare(object? x, object? y)
         {
             if (x == y) return 0;
             if (x == null) return -1;
             if (y == null) return 1;
 
-            String sa = x as String;
-            if (sa != null)
+            if (x is string sa)
             {
-                String sb = y as String;
-                if (sb != null)
+                if (y is string sb)
                 {
                     return Compare(sa, sb);
                 }
             }
 
-            IComparable ia = x as IComparable;
-            if (ia != null)
+            if (x is IComparable ia)
             {
                 return ia.CompareTo(y);
             }
@@ -133,16 +123,14 @@ namespace System
             throw new ArgumentException(SR.Argument_ImplementIComparable);
         }
 
-        public new bool Equals(Object x, Object y)
+        public new bool Equals(object? x, object? y)
         {
             if (x == y) return true;
             if (x == null || y == null) return false;
 
-            String sa = x as String;
-            if (sa != null)
+            if (x is string sa)
             {
-                String sb = y as String;
-                if (sb != null)
+                if (y is string sb)
                 {
                     return Equals(sa, sb);
                 }
@@ -157,17 +145,18 @@ namespace System
                 throw new ArgumentNullException(nameof(obj));
             }
 
-            string s = obj as string;
-            if (s != null)
+            if (obj is string s)
             {
                 return GetHashCode(s);
             }
             return obj.GetHashCode();
         }
 
-        public abstract int Compare(String x, String y);
-        public abstract bool Equals(String x, String y);
+        public abstract int Compare(string? x, string? y);
+        public abstract bool Equals(string? x, string? y);
+#pragma warning disable CS8614 // Remove warning disable when nullable attributes are respected
         public abstract int GetHashCode(string obj);
+#pragma warning restore CS8614
     }
 
     [Serializable]
@@ -177,7 +166,7 @@ namespace System
         private const CompareOptions ValidCompareMaskOffFlags = ~(CompareOptions.IgnoreCase | CompareOptions.IgnoreSymbols | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreWidth | CompareOptions.IgnoreKanaType | CompareOptions.StringSort);
 
         private readonly CompareInfo _compareInfo; // Do not rename (binary serialization)
-        private CompareOptions _options;
+        private readonly CompareOptions _options;
 
         internal CultureAwareComparer(CultureInfo culture, CompareOptions options) : this(culture.CompareInfo, options) { }
 
@@ -194,7 +183,7 @@ namespace System
 
         private CultureAwareComparer(SerializationInfo info, StreamingContext context)
         {
-            _compareInfo = (CompareInfo)info.GetValue("_compareInfo", typeof(CompareInfo));
+            _compareInfo = (CompareInfo)info.GetValue("_compareInfo", typeof(CompareInfo))!;
             bool ignoreCase = info.GetBoolean("_ignoreCase");
 
             var obj = info.GetValueNoThrow("_options", typeof(CompareOptions));
@@ -205,7 +194,7 @@ namespace System
             _options |= ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None;
         }
 
-        public override int Compare(string x, string y)
+        public override int Compare(string? x, string? y)
         {
             if (object.ReferenceEquals(x, y)) return 0;
             if (x == null) return -1;
@@ -213,7 +202,7 @@ namespace System
             return _compareInfo.Compare(x, y, _options);
         }
 
-        public override bool Equals(string x, string y)
+        public override bool Equals(string? x, string? y)
         {
             if (object.ReferenceEquals(x, y)) return true;
             if (x == null || y == null) return false;
@@ -230,11 +219,10 @@ namespace System
         }
 
         // Equals method for the comparer itself.
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            CultureAwareComparer comparer = obj as CultureAwareComparer;
             return
-                comparer != null &&
+                obj is CultureAwareComparer comparer &&
                 _options == comparer._options &&
                 _compareInfo.Equals(comparer._compareInfo);
         }
@@ -254,7 +242,7 @@ namespace System
 
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public class OrdinalComparer : StringComparer 
+    public class OrdinalComparer : StringComparer
     {
         private readonly bool _ignoreCase; // Do not rename (binary serialization)
 
@@ -263,7 +251,7 @@ namespace System
             _ignoreCase = ignoreCase;
         }
 
-        public override int Compare(string x, string y)
+        public override int Compare(string? x, string? y)
         {
             if (ReferenceEquals(x, y))
                 return 0;
@@ -280,7 +268,7 @@ namespace System
             return string.CompareOrdinal(x, y);
         }
 
-        public override bool Equals(string x, string y)
+        public override bool Equals(string? x, string? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -293,7 +281,7 @@ namespace System
                 {
                     return false;
                 }
-                return (string.Compare(x, y, StringComparison.OrdinalIgnoreCase) == 0);
+                return CompareInfo.EqualsOrdinalIgnoreCase(ref x.GetRawStringData(), ref y.GetRawStringData(), x.Length);
             }
             return x.Equals(y);
         }
@@ -307,17 +295,16 @@ namespace System
 
             if (_ignoreCase)
             {
-                return CompareInfo.GetIgnoreCaseHash(obj);
+                return obj.GetHashCodeOrdinalIgnoreCase();
             }
 
             return obj.GetHashCode();
         }
 
-        // Equals method for the comparer itself. 
-        public override bool Equals(object obj)
+        // Equals method for the comparer itself.
+        public override bool Equals(object? obj)
         {
-            OrdinalComparer comparer = obj as OrdinalComparer;
-            if (comparer == null)
+            if (!(obj is OrdinalComparer comparer))
             {
                 return false;
             }
@@ -338,9 +325,9 @@ namespace System
         {
         }
 
-        public override int Compare(string x, string y) => string.CompareOrdinal(x, y);
+        public override int Compare(string? x, string? y) => string.CompareOrdinal(x, y);
 
-        public override bool Equals(string x, string y) => string.Equals(x, y);
+        public override bool Equals(string? x, string? y) => string.Equals(x, y);
 
         public override int GetHashCode(string obj)
         {
@@ -365,9 +352,27 @@ namespace System
         {
         }
 
-        public override int Compare(string x, string y) => string.Compare(x, y, StringComparison.OrdinalIgnoreCase);
+        public override int Compare(string? x, string? y) => string.Compare(x, y, StringComparison.OrdinalIgnoreCase);
 
-        public override bool Equals(string x, string y) => string.Equals(x, y, StringComparison.OrdinalIgnoreCase);
+        public override bool Equals(string? x, string? y)
+        {
+            if (ReferenceEquals(x, y))
+            {
+                return true;
+            }
+
+            if (x is null || y is null)
+            {
+                return false;
+            }
+
+            if (x.Length != y.Length)
+            {
+                return false;
+            }
+
+            return CompareInfo.EqualsOrdinalIgnoreCase(ref x.GetRawStringData(), ref y.GetRawStringData(), x.Length);
+        }
 
         public override int GetHashCode(string obj)
         {
@@ -375,7 +380,7 @@ namespace System
             {
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.obj);
             }
-            return CompareInfo.GetIgnoreCaseHash(obj);
+            return obj.GetHashCodeOrdinalIgnoreCase();
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)

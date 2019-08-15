@@ -15,17 +15,19 @@ internal static partial class Interop
     {
         internal const string RootPath = "/proc/";
         private const string ExeFileName = "/exe";
+        private const string CmdLineFileName = "/cmdline";
         private const string StatFileName = "/stat";
         private const string MapsFileName = "/maps";
         private const string FileDescriptorDirectoryName = "/fd/";
         private const string TaskDirectoryName = "/task/";
 
         internal const string SelfExeFilePath = RootPath + "self" + ExeFileName;
+        internal const string SelfCmdLineFilePath = RootPath + "self" + CmdLineFileName;
         internal const string ProcStatFilePath = RootPath + "stat";
 
         internal struct ParsedStat
         {
-            // Commented out fields are available in the stat data file but 
+            // Commented out fields are available in the stat data file but
             // are currently not used.  If/when needed, they can be uncommented,
             // and the corresponding entry can be added back to StatParser, replacing
             // the MoveNext() with the appropriate ParseNext* call and assignment.
@@ -33,7 +35,7 @@ internal static partial class Interop
             internal int pid;
             internal string comm;
             internal char state;
-            //internal int ppid;
+            internal int ppid;
             //internal int pgrp;
             internal int session;
             //internal int tty_nr;
@@ -87,6 +89,11 @@ internal static partial class Interop
             return RootPath + pid.ToString(CultureInfo.InvariantCulture) + ExeFileName;
         }
 
+        internal static string GetCmdLinePathForProcess(int pid)
+        {
+            return RootPath + pid.ToString(CultureInfo.InvariantCulture) + CmdLineFileName;
+        }
+
         internal static string GetStatFilePathForProcess(int pid)
         {
             return RootPath + pid.ToString(CultureInfo.InvariantCulture) + StatFileName;
@@ -129,8 +136,8 @@ internal static partial class Interop
                 // Use a StringParser to avoid string.Split costs
                 var parser = new StringParser(line, separator: ' ', skipEmpty: true);
 
-                // Parse the address range 
-                KeyValuePair<long, long> addressRange =  
+                // Parse the address range
+                KeyValuePair<long, long> addressRange =
                     parser.ParseRaw(delegate (string s, ref int start, ref int end)
                     {
                         long startingAddress = 0, endingAddress = 0;
@@ -185,9 +192,9 @@ internal static partial class Interop
         {
             // Perf note: Calling GetTaskDirectoryPathForProcess will allocate a string,
             // which we then use in another Concat call to produce another string.  The straightforward alternative,
-            // though, since we have five input strings, is to use the string.Concat overload that takes a params array. 
+            // though, since we have five input strings, is to use the string.Concat overload that takes a params array.
             // This results in allocating not only the params array but also a defensive copy inside of Concat,
-            // which means allocating two five-element arrays.  This two-string approach will result not only in fewer 
+            // which means allocating two five-element arrays.  This two-string approach will result not only in fewer
             // allocations, but also typically in less memory allocated, and it's a bit more maintainable.
             return GetTaskDirectoryPathForProcess(pid) + tid.ToString(CultureInfo.InvariantCulture) + StatFileName;
         }
@@ -233,7 +240,7 @@ internal static partial class Interop
             results.pid = parser.ParseNextInt32();
             results.comm = parser.MoveAndExtractNextInOuterParens();
             results.state = parser.ParseNextChar();
-            parser.MoveNextOrFail(); // ppid
+            results.ppid = parser.ParseNextInt32();
             parser.MoveNextOrFail(); // pgrp
             results.session = parser.ParseNextInt32();
             parser.MoveNextOrFail(); // tty_nr
@@ -259,7 +266,7 @@ internal static partial class Interop
             // The following lines are commented out as there's no need to parse through
             // the rest of the entry (we've gotten all of the data we need).  Should any
             // of these fields be needed in the future, uncomment all of the lines up
-            // through and including the one that's needed.  For now, these are being left 
+            // through and including the one that's needed.  For now, these are being left
             // commented to document what's available in the remainder of the entry.
 
             //parser.MoveNextOrFail(); // startcode

@@ -75,7 +75,6 @@ namespace System.Security.Cryptography.Cng.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18719")]
         public static void TestVerify521_EcdhKey()
         {
             byte[] keyBlob = (byte[])TestData.s_ECDsa521KeyBlob.Clone();
@@ -151,6 +150,13 @@ namespace System.Security.Cryptography.Cng.Tests
             }
         }
 
+        [Fact]
+        public static void HashAlgorithm_DefaultsToSha256()
+        {
+            using (var cng = new ECDsaCng())
+               Assert.Equal(CngAlgorithm.Sha256, cng.HashAlgorithm);
+        }
+
 #if netcoreapp
         [Fact]
         public static void TestPositive256WithBlob()
@@ -188,8 +194,8 @@ namespace System.Security.Cryptography.Cng.Tests
             }
         }
 
-        [Theory, MemberData(nameof(TestInvalidCurves))]
-        public static void TestCreateKeyFromCngAlgorithmNegative(CurveDef curveDef)
+        [Fact]
+        public static void TestCreateKeyFromCngAlgorithmNegative()
         {
             CngAlgorithm alg = CngAlgorithm.ECDsa;
             Assert.ThrowsAny<Exception>(() => CngKey.Create(alg));

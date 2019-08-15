@@ -93,7 +93,6 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public static void DebuggerAttribute()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(new Queue());
@@ -112,7 +111,6 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public static void DebuggerAttribute_NullQueue_ThrowsArgumentNullException()
         {
             bool threwNull = false;
@@ -257,7 +255,7 @@ namespace System.Collections.Tests
                     queue2.Enqueue(i);
                 }
 
-                // Insert and Remove 75 items in the Queue. This should wrap the queue 
+                // Insert and Remove 75 items in the Queue. This should wrap the queue
                 // where there is 25 at the end of the array and 25 at the beginning
                 for (int i = 0; i < 75; i++)
                 {
@@ -304,7 +302,7 @@ namespace System.Collections.Tests
                 Assert.False(queue2.Contains(null));
 
                 queue2.Enqueue(null);
-                Assert.False(queue2.Contains(-1)); // We have a null item in the list, so the algorithm may use a different branch 
+                Assert.False(queue2.Contains(-1)); // We have a null item in the list, so the algorithm may use a different branch
             });
         }
 
@@ -355,7 +353,7 @@ namespace System.Collections.Tests
                 queue1.Enqueue(i);
             }
 
-            // Insert and Remove 75 items in the Queue. This should wrap the queue 
+            // Insert and Remove 75 items in the Queue. This should wrap the queue
             // where there is 25 at the end of the array and 25 at the beginning
             for (int i = 0; i < 75; i++)
             {
@@ -742,7 +740,7 @@ namespace System.Collections.Tests
                 Assert.Equal(0, arr.Length);
             });
         }
-        
+
         [Theory]
         [InlineData(0)]
         [InlineData(1)]
@@ -794,7 +792,7 @@ namespace System.Collections.Tests
                 Assert.Equal(1, queue2.Dequeue());
             });
         }
-        
+
         [Fact]
         public static void TrimToSize_Wrapped()
         {
@@ -806,7 +804,7 @@ namespace System.Collections.Tests
                 queue.Enqueue(i);
             }
 
-            // Insert and Remove 75 items in the Queue. This should wrap the queue 
+            // Insert and Remove 75 items in the Queue. This should wrap the queue
             // where there is 25 at the end of the array and 25 at the beginning
             for (int i = 0; i < 75; i++)
             {
@@ -829,7 +827,7 @@ namespace System.Collections.Tests
             {
                 IntValue = intValue;
             }
-            
+
             public int IntValue { get; set; }
         }
     }
@@ -850,7 +848,7 @@ namespace System.Collections.Tests
             {
                 queueMother.Enqueue(i);
             }
-            Assert.Equal(queueMother.SyncRoot.GetType(), typeof(object));
+            Assert.IsType<Queue>(queueMother.SyncRoot);
 
             var queueSon = Queue.Synchronized(queueMother);
             _queueGrandDaughter = Queue.Synchronized(queueSon);
@@ -958,7 +956,7 @@ namespace System.Collections.Tests
             AssertExtensions.Throws<ArgumentNullException>("queue", () => Queue.Synchronized(null)); // Queue is null
         }
 
-        public void StartEnqueueThread()
+        private void StartEnqueueThread()
         {
             int t_age = _threadAge;
             while (t_age > 0)

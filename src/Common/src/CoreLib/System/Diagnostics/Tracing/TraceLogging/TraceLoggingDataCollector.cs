@@ -85,12 +85,21 @@ namespace System.Diagnostics.Tracing
         }
 
         /// <summary>
+        /// Adds a Boolean value to the event payload.
+        /// </summary>
+        /// <param name="value">Value to be added.</param>
+        public void AddScalar(bool value)
+        {
+            DataCollector.ThreadInstance.AddScalar(&value, sizeof(bool));
+        }
+
+        /// <summary>
         /// Adds a null-terminated String value to the event payload.
         /// </summary>
         /// <param name="value">
         /// Value to be added. A null value is treated as a zero-length string.
         /// </param>
-        public void AddNullTerminatedString(string value)
+        public void AddNullTerminatedString(string? value)
         {
             DataCollector.ThreadInstance.AddNullTerminatedString(value);
         }
@@ -101,14 +110,14 @@ namespace System.Diagnostics.Tracing
         /// <param name="value">
         /// Value to be added. A null value is treated as a zero-length string.
         /// </param>
-        public void AddBinary(string value)
+        public void AddBinary(string? value)
         {
             DataCollector.ThreadInstance.AddBinary(value, value == null ? 0 : value.Length * 2);
         }
 
         public void AddArray(PropertyValue value, int elementSize)
         {
-            Array array = (Array)value.ReferenceValue;
+            Array? array = (Array?)value.ReferenceValue;
             DataCollector.ThreadInstance.AddArray(array, array == null ? 0 : array.Length, elementSize);
         }
     }

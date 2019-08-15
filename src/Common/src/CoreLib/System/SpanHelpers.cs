@@ -3,12 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Globalization;
 using System.Runtime;
-using System.Runtime.InteropServices;
 
 using Internal.Runtime.CompilerServices;
 
+#pragma warning disable SA1121 // explicitly using type aliases instead of built-in types
 #if BIT64
 using nuint = System.UInt64;
 #else
@@ -24,8 +23,10 @@ namespace System
             if (byteLength == 0)
                 return;
 
-#if CORECLR && (AMD64 || ARM64)
-            if (byteLength > 4096)
+#if AMD64 || ARM64
+            // The exact matrix on when RhZeroMemory is faster than InitBlockUnaligned is very complex. The factors to consider include
+            // type of hardware and memory aligment. This threshold was chosen as a good balance accross different configurations.
+            if (byteLength > 768)
                 goto PInvoke;
             Unsafe.InitBlockUnaligned(ref b, 0, (uint)byteLength);
             return;
@@ -234,13 +235,13 @@ namespace System
 
             nuint i = 0; // byte offset at which we're copying
 
-            if ((Unsafe.As<byte, int>(ref b) & 3) != 0)
+            if (((nuint)Unsafe.AsPointer(ref b) & 3) != 0)
             {
-                if ((Unsafe.As<byte, int>(ref b) & 1) != 0)
+                if (((nuint)Unsafe.AsPointer(ref b) & 1) != 0)
                 {
-                    Unsafe.AddByteOffset<byte>(ref b, i) = 0;
+                    b = 0;
                     i += 1;
-                    if ((Unsafe.As<byte, int>(ref b) & 2) != 0)
+                    if (((nuint)Unsafe.AsPointer(ref b) & 2) != 0)
                         goto IntAligned;
                 }
                 Unsafe.As<byte, short>(ref Unsafe.AddByteOffset<byte>(ref b, i)) = 0;
@@ -257,7 +258,7 @@ namespace System
             // The thing 1, 2, 3, and 4 have in common that the others don't is that if you
             // subtract one from them, their 3rd lsb will not be set. Hence, the below check.
 
-            if (((Unsafe.As<byte, int>(ref b) - 1) & 4) == 0)
+            if ((((nuint)Unsafe.AsPointer(ref b) - 1) & 4) == 0)
             {
                 Unsafe.As<byte, int>(ref Unsafe.AddByteOffset<byte>(ref b, i)) = 0;
                 i += 4;
@@ -348,14 +349,14 @@ namespace System
 
             for (; pointerSizeLength >= 8; pointerSizeLength -= 8)
             {
-                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -1) = default(IntPtr);
-                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -2) = default(IntPtr);
-                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -3) = default(IntPtr);
-                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -4) = default(IntPtr);
-                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -5) = default(IntPtr);
-                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -6) = default(IntPtr);
-                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -7) = default(IntPtr);
-                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -8) = default(IntPtr);
+                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -1) = default;
+                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -2) = default;
+                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -3) = default;
+                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -4) = default;
+                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -5) = default;
+                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -6) = default;
+                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -7) = default;
+                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -8) = default;
             }
 
             Debug.Assert(pointerSizeLength <= 7);
@@ -364,7 +365,7 @@ namespace System
             // given range of lengths. For example, the lengths [ 4 .. 7 ] are handled by a single
             // branch, [ 2 .. 3 ] are handled by a single branch, and [ 1 ] is handled by a single
             // branch.
-            // 
+            //
             // We can write both forward and backward as a perf improvement. For example,
             // the lengths [ 4 .. 7 ] can be handled by zeroing out the first four natural
             // words and the last 3 natural words. In the best case (length = 7), there are
@@ -394,23 +395,23 @@ namespace System
             Debug.Assert(pointerSizeLength >= 4);
 
             // Write first four and last three.
-            Unsafe.Add(ref ip, 2) = default(IntPtr);
-            Unsafe.Add(ref ip, 3) = default(IntPtr);
-            Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -3) = default(IntPtr);
-            Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -2) = default(IntPtr);
+            Unsafe.Add(ref ip, 2) = default;
+            Unsafe.Add(ref ip, 3) = default;
+            Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -3) = default;
+            Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -2) = default;
 
         Write2To3:
             Debug.Assert(pointerSizeLength >= 2);
 
             // Write first two and last one.
-            Unsafe.Add(ref ip, 1) = default(IntPtr);
-            Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -1) = default(IntPtr);
+            Unsafe.Add(ref ip, 1) = default;
+            Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -1) = default;
 
         Write1:
             Debug.Assert(pointerSizeLength >= 1);
 
             // Write only element.
-            ip = default(IntPtr);
+            ip = default;
         }
     }
 }

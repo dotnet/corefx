@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Diagnostics;
 using System.Text;
 using System.Runtime.InteropServices;
@@ -15,12 +16,7 @@ namespace System.IO
         internal const char AltDirectorySeparatorChar = '/';
         internal const char VolumeSeparatorChar = '/';
         internal const char PathSeparator = ':';
-
         internal const string DirectorySeparatorCharAsString = "/";
-
-        // There is only one invalid path character in Unix
-        private const char InvalidPathChar = '\0';
-
         internal const string ParentDirectoryPrefix = @"../";
 
         internal static int GetRootLength(ReadOnlySpan<char> path)
@@ -86,10 +82,10 @@ namespace System.IO
 
         /// <summary>
         /// Returns true if the path is effectively empty for the current OS.
-        /// For unix, this is empty or null. For Windows, this is empty, null, or 
+        /// For unix, this is empty or null. For Windows, this is empty, null, or
         /// just spaces ((char)32).
         /// </summary>
-        internal static bool IsEffectivelyEmpty(string path)
+        internal static bool IsEffectivelyEmpty(string? path)
         {
             return string.IsNullOrEmpty(path);
         }

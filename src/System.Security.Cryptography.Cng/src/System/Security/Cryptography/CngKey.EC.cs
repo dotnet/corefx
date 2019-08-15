@@ -26,41 +26,45 @@ namespace System.Security.Cryptography
                 algorithm == CngAlgorithm.ECDsa.Algorithm);
         }
 
-        internal string GetCurveName()
+        internal string GetCurveName(out string oidValue)
         {
             if (IsECNamedCurve())
             {
+                oidValue = null;
                 return _keyHandle.GetPropertyAsString(KeyPropertyName.ECCCurveName, CngPropertyOptions.None);
             }
 
             // Use hard-coded values (for use with pre-Win10 APIs)
-            return GetECSpecificCurveName();
+            return GetECSpecificCurveName(out oidValue);
         }
 
-        private string GetECSpecificCurveName()
+        private string GetECSpecificCurveName(out string oidValue)
         {
             string algorithm = Algorithm.Algorithm;
 
             if (algorithm == CngAlgorithm.ECDiffieHellmanP256.Algorithm ||
                 algorithm == CngAlgorithm.ECDsaP256.Algorithm)
             {
+                oidValue = Oids.secp256r1;
                 return "nistP256";
             }
 
             if (algorithm == CngAlgorithm.ECDiffieHellmanP384.Algorithm ||
                 algorithm == CngAlgorithm.ECDsaP384.Algorithm)
             {
+                oidValue = Oids.secp384r1;
                 return "nistP384";
             }
 
             if (algorithm == CngAlgorithm.ECDiffieHellmanP521.Algorithm ||
                 algorithm == CngAlgorithm.ECDsaP521.Algorithm)
             {
+                oidValue = Oids.secp521r1;
                 return "nistP521";
             }
 
-            Debug.Fail(string.Format("Unknown curve {0}", algorithm));
-            throw new PlatformNotSupportedException(string.Format(SR.Cryptography_CurveNotSupported, algorithm));
+            Debug.Fail($"Unknown curve {algorithm}");
+            throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_CurveNotSupported, algorithm));
         }
 
         /// <summary>
@@ -143,7 +147,7 @@ namespace System.Security.Cryptography
             if (curve.IsNamed)
             {
                 if (string.IsNullOrEmpty(curve.Oid.FriendlyName))
-                    throw new PlatformNotSupportedException(string.Format(SR.Cryptography_InvalidCurveOid, curve.Oid.Value));
+                    throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_InvalidCurveOid, curve.Oid.Value));
 
                 // Map curve name to algorithm to support pre-Win10 curves
                 alg = algorithmResolver(curve.Oid.FriendlyName);
@@ -162,7 +166,7 @@ namespace System.Security.Cryptography
                     }
                     else
                     {
-                        Debug.Fail(string.Format("Unknown algorithm {0}", alg.ToString()));
+                        Debug.Fail($"Unknown algorithm {alg}");
                         throw new ArgumentException(SR.Cryptography_InvalidKeySize);
                     }
                 }
@@ -181,7 +185,7 @@ namespace System.Security.Cryptography
             }
             else
             {
-                throw new PlatformNotSupportedException(string.Format(SR.Cryptography_CurveNotSupported, curve.CurveType.ToString()));
+                throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_CurveNotSupported, curve.CurveType.ToString()));
             }
 
             try
@@ -196,7 +200,7 @@ namespace System.Security.Cryptography
                     errorCode == Interop.NCrypt.ErrorCode.NTE_NOT_SUPPORTED)
                 {
                     string target = curve.IsNamed ? curve.Oid.FriendlyName : curve.CurveType.ToString();
-                    throw new PlatformNotSupportedException(string.Format(SR.Cryptography_CurveNotSupported, target), e);
+                    throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_CurveNotSupported, target), e);
                 }
 
                 throw;

@@ -32,15 +32,6 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public static void NullEncodingThrows()
-        {
-            // [] Check for ArgumentNullException on null encoding
-            //-----------------------------------------------------------------
-
-            Assert.Throws<ArgumentNullException>(() => new StreamWriter(new MemoryStream(), null));
-        }
-        
-        [Fact]
         public static void UTF8Encoding()
         {
             TestEnconding(System.Text.Encoding.UTF8, "This is UTF8\u00FF");

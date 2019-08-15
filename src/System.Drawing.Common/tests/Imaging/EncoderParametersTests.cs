@@ -9,21 +9,25 @@ namespace System.Drawing.Imaging.Tests
 {
     public class EncoderParametersTests
     {
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Ctor_Default()
         {
-            EncoderParameters ep = new EncoderParameters();
-            Assert.NotNull(ep.Param);
-            Assert.Equal(new EncoderParameter[1], ep.Param);
+            using (EncoderParameters ep = new EncoderParameters())
+            {
+                Assert.NotNull(ep.Param);
+                Assert.Equal(new EncoderParameter[1], ep.Param);
+            }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(1)]
         public void Ctor_Count_Default(int count)
         {
-            EncoderParameters ep = new EncoderParameters(count);
-            Assert.NotNull(ep.Param);
-            Assert.Equal(new EncoderParameter[count], ep.Param);
+            using (EncoderParameters ep = new EncoderParameters(count))
+            {
+                Assert.NotNull(ep.Param);
+                Assert.Equal(new EncoderParameter[count], ep.Param);
+            }
         }
 
         public static IEnumerable<object[]> Param_TestData
@@ -36,16 +40,18 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Param_TestData))]
         public void Param_Success(EncoderParameter[] param)
         {
-            EncoderParameters ep = new EncoderParameters();
-            ep.Param = param;
-            Assert.Equal(param, ep.Param);
+            using (EncoderParameters ep = new EncoderParameters())
+            {
+                ep.Param = param;
+                Assert.Equal(param, ep.Param);
+            }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Param_TestData))]
         public void Dispose_Success(EncoderParameter[] param)
         {

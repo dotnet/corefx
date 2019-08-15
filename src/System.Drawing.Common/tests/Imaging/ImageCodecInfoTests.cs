@@ -1,9 +1,9 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 //
 // Authors:
-// 	Jordi Mas i Hernàndez (jordi@ximian.com)
-//	Sebastien Pouliot  <sebastien@ximian.com>
+//  Jordi Mas i Hernàndez (jordi@ximian.com)
+//  Sebastien Pouliot  <sebastien@ximian.com>
 //
 // (C) 2004 Ximian, Inc.  http://www.ximian.com
 // Copyright (C) 2004-2007 Novell, Inc (http://www.novell.com)
@@ -15,10 +15,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -96,7 +96,7 @@ namespace System.Drawing.Imaging.Tests
             Assert.Equal(format.Guid, codecInfo.FormatID);
             Assert.Contains(CodecName, codecInfo.CodecName);
             Assert.Equal(DllName, codecInfo.DllName);
-            Assert.True(extRegex.IsMatch(codecInfo.FilenameExtension));
+            Assert.Matches(extRegex, codecInfo.FilenameExtension);
             Assert.Equal(Flags, codecInfo.Flags);
             Assert.Contains(FormatDescription, codecInfo.FormatDescription);
             Assert.Contains(MimeType, codecInfo.MimeType);
@@ -160,7 +160,7 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(GIF_CSID)]
         [InlineData(EMF_CSID)]
         [InlineData(BMP_DIB_RLE_CSID)]
@@ -174,7 +174,7 @@ namespace System.Drawing.Imaging.Tests
             Assert.NotNull(GetDecoder(csid));
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(GIF_CSID)]
         [InlineData(BMP_DIB_RLE_CSID)]
         [InlineData(JPG_JPEG_JPE_JFIF_CSID)]
@@ -185,19 +185,19 @@ namespace System.Drawing.Imaging.Tests
             Assert.NotNull(GetEncoder(csid));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void CountEncoders_ReturnsExcpected()
         {
             Assert.Equal(5, encoders.Count);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void CountDecoders_ReturnsExcpected()
         {
             Assert.Equal(8, decoders.Count);
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(CodecInfoTestData))]
         public void CheckDecoderAndEncoder_ReturnsExpecetd(string clsid, ImageFormat format, string codecName, string dllName,
             string fileNameExtension, ImageCodecFlags flags, string formatDescription,
@@ -206,7 +206,7 @@ namespace System.Drawing.Imaging.Tests
             CheckDecoderAndEncoder(clsid, format, codecName, dllName, fileNameExtension, flags, formatDescription, mimeType, version, signatureLength, mask, pattern, pattern2);
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(WMF_CSID)]
         [InlineData(EMF_CSID)]
         [InlineData(ICO_CSID)]

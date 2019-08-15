@@ -79,7 +79,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
 
             public static dynamic ValueTypeDelegate() => (Func<PrivateValueType>)(() => new PrivateValueType());
 
-            public unsafe static dynamic PointerArray() => new PrivateValueType*[4];
+            public static unsafe dynamic PointerArray() => new PrivateValueType*[4];
 
             public static dynamic PrivateInterfaceDelegate() => (Func<IPrivateInterface>)(() => null);
 
@@ -254,6 +254,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
         }
 
         [Fact]
+        [ActiveIssue(31032, TargetFrameworkMonikers.NetFramework)]
         public void AccessNestedPrivateProtectedAssembly()
         {
             dynamic d = Container.PrivateProtectedValueTypeArray();
@@ -271,6 +272,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
         }
 
         [Fact]
+        [ActiveIssue(31032, TargetFrameworkMonikers.NetFramework)]
         public void InaccessibleFields()
         {
             dynamic d = new TypeWithFields();

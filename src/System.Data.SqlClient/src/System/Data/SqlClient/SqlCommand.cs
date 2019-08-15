@@ -51,9 +51,9 @@ namespace System.Data.SqlClient
         // The OnReturnValue function will test this flag to determine whether the returned value is a _prepareHandle or something else.
         //
         // _prepareHandle - the handle of a prepared command. Apparently there can be multiple prepared commands at a time - a feature that we do not support yet.
-
+        private static readonly object s_cachedInvalidPrepareHandle = (object)-1;
         private bool _inPrepare = false;
-        private int _prepareHandle = -1;
+        private object _prepareHandle = s_cachedInvalidPrepareHandle; // this is an int which is used in the object typed SqlParameter.Value field, avoid repeated boxing by storing in a box
         private bool _hiddenPrepare = false;
         private int _preparedConnectionCloseCount = -1;
         private int _preparedConnectionReconnectCount = -1;
@@ -83,7 +83,7 @@ namespace System.Data.SqlClient
         }
 
         // Cached info for async executions
-        private class CachedAsyncState
+        private sealed class CachedAsyncState
         {
             private int _cachedAsyncCloseCount = -1;    // value of the connection's CloseCount property when the asyncResult was set; tracks when connections are closed after an async operation
             private TaskCompletionSource<object> _cachedAsyncResult = null;
@@ -198,7 +198,7 @@ namespace System.Data.SqlClient
 
         // Volatile bool used to synchronize with cancel thread the state change of an executing
         // command going from pre-processing to obtaining a stateObject.  The cancel synchronization
-        // we require in the command is only from entering an Execute* API to obtaining a 
+        // we require in the command is only from entering an Execute* API to obtaining a
         // stateObj.  Once a stateObj is successfully obtained, cancel synchronization is handled
         // by the stateObject.
         private volatile bool _pendingCancel;
@@ -250,7 +250,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        new public SqlConnection Connection
+        public new SqlConnection Connection
         {
             get
             {
@@ -261,7 +261,7 @@ namespace System.Data.SqlClient
                 // Don't allow the connection to be changed while in an async operation.
                 if (_activeConnection != value && _activeConnection != null)
                 { // If new value...
-                    if (cachedAsyncState.PendingAsyncOperation)
+                    if (_cachedAsyncState != null && _cachedAsyncState.PendingAsyncOperation)
                     { // If in pending async state, throw.
                         throw SQL.CannotModifyPropertyAsyncOperationInProgress();
                     }
@@ -287,12 +287,12 @@ namespace System.Data.SqlClient
                         }
                         catch (Exception)
                         {
-                            // we do not really care about errors in unprepare (may be the old connection went bad)                                        
+                            // we do not really care about errors in unprepare (may be the old connection went bad)
                         }
                         finally
                         {
                             // clean prepare status (even successful Unprepare does not do that)
-                            _prepareHandle = -1;
+                            _prepareHandle = s_cachedInvalidPrepareHandle;
                             _execType = EXECTYPE.UNPREPARED;
                         }
                     }
@@ -302,7 +302,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override protected DbConnection DbConnection
+        protected override DbConnection DbConnection
         {
             get
             {
@@ -351,7 +351,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        new public SqlTransaction Transaction
+        public new SqlTransaction Transaction
         {
             get
             {
@@ -377,7 +377,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override protected DbTransaction DbTransaction
+        protected override DbTransaction DbTransaction
         {
             get
             {
@@ -389,12 +389,12 @@ namespace System.Data.SqlClient
             }
         }
 
-        override public string CommandText
+        public override string CommandText
         {
             get
             {
                 string value = _commandText;
-                return ((null != value) ? value : ADP.StrEmpty);
+                return ((null != value) ? value : string.Empty);
             }
             set
             {
@@ -406,7 +406,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override public int CommandTimeout
+        public override int CommandTimeout
         {
             get
             {
@@ -435,7 +435,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override public CommandType CommandType
+        public override CommandType CommandType
         {
             get
             {
@@ -478,7 +478,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        new public SqlParameterCollection Parameters
+        public new SqlParameterCollection Parameters
         {
             get
             {
@@ -492,7 +492,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override protected DbParameterCollection DbParameterCollection
+        protected override DbParameterCollection DbParameterCollection
         {
             get
             {
@@ -500,7 +500,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override public UpdateRowSource UpdatedRowSource
+        public override UpdateRowSource UpdatedRowSource
         {
             get
             {
@@ -561,7 +561,7 @@ namespace System.Data.SqlClient
             this.IsDirty = true;
         }
 
-        override public void Prepare()
+        public override void Prepare()
         {
             // Reset _pendingCancel upon entry into any Execute - used to synchronize state
             // between entry into Execute* API and the thread obtaining the stateObject.
@@ -569,65 +569,69 @@ namespace System.Data.SqlClient
 
 
             SqlStatistics statistics = null;
-            statistics = SqlStatistics.StartTimer(Statistics);
-
-            // only prepare if batch with parameters
-            if (
-                this.IsPrepared && !this.IsDirty
-                || (this.CommandType == CommandType.StoredProcedure)
-                || (
-                        (System.Data.CommandType.Text == this.CommandType)
-                        && (0 == GetParameterCount(_parameters))
-                    )
-
-            )
+            try
             {
-                if (null != Statistics)
-                {
-                    Statistics.SafeIncrement(ref Statistics._prepares);
-                }
-                _hiddenPrepare = false;
-            }
-            else
-            {
-                // Validate the command outside of the try\catch to avoid putting the _stateObj on error
-                ValidateCommand(async: false);
+                statistics = SqlStatistics.StartTimer(Statistics);
 
-                bool processFinallyBlock = true;
-                try
+                // only prepare if batch with parameters
+                if (
+                    this.IsPrepared && !this.IsDirty
+                    || (this.CommandType == CommandType.StoredProcedure)
+                    || (
+                            (System.Data.CommandType.Text == this.CommandType)
+                            && (0 == GetParameterCount(_parameters))
+                        )
+                )
                 {
-                    // NOTE: The state object isn't actually needed for this, but it is still here for back-compat (since it does a bunch of checks)
-                    GetStateObject();
-
-                    // Loop through parameters ensuring that we do not have unspecified types, sizes, scales, or precisions
-                    if (null != _parameters)
+                    if (null != Statistics)
                     {
-                        int count = _parameters.Count;
-                        for (int i = 0; i < count; ++i)
+                        Statistics.SafeIncrement(ref Statistics._prepares);
+                    }
+                    _hiddenPrepare = false;
+                }
+                else
+                {
+                    // Validate the command outside of the try\catch to avoid putting the _stateObj on error
+                    ValidateCommand(async: false);
+
+                    bool processFinallyBlock = true;
+                    try
+                    {
+                        // NOTE: The state object isn't actually needed for this, but it is still here for back-compat (since it does a bunch of checks)
+                        GetStateObject();
+
+                        // Loop through parameters ensuring that we do not have unspecified types, sizes, scales, or precisions
+                        if (null != _parameters)
                         {
-                            _parameters[i].Prepare(this);
+                            int count = _parameters.Count;
+                            for (int i = 0; i < count; ++i)
+                            {
+                                _parameters[i].Prepare(this);
+                            }
+                        }
+
+                        InternalPrepare();
+                    }
+                    catch (Exception e)
+                    {
+                        processFinallyBlock = ADP.IsCatchableExceptionType(e);
+                        throw;
+                    }
+                    finally
+                    {
+                        if (processFinallyBlock)
+                        {
+                            _hiddenPrepare = false; // The command is now officially prepared
+
+                            ReliablePutStateObject();
                         }
                     }
-
-                    InternalPrepare();
-                }
-                catch (Exception e)
-                {
-                    processFinallyBlock = ADP.IsCatchableExceptionType(e);
-                    throw;
-                }
-                finally
-                {
-                    if (processFinallyBlock)
-                    {
-                        _hiddenPrepare = false; // The command is now officially prepared
-
-                        ReliablePutStateObject();
-                    }
                 }
             }
-
-            SqlStatistics.StopTimer(statistics);
+            finally
+            {
+                SqlStatistics.StopTimer(statistics);
+            }
         }
 
         private void InternalPrepare()
@@ -672,7 +676,7 @@ namespace System.Data.SqlClient
             if ((_activeConnection.CloseCount != _preparedConnectionCloseCount) || (_activeConnection.ReconnectCount != _preparedConnectionReconnectCount))
             {
                 // reset our handle
-                _prepareHandle = -1;
+                _prepareHandle = s_cachedInvalidPrepareHandle;
             }
 
             _cachedMetaData = null;
@@ -683,7 +687,7 @@ namespace System.Data.SqlClient
         // It doesn't make sense to verify the connection exists or that it is open during cancel
         // because immediately after checkin the connection can be closed or removed via another thread.
         //
-        override public void Cancel()
+        public override void Cancel()
         {
             SqlStatistics statistics = null;
             try
@@ -716,7 +720,7 @@ namespace System.Data.SqlClient
                 }
 
                 // The lock here is to protect against the command.cancel / connection.close race condition
-                // The SqlInternalConnectionTds is set to OpenBusy during close, once this happens the cast below will fail and 
+                // The SqlInternalConnectionTds is set to OpenBusy during close, once this happens the cast below will fail and
                 // the command will no longer be cancelable.  It might be desirable to be able to cancel the close operation, but this is
                 // outside of the scope of Whidbey RTM.  See (SqlConnection::Close) for other lock.
                 lock (connection)
@@ -738,7 +742,7 @@ namespace System.Data.SqlClient
                       // Before attempting actual cancel, set the _pendingCancel flag to false.
                       // This denotes to other thread before obtaining stateObject from the
                       // session pool that there is another thread wishing to cancel.
-                      // The period in question is between entering the ExecuteAPI and obtaining 
+                      // The period in question is between entering the ExecuteAPI and obtaining
                       // a stateObject.
                         _pendingCancel = true;
 
@@ -764,17 +768,17 @@ namespace System.Data.SqlClient
             }
         }
 
-        new public SqlParameter CreateParameter()
+        public new SqlParameter CreateParameter()
         {
             return new SqlParameter();
         }
 
-        override protected DbParameter CreateDbParameter()
+        protected override DbParameter CreateDbParameter()
         {
             return CreateParameter();
         }
 
-        override protected void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             if (disposing)
             { // release managed objects
@@ -784,7 +788,7 @@ namespace System.Data.SqlClient
             base.Dispose(disposing);
         }
 
-        override public object ExecuteScalar()
+        public override object ExecuteScalar()
         {
             // Reset _pendingCancel upon entry into any Execute - used to synchronize state
             // between entry into Execute* API and the thread obtaining the stateObject.
@@ -852,7 +856,7 @@ namespace System.Data.SqlClient
             return retResult;
         }
 
-        override public int ExecuteNonQuery()
+        public override int ExecuteNonQuery()
         {
             // Reset _pendingCancel upon entry into any Execute - used to synchronize state
             // between entry into Execute* API and the thread obtaining the stateObject.
@@ -918,7 +922,13 @@ namespace System.Data.SqlClient
                     cachedAsyncState.SetActiveConnectionAndResult(completion, nameof(EndExecuteNonQuery), _activeConnection);
                     if (execNQ != null)
                     {
-                        AsyncHelper.ContinueTask(execNQ, completion, () => BeginExecuteNonQueryInternalReadStage(completion));
+                        AsyncHelper.ContinueTaskWithState(execNQ, completion,
+                            state: Tuple.Create(this, completion),
+                            onSuccess: state => {
+                                var parameters = (Tuple<SqlCommand, TaskCompletionSource<object>>)state;
+                                parameters.Item1.BeginExecuteNonQueryInternalReadStage(parameters.Item2);
+                            }
+                        );
                     }
                     else
                     {
@@ -941,7 +951,12 @@ namespace System.Data.SqlClient
                 // Add callback after work is done to avoid overlapping Begin\End methods
                 if (callback != null)
                 {
-                    completion.Task.ContinueWith((t) => callback(t), TaskScheduler.Default);
+                    completion.Task.ContinueWith(
+                        (task, state) => ((AsyncCallback)state)(task),
+                        state: callback,
+                        CancellationToken.None,
+                        TaskContinuationOptions.DenyChildAttach,
+                        TaskScheduler.Default);
                 }
 
                 return completion.Task;
@@ -972,7 +987,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        private void VerifyEndExecuteState(Task completionTask, String endMethod)
+        private void VerifyEndExecuteState(Task completionTask, string endMethod)
         {
             Debug.Assert(completionTask != null);
 
@@ -1011,7 +1026,6 @@ namespace System.Data.SqlClient
 
         private void WaitForAsyncResults(IAsyncResult asyncResult)
         {
-            Task completionTask = (Task)asyncResult;
             if (!asyncResult.IsCompleted)
             {
                 asyncResult.AsyncWaitHandle.WaitOne();
@@ -1170,7 +1184,10 @@ namespace System.Data.SqlClient
                 {
                     if (task != null)
                     {
-                        task = AsyncHelper.CreateContinuationTask(task, () => reader.Close());
+                        task = AsyncHelper.CreateContinuationTaskWithState(task,
+                            state: reader,
+                            onSuccess: state => ((SqlDataReader)state).Close()
+                        );
                     }
                     else
                     {
@@ -1265,7 +1282,13 @@ namespace System.Data.SqlClient
                 cachedAsyncState.SetActiveConnectionAndResult(completion, nameof(EndExecuteXmlReader), _activeConnection);
                 if (writeTask != null)
                 {
-                    AsyncHelper.ContinueTask(writeTask, completion, () => BeginExecuteXmlReaderInternalReadStage(completion));
+                    AsyncHelper.ContinueTaskWithState(writeTask, completion,
+                        state: Tuple.Create(this, completion),
+                        onSuccess: state => {
+                            var parameters = (Tuple<SqlCommand, TaskCompletionSource<object>>)state;
+                            parameters.Item1.BeginExecuteXmlReaderInternalReadStage(parameters.Item2);
+                        }
+                    );
                 }
                 else
                 {
@@ -1275,7 +1298,12 @@ namespace System.Data.SqlClient
                 // Add callback after work is done to avoid overlapping Begin\End methods
                 if (callback != null)
                 {
-                    completion.Task.ContinueWith((t) => callback(t), TaskScheduler.Default);
+                    completion.Task.ContinueWith(
+                        (task, state) => ((AsyncCallback)state)(task),
+                        state: callback,
+                        CancellationToken.None,
+                        TaskContinuationOptions.DenyChildAttach,
+                        TaskScheduler.Default);
                 }
                 return completion.Task;
             }
@@ -1385,12 +1413,12 @@ namespace System.Data.SqlClient
         }
 
 
-        override protected DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
+        protected override DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
         {
             return ExecuteReader(behavior);
         }
 
-        new public SqlDataReader ExecuteReader()
+        public new SqlDataReader ExecuteReader()
         {
             SqlStatistics statistics = null;
             try
@@ -1404,7 +1432,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        new public SqlDataReader ExecuteReader(CommandBehavior behavior)
+        public new SqlDataReader ExecuteReader(CommandBehavior behavior)
         {
             // Reset _pendingCancel upon entry into any Execute - used to synchronize state
             // between entry into Execute* API and the thread obtaining the stateObject.
@@ -1441,7 +1469,7 @@ namespace System.Data.SqlClient
         }
 
 
-        internal SqlDataReader EndExecuteReader(IAsyncResult asyncResult)
+        public SqlDataReader EndExecuteReader(IAsyncResult asyncResult)
         {
             Exception asyncException = ((Task)asyncResult).Exception;
             if (asyncException != null)
@@ -1491,7 +1519,22 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal IAsyncResult BeginExecuteReader(CommandBehavior behavior, AsyncCallback callback, object stateObject)
+        public IAsyncResult BeginExecuteReader()
+        {
+            return BeginExecuteReader(null, null, CommandBehavior.Default);
+        }
+
+        public IAsyncResult BeginExecuteReader(AsyncCallback callback, object stateObject)
+        {
+            return BeginExecuteReader(callback, stateObject, CommandBehavior.Default);
+        }
+
+        public IAsyncResult BeginExecuteReader(CommandBehavior behavior)
+        {
+            return BeginExecuteReader(null, null, behavior);
+        }
+
+        public IAsyncResult BeginExecuteReader(AsyncCallback callback, object stateObject, CommandBehavior behavior)
         {
             // Reset _pendingCancel upon entry into any Execute - used to synchronize state
             // between entry into Execute* API and the thread obtaining the stateObject.
@@ -1528,7 +1571,13 @@ namespace System.Data.SqlClient
                 cachedAsyncState.SetActiveConnectionAndResult(completion, nameof(EndExecuteReader), _activeConnection);
                 if (writeTask != null)
                 {
-                    AsyncHelper.ContinueTask(writeTask, completion, () => BeginExecuteReaderInternalReadStage(completion));
+                    AsyncHelper.ContinueTaskWithState(writeTask, completion,
+                        state: Tuple.Create(this, completion),
+                        onSuccess: state => {
+                            var parameters = (Tuple<SqlCommand, TaskCompletionSource<object>>)state;
+                            parameters.Item1.BeginExecuteReaderInternalReadStage(parameters.Item2);
+                        }
+                    );
                 }
                 else
                 {
@@ -1538,7 +1587,12 @@ namespace System.Data.SqlClient
                 // Add callback after work is done to avoid overlapping Begin\End methods
                 if (callback != null)
                 {
-                    completion.Task.ContinueWith((t) => callback(t), TaskScheduler.Default);
+                    completion.Task.ContinueWith(
+                        (task, state) => ((AsyncCallback)state)(task),
+                        state: callback,
+                        CancellationToken.None,
+                        TaskContinuationOptions.DenyChildAttach,
+                        TaskScheduler.Default);
                 }
                 return completion.Task;
             }
@@ -1647,22 +1701,22 @@ namespace System.Data.SqlClient
             }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.NotOnCanceled, TaskScheduler.Default);
         }
 
-        new public Task<SqlDataReader> ExecuteReaderAsync()
+        public new Task<SqlDataReader> ExecuteReaderAsync()
         {
             return ExecuteReaderAsync(CommandBehavior.Default, CancellationToken.None);
         }
 
-        new public Task<SqlDataReader> ExecuteReaderAsync(CommandBehavior behavior)
+        public new Task<SqlDataReader> ExecuteReaderAsync(CommandBehavior behavior)
         {
             return ExecuteReaderAsync(behavior, CancellationToken.None);
         }
 
-        new public Task<SqlDataReader> ExecuteReaderAsync(CancellationToken cancellationToken)
+        public new Task<SqlDataReader> ExecuteReaderAsync(CancellationToken cancellationToken)
         {
             return ExecuteReaderAsync(CommandBehavior.Default, cancellationToken);
         }
 
-        new public Task<SqlDataReader> ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+        public new Task<SqlDataReader> ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
         {
             Guid operationId = default(Guid);
             if (!_parentOperationStarted)
@@ -1686,7 +1740,7 @@ namespace System.Data.SqlClient
             {
                 RegisterForConnectionCloseNotification(ref returnedTask);
 
-                Task<SqlDataReader>.Factory.FromAsync(BeginExecuteReader, EndExecuteReader, behavior, null).ContinueWith((t) =>
+                Task<SqlDataReader>.Factory.FromAsync((commandBehavior, callback, stateObject) => BeginExecuteReader(callback, stateObject, commandBehavior), EndExecuteReader, behavior, null).ContinueWith((t) =>
                 {
                     registration.Dispose();
                     if (t.IsFaulted)
@@ -2113,7 +2167,7 @@ namespace System.Data.SqlClient
                     {
                         p.SqlDbType = MetaType.GetSqlDbTypeFromOleDbType((short)r[colNames[(int)ProcParamsColIndex.DataType]],
                             ADP.IsNull(r[colNames[(int)ProcParamsColIndex.TypeName]]) ?
-                                ADP.StrEmpty :
+                                string.Empty :
                                 (string)r[colNames[(int)ProcParamsColIndex.TypeName]]);
                     }
 
@@ -2173,6 +2227,13 @@ namespace System.Data.SqlClient
                         p.TypeName = r[colNames[(int)ProcParamsColIndex.TypeCatalogName]] + "." +
                             r[colNames[(int)ProcParamsColIndex.TypeSchemaName]] + "." +
                             r[colNames[(int)ProcParamsColIndex.TypeName]];
+
+                        // the constructed type name above is incorrectly formatted, it should be a 2 part name not 3
+                        // for compatibility we can't change this because the bug has existed for a long time and been
+                        // worked around by users, so identify that it is present and catch it later in the execution
+                        // process once users can no longer interact with the parameter type name
+                        p.IsDerivedParameterTypeName = true;
+
                     }
 
                     // XmlSchema name for Xml types
@@ -2181,13 +2242,13 @@ namespace System.Data.SqlClient
                         object value;
 
                         value = r[colNames[(int)ProcParamsColIndex.XmlSchemaCollectionCatalogName]];
-                        p.XmlSchemaCollectionDatabase = ADP.IsNull(value) ? String.Empty : (string)value;
+                        p.XmlSchemaCollectionDatabase = ADP.IsNull(value) ? string.Empty : (string)value;
 
                         value = r[colNames[(int)ProcParamsColIndex.XmlSchemaCollectionSchemaName]];
-                        p.XmlSchemaCollectionOwningSchema = ADP.IsNull(value) ? String.Empty : (string)value;
+                        p.XmlSchemaCollectionOwningSchema = ADP.IsNull(value) ? string.Empty : (string)value;
 
                         value = r[colNames[(int)ProcParamsColIndex.XmlSchemaCollectionName]];
-                        p.XmlSchemaCollectionName = ADP.IsNull(value) ? String.Empty : (string)value;
+                        p.XmlSchemaCollectionName = ADP.IsNull(value) ? string.Empty : (string)value;
                     }
 
                     if (MetaType._IsVarTime(p.SqlDbType))
@@ -2269,7 +2330,7 @@ namespace System.Data.SqlClient
             // ctor is called.  But, if we are using default queue, then we do not have this data until
             // Start().  Due to this, we always delay setting options until execute.
 
-            // There is a variance in order between Start(), SqlDependency(), and Execute.  This is the 
+            // There is a variance in order between Start(), SqlDependency(), and Execute.  This is the
             // best way to solve that problem.
             if (null != Notification)
             {
@@ -2328,27 +2389,7 @@ namespace System.Data.SqlClient
                         TaskCompletionSource<object> completion = new TaskCompletionSource<object>();
                         _activeConnection.RegisterWaitingForReconnect(completion.Task);
                         _reconnectionCompletionSource = completion;
-                        CancellationTokenSource timeoutCTS = new CancellationTokenSource();
-                        AsyncHelper.SetTimeoutException(completion, timeout, SQL.CR_ReconnectTimeout, timeoutCTS.Token);
-                        AsyncHelper.ContinueTask(reconnectTask, completion,
-                            () =>
-                            {
-                                if (completion.Task.IsCompleted)
-                                {
-                                    return;
-                                }
-                                Interlocked.CompareExchange(ref _reconnectionCompletionSource, null, completion);
-                                timeoutCTS.Cancel();
-                                Task subTask = RunExecuteNonQueryTds(methodName, async, TdsParserStaticMethods.GetRemainingTimeout(timeout, reconnectionStart), asyncWrite);
-                                if (subTask == null)
-                                {
-                                    completion.SetResult(null);
-                                }
-                                else
-                                {
-                                    AsyncHelper.ContinueTask(subTask, completion, () => completion.SetResult(null));
-                                }
-                            }, connectionToAbort: _activeConnection);
+                        RunExecuteNonQueryTdsSetupReconnnectContinuation(methodName, async, timeout, asyncWrite, reconnectTask, reconnectionStart, completion);
                         return completion.Task;
                     }
                     else
@@ -2401,16 +2442,45 @@ namespace System.Data.SqlClient
             return null;
         }
 
+        // This is in its own method to avoid always allocating the lambda in RunExecuteNonQueryTds, cannot use ContinueTaskWithState because of MarshalByRef and the CompareExchange
+        private void RunExecuteNonQueryTdsSetupReconnnectContinuation(string methodName, bool async, int timeout, bool asyncWrite, Task reconnectTask, long reconnectionStart, TaskCompletionSource<object> completion)
+        {
+            CancellationTokenSource timeoutCTS = new CancellationTokenSource();
+            AsyncHelper.SetTimeoutException(completion, timeout, SQL.CR_ReconnectTimeout, timeoutCTS.Token);
+            AsyncHelper.ContinueTask(reconnectTask, completion,
+                () =>
+                {
+                    if (completion.Task.IsCompleted)
+                    {
+                        return;
+                    }
+                    Interlocked.CompareExchange(ref _reconnectionCompletionSource, null, completion);
+                    timeoutCTS.Cancel();
+                    Task subTask = RunExecuteNonQueryTds(methodName, async, TdsParserStaticMethods.GetRemainingTimeout(timeout, reconnectionStart), asyncWrite);
+                    if (subTask == null)
+                    {
+                        completion.SetResult(null);
+                    }
+                    else
+                    {
+                        AsyncHelper.ContinueTaskWithState(subTask, completion,
+                            state: completion,
+                            onSuccess: (state) => ((TaskCompletionSource<object>)state).SetResult(null)
+                        );
+                    }
+                }
+            );
+        }
 
         internal SqlDataReader RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, bool returnStream, [CallerMemberName] string method = "")
         {
-            Task unused; // sync execution 
+            Task unused; // sync execution
             SqlDataReader reader = RunExecuteReader(cmdBehavior, runBehavior, returnStream, completion: null, timeout: CommandTimeout, task: out unused, method: method);
             Debug.Assert(unused == null, "returned task during synchronous execution");
             return reader;
         }
 
-        // task is created in case of pending asynchronous write, returned SqlDataReader should not be utilized until that task is complete 
+        // task is created in case of pending asynchronous write, returned SqlDataReader should not be utilized until that task is complete
         internal SqlDataReader RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, bool returnStream, TaskCompletionSource<object> completion, int timeout, out Task task, bool asyncWrite = false, [CallerMemberName] string method = "")
         {
             bool async = (null != completion);
@@ -2470,28 +2540,7 @@ namespace System.Data.SqlClient
                     TaskCompletionSource<object> completion = new TaskCompletionSource<object>();
                     _activeConnection.RegisterWaitingForReconnect(completion.Task);
                     _reconnectionCompletionSource = completion;
-                    CancellationTokenSource timeoutCTS = new CancellationTokenSource();
-                    AsyncHelper.SetTimeoutException(completion, timeout, SQL.CR_ReconnectTimeout, timeoutCTS.Token);
-                    AsyncHelper.ContinueTask(reconnectTask, completion,
-                        () =>
-                        {
-                            if (completion.Task.IsCompleted)
-                            {
-                                return;
-                            }
-                            Interlocked.CompareExchange(ref _reconnectionCompletionSource, null, completion);
-                            timeoutCTS.Cancel();
-                            Task subTask;
-                            RunExecuteReaderTds(cmdBehavior, runBehavior, returnStream, async, TdsParserStaticMethods.GetRemainingTimeout(timeout, reconnectionStart), out subTask, asyncWrite, ds);
-                            if (subTask == null)
-                            {
-                                completion.SetResult(null);
-                            }
-                            else
-                            {
-                                AsyncHelper.ContinueTask(subTask, completion, () => completion.SetResult(null));
-                            }
-                        }, connectionToAbort: _activeConnection);
+                    RunExecuteReaderTdsSetupReconnectContinuation(cmdBehavior, runBehavior, returnStream, async, timeout, asyncWrite, ds, reconnectTask, reconnectionStart, completion);
                     task = completion.Task;
                     return ds;
                 }
@@ -2568,7 +2617,7 @@ namespace System.Data.SqlClient
 
                     if (_execType == EXECTYPE.PREPARED)
                     {
-                        Debug.Assert(this.IsPrepared && (_prepareHandle != -1), "invalid attempt to call sp_execute without a handle!");
+                        Debug.Assert(this.IsPrepared && ((int)_prepareHandle != -1), "invalid attempt to call sp_execute without a handle!");
                         rpc = BuildExecute(inSchema);
                     }
                     else if (_execType == EXECTYPE.PREPAREPENDING)
@@ -2627,15 +2676,7 @@ namespace System.Data.SqlClient
                     decrementAsyncCountOnFailure = false;
                     if (writeTask != null)
                     {
-                        task = AsyncHelper.CreateContinuationTask(writeTask, () =>
-                        {
-                            _activeConnection.GetOpenTdsConnection(); // it will throw if connection is closed
-                            cachedAsyncState.SetAsyncReaderState(ds, runBehavior, optionSettings);
-                        },
-                                 onFailure: (exc) =>
-                                 {
-                                     _activeConnection.GetOpenTdsConnection().DecrementAsyncCount();
-                                 });
+                        task = RunExecuteReaderTdsSetupContinuation(runBehavior, ds, optionSettings, writeTask);
                     }
                     else
                     {
@@ -2655,7 +2696,7 @@ namespace System.Data.SqlClient
                 {
                     SqlInternalConnectionTds innerConnectionTds = (_activeConnection.InnerConnection as SqlInternalConnectionTds);
                     if (null != innerConnectionTds)
-                    { // it may be closed 
+                    { // it may be closed
                         innerConnectionTds.DecrementAsyncCount();
                     }
                 }
@@ -2674,6 +2715,53 @@ namespace System.Data.SqlClient
             return ds;
         }
 
+        // This is in its own method to avoid always allocating the lambda in RunExecuteReaderTds
+        private Task RunExecuteReaderTdsSetupContinuation(RunBehavior runBehavior, SqlDataReader ds, string optionSettings, Task writeTask)
+        {
+            Task task = AsyncHelper.CreateContinuationTask(writeTask,
+                onSuccess: () =>
+                {
+                    _activeConnection.GetOpenTdsConnection(); // it will throw if connection is closed
+                    cachedAsyncState.SetAsyncReaderState(ds, runBehavior, optionSettings);
+                },
+                onFailure: (exc) =>
+                {
+                    _activeConnection.GetOpenTdsConnection().DecrementAsyncCount();
+                }
+            );
+            return task;
+        }
+
+        // This is in its own method to avoid always allocating the lambda in RunExecuteReaderTds
+        private void RunExecuteReaderTdsSetupReconnectContinuation(CommandBehavior cmdBehavior, RunBehavior runBehavior, bool returnStream, bool async, int timeout, bool asyncWrite, SqlDataReader ds, Task reconnectTask, long reconnectionStart, TaskCompletionSource<object> completion)
+        {
+            CancellationTokenSource timeoutCTS = new CancellationTokenSource();
+            AsyncHelper.SetTimeoutException(completion, timeout, SQL.CR_ReconnectTimeout, timeoutCTS.Token);
+            AsyncHelper.ContinueTask(reconnectTask, completion,
+                () =>
+                {
+                    if (completion.Task.IsCompleted)
+                    {
+                        return;
+                    }
+                    Interlocked.CompareExchange(ref _reconnectionCompletionSource, null, completion);
+                    timeoutCTS.Cancel();
+                    Task subTask;
+                    RunExecuteReaderTds(cmdBehavior, runBehavior, returnStream, async, TdsParserStaticMethods.GetRemainingTimeout(timeout, reconnectionStart), out subTask, asyncWrite, ds);
+                    if (subTask == null)
+                    {
+                        completion.SetResult(null);
+                    }
+                    else
+                    {
+                        AsyncHelper.ContinueTaskWithState(subTask, completion,
+                            state: completion,
+                            onSuccess: (state) => ((TaskCompletionSource<object>)state).SetResult(null)
+                        );
+                    }
+                }
+            );
+        }
 
         private SqlDataReader CompleteAsyncExecuteReader()
         {
@@ -2863,16 +2951,16 @@ namespace System.Data.SqlClient
 
         private void ValidateAsyncCommand()
         {
-            if (cachedAsyncState.PendingAsyncOperation)
+            if (_cachedAsyncState != null && _cachedAsyncState.PendingAsyncOperation)
             { // Enforce only one pending async execute at a time.
-                if (cachedAsyncState.IsActiveConnectionValid(_activeConnection))
+                if (_cachedAsyncState.IsActiveConnectionValid(_activeConnection))
                 {
                     throw SQL.PendingBeginXXXExists();
                 }
                 else
                 {
                     _stateObj = null; // Session was re-claimed by session pool upon connection close.
-                    cachedAsyncState.ResetAsyncState();
+                    _cachedAsyncState.ResetAsyncState();
                 }
             }
         }
@@ -2985,7 +3073,7 @@ namespace System.Data.SqlClient
                 }
                 else
                 {
-                    Debug.Assert(false, "OnReturnStatus: SqlCommand got too many DONEPROC events");
+                    Debug.Fail("OnReturnStatus: SqlCommand got too many DONEPROC events");
                     parameters = null;
                 }
             }
@@ -3126,7 +3214,7 @@ namespace System.Data.SqlClient
                 }
                 else
                 {
-                    Debug.Assert(false, "OnReturnValue: SqlCommand got too many DONEPROC events");
+                    Debug.Fail("OnReturnValue: SqlCommand got too many DONEPROC events");
                     return null;
                 }
             }
@@ -3175,10 +3263,9 @@ namespace System.Data.SqlClient
                 return null;
         }
 
-        private void GetRPCObject(int paramCount, ref _SqlRPC rpc)
+        private void GetRPCObject(int systemParamCount, int userParamCount, ref _SqlRPC rpc)
         {
             // Designed to minimize necessary allocations
-            int ii;
             if (rpc == null)
             {
                 if (_rpcArrayOf1 == null)
@@ -3189,42 +3276,39 @@ namespace System.Data.SqlClient
                 rpc = _rpcArrayOf1[0];
             }
 
-            rpc.ProcID = 0;
-            rpc.rpcName = null;
             rpc.options = 0;
+            rpc.systemParamCount = systemParamCount;
 
-
+            int currentCount = rpc.systemParams?.Length ?? 0;
             // Make sure there is enough space in the parameters and paramoptions arrays
-            if (rpc.parameters == null || rpc.parameters.Length < paramCount)
+            if (currentCount < systemParamCount)
             {
-                rpc.parameters = new SqlParameter[paramCount];
+                Array.Resize(ref rpc.systemParams, systemParamCount);
+                Array.Resize(ref rpc.systemParamOptions, systemParamCount);
+                for (int index = currentCount; index < systemParamCount; index++)
+                {
+                    rpc.systemParams[index] = new SqlParameter();
+                }
             }
-            else if (rpc.parameters.Length > paramCount)
+            for (int ii = 0; ii < systemParamCount; ii++)
             {
-                rpc.parameters[paramCount] = null;    // Terminator
+                rpc.systemParamOptions[ii] = 0;
             }
-            if (rpc.paramoptions == null || (rpc.paramoptions.Length < paramCount))
+            if ((rpc.userParamMap?.Length ?? 0) < userParamCount)
             {
-                rpc.paramoptions = new byte[paramCount];
-            }
-            else
-            {
-                for (ii = 0; ii < paramCount; ii++)
-                    rpc.paramoptions[ii] = 0;
+                Array.Resize(ref rpc.userParamMap, userParamCount);
             }
         }
 
-        private void SetUpRPCParameters(_SqlRPC rpc, int startCount, bool inSchema, SqlParameterCollection parameters)
+        private void SetUpRPCParameters(_SqlRPC rpc, bool inSchema, SqlParameterCollection parameters)
         {
-            int ii;
             int paramCount = GetParameterCount(parameters);
-            int j = startCount;
-            TdsParser parser = _activeConnection.Parser;
+            int userParamCount = 0;
 
-            for (ii = 0; ii < paramCount; ii++)
+            for (int index = 0; index < paramCount; index++)
             {
-                SqlParameter parameter = parameters[ii];
-                parameter.Validate(ii, CommandType.StoredProcedure == CommandType);
+                SqlParameter parameter = parameters[index];
+                parameter.Validate(index, CommandType.StoredProcedure == CommandType);
 
                 // func will change type to that with a 4 byte length if the type has a two
                 // byte length and a parameter length > than that expressible in 2 bytes
@@ -3235,16 +3319,33 @@ namespace System.Data.SqlClient
 
                 if (ShouldSendParameter(parameter))
                 {
-                    rpc.parameters[j] = parameter;
+                    byte options = 0;
 
                     // set output bit
                     if (parameter.Direction == ParameterDirection.InputOutput ||
                         parameter.Direction == ParameterDirection.Output)
-                        rpc.paramoptions[j] = TdsEnums.RPC_PARAM_BYREF;
+                        options = TdsEnums.RPC_PARAM_BYREF;
 
                     // set default value bit
                     if (parameter.Direction != ParameterDirection.Output)
                     {
+                        // detect incorrectly derived type names unchanged by the caller and fix them
+                        if (parameter.IsDerivedParameterTypeName)
+                        {
+                            string[] parts = MultipartIdentifier.ParseMultipartIdentifier(parameter.TypeName, "[\"", "]\"", SR.SQL_TDSParserTableName, false);
+                            if (parts != null && parts.Length==4) // will always return int[4] right justified
+                            {
+                                if (
+                                    parts[3] != null && // name must not be null
+                                    parts[2] != null && // schema must not be null
+                                    parts[1] != null // server should not be null or we don't need to remove it
+                                )
+                                {
+                                    parameter.TypeName = QuoteIdentifier(parts.AsSpan(2,2));
+                                }
+                            }
+                        }
+
                         // remember that null == Convert.IsEmpty, DBNull.Value is a database null!
 
                         // Don't assume a default value exists for parameters in the case when
@@ -3252,50 +3353,58 @@ namespace System.Data.SqlClient
                         // TVPs use DEFAULT and do not allow NULL, even for schema only.
                         if (null == parameter.Value && (!inSchema || SqlDbType.Structured == parameter.SqlDbType))
                         {
-                            rpc.paramoptions[j] |= TdsEnums.RPC_PARAM_DEFAULT;
+                            options |= TdsEnums.RPC_PARAM_DEFAULT;
                         }
                     }
 
+                    rpc.userParamMap[userParamCount] = ((((long)options) << 32) | (long)index);
+                    userParamCount += 1;
                     // Must set parameter option bit for LOB_COOKIE if unfilled LazyMat blob
-                    j++;
+
                 }
             }
+            rpc.userParamCount = userParamCount;
+            rpc.userParams = parameters;
         }
 
         private _SqlRPC BuildPrepExec(CommandBehavior behavior)
         {
             Debug.Assert(System.Data.CommandType.Text == this.CommandType, "invalid use of sp_prepexec for stored proc invocation!");
             SqlParameter sqlParam;
-            int j = 3;
+            const int systemParameterCount = 3;
 
-            int count = CountSendableParameters(_parameters);
+            int userParameterCount = CountSendableParameters(_parameters);
 
             _SqlRPC rpc = null;
-            GetRPCObject(count + j, ref rpc);
+            GetRPCObject(systemParameterCount, userParameterCount, ref rpc);
 
             rpc.ProcID = TdsEnums.RPC_PROCID_PREPEXEC;
             rpc.rpcName = TdsEnums.SP_PREPEXEC;
 
             //@handle
-            sqlParam = new SqlParameter(null, SqlDbType.Int);
-            sqlParam.Direction = ParameterDirection.InputOutput;
+            sqlParam = rpc.systemParams[0];
+            sqlParam.SqlDbType = SqlDbType.Int;
             sqlParam.Value = _prepareHandle;
-            rpc.parameters[0] = sqlParam;
-            rpc.paramoptions[0] = TdsEnums.RPC_PARAM_BYREF;
+            sqlParam.Size = 4;
+            sqlParam.Direction = ParameterDirection.InputOutput;
+            rpc.systemParamOptions[0] = TdsEnums.RPC_PARAM_BYREF;
 
             //@batch_params
             string paramList = BuildParamList(_stateObj.Parser, _parameters);
-            sqlParam = new SqlParameter(null, ((paramList.Length << 1) <= TdsEnums.TYPE_SIZE_LIMIT) ? SqlDbType.NVarChar : SqlDbType.NText, paramList.Length);
+            sqlParam = rpc.systemParams[1];
+            sqlParam.SqlDbType = ((paramList.Length << 1) <= TdsEnums.TYPE_SIZE_LIMIT) ? SqlDbType.NVarChar : SqlDbType.NText;
+            sqlParam.Size = paramList.Length;
             sqlParam.Value = paramList;
-            rpc.parameters[1] = sqlParam;
 
             //@batch_text
             string text = GetCommandText(behavior);
-            sqlParam = new SqlParameter(null, ((text.Length << 1) <= TdsEnums.TYPE_SIZE_LIMIT) ? SqlDbType.NVarChar : SqlDbType.NText, text.Length);
+            sqlParam = rpc.systemParams[2];
+            sqlParam.SqlDbType = ((text.Length << 1) <= TdsEnums.TYPE_SIZE_LIMIT) ? SqlDbType.NVarChar : SqlDbType.NText;
+            sqlParam.Size = text.Length;
             sqlParam.Value = text;
-            rpc.parameters[2] = sqlParam;
 
-            SetUpRPCParameters(rpc, j, false, _parameters);
+            SetUpRPCParameters(rpc, false, _parameters);
+
             return rpc;
         }
 
@@ -3317,7 +3426,7 @@ namespace System.Data.SqlClient
                     // InputOutput/Output parameters are aways sent
                     return true;
                 default:
-                    Debug.Assert(false, "Invalid ParameterDirection!");
+                    Debug.Fail("Invalid ParameterDirection!");
                     return false;
             }
         }
@@ -3350,12 +3459,13 @@ namespace System.Data.SqlClient
         private void BuildRPC(bool inSchema, SqlParameterCollection parameters, ref _SqlRPC rpc)
         {
             Debug.Assert(this.CommandType == System.Data.CommandType.StoredProcedure, "Command must be a stored proc to execute an RPC");
-            int count = CountSendableParameters(parameters);
-            GetRPCObject(count, ref rpc);
+            int userParameterCount = CountSendableParameters(parameters);
+            GetRPCObject(0, userParameterCount, ref rpc);
 
+            rpc.ProcID = 0;
             rpc.rpcName = this.CommandText; // just get the raw command text
 
-            SetUpRPCParameters(rpc, 0, inSchema, parameters);
+            SetUpRPCParameters(rpc, inSchema, parameters);
         }
 
         //
@@ -3371,25 +3481,24 @@ namespace System.Data.SqlClient
 
         private _SqlRPC BuildExecute(bool inSchema)
         {
-            Debug.Assert(_prepareHandle != -1, "Invalid call to sp_execute without a valid handle!");
-            int j = 1;
+            Debug.Assert((int)_prepareHandle != -1, "Invalid call to sp_execute without a valid handle!");
+            const int systemParameterCount = 1;
 
-            int count = CountSendableParameters(_parameters);
+            int userParameterCount = CountSendableParameters(_parameters);
 
             _SqlRPC rpc = null;
-            GetRPCObject(count + j, ref rpc);
-
-            SqlParameter sqlParam;
+            GetRPCObject(systemParameterCount, userParameterCount, ref rpc);
 
             rpc.ProcID = TdsEnums.RPC_PROCID_EXECUTE;
             rpc.rpcName = TdsEnums.SP_EXECUTE;
 
             //@handle
-            sqlParam = new SqlParameter(null, SqlDbType.Int);
+            SqlParameter sqlParam = rpc.systemParams[0];
+            sqlParam.SqlDbType = SqlDbType.Int;
             sqlParam.Value = _prepareHandle;
-            rpc.parameters[0] = sqlParam;
+            sqlParam.Direction = ParameterDirection.Input;
 
-            SetUpRPCParameters(rpc, j, inSchema, _parameters);
+            SetUpRPCParameters(rpc, inSchema, _parameters);
             return rpc;
         }
 
@@ -3401,22 +3510,23 @@ namespace System.Data.SqlClient
         private void BuildExecuteSql(CommandBehavior behavior, string commandText, SqlParameterCollection parameters, ref _SqlRPC rpc)
         {
 
-            Debug.Assert(_prepareHandle == -1, "This command has an existing handle, use sp_execute!");
+            Debug.Assert((int)_prepareHandle == -1, "This command has an existing handle, use sp_execute!");
             Debug.Assert(CommandType.Text == this.CommandType, "invalid use of sp_executesql for stored proc invocation!");
-            int j;
+            int systemParamCount;
             SqlParameter sqlParam;
 
-            int cParams = CountSendableParameters(parameters);
-            if (cParams > 0)
+            int userParamCount = CountSendableParameters(parameters);
+            if (userParamCount > 0)
             {
-                j = 2;
+                systemParamCount = 2;
             }
             else
             {
-                j = 1;
+                systemParamCount = 1;
             }
 
-            GetRPCObject(cParams + j, ref rpc);
+            GetRPCObject(systemParamCount, userParamCount, ref rpc);
+
             rpc.ProcID = TdsEnums.RPC_PROCID_EXECUTESQL;
             rpc.rpcName = TdsEnums.SP_EXECUTESQL;
 
@@ -3425,19 +3535,22 @@ namespace System.Data.SqlClient
             {
                 commandText = GetCommandText(behavior);
             }
-            sqlParam = new SqlParameter(null, ((commandText.Length << 1) <= TdsEnums.TYPE_SIZE_LIMIT) ? SqlDbType.NVarChar : SqlDbType.NText, commandText.Length);
+            sqlParam = rpc.systemParams[0];
+            sqlParam.SqlDbType = ((commandText.Length << 1) <= TdsEnums.TYPE_SIZE_LIMIT) ? SqlDbType.NVarChar : SqlDbType.NText;
+            sqlParam.Size = commandText.Length;
             sqlParam.Value = commandText;
-            rpc.parameters[0] = sqlParam;
+            sqlParam.Direction = ParameterDirection.Input;
 
-            if (cParams > 0)
+            if (userParamCount > 0)
             {
                 string paramList = BuildParamList(_stateObj.Parser, BatchRPCMode ? parameters : _parameters);
-                sqlParam = new SqlParameter(null, ((paramList.Length << 1) <= TdsEnums.TYPE_SIZE_LIMIT) ? SqlDbType.NVarChar : SqlDbType.NText, paramList.Length);
+                sqlParam = rpc.systemParams[1];
+                sqlParam.SqlDbType = ((paramList.Length << 1) <= TdsEnums.TYPE_SIZE_LIMIT) ? SqlDbType.NVarChar : SqlDbType.NText;
+                sqlParam.Size = paramList.Length;
                 sqlParam.Value = paramList;
-                rpc.parameters[1] = sqlParam;
 
                 bool inSchema = (0 != (behavior & CommandBehavior.SchemaOnly));
-                SetUpRPCParameters(rpc, j, inSchema, parameters);
+                SetUpRPCParameters(rpc, inSchema, parameters);
             }
         }
 
@@ -3589,14 +3702,19 @@ namespace System.Data.SqlClient
 
         // Adds quotes to each part of a SQL identifier that may be multi-part, while leaving
         //  the result as a single composite name.
-        private string ParseAndQuoteIdentifier(string identifier, bool isUdtTypeName)
+        private static string ParseAndQuoteIdentifier(string identifier, bool isUdtTypeName)
         {
             string[] strings = SqlParameter.ParseTypeName(identifier, isUdtTypeName);
+            return QuoteIdentifier(strings);
+        }
+
+        private static string QuoteIdentifier(ReadOnlySpan<string> strings)
+        {
             StringBuilder bld = new StringBuilder();
 
             // Stitching back together is a little tricky. Assume we want to build a full multi-part name
             //  with all parts except trimming separators for leading empty names (null or empty strings,
-            //  but not whitespace). Separators in the middle should be added, even if the name part is 
+            //  but not whitespace). Separators in the middle should be added, even if the name part is
             //  null/empty, to maintain proper location of the parts.
             for (int i = 0; i < strings.Length; i++)
             {
@@ -3606,7 +3724,7 @@ namespace System.Data.SqlClient
                 }
                 if (null != strings[i] && 0 != strings[i].Length)
                 {
-                    bld.Append(ADP.BuildQuotedString("[", "]", strings[i]));
+                    ADP.AppendQuotedString(bld, "[", "]", strings[i]);
                 }
             }
 
@@ -3662,7 +3780,7 @@ namespace System.Data.SqlClient
             return s;
         }
 
-        private String GetCommandText(CommandBehavior behavior)
+        private string GetCommandText(CommandBehavior behavior)
         {
             // build the batch string we send over, since we execute within a stored proc (sp_executesql), the SET options never need to be
             // turned off since they are scoped to the sproc
@@ -3936,5 +4054,3 @@ namespace System.Data.SqlClient
         public SqlCommand Clone() => new SqlCommand(this);
     }
 }
-
-

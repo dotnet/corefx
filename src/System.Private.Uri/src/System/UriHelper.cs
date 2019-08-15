@@ -4,6 +4,7 @@
 
 using System.Text;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System
 {
@@ -12,6 +13,9 @@ namespace System
         internal static readonly char[] s_hexUpperChars = {
                                    '0', '1', '2', '3', '4', '5', '6', '7',
                                    '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+
+        internal static readonly Encoding s_noFallbackCharUTF8 = Encoding.GetEncoding(
+            Encoding.UTF8.CodePage, new EncoderReplacementFallback(""), new DecoderReplacementFallback(""));
 
         // http://host/Path/Path/File?Query is the base of
         //      - http://host/Path/Path/File/ ...    (those "File" words may be different in semantic but anyway)
@@ -125,7 +129,9 @@ namespace System
         private const short c_MaxUnicodeCharsReallocate = 40;
         private const short c_MaxUTF_8BytesPerUnicodeChar = 4;
         private const short c_EncodedCharsPerByte = 3;
-        internal static unsafe char[] EscapeString(string input, int start, int end, char[] dest, ref int destPos,
+
+        [return: NotNullIfNotNull("dest")]
+        internal static unsafe char[]? EscapeString(string input, int start, int end, char[]? dest, ref int destPos,
             bool isUriString, char force1, char force2, char rsvd)
         {
             if (end - start >= Uri.c_MaxUriBufferSize)
@@ -229,15 +235,15 @@ namespace System
         //
         // ensure destination array has enough space and contains all the needed input stuff
         //
-        private static unsafe char[] EnsureDestinationSize(char* pStr, char[] dest, int currentInputPos,
+        private static unsafe char[] EnsureDestinationSize(char* pStr, char[]? dest, int currentInputPos,
             short charsToAdd, short minReallocateChars, ref int destPos, int prevInputPos)
         {
-            if ((object)dest == null || dest.Length < destPos + (currentInputPos - prevInputPos) + charsToAdd)
+            if ((object?)dest == null || dest.Length < destPos + (currentInputPos - prevInputPos) + charsToAdd)
             {
                 // allocating or reallocating array by ensuring enough space based on maxCharsToAdd.
                 char[] newresult = new char[destPos + (currentInputPos - prevInputPos) + minReallocateChars];
 
-                if ((object)dest != null && destPos != 0)
+                if ((object?)dest != null && destPos != 0)
                     Buffer.BlockCopy(dest, 0, newresult, 0, destPos << 1);
                 dest = newresult;
             }
@@ -260,7 +266,7 @@ namespace System
         //   For this reason it returns a char[] that is usually the same ref as the input "dest" value.
         //
         internal static unsafe char[] UnescapeString(string input, int start, int end, char[] dest,
-            ref int destPosition, char rsvd1, char rsvd2, char rsvd3, UnescapeMode unescapeMode, UriParser syntax,
+            ref int destPosition, char rsvd1, char rsvd2, char rsvd3, UnescapeMode unescapeMode, UriParser? syntax,
             bool isQuery)
         {
             fixed (char* pStr = input)
@@ -270,14 +276,15 @@ namespace System
             }
         }
         internal static unsafe char[] UnescapeString(char* pStr, int start, int end, char[] dest, ref int destPosition,
-            char rsvd1, char rsvd2, char rsvd3, UnescapeMode unescapeMode, UriParser syntax, bool isQuery)
+            char rsvd1, char rsvd2, char rsvd3, UnescapeMode unescapeMode, UriParser? syntax, bool isQuery)
         {
-            byte[] bytes = null;
+            byte[]? bytes = null;
             byte escapedReallocations = 0;
             bool escapeReserved = false;
             int next = start;
             bool iriParsing = Uri.IriParsingStatic(syntax)
                                 && ((unescapeMode & UnescapeMode.EscapeUnescape) == UnescapeMode.EscapeUnescape);
+            char[]? unescapedChars = null;
 
             while (true)
             {
@@ -349,7 +356,7 @@ namespace System
                                     else if (iriParsing && ((ch <= '\x9F' && IsNotSafeForUnescape(ch)) ||
                                                             (ch > '\x9F' && !IriHelper.CheckIriUnicodeRange(ch, isQuery))))
                                     {
-                                        // check if unenscaping gives a char outside iri range 
+                                        // check if unenscaping gives a char outside iri range
                                         // if it does then keep it escaped
                                         next += 2;
                                         continue;
@@ -364,7 +371,7 @@ namespace System
                                         // Should be a rare case where the app tries to feed an invalid escaped sequence
                                         throw new UriFormatException(SR.net_uri_BadString);
                                     }
-                                    // keep a '%' as part of a bogus sequence 
+                                    // keep a '%' as part of a bogus sequence
                                     continue;
                                 }
                                 else
@@ -446,7 +453,7 @@ namespace System
 
                             int byteCount = 1;
                             // lazy initialization of max size, will reuse the array for next sequences
-                            if ((object)bytes == null)
+                            if ((object?)bytes == null)
                                 bytes = new byte[end - next];
 
                             bytes[0] = (byte)ch;
@@ -474,13 +481,12 @@ namespace System
                                 }
                             }
 
-                            Encoding noFallbackCharUTF8 = Encoding.GetEncoding(
-                                                                                Encoding.UTF8.CodePage,
-                                                                                new EncoderReplacementFallback(""),
-                                                                                new DecoderReplacementFallback(""));
+                            if (unescapedChars == null || unescapedChars.Length < bytes.Length)
+                            {
+                                unescapedChars = new char[bytes.Length];
+                            }
 
-                            char[] unescapedChars = new char[bytes.Length];
-                            int charCount = noFallbackCharUTF8.GetChars(bytes, 0, byteCount, unescapedChars, 0);
+                            int charCount = s_noFallbackCharUTF8.GetChars(bytes, 0, byteCount, unescapedChars, 0);
 
                             start = next;
 
@@ -488,7 +494,7 @@ namespace System
                             // Do not unescape chars not allowed by Iri
                             // need to check for invalid utf sequences that may not have given any chars
 
-                            MatchUTF8Sequence(pDest, dest, ref destPosition, unescapedChars, charCount, bytes,
+                            MatchUTF8Sequence(pDest, dest, ref destPosition, unescapedChars.AsSpan(0, charCount), charCount, bytes,
                                 byteCount, isQuery, iriParsing);
                         }
 
@@ -507,18 +513,20 @@ namespace System
         // We got the unescaped chars, we then re-encode them and match off the bytes
         // to get the invalid sequence bytes that we just copy off
         //
-        internal static unsafe void MatchUTF8Sequence(char* pDest, char[] dest, ref int destOffset, char[] unescapedChars,
+        internal static unsafe void MatchUTF8Sequence(char* pDest, char[] dest, ref int destOffset, Span<char> unescapedChars,
             int charCount, byte[] bytes, int byteCount, bool isQuery, bool iriParsing)
         {
+            Span<byte> maxUtf8EncodedSpan = stackalloc byte[4];
+
             int count = 0;
             fixed (char* unescapedCharsPtr = unescapedChars)
             {
                 for (int j = 0; j < charCount; ++j)
                 {
                     bool isHighSurr = char.IsHighSurrogate(unescapedCharsPtr[j]);
-
-                    byte[] encodedBytes = Encoding.UTF8.GetBytes(unescapedChars, j, isHighSurr ? 2 : 1);
-                    int encodedBytesLength = encodedBytes.Length;
+                    Span<byte> encodedBytes = maxUtf8EncodedSpan;
+                    int bytesWritten = Encoding.UTF8.GetBytes(unescapedChars.Slice(j, isHighSurr ? 2 : 1), encodedBytes);
+                    encodedBytes = encodedBytes.Slice(0, bytesWritten);
 
                     // we have to keep unicode chars outside Iri range escaped
                     bool inIriRange = false;
@@ -546,7 +554,7 @@ namespace System
                         // check if all bytes match
                         bool allBytesMatch = true;
                         int k = 0;
-                        for (; k < encodedBytesLength; ++k)
+                        for (; k < encodedBytes.Length; ++k)
                         {
                             if (bytes[count + k] != encodedBytes[k])
                             {
@@ -557,7 +565,7 @@ namespace System
 
                         if (allBytesMatch)
                         {
-                            count += encodedBytesLength;
+                            count += encodedBytes.Length;
                             if (iriParsing)
                             {
                                 if (!inIriRange)
@@ -660,7 +668,6 @@ namespace System
         internal const string RFC3986ReservedMarks = @";/?:@&=+$,#[]!'()*";
         private const string RFC2396ReservedMarks = @";/?:@&=+$,";
         private const string RFC3986UnreservedMarks = @"-_.~";
-        private const string RFC2396UnreservedMarks = @"-_.~*'()!";
         private const string AdditionalUnsafeToUnescape = @"%\#";// While not specified as reserved, these are still unsafe to unescape.
 
         // When unescaping in safe mode, do not unescape the RFC 3986 reserved set:
@@ -671,8 +678,8 @@ namespace System
         // In addition, do not unescape the following unsafe characters:
         // excluded    = "%" / "\"
         //
-        // This implementation used to use the following variant of the RFC 2396 reserved set. 
-        // That behavior is now disabled by default, and is controlled by a UriSyntax property. 
+        // This implementation used to use the following variant of the RFC 2396 reserved set.
+        // That behavior is now disabled by default, and is controlled by a UriSyntax property.
         // reserved    = ";" | "/" | "?" | "@" | "&" | "=" | "+" | "$" | ","
         // excluded    = control | "#" | "%" | "\"
         internal static bool IsNotSafeForUnescape(char ch)

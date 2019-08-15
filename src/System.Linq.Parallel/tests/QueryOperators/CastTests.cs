@@ -100,6 +100,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(Sources.Ranges), new[] { 0 }, MemberType = typeof(Sources))]
         public static void Cast_Empty(Labeled<ParallelQuery<int>> labeled, int count)
         {
+            _ = count;
             ParallelQuery<int> empty = labeled.Item;
 
             Assert.IsAssignableFrom<ParallelQuery<int>>(empty.Cast<string>().Cast<int>());
@@ -121,6 +122,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(Sources.Ranges), new[] { 1, 2, 16 }, MemberType = typeof(Sources))]
         public static void Cast_InvalidCastException(Labeled<ParallelQuery<int>> labeled, int count)
         {
+            _ = count;
             AssertThrows.Wrapped<InvalidCastException>(() => labeled.Item.Cast<double>().ForAll(x => {; }));
             AssertThrows.Wrapped<InvalidCastException>(() => labeled.Item.Cast<double>().ToList());
         }
@@ -139,12 +141,12 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(Sources.Ranges), new[] { 1, 2, 16 }, MemberType = typeof(Sources))]
         public static void Cast_Assignable_InvalidCastException(Labeled<ParallelQuery<int>> labeled, int count)
         {
+            _ = count;
             AssertThrows.Wrapped<InvalidCastException>(() => labeled.Item.Select(x => (Int32)x).Cast<Castable>().ForAll(x => {; }));
             AssertThrows.Wrapped<InvalidCastException>(() => labeled.Item.Select(x => (Int32)x).Cast<Castable>().ToList());
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Core bug fix https://github.com/dotnet/corefx/pull/1970 not available in desktop")]
         public static void Cast_ArgumentNullException()
         {
             AssertExtensions.Throws<ArgumentNullException>("source", () => ((ParallelQuery<object>)null).Cast<int>());
@@ -161,7 +163,7 @@ namespace System.Linq.Parallel.Tests
 
             public int Value { get { return _value; } }
 
-            public static explicit operator Castable(Int32 value)
+            public static explicit operator Castable(int value)
             {
                 return new Castable(value);
             }

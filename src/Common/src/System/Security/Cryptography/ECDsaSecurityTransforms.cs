@@ -49,11 +49,11 @@ namespace System.Security.Cryptography
         {
             public sealed partial class ECDsaSecurityTransforms : ECDsa
             {
-                private readonly EccSecurityTransforms _ecc = new EccSecurityTransforms();
+                private readonly EccSecurityTransforms _ecc = new EccSecurityTransforms(nameof(ECDsa));
 
                 public ECDsaSecurityTransforms()
                 {
-                    KeySize = 521;
+                    base.KeySize = 521;
                 }
 
                 internal ECDsaSecurityTransforms(SafeSecKeyRefHandle publicKey)
@@ -91,7 +91,7 @@ namespace System.Security.Cryptography
 
                         // Set the KeySize before freeing the key so that an invalid value doesn't throw away the key
                         base.KeySize = value;
-                        _ecc.Dispose();
+                        _ecc.DisposeKey();
                     }
                 }
 
@@ -155,11 +155,25 @@ namespace System.Security.Cryptography
                     return VerifyHash((ReadOnlySpan<byte>)hash, (ReadOnlySpan<byte>)signature);
                 }
 
-                public override bool VerifyHash(ReadOnlySpan<byte> hash, ReadOnlySpan<byte> signature) =>
-                    Interop.AppleCrypto.VerifySignature(
+                public override bool VerifyHash(ReadOnlySpan<byte> hash, ReadOnlySpan<byte> signature)
+                {
+                    ThrowIfDisposed();
+
+                    // The signature format for .NET is r.Concat(s). Each of r and s are of length BitsToBytes(KeySize), even
+                    // when they would have leading zeroes.  If it's the correct size, then we need to encode it from
+                    // r.Concat(s) to SEQUENCE(INTEGER(r), INTEGER(s)), because that's the format that OpenSSL expects.
+                    int expectedBytes = 2 * AsymmetricAlgorithmHelpers.BitsToBytes(KeySize);
+                    if (signature.Length != expectedBytes)
+                    {
+                        // The input isn't of the right length, so we can't sensibly re-encode it.
+                        return false;
+                    }
+
+                    return Interop.AppleCrypto.VerifySignature(
                         GetKeys().PublicKey,
                         hash,
                         AsymmetricAlgorithmHelpers.ConvertIeee1363ToDer(signature));
+                }
 
                 protected override byte[] HashData(byte[] data, int offset, int count, HashAlgorithmName hashAlgorithm) =>
                     AsymmetricAlgorithmHelpers.HashData(data, offset, count, hashAlgorithm);
@@ -169,6 +183,11 @@ namespace System.Security.Cryptography
 
                 protected override bool TryHashData(ReadOnlySpan<byte> source, Span<byte> destination, HashAlgorithmName hashAlgorithm, out int bytesWritten) =>
                     AsymmetricAlgorithmHelpers.TryHashData(source, destination, hashAlgorithm, out bytesWritten);
+
+                private void ThrowIfDisposed()
+                {
+                    _ecc.ThrowIfDisposed();
+                }
 
                 protected override void Dispose(bool disposing)
                 {
@@ -193,6 +212,24 @@ namespace System.Security.Cryptography
                 public override void ImportParameters(ECParameters parameters)
                 {
                     KeySizeValue = _ecc.ImportParameters(parameters);
+                }
+
+                public override void ImportEncryptedPkcs8PrivateKey(
+                    ReadOnlySpan<byte> passwordBytes,
+                    ReadOnlySpan<byte> source,
+                    out int bytesRead)
+                {
+                    ThrowIfDisposed();
+                    base.ImportEncryptedPkcs8PrivateKey(passwordBytes, source, out bytesRead);
+                }
+
+                public override void ImportEncryptedPkcs8PrivateKey(
+                    ReadOnlySpan<char> password,
+                    ReadOnlySpan<byte> source,
+                    out int bytesRead)
+                {
+                    ThrowIfDisposed();
+                    base.ImportEncryptedPkcs8PrivateKey(password, source, out bytesRead);
                 }
 
                 public override void GenerateKey(ECCurve curve)

@@ -23,15 +23,25 @@ namespace System.Configuration
             out string locationConfigPath, IInternalConfigRoot configRoot, params object[] hostInitConfigurationParams)
         {
             // Stash the filemap so we can see if the machine config was explicitly specified
-            _fileMap = (ConfigurationFileMap)hostInitConfigurationParams[0];
+            GetFileMap(hostInitConfigurationParams);
             base.InitForConfiguration(ref locationSubPath, out configPath, out locationConfigPath, configRoot, hostInitConfigurationParams);
         }
 
         public override void Init(IInternalConfigRoot configRoot, params object[] hostInitParams)
         {
             // Stash the filemap so we can see if the machine config was explicitly specified
-            _fileMap = (ConfigurationFileMap)hostInitParams[0];
+            GetFileMap(hostInitParams);
             base.Init(configRoot, hostInitParams);
+        }
+
+        private void GetFileMap(object[] parameters)
+        {
+            foreach (object parameter in parameters)
+            {
+                _fileMap = parameter as ConfigurationFileMap;
+                if (_fileMap != null)
+                    return;
+            }
         }
 
         public override string GetStreamName(string configPath)
@@ -56,13 +66,13 @@ namespace System.Configuration
             if (stream == null && streamName == _machineStreamName)
             {
                 // We only want to inject if we aren't able to load
-                stream = new MemoryStream(Encoding.UTF8.GetBytes(s_implicitMachineConfig));
+                stream = new MemoryStream(Encoding.UTF8.GetBytes(ImplicitMachineConfig));
             }
 
             return stream;
         }
 
-        private static string s_implicitMachineConfig =
+        private const string ImplicitMachineConfig =
 @"<configuration>
     <configSections>
         <section name='appSettings' type='System.Configuration.AppSettingsSection, System.Configuration.ConfigurationManager' restartOnExternalChanges='false' requirePermission='false' />

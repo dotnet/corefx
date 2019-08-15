@@ -38,7 +38,7 @@ namespace System.Runtime.InteropServices.Tests
             GCHandle handle = GCHandle.Alloc(value);
             ValidateGCHandle(handle, GCHandleType.Normal, value);
         }
-        
+
         public static IEnumerable<object[]> Alloc_Type_TestData()
         {
             foreach (object[] data in Alloc_TestData())
@@ -75,7 +75,7 @@ namespace System.Runtime.InteropServices.Tests
         [MemberData(nameof(InvalidPinnedObject_TestData))]
         public void Alloc_InvalidPinnedObject_ThrowsArgumentException(object value)
         {
-            AssertExtensions.Throws<ArgumentException>(null, () => GCHandle.Alloc(value, GCHandleType.Pinned));
+            Assert.Throws<ArgumentException>(() => GCHandle.Alloc(value, GCHandleType.Pinned));
         }
 
         [Theory]

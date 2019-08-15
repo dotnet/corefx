@@ -2,7 +2,7 @@
 // See the LICENSE file in the project root for more information.
 
 // Copyright (c) 2004 Mainsoft Co.
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
 // "Software"), to deal in the Software without restriction, including
@@ -10,10 +10,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -97,14 +97,14 @@ namespace System.Data.Tests
         {
             var ds = new DataSet();
             ds.Tables.Add();
-            Assert.Equal(true, ds.Tables.CanRemove(ds.Tables[0]));
+            Assert.True(ds.Tables.CanRemove(ds.Tables[0]));
         }
 
         [Fact]
         public void CanRemove_NullValue()
         {
             var ds = new DataSet();
-            Assert.Equal(false, ds.Tables.CanRemove(null));
+            Assert.False(ds.Tables.CanRemove(null));
         }
 
         [Fact]
@@ -113,7 +113,7 @@ namespace System.Data.Tests
             var ds = new DataSet();
             DataSet ds1 = new DataSet();
             ds1.Tables.Add();
-            Assert.Equal(false, ds.Tables.CanRemove(ds1.Tables[0]));
+            Assert.False(ds.Tables.CanRemove(ds1.Tables[0]));
         }
 
         [Fact]
@@ -125,15 +125,15 @@ namespace System.Data.Tests
 
             ds.Relations.Add("rel", ds.Tables[0].Columns["ParentId"], ds.Tables[1].Columns["ParentId"], false);
 
-            Assert.Equal(false, ds.Tables.CanRemove(ds.Tables[0]));
-            Assert.Equal(false, ds.Tables.CanRemove(ds.Tables[1]));
+            Assert.False(ds.Tables.CanRemove(ds.Tables[0]));
+            Assert.False(ds.Tables.CanRemove(ds.Tables[1]));
         }
         [Fact]
         public void CanRemove_PartOfConstraint()
         {
-            DataSet ds = DataProvider.CreateForigenConstraint();
-            Assert.Equal(false, ds.Tables.CanRemove(ds.Tables[0]));
-            Assert.Equal(false, ds.Tables.CanRemove(ds.Tables[1]));
+            DataSet ds = DataProvider.CreateForeignConstraint();
+            Assert.False(ds.Tables.CanRemove(ds.Tables[0]));
+            Assert.False(ds.Tables.CanRemove(ds.Tables[1]));
         }
 
         [Fact]
@@ -183,13 +183,13 @@ namespace System.Data.Tests
             ds.Tables.Add("NewTable1");
             ds.Tables.Add("NewTable2");
 
-            Assert.Equal(true, ds.Tables.Contains("NewTable1"));
-            Assert.Equal(true, ds.Tables.Contains("NewTable2"));
-            Assert.Equal(false, ds.Tables.Contains("NewTable3"));
+            Assert.True(ds.Tables.Contains("NewTable1"));
+            Assert.True(ds.Tables.Contains("NewTable2"));
+            Assert.False(ds.Tables.Contains("NewTable3"));
 
             ds.Tables["NewTable1"].TableName = "Tbl1";
-            Assert.Equal(false, ds.Tables.Contains("NewTable1"));
-            Assert.Equal(true, ds.Tables.Contains("Tbl1"));
+            Assert.False(ds.Tables.Contains("NewTable1"));
+            Assert.True(ds.Tables.Contains("Tbl1"));
         }
 
         [Fact]
@@ -240,6 +240,8 @@ namespace System.Data.Tests
             }
             Assert.Equal(2, count);
         }
+
+        [Fact]
         public void IndexOf_ByDataTable()
         {
             var ds = new DataSet();
@@ -257,6 +259,7 @@ namespace System.Data.Tests
             Assert.Equal(-1, ds.Tables.IndexOf(dt2));
         }
 
+        [Fact]
         public void IndexOf_ByName()
         {
             var ds = new DataSet();
@@ -453,7 +456,7 @@ namespace System.Data.Tests
         [Fact]
         public void DataTableCollection_RemoveAt_I3()
         {
-            DataSet ds = DataProvider.CreateForigenConstraint();
+            DataSet ds = DataProvider.CreateForeignConstraint();
 
             AssertExtensions.Throws<ArgumentException>(null, () => ds.Tables.RemoveAt(0)); //Parent table
         }

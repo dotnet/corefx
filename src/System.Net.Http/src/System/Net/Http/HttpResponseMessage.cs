@@ -13,6 +13,7 @@ namespace System.Net.Http
 
         private HttpStatusCode _statusCode;
         private HttpResponseHeaders _headers;
+        private HttpResponseHeaders _trailingHeaders;
         private string _reasonPhrase;
         private HttpRequestMessage _requestMessage;
         private Version _version;
@@ -115,6 +116,19 @@ namespace System.Net.Http
             }
         }
 
+        public HttpResponseHeaders TrailingHeaders
+        {
+            get
+            {
+                if (_trailingHeaders == null)
+                {
+                    _trailingHeaders = new HttpResponseHeaders();
+                }
+
+                return _trailingHeaders;
+            }
+        }
+
         public HttpRequestMessage RequestMessage
         {
             get { return _requestMessage; }
@@ -155,18 +169,13 @@ namespace System.Net.Http
         {
             if (!IsSuccessStatusCode)
             {
-                // Disposing the content should help users: If users call EnsureSuccessStatusCode(), an exception is
-                // thrown if the response status code is != 2xx. I.e. the behavior is similar to a failed request (e.g.
-                // connection failure). Users don't expect to dispose the content in this case: If an exception is 
-                // thrown, the object is responsible fore cleaning up its state.
-                if (_content != null)
-                {
-                    _content.Dispose();
-                }
-
-                throw new HttpRequestException(string.Format(System.Globalization.CultureInfo.InvariantCulture, SR.net_http_message_not_success_statuscode, (int)_statusCode,
+                throw new HttpRequestException(SR.Format(
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    SR.net_http_message_not_success_statuscode,
+                    (int)_statusCode,
                     ReasonPhrase));
             }
+
             return this;
         }
 
@@ -187,7 +196,13 @@ namespace System.Net.Http
             sb.Append(_content == null ? "<null>" : _content.GetType().ToString());
 
             sb.Append(", Headers:\r\n");
-            sb.Append(HeaderUtilities.DumpHeaders(_headers, _content == null ? null : _content.Headers));
+            HeaderUtilities.DumpHeaders(sb, _headers, _content?.Headers);
+
+            if (_trailingHeaders != null)
+            {
+                sb.Append(", Trailing Headers:\r\n");
+                HeaderUtilities.DumpHeaders(sb, _trailingHeaders);
+            }
 
             return sb.ToString();
         }
@@ -209,7 +224,7 @@ namespace System.Net.Http
         protected virtual void Dispose(bool disposing)
         {
             // The reason for this type to implement IDisposable is that it contains instances of types that implement
-            // IDisposable (content). 
+            // IDisposable (content).
             if (disposing && !_disposed)
             {
                 _disposed = true;

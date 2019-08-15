@@ -20,7 +20,8 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ActiveIssue(39232)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Dispose_NoSuchEntryPoint_SilentyCatchesException()
         {
             var brush = new SubBrush();

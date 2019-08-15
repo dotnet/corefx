@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -47,7 +47,7 @@ namespace System.Xml.Tests
             val.ValidateEndElement(null);
             val.ValidateEndElement(info);
 
-            Assert.Equal(info.ContentType, XmlSchemaContentType.ElementOnly);
+            Assert.Equal(XmlSchemaContentType.ElementOnly, info.ContentType);
             Assert.True(info.SchemaType != null);
 
             return;
@@ -205,7 +205,7 @@ namespace System.Xml.Tests
         [Theory]
         [InlineData("default")]
         [InlineData("custom")]
-        public void Default_Custom_ValueForLineInfoProvider(String param)
+        public void Default_Custom_ValueForLineInfoProvider(string param)
         {
             string xmlSrc = "<root><foo>FooText</foo><bar>BarText</bar></root>";
             XmlSchemaInfo info = new XmlSchemaInfo();
@@ -325,8 +325,8 @@ namespace System.Xml.Tests
             }
             catch (XmlSchemaValidationException e)
             {
-                Assert.Equal(e.LineNumber, 2);
-                Assert.Equal(e.LinePosition, 8);
+                Assert.Equal(2, e.LineNumber);
+                Assert.Equal(8, e.LinePosition);
             }
 
             return;
@@ -350,7 +350,7 @@ namespace System.Xml.Tests
         [InlineData("\\\\wddata\\some\\path")]
         [InlineData("http://tempuri.com/schemas")]
         [InlineData("file://tempuri.com/schemas")]
-        public void Default_Empty_RelativeUri_NetworkFolder_HTTP_FILE_ForSourceURI(String sourceUri)
+        public void Default_Empty_RelativeUri_NetworkFolder_HTTP_FILE_ForSourceURI(string sourceUri)
         {
             string xmlSrc = "<root>foo</root>";
             Uri tempUri;
@@ -358,7 +358,7 @@ namespace System.Xml.Tests
 
             XmlSchemaValidator val = CreateValidator(CreateSchemaSetFromXml(xmlSrc));
 
-            if (sourceUri != "default" && sourceUri != String.Empty && sourceUri != null)
+            if (sourceUri != "default" && sourceUri != string.Empty && sourceUri != null)
             {
                 tempUri = new Uri(sourceUri);
                 val.SourceUri = tempUri;
@@ -436,7 +436,7 @@ namespace System.Xml.Tests
         [InlineData("reader")]
         [InlineData("document")]
         [InlineData("navigator")]
-        public void Default_Null_ArbitraryObject_XmlReader_XmlDocument_XPathNavigator_ProvidedAsValidationEventSender(String param)
+        public void Default_Null_ArbitraryObject_XmlReader_XmlDocument_XPathNavigator_ProvidedAsValidationEventSender(string param)
         {
             XmlSchemaInfo info = new XmlSchemaInfo();
             XmlSchemaValidator val = CreateValidator(CreateSchemaSetFromXml("<root>foo</root>"));
@@ -562,7 +562,7 @@ namespace System.Xml.Tests
             val.Initialize();
             val.ValidateElement("bar", "", info);
 
-            Assert.Equal(holder.NestingDepth, 3);
+            Assert.Equal(3, holder.NestingDepth);
 
             return;
         }

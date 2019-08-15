@@ -16,17 +16,38 @@ namespace System.Net.Http
             {
             }
 
-            public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken)
+            public override int Read(Span<byte> buffer)
             {
-                CancellationHelper.ThrowIfCancellationRequested(cancellationToken);
-
-                if (_connection == null || buffer.Length == 0)
+                HttpConnection connection = _connection;
+                if (connection == null || buffer.Length == 0)
                 {
                     // Response body fully consumed or the caller didn't ask for any data
                     return 0;
                 }
 
-                ValueTask<int> readTask = _connection.ReadAsync(buffer);
+                int bytesRead = connection.Read(buffer);
+                if (bytesRead == 0)
+                {
+                    // We cannot reuse this connection, so close it.
+                    _connection = null;
+                    connection.Dispose();
+                }
+
+                return bytesRead;
+            }
+
+            public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken)
+            {
+                CancellationHelper.ThrowIfCancellationRequested(cancellationToken);
+
+                HttpConnection connection = _connection;
+                if (connection == null || buffer.Length == 0)
+                {
+                    // Response body fully consumed or the caller didn't ask for any data
+                    return 0;
+                }
+
+                ValueTask<int> readTask = connection.ReadAsync(buffer);
                 int bytesRead;
                 if (readTask.IsCompletedSuccessfully)
                 {
@@ -34,7 +55,7 @@ namespace System.Net.Http
                 }
                 else
                 {
-                    CancellationTokenRegistration ctr = _connection.RegisterCancellation(cancellationToken);
+                    CancellationTokenRegistration ctr = connection.RegisterCancellation(cancellationToken);
                     try
                     {
                         bytesRead = await readTask.ConfigureAwait(false);
@@ -60,9 +81,8 @@ namespace System.Net.Http
                     CancellationHelper.ThrowIfCancellationRequested(cancellationToken);
 
                     // We cannot reuse this connection, so close it.
-                    _connection.Dispose();
                     _connection = null;
-                    return 0;
+                    connection.Dispose();
                 }
 
                 return bytesRead;
@@ -77,25 +97,26 @@ namespace System.Net.Http
                     return Task.FromCanceled(cancellationToken);
                 }
 
-                if (_connection == null)
+                HttpConnection connection = _connection;
+                if (connection == null)
                 {
                     // null if response body fully consumed
                     return Task.CompletedTask;
                 }
 
-                Task copyTask = _connection.CopyToUntilEofAsync(destination, bufferSize, cancellationToken);
+                Task copyTask = connection.CopyToUntilEofAsync(destination, bufferSize, cancellationToken);
                 if (copyTask.IsCompletedSuccessfully)
                 {
-                    Finish();
+                    Finish(connection);
                     return Task.CompletedTask;
                 }
 
-                return CompleteCopyToAsync(copyTask, cancellationToken);
+                return CompleteCopyToAsync(copyTask, connection, cancellationToken);
             }
 
-            private async Task CompleteCopyToAsync(Task copyTask, CancellationToken cancellationToken)
+            private async Task CompleteCopyToAsync(Task copyTask, HttpConnection connection, CancellationToken cancellationToken)
             {
-                CancellationTokenRegistration ctr = _connection.RegisterCancellation(cancellationToken);
+                CancellationTokenRegistration ctr = connection.RegisterCancellation(cancellationToken);
                 try
                 {
                     await copyTask.ConfigureAwait(false);
@@ -115,14 +136,14 @@ namespace System.Net.Http
                 // been requested, we assume the copy completed due to cancellation and throw.
                 CancellationHelper.ThrowIfCancellationRequested(cancellationToken);
 
-                Finish();
+                Finish(connection);
             }
 
-            private void Finish()
+            private void Finish(HttpConnection connection)
             {
                 // We cannot reuse this connection, so close it.
-                _connection.Dispose();
                 _connection = null;
+                connection.Dispose();
             }
         }
     }

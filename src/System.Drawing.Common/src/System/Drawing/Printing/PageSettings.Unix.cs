@@ -21,10 +21,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -49,12 +49,12 @@ namespace System.Drawing.Printing
         internal PrinterResolution printerResolution;
 
         // create a new default Margins object (is 1 inch for all margins)
-        Margins margins = new Margins();
+        private Margins margins = new Margins();
 #pragma warning disable 649
-        float hardMarginX;
-        float hardMarginY;
-        RectangleF printableArea;
-        PrinterSettings printerSettings;
+        private float hardMarginX;
+        private float hardMarginY;
+        private RectangleF printableArea;
+        private PrinterSettings printerSettings;
 #pragma warning restore 649
 
         public PageSettings() : this(new PrinterSettings())
@@ -243,14 +243,12 @@ namespace System.Drawing.Printing
         }
 
 
-        [MonoTODO("PageSettings.CopyToHdevmode")]
         public void CopyToHdevmode(IntPtr hdevmode)
         {
             throw new NotImplementedException();
         }
 
 
-        [MonoTODO("PageSettings.SetHdevmode")]
         public void SetHdevmode(IntPtr hdevmode)
         {
             throw new NotImplementedException();
@@ -258,15 +256,7 @@ namespace System.Drawing.Printing
 
         public override string ToString()
         {
-            string ret = "[PageSettings: Color={0}";
-            ret += ", Landscape={1}";
-            ret += ", Margins={2}";
-            ret += ", PaperSize={3}";
-            ret += ", PaperSource={4}";
-            ret += ", PrinterResolution={5}";
-            ret += "]";
-
-            return String.Format(ret, this.color, this.landscape, this.margins, this.paperSize, this.paperSource, this.printerResolution);
+            return $"[{nameof(PageSettings)}: {nameof(Color)}={color}, {nameof(Landscape)}={landscape}, {nameof(Margins)}={margins}, {nameof(PaperSize)}={paperSize}, {nameof(PaperSource)}={paperSource}, {nameof(PrinterResolution)}={printerResolution}]";
         }
     }
 }

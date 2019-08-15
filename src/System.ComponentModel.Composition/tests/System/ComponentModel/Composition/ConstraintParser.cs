@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
+using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.Internal;
@@ -41,7 +42,7 @@ namespace System.ComponentModel.Composition
                     requiredMetadataList.Add(new KeyValuePair<string, Type>(requiredMetadataItemName, requiredMetadataItemType));
                 }
 
-                // Just skip the expressions we don't understand  
+                // Just skip the expressions we don't understand
             }
 
             // ContractName should have been set already, just need to set metadata
@@ -54,7 +55,7 @@ namespace System.ComponentModel.Composition
             Assert.NotNull(expression);
 
             // The expression we know about should be a set of nested AndAlso's, we
-            // need to flatten them into one list. we do this iteratively, as 
+            // need to flatten them into one list. we do this iteratively, as
             // recursion will create too much of a memory churn.
             Stack<Expression> expressions = new Stack<Expression>();
             expressions.Push(expression);
@@ -136,7 +137,15 @@ namespace System.ComponentModel.Composition
 
         private static bool TryParseExpressionAsMetadataConstraintBody(Expression expression, Expression parameter, out string requiredMetadataKey, out Type requiredMetadataType)
         {
-            Assumes.NotNull(expression, parameter);
+            if (expression == null)
+            {
+                throw new ArgumentNullException(nameof(expression));
+            }
+
+            if (parameter == null)
+            {
+                throw new ArgumentNullException(nameof(parameter));
+            }
 
             requiredMetadataKey = null;
             requiredMetadataType = null;
@@ -153,7 +162,10 @@ namespace System.ComponentModel.Composition
             {
                 return false;
             }
-            Assumes.IsTrue(outerMethodCall.Arguments.Count == 1);
+            if (outerMethodCall.Arguments.Count != 1)
+            {
+                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
+            }
 
             // 'this' should be a constant expression pointing at a Type object
             ConstantExpression targetType = outerMethodCall.Object as ConstantExpression;
@@ -174,7 +186,7 @@ namespace System.ComponentModel.Composition
                 return false;
             }
 
-            // Make sure the method is being called on the right object            
+            // Make sure the method is being called on the right object
             MemberExpression targetMember = methodCall.Object as MemberExpression;
             if (targetMember == null)
             {
@@ -186,10 +198,12 @@ namespace System.ComponentModel.Composition
                 return false;
             }
 
-            // There should only ever be one argument; otherwise, 
+            // There should only ever be one argument; otherwise,
             // we've got the wrong IDictionary.get_Item method.
-            Assumes.IsTrue(methodCall.Arguments.Count == 1);
-
+            if (methodCall.Arguments.Count != 1)
+            {
+                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
+            }
             // Argument should a constant expression containing the metadata key
             ConstantExpression requiredMetadataKeyConstant = methodCall.Arguments[0] as ConstantExpression;
             if (requiredMetadataKeyConstant == null)
@@ -208,7 +222,10 @@ namespace System.ComponentModel.Composition
         private static bool TryParseConstant<T>(ConstantExpression constant, out T result)
             where T : class
         {
-            Assumes.NotNull(constant);
+            if (constant == null)
+            {
+                throw new ArgumentNullException(nameof(constant));
+            }
 
             if (constant.Type == typeof(T) && constant.Value != null)
             {

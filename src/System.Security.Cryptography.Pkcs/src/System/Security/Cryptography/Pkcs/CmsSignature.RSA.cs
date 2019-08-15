@@ -15,19 +15,32 @@ namespace System.Security.Cryptography.Pkcs
     {
         static partial void PrepareRegistrationRsa(Dictionary<string, CmsSignature> lookup)
         {
-            lookup.Add(Oids.Rsa, new RSAPkcs1CmsSignature());
+            lookup.Add(Oids.Rsa, new RSAPkcs1CmsSignature(null, null));
+            lookup.Add(Oids.RsaPkcs1Sha1, new RSAPkcs1CmsSignature(Oids.RsaPkcs1Sha1, HashAlgorithmName.SHA1));
+            lookup.Add(Oids.RsaPkcs1Sha256, new RSAPkcs1CmsSignature(Oids.RsaPkcs1Sha256, HashAlgorithmName.SHA256));
+            lookup.Add(Oids.RsaPkcs1Sha384, new RSAPkcs1CmsSignature(Oids.RsaPkcs1Sha384, HashAlgorithmName.SHA384));
+            lookup.Add(Oids.RsaPkcs1Sha512, new RSAPkcs1CmsSignature(Oids.RsaPkcs1Sha512, HashAlgorithmName.SHA512));
             lookup.Add(Oids.RsaPss, new RSAPssCmsSignature());
         }
 
         private abstract class RSACmsSignature : CmsSignature
         {
+            private readonly string _signatureAlgorithm;
+            private readonly HashAlgorithmName? _expectedDigest;
+
+            protected RSACmsSignature(string signatureAlgorithm, HashAlgorithmName? expectedDigest)
+            {
+                _signatureAlgorithm = signatureAlgorithm;
+                _expectedDigest = expectedDigest;
+            }
+
             protected override bool VerifyKeyType(AsymmetricAlgorithm key)
             {
                 return (key as RSA) != null;
             }
 
             internal override bool VerifySignature(
-#if netcoreapp
+#if netcoreapp || netstandard21
                 ReadOnlySpan<byte> valueHash,
                 ReadOnlyMemory<byte> signature,
 #else
@@ -39,6 +52,15 @@ namespace System.Security.Cryptography.Pkcs
                 ReadOnlyMemory<byte>? signatureParameters,
                 X509Certificate2 certificate)
             {
+                if (_expectedDigest.HasValue && _expectedDigest.Value != digestAlgorithmName)
+                {
+                    throw new CryptographicException(
+                        SR.Format(
+                            SR.Cryptography_Cms_InvalidSignerHashForSignatureAlg,
+                            digestAlgorithmOid,
+                            _signatureAlgorithm));
+                }
+
                 RSASignaturePadding padding = GetSignaturePadding(
                     signatureParameters,
                     digestAlgorithmOid,
@@ -54,7 +76,7 @@ namespace System.Security.Cryptography.Pkcs
 
                 return publicKey.VerifyHash(
                     valueHash,
-#if netcoreapp
+#if netcoreapp || netstandard21
                     signature.Span,
 #else
                     signature,
@@ -72,6 +94,11 @@ namespace System.Security.Cryptography.Pkcs
 
         private sealed class RSAPkcs1CmsSignature : RSACmsSignature
         {
+            public RSAPkcs1CmsSignature(string signatureAlgorithm, HashAlgorithmName? expectedDigest)
+                : base(signatureAlgorithm, expectedDigest)
+            {
+            }
+
             protected override RSASignaturePadding GetSignaturePadding(
                 ReadOnlyMemory<byte>? signatureParameters,
                 string digestAlgorithmOid,
@@ -96,7 +123,7 @@ namespace System.Security.Cryptography.Pkcs
             }
 
             protected override bool Sign(
-#if netcoreapp
+#if netcoreapp || netstandard21
                 ReadOnlySpan<byte> dataHash,
 #else
                 byte[] dataHash,
@@ -124,7 +151,7 @@ namespace System.Security.Cryptography.Pkcs
 
                 signatureAlgorithm = new Oid(Oids.Rsa, Oids.Rsa);
 
-#if netcoreapp
+#if netcoreapp || netstandard21
                 byte[] signature = new byte[privateKey.KeySize / 8];
 
                 bool signed = privateKey.TrySignHash(
@@ -149,7 +176,7 @@ namespace System.Security.Cryptography.Pkcs
                 }
 #endif
                 signatureValue = privateKey.SignHash(
-#if netcoreapp
+#if netcoreapp || netstandard21
                     dataHash.ToArray(),
 #else
                     dataHash,
@@ -170,6 +197,10 @@ namespace System.Security.Cryptography.Pkcs
 
         private class RSAPssCmsSignature : RSACmsSignature
         {
+            public RSAPssCmsSignature() : base(null, null)
+            {
+            }
+
             protected override RSASignaturePadding GetSignaturePadding(
                 ReadOnlyMemory<byte>? signatureParameters,
                 string digestAlgorithmOid,
@@ -181,8 +212,7 @@ namespace System.Security.Cryptography.Pkcs
                     throw new CryptographicException(SR.Cryptography_Pkcs_PssParametersMissing);
                 }
 
-                PssParamsAsn pssParams =
-                    AsnSerializer.Deserialize<PssParamsAsn>(signatureParameters.Value, AsnEncodingRules.DER);
+                PssParamsAsn pssParams = PssParamsAsn.Decode(signatureParameters.Value, AsnEncodingRules.DER);
 
                 if (pssParams.HashAlgorithm.Algorithm.Value != digestAlgorithmOid)
                 {
@@ -219,7 +249,7 @@ namespace System.Security.Cryptography.Pkcs
                     throw new CryptographicException(SR.Cryptography_Pkcs_InvalidSignatureParameters);
                 }
 
-                AlgorithmIdentifierAsn mgfParams = AsnSerializer.Deserialize<AlgorithmIdentifierAsn>(
+                AlgorithmIdentifierAsn mgfParams = AlgorithmIdentifierAsn.Decode(
                     pssParams.MaskGenAlgorithm.Parameters.Value,
                     AsnEncodingRules.DER);
 
@@ -237,7 +267,7 @@ namespace System.Security.Cryptography.Pkcs
             }
 
             protected override bool Sign(
-#if netcoreapp
+#if netcoreapp || netstandard21
                 ReadOnlySpan<byte> dataHash,
 #else
                 byte[] dataHash,

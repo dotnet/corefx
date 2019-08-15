@@ -23,6 +23,6 @@ namespace System.Runtime.Serialization
         double ToDouble(object value);
         decimal ToDecimal(object value);
         DateTime ToDateTime(object value);
-        string ToString(object value);
+        string? ToString(object value);
     }
 }

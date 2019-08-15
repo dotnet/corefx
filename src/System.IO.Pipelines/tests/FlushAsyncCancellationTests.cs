@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,7 +26,7 @@ namespace System.IO.Pipelines.Tests
             ValueTaskAwaiter<FlushResult> awaiter = buffer.FlushAsync(cts.Token).GetAwaiter();
             awaiter.OnCompleted(
                 () => {
-                    // We are on cancellation thread and need to wait untill another FlushAsync call
+                    // We are on cancellation thread and need to wait until another FlushAsync call
                     // takes pipe state lock
                     e.Wait();
 
@@ -36,7 +37,7 @@ namespace System.IO.Pipelines.Tests
                     buffer.FlushAsync();
                 });
 
-            // Start a thread that would run cancellation calbacks
+            // Start a thread that would run cancellation callbacks
             Task cancellationTask = Task.Run(() => cts.Cancel());
             // Start a thread that would call FlushAsync with different token
             // and block on _cancellationTokenRegistration.Dispose
@@ -46,8 +47,8 @@ namespace System.IO.Pipelines.Tests
                     buffer.FlushAsync(cts2.Token);
                 });
 
-            bool completed = Task.WhenAll(cancellationTask, blockingTask).Wait(TimeSpan.FromSeconds(10));
-            Assert.True(completed);
+            bool completed = Task.WhenAll(cancellationTask, blockingTask).Wait(TimeSpan.FromSeconds(30));
+            Assert.True(completed, $"Flush tasks are not completed. CancellationTask: {cancellationTask.Status} BlockingTask: {blockingTask.Status}");
         }
 
         [Fact]
@@ -324,6 +325,28 @@ namespace System.IO.Pipelines.Tests
 
             Assert.True(task.IsCompleted);
             Assert.True(task.Result.IsCompleted);
+        }
+
+        [Fact]
+        public async Task ReadAsyncReturnsDataAfterItWasWrittenDuringCancelledRead()
+        {
+            ValueTask<ReadResult> readTask = Pipe.Reader.ReadAsync();
+            ValueTaskAwaiter<ReadResult> awaiter = readTask.GetAwaiter();
+            ReadResult result = default;
+            awaiter.OnCompleted(
+                () =>
+                {
+                    Pipe.Writer.WriteAsync(new byte[] { 1 }).AsTask().Wait();
+                    result = awaiter.GetResult();
+                });
+
+            Pipe.Reader.CancelPendingRead();
+
+            Assert.True(result.IsCanceled);
+
+            result = await Pipe.Reader.ReadAsync();
+            Assert.False(result.IsCanceled);
+            Assert.Equal(new byte[] { 1 }, result.Buffer.ToArray());
         }
     }
 

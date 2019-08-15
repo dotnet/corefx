@@ -15,18 +15,18 @@ namespace System.IO
         {
         }
 
-        public InvalidDataException(string message)
+        public InvalidDataException(string? message)
             : base(message)
         {
         }
 
-        public InvalidDataException(string message, Exception innerException)
+        public InvalidDataException(string? message, Exception? innerException)
             : base(message, innerException)
         {
         }
 
         private InvalidDataException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {            
+        {
         }
     }
 }

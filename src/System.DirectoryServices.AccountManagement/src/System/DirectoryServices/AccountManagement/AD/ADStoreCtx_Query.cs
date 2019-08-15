@@ -88,7 +88,7 @@ namespace System.DirectoryServices.AccountManagement
                     }
                 }
 
-                // Reflect the properties off the extension class and add them to the list.                
+                // Reflect the properties off the extension class and add them to the list.
                 BuildExtensionPropertyList(propertyList, p);
 
                 foreach (string property in propertyList.Values)
@@ -96,7 +96,7 @@ namespace System.DirectoryServices.AccountManagement
                     propertySet.Add(property);
                 }
 
-                // Cache the list for this property type so we don't need to reflect again in the future.                                
+                // Cache the list for this property type so we don't need to reflect again in the future.
                 this.AddPropertySetToTypePropListMap(p, propertySet);
             }
         }
@@ -104,12 +104,12 @@ namespace System.DirectoryServices.AccountManagement
         // Pushes the query represented by the QBE filter into the PrincipalSearcher's underlying native
         // searcher object (creating a fresh native searcher and assigning it to the PrincipalSearcher if one
         // doesn't already exist) and returns the native searcher.
-        // If the PrincipalSearcher does not have a query filter set (PrincipalSearcher.QueryFilter == null), 
+        // If the PrincipalSearcher does not have a query filter set (PrincipalSearcher.QueryFilter == null),
         // produces a query that will match all principals in the store.
         //
         // For stores which don't have a native searcher (SAM), the StoreCtx
         // is free to create any type of object it chooses to use as its internal representation of the query.
-        // 
+        //
         // Also adds in any clauses to the searcher to ensure that only principals, not mere
         // contacts, are retrieved from the store.
         internal override object PushFilterToNativeSearcher(PrincipalSearcher ps)
@@ -161,8 +161,7 @@ namespace System.DirectoryServices.AccountManagement
                     {
                         // Must be a property we don't support
                         throw new InvalidOperationException(
-                                    String.Format(
-                                        CultureInfo.CurrentCulture,
+                                    SR.Format(
                                         SR.StoreCtxUnsupportedPropertyForQuery,
                                         PropertyNamesExternal.GetExternalForm(filter.PropertyName)));
                     }
@@ -187,7 +186,7 @@ namespace System.DirectoryServices.AccountManagement
             return ds;
         }
 
-        virtual protected string GetObjectClassPortion(Type principalType)
+        protected virtual string GetObjectClassPortion(Type principalType)
         {
             string ldapFilter;
 
@@ -206,9 +205,8 @@ namespace System.DirectoryServices.AccountManagement
                 string objClass = ExtensionHelper.ReadStructuralObjectClass(principalType);
                 if (null == objClass)
                 {
-                    Debug.Fail("ADStoreCtx.GetObjectClassPortion: fell off end looking for " + principalType.ToString());
-                    throw new InvalidOperationException(
-                                    String.Format(CultureInfo.CurrentCulture, SR.StoreCtxUnsupportedPrincipalTypeForQuery, principalType.ToString()));
+                    Debug.Fail($"ADStoreCtx.GetObjectClassPortion: fell off end looking for {principalType}");
+                    throw new InvalidOperationException(SR.Format(SR.StoreCtxUnsupportedPrincipalTypeForQuery, principalType));
                 }
                 StringBuilder SB = new StringBuilder();
                 SB.Append("(&(objectClass=");
@@ -221,10 +219,10 @@ namespace System.DirectoryServices.AccountManagement
         }
 
         // The core query operation.
-        // Given a PrincipalSearcher containg a query filter, transforms it into the store schema 
+        // Given a PrincipalSearcher containg a query filter, transforms it into the store schema
         // and performs the query to get a collection of matching native objects (up to a maximum of sizeLimit,
-        // or uses the sizelimit already set on the DirectorySearcher if sizeLimit == -1). 
-        // If the PrincipalSearcher does not have a query filter (PrincipalSearcher.QueryFilter == null), 
+        // or uses the sizelimit already set on the DirectorySearcher if sizeLimit == -1).
+        // If the PrincipalSearcher does not have a query filter (PrincipalSearcher.QueryFilter == null),
         // matches all principals in the store.
         //
         // The collection may not be complete, i.e., paging - the returned ResultSet will automatically
@@ -267,7 +265,7 @@ namespace System.DirectoryServices.AccountManagement
 
         // We only list properties we support filtering on in this table.  At run-time, if we detect they set a
         // property that's not listed here, we throw an exception.
-        private static object[,] s_filterPropertiesTableRaw =
+        private static readonly object[,] s_filterPropertiesTableRaw =
         {
             // QbeType                                          AD property             Converter
             {typeof(DescriptionFilter),                         "description",          new FilterConverterDelegate(StringConverter)},
@@ -373,7 +371,7 @@ namespace System.DirectoryServices.AccountManagement
             return sb.ToString();
         }
 
-        // Use this function when searching for an attribute where the absence of the attribute = a default setting. 
+        // Use this function when searching for an attribute where the absence of the attribute = a default setting.
         // i.e.  ms-DS-UserPasswordNotRequired in ADAM where non existence equals false.
         protected static string DefaultValueBoolConverter(FilterBase filter, string suggestedAdProperty)
         {
@@ -414,7 +412,7 @@ namespace System.DirectoryServices.AccountManagement
 
             return sb.ToString();
         }
-        /*** If standard bool conversion is needed uncomment this function        
+        /*** If standard bool conversion is needed uncomment this function
                 protected static string BoolConverter(FilterBase filter, string suggestedAdProperty)
                 {
                     StringBuilder sb = new StringBuilder();
@@ -424,14 +422,14 @@ namespace System.DirectoryServices.AccountManagement
                         sb.Append("(");
                         sb.Append(suggestedAdProperty);
                         sb.Append("=");
-                        sb.Append( (bool)filter.Value ? "TRUE" : "FALSE" );                
+                        sb.Append( (bool)filter.Value ? "TRUE" : "FALSE" );
                         sb.Append(")");
                     }
                     else
                     {
                         sb.Append("(!(");
                         sb.Append(suggestedAdProperty);
-                        sb.Append("=*))");                
+                        sb.Append("=*))");
                     }
 
                     return sb.ToString();
@@ -460,7 +458,7 @@ namespace System.DirectoryServices.AccountManagement
             return sb.ToString();
         }
 
-        protected static bool IdentityClaimToFilter(string identity, string identityFormat, ref String filter, bool throwOnFail)
+        protected static bool IdentityClaimToFilter(string identity, string identityFormat, ref string filter, bool throwOnFail)
         {
             if (identity == null)
                 identity = "";
@@ -489,7 +487,7 @@ namespace System.DirectoryServices.AccountManagement
                             return false;
                     }
 
-                    Byte[] gByte = g.ToByteArray();
+                    byte[] gByte = g.ToByteArray();
 
                     StringBuilder stringguid = new StringBuilder();
 
@@ -671,7 +669,7 @@ namespace System.DirectoryServices.AccountManagement
         }
         protected static string UserAccountControlConverter(FilterBase filter, string suggestedAdProperty)
         {
-            Debug.Assert(String.Compare(suggestedAdProperty, "userAccountControl", StringComparison.OrdinalIgnoreCase) == 0);
+            Debug.Assert(string.Equals(suggestedAdProperty, "userAccountControl", StringComparison.OrdinalIgnoreCase));
 
             StringBuilder sb = new StringBuilder();
 
@@ -684,7 +682,7 @@ namespace System.DirectoryServices.AccountManagement
                 case AuthPrincEnabledFilter.PropertyNameStatic:
                     // UF_ACCOUNTDISABLE
                     // Note that the logic is inverted on this one.  We expose "Enabled",
-                    // but AD stores it as "Disabled".                    
+                    // but AD stores it as "Disabled".
                     if (value)
                         sb.Append("(!(userAccountControl:1.2.840.113556.1.4.803:=2))");
                     else
@@ -734,8 +732,7 @@ namespace System.DirectoryServices.AccountManagement
                     // This bit doesn't work correctly in AD (AD models the "user can't change password"
                     // setting as special ACEs in the ntSecurityDescriptor).
                     throw new InvalidOperationException(
-                                            String.Format(
-                                                    CultureInfo.CurrentCulture,
+                                            SR.Format(
                                                     SR.StoreCtxUnsupportedPropertyForQuery,
                                                     PropertyNamesExternal.GetExternalForm(filter.PropertyName)));
 
@@ -781,7 +778,7 @@ namespace System.DirectoryServices.AccountManagement
 
         protected static string ExpirationDateConverter(FilterBase filter, string suggestedAdProperty)
         {
-            Debug.Assert(String.Compare(suggestedAdProperty, "accountExpires", StringComparison.OrdinalIgnoreCase) == 0);
+            Debug.Assert(string.Equals(suggestedAdProperty, "accountExpires", StringComparison.OrdinalIgnoreCase));
             Debug.Assert(filter is ExpirationDateFilter);
 
             Nullable<DateTime> date = (Nullable<DateTime>)filter.Value;
@@ -804,7 +801,7 @@ namespace System.DirectoryServices.AccountManagement
 
         protected static string GuidConverter(FilterBase filter, string suggestedAdProperty)
         {
-            Debug.Assert(String.Compare(suggestedAdProperty, "objectGuid", StringComparison.OrdinalIgnoreCase) == 0);
+            Debug.Assert(string.Equals(suggestedAdProperty, "objectGuid", StringComparison.OrdinalIgnoreCase));
             Debug.Assert(filter is GuidFilter);
 
             Nullable<Guid> guid = (Nullable<Guid>)filter.Value;
@@ -884,7 +881,7 @@ namespace System.DirectoryServices.AccountManagement
 
         protected static string GroupTypeConverter(FilterBase filter, string suggestedAdProperty)
         {
-            Debug.Assert(String.Compare(suggestedAdProperty, "groupType", StringComparison.OrdinalIgnoreCase) == 0);
+            Debug.Assert(string.Equals(suggestedAdProperty, "groupType", StringComparison.OrdinalIgnoreCase));
             Debug.Assert(filter is GroupIsSecurityGroupFilter || filter is GroupScopeFilter);
 
             // 1.2.840.113556.1.4.803 is like a bit-wise AND operator
@@ -1033,12 +1030,12 @@ namespace System.DirectoryServices.AccountManagement
             return (ldapFilter.ToString());
         }
 
-        public static string ExtensionTypeConverter(string attributeName, Type type, Object value, MatchType mt)
+        public static string ExtensionTypeConverter(string attributeName, Type type, object value, MatchType mt)
         {
             StringBuilder ldapFilter = new StringBuilder("(");
             string ldapValue;
 
-            if (typeof(Boolean) == type)
+            if (typeof(bool) == type)
             {
                 ldapValue = ((bool)value ? "TRUE" : "FALSE");
             }

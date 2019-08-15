@@ -67,14 +67,14 @@ namespace System.Data.Odbc
             {
                 driverName = stringValue;
             }
-            
+
             Stream XMLStream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("System.Data.Odbc.OdbcMetaData.xml");
             cacheMetaDataFactory = true;
-            
+
 
             Debug.Assert(XMLStream != null, "XMLstream may not be null.");
 
-            String versionString = odbcOuterConnection.GetInfoStringUnhandled(ODBC32.SQL_INFO.DBMS_VER);
+            string versionString = odbcOuterConnection.GetInfoStringUnhandled(ODBC32.SQL_INFO.DBMS_VER);
 
             return new OdbcMetaDataFactory(XMLStream,
                                             versionString,

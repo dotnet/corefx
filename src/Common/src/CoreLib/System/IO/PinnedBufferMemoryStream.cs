@@ -4,11 +4,11 @@
 
 /*============================================================
 **
-** 
-** 
 **
 **
-** Purpose: Pins a byte[], exposing it as an unmanaged memory 
+**
+**
+** Purpose: Pins a byte[], exposing it as an unmanaged memory
 **          stream.  Used in ResourceReader for corner cases.
 **
 **
@@ -22,7 +22,7 @@ namespace System.IO
 {
     internal sealed unsafe class PinnedBufferMemoryStream : UnmanagedMemoryStream
     {
-        private byte[] _array;
+        private readonly byte[] _array;
         private GCHandle _pinningHandle;
 
         internal PinnedBufferMemoryStream(byte[] array)
@@ -38,9 +38,11 @@ namespace System.IO
                 Initialize(ptr, len, len, FileAccess.Read);
         }
 
+#if !netstandard
         public override int Read(Span<byte> buffer) => ReadCore(buffer);
 
         public override void Write(ReadOnlySpan<byte> buffer) => WriteCore(buffer);
+#endif
 
         ~PinnedBufferMemoryStream()
         {

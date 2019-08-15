@@ -15,7 +15,7 @@ namespace System.Net.Http
         private const int MessageNotYetSent = 0;
         private const int MessageAlreadySent = 1;
 
-        // Track whether the message has been sent. 
+        // Track whether the message has been sent.
         // The message shouldn't be sent again if this field is equal to MessageAlreadySent.
         private int _sendStatus = MessageNotYetSent;
 
@@ -25,7 +25,7 @@ namespace System.Net.Http
         private Version _version;
         private HttpContent _content;
         private bool _disposed;
-        private IDictionary<String, Object> _properties;
+        private IDictionary<string, object> _properties;
 
         public Version Version
         {
@@ -112,13 +112,13 @@ namespace System.Net.Http
 
         internal bool HasHeaders => _headers != null;
 
-        public IDictionary<String, Object> Properties
+        public IDictionary<string, object> Properties
         {
             get
             {
                 if (_properties == null)
                 {
-                    _properties = new Dictionary<String, Object>();
+                    _properties = new Dictionary<string, object>();
                 }
                 return _properties;
             }
@@ -174,7 +174,7 @@ namespace System.Net.Http
             sb.Append(_content == null ? "<null>" : _content.GetType().ToString());
 
             sb.Append(", Headers:\r\n");
-            sb.Append(HeaderUtilities.DumpHeaders(_headers, _content == null ? null : _content.Headers));
+            HeaderUtilities.DumpHeaders(sb, _headers, _content?.Headers);
 
             return sb.ToString();
         }
@@ -205,7 +205,7 @@ namespace System.Net.Http
         protected virtual void Dispose(bool disposing)
         {
             // The reason for this type to implement IDisposable is that it contains instances of types that implement
-            // IDisposable (content). 
+            // IDisposable (content).
             if (disposing && !_disposed)
             {
                 _disposed = true;

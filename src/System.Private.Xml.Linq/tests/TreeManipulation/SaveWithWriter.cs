@@ -75,7 +75,7 @@ namespace XLinqTests
         public Encoding[] GetEncodings()
         {
             Encoding[] encodings = { Encoding.UTF8
-                //Encoding.Unicode, 
+                //Encoding.Unicode,
                 //Encoding.BigEndianUnicode,
             };
 
@@ -139,7 +139,7 @@ namespace XLinqTests
         public void writer_20()
         {
             var doc = new XDocument(new XElement("PurchaseOrder"));
-            //save with TextWriter              
+            //save with TextWriter
             try
             {
                 doc.Save((TextWriter)null);
@@ -188,7 +188,7 @@ namespace XLinqTests
                 {
                 }
             }
-            //save with XmlWriter             
+            //save with XmlWriter
             try
             {
                 doc.Save((XmlWriter)null);
@@ -211,7 +211,7 @@ namespace XLinqTests
         public void writer_21()
         {
             var doc = new XElement(new XElement("PurchaseOrder"));
-            //save with TextWriter              
+            //save with TextWriter
             try
             {
                 doc.Save((TextWriter)null);
@@ -238,7 +238,7 @@ namespace XLinqTests
             {
             }
 
-            //save with XmlWriter             
+            //save with XmlWriter
             try
             {
                 doc.Save((XmlWriter)null);
@@ -307,14 +307,14 @@ namespace XLinqTests
         #endregion
 
         //
-        // helpers 
-        //       
+        // helpers
+        //
 
         #region Methods
 
         private string GenerateTestFileName(int index)
         {
-            string filename = String.Format("{0}{1}.xml", TestSaveFileName, index);
+            string filename = string.Format("{0}{1}.xml", TestSaveFileName, index);
             try
             {
                 FilePathUtil.getStream(filename);
@@ -350,9 +350,9 @@ namespace XLinqTests
             ws.ConformanceLevel = conformanceLevel;
 
             TextWriter tw = new StreamWriter(FilePathUtil.getStream(GenerateTestFileName(count++)));
-            xmlWriters.Add(new CoreXml.Test.XLinq.CustomWriter(tw, ws)); // CustomWriter                  
-            xmlWriters.Add(XmlWriter.Create(FilePathUtil.getStream(GenerateTestFileName(count++)), s)); // Factory XmlWriter       
-            xmlWriters.Add(XmlWriter.Create(FilePathUtil.getStream(GenerateTestFileName(count++)), ws)); // Factory Writer   
+            xmlWriters.Add(new CoreXml.Test.XLinq.CustomWriter(tw, ws)); // CustomWriter
+            xmlWriters.Add(XmlWriter.Create(FilePathUtil.getStream(GenerateTestFileName(count++)), s)); // Factory XmlWriter
+            xmlWriters.Add(XmlWriter.Create(FilePathUtil.getStream(GenerateTestFileName(count++)), ws)); // Factory Writer
 
             return xmlWriters;
         }
@@ -366,7 +366,7 @@ namespace XLinqTests
             FilePathUtil.addStream(BaseSaveFileName, ms);
         }
 
-        private void SaveWithFile(Object doc)
+        private void SaveWithFile(object doc)
         {
             string file0 = GenerateTestFileName(0);
             string file1 = GenerateTestFileName(1);
@@ -396,7 +396,7 @@ namespace XLinqTests
             }
         }
 
-        private void SaveWithTextWriter(Object doc)
+        private void SaveWithTextWriter(object doc)
         {
             string file0 = GenerateTestFileName(0);
             string file1 = GenerateTestFileName(1);
@@ -436,7 +436,7 @@ namespace XLinqTests
             }
         }
 
-        private void SaveWithXmlWriter(Object doc)
+        private void SaveWithXmlWriter(object doc)
         {
             foreach (Encoding encoding in GetEncodings())
             {
@@ -485,10 +485,10 @@ namespace XLinqTests
             }
         }
 
-        private void TestToStringAndXml(Object doc, string expectedXml)
+        private void TestToStringAndXml(object doc, string expectedXml)
         {
             string toString = doc.ToString();
-            string xml = String.Empty;
+            string xml = string.Empty;
 
             if (doc is XDocument)
             {

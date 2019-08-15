@@ -32,13 +32,18 @@ namespace System.Net.Security
             get { return _context; }
         }
 
-        public SafeDeleteNegoContext(SafeFreeNegoCredentials credential, string targetName)
+        public SafeDeleteNegoContext(SafeFreeNegoCredentials credential)
             : base(credential)
         {
             Debug.Assert((null != credential), "Null credential in SafeDeleteNegoContext");
+        }
+
+        public SafeDeleteNegoContext(SafeFreeNegoCredentials credential, string targetName)
+            : this(credential)
+        {
             try
             {
-                _targetName = SafeGssNameHandle.CreatePrincipal(targetName);
+                _targetName = SafeGssNameHandle.CreateTarget(targetName);
             }
             catch
             {

@@ -96,9 +96,8 @@ namespace System.Diagnostics
                 throw new ArgumentNullException(nameof(value));
 
             if (!(value is CounterCreationData))
-                throw new ArgumentException(SR.Format(SR.MustAddCounterCreationData));
+                throw new ArgumentException(SR.MustAddCounterCreationData);
         }
 
     }
 }
-

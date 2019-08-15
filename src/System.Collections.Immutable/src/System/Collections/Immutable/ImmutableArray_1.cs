@@ -92,6 +92,11 @@ namespace System.Collections.Immutable
             }
         }
 
+#if !NETSTANDARD10
+        public ReadOnlySpan<T> AsSpan() => new ReadOnlySpan<T>(array);
+
+        public ReadOnlyMemory<T> AsMemory() => new ReadOnlyMemory<T>(array);
+#endif
         /// <summary>
         /// Searches the array for the specified item.
         /// </summary>
@@ -317,7 +322,7 @@ namespace System.Collections.Immutable
             {
                 Array.Copy(self.array, index, tmp, index + 1, self.Length - index);
             }
-            
+
             return new ImmutableArray<T>(tmp);
         }
 
@@ -347,7 +352,7 @@ namespace System.Collections.Immutable
             }
 
             T[] tmp = new T[self.Length + count];
-            
+
             if (index != 0)
             {
                 Array.Copy(self.array, 0, tmp, 0, index);
@@ -399,7 +404,7 @@ namespace System.Collections.Immutable
             }
 
             T[] tmp = new T[self.Length + items.Length];
-            
+
             if (index != 0)
             {
                 Array.Copy(self.array, 0, tmp, 0, index);
@@ -1141,10 +1146,10 @@ namespace System.Collections.Immutable
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="System.Object"/> at the specified index.
+        /// Gets or sets the <see cref="object"/> at the specified index.
         /// </summary>
         /// <value>
-        /// The <see cref="System.Object"/>.
+        /// The <see cref="object"/>.
         /// </value>
         /// <param name="index">The index.</param>
         /// <returns></returns>
@@ -1257,6 +1262,11 @@ namespace System.Collections.Immutable
             if (otherArray != null)
             {
                 IStructuralComparable ours = self.array;
+                if (ours == null)
+                {
+                    throw new ArgumentException(SR.ArrayInitializedStateNotEqual, nameof(other));
+                }
+
                 return ours.CompareTo(otherArray, comparer);
             }
 

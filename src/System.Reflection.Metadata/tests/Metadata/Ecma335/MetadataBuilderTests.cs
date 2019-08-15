@@ -128,7 +128,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             builder.AddManifestResource(default(ManifestResourceAttributes), default(StringHandle), MetadataTokens.AssemblyFileHandle(1), default(uint));
             Assert.Equal(1, builder.GetRowCount(TableIndex.ManifestResource));
 
-            builder.AddAssemblyFile(default(StringHandle), default(BlobHandle), default(Boolean));
+            builder.AddAssemblyFile(default(StringHandle), default(BlobHandle), default(bool));
             Assert.Equal(1, builder.GetRowCount(TableIndex.File));
 
             builder.AddExportedType(default(TypeAttributes), default(StringHandle), default(StringHandle), MetadataTokens.AssemblyFileHandle(1), default(int));
@@ -211,7 +211,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             var builder = new MetadataBuilder();
 
             var badHandleKind = CustomAttributeHandle.FromRowId(1);
-            
+
             Assert.Throws<ArgumentNullException>(() => builder.AddAssembly(default(StringHandle), null, default(StringHandle), default(BlobHandle), 0, 0));
             Assert.Throws<ArgumentNullException>(() => builder.AddAssemblyReference(default(StringHandle), null, default(StringHandle), default(BlobHandle), 0, default(BlobHandle)));
             AssertExtensions.Throws<ArgumentException>(null, () => builder.AddTypeDefinition(0, default(StringHandle), default(StringHandle), badHandleKind, default(FieldDefinitionHandle), default(MethodDefinitionHandle)));
@@ -355,17 +355,17 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             var heaps = new BlobBuilder();
             mdBuilder.WriteHeapsTo(heaps, serialized.StringHeap);
 
-            AssertEx.Equal(new byte[] 
+            AssertEx.Equal(new byte[]
             {
                 // #String
-                0x00, 
+                0x00,
                 0x66, 0x6F, 0x6F, 0x00,
                 0x00, 0x00, 0x00,
                 // #US
                 0x00,
                 0x01, 0x00,
                 0x07, 0x62, 0x00, 0x61, 0x00, 0x72, 0x00, 0x00,
-                0x00, 
+                0x00,
                 // #Guid
                 0x59, 0x35, 0x9F, 0xD3, 0x6A, 0x47, 0x1E, 0x4D, 0xB6, 0xD2, 0x88, 0xE6, 0x63, 0x95, 0x23, 0x0B,
                 // #Blob
@@ -399,7 +399,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 0x00, 0x00, 0x00, 0x00,
                 // #US
                 0x00, 0x00, 0x00, 0x00,
-                
+
                 0x00,              // 0x00
 
                 // ""
@@ -413,7 +413,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 0x05, (byte)'/', 0x00, 0x04, 0x06, 0x08,
 
                 // 0x10
-                0x02, (byte)'c', (byte)'c', 
+                0x02, (byte)'c', (byte)'c',
 
                 // @"\a\b\cc"
                 0x05, (byte)'\\', 0x00, 0x04, 0x06, 0x10,
@@ -432,7 +432,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
                 // @"/\a/\b\\//c"
                 0x06, (byte)'/', 0x00, 0x22, 0x25, 0x00, 0x08,
-                
+
                 // @"a/"
                 0x03, (byte)'/', 0x04, 0x00,
 
@@ -492,7 +492,16 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 Assert.Equal(@"a/", mdReader.GetString(MetadataTokens.DocumentNameBlobHandle(MetadataTokens.GetHeapOffset(n6))));
                 Assert.Equal(@"/", mdReader.GetString(MetadataTokens.DocumentNameBlobHandle(MetadataTokens.GetHeapOffset(n7))));
                 Assert.Equal(@"\\", mdReader.GetString(MetadataTokens.DocumentNameBlobHandle(MetadataTokens.GetHeapOffset(n8))));
-                Assert.Equal("\uFFFd\uFFFd", mdReader.GetString(MetadataTokens.DocumentNameBlobHandle(MetadataTokens.GetHeapOffset(n9))));
+                if (PlatformDetection.IsNetCore)
+                {
+                    Assert.Equal("\uFFFD\uFFFD\uFFFD", mdReader.GetString(MetadataTokens.DocumentNameBlobHandle(MetadataTokens.GetHeapOffset(n9))));
+                }
+                else
+                {
+                    // Versions of .NET prior to Core 3.0 didn't follow Unicode recommendations for U+FFFD substitution,
+                    // so they sometimes emitted too few replacement chars.
+                    Assert.Equal("\uFFFD\uFFFD", mdReader.GetString(MetadataTokens.DocumentNameBlobHandle(MetadataTokens.GetHeapOffset(n9))));
+                }
                 Assert.Equal("\0", mdReader.GetString(MetadataTokens.DocumentNameBlobHandle(MetadataTokens.GetHeapOffset(n10))));
             }
         }
@@ -502,7 +511,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
         {
             var mdBuilder = new MetadataBuilder(
                 userStringHeapStartOffset: 0x10,
-                stringHeapStartOffset: 0x20, 
+                stringHeapStartOffset: 0x20,
                 blobHeapStartOffset: 0x30,
                 guidHeapStartOffset: 0x40);
 
@@ -552,7 +561,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 0x00,
                 0x01, 0x00,
                 0x07, 0x62, 0x00, 0x61, 0x00, 0x72, 0x00, 0x00,
-                0x00, 
+                0x00,
                 // #Guid
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -587,9 +596,9 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 // #String
                 0x00, 0x00, 0x00, 0x00,
                 // #US
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 // #Guid
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 // #Blob
                 0x00, 0x00, 0x00, 0x00
             }, builder.ToArray());
@@ -635,8 +644,8 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
             var builder4 = new MetadataBuilder(userStringHeapStartOffset: 0x00fffff7);
             Assert.Equal(0x70fffff8, MetadataTokens.GetToken(builder4.GetOrAddUserString("1"))); // 4B
-            Assert.Equal(0x70fffffc, MetadataTokens.GetToken(builder4.GetOrAddUserString("2"))); // 4B 
-            Assert.Throws<ImageFormatLimitationException>(() => builder4.GetOrAddUserString("3")); // hits the limit exactly 
+            Assert.Equal(0x70fffffc, MetadataTokens.GetToken(builder4.GetOrAddUserString("2"))); // 4B
+            Assert.Throws<ImageFormatLimitationException>(() => builder4.GetOrAddUserString("3")); // hits the limit exactly
 
             var builder5 = new MetadataBuilder(userStringHeapStartOffset: 0x00fffff8);
             Assert.Equal(0x70fffff9, MetadataTokens.GetToken(builder5.GetOrAddUserString("1"))); // 4B

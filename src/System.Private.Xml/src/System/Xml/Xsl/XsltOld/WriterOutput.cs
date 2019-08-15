@@ -2,18 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+using System.Collections;
+
 namespace System.Xml.Xsl.XsltOld
 {
-    using System;
-    using System.Diagnostics;
-    using System.Xml;
-    using System.Xml.XPath;
-    using System.Collections;
-
-    internal class WriterOutput : RecordOutput
+    internal sealed class WriterOutput : IRecordOutput
     {
         private XmlWriter _writer;
-        private Processor _processor;
+        private readonly Processor _processor;
 
         internal WriterOutput(Processor processor, XmlWriter writer)
         {
@@ -50,7 +47,7 @@ namespace System.Xml.Xsl.XsltOld
                     _writer.WriteString(mainNode.Value);
                     break;
                 case XmlNodeType.CDATA:
-                    Debug.Assert(false, "XSLT never gives us CDATA");
+                    Debug.Fail("XSLT never gives us CDATA");
                     _writer.WriteCData(mainNode.Value);
                     break;
                 case XmlNodeType.EntityReference:
@@ -105,4 +102,3 @@ namespace System.Xml.Xsl.XsltOld
         }
     }
 }
-

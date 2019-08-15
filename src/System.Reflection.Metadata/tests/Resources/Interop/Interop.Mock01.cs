@@ -58,18 +58,18 @@ namespace MockInterop01
         [StructLayout(LayoutKind.Sequential)]
         public struct InnterStruct
         {
-            public Int16 x;
-            public Int64 y;
+            public short x;
+            public long y;
             public IntPtr z;
         }
         [DispId(1)]
         public Guid GuidField;
         [DispId(2)]
-        public Decimal DecimalField;
+        public decimal DecimalField;
         [DispId(3), ComConversionLoss, ComAliasName("MockInterop01.UnionStruct"), MarshalAs(UnmanagedType.Struct)]
         public UnionStruct UnionField;
     }
-     
+
     [ComImport /*, TypeIdentifier*/]
     [InterfaceTypeAttribute(ComInterfaceType.InterfaceIsIUnknown)]
     [Guid("5720C75D-2448-447A-B786-64682CBEF156")]

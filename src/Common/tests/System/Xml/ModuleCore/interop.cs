@@ -58,17 +58,17 @@ namespace OLEDB.Test.ModuleCore
     public interface IError
     {
         // These two methods get/set the ErrorLevel property. This property affects the
-        // behavior of the 'Validate' method. The enum values have the following 
+        // behavior of the 'Validate' method. The enum values have the following
         // effects on that method:
-        //	HR_STRICT:	The 'hrActual' parameter MUST match the 'hrExpected' parameter,
-        //				or else the error count in incremented.
-        //  HR_SUCCEED: The 'hrActual' MUST be a success code, or else the error count
-        //				is incremented.
-        //	HR_FAIL:	The 'hrActual' MUST be an error code, or else the error count
-        //				is incremented.
-        //	HR_OPTIONAL:The error count will not be incremented, regardless of the
-        //				parameters passed in to 'Validate.'
-        // 
+        //    HR_STRICT:  The 'hrActual' parameter MUST match the 'hrExpected' parameter,
+        //                or else the error count in incremented.
+        //  HR_SUCCEED:   The 'hrActual' MUST be a success code, or else the error count
+        //                is incremented.
+        //    HR_FAIL:    The 'hrActual' MUST be an error code, or else the error count
+        //                is incremented.
+        //    HR_OPTIONAL:The error count will not be incremented, regardless of the
+        //                parameters passed in to 'Validate.'
+        //
         tagERRORLEVEL GetErrorLevel();
         void SetErrorLevel(tagERRORLEVEL ErrorLevel);
 
@@ -104,8 +104,8 @@ namespace OLEDB.Test.ModuleCore
                              string bstrFileName,
                              int lLineNo);
 
-        // The 'ResetxxxxErrors' methods simply reset the internal error count of 
-        // a Module, Case, or Variation (respectively.) 
+        // The 'ResetxxxxErrors' methods simply reset the internal error count of
+        // a Module, Case, or Variation (respectively.)
         //
         void ResetModErrors();
         void ResetCaseErrors();
@@ -126,7 +126,7 @@ namespace OLEDB.Test.ModuleCore
         int GetCaseWarnings();
         int GetVarWarnings();
 
-        // 'Increment' will increment the error count of the currently running 
+        // 'Increment' will increment the error count of the currently running
         // Test Module, the currently running Test Case, as well as the currently
         // running Variation.
         //
@@ -175,19 +175,19 @@ namespace OLEDB.Test.ModuleCore
         // the provider they are running against (if any.)
         //
         // The properties are described as follows:
-        //	>Name:			The name the provider gives itself. For Kagera this is MSDASQL.
-        //	>FriendlyName:	A special name the user has given this provider configuration.
-        //	>InitString:	A string which contains initialization data. The interpretation
-        //					of this string is Test Module-specific -- so you simply must
-        //					make users of LTM aware of what your particular Test Module
-        //					wants to see in this string.
-        //	>MachineName:	If you will be testing a remote provider, the user will pass
-        //					the machine name the provider is located on to you through
-        //					this property.
-        //	>CLSID:			This is the CLSID of the provider you are to run against.
-        //	>CLSCTX:		This tells you whether the provider will be InProc, Local, or
-        //					Remote (values of this property are identical to the values
-        //					of the CLSCTX enumeration in wtypes.h)
+        //    >Name:          The name the provider gives itself. For Kagera this is MSDASQL.
+        //    >FriendlyName:  A special name the user has given this provider configuration.
+        //    >InitString:    A string which contains initialization data. The interpretation
+        //                    of this string is Test Module-specific -- so you simply must
+        //                    make users of LTM aware of what your particular Test Module
+        //                    wants to see in this string.
+        //    >MachineName:   If you will be testing a remote provider, the user will pass
+        //                    the machine name the provider is located on to you through
+        //                    this property.
+        //    >CLSID:         This is the CLSID of the provider you are to run against.
+        //    >CLSCTX:        This tells you whether the provider will be InProc, Local, or
+        //                    Remote (values of this property are identical to the values
+        //                    of the CLSCTX enumeration in wtypes.h)
         string GetName();
         void SetName(string bstrProviderName);
         string GetFriendlyName();
@@ -240,23 +240,23 @@ namespace OLEDB.Test.ModuleCore
         string GetDescription();
 
         // SyncProviderInterface() should cause this TestCase to release its current
-        // IProviderInterface (if any) and retrieve a new IProviderInterface 
+        // IProviderInterface (if any) and retrieve a new IProviderInterface
         // from its owning ITestModule (via the 'GetProviderInterface' call)
         //
-        // GetProviderInterface() returns the current IProviderInterface for 
+        // GetProviderInterface() returns the current IProviderInterface for
         // this test case.
         //
         void SyncProviderInterface();
         IProviderInfo GetProviderInterface();
 
-        // 'GetOwningITestModule' should retrieve the back-pointer 
+        // 'GetOwningITestModule' should retrieve the back-pointer
         // to this test case's owning ITestModule object.
         //
         ITestModule GetOwningITestModule();
 
         // LTM will call 'Init' before it runs any variations in this Test Case.
         // Any code that sets up objects for use by the Variations should go here.
-        // 
+        //
         int Init();
 
         // LTM will call 'Terminate' after it runs any variations on this
@@ -278,7 +278,7 @@ namespace OLEDB.Test.ModuleCore
         // Do not confuse 'index' with 'Variation ID'. The latter is a non-sequential
         // unique identifier for the variation, which can be any 32-bit number. This
         // exists so that even when variations are added or removed during test
-        // development, the ID is ALWAYS the same for the same variation (though 
+        // development, the ID is ALWAYS the same for the same variation (though
         // the Index will surely change.)
         //
         tagVARIATION_STATUS ExecuteVariation(int lIndex);
@@ -298,7 +298,7 @@ namespace OLEDB.Test.ModuleCore
         string GetCLSID();
         int GetVersion();
 
-        // LTM will call 'SetProviderInterface' after the ITestModule object is instantiated 
+        // LTM will call 'SetProviderInterface' after the ITestModule object is instantiated
         // (if appropriate).
         // 'GetProviderInterface' is added for the implementor's convenience, but is not
         // called by LTM.

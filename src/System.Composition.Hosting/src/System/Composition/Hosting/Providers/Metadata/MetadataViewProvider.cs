@@ -4,16 +4,16 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Microsoft.Internal;
 
 namespace System.Composition.Hosting.Providers.Metadata
 {
     internal static class MetadataViewProvider
     {
-        private static readonly MethodInfo s_getMetadataValueMethod = typeof(MetadataViewProvider).GetTypeInfo().GetDeclaredMethod("GetMetadataValue");
+        private static readonly MethodInfo s_getMetadataValueMethod = typeof(MetadataViewProvider).GetTypeInfo().GetDeclaredMethod(nameof(GetMetadataValue));
 
         // While not called through the composition pipeline, we use the dependency mechanism to surface errors
         // with appropriate context information.
@@ -85,7 +85,9 @@ namespace System.Composition.Hosting.Providers.Metadata
 
             // This could be significantly improved by describing the target metadata property.
             var message = SR.Format(SR.MetadataViewProvider_MissingMetadata, name);
-            throw ThrowHelper.CompositionException(message);
+            var ex = new CompositionFailedException(message);
+            Debug.WriteLine(SR.Diagnostic_ThrowingException, ex.ToString());
+            throw ex;
         }
     }
 }

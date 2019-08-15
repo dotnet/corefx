@@ -25,8 +25,8 @@ namespace System.Xml.Xsl.Xslt
     }
 
     // RootLevel is underdeveloped consept currently. I plane to move here more collections from Compiler.
-    // Compiler is like a stylesheet in some sense. it has a lot of properties of stylesheet. Instead of 
-    // inhereting from Styleseet (or StylesheetLevel) I desided to agregate special subclass of StylesheetLevel.
+    // Compiler is like a stylesheet in some sense. it has a lot of properties of stylesheet. Instead of
+    // inhereting from Styleseet (or StylesheetLevel) I desided to aggregate special subclass of StylesheetLevel.
     // One more reason to for this design is to normolize apply-templates and apply-imports to one concept:
     // apply-templates is apply-imports(compiler.Root).
     // For now I don't create new files for these new classes to simplify integrations WebData <-> WebData_xsl
@@ -64,7 +64,7 @@ namespace System.Xml.Xsl.Xslt
         public Dictionary<QilName, AttributeSet> AttributeSets = new Dictionary<QilName, AttributeSet>();
         public Dictionary<string, NsAlias> NsAliases = new Dictionary<string, NsAlias>();
 
-        private Dictionary<string, int> _moduleOrder = new Dictionary<string, int>();
+        private readonly Dictionary<string, int> _moduleOrder = new Dictionary<string, int>();
 
         public Compiler(XsltSettings settings, bool debug, string scriptAssemblyPath)
         {
@@ -365,7 +365,7 @@ namespace System.Xml.Xsl.Xslt
 
         private class CompilerErrorComparer : IComparer<CompilerError>
         {
-            private Dictionary<string, int> _moduleOrder;
+            private readonly Dictionary<string, int> _moduleOrder;
 
             public CompilerErrorComparer(Dictionary<string, int> moduleOrder)
             {

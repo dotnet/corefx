@@ -526,7 +526,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.generics.de
 
     public class Test
     {
-        
+
         public static void DynamicCSharpRunTest()
         {
             Assert.Equal(0, MainMethod());
@@ -783,7 +783,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.generics.de
 
     public class Program
     {
-        
+
         public static void DynamicCSharpRunTest()
         {
             Assert.Equal(0, MainMethod());
@@ -1825,7 +1825,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.generics.de
     // <Code>
 
     public delegate int Foo<T>(T t);
-    abstract public class C<T>
+    public abstract class C<T>
     {
         public abstract int M(T x);
         public abstract int P

@@ -88,13 +88,13 @@ namespace System.Data
          * CONSIDER: should we read the user (or system) local settings?
          * CONSIDER: make this configurable by the user, and system locale for the string compare
          */
-        private char _escape = '\\';
-        private char _decimalSeparator = '.';
+        private readonly char _escape = '\\';
+        private readonly char _decimalSeparator = '.';
         //not used: private char ThousandSeparator = ',';
-        private char _listSeparator = ',';
+        private readonly char _listSeparator = ',';
         //not used: private char DateSeparator = '/';
-        private char _exponentL = 'e';
-        private char _exponentU = 'E';
+        private readonly char _exponentL = 'e';
+        private readonly char _exponentU = 'E';
 
         internal char[] _text;
         internal int _pos = 0;
@@ -307,7 +307,7 @@ namespace System.Data
                                 node = new ConstNode(_table, ValueType.Date, str);
                                 break;
                             default:
-                                Debug.Assert(false, "unhandled token");
+                                Debug.Fail("unhandled token");
                                 break;
                         }
 
@@ -762,7 +762,7 @@ namespace System.Data
                         break;
 
                     default:
-                        Debug.Assert(false, "Unhandled operator type");
+                        Debug.Fail("Unhandled operator type");
                         goto end_loop;
                 }
                 Debug.Assert(expr != null, "Failed to create expression");
@@ -941,7 +941,6 @@ namespace System.Data
                         /* Check for binary constant */
                         if (ch == '0' && (text[_pos] == 'x' || text[_pos] == 'X'))
                         {
-                            ScanBinaryConstant();
                             _token = Tokens.BinaryConst;
                             goto end_loop;
                         }
@@ -1101,11 +1100,6 @@ namespace System.Data
                 _token = Tokens.Date;
             }
             _pos++;
-        }
-
-        private void ScanBinaryConstant()
-        {
-            char[] text = _text;
         }
 
         private void ScanReserved()

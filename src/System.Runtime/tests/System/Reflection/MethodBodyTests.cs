@@ -13,10 +13,9 @@ namespace System.Reflection.Tests
     public static class MethodBodyTests
     {
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Method.GetMethodBody() not supported on UapAot")]
         public static void Test_MethodBody_ExceptionHandlingClause()
         {
-            MethodInfo mi = typeof(MethodBodyTests).GetMethod("MethodBodyExample");
+            MethodInfo mi = typeof(MethodBodyTests).GetMethod("MethodBodyExample", BindingFlags.NonPublic | BindingFlags.Static);
             MethodBody mb = mi.GetMethodBody();
 
             Assert.True(mb.InitLocals);  // local variables are initialized
@@ -72,8 +71,8 @@ namespace System.Reflection.Tests
 
             Assert.True(false, "Expected to find CatchType clause.");
         }
-    
-        public static void MethodBodyExample(object arg)
+
+        private static void MethodBodyExample(object arg)
         {
             int var1 = 2;
             string var2 = "I am a string";
@@ -87,12 +86,12 @@ namespace System.Reflection.Tests
                 if (arg.GetType() == typeof(string))
                 {
                     throw new ArgumentException("Input argument cannot be a string.");
-                }        
+                }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-            }        
+            }
             finally
             {
                 var1 = 3;

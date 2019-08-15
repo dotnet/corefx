@@ -30,7 +30,7 @@ namespace System.Diagnostics
         {
             get
             {
-                return GetProcessId();
+                return TraceListenerHelpers.GetProcessId();
             }
         }
 
@@ -38,7 +38,7 @@ namespace System.Diagnostics
         {
             get
             {
-                return GetThreadId().ToString(CultureInfo.InvariantCulture);
+                return TraceListenerHelpers.GetThreadId().ToString(CultureInfo.InvariantCulture);
             }
         }
 
@@ -52,9 +52,9 @@ namespace System.Diagnostics
             }
         }
 
-        public string Callstack 
+        public string Callstack
         {
-            get 
+            get
             {
                 if (_stackTrace == null)
                 {
@@ -65,18 +65,12 @@ namespace System.Diagnostics
             }
         }
 
-        public Stack LogicalOperationStack 
+        public Stack LogicalOperationStack
         {
-            get 
+            get
             {
                 return Trace.CorrelationManager.LogicalOperationStack;
             }
         }
-
-        internal static int GetThreadId()
-        {
-            return Environment.CurrentManagedThreadId;
-        }
     }
 }
-

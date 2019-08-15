@@ -5,7 +5,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading;
 using Microsoft.Internal;
@@ -39,7 +38,7 @@ namespace System.ComponentModel.Composition.Primitives
         ///     Gets the part definitions of the catalog.
         /// </summary>
         /// <value>
-        ///     A <see cref="IQueryable{T}"/> of <see cref="ComposablePartDefinition"/> objects of the 
+        ///     A <see cref="IQueryable{T}"/> of <see cref="ComposablePartDefinition"/> objects of the
         ///     <see cref="ComposablePartCatalog"/>.
         /// </value>
         /// <exception cref="ObjectDisposedException">
@@ -51,20 +50,20 @@ namespace System.ComponentModel.Composition.Primitives
         ///     </note>
         /// </remarks>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
-        public virtual IQueryable<ComposablePartDefinition> Parts 
+        public virtual IQueryable<ComposablePartDefinition> Parts
         {
             get
             {
                 ThrowIfDisposed();
-                if(_queryableParts == null)
+                if (_queryableParts == null)
                 {
                     // Guarantee one time only set _queryableParts
                     var p = this.AsQueryable();
-                    // NOTE : According to http://msdn.microsoft.com/en-us/library/4bw5ewxy.aspx, the warning is bogus when used with Interlocked API.
-#pragma warning disable 420
                     Interlocked.CompareExchange(ref _queryableParts, p, null);
-#pragma warning restore 420
-                    Assumes.NotNull(_queryableParts);
+                    if (_queryableParts == null)
+                    {
+                        throw new Exception(SR.Diagnostic_InternalExceptionMessage);
+                    }
                 }
                 return _queryableParts;
             }
@@ -74,13 +73,13 @@ namespace System.ComponentModel.Composition.Primitives
         ///     Returns the export definitions that match the constraint defined by the specified definition.
         /// </summary>
         /// <param name="definition">
-        ///     The <see cref="ImportDefinition"/> that defines the conditions of the 
+        ///     The <see cref="ImportDefinition"/> that defines the conditions of the
         ///     <see cref="ExportDefinition"/> objects to return.
         /// </param>
         /// <returns>
-        ///     An <see cref="IEnumerable{T}"/> of <see cref="Tuple{T1, T2}"/> containing the 
-        ///     <see cref="ExportDefinition"/> objects and their associated 
-        ///     <see cref="ComposablePartDefinition"/> for objects that match the constraint defined 
+        ///     An <see cref="IEnumerable{T}"/> of <see cref="Tuple{T1, T2}"/> containing the
+        ///     <see cref="ExportDefinition"/> objects and their associated
+        ///     <see cref="ComposablePartDefinition"/> for objects that match the constraint defined
         ///     by <paramref name="definition"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
@@ -91,8 +90,8 @@ namespace System.ComponentModel.Composition.Primitives
         /// </exception>
         /// <remarks>
         ///     <note type="inheritinfo">
-        ///         Overriders of this property should never return <see langword="null"/>, if no 
-        ///         <see cref="ExportDefinition"/> match the conditions defined by 
+        ///         Overriders of this property should never return <see langword="null"/>, if no
+        ///         <see cref="ExportDefinition"/> match the conditions defined by
         ///         <paramref name="definition"/>, return an empty <see cref="IEnumerable{T}"/>.
         ///     </note>
         /// </remarks>
@@ -102,7 +101,6 @@ namespace System.ComponentModel.Composition.Primitives
             ThrowIfDisposed();
 
             Requires.NotNull(definition, nameof(definition));
-            Contract.Ensures(Contract.Result<IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>>>() != null);
 
             List<Tuple<ComposablePartDefinition, ExportDefinition>> exports = null;
             var candidateParts = GetCandidateParts(definition);
@@ -120,29 +118,25 @@ namespace System.ComponentModel.Composition.Primitives
                 }
             }
 
+            Debug.Assert(exports != null || _EmptyExportsList != null);
             return exports ?? _EmptyExportsList;
         }
 
-internal virtual IEnumerable<ComposablePartDefinition> GetCandidateParts(ImportDefinition definition)
+        internal virtual IEnumerable<ComposablePartDefinition> GetCandidateParts(ImportDefinition definition)
         {
             return this;
         }
 
-/// <summary>
-        ///     Releases the unmanaged resources used by the <see cref="ComposablePartCatalog"/> and 
-        ///     optionally releases the managed resources.
+        /// <summary>
+        ///     Releases the unmanaged and managed resources used by the <see cref="ComposablePartCatalog"/>.
         /// </summary>
-        /// <param name="disposing">
-        ///     <see langword="true"/> to release both managed and unmanaged resources; 
-        ///     <see langword="false"/> to release only unmanaged resources.
-        /// </param>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        protected virtual void Dispose(bool disposing) 
+        protected virtual void Dispose(bool disposing)
         {
             _isDisposed = true;
         }
@@ -169,7 +163,7 @@ internal virtual IEnumerable<ComposablePartDefinition> GetCandidateParts(ImportD
         public virtual IEnumerator<ComposablePartDefinition> GetEnumerator()
         {
             var parts = Parts;
-            if(object.ReferenceEquals(parts, _queryableParts))
+            if (object.ReferenceEquals(parts, _queryableParts))
             {
                 return Enumerable.Empty<ComposablePartDefinition>().GetEnumerator();
             }

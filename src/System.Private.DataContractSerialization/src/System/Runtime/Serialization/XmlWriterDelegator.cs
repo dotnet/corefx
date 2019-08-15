@@ -8,7 +8,7 @@ using System.Globalization;
 
 namespace System.Runtime.Serialization
 {
-#if USE_REFEMIT || uapaot
+#if USE_REFEMIT
     public class XmlWriterDelegator
 #else
     internal class XmlWriterDelegator
@@ -46,11 +46,11 @@ namespace System.Runtime.Serialization
             writer.WriteEndAttribute();
         }
 
-#if USE_REFEMIT        
+#if USE_REFEMIT
         public void WriteEndElement()
-#else                
+#else
         internal void WriteEndElement()
-#endif                
+#endif
         {
             writer.WriteEndElement();
             depth--;
@@ -83,7 +83,7 @@ namespace System.Runtime.Serialization
             if (ns != null)
             {
                 if (ns.Length == 0)
-                    writer.WriteAttributeString("xmlns", String.Empty, null, ns);
+                    writer.WriteAttributeString("xmlns", string.Empty, null, ns);
                 else
                 {
                     if (dictionaryWriter != null)
@@ -93,7 +93,7 @@ namespace System.Runtime.Serialization
                         string prefix = writer.LookupPrefix(ns);
                         if (prefix == null)
                         {
-                            prefix = String.Format(CultureInfo.InvariantCulture, "d{0}p{1}", depth, _prefixes);
+                            prefix = string.Format(CultureInfo.InvariantCulture, "d{0}p{1}", depth, _prefixes);
                             _prefixes++;
                             writer.WriteAttributeString("xmlns", prefix, null, ns);
                         }
@@ -885,4 +885,3 @@ namespace System.Runtime.Serialization
         }
     }
 }
-

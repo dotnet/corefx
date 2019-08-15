@@ -32,6 +32,14 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        public void MemoryStream_GetBuffer_AfterCapacityReset()
+        {
+            var ms = new MemoryStream(100);
+            ms.Capacity = 0;
+            Assert.NotNull(ms.GetBuffer());
+        }
+
+        [Fact]
         public void MemoryStream_GetBuffer()
         {
             byte[] testdata = new byte[100];

@@ -148,7 +148,7 @@ namespace System.Text.RegularExpressions
         }
 
         /// <summary>
-        /// Yet another related computation: it takes a RegexTree and computes 
+        /// Yet another related computation: it takes a RegexTree and computes
         /// the leading anchors that it encounters.
         /// </summary>
         public static int Anchors(RegexTree tree)
@@ -523,7 +523,7 @@ namespace System.Text.RegularExpressions
 
     internal sealed class RegexFC
     {
-        private RegexCharClass _cc;
+        private readonly RegexCharClass _cc;
         public bool _nullable;
 
         public RegexFC(bool nullable)

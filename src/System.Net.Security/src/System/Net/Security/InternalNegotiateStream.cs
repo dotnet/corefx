@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,8 +14,8 @@ namespace System.Net.Security
     //
     public partial class NegotiateStream : AuthenticatedStream
     {
-        private static AsyncCallback s_writeCallback = new AsyncCallback(WriteCallback);
-        private static AsyncProtocolCallback s_readCallback = new AsyncProtocolCallback(ReadCallback);
+        private static readonly AsyncCallback s_writeCallback = new AsyncCallback(WriteCallback);
+        private static readonly AsyncProtocolCallback s_readCallback = new AsyncProtocolCallback(ReadCallback);
 
         private int _NestedWrite;
         private int _NestedRead;
@@ -264,7 +263,7 @@ namespace System.Net.Security
             if (asyncRequest != null)
             {
                 asyncRequest.SetNextRequest(_ReadHeader, 0, _ReadHeader.Length, s_readCallback);
-                FixedSizeReader.ReadPacketAsync(InnerStream, asyncRequest);
+                _ = FixedSizeReader.ReadPacketAsync(InnerStream, asyncRequest);
                 if (!asyncRequest.MustCompleteSynchronously)
                 {
                     return 0;
@@ -318,7 +317,7 @@ namespace System.Net.Security
             {
                 asyncRequest.SetNextRequest(InternalBuffer, 0, readBytes, s_readCallback);
 
-                FixedSizeReader.ReadPacketAsync(InnerStream, asyncRequest);
+                _ = FixedSizeReader.ReadPacketAsync(InnerStream, asyncRequest);
 
                 if (!asyncRequest.MustCompleteSynchronously)
                 {

@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 namespace System.Globalization
 {
-    sealed partial class IdnMapping
+    public sealed partial class IdnMapping
     {
         private unsafe string GetAsciiCore(string unicodeString, char* unicode, int count)
         {
@@ -122,7 +122,7 @@ namespace System.Globalization
         /// is enabled.
         ///
         /// To match Windows behavior, we walk the string ourselves looking for these
-        /// bad characters so we can continue to throw ArgumentException in these cases. 
+        /// bad characters so we can continue to throw ArgumentException in these cases.
         /// </summary>
         private static unsafe void CheckInvalidIdnCharacters(char* s, int count, uint flags, string paramName)
         {

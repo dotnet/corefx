@@ -95,7 +95,7 @@ namespace System.Tests
             }
         }
 
-        private static IEnumerable<object[]> TestData_AttributeExists()
+        public static IEnumerable<object[]> TestData_AttributeExists()
         {
             yield return new object[] { typeof(TestTypeWithAttributes), typeof(SerializableAttribute), new SerializableAttribute() };
             yield return new object[] { typeof(ITestComInterface), typeof(ComImportAttribute), new ComImportAttribute() };
@@ -121,7 +121,7 @@ namespace System.Tests
             yield return new object[] { testMethod, typeof(PreserveSigAttribute), new PreserveSigAttribute() };
         }
 
-        private static IEnumerable<object[]> TestData_AttributeDoesNotExist()
+        public static IEnumerable<object[]> TestData_AttributeDoesNotExist()
         {
             yield return new object[] { typeof(TestTypeWithoutAttributes), typeof(SerializableAttribute), null };
 
@@ -159,7 +159,7 @@ namespace System.Tests
             [PreserveSigAttribute]
             [return: MarshalAsAttribute(UnmanagedType.Bool)]
             [DllImportAttribute("nonexistent", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true, PreserveSig = true, EntryPoint = "MyEntryPoint")]
-            public extern static bool TestMethod([MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.I4), In, Out, Optional] int[] x);
+            public static extern bool TestMethod([MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.I4), In, Out, Optional] int[] x);
         }
 
         public class TestTypeWithoutAttributes

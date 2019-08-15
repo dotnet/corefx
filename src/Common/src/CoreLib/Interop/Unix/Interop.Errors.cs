@@ -16,7 +16,7 @@ internal static partial class Interop
         // which obtains the raw errno that varies between unixes. The strong typing as an enum is meant to
         // prevent confusing the two. Casting to or from int is suspect. Use GetLastErrorInfo() if you need to
         // correlate these to the underlying platform values or obtain the corresponding error message.
-        // 
+        //
 
         SUCCESS          = 0,
 
@@ -101,6 +101,9 @@ internal static partial class Interop
         EHOSTDOWN        = 0x10070,           // Host is down.
         ENODATA          = 0x10071,           // No data available.
 
+        // Custom Error codes to track errors beyond kernel interface.
+        EHOSTNOTFOUND    = 0x20001,           // Name lookup failed
+
         // POSIX permits these to have the same value and we make them always equal so
         // that CoreFX cannot introduce a dependency on distinguishing between them that
         // would not work on all platforms.
@@ -144,9 +147,7 @@ internal static partial class Interop
 
         public override string ToString()
         {
-            return string.Format(
-                "RawErrno: {0} Error: {1} GetErrorMessage: {2}", // No localization required; text is member names used for debugging purposes
-                RawErrno, Error, GetErrorMessage());
+            return $"RawErrno: {RawErrno} Error: {Error} GetErrorMessage: {GetErrorMessage()}"; // No localization required; text is member names used for debugging purposes
         }
     }
 
@@ -178,7 +179,7 @@ internal static partial class Interop
                 message = buffer;
             }
 
-            return Marshal.PtrToStringAnsi((IntPtr)message);
+            return Marshal.PtrToStringAnsi((IntPtr)message)!;
         }
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_ConvertErrorPlatformToPal")]

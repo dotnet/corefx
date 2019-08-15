@@ -14,10 +14,10 @@ internal static partial class Interop
         // without putting too much pressure on the stack.
         private const int StackBufferSize = 256;
 
-        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_Stat2", SetLastError = true)]
-        internal unsafe static extern int Stat(ref byte path, out FileStatus output);
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_Stat", SetLastError = true)]
+        internal static extern unsafe int Stat(ref byte path, out FileStatus output);
 
-        internal unsafe static int Stat(ReadOnlySpan<char> path, out FileStatus output)
+        internal static unsafe int Stat(ReadOnlySpan<char> path, out FileStatus output)
         {
             byte* buffer = stackalloc byte[StackBufferSize];
             var converter = new ValueUtf8Converter(new Span<byte>(buffer, StackBufferSize));
@@ -26,10 +26,10 @@ internal static partial class Interop
             return result;
         }
 
-        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_LStat2", SetLastError = true)]
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_LStat", SetLastError = true)]
         internal static extern int LStat(ref byte path, out FileStatus output);
 
-        internal unsafe static int LStat(ReadOnlySpan<char> path, out FileStatus output)
+        internal static unsafe int LStat(ReadOnlySpan<char> path, out FileStatus output)
         {
             byte* buffer = stackalloc byte[StackBufferSize];
             var converter = new ValueUtf8Converter(new Span<byte>(buffer, StackBufferSize));

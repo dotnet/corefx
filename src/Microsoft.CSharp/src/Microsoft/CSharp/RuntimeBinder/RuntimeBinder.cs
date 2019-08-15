@@ -544,13 +544,13 @@ namespace Microsoft.CSharp.RuntimeBinder
                     mask = symbmask_t.MASK_MethodSymbol;
                     break;
                 default:
-                    Debug.Assert(false, "Unhandled kind");
+                    Debug.Fail("Unhandled kind");
                     break;
             }
 
             // If we have a constructor, only find its type.
             bool bIsConstructor = name == NameManager.GetPredefinedName(PredefinedName.PN_CTOR);
-            foreach(AggregateType t in callingType.TypeHierarchy)
+            foreach (AggregateType t in callingType.TypeHierarchy)
             {
                 if (SymbolTable.AggregateContainsMethod(t.OwningAggregate, Name, mask) && distinctCallingTypes.Add(t))
                 {
@@ -739,7 +739,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             if (swt.Sym.getKind() != SYMKIND.SK_MethodSymbol)
             {
-                Debug.Assert(false, "Unexpected type returned from lookup");
+                Debug.Fail("Unexpected type returned from lookup");
                 throw Error.InternalCompilerError();
             }
 
@@ -871,7 +871,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             Type windowsRuntimeMarshalType = SymbolTable.WindowsRuntimeMarshalType;
             SymbolTable.PopulateSymbolTableWithName(methodName, new List<Type> { evtType }, windowsRuntimeMarshalType);
             ExprClass marshalClass = ExprFactory.CreateClass(SymbolTable.GetCTypeFromType(windowsRuntimeMarshalType));
-            ExprMemberGroup addEventGrp = CreateMemberGroupExpr(methodName, new [] { evtType }, marshalClass, SYMKIND.SK_MethodSymbol);
+            ExprMemberGroup addEventGrp = CreateMemberGroupExpr(methodName, new[] { evtType }, marshalClass, SYMKIND.SK_MethodSymbol);
             return _binder.BindMethodGroupToArguments(
                 BindingFlag.BIND_RVALUEREQUIRED | BindingFlag.BIND_STMTEXPRONLY,
                 addEventGrp,
@@ -964,7 +964,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             if (pArg is ExprList list)
             {
-                for(;;)
+                for (;;)
                 {
                     list.OptionalElement = StripNamedArgument(list.OptionalElement);
 
@@ -1061,7 +1061,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             switch (p)
             {
                 default:
-                    Debug.Assert(false, "Unknown operator: " + p);
+                    Debug.Fail("Unknown operator: " + p);
                     throw Error.InternalCompilerError();
 
                 // Binary Operators
@@ -1222,7 +1222,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     throw Error.BindPropertyFailedEvent(name);
 
                 default:
-                    Debug.Assert(false, "Unexpected type returned from lookup");
+                    Debug.Fail("Unexpected type returned from lookup");
                     throw Error.InternalCompilerError();
             }
         }

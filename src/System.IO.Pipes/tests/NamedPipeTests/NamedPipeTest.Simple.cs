@@ -246,7 +246,7 @@ namespace System.IO.Pipes.Tests
                 NamedPipeServerStream server = pair.serverStream;
                 Task waitForConnectionTask = server.WaitForConnectionAsync(CancellationToken.None);
 
-                Assert.True(Interop.CancelIoEx(server.SafePipeHandle), "Outer cancellation failed");
+                Assert.True(InteropTest.CancelIoEx(server.SafePipeHandle), "Outer cancellation failed");
                 await Assert.ThrowsAnyAsync<OperationCanceledException>(() => waitForConnectionTask);
                 Assert.True(waitForConnectionTask.IsCanceled);
             }
@@ -262,7 +262,7 @@ namespace System.IO.Pipes.Tests
                 NamedPipeServerStream server = pair.serverStream;
                 Task waitForConnectionTask = server.WaitForConnectionAsync(cts.Token);
 
-                Assert.True(Interop.CancelIoEx(server.SafePipeHandle), "Outer cancellation failed");
+                Assert.True(InteropTest.CancelIoEx(server.SafePipeHandle), "Outer cancellation failed");
                 await Assert.ThrowsAsync<IOException>(() => waitForConnectionTask);
             }
         }
@@ -411,7 +411,7 @@ namespace System.IO.Pipes.Tests
                     Assert.Throws<InvalidOperationException>(() => { server.ReadAsync(buffer, 0, buffer.Length); });
                 }
 
-                Assert.Throws<InvalidOperationException>(() => server.Disconnect());    // disconnect when not connected 
+                Assert.Throws<InvalidOperationException>(() => server.Disconnect());    // disconnect when not connected
                 Assert.Throws<InvalidOperationException>(() => server.IsMessageComplete);
             }
         }
@@ -523,7 +523,6 @@ namespace System.IO.Pipes.Tests
         }
 
         [Fact]
-        [ActiveIssue("dotnet/corefx #16934", TargetFrameworkMonikers.NetFramework)] //Hangs forever in desktop as it doesn't have cancellation support
         public async Task Server_ReadWriteCancelledToken_Throws_OperationCanceledException()
         {
             using (NamedPipePair pair = CreateNamedPipePair())
@@ -546,7 +545,7 @@ namespace System.IO.Pipes.Tests
                     Assert.True(server.ReadAsync(buffer, 0, buffer.Length, ctx1.Token).IsCanceled);
                 }
 
-                if (server.CanWrite) 
+                if (server.CanWrite)
                 {
                     var ctx1 = new CancellationTokenSource();
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // On Unix WriteAsync's aren't cancelable once initiated
@@ -576,7 +575,7 @@ namespace System.IO.Pipes.Tests
                 {
                     Task serverReadToken = server.ReadAsync(buffer, 0, buffer.Length, CancellationToken.None);
 
-                    Assert.True(Interop.CancelIoEx(server.SafePipeHandle), "Outer cancellation failed");
+                    Assert.True(InteropTest.CancelIoEx(server.SafePipeHandle), "Outer cancellation failed");
                     await Assert.ThrowsAnyAsync<OperationCanceledException>(() => serverReadToken);
                     Assert.True(serverReadToken.IsCanceled);
                 }
@@ -584,7 +583,7 @@ namespace System.IO.Pipes.Tests
                 {
                     Task serverWriteToken = server.WriteAsync(buffer, 0, buffer.Length, CancellationToken.None);
 
-                    Assert.True(Interop.CancelIoEx(server.SafePipeHandle), "Outer cancellation failed");
+                    Assert.True(InteropTest.CancelIoEx(server.SafePipeHandle), "Outer cancellation failed");
                     await Assert.ThrowsAnyAsync<OperationCanceledException>(() => serverWriteToken);
                     Assert.True(serverWriteToken.IsCanceled);
                 }
@@ -607,7 +606,7 @@ namespace System.IO.Pipes.Tests
                     var cts = new CancellationTokenSource();
                     Task serverReadToken = server.ReadAsync(buffer, 0, buffer.Length, cts.Token);
 
-                    Assert.True(Interop.CancelIoEx(server.SafePipeHandle), "Outer cancellation failed");
+                    Assert.True(InteropTest.CancelIoEx(server.SafePipeHandle), "Outer cancellation failed");
                     await Assert.ThrowsAnyAsync<OperationCanceledException>(() => serverReadToken);
                 }
                 if (server.CanWrite)
@@ -615,14 +614,13 @@ namespace System.IO.Pipes.Tests
                     var cts = new CancellationTokenSource();
                     Task serverWriteToken = server.WriteAsync(buffer, 0, buffer.Length, cts.Token);
 
-                    Assert.True(Interop.CancelIoEx(server.SafePipeHandle), "Outer cancellation failed");
+                    Assert.True(InteropTest.CancelIoEx(server.SafePipeHandle), "Outer cancellation failed");
                     await Assert.ThrowsAnyAsync<OperationCanceledException>(() => serverWriteToken);
                 }
             }
         }
 
         [Fact]
-        [ActiveIssue("dotnet/corefx #16934", TargetFrameworkMonikers.NetFramework)] //Hangs forever in desktop as it doesn't have cancellation support
         public async Task Client_ReadWriteCancelledToken_Throws_OperationCanceledException()
         {
             using (NamedPipePair pair = CreateNamedPipePair())
@@ -672,7 +670,7 @@ namespace System.IO.Pipes.Tests
                 {
                     Task clientReadToken = client.ReadAsync(buffer, 0, buffer.Length, CancellationToken.None);
 
-                    Assert.True(Interop.CancelIoEx(client.SafePipeHandle), "Outer cancellation failed");
+                    Assert.True(InteropTest.CancelIoEx(client.SafePipeHandle), "Outer cancellation failed");
                     await Assert.ThrowsAnyAsync<OperationCanceledException>(() => clientReadToken);
                     Assert.True(clientReadToken.IsCanceled);
                 }
@@ -680,7 +678,7 @@ namespace System.IO.Pipes.Tests
                 {
                     Task clientWriteToken = client.WriteAsync(buffer, 0, buffer.Length, CancellationToken.None);
 
-                    Assert.True(Interop.CancelIoEx(client.SafePipeHandle), "Outer cancellation failed");
+                    Assert.True(InteropTest.CancelIoEx(client.SafePipeHandle), "Outer cancellation failed");
                     await Assert.ThrowsAnyAsync<OperationCanceledException>(() => clientWriteToken);
                     Assert.True(clientWriteToken.IsCanceled);
                 }
@@ -702,7 +700,7 @@ namespace System.IO.Pipes.Tests
                     var cts = new CancellationTokenSource();
                     Task clientReadToken = client.ReadAsync(buffer, 0, buffer.Length, cts.Token);
 
-                    Assert.True(Interop.CancelIoEx(client.SafePipeHandle), "Outer cancellation failed");
+                    Assert.True(InteropTest.CancelIoEx(client.SafePipeHandle), "Outer cancellation failed");
                     await Assert.ThrowsAnyAsync<OperationCanceledException>(() => clientReadToken);
                 }
                 if (client.CanWrite)
@@ -710,7 +708,7 @@ namespace System.IO.Pipes.Tests
                     var cts = new CancellationTokenSource();
                     Task clientWriteToken = client.WriteAsync(buffer, 0, buffer.Length, cts.Token);
 
-                    Assert.True(Interop.CancelIoEx(client.SafePipeHandle), "Outer cancellation failed");
+                    Assert.True(InteropTest.CancelIoEx(client.SafePipeHandle), "Outer cancellation failed");
                     await Assert.ThrowsAnyAsync<OperationCanceledException>(() => clientWriteToken);
                 }
             }
@@ -753,8 +751,8 @@ namespace System.IO.Pipes.Tests
             }
         }
     }
-    
-    [ActiveIssue(22271, TargetFrameworkMonikers.UapNotUapAot)]
+
+    [ActiveIssue(22271, TargetFrameworkMonikers.Uap)]
     public class NamedPipeTest_Simple_ServerInOutRead_ClientInOutWrite : NamedPipeTest_Simple
     {
         protected override NamedPipePair CreateNamedPipePair(PipeOptions serverOptions, PipeOptions clientOptions)
@@ -767,8 +765,8 @@ namespace System.IO.Pipes.Tests
             return ret;
         }
     }
-    
-    [ActiveIssue(22271, TargetFrameworkMonikers.UapNotUapAot)]
+
+    [ActiveIssue(22271, TargetFrameworkMonikers.Uap)]
     public class NamedPipeTest_Simple_ServerInOutWrite_ClientInOutRead : NamedPipeTest_Simple
     {
         protected override NamedPipePair CreateNamedPipePair(PipeOptions serverOptions, PipeOptions clientOptions)
@@ -781,8 +779,8 @@ namespace System.IO.Pipes.Tests
             return ret;
         }
     }
-    
-    [ActiveIssue(22271, TargetFrameworkMonikers.UapNotUapAot)]
+
+    [ActiveIssue(22271, TargetFrameworkMonikers.Uap)]
     public class NamedPipeTest_Simple_ServerInOut_ClientIn : NamedPipeTest_Simple
     {
         protected override NamedPipePair CreateNamedPipePair(PipeOptions serverOptions, PipeOptions clientOptions)
@@ -795,8 +793,8 @@ namespace System.IO.Pipes.Tests
             return ret;
         }
     }
-    
-    [ActiveIssue(22271, TargetFrameworkMonikers.UapNotUapAot)]
+
+    [ActiveIssue(22271, TargetFrameworkMonikers.Uap)]
     public class NamedPipeTest_Simple_ServerInOut_ClientOut : NamedPipeTest_Simple
     {
         protected override NamedPipePair CreateNamedPipePair(PipeOptions serverOptions, PipeOptions clientOptions)
@@ -809,8 +807,8 @@ namespace System.IO.Pipes.Tests
             return ret;
         }
     }
-    
-    [ActiveIssue(22271, TargetFrameworkMonikers.UapNotUapAot)]
+
+    [ActiveIssue(22271, TargetFrameworkMonikers.Uap)]
     public class NamedPipeTest_Simple_ServerOut_ClientIn : NamedPipeTest_Simple
     {
         protected override NamedPipePair CreateNamedPipePair(PipeOptions serverOptions, PipeOptions clientOptions)
@@ -823,8 +821,8 @@ namespace System.IO.Pipes.Tests
             return ret;
         }
     }
-    
-    [ActiveIssue(22271, TargetFrameworkMonikers.UapNotUapAot)]
+
+    [ActiveIssue(22271, TargetFrameworkMonikers.Uap)]
     public class NamedPipeTest_Simple_ServerIn_ClientOut : NamedPipeTest_Simple
     {
         protected override NamedPipePair CreateNamedPipePair(PipeOptions serverOptions, PipeOptions clientOptions)
@@ -837,5 +835,5 @@ namespace System.IO.Pipes.Tests
             return ret;
         }
     }
-      
+
 }

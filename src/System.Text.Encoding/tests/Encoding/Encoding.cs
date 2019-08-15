@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -12,7 +12,7 @@ namespace System.Text.Encodings.Tests
     {
         public static IEnumerable<object[]> Encoding_TestData()
         {
-            //                          CodePage   Name         BodyName      HeaderName    IsBrowserDisplay IsBrowserSave  IsMailNewsDisplay   IsMailNewsSave WindowsCodePage            
+            //                          CodePage   Name         BodyName      HeaderName    IsBrowserDisplay IsBrowserSave  IsMailNewsDisplay   IsMailNewsSave WindowsCodePage
             yield return new object[] { 20127,    "us-ascii",   "us-ascii",   "us-ascii",   false,            false,          true,               true,           1252 };
             yield return new object[] { 28591,    "iso-8859-1", "iso-8859-1", "iso-8859-1", true,             true,           true,               true,           1252 };
             yield return new object[] { 65000,    "utf-7",      "utf-7",      "utf-7",      false,            false,          true,               true,           1200 };
@@ -45,7 +45,6 @@ namespace System.Text.Encodings.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework uses system ACP and not UTF8")]
         public static void DefaultEncodingBOMTest()
         {
             UTF8Encoding defaultEncoding = Encoding.Default as UTF8Encoding;
@@ -62,13 +61,13 @@ namespace System.Text.Encodings.Tests
                 Encoding encoding = Encoding.GetEncoding(info.CodePage);
                 Assert.Equal(encoding, info.GetEncoding());
                 Assert.Equal(encoding.WebName, info.Name);
-                Assert.False(String.IsNullOrEmpty(info.DisplayName));
+                Assert.False(string.IsNullOrEmpty(info.DisplayName));
             }
         }
 
         [Theory]
         [MemberData(nameof(Encoding_TestData))]
-        public static void NormalizationTest(int codepage, string name, string bodyName, string headerName, bool isBrowserDisplay, 
+        public static void NormalizationTest(int codepage, string name, string bodyName, string headerName, bool isBrowserDisplay,
                                             bool isBrowserSave, bool isMailNewsDisplay, bool isMailNewsSave, int windowsCodePage)
         {
             Encoding encoding = Encoding.GetEncoding(codepage);

@@ -24,7 +24,7 @@ namespace System.DirectoryServices.AccountManagement
         // Native <--> Principal
         //
 
-        // For modified object, pushes any changes (including IdentityClaim changes) 
+        // For modified object, pushes any changes (including IdentityClaim changes)
         // into the underlying store-specific object (e.g., DirectoryEntry) and returns the underlying object.
         // For unpersisted object, creates a  underlying object if one doesn't already exist (in
         // Principal.UnderlyingObject), then pushes any changes into the underlying object.
@@ -52,7 +52,7 @@ namespace System.DirectoryServices.AccountManagement
                     else
                     {
                         throw new InvalidOperationException(
-                                        String.Format(CultureInfo.CurrentCulture, SR.StoreCtxUnsupportedPrincipalTypeForSave, principalType.ToString()));
+                                        SR.Format(SR.StoreCtxUnsupportedPrincipalTypeForSave, principalType));
                     }
 
                     // Determine the SAM account name for the entry we'll be creating.  Use the name from the NT4 IdentityClaim.
@@ -178,7 +178,7 @@ namespace System.DirectoryServices.AccountManagement
         }
 
         // Given a underlying store object (e.g., DirectoryEntry), further narrowed down a discriminant
-        // (if applicable for the StoreCtx type), returns a fresh instance of a Principal 
+        // (if applicable for the StoreCtx type), returns a fresh instance of a Principal
         // object based on it.  The WinFX Principal API follows ADSI-style semantics, where you get multiple
         // in-memory objects all referring to the same store pricipal, rather than WinFS semantics, where
         // multiple searches all return references to the same in-memory object.
@@ -191,8 +191,8 @@ namespace System.DirectoryServices.AccountManagement
         //
         //
         // This method works for native objects from the store corresponding to _this_ StoreCtx.
-        // Each StoreCtx will also have its own internal algorithms used for dealing with cross-store objects, e.g., 
-        // for use when iterating over group membership.  These routines are exposed as 
+        // Each StoreCtx will also have its own internal algorithms used for dealing with cross-store objects, e.g.,
+        // for use when iterating over group membership.  These routines are exposed as
         // ResolveCrossStoreRefToPrincipal, and will be called by the StoreCtx's associated ResultSet
         // classes when iterating over a representation of a "foreign" principal.
         internal override Principal GetAsPrincipal(object storeObject, object discriminant)
@@ -270,7 +270,7 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        // Loads the store values from p.UnderlyingObject into p, performing schema mapping as needed.        
+        // Loads the store values from p.UnderlyingObject into p, performing schema mapping as needed.
         internal override void Load(Principal p)
         {
             try
@@ -371,7 +371,7 @@ namespace System.DirectoryServices.AccountManagement
                         Marshal.FreeHGlobal(pSid);
                 }
 
-                // Not a fake group.  Search for the real group.            
+                // Not a fake group.  Search for the real group.
                 object o = FindNativeBySIDIdentRef(principalType, sid);
                 return (o != null) ? GetAsPrincipal(o, null) : null;
             }
@@ -409,7 +409,7 @@ namespace System.DirectoryServices.AccountManagement
                 {
                     // Are they perhaps searching for a fake group?
                     // If they passed in a valid SID for a fake group, construct and return the fake
-                    // group.                
+                    // group.
                     if (principalType == typeof(Principal) || principalType == typeof(GroupPrincipal) || principalType.IsSubclassOf(typeof(GroupPrincipal)))
                     {
                         // They passed in a hex string, is it a valid SID, and if so, does it correspond to a fake
@@ -512,7 +512,7 @@ namespace System.DirectoryServices.AccountManagement
             }
 
             // Valid SID, but not for our context (machine).  No match.
-            if (String.Compare(domainName, this.MachineFlatName, StringComparison.OrdinalIgnoreCase) != 0)
+            if (!string.Equals(domainName, this.MachineFlatName, StringComparison.OrdinalIgnoreCase))
             {
                 GlobalDebug.WriteLineIf(GlobalDebug.Warn, "SAMStoreCtx", "FindNativeBySIDIdentRef: {0} != {1}, no match", domainName, this.MachineFlatName);
                 return null;
@@ -598,7 +598,7 @@ namespace System.DirectoryServices.AccountManagement
                 throw ExceptionHelper.GetExceptionFromCOMException(e);
             }
 
-            // Make sure it's of the correct type           
+            // Make sure it's of the correct type
             bool fMatch = false;
 
             if ((principalType == typeof(UserPrincipal)) && SAMUtils.IsOfObjectClass(de, "User"))
@@ -641,7 +641,7 @@ namespace System.DirectoryServices.AccountManagement
         // We only list properties we map in this table.  At run-time, if we detect they set a
         // property that's not listed here, or is listed here but not for the correct principal type,
         // when writing to SAM, we throw an exception.
-        private static object[,] s_propertyMappingTableRaw =
+        private static readonly object[,] s_propertyMappingTableRaw =
         {
             // PropertyName                          Principal Type     SAM property            Converter(WinNT->PAPI)                                    Converter(PAPI->WinNT)
             {PropertyNames.PrincipalDisplayName,     typeof(UserPrincipal),      "FullName",             new FromWinNTConverterDelegate(StringFromWinNTConverter),  new ToWinNTConverterDelegate(StringToWinNTConverter)},
@@ -651,11 +651,11 @@ namespace System.DirectoryServices.AccountManagement
             {PropertyNames.PrincipalSid,                        typeof(Principal), "objectSid",            new FromWinNTConverterDelegate(SidFromWinNTConverter), null },
             {PropertyNames.PrincipalDistinguishedName, typeof(UserPrincipal), null,          null,  new ToWinNTConverterDelegate(ExceptionToWinNTConverter)},
             {PropertyNames.PrincipalGuid,                      typeof(UserPrincipal), null,         null,   new ToWinNTConverterDelegate(ExceptionToWinNTConverter)},
-            {PropertyNames.PrincipalUserPrincipalName,  typeof(UserPrincipal), null,         null,   new ToWinNTConverterDelegate(ExceptionToWinNTConverter)},            
+            {PropertyNames.PrincipalUserPrincipalName,  typeof(UserPrincipal), null,         null,   new ToWinNTConverterDelegate(ExceptionToWinNTConverter)},
             // Name and SamAccountNAme properties are currently routed to the same underlying Name property.
             {PropertyNames.PrincipalName,                  typeof(Principal), "Name",            new FromWinNTConverterDelegate(SamAccountNameFromWinNTConverter),  null},
-            
-            
+
+
 
             //
             {PropertyNames.AuthenticablePrincipalEnabled ,     typeof(UserPrincipal),  "UserFlags",     new FromWinNTConverterDelegate(UserFlagsFromWinNTConverter),  new ToWinNTConverterDelegate(UserFlagsToWinNTConverter)},
@@ -723,17 +723,17 @@ namespace System.DirectoryServices.AccountManagement
             {PropertyNames.PwdInfoAllowReversiblePasswordEncryption, typeof(ComputerPrincipal),       null,   null,   new ToWinNTConverterDelegate(ExceptionToWinNTConverter)}
         };
 
-        private static Hashtable s_userPropertyMappingTableByProperty = null;
-        private static Hashtable s_userPropertyMappingTableByWinNT = null;
+        private static readonly Hashtable s_userPropertyMappingTableByProperty = null;
+        private static readonly Hashtable s_userPropertyMappingTableByWinNT = null;
 
-        private static Hashtable s_groupPropertyMappingTableByProperty = null;
-        private static Hashtable s_groupPropertyMappingTableByWinNT = null;
+        private static readonly Hashtable s_groupPropertyMappingTableByProperty = null;
+        private static readonly Hashtable s_groupPropertyMappingTableByWinNT = null;
 
-        private static Hashtable s_computerPropertyMappingTableByProperty = null;
-        private static Hashtable s_computerPropertyMappingTableByWinNT = null;
+        private static readonly Hashtable s_computerPropertyMappingTableByProperty = null;
+        private static readonly Hashtable s_computerPropertyMappingTableByWinNT = null;
 
-        private static Dictionary<string, ObjectMask> s_validPropertyMap = null;
-        private static Dictionary<Type, ObjectMask> s_maskMap = null;
+        private static readonly Dictionary<string, ObjectMask> s_validPropertyMap = null;
+        private static readonly Dictionary<Type, ObjectMask> s_maskMap = null;
 
         [Flags]
         private enum ObjectMask
@@ -864,7 +864,7 @@ namespace System.DirectoryServices.AccountManagement
             {
                 // We're intended to handle single-valued scalar properties
                 Debug.Assert(values.Count == 1);
-                Debug.Assert(values[0] is Int32);
+                Debug.Assert(values[0] is int);
 
                 int secondsLapsed = (int)values[0];
 
@@ -892,7 +892,7 @@ namespace System.DirectoryServices.AccountManagement
 
         private static void UserFlagsFromWinNTConverter(DirectoryEntry de, string suggestedWinNTProperty, Principal p, string propertyName)
         {
-            Debug.Assert(String.Compare(suggestedWinNTProperty, "UserFlags", StringComparison.OrdinalIgnoreCase) == 0);
+            Debug.Assert(string.Equals(suggestedWinNTProperty, "UserFlags", StringComparison.OrdinalIgnoreCase));
 
             SDSUtils.AccountControlFromDirectoryEntry(new dSPropertyCollection(de.Properties), suggestedWinNTProperty, p, propertyName, true);
         }
@@ -904,10 +904,9 @@ namespace System.DirectoryServices.AccountManagement
         private static void ExceptionToWinNTConverter(Principal p, string propertyName, DirectoryEntry de, string suggestedWinNTProperty, bool isLSAM)
         {
             throw new InvalidOperationException(
-                            String.Format(CultureInfo.CurrentCulture,
-                                          SR.PrincipalUnsupportPropertyForType,
-                                          p.GetType().ToString(),
-                                          PropertyNamesExternal.GetExternalForm(propertyName)));
+                            SR.Format(SR.PrincipalUnsupportPropertyForType,
+                                      p.GetType(),
+                                      PropertyNamesExternal.GetExternalForm(propertyName)));
         }
 
         private static void StringToWinNTConverter(Principal p, string propertyName, DirectoryEntry de, string suggestedWinNTProperty, bool isLSAM)
@@ -957,9 +956,7 @@ namespace System.DirectoryServices.AccountManagement
         {
             if (!isLSAM)
                 throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture,
-                                  SR.PrincipalUnsupportPropertyForPlatform,
-                                  PropertyNamesExternal.GetExternalForm(propertyName)));
+                    SR.Format(SR.PrincipalUnsupportPropertyForPlatform, PropertyNamesExternal.GetExternalForm(propertyName)));
         }
 
         private static void GroupTypeToWinNTConverter(Principal p, string propertyName, DirectoryEntry de, string suggestedWinNTProperty, bool isLSAM)
@@ -968,9 +965,7 @@ namespace System.DirectoryServices.AccountManagement
             {
                 if (!isLSAM)
                     throw new InvalidOperationException(
-                        String.Format(CultureInfo.CurrentCulture,
-                                      SR.PrincipalUnsupportPropertyForPlatform,
-                                      PropertyNamesExternal.GetExternalForm(propertyName)));
+                        SR.Format(SR.PrincipalUnsupportPropertyForPlatform, PropertyNamesExternal.GetExternalForm(propertyName)));
             }
             else
             {
@@ -988,9 +983,7 @@ namespace System.DirectoryServices.AccountManagement
         {
             if (!isLSAM)
                 throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture,
-                                  SR.PrincipalUnsupportPropertyForPlatform,
-                                  PropertyNamesExternal.GetExternalForm(propertyName)));
+                    SR.Format(SR.PrincipalUnsupportPropertyForPlatform, PropertyNamesExternal.GetExternalForm(propertyName)));
         }
 
         private static void AcctExpirDateToNTConverter(Principal p, string propertyName, DirectoryEntry de, string suggestedWinNTProperty, bool isLSAM)
@@ -1009,7 +1002,7 @@ namespace System.DirectoryServices.AccountManagement
 
         private static void UserFlagsToWinNTConverter(Principal p, string propertyName, DirectoryEntry de, string suggestedWinNTProperty, bool isLSAM)
         {
-            Debug.Assert(String.Compare(suggestedWinNTProperty, "UserFlags", StringComparison.OrdinalIgnoreCase) == 0);
+            Debug.Assert(string.Equals(suggestedWinNTProperty, "UserFlags", StringComparison.OrdinalIgnoreCase));
 
             SDSUtils.AccountControlToDirectoryEntry(p, propertyName, de, suggestedWinNTProperty, true, p.unpersisted);
         }
@@ -1063,8 +1056,7 @@ namespace System.DirectoryServices.AccountManagement
                         GlobalDebug.WriteLineIf(GlobalDebug.Warn, "SAMStoreCtx", "UpdateGroupMembership: error while clearing, hr={0}", hr);
 
                         throw new PrincipalOperationException(
-                                        String.Format(
-                                                CultureInfo.CurrentCulture,
+                                        SR.Format(
                                                 SR.SAMStoreCtxFailedToClearGroup,
                                                 hr.ToString(CultureInfo.InvariantCulture)));
                     }
@@ -1085,7 +1077,7 @@ namespace System.DirectoryServices.AccountManagement
                          (memberType != typeof(GroupPrincipal)) && (!memberType.IsSubclassOf(typeof(GroupPrincipal))))
                     {
                         throw new InvalidOperationException(
-                                        String.Format(CultureInfo.CurrentCulture, SR.StoreCtxUnsupportedPrincipalTypeForGroupInsert, memberType.ToString()));
+                                        SR.Format(SR.StoreCtxUnsupportedPrincipalTypeForGroupInsert, memberType));
                     }
 
                     // Can't inserted unpersisted principal

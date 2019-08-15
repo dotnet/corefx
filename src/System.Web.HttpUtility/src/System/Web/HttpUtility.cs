@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -17,10 +17,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -59,7 +59,21 @@ namespace System.Web
                 string[] keys = AllKeys;
                 for (int i = 0; i < count; i++)
                 {
-                    sb.AppendFormat("{0}={1}&", keys[i], UrlEncode(this[keys[i]]));
+                    string[] values = GetValues(keys[i]);
+                    if (values != null)
+                    {
+                        foreach (string value in values)
+                        {
+                            if (string.IsNullOrEmpty(keys[i]))
+                            {
+                                sb.AppendFormat("{0}&", UrlEncode(value));
+                            }
+                            else
+                            {
+                                sb.AppendFormat("{0}={1}&", keys[i], UrlEncode(value));
+                            }
+                        }
+                    }
                 }
 
                 return sb.ToString(0, sb.Length - 1);

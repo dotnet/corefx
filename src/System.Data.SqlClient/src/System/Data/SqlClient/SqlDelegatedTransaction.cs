@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -13,7 +13,7 @@ using System.Transactions;
 
 namespace System.Data.SqlClient
 {
-    sealed internal class SqlDelegatedTransaction : IPromotableSinglePhaseNotification
+    internal sealed partial class SqlDelegatedTransaction : IPromotableSinglePhaseNotification
     {
         private static int _objectTypeCount;
         private readonly int _objectID = Interlocked.Increment(ref _objectTypeCount);
@@ -33,10 +33,10 @@ namespace System.Data.SqlClient
         //  may be initiated here AFTER the connection lock is released, but should NOT fall under this class's locking strategy.
 
         private SqlInternalConnection _connection;            // the internal connection that is the root of the transaction
-        private IsolationLevel _isolationLevel;        // the IsolationLevel of the transaction we delegated to the server
+        private readonly IsolationLevel _isolationLevel;        // the IsolationLevel of the transaction we delegated to the server
         private SqlInternalTransaction _internalTransaction;   // the SQL Server transaction we're delegating to
 
-        private Transaction _atomicTransaction;
+        private readonly Transaction _atomicTransaction;
 
         private bool _active;                // Is the transaction active?
 
@@ -135,7 +135,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        public Byte[] Promote()
+        public byte[] Promote()
         {
             // Operations that might be affected by multi-threaded use MUST be done inside the lock.
             //  Don't read values off of the connection outside the lock unless it doesn't really matter
@@ -251,15 +251,15 @@ namespace System.Data.SqlClient
                         // VSTS 144562: doom the connection while having the lock on it to prevent race condition with "Transaction Ended" Event
                         connection.DoomThisConnection();
 
-                        // Unlike SinglePhaseCommit, a rollback is a rollback, regardless 
+                        // Unlike SinglePhaseCommit, a rollback is a rollback, regardless
                         // of how it happens, so SysTx won't throw an exception, and we
-                        // don't want to throw an exception either, because SysTx isn't 
+                        // don't want to throw an exception either, because SysTx isn't
                         // handling it and it may create a fail fast scenario. In the end,
                         // there is no way for us to communicate to the consumer that this
                         // failed for more serious reasons than usual.
-                        // 
+                        //
                         // This is a bit like "should you throw if Close fails", however,
-                        // it only matters when you really need to know.  In that case, 
+                        // it only matters when you really need to know.  In that case,
                         // we have the tracing that we're doing to fallback on for the
                         // investigation.
                     }
@@ -369,7 +369,7 @@ namespace System.Data.SqlClient
                         }
 
                         // We eat the exception.  This is called on the SysTx
-                        // thread, not the applications thread.  If we don't 
+                        // thread, not the applications thread.  If we don't
                         // eat the exception an UnhandledException will occur,
                         // causing the process to FailFast.
                     }
@@ -455,16 +455,6 @@ namespace System.Data.SqlClient
 
                 throw ADP.InternalError(ADP.InternalErrorCode.UnpooledObjectHasWrongOwner);  //TODO: Create a new code
             }
-        }
-
-        // Get the server-side Global Transaction Id from the PromotedDTCToken
-        // Skip first 4 bytes since they contain the version
-        private Guid GetGlobalTxnIdentifierFromToken()
-        {
-            byte[] txnGuid = new byte[16];
-            Array.Copy(_connection.PromotedDTCToken, _globalTransactionsTokenVersionSizeInBytes, // Skip the version
-                txnGuid, 0, txnGuid.Length);
-            return new Guid(txnGuid);
         }
     }
 }

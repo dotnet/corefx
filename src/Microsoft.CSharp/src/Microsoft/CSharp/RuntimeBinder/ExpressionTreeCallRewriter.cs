@@ -48,7 +48,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             ExpressionTreeCallRewriter rewriter = new ExpressionTreeCallRewriter(listOfParameters);
 
             // We should have a ExprBinOp that's an EK_SEQUENCE. The RHS of our sequence
-            // should be a call to PM_EXPRESSION_LAMBDA. The LHS of our sequence is the 
+            // should be a call to PM_EXPRESSION_LAMBDA. The LHS of our sequence is the
             // set of declarations for the parameters that we'll need.
             // Assert all of these first, and then unwrap them.
 
@@ -201,7 +201,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     break;
 
                 default:
-                    Debug.Assert(false, "Invalid Predefined Method in VisitCALL");
+                    Debug.Fail("Invalid Predefined Method in VisitCALL");
                     throw Error.InternalCompilerError();
             }
 
@@ -217,7 +217,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private Expr GenerateLambda(ExprCall pExpr)
         {
-            // We always call Lambda(body, arrayinit) where the arrayinit 
+            // We always call Lambda(body, arrayinit) where the arrayinit
             // is the initialization of the parameters.
             return Visit(((ExprList)pExpr.OptionalArguments).OptionalElement);
 
@@ -263,7 +263,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             if (m == null)
             {
-                Debug.Assert(false, "How did we get a call that doesn't have a methodinfo?");
+                Debug.Fail("How did we get a call that doesn't have a methodinfo?");
                 throw Error.InternalCompilerError();
             }
 
@@ -281,9 +281,9 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private Expression GenerateArrayIndex(ExprCall pExpr)
         {
-            // We have two possibilities here - we're either a single index array, in which 
+            // We have two possibilities here - we're either a single index array, in which
             // case we'll be PM_EXPRESSION_ARRAYINDEX, or we have multiple dimensions,
-            // in which case we are PM_EXPRESSION_ARRAYINDEX2. 
+            // in which case we are PM_EXPRESSION_ARRAYINDEX2.
             //
             // Our arguments then, are: object, index or object, indices.
             ExprList list = (ExprList)pExpr.OptionalArguments;
@@ -397,7 +397,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             if (p == null)
             {
-                Debug.Assert(false, "How did we get a prop that doesn't have a propinfo?");
+                Debug.Fail("How did we get a prop that doesn't have a propinfo?");
                 throw Error.InternalCompilerError();
             }
 
@@ -536,7 +536,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     return Expression.SubtractChecked(arg1, arg2);
 
                 default:
-                    Debug.Assert(false, "Invalid Predefined Method in GenerateBinaryOperator");
+                    Debug.Fail("Invalid Predefined Method in GenerateBinaryOperator");
                     throw Error.InternalCompilerError();
             }
         }
@@ -612,7 +612,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     return Expression.SubtractChecked(arg1, arg2, methodInfo);
 
                 default:
-                    Debug.Assert(false, "Invalid Predefined Method in GenerateUserDefinedBinaryOperator");
+                    Debug.Fail("Invalid Predefined Method in GenerateUserDefinedBinaryOperator");
                     throw Error.InternalCompilerError();
             }
         }
@@ -636,7 +636,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     return Expression.NegateChecked(arg);
 
                 default:
-                    Debug.Assert(false, "Invalid Predefined Method in GenerateUnaryOperator");
+                    Debug.Fail("Invalid Predefined Method in GenerateUnaryOperator");
                     throw Error.InternalCompilerError();
             }
         }
@@ -665,7 +665,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     return Expression.NegateChecked(arg, methodInfo);
 
                 default:
-                    Debug.Assert(false, "Invalid Predefined Method in GenerateUserDefinedUnaryOperator");
+                    Debug.Fail("Invalid Predefined Method in GenerateUserDefinedUnaryOperator");
                     throw Error.InternalCompilerError();
             }
         }
@@ -862,7 +862,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                         return GenerateUserDefinedUnaryOperator(call);
 
                     default:
-                        Debug.Assert(false, "Invalid Predefined Method in GetExpression");
+                        Debug.Fail("Invalid Predefined Method in GetExpression");
                         throw Error.InternalCompilerError();
                 }
             }

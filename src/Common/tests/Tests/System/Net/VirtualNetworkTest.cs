@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -30,8 +30,7 @@ namespace System.Net.Test.Common
 
                 network.WriteFrame(i % 2 == 0, writeFrame);
 
-                byte [] readFrame;
-                network.ReadFrame(i % 2 == 1, out readFrame);
+                byte [] readFrame = network.ReadFrame(i % 2 == 1);
 
                 uint readChecksum = Fletcher32.Checksum(readFrame, 0, readFrame.Length);
 
@@ -53,7 +52,7 @@ namespace System.Net.Test.Common
 
                 byte[] writeFrame = new byte[bufferSize];
                 rnd.NextBytes(writeFrame);
-                
+
                 // First 4 bytes represent the sequence number.
                 byte [] sequenceNo = BitConverter.GetBytes(i);
                 sequenceNo.CopyTo(writeFrame, 0);
@@ -66,8 +65,7 @@ namespace System.Net.Test.Common
                 int delayMilliseconds = rnd.Next(0, 1000);
                 await Task.Delay(delayMilliseconds);
 
-                byte[] readFrame;
-                network.ReadFrame(i % 2 == 1, out readFrame);
+                byte[] readFrame = network.ReadFrame(i % 2 == 1);
 
                 uint readChecksum = Fletcher32.Checksum(readFrame, 0, readFrame.Length);
 

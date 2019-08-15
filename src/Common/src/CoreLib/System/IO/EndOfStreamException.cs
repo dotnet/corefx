@@ -16,13 +16,13 @@ namespace System.IO
             HResult = HResults.COR_E_ENDOFSTREAM;
         }
 
-        public EndOfStreamException(string message)
+        public EndOfStreamException(string? message)
             : base(message)
         {
             HResult = HResults.COR_E_ENDOFSTREAM;
         }
 
-        public EndOfStreamException(string message, Exception innerException)
+        public EndOfStreamException(string? message, Exception? innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_ENDOFSTREAM;

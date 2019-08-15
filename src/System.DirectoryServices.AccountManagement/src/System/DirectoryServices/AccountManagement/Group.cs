@@ -5,7 +5,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Security.Permissions;
 
 namespace System.DirectoryServices.AccountManagement
 {
@@ -78,7 +77,7 @@ namespace System.DirectoryServices.AccountManagement
 
                 // We don't want to let them set a null value.
                 if (!value.HasValue)
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
 
                 HandleSet<bool>(ref _isSecurityGroup, value.Value, ref _isSecurityGroupChanged, PropertyNames.GroupIsSecurityGroup);
             }
@@ -124,7 +123,7 @@ namespace System.DirectoryServices.AccountManagement
 
                 // We don't want to let them set a null value.
                 if (!value.HasValue)
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
 
                 HandleSet<GroupScope>(ref _groupScope, value.Value, ref _groupScopeChanged, PropertyNames.GroupGroupScope);
             }
@@ -239,7 +238,7 @@ namespace System.DirectoryServices.AccountManagement
         //
         // Internal "constructor": Used for constructing Groups returned by a query
         //
-        static internal GroupPrincipal MakeGroup(PrincipalContext ctx)
+        internal static GroupPrincipal MakeGroup(PrincipalContext ctx)
         {
             GroupPrincipal g = new GroupPrincipal(ctx);
             g.unpersisted = false;
@@ -361,7 +360,7 @@ namespace System.DirectoryServices.AccountManagement
 
         /// <summary>
         ///  Finds if the group is "small", meaning that it has less than MaxValRange values (usually 1500)
-        ///  The property list for the searcher of a group has "member" attribute. if there are more results than MaxValRange, there will also be a "member;range=..." attribute               
+        ///  The property list for the searcher of a group has "member" attribute. if there are more results than MaxValRange, there will also be a "member;range=..." attribute
         ///  we can cache the result and don't fear from changes through Add/Remove/Save because the completed/pending lists are looked up before the actual values are
         /// </summary>
         internal bool IsSmallGroup()

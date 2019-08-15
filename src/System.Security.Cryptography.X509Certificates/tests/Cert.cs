@@ -8,7 +8,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 {
     //
     // Helper class centralizes all loading of PFX's. Loading PFX's is a problem because of the key on disk that it creates and gets left behind
-    // if the certificate isn't properly disposed. Properly disposing PFX's imported into a X509Certificate2Collection is a pain because X509Certificate2Collection 
+    // if the certificate isn't properly disposed. Properly disposing PFX's imported into a X509Certificate2Collection is a pain because X509Certificate2Collection
     // doesn't implement IDisposable. To make this easier, we wrap these in an ImportedCollection class that does implement IDisposable.
     //
     internal static class Cert
@@ -17,7 +17,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         // netcoreapp-OSX: DefaultKeySet
         // netcoreapp-other: EphemeralKeySet
         internal static readonly X509KeyStorageFlags EphemeralIfPossible =
+#if !NO_EPHEMERALKEYSET_AVAILABLE
             !RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? X509KeyStorageFlags.EphemeralKeySet :
+#endif
             X509KeyStorageFlags.DefaultKeySet;
         //
         // The Import() methods have an overload for each X509Certificate2Collection.Import() overload.
@@ -86,4 +88,3 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         private X509Certificate2[] _certs;
     }
 }
-

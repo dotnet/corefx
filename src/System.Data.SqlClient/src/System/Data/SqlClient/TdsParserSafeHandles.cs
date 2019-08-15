@@ -21,7 +21,7 @@ namespace System.Data.SqlClient
         internal readonly SNINativeMethodWrapper.SqlAsyncCallbackDelegate ReadAsyncCallbackDispatcher = new SNINativeMethodWrapper.SqlAsyncCallbackDelegate(ReadDispatcher);
         internal readonly SNINativeMethodWrapper.SqlAsyncCallbackDelegate WriteAsyncCallbackDispatcher = new SNINativeMethodWrapper.SqlAsyncCallbackDelegate(WriteDispatcher);
 
-        private readonly UInt32 _sniStatus = TdsEnums.SNI_UNINITIALIZED;
+        private readonly uint _sniStatus = TdsEnums.SNI_UNINITIALIZED;
         private readonly EncryptionOptions _encryptionOption;
 
         private SNILoadHandle() : base(IntPtr.Zero, true)
@@ -34,7 +34,7 @@ namespace System.Data.SqlClient
             {
                 _sniStatus = SNINativeMethodWrapper.SNIInitialize();
 
-                UInt32 value = 0;
+                uint value = 0;
 
                 // VSDevDiv 479597: If initialize fails, don't call QueryInfo.
                 if (TdsEnums.SNI_SUCCESS == _sniStatus)
@@ -57,7 +57,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override protected bool ReleaseHandle()
+        protected override bool ReleaseHandle()
         {
             if (base.handle != IntPtr.Zero)
             {
@@ -72,7 +72,7 @@ namespace System.Data.SqlClient
             return true;
         }
 
-        public UInt32 Status
+        public uint Status
         {
             get
             {
@@ -88,44 +88,44 @@ namespace System.Data.SqlClient
             }
         }
 
-        private static void ReadDispatcher(IntPtr key, IntPtr packet, UInt32 error)
+        private static void ReadDispatcher(IntPtr key, IntPtr packet, uint error)
         {
-            // This is the app-domain dispatcher for all async read callbacks, It 
-            // simply gets the state object from the key that it is passed, and 
+            // This is the app-domain dispatcher for all async read callbacks, It
+            // simply gets the state object from the key that it is passed, and
             // calls the state object's read callback.
             Debug.Assert(IntPtr.Zero != key, "no key passed to read callback dispatcher?");
             if (IntPtr.Zero != key)
             {
                 // NOTE: we will get a null ref here if we don't get a key that
-                //       contains a GCHandle to TDSParserStateObject; that is 
+                //       contains a GCHandle to TDSParserStateObject; that is
                 //       very bad, and we want that to occur so we can catch it.
                 GCHandle gcHandle = (GCHandle)key;
                 TdsParserStateObject stateObj = (TdsParserStateObject)gcHandle.Target;
 
                 if (null != stateObj)
                 {
-                    stateObj.ReadAsyncCallback(IntPtr.Zero, packet, error);
+                    stateObj.ReadAsyncCallback(IntPtr.Zero, PacketHandle.FromNativePointer(packet), error);
                 }
             }
         }
 
-        private static void WriteDispatcher(IntPtr key, IntPtr packet, UInt32 error)
+        private static void WriteDispatcher(IntPtr key, IntPtr packet, uint error)
         {
-            // This is the app-domain dispatcher for all async write callbacks, It 
-            // simply gets the state object from the key that it is passed, and 
+            // This is the app-domain dispatcher for all async write callbacks, It
+            // simply gets the state object from the key that it is passed, and
             // calls the state object's write callback.
             Debug.Assert(IntPtr.Zero != key, "no key passed to write callback dispatcher?");
             if (IntPtr.Zero != key)
             {
                 // NOTE: we will get a null ref here if we don't get a key that
-                //       contains a GCHandle to TDSParserStateObject; that is 
+                //       contains a GCHandle to TDSParserStateObject; that is
                 //       very bad, and we want that to occur so we can catch it.
                 GCHandle gcHandle = (GCHandle)key;
                 TdsParserStateObject stateObj = (TdsParserStateObject)gcHandle.Target;
 
                 if (null != stateObj)
                 {
-                    stateObj.WriteAsyncCallback(IntPtr.Zero, packet, error);
+                    stateObj.WriteAsyncCallback(IntPtr.Zero, PacketHandle.FromNativePointer(packet), error);
                 }
             }
         }
@@ -133,7 +133,7 @@ namespace System.Data.SqlClient
 
     internal sealed class SNIHandle : SafeHandle
     {
-        private readonly UInt32 _status = TdsEnums.SNI_UNINITIALIZED;
+        private readonly uint _status = TdsEnums.SNI_UNINITIALIZED;
         private readonly bool _fSync = false;
 
         // creates a physical connection
@@ -182,7 +182,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override protected bool ReleaseHandle()
+        protected override bool ReleaseHandle()
         {
             // NOTE: The SafeHandle class guarantees this will be called exactly once.
             IntPtr ptr = base.handle;
@@ -197,7 +197,7 @@ namespace System.Data.SqlClient
             return true;
         }
 
-        internal UInt32 Status
+        internal uint Status
         {
             get
             {
@@ -225,7 +225,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override protected bool ReleaseHandle()
+        protected override bool ReleaseHandle()
         {
             // NOTE: The SafeHandle class guarantees this will be called exactly once.
             IntPtr ptr = base.handle;
@@ -241,7 +241,7 @@ namespace System.Data.SqlClient
     internal sealed class WritePacketCache : IDisposable
     {
         private bool _disposed;
-        private Stack<SNIPacket> _packets;
+        private readonly Stack<SNIPacket> _packets;
 
         public WritePacketCache()
         {

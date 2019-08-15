@@ -7,15 +7,17 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
+using Microsoft.DotNet.XUnitExtensions;
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 namespace System.Tests
 {
-    public class EnvironmentTests : RemoteExecutorTestBase
+    public class EnvironmentTests : FileCleanupTestBase
     {
         [Fact]
         public void CurrentDirectory_Null_Path_Throws_ArgumentNullException()
@@ -38,7 +40,7 @@ namespace System.Tests
         [Fact]
         public void CurrentDirectory_SetToValidOtherDirectory()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 Environment.CurrentDirectory = TestDirectory;
                 Assert.Equal(Directory.GetCurrentDirectory(), Environment.CurrentDirectory);
@@ -51,7 +53,7 @@ namespace System.Tests
                     Assert.Equal(TestDirectory, Directory.GetCurrentDirectory());
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -132,6 +134,28 @@ namespace System.Tests
             Assert.Contains(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "Windows" : "Unix", versionString);
         }
 
+        // On Unix, we must parse the version from uname -r
+        [Theory]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [InlineData("2.6.19-1.2895.fc6", 2, 6, 19, 1)]
+        [InlineData("xxx1yyy2zzz3aaa4bbb", 1, 2, 3, 4)]
+        [InlineData("2147483647.2147483647.2147483647.2147483647", int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue)]
+        [InlineData("0.0.0.0", 0, 0, 0, 0)]
+        [InlineData("-1.-1.-1.-1", 1, 1, 1, 1)]
+        [InlineData("nelknet 4.15.0-10000000000-generic", 4, 15, 0, int.MaxValue)] // integer overflow
+        [InlineData("nelknet 4.15.0-24201807041620-generic", 4, 15, 0, int.MaxValue)] // integer overflow
+        [InlineData("", 0, 0, 0, 0)]
+        [InlineData("1abc", 1, 0, 0, 0)]
+        public void OSVersion_ParseVersion(string input, int major, int minor, int build, int revision)
+        {
+            var getOSMethod = typeof(Environment).GetMethod("GetOperatingSystem", BindingFlags.Static | BindingFlags.NonPublic);
+
+            var expected = new Version(major, minor, build, revision);
+            var actual = ((OperatingSystem)getOSMethod.Invoke(null, new object[] { input })).Version;
+
+            Assert.Equal(expected, actual);
+        }
+
         [Fact]
         public void SystemPageSize_Valid()
         {
@@ -149,9 +173,9 @@ namespace System.Tests
         }
 
         [Fact]
-        public void Version_MatchesFixedVersion()
+        public void Version_Valid()
         {
-            Assert.Equal(new Version(4, 0, 30319, 42000), Environment.Version);
+            Assert.True(Environment.Version >= new Version(3, 0));
         }
 
         [Fact]
@@ -171,28 +195,28 @@ namespace System.Tests
         [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
         [OuterLoop]
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/21404", TargetFrameworkMonikers.Uap)]
+        [ActiveIssue("21404", TargetFrameworkMonikers.Uap)]
         public void FailFast_ExpectFailureExitCode()
         {
-            using (RemoteInvokeHandle handle = RemoteInvoke(() => { Environment.FailFast("message"); return SuccessExitCode; }))
+            using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(() => { Environment.FailFast("message"); return RemoteExecutor.SuccessExitCode; }))
             {
                 Process p = handle.Process;
                 handle.Process = null;
                 p.WaitForExit();
-                Assert.NotEqual(SuccessExitCode, p.ExitCode);
+                Assert.NotEqual(RemoteExecutor.SuccessExitCode, p.ExitCode);
             }
 
-            using (RemoteInvokeHandle handle = RemoteInvoke(() => { Environment.FailFast("message", new Exception("uh oh")); return SuccessExitCode; }))
+            using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(() => { Environment.FailFast("message", new Exception("uh oh")); return RemoteExecutor.SuccessExitCode; }))
             {
                 Process p = handle.Process;
                 handle.Process = null;
                 p.WaitForExit();
-                Assert.NotEqual(SuccessExitCode, p.ExitCode);
+                Assert.NotEqual(RemoteExecutor.SuccessExitCode, p.ExitCode);
             }
         }
 
         [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework does not have dotnet/coreclr#16622")]
+        [ActiveIssue("29869", TargetFrameworkMonikers.Uap)]
         [Fact]
         public void FailFast_ExceptionStackTrace_ArgumentException()
         {
@@ -200,22 +224,21 @@ namespace System.Tests
             psi.RedirectStandardError = true;
             psi.RedirectStandardOutput = true;
 
-            using (RemoteInvokeHandle handle = RemoteInvoke(
-                () => { Environment.FailFast("message", new ArgumentException("bad arg")); return SuccessExitCode; },
+            using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(
+                () => { Environment.FailFast("message", new ArgumentException("bad arg")); return RemoteExecutor.SuccessExitCode; },
                 new RemoteInvokeOptions { StartInfo = psi }))
             {
                 Process p = handle.Process;
                 handle.Process = null;
                 p.WaitForExit();
                 string consoleOutput = p.StandardError.ReadToEnd();
-                Assert.Contains("Exception details:", consoleOutput);
                 Assert.Contains("ArgumentException:", consoleOutput);
                 Assert.Contains("bad arg", consoleOutput);
             }
         }
 
         [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework does not have dotnet/coreclr#16622")]
+        [ActiveIssue("29869", TargetFrameworkMonikers.Uap)]
         [Fact]
         public void FailFast_ExceptionStackTrace_StackOverflowException()
         {
@@ -224,22 +247,21 @@ namespace System.Tests
             psi.RedirectStandardError = true;
             psi.RedirectStandardOutput = true;
 
-            using (RemoteInvokeHandle handle = RemoteInvoke(
-                () => { Environment.FailFast("message", new StackOverflowException("SO exception")); return SuccessExitCode; },
+            using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(
+                () => { Environment.FailFast("message", new StackOverflowException("SO exception")); return RemoteExecutor.SuccessExitCode; },
                 new RemoteInvokeOptions { StartInfo = psi }))
             {
                 Process p = handle.Process;
                 handle.Process = null;
                 p.WaitForExit();
                 string consoleOutput = p.StandardError.ReadToEnd();
-                Assert.Contains("Exception details:", consoleOutput);
                 Assert.Contains("StackOverflowException", consoleOutput);
                 Assert.Contains("SO exception", consoleOutput);
             }
         }
 
         [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework does not have dotnet/coreclr#16622")]
+        [ActiveIssue("29869", TargetFrameworkMonikers.Uap)]
         [Fact]
         public void FailFast_ExceptionStackTrace_InnerException()
         {
@@ -248,15 +270,14 @@ namespace System.Tests
             psi.RedirectStandardError = true;
             psi.RedirectStandardOutput = true;
 
-            using (RemoteInvokeHandle handle = RemoteInvoke(
-                () => { Environment.FailFast("message", new ArgumentException("first exception", new NullReferenceException("inner exception"))); return SuccessExitCode; },
+            using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(
+                () => { Environment.FailFast("message", new ArgumentException("first exception", new NullReferenceException("inner exception"))); return RemoteExecutor.SuccessExitCode; },
                 new RemoteInvokeOptions { StartInfo = psi }))
             {
                 Process p = handle.Process;
                 handle.Process = null;
                 p.WaitForExit();
                 string consoleOutput = p.StandardError.ReadToEnd();
-                Assert.Contains("Exception details:", consoleOutput);
                 Assert.Contains("first exception", consoleOutput);
                 Assert.Contains("inner exception", consoleOutput);
                 Assert.Contains("ArgumentException", consoleOutput);
@@ -314,8 +335,7 @@ namespace System.Tests
         [Theory]
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests OS-specific environment
         [InlineData(Environment.SpecialFolder.UserProfile, Environment.SpecialFolderOption.None)]
-        [InlineData(Environment.SpecialFolder.Personal, Environment.SpecialFolderOption.None)]
-        [InlineData(Environment.SpecialFolder.MyDocuments, Environment.SpecialFolderOption.None)]
+        [InlineData(Environment.SpecialFolder.MyDocuments, Environment.SpecialFolderOption.None)] // MyDocuments == Personal
         [InlineData(Environment.SpecialFolder.CommonApplicationData, Environment.SpecialFolderOption.None)]
         [InlineData(Environment.SpecialFolder.CommonTemplates, Environment.SpecialFolderOption.DoNotVerify)]
         [InlineData(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.DoNotVerify)]
@@ -460,7 +480,7 @@ namespace System.Tests
         [InlineData(Environment.SpecialFolder.SystemX86)]
         [InlineData(Environment.SpecialFolder.Windows)]
         [PlatformSpecific(TestPlatforms.Windows)]  // Tests OS-specific environment
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)] // Don't run on UAP
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // Don't run on UAP
         public unsafe void GetFolderPath_Windows(Environment.SpecialFolder folder)
         {
             string knownFolder = Environment.GetFolderPath(folder);

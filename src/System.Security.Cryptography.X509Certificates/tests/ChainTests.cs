@@ -8,14 +8,13 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using Test.Cryptography;
 using Xunit;
 
 namespace System.Security.Cryptography.X509Certificates.Tests
 {
     public static class ChainTests
     {
-        internal static bool CanModifyStores { get; } = TestEnvironmentConfiguration.CanModifyStores;
-
         private static bool TrustsMicrosoftDotComRoot
         {
             get
@@ -124,8 +123,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
+        [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
-        [ConditionalFact(nameof(CanModifyStores))]
         public static void VerifyChainFromHandle_Unix()
         {
             using (var microsoftDotCom = new X509Certificate2(TestData.MicrosoftDotComSslCertBytes))
@@ -176,6 +175,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 chain.ChainPolicy.ExtraStore.Add(sampleCert);
                 bool valid = chain.Build(sampleCert);
                 Assert.False(valid);
+                chainHolder.DisposeChainElements();
 
                 chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
                 chain.ChainPolicy.VerificationTime = new DateTime(2015, 10, 15, 12, 01, 01, DateTimeKind.Local);
@@ -185,6 +185,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.True(valid, "Chain built validly");
 
                 Assert.Equal(1, chain.ChainElements.Count);
+                chainHolder.DisposeChainElements();
 
                 chain.Reset();
                 Assert.Equal(0, chain.ChainElements.Count);
@@ -264,9 +265,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 DateTime local = utcTime.ToLocalTime();
                 DateTime unspecified = new DateTime(local.Ticks);
 
-                testCases.Add(new object[] { utcTime, true, utcTime.Kind });
-                testCases.Add(new object[] { local, true, local.Kind });
-                testCases.Add(new object[] { unspecified, true, unspecified.Kind });
+                testCases.Add(new object[] { utcTime, true });
+                testCases.Add(new object[] { local, true });
+                testCases.Add(new object[] { unspecified, true });
             }
 
             foreach (DateTime utcTime in invalidTimes)
@@ -274,9 +275,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 DateTime local = utcTime.ToLocalTime();
                 DateTime unspecified = new DateTime(local.Ticks);
 
-                testCases.Add(new object[] { utcTime, false, utcTime.Kind });
-                testCases.Add(new object[] { local, false, local.Kind });
-                testCases.Add(new object[] { unspecified, false, unspecified.Kind });
+                testCases.Add(new object[] { utcTime, false });
+                testCases.Add(new object[] { local, false });
+                testCases.Add(new object[] { unspecified, false });
             }
 
             return testCases;
@@ -284,7 +285,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
         [Theory]
         [MemberData(nameof(VerifyExpressionData))]
-        public static void VerifyExpiration_LocalTime(DateTime verificationTime, bool shouldBeValid, DateTimeKind kind)
+        public static void VerifyExpiration_LocalTime(DateTime verificationTime, bool shouldBeValid)
         {
             using (var microsoftDotCom = new X509Certificate2(TestData.MicrosoftDotComSslCertBytes))
             using (var microsoftDotComIssuer = new X509Certificate2(TestData.MicrosoftDotComIssuerBytes))
@@ -414,14 +415,58 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
-        [ConditionalFact(nameof(TrustsMicrosoftDotComRoot), nameof(CanModifyStores))]
+        [ConditionalFact(nameof(TrustsMicrosoftDotComRoot))]
+        public static void BuildChain_FailOnlyApplicationPolicy()
+        {
+            using (var microsoftDotCom = new X509Certificate2(TestData.MicrosoftDotComSslCertBytes))
+            using (var microsoftDotComRoot = new X509Certificate2(TestData.MicrosoftDotComRootBytes))
+            using (ChainHolder holder = new ChainHolder())
+            {
+                holder.Chain.ChainPolicy.ApplicationPolicy.Add(new Oid("0.1.2.3.4", null));
+                holder.Chain.ChainPolicy.VerificationTime = microsoftDotCom.NotBefore.AddDays(1);
+                holder.Chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+
+                Assert.False(holder.Chain.Build(microsoftDotCom));
+
+                Assert.Equal(
+                    X509ChainStatusFlags.NotValidForUsage,
+                    holder.Chain.ChainStatus.Aggregate(
+                        X509ChainStatusFlags.NoError,
+                        (a, status) => a | status.Status));
+
+                Assert.Equal(3, holder.Chain.ChainElements.Count);
+
+                Assert.Equal(microsoftDotCom.RawData, holder.Chain.ChainElements[0].Certificate.RawData);
+                Assert.Equal(microsoftDotComRoot.RawData, holder.Chain.ChainElements[2].Certificate.RawData);
+
+                Assert.Equal(
+                    X509ChainStatusFlags.NotValidForUsage,
+                    holder.Chain.ChainElements[0].ChainElementStatus.Aggregate(
+                        X509ChainStatusFlags.NoError,
+                        (a, status) => a | status.Status));
+
+                Assert.Equal(
+                    X509ChainStatusFlags.NotValidForUsage,
+                    holder.Chain.ChainElements[1].ChainElementStatus.Aggregate(
+                        X509ChainStatusFlags.NoError,
+                        (a, status) => a | status.Status));
+
+                Assert.Equal(
+                    X509ChainStatusFlags.NotValidForUsage,
+                    holder.Chain.ChainElements[2].ChainElementStatus.Aggregate(
+                        X509ChainStatusFlags.NoError,
+                        (a, status) => a | status.Status));
+            }
+        }
+
+        [ConditionalFact(nameof(TrustsMicrosoftDotComRoot))]
         [OuterLoop(/* Modifies user certificate store */)]
         public static void BuildChain_MicrosoftDotCom_WithRootCertInUserAndSystemRootCertStores()
         {
-            // Verifies that when the same root cert is placed in both a user and machine root certificate store, 
+            // Verifies that when the same root cert is placed in both a user and machine root certificate store,
             // any certs chain building to that root cert will build correctly
-            // 
-            // We use a copy of the microsoft.com SSL certs and root certs to validate that the chain can build 
+            //
+            // We use a copy of the microsoft.com SSL certs and root certs to validate that the chain can build
             // successfully
 
             bool shouldInstallCertToUserStore = true;
@@ -449,9 +494,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     Assert.True(foundCert, string.Format("Did not find expected certificate with thumbprint '{0}' in the machine root store", microsoftDotComRoot.Thumbprint));
                 }
 
-                // Concievably at this point there could still be something wrong and we still don't chain build correctly - if that's 
-                // the case, then there's likely something wrong with the machine. Validating that happy path is out of scope 
-                // of this particular test. 
+                // Concievably at this point there could still be something wrong and we still don't chain build correctly - if that's
+                // the case, then there's likely something wrong with the machine. Validating that happy path is out of scope
+                // of this particular test.
 
                 // Check that microsoft.com's root certificate is NOT installed on in the user cert store as a sanity step
                 // We won't try to install the microsoft.com root cert into the user root store if it's already there
@@ -556,14 +601,23 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                     for (int j = 0; j < onlineChain.ChainElements.Count; j++)
                     {
+                        X509ChainStatusFlags chainFlags = onlineChain.AllStatusFlags();
+
+                        const X509ChainStatusFlags WontCheck =
+                            X509ChainStatusFlags.RevocationStatusUnknown | X509ChainStatusFlags.UntrustedRoot;
+
+                        if (chainFlags == WontCheck)
+                        {
+                            Console.WriteLine($"{nameof(VerifyWithRevocation)}: online chain failed with {{{chainFlags}}}, skipping");
+                            return;
+                        }
+
                         X509ChainElement chainElement = onlineChain.ChainElements[j];
 
                         // Since `NoError` gets mapped as the empty array, just look for non-empty arrays
                         if (chainElement.ChainElementStatus.Length > 0)
                         {
-                            X509ChainStatusFlags allFlags = chainElement.ChainElementStatus.Aggregate(
-                                X509ChainStatusFlags.NoError,
-                                (cur, status) => cur | status.Status);
+                            X509ChainStatusFlags allFlags = chainElement.AllStatusFlags();
 
                             Console.WriteLine(
                                 $"{nameof(VerifyWithRevocation)}: online attempt {i} - errors at depth {j}: {allFlags}");
@@ -594,7 +648,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 // The root CA is not expected to be installed on everyone's machines,
                 // so allow for it to report UntrustedRoot, but nothing else..
                 X509ChainStatus[] rootElementStatus = onlineChain.ChainElements[2].ChainElementStatus;
-                
+
                 if (rootElementStatus.Length != 0)
                 {
                     Assert.Equal(1, rootElementStatus.Length);
@@ -629,6 +683,16 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         {
             using (var chain = X509Chain.Create())
                 Assert.NotNull(chain);
+        }
+
+        [Fact]
+        public static void BuildChainInvalidValues()
+        {
+            using (var chain = X509Chain.Create())
+            {
+                AssertExtensions.Throws<ArgumentException>("certificate", () => chain.Build(null));
+                AssertExtensions.Throws<ArgumentException>("certificate", () => chain.Build(new X509Certificate2()));
+            }
         }
 
         [Fact]
@@ -670,10 +734,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 chain.Build(cert);
 
-                X509ChainStatusFlags allFlags =
-                    chain.ChainStatus.Select(cs => cs.Status).Aggregate(
-                        X509ChainStatusFlags.NoError,
-                        (a, b) => a | b);
+                X509ChainStatusFlags allFlags = chain.AllStatusFlags();
 
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
@@ -689,6 +750,187 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 Assert.Equal(expectedFlags, allFlags);
             }
+        }
+
+        [Fact]
+        public static void ChainErrorsAtMultipleLayers()
+        {
+            // These certificates were generated for this test using CertificateRequest
+            // but the netstandard(2.0) version of this test library doesn't have
+            // CertificateRequest available.
+            //
+            // These certificates have been hard-coded to enable the scenario on
+            // netstandard.
+            byte[] endEntityBytes = Encoding.ASCII.GetBytes(@"
+-----BEGIN CERTIFICATE-----
+MIIC6DCCAdCgAwIBAgIQAKjmD7+TWUwQN2ucajn9kTANBgkqhkiG9w0BAQsFADAXMRUwEwYDVQQD
+EwxJbnRlcm1lZGlhdGUwHhcNMTkwMzAzMjM1NzA3WhcNMTkwNjAzMjM1NzA3WjAVMRMwEQYDVQQD
+EwpFbmQtRW50aXR5MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxTybBkpMdQ8IeL1C
+jG755+ifQfqjNt4+Xhm3pbMi+nCRD68tym1xviUka1hQmx+I1mptswW0Laq1owur0r2KanKoIP2F
+i2h6orOOdslMFPMWqCuNTU4C7cUxokaWah0R7FihwW+aBeWgxG948Cvt+ByQeR1ns9yo7wa8f8kT
+IwzOUu0v1Yj5oW5bOn/cmIBE1C5CD5RivPMGUXX8mZ/myNh16dLQqJW5yQt/uvfr7lkNWC0qq+v7
+Ely4+X27acwMTdtk4chcr5/bTS5FXV7HVqwhajOmm6WrzagPZBELWKRk2EaJkha/MLrBqNfHExs4
+sx2ks+TTclrOrRzG+AUBuQIDAQABozIwMDAMBgNVHRMBAf8EAjAAMAsGA1UdDwQEAwIF4DATBgNV
+HSUEDDAKBggrBgEFBQcDAjANBgkqhkiG9w0BAQsFAAOCAQEAbrEbiw4gpgWi3SJ+sGrfcWCAldpx
+0735hkkYz94OsJjIwWfgQ03pYZwjcnIE4Ln0PU2E52D2ldsJlAE376hpNxdO0X4RLpZVZPEjKGTF
+v2Rf+d0cpqha5J//mqcTTm7F58JRKyfEQn0pqfxx4VyXeLfEsqYbT3kY7ufK0km3Jst0DGw2AGue
+MPmiZicaNlXPVO9vyW4s6J23+kol6X8K2rnVht9jagfnOQ990Ux2xXGyDGM4I0pvW1Zo4vid/eli
+psHHsU9xg0o7L2WXD5qYhD2JCQIVWNRmRZCf1luWlKqUaqWWONMJ44hk8Md+ohxpyCRmbtLRZPzd
+wlkQzPsc9A==
+-----END CERTIFICATE-----");
+            byte[] intermediateBytes = Encoding.ASCII.GetBytes(@"
+-----BEGIN CERTIFICATE-----
+MIIC1DCCAbygAwIBAgIPRoY1rB2tMVJeYB4GILkNMA0GCSqGSIb3DQEBCwUAMBQxEjAQBgNVBAMT
+CVRlc3QgUm9vdDAeFw0xOTAyMTgyMzU3MDdaFw0yMDAyMTgyMzU3MDdaMBcxFTATBgNVBAMTDElu
+dGVybWVkaWF0ZTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALxYzEN6nYvQ0TOg/jOF
+wdBGRUYhTiJpYGFBh9826X5vKlbCS1UAcjFRXmKtJ4WZ8v3peCBPxvVe/1KR38+MWNVtO4B1GBvr
+qR2T9k1ewgn0lO3i6krnIAhJQ+F94xGcsRAfZjXBh7lOmTE9ZlDhDJWkehBIs5TteiBOfbGDml2S
+v7x81cmm2o/sDoP1oVGhezOkFtI2/NdZYKxRthnjDywN3W4KFataJFATVv/yq+QjcLEWrXFRpzDE
+rpVdYmj66kaAnu9D4sHhFqOk1SX3JvcB361stVuUPp2ri75MaaXakweH6X/Yb4nPNV6m1ENwMoDy
+HqrZrHSK8SpzfhY9aB0CAwEAAaMgMB4wDwYDVR0TAQH/BAUwAwEB/zALBgNVHQ8EBAMCAYYwDQYJ
+KoZIhvcNAQELBQADggEBAC4oJ2SH+Ov4QIMXo7mwGSrwONkdMuKyyM9shZiGEH+zIO9SVuPuvtQG
+cePR2bijSz2DtjySi+ST8y3Ql7A3isfbXYPDFmnkzKP6hGvLkctc8eO8U1x7ny+QW1max0gm3UA8
+CY0IMP8pCHUZH9OX/K0N9L+GItqlBK8G4grJ4o43da2x9L0hIrdauPadaGcJalf8k1ymhJ4VDj7t
+ueuTl2qTtbBh015GuEld61EBXSBLIUqwOAeFYrNJbC4J2mXgnLTWC380cBf5KWeSdjLYgk2sZ1V4
+FKKQecZIhxdlDGzMAbbmEV+2EqS+As2C7+y4dkpG4nnbQe/4AFr8vekHdrI=
+-----END CERTIFICATE-----");
+            byte[] rootBytes = Encoding.ASCII.GetBytes(@"
+-----BEGIN CERTIFICATE-----
+MIICyjCCAbKgAwIBAgIIKKt3K3rRbvQwDQYJKoZIhvcNAQELBQAwFDESMBAGA1UEAxMJVGVzdCBS
+b290MB4XDTE5MDIwNDIzNTcwN1oXDTIxMDIwNDIzNTcwN1owFDESMBAGA1UEAxMJVGVzdCBSb290
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiM7tv4YvqmWYGF1vbeM2cQWV1NVBxKU4
+ZK5XEJHZirzE2HCiA0+hI/UD7xnfBrzGQRLsHnp9vfhBi/0wenSIKTckxcGGpuM+JzNoVF97uFSd
+bKvfIwQZzbdRGyTF1eoQWCylsZsnZOXg8c/yoFhG2TJB38l09RYn+HkMkapQERFKSXPZ7taNVJNb
+Sedp3l9jO0aVmh9rmJ7taBXBfWDmSWqhkxjkEcbiRxB7z5K8YxZBlHQCLqf43JiCbKIMBHdzTg+N
+lEBkBGp6T2hoJ4/A1uwvhesjmyqagZrC2NnzOWOxUQ/WujIUfS62ii/yDkP4Jo3745lJ9XXoPbIw
+AwvWYQIDAQABoyAwHjAPBgNVHRMBAf8EBTADAQH/MAsGA1UdDwQEAwIBhjANBgkqhkiG9w0BAQsF
+AAOCAQEAA/pfswrUzcLP5UfmHgQDc1slJjh0btnkN+4dxCCTLcnteJCTumYw+/82qL+O4t1KlzlS
+2Eqgyx0u48YmwDp/5jWAvT8RX8pvV3Prd7T8/dp/ucES7R9r3zF2Rmw5Me9iq1yaLAypGyBGqV1J
+HAwJjH/eKZ5iuOMhFljs2R5Gh5rRsQjNVUCRsolCds4d1f+76fi2SGaKqkAA4gzg1c71SPTAaUPR
+ythjxnoCBDVFmwV5opXZj9qIZoUdH92gCVFgMWkxWCYWzyH78uIUzV1oo+KNwK1SCTnfVHcfWRIL
+tHP28fj0LUop/QFojSZPsaPAW6JvoQ0t4hd6WoyX6z7FsA==
+-----END CERTIFICATE-----");
+
+            using (X509Certificate2 endEntityCert = new X509Certificate2(endEntityBytes))
+            using (X509Certificate2 intermediateCert = new X509Certificate2(intermediateBytes))
+            using (X509Certificate2 rootCert = new X509Certificate2(rootBytes))
+            using (ChainHolder chainHolder = new ChainHolder())
+            {
+                X509Chain chain = chainHolder.Chain;
+                chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                chain.ChainPolicy.VerificationFlags |= X509VerificationFlags.AllowUnknownCertificateAuthority;
+                chain.ChainPolicy.ExtraStore.Add(intermediateCert);
+                chain.ChainPolicy.ExtraStore.Add(rootCert);
+                chain.ChainPolicy.VerificationTime = endEntityCert.NotAfter.AddDays(1);
+
+                Assert.False(chain.Build(endEntityCert));
+
+                Assert.Equal(3, chain.ChainElements.Count);
+                Assert.Equal(X509ChainStatusFlags.NotTimeValid, chain.ChainElements[0].AllStatusFlags());
+                Assert.Equal(X509ChainStatusFlags.NoError, chain.ChainElements[1].AllStatusFlags());
+                Assert.Equal(X509ChainStatusFlags.UntrustedRoot, chain.ChainElements[2].AllStatusFlags());
+
+                Assert.Equal(
+                    X509ChainStatusFlags.NotTimeValid | X509ChainStatusFlags.UntrustedRoot,
+                    chain.AllStatusFlags());
+            }
+        }
+
+        [Fact]
+        public static void ChainWithEmptySubject()
+        {
+            using (var cert = new X509Certificate2(TestData.EmptySubjectCertificate))
+            using (var issuer = new X509Certificate2(TestData.EmptySubjectIssuerCertificate))
+            using (ChainHolder chainHolder = new ChainHolder())
+            {
+                X509Chain chain = chainHolder.Chain;
+                chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                chain.ChainPolicy.VerificationFlags |= X509VerificationFlags.AllowUnknownCertificateAuthority;
+                chain.ChainPolicy.ExtraStore.Add(issuer);
+
+                Assert.True(chain.Build(cert), "chain.Build(cert)");
+                Assert.Equal(2, chain.ChainElements.Count);
+                Assert.Equal(string.Empty, cert.Subject);
+                Assert.Equal(cert.RawData, chain.ChainElements[0].Certificate.RawData);
+                Assert.Equal(issuer.RawData, chain.ChainElements[1].Certificate.RawData);
+            }
+        }
+
+        [Fact]
+        public static void BuildInvalidSignatureTwice()
+        {
+            byte[] bytes = (byte[])TestData.MsCertificate.Clone();
+            bytes[bytes.Length - 1] ^= 0xFF;
+
+            using (X509Certificate2 cert = new X509Certificate2(bytes))
+            using (ChainHolder chainHolder = new ChainHolder())
+            {
+                X509Chain chain = chainHolder.Chain;
+                chain.ChainPolicy.VerificationTime = cert.NotBefore.AddHours(2);
+                chain.ChainPolicy.VerificationFlags =
+                    X509VerificationFlags.AllowUnknownCertificateAuthority;
+
+                chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+
+                int iter = 0;
+
+                void CheckChain()
+                {
+                    iter++;
+                    bool valid = chain.Build(cert);
+                    X509ChainStatusFlags allFlags = chain.AllStatusFlags();
+
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    {
+                        // OSX considers this to be valid because it doesn't report NotSignatureValid,
+                        // just PartialChain ("I couldn't find an issuer that made the signature work"),
+                        // and PartialChain + AllowUnknownCertificateAuthority == pass.
+                        Assert.True(valid, $"Chain is valid on execution {iter}");
+
+                        Assert.Equal(1, chain.ChainElements.Count);
+
+                        Assert.Equal(
+                            X509ChainStatusFlags.PartialChain,
+                            allFlags);
+                    }
+                    else
+                    {
+                        // These asserts are "most informative first".
+                        // (There was an interval where valid was reporting as true in CI, but
+                        // that is the least informative failure)
+
+                        // Clear UntrustedRoot, if it happened.
+                        allFlags &= ~X509ChainStatusFlags.UntrustedRoot;
+
+                        Assert.Equal(
+                            X509ChainStatusFlags.NotSignatureValid,
+                            allFlags);
+
+                        Assert.Equal(3, chain.ChainElements.Count);
+
+                        Assert.False(valid, $"Chain is valid on execution {iter}");
+                    }
+
+                    chainHolder.DisposeChainElements();
+                }
+
+                CheckChain();
+                CheckChain();
+            }
+        }
+
+        internal static X509ChainStatusFlags AllStatusFlags(this X509Chain chain)
+        {
+            return chain.ChainStatus.Aggregate(
+                X509ChainStatusFlags.NoError,
+                (f, s) => f | s.Status);
+        }
+
+        internal static X509ChainStatusFlags AllStatusFlags(this X509ChainElement chainElement)
+        {
+            return chainElement.ChainElementStatus.Aggregate(
+                X509ChainStatusFlags.NoError,
+                (f, s) => f | s.Status);
         }
     }
 }

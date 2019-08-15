@@ -186,7 +186,8 @@ namespace System.Tests
         [Fact]
         public static void InvalidInput()
         {
-            Assert.Throws<ArgumentNullException>(() => Convert.FromBase64CharArray(null, 0, 3));
+            Assert.Throws<ArgumentNullException>("inArray", () => Convert.FromBase64CharArray(null, 0, 3));
+            Assert.Throws<ArgumentNullException>("s", () => Convert.FromBase64String(null));
 
             // Input must be at least 4 characters long
             VerifyInvalidInput("No");
@@ -208,6 +209,16 @@ namespace System.Tests
             VerifyInvalidInput("abcdab==abcd");
             VerifyInvalidInput("abcda===abcd");
             VerifyInvalidInput("abcd====abcd");
+
+            // Input must not contain extra trailing padding characters
+            VerifyInvalidInput("=");
+            VerifyInvalidInput("abc===");
+        }
+
+        [Fact]
+        public static void ExtraPaddingCharacter()
+        {
+            VerifyInvalidInput("abcdxyz=" + "=");
         }
 
         [Fact]

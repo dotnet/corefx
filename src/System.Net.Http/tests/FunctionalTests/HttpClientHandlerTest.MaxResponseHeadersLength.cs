@@ -8,13 +8,16 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    public abstract class HttpClientHandler_MaxResponseHeadersLength_Test : HttpClientTestBase
+    public abstract class HttpClientHandler_MaxResponseHeadersLength_Test : HttpClientHandlerTestBase
     {
+        public HttpClientHandler_MaxResponseHeadersLength_Test(ITestOutputHelper output) : base(output) { }
+
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not currently supported on UAP")]
         [Theory]
         [InlineData(0)]
@@ -45,7 +48,7 @@ namespace System.Net.Http.Functional.Tests
         public async Task SetAfterUse_Throws()
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 handler.MaxResponseHeadersLength = 1;
                 (await client.GetStreamAsync(Configuration.Http.RemoteEchoServer)).Dispose();
@@ -53,6 +56,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not currently supported on UAP")]
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task InfiniteSingleHeader_ThrowsException()
@@ -66,7 +70,7 @@ namespace System.Net.Http.Functional.Tests
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
                 using (HttpClientHandler handler = CreateHttpClientHandler())
-                using (var client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     Task<HttpResponseMessage> getAsync = client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
                     await server.AcceptConnectionAsync(async connection =>
@@ -86,8 +90,12 @@ namespace System.Net.Http.Functional.Tests
                             catch { }
                         });
 
-                        await Assert.ThrowsAsync<HttpRequestException>(() => getAsync);
+                        Exception e = await Assert.ThrowsAsync<HttpRequestException>(() => getAsync);
                         cts.Cancel();
+                        if (UseSocketsHttpHandler)
+                        {
+                            Assert.Contains((handler.MaxResponseHeadersLength * 1024).ToString(), e.ToString());
+                        }
                         await serverTask;
                     });
                 }
@@ -108,7 +116,7 @@ namespace System.Net.Http.Functional.Tests
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
                 using (HttpClientHandler handler = CreateHttpClientHandler())
-                using (var client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     if (maxResponseHeadersLength.HasValue)
                     {
@@ -127,7 +135,11 @@ namespace System.Net.Http.Functional.Tests
                         }
                         else
                         {
-                            await Assert.ThrowsAsync<HttpRequestException>(() => getAsync);
+                            Exception e = await Assert.ThrowsAsync<HttpRequestException>(() => getAsync);
+                            if (UseSocketsHttpHandler)
+                            {
+                                Assert.Contains((handler.MaxResponseHeadersLength * 1024).ToString(), e.ToString());
+                            }
                             try { await serverTask; } catch { }
                         }
                     });
@@ -163,7 +175,7 @@ namespace System.Net.Http.Functional.Tests
             buffer.Append(new string('c', responseHeadersSizeInBytes - (buffer.Length + 4)));
             buffer.Append("\r\n\r\n");
 
-            string response = buffer.ToString();            
+            string response = buffer.ToString();
             Assert.Equal(responseHeadersSizeInBytes, response.Length);
             return response;
         }

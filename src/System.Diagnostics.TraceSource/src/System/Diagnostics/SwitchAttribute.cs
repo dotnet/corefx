@@ -14,7 +14,7 @@ namespace System.Diagnostics
     {
         private Type _type;
         private string _name;
-        
+
         public SwitchAttribute(string switchName, Type switchType)
         {
             SwitchName = switchName;
@@ -67,7 +67,7 @@ namespace System.Diagnostics
             return ret;
         }
 
-        static void GetAllRecursive(Type type, List<object> switchAttribs)
+        private static void GetAllRecursive(Type type, List<object> switchAttribs)
         {
             GetAllRecursive((MemberInfo)type, switchAttribs);
             MemberInfo[] members = type.GetMembers(BindingFlags.Public | BindingFlags.NonPublic |
@@ -82,11 +82,10 @@ namespace System.Diagnostics
             }
         }
 
-        static void GetAllRecursive(MemberInfo member, List<object> switchAttribs)
+        private static void GetAllRecursive(MemberInfo member, List<object> switchAttribs)
         {
             object[] attribs = member.GetCustomAttributes(typeof(SwitchAttribute), false);
             switchAttribs.AddRange(attribs);
         }
     }
 }
-

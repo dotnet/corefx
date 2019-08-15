@@ -4,7 +4,7 @@
 // System.Net.HttpEndPointManager
 //
 // Author:
-//	Gonzalo Paniagua Javier (gonzalo@ximian.com)
+//  Gonzalo Paniagua Javier (gonzalo@ximian.com)
 //
 // Copyright (c) 2005 Novell, Inc. (http://www.novell.com)
 //
@@ -15,10 +15,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -83,7 +83,7 @@ namespace System.Net
                 // root can't be -1 here, since we've already checked for ending '/' in ListenerPrefix.
                 int root = p.IndexOf('/', colon, p.Length - colon);
                 string portString = p.Substring(colon + 1, root - colon - 1);
-                
+
                 int port;
                 if (!int.TryParse(portString, out port) || port <= 0 || port >= 65536)
                 {
@@ -95,7 +95,7 @@ namespace System.Net
             if (lp.Host != "*" && lp.Host != "+" && Uri.CheckHostName(lp.Host) == UriHostNameType.Unknown)
                 throw new HttpListenerException((int)HttpStatusCode.BadRequest, SR.net_listener_host);
 
-            if (lp.Path.IndexOf('%') != -1)
+            if (lp.Path.Contains('%'))
                 throw new HttpListenerException((int)HttpStatusCode.BadRequest, SR.net_invalid_path);
 
             if (lp.Path.IndexOf("//", StringComparison.Ordinal) != -1)
@@ -202,7 +202,7 @@ namespace System.Net
         private static void RemovePrefixInternal(string prefix, HttpListener listener)
         {
             ListenerPrefix lp = new ListenerPrefix(prefix);
-            if (lp.Path.IndexOf('%') != -1)
+            if (lp.Path.Contains('%'))
                 return;
 
             if (lp.Path.IndexOf("//", StringComparison.Ordinal) != -1)

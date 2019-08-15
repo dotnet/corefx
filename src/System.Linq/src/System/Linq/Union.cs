@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -16,12 +16,12 @@ namespace System.Linq
         {
             if (first == null)
             {
-                throw Error.ArgumentNull(nameof(first));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.first);
             }
 
             if (second == null)
             {
-                throw Error.ArgumentNull(nameof(second));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.second);
             }
 
             return first is UnionIterator<TSource> union && AreEqualityComparersEqual(comparer, union._comparer) ? union.Union(second) : new UnionIterator2<TSource>(first, second, comparer);
@@ -31,7 +31,7 @@ namespace System.Linq
         /// An iterator that yields distinct values from two or more <see cref="IEnumerable{TSource}"/>.
         /// </summary>
         /// <typeparam name="TSource">The type of the source enumerables.</typeparam>
-        private abstract class UnionIterator<TSource> : Iterator<TSource>, IIListProvider<TSource>
+        private abstract partial class UnionIterator<TSource> : Iterator<TSource>
         {
             internal readonly IEqualityComparer<TSource> _comparer;
             private IEnumerator<TSource> _enumerator;
@@ -131,29 +131,8 @@ namespace System.Linq
                 Dispose();
                 return false;
             }
-
-            private Set<TSource> FillSet()
-            {
-                Set<TSource> set = new Set<TSource>(_comparer);
-                for (int index = 0; ; ++index)
-                {
-                    IEnumerable<TSource> enumerable = GetEnumerable(index);
-                    if (enumerable == null)
-                    {
-                        return set;
-                    }
-
-                    set.UnionWith(enumerable);
-                }
-            }
-
-            public TSource[] ToArray() => FillSet().ToArray();
-
-            public List<TSource> ToList() => FillSet().ToList();
-
-            public int GetCount(bool onlyIfCheap) => onlyIfCheap ? -1 : FillSet().Count;
         }
-        
+
         /// <summary>
         /// An iterator that yields distinct values from two <see cref="IEnumerable{TSource}"/>.
         /// </summary>
@@ -224,7 +203,7 @@ namespace System.Linq
                 {
                     // In the unlikely case of this many unions, if we produced a UnionIteratorN
                     // with int.MaxValue then state would overflow before it matched it's index.
-                    // So we use the naïve approach of just having a left and right sequence.
+                    // So we use the naive approach of just having a left and right sequence.
                     return new UnionIterator2<TSource>(this, next, _comparer);
                 }
 

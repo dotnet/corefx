@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -44,7 +44,7 @@ namespace Microsoft.SqlServer.TDS.FeatureExtAck
             // Nonce and/or Signature can be null depending on the FedAuthLibrary used
             if (clientNonce == null && signature != null)
             {
-                throw new ArgumentNullException("signature");
+                throw new ArgumentNullException(nameof(signature));
             }
             else if (clientNonce != null && clientNonce.Length != s_nonceDataLength)
             {
@@ -94,7 +94,7 @@ namespace Microsoft.SqlServer.TDS.FeatureExtAck
 
             if (ClientNonce != null)
             {
-                // Write the Nonce            
+                // Write the Nonce
                 destination.Write(ClientNonce, 0, (int)s_nonceDataLength);
             }
 

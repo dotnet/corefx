@@ -21,12 +21,25 @@ namespace System.IO.Tests
             // Set to True
             test.IsReadOnly = true;
             test.Refresh();
-            Assert.Equal(true, test.IsReadOnly);
+            Assert.True(test.IsReadOnly);
 
             // Set To False
             test.IsReadOnly = false;
             test.Refresh();
-            Assert.Equal(false, test.IsReadOnly);
+            Assert.False(test.IsReadOnly);
+        }
+
+        [Theory]
+        [InlineData(".", true)]
+        [InlineData("", false)]
+        [PlatformSpecific(TestPlatforms.OSX)]
+        public void HiddenAttributeSetCorrectly_OSX(string filePrefix, bool hidden)
+        {
+            string testFilePath = Path.Combine(TestDirectory, $"{filePrefix}{GetTestFileName()}");
+            FileInfo fileInfo = new FileInfo(testFilePath);
+            fileInfo.Create().Dispose();
+
+            Assert.Equal(hidden, (fileInfo.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden);
         }
     }
 }

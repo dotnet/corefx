@@ -15,13 +15,13 @@ using System.Runtime.Serialization;
 
 namespace System
 {
-    // The ArgumentException is thrown when an argument 
+    // The ArgumentException is thrown when an argument
     // is null when it shouldn't be.
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class ArgumentNullException : ArgumentException
     {
-        // Creates a new ArgumentNullException with its message 
+        // Creates a new ArgumentNullException with its message
         // string set to a default message explaining an argument was null.
         public ArgumentNullException()
              : base(SR.ArgumentNull_Generic)
@@ -30,19 +30,19 @@ namespace System
             HResult = HResults.E_POINTER;
         }
 
-        public ArgumentNullException(String paramName)
+        public ArgumentNullException(string? paramName)
             : base(SR.ArgumentNull_Generic, paramName)
         {
             HResult = HResults.E_POINTER;
         }
 
-        public ArgumentNullException(String message, Exception innerException)
+        public ArgumentNullException(string? message, Exception? innerException)
             : base(message, innerException)
         {
             HResult = HResults.E_POINTER;
         }
 
-        public ArgumentNullException(String paramName, String message)
+        public ArgumentNullException(string? paramName, string? message)
             : base(message, paramName)
         {
             HResult = HResults.E_POINTER;

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -9,37 +9,37 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 {
     public class TransactionEnlistmentTest
     {
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void TestAutoEnlistment_TxScopeComplete()
         {
             RunTestSet(TestCase_AutoEnlistment_TxScopeComplete);
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void TestAutoEnlistment_TxScopeNonComplete()
         {
             RunTestSet(TestCase_AutoEnlistment_TxScopeNonComplete);
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void TestManualEnlistment_Enlist()
         {
             RunTestSet(TestCase_ManualEnlistment_Enlist);
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void TestManualEnlistment_NonEnlist()
         {
             RunTestSet(TestCase_ManualEnlistment_NonEnlist);
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void TestManualEnlistment_Enlist_TxScopeComplete()
         {
             RunTestSet(TestCase_ManualEnlistment_Enlist_TxScopeComplete);
         }
 
-        
+
 
 
         private static void TestCase_AutoEnlistment_TxScopeComplete()

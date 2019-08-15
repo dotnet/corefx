@@ -17,7 +17,7 @@ namespace System.Collections.Immutable
     /// with <c>TKey</c> fixed to be <see cref="int"/>.  This avoids multiple interface-based dispatches while examining
     /// each node in the tree during a lookup: an interface call to the comparer's <see cref="IComparer{T}.Compare"/> method,
     /// and then an interface call to <see cref="int"/>'s <see cref="IComparable{T}.CompareTo"/> method as part of
-    /// the <see cref="T:System.Collections.Generic.GenericComparer`1"/>'s <see cref="IComparer{T}.Compare"/> implementation.
+    /// the comparer's <see cref="IComparer{T}.Compare"/> implementation.
     /// </remarks>
     [DebuggerDisplay("{_key} = {_value}")]
     internal sealed partial class SortedInt32KeyNode<TValue> : IBinaryTree
@@ -200,8 +200,28 @@ namespace System.Collections.Immutable
         [Pure]
         internal TValue GetValueOrDefault(int key)
         {
-            var match = this.Search(key);
-            return match.IsEmpty ? default(TValue) : match._value;
+            SortedInt32KeyNode<TValue> node = this;
+            while (true)
+            {
+                if (node.IsEmpty)
+                {
+                    return default(TValue);
+                }
+
+                if (key == node._key)
+                {
+                    return node._value;
+                }
+
+                if (key > node._key)
+                {
+                    node = node._right;
+                }
+                else
+                {
+                    node = node._left;
+                }
+            }
         }
 
         /// <summary>
@@ -213,16 +233,29 @@ namespace System.Collections.Immutable
         [Pure]
         internal bool TryGetValue(int key, out TValue value)
         {
-            var match = this.Search(key);
-            if (match.IsEmpty)
+            SortedInt32KeyNode<TValue> node = this;
+            while (true)
             {
-                value = default(TValue);
-                return false;
-            }
-            else
-            {
-                value = match._value;
-                return true;
+                if (node.IsEmpty)
+                {
+                    value = default(TValue);
+                    return false;
+                }
+
+                if (key == node._key)
+                {
+                    value = node._value;
+                    return true;
+                }
+
+                if (key > node._key)
+                {
+                    node = node._right;
+                }
+                else
+                {
+                    node = node._left;
+                }
             }
         }
 
@@ -437,7 +470,7 @@ namespace System.Collections.Immutable
                     }
                     else
                     {
-                        throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, SR.DuplicateKey, key));
+                        throw new ArgumentException(SR.Format(SR.DuplicateKey, key));
                     }
                 }
 
@@ -466,7 +499,7 @@ namespace System.Collections.Immutable
                     // We have a match.
                     mutated = true;
 
-                    // If this is a leaf, just remove it 
+                    // If this is a leaf, just remove it
                     // by returning Empty.  If we have only one child,
                     // replace the node with the child.
                     if (_right.IsEmpty && _left.IsEmpty)
@@ -546,26 +579,6 @@ namespace System.Collections.Immutable
                 _height = checked((byte)(1 + Math.Max(_left._height, _right._height)));
                 return this;
             }
-        }
-
-        /// <summary>
-        /// Searches the specified key. Callers are expected to validate arguments.
-        /// </summary>
-        /// <param name="key">The key.</param>
-        [Pure]
-        private SortedInt32KeyNode<TValue> Search(int key)
-        {
-            if (this.IsEmpty || key == _key)
-            {
-                return this;
-            }
-
-            if (key > _key)
-            {
-                return _right.Search(key);
-            }
-
-            return _left.Search(key);
         }
     }
 }

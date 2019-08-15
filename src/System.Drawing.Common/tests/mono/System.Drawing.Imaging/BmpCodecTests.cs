@@ -4,8 +4,8 @@
 // BMPCodec class testing unit
 //
 // Authors:
-// 	Jordi Mas i Hernàndez (jordi@ximian.com)
-//	Sebastien Pouliot  <sebastien@ximian.com>
+//  Jordi Mas i Hernàndez (jordi@ximian.com)
+//  Sebastien Pouliot  <sebastien@ximian.com>
 //
 // (C) 2004 Ximian, Inc.  http://www.ximian.com
 // Copyright (C) 2004-2007 Novell, Inc (http://www.novell.com)
@@ -17,10 +17,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -41,7 +41,7 @@ namespace MonoTests.System.Drawing.Imaging
     public class BmpCodecTest
     {
         /* Checks bitmap features on a known 1bbp bitmap */
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Bitmap1bitFeatures()
         {
             string sInFile = Helpers.GetTestBitmapPath("almogaver1bit.bmp");
@@ -64,7 +64,7 @@ namespace MonoTests.System.Drawing.Imaging
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Bitmap1bitPixels()
         {
             string sInFile = Helpers.GetTestBitmapPath("almogaver1bit.bmp");
@@ -111,7 +111,7 @@ namespace MonoTests.System.Drawing.Imaging
         }
 
         /* Checks bitmap features on a known 8bbp bitmap */
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Bitmap8bitFeatures()
         {
             string sInFile = Helpers.GetTestBitmapPath("almogaver8bits.bmp");
@@ -134,7 +134,7 @@ namespace MonoTests.System.Drawing.Imaging
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Bitmap8bitPixels()
         {
             string sInFile = Helpers.GetTestBitmapPath("almogaver8bits.bmp");
@@ -181,7 +181,7 @@ namespace MonoTests.System.Drawing.Imaging
         }
 
         /* Checks bitmap features on a known 24-bits bitmap */
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Bitmap24bitFeatures()
         {
             string sInFile = Helpers.GetTestBitmapPath("almogaver24bits.bmp");
@@ -204,7 +204,7 @@ namespace MonoTests.System.Drawing.Imaging
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Bitmap24bitPixels()
         {
             string sInFile = Helpers.GetTestBitmapPath("almogaver24bits.bmp");
@@ -249,7 +249,7 @@ namespace MonoTests.System.Drawing.Imaging
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsDrawingSupported), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35744)]
         public void Bitmap24bitData()
         {
             string sInFile = Helpers.GetTestBitmapPath("almogaver24bits.bmp");
@@ -374,7 +374,7 @@ namespace MonoTests.System.Drawing.Imaging
         }
 
         /* Checks bitmap features on a known 32-bits bitmap (codec)*/
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Bitmap32bitFeatures()
         {
             string sInFile = Helpers.GetTestBitmapPath("almogaver32bits.bmp");
@@ -396,7 +396,7 @@ namespace MonoTests.System.Drawing.Imaging
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Bitmap32bitPixels()
         {
             string sInFile = Helpers.GetTestBitmapPath("almogaver32bits.bmp");
@@ -447,7 +447,7 @@ namespace MonoTests.System.Drawing.Imaging
         {
             string sOutFile = $"linerect-{expected}.bmp";
 
-            // Save		
+            // Save
             Bitmap bmp = new Bitmap(100, 100, original);
             Graphics gr = Graphics.FromImage(bmp);
 
@@ -510,7 +510,7 @@ namespace MonoTests.System.Drawing.Imaging
             Save(PixelFormat.Format32bppPArgb, PixelFormat.Format32bppRgb, true);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void NonInvertedBitmap()
         {
             // regression check against http://bugzilla.ximian.com/show_bug.cgi?id=80751

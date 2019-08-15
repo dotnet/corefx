@@ -9,7 +9,7 @@ using System.Linq;
 using System.Globalization;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text.RegularExpressions; 
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XmlDiff;
@@ -428,9 +428,9 @@ namespace CoreXml.Test.XLinq
                 public void docType_4()
                 {
                     XDocument doc = new XDocument();
-                    String docName = "";
+                    string docName = "";
                     if (Variation.Param.ToString() == "String.Empty")
-                        docName = String.Empty;
+                        docName = string.Empty;
                     else if (Variation.Param.ToString() == "null")
                         docName = null;
                     using (XmlWriter w = CreateWriter(doc))
@@ -542,7 +542,7 @@ namespace CoreXml.Test.XLinq
                     {
                         try
                         {
-                            w.WriteStartElement(String.Empty);
+                            w.WriteStartElement(string.Empty);
                         }
                         catch (ArgumentException)
                         {
@@ -577,7 +577,7 @@ namespace CoreXml.Test.XLinq
                 {
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
-                    w.WriteStartElement("Root", String.Empty);
+                    w.WriteStartElement("Root", string.Empty);
                     w.WriteEndElement();
                     w.Dispose();
                     if (!CompareReader(doc, "<Root />"))
@@ -765,7 +765,7 @@ namespace CoreXml.Test.XLinq
                         try
                         {
                             w.WriteStartElement("Root");
-                            w.WriteStartAttribute(String.Empty);
+                            w.WriteStartAttribute(string.Empty);
                         }
                         catch (ArgumentException)
                         {
@@ -2381,7 +2381,7 @@ namespace CoreXml.Test.XLinq
 
                     w.Dispose();
 
-                    string strExpected = String.Format("<root xmlns:pre=\"{0}\"><pre:elt>text</pre:elt></root>", uri);
+                    string strExpected = string.Format("<root xmlns:pre=\"{0}\"><pre:elt>text</pre:elt></root>", uri);
                     if (!CompareReader(doc, strExpected)) throw new TestException(TestResult.Failed, "");
                 }
 
@@ -2546,7 +2546,7 @@ namespace CoreXml.Test.XLinq
                 {
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
-                    w.WriteStartElement(String.Empty, "Root", "ns");
+                    w.WriteStartElement(string.Empty, "Root", "ns");
                     w.WriteEndElement();
                     w.Dispose();
 
@@ -2570,7 +2570,7 @@ namespace CoreXml.Test.XLinq
                 {
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
-                    w.WriteStartElement("Root", String.Empty);
+                    w.WriteStartElement("Root", string.Empty);
                     w.WriteEndElement();
                     w.Dispose();
 
@@ -2596,7 +2596,7 @@ namespace CoreXml.Test.XLinq
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
                     w.WriteStartElement("pre", "Root", "ns");
-                    w.WriteElementString(String.Empty, "child", "ns", "test");
+                    w.WriteElementString(string.Empty, "child", "ns", "test");
                     w.WriteEndElement();
                     w.Dispose();
 
@@ -2625,7 +2625,7 @@ namespace CoreXml.Test.XLinq
                         try
                         {
                             w.WriteStartElement("pre", "Root", "ns");
-                            w.WriteElementString("pre", "child", String.Empty, "test");
+                            w.WriteElementString("pre", "child", string.Empty, "test");
                         }
                         catch (ArgumentException)
                         {
@@ -2644,7 +2644,7 @@ namespace CoreXml.Test.XLinq
                         try
                         {
                             w.WriteStartElement("pre", "Root", "ns");
-                            w.WriteElementString("pre", "child", String.Empty, "test");
+                            w.WriteElementString("pre", "child", string.Empty, "test");
                         }
                         catch (ArgumentException)
                         {
@@ -2906,9 +2906,9 @@ namespace CoreXml.Test.XLinq
                     XmlWriter w = CreateWriter(doc);
                     w.WriteStartElement("Root");
                     w.WriteAttributeString(null, "a", null, "b");
-                    w.WriteAttributeString(String.Empty, "c", String.Empty, "d");
-                    w.WriteAttributeString(null, "e", String.Empty, "f");
-                    w.WriteAttributeString(String.Empty, "g", null, "h");
+                    w.WriteAttributeString(string.Empty, "c", string.Empty, "d");
+                    w.WriteAttributeString(null, "e", string.Empty, "f");
+                    w.WriteAttributeString(string.Empty, "g", null, "h");
                     w.WriteEndElement();
                     w.Dispose();
 
@@ -2949,7 +2949,7 @@ namespace CoreXml.Test.XLinq
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
                     w.WriteStartElement("Root");
-                    w.WriteAttributeString("x", "a", String.Empty, "b");
+                    w.WriteAttributeString("x", "a", string.Empty, "b");
                     w.WriteEndElement();
                     w.Dispose();
 
@@ -3208,7 +3208,7 @@ namespace CoreXml.Test.XLinq
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
                     w.WriteStartElement("Root");
-                    w.WriteAttributeString(String.Empty, "attr", "ns", "value");
+                    w.WriteAttributeString(string.Empty, "attr", "ns", "value");
                     w.WriteEndElement();
                     w.Dispose();
 
@@ -3234,7 +3234,7 @@ namespace CoreXml.Test.XLinq
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
                     w.WriteStartElement("Root");
-                    w.WriteAttributeString("pre", "attr", String.Empty, "value");
+                    w.WriteAttributeString("pre", "attr", string.Empty, "value");
                     w.WriteEndElement();
                     w.Dispose();
 
@@ -3260,7 +3260,7 @@ namespace CoreXml.Test.XLinq
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
                     w.WriteStartElement("pre", "Root", "ns");
-                    w.WriteAttributeString(String.Empty, "child", "ns", "test");
+                    w.WriteAttributeString(string.Empty, "child", "ns", "test");
                     w.WriteEndElement();
                     w.Dispose();
 
@@ -3286,7 +3286,7 @@ namespace CoreXml.Test.XLinq
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
                     w.WriteStartElement("pre", "Root", "ns");
-                    w.WriteAttributeString("pre", "child", String.Empty, "test");
+                    w.WriteAttributeString("pre", "child", string.Empty, "test");
                     w.WriteEndElement();
                     w.Dispose();
 
@@ -3351,7 +3351,7 @@ namespace CoreXml.Test.XLinq
             public partial class TCCData : BridgeHelpers
             {
                 //[Variation(Id = 1, Desc = "WriteCData with null", Priority = 1)]
-                public void CData_1()
+                private void CData_1()
                 {
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
@@ -3364,12 +3364,12 @@ namespace CoreXml.Test.XLinq
                 }
 
                 //[Variation(Id = 2, Desc = "WriteCData with String.Empty", Priority = 1)]
-                public void CData_2()
+                private void CData_2()
                 {
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
                     w.WriteStartElement("Root");
-                    w.WriteCData(String.Empty);
+                    w.WriteCData(string.Empty);
                     w.WriteEndElement();
                     w.Dispose();
 
@@ -3377,7 +3377,7 @@ namespace CoreXml.Test.XLinq
                 }
 
                 //[Variation(Id = 3, Desc = "WriteCData Sanity test", Priority = 0)]
-                public void CData_3()
+                private void CData_3()
                 {
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
@@ -3390,7 +3390,7 @@ namespace CoreXml.Test.XLinq
                 }
 
                 //[Variation(Id = 4, Desc = "WriteCData with valid surrogate pair", Priority = 1)]
-                public void CData_4()
+                private void CData_4()
                 {
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
@@ -3417,20 +3417,17 @@ namespace CoreXml.Test.XLinq
                     using (XmlReader reader = doc.CreateReader())
                     {
                         Exception exception = AssertExtensions.Throws<ArgumentException>(null, () => MoveToFirstElement(reader).ReadOuterXml());
-                        if (!PlatformDetection.IsNetNative) // .Net Native toolchain optimizes away Exception messages
-                        {
-                            // \p{Pi} any kind of opening quote https://www.compart.com/en/unicode/category/Pi
-                            // \p{Pf} any kind of closing quote https://www.compart.com/en/unicode/category/Pf
-                            // \p{Po} any kind of punctuation character that is not a dash, bracket, quote or connector https://www.compart.com/en/unicode/category/Po
-                            Assert.True(Regex.IsMatch(exception.Message, @"[\p{Pi}\p{Po}]" + Regex.Escape("]]>") + @"[\p{Pf}\p{Po}]"));
-                            Assert.True(Regex.IsMatch(exception.Message, @"\b" + "XML" + @"\b"));
-                            Assert.True(Regex.IsMatch(exception.Message, @"\b" + "CDATA" + @"\b"));
-                        }
+                        // \p{Pi} any kind of opening quote https://www.compart.com/en/unicode/category/Pi
+                        // \p{Pf} any kind of closing quote https://www.compart.com/en/unicode/category/Pf
+                        // \p{Po} any kind of punctuation character that is not a dash, bracket, quote or connector https://www.compart.com/en/unicode/category/Po
+                        Assert.Matches(@"[\p{Pi}\p{Po}]" + Regex.Escape("]]>") + @"[\p{Pf}\p{Po}]", exception.Message);
+                        Assert.Matches(@"\b" + "XML" + @"\b", exception.Message);
+                        Assert.Matches(@"\b" + "CDATA" + @"\b", exception.Message);
                     }
                 }
 
                 //[Variation(Id = 6, Desc = "WriteCData with & < > chars, they should not be escaped", Priority = 2)]
-                public void CData_6()
+                private void CData_6()
                 {
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
@@ -3443,7 +3440,7 @@ namespace CoreXml.Test.XLinq
                 }
 
                 //[Variation(Id = 7, Desc = "WriteCData with <![CDATA[", Priority = 2)]
-                public void CData_7()
+                private void CData_7()
                 {
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
@@ -3455,7 +3452,7 @@ namespace CoreXml.Test.XLinq
                     if (!CompareReader(doc, "<Root><![CDATA[<![CDATA[]]></Root>")) throw new TestException(TestResult.Failed, "");
                 }
                 //[Variation(Id = 8, Desc = "CData state machine", Priority = 2)]
-                public void CData_8()
+                private void CData_8()
                 {
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
@@ -3468,7 +3465,7 @@ namespace CoreXml.Test.XLinq
                 }
 
                 //[Variation(Id = 9, Desc = "WriteCData with invalid surrogate pair", Priority = 1)]
-                public void CData_9()
+                private void CData_9()
                 {
                     XCData xa = new XCData("\uD812");
                     XElement doc = new XElement("root");
@@ -3489,7 +3486,7 @@ namespace CoreXml.Test.XLinq
                 }
 
                 //[Variation(Id = 10, Desc = "WriteCData after root element")]
-                public void CData_10()
+                private void CData_10()
                 {
                     XDocument doc = new XDocument();
                     using (XmlWriter w = CreateWriter(doc))
@@ -3511,7 +3508,7 @@ namespace CoreXml.Test.XLinq
                 }
 
                 //[Variation(Id = 11, Desc = "Call WriteCData twice - that should write two CData blocks", Priority = 1)]
-                public void CData_11()
+                private void CData_11()
                 {
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
@@ -3528,7 +3525,7 @@ namespace CoreXml.Test.XLinq
             public partial class TCComment : BridgeHelpers
             {
                 //[Variation(Id = 1, Desc = "Sanity test for WriteComment", Priority = 0)]
-                public void comment_1()
+                private void comment_1()
                 {
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
@@ -3541,12 +3538,12 @@ namespace CoreXml.Test.XLinq
                 }
 
                 //[Variation(Id = 2, Desc = "Comment value = String.Empty", Priority = 0)]
-                public void comment_2()
+                private void comment_2()
                 {
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
                     w.WriteStartElement("Root");
-                    w.WriteComment(String.Empty);
+                    w.WriteComment(string.Empty);
                     w.WriteEndElement();
                     w.Dispose();
 
@@ -3554,7 +3551,7 @@ namespace CoreXml.Test.XLinq
                 }
 
                 //[Variation(Id = 3, Desc = "Comment value = null", Priority = 0)]
-                public void comment_3()
+                private void comment_3()
                 {
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
@@ -3567,7 +3564,7 @@ namespace CoreXml.Test.XLinq
                 }
 
                 //[Variation(Id = 4, Desc = "WriteComment with valid surrogate pair", Priority = 1)]
-                public void comment_4()
+                private void comment_4()
                 {
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
@@ -3580,7 +3577,7 @@ namespace CoreXml.Test.XLinq
                 }
 
                 //[Variation(Id = 5, Desc = "WriteComment with invalid surrogate pair", Priority = 1)]
-                public void comment_5()
+                private void comment_5()
                 {
                     XComment xa = new XComment("\uD812");
                     XElement doc = new XElement("root");
@@ -3615,16 +3612,13 @@ namespace CoreXml.Test.XLinq
                     using (XmlReader reader = doc.CreateReader())
                     {
                         Exception exception = AssertExtensions.Throws<ArgumentException>(null, () => MoveToFirstElement(reader).ReadOuterXml());
-                        if (!PlatformDetection.IsNetNative) // .Net Native toolchain optimizes away Exception messages
-                        {
-                            // \b word boundary
-                            // \p{Pi} any kind of opening quote https://www.compart.com/en/unicode/category/Pi
-                            // \p{Pf} any kind of closing quote https://www.compart.com/en/unicode/category/Pf
-                            // \p{Po} any kind of punctuation character that is not a dash, bracket, quote or connector https://www.compart.com/en/unicode/category/Po
-                            Assert.True(Regex.IsMatch(exception.Message, @"\b" + "XML" + @"\b"));
-                            Assert.True(Regex.IsMatch(exception.Message, @"[\p{Pi}\p{Po}]" + Regex.Escape("--") + @"[\p{Pf}\p{Po}]"));
-                            Assert.True(Regex.IsMatch(exception.Message, @"[\p{Pi}\p{Po}]" + Regex.Escape("-") + @"[\p{Pf}\p{Po}]"));
-                        }
+                        // \b word boundary
+                        // \p{Pi} any kind of opening quote https://www.compart.com/en/unicode/category/Pi
+                        // \p{Pf} any kind of closing quote https://www.compart.com/en/unicode/category/Pf
+                        // \p{Po} any kind of punctuation character that is not a dash, bracket, quote or connector https://www.compart.com/en/unicode/category/Po
+                        Assert.Matches(@"\b" + "XML" + @"\b", exception.Message);
+                        Assert.Matches(@"[\p{Pi}\p{Po}]" + Regex.Escape("--") + @"[\p{Pf}\p{Po}]", exception.Message);
+                        Assert.Matches(@"[\p{Pi}\p{Po}]" + Regex.Escape("-") + @"[\p{Pf}\p{Po}]", exception.Message);
                     }
                 }
             }
@@ -3652,7 +3646,7 @@ namespace CoreXml.Test.XLinq
                             temp = null;
                             break;
                         case "String.Empty":
-                            temp = String.Empty;
+                            temp = string.Empty;
                             break;
                         default:
                             temp = Variation.Param.ToString();
@@ -4028,7 +4022,7 @@ namespace CoreXml.Test.XLinq
             public partial class TCPI : BridgeHelpers
             {
                 //[Variation(Id = 1, Desc = "Sanity test for WritePI", Priority = 0)]
-                public void pi_1()
+                private void pi_1()
                 {
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
@@ -4041,7 +4035,7 @@ namespace CoreXml.Test.XLinq
                 }
 
                 //[Variation(Id = 2, Desc = "PI text value = null", Priority = 1)]
-                public void pi_2()
+                private void pi_2()
                 {
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
@@ -4054,12 +4048,12 @@ namespace CoreXml.Test.XLinq
                 }
 
                 //[Variation(Id = 3, Desc = "PI text value = String.Empty", Priority = 1)]
-                public void pi_3()
+                private void pi_3()
                 {
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
                     w.WriteStartElement("Root");
-                    w.WriteProcessingInstruction("test", String.Empty);
+                    w.WriteProcessingInstruction("test", string.Empty);
                     w.WriteEndElement();
                     w.Dispose();
 
@@ -4067,7 +4061,7 @@ namespace CoreXml.Test.XLinq
                 }
 
                 //[Variation(Id = 4, Desc = "PI name = null should error", Priority = 1)]
-                public void pi_4()
+                private void pi_4()
                 {
                     XDocument doc = new XDocument();
                     using (XmlWriter w = CreateWriter(doc))
@@ -4088,7 +4082,7 @@ namespace CoreXml.Test.XLinq
                 }
 
                 //[Variation(Id = 5, Desc = "PI name = String.Empty should error", Priority = 1)]
-                public void pi_5()
+                private void pi_5()
                 {
                     XDocument doc = new XDocument();
                     using (XmlWriter w = CreateWriter(doc))
@@ -4096,7 +4090,7 @@ namespace CoreXml.Test.XLinq
                         try
                         {
                             w.WriteStartElement("Root");
-                            w.WriteProcessingInstruction(String.Empty, "test");
+                            w.WriteProcessingInstruction(string.Empty, "test");
                         }
                         catch (ArgumentException)
                         {
@@ -4109,7 +4103,7 @@ namespace CoreXml.Test.XLinq
                 }
 
                 //[Variation(Id = 6, Desc = "WritePI with xmlns as the name value")]
-                public void pi_6()
+                private void pi_6()
                 {
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
@@ -4123,7 +4117,7 @@ namespace CoreXml.Test.XLinq
                 }
 
                 //[Variation(Id = 7, Desc = "WritePI with XmL as the name value")]
-                public void pi_7()
+                private void pi_7()
                 {
                     XDocument doc = new XDocument();
                     using (XmlWriter w = CreateWriter(doc))
@@ -4146,7 +4140,7 @@ namespace CoreXml.Test.XLinq
                 }
 
                 //[Variation(Id = 8, Desc = "WritePI before XmlDecl", Priority = 1)]
-                public void pi_8()
+                private void pi_8()
                 {
                     XDocument doc = new XDocument();
                     using (XmlWriter w = CreateWriter(doc))
@@ -4167,7 +4161,7 @@ namespace CoreXml.Test.XLinq
                 }
 
                 //[Variation(Id = 9, Desc = "WritePI (after StartDocument) with name = 'xml' text = 'version = 1.0' should error", Priority = 1)]
-                public void pi_9()
+                private void pi_9()
                 {
                     XDocument doc = new XDocument();
                     using (XmlWriter w = CreateWriter(doc))
@@ -4188,7 +4182,7 @@ namespace CoreXml.Test.XLinq
                 }
 
                 //[Variation(Id = 10, Desc = "WritePI (before StartDocument) with name = 'xml' text = 'version = 1.0' should error", Priority = 1)]
-                public void pi_10()
+                private void pi_10()
                 {
                     XDocument doc = new XDocument();
                     using (XmlWriter w = CreateWriter(doc))
@@ -4223,20 +4217,17 @@ namespace CoreXml.Test.XLinq
                     using (XmlReader reader = doc.CreateReader())
                     {
                         Exception exception = AssertExtensions.Throws<ArgumentException>(null, () => MoveToFirstElement(reader).ReadOuterXml());
-                        if (!PlatformDetection.IsNetNative) // .Net Native toolchain optimizes away Exception messages
-                        {
-                            // \b word boundary
-                            // \p{Pi} any kind of opening quote https://www.compart.com/en/unicode/category/Pi
-                            // \p{Pf} any kind of closing quote https://www.compart.com/en/unicode/category/Pf
-                            // \p{Po} any kind of punctuation character that is not a dash, bracket, quote or connector https://www.compart.com/en/unicode/category/Po
-                            Assert.True(Regex.IsMatch(exception.Message, @"[\p{Pi}\p{Po}]" + Regex.Escape("?>") + @"[\p{Pf}\p{Po}]"));
-                            Assert.True(Regex.IsMatch(exception.Message, @"\b" + "XML" + @"\b"));
-                        }
+                        // \b word boundary
+                        // \p{Pi} any kind of opening quote https://www.compart.com/en/unicode/category/Pi
+                        // \p{Pf} any kind of closing quote https://www.compart.com/en/unicode/category/Pf
+                        // \p{Po} any kind of punctuation character that is not a dash, bracket, quote or connector https://www.compart.com/en/unicode/category/Po
+                        Assert.Matches(@"[\p{Pi}\p{Po}]" + Regex.Escape("?>") + @"[\p{Pf}\p{Po}]", exception.Message);
+                        Assert.Matches(@"\b" + "XML" + @"\b", exception.Message);
                     }
                 }
 
                 //[Variation(Id = 12, Desc = "WriteProcessingInstruction with valid surrogate pair", Priority = 1)]
-                public void pi_12()
+                private void pi_12()
                 {
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
@@ -4249,7 +4240,7 @@ namespace CoreXml.Test.XLinq
                 }
 
                 //[Variation(Id = 13, Desc = "WritePI with invalid surrogate pair", Priority = 1)]
-                public void pi_13()
+                private void pi_13()
                 {
                     XProcessingInstruction xa = new XProcessingInstruction("pi", "\uD812");
                     XElement doc = new XElement("root");
@@ -4286,7 +4277,7 @@ namespace CoreXml.Test.XLinq
                             if (Variation.Param.ToString() == "null")
                                 temp = null;
                             else
-                                temp = String.Empty;
+                                temp = string.Empty;
                             w.WriteNmToken(temp);
                             w.WriteEndElement();
                         }
@@ -4368,7 +4359,7 @@ namespace CoreXml.Test.XLinq
                             if (Variation.Param.ToString() == "null")
                                 temp = null;
                             else
-                                temp = String.Empty;
+                                temp = string.Empty;
                             w.WriteName(temp);
                             w.WriteEndElement();
                         }
@@ -4449,7 +4440,7 @@ namespace CoreXml.Test.XLinq
                             if (Variation.Param.ToString() == "null")
                                 temp = null;
                             else
-                                temp = String.Empty;
+                                temp = string.Empty;
                             w.WriteQualifiedName(temp, "test");
                             w.WriteEndElement();
                         }
@@ -4693,7 +4684,7 @@ namespace CoreXml.Test.XLinq
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
                     w.WriteStartElement("Root");
-                    w.WriteString(String.Empty);
+                    w.WriteString(string.Empty);
                     w.WriteEndElement();
                     w.Dispose();
 
@@ -4813,7 +4804,7 @@ namespace CoreXml.Test.XLinq
                 public void writeString_13()
                 {
                     char[] invalidXML = { '\uD800', '\uDC00', '\uD800', '\uDFFF', '\uDBFF', '\uDC00', '\uDBFF', '\uDFFF' };
-                    string invXML = new String(invalidXML);
+                    string invXML = new string(invalidXML);
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
                     w.WriteStartElement("Root");
@@ -4828,7 +4819,7 @@ namespace CoreXml.Test.XLinq
                 public void writeString_14()
                 {
                     char[] invalidXML = { 'a', 'b', '\uDA34' };
-                    string invXML = new String(invalidXML);
+                    string invXML = new string(invalidXML);
                     XDocument doc = new XDocument();
                     using (XmlWriter w = CreateWriter(doc))
                     {
@@ -4853,7 +4844,7 @@ namespace CoreXml.Test.XLinq
                 public void writeString_15()
                 {
                     char[] invalidXML = { '\uDF20', 'b', 'c' };
-                    string invXML = new String(invalidXML);
+                    string invXML = new string(invalidXML);
                     XDocument doc = new XDocument();
                     using (XmlWriter w = CreateWriter(doc))
                     {
@@ -4878,7 +4869,7 @@ namespace CoreXml.Test.XLinq
                 public void writeString_16()
                 {
                     char[] invalidXML = { 'a', '\uDE40', '\uDA72', 'c' };
-                    string invXML = new String(invalidXML);
+                    string invXML = new string(invalidXML);
                     XDocument doc = new XDocument();
                     using (XmlWriter w = CreateWriter(doc))
                     {
@@ -4929,7 +4920,7 @@ namespace CoreXml.Test.XLinq
                     if (Variation.Param.ToString() == "null")
                         temp = null;
                     else
-                        temp = String.Empty;
+                        temp = string.Empty;
                     w.WriteStartElement("Root");
 
                     w.WriteWhitespace(temp);
@@ -5001,7 +4992,7 @@ namespace CoreXml.Test.XLinq
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
                     w.WriteStartElement("Root");
-                    w.WriteValue(Decimal.MaxValue);
+                    w.WriteValue(decimal.MaxValue);
                     w.WriteEndElement();
                     w.Dispose();
 
@@ -5014,7 +5005,7 @@ namespace CoreXml.Test.XLinq
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
                     w.WriteStartElement("Root");
-                    w.WriteValue(Double.MaxValue);
+                    w.WriteValue(double.MaxValue);
                     w.WriteEndElement();
                     w.Dispose();
 
@@ -5027,7 +5018,7 @@ namespace CoreXml.Test.XLinq
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
                     w.WriteStartElement("Root");
-                    w.WriteValue(Int32.MaxValue);
+                    w.WriteValue(int.MaxValue);
                     w.WriteEndElement();
                     w.Dispose();
 
@@ -5040,7 +5031,7 @@ namespace CoreXml.Test.XLinq
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
                     w.WriteStartElement("Root");
-                    w.WriteValue(Int64.MaxValue);
+                    w.WriteValue(long.MaxValue);
                     w.WriteEndElement();
                     w.Dispose();
 
@@ -5053,11 +5044,11 @@ namespace CoreXml.Test.XLinq
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
                     w.WriteStartElement("Root");
-                    w.WriteValue(Single.MaxValue);
+                    w.WriteValue(float.MaxValue);
                     w.WriteEndElement();
                     w.Dispose();
 
-                    if (!CompareReader(doc, "<Root>3.40282347E+38</Root>")) throw new TestException(TestResult.Failed, "");
+                    if (!CompareReader(doc, $"<Root>{float.MaxValue.ToString("R", CultureInfo.InvariantCulture)}</Root>")) throw new TestException(TestResult.Failed, "");
                 }
 
                 //[Variation(Id = 8, Desc = "WriteValue(string)", Priority = 1)]
@@ -5239,14 +5230,14 @@ namespace CoreXml.Test.XLinq
                     throw new TestException(TestResult.Failed, "");
                 }
 
-                //[Variation(Id = 2, Desc = "LookupPrefix with String.Empty should if(!String.Empty", Priority = 1)]
+                //[Variation(Id = 2, Desc = "LookupPrefix with String.Empty should if (!String.Empty", Priority = 1)]
                 public void lookupPrefix_2()
                 {
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
                     w.WriteStartElement("Root");
-                    string s = w.LookupPrefix(String.Empty);
-                    TestLog.Compare(s, String.Empty, "Error");
+                    string s = w.LookupPrefix(string.Empty);
+                    TestLog.Compare(s, string.Empty, "Error");
                     w.Dispose();
                 }
 
@@ -5294,7 +5285,7 @@ namespace CoreXml.Test.XLinq
                     w.WriteStartElement("Root", "foo");
                     w.WriteString("content");
                     string s = w.LookupPrefix("foo");
-                    TestLog.Compare(s, String.Empty, "Error");
+                    TestLog.Compare(s, string.Empty, "Error");
                     w.Dispose();
                 }
 
@@ -5363,7 +5354,7 @@ namespace CoreXml.Test.XLinq
                     TestLog.Compare(s, "x", "Error in nested element");
                     w.WriteEndElement();
                     s = w.LookupPrefix("foo");
-                    TestLog.Compare(s, String.Empty, "Error in root element");
+                    TestLog.Compare(s, string.Empty, "Error in root element");
                     w.WriteEndElement();
                     w.Dispose();
                 }
@@ -5830,7 +5821,7 @@ namespace CoreXml.Test.XLinq
                 //[Variation(Id = 14, Desc = "Index = Count = 0", Priority = 1)]
                 public void writeRaw_14()
                 {
-                    string lang = new String('a', 1);
+                    string lang = new string('a', 1);
                     char[] buffer = lang.ToCharArray();
                     XDocument doc = new XDocument();
                     XmlWriter w = CreateWriter(doc);
@@ -6355,7 +6346,7 @@ namespace CoreXml.Test.XLinq
                             w.WriteQualifiedName("foo", "bar");
                             break;
                         case "WriteValue":
-                            w.WriteValue(Int32.MaxValue);
+                            w.WriteValue(int.MaxValue);
                             break;
                         case "WriteAttributes":
                             XmlReader xr1 = XmlReader.Create(new StringReader("<root attr='test'/>"));

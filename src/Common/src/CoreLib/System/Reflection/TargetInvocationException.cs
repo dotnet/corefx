@@ -10,19 +10,19 @@ namespace System.Reflection
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public sealed class TargetInvocationException : ApplicationException
     {
-        public TargetInvocationException(Exception inner)
+        public TargetInvocationException(Exception? inner)
             : base(SR.Arg_TargetInvocationException, inner)
         {
             HResult = HResults.COR_E_TARGETINVOCATION;
         }
 
-        public TargetInvocationException(string message, Exception inner)
+        public TargetInvocationException(string? message, Exception? inner)
             : base(message, inner)
         {
             HResult = HResults.COR_E_TARGETINVOCATION;
         }
 
-        internal TargetInvocationException(SerializationInfo info, StreamingContext context)
+        private TargetInvocationException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }

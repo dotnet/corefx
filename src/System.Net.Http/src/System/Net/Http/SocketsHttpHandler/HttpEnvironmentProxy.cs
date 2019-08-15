@@ -73,7 +73,7 @@ namespace System.Net.Http
             int idx = value.IndexOf(':');
             if (idx != -1)
             {
-                password = value.Substring(idx+1);
+                password = value.Substring(idx + 1);
                 value = value.Substring(0, idx);
             }
 
@@ -81,64 +81,25 @@ namespace System.Net.Http
             if (idx != -1)
             {
                 domain = value.Substring(0, idx);
-                value = value.Substring(idx+1);
+                value = value.Substring(idx + 1);
             }
 
             return new NetworkCredential(value, password, domain);
         }
     }
 
-    internal sealed class HttpEnvironmentProxy : IWebProxy
+    internal sealed partial class HttpEnvironmentProxy : IWebProxy
     {
         private const string EnvAllProxyUC = "ALL_PROXY";
-        private const string EnvAllProxyLC = "all_proxy";
-        private const string EnvHttpProxyLC = "http_proxy";
-        private const string EnvHttpsProxyLC = "https_proxy";
+        private const string EnvHttpProxyUC = "HTTP_PROXY";
         private const string EnvHttpsProxyUC = "HTTPS_PROXY";
-        private const string EnvNoProxyLC = "no_proxy";
+        private const string EnvNoProxyUC = "NO_PROXY";
+        private const string EnvCGI = "GATEWAY_INTERFACE"; // Running in a CGI environment.
 
-        private Uri _httpProxyUri;      // String URI for HTTP requests
-        private Uri _httpsProxyUri;     // String URI for HTTPS requests
-        private string[] _bypass = null;// list of domains not to proxy
-        private ICredentials _credentials;
-
-        public static bool TryCreate(out IWebProxy proxy)
-        {
-            // Get environmental variables. Protocol specific take precedence over
-            // general all_*, lower case variable has precedence over upper case.
-            // Note that curl uses HTTPS_PROXY but not HTTP_PROXY.
-            // For http, only http_proxy and generic variables are used.
-
-            Uri httpProxy = GetUriFromString(Environment.GetEnvironmentVariable(EnvHttpProxyLC));
-            Uri httpsProxy = GetUriFromString(Environment.GetEnvironmentVariable(EnvHttpsProxyLC)) ??
-                             GetUriFromString(Environment.GetEnvironmentVariable(EnvHttpsProxyUC));
-
-            if (httpProxy == null || httpsProxy == null)
-            {
-                Uri allProxy = GetUriFromString(Environment.GetEnvironmentVariable(EnvAllProxyLC)) ??
-                                GetUriFromString(Environment.GetEnvironmentVariable(EnvAllProxyUC));
-
-                if (httpProxy == null)
-                {
-                    httpProxy = allProxy;
-                }
-                if (httpsProxy == null)
-                {
-                    httpsProxy = allProxy;
-                }
-            }
-
-            // Do not instantiate if nothing is set.
-            // Caller may pick some other proxy type.
-            if (httpProxy == null && httpsProxy == null)
-            {
-                proxy = null;
-                return false;
-            }
-
-            proxy = new HttpEnvironmentProxy(httpProxy, httpsProxy, Environment.GetEnvironmentVariable(EnvNoProxyLC));
-            return true;
-        }
+        private readonly Uri _httpProxyUri;      // String URI for HTTP requests
+        private readonly Uri _httpsProxyUri;     // String URI for HTTPS requests
+        private readonly string[] _bypass = null;// list of domains not to proxy
+        private readonly ICredentials _credentials;
 
         private HttpEnvironmentProxy(Uri httpProxy, Uri httpsProxy, string bypassList)
         {
@@ -185,7 +146,7 @@ namespace System.Net.Http
 
             string user = null;
             string password = null;
-            UInt16 port = 80;
+            ushort port = 80;
             string host = null;
 
             // Check if there is authentication part with user and possibly password.
@@ -227,7 +188,18 @@ namespace System.Net.Http
             else
             {
                 host = value.Substring(0, separatorIndex);
-                if (!UInt16.TryParse(value.AsSpan(separatorIndex + 1), out port))
+                int endIndex = separatorIndex + 1;
+                // Strip any trailing characters after port number.
+                while (endIndex < value.Length)
+                {
+                    if (!char.IsDigit(value[endIndex]))
+                    {
+                        break;
+                    }
+                    endIndex += 1;
+                }
+
+                if (!ushort.TryParse(value.AsSpan(separatorIndex + 1, endIndex - separatorIndex - 1), out port))
                 {
                     return null;
                 }
@@ -267,7 +239,7 @@ namespace System.Net.Http
                         // This should match either domain it self or any subdomain or host
                         // .foo.com will match foo.com it self or *.foo.com
                         if ((s.Length - 1) == input.Host.Length &&
-                            String.Compare(s, 1, input.Host, 0, input.Host.Length, StringComparison.OrdinalIgnoreCase) == 0)
+                            string.Compare(s, 1, input.Host, 0, input.Host.Length, StringComparison.OrdinalIgnoreCase) == 0)
                         {
                             return true;
                         }
@@ -279,7 +251,7 @@ namespace System.Net.Http
                     }
                     else
                     {
-                        if (String.Equals(s, input.Host, StringComparison.OrdinalIgnoreCase))
+                        if (string.Equals(s, input.Host, StringComparison.OrdinalIgnoreCase))
                         {
                             return true;
                         }

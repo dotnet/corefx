@@ -5,16 +5,13 @@
 #pragma once
 
 #include "pal_compiler.h"
-
-BEGIN_EXTERN_C
-
 #include "pal_types.h"
 #include <sys/types.h>
 
 /**
 * Passwd struct
 */
-struct Passwd
+typedef struct
 {
     char* Name;
     char* Password;
@@ -23,7 +20,7 @@ struct Passwd
     char* UserInfo;
     char* HomeDirectory;
     char* Shell;
-};
+} Passwd;
 
 /**
 * Gets a password structure for the given uid.
@@ -50,7 +47,7 @@ DLLEXPORT int32_t SystemNative_GetPwNamR(const char* name, Passwd* pwd, char* bu
 *
 * Always succeeds.
 */
-DLLEXPORT uint32_t SystemNative_GetEUid();
+DLLEXPORT uint32_t SystemNative_GetEUid(void);
 
 /**
 * Gets and returns the effective group's identity.
@@ -58,7 +55,7 @@ DLLEXPORT uint32_t SystemNative_GetEUid();
 *
 * Always succeeds.
 */
-DLLEXPORT uint32_t SystemNative_GetEGid();
+DLLEXPORT uint32_t SystemNative_GetEGid(void);
 
 /**
 * Sets the effective user ID of the calling process
@@ -66,6 +63,22 @@ DLLEXPORT uint32_t SystemNative_GetEGid();
 *
 * Returns 0 for success. On error, -1 is returned and errno is set.
 */
-DLLEXPORT int32_t SystemNative_SetEUid(uid_t euid);
+DLLEXPORT int32_t SystemNative_SetEUid(uint32_t euid);
 
-END_EXTERN_C
+/**
+* Gets the list of groups to which a user belongs.
+* Implemented as a shim to getgrouplist.
+*
+* Returns number of groups for success.
+* If the buffer is too small, -1 is returned and ngroups contains the required size.
+* On error, -1 is returned and errno is set.
+*/
+DLLEXPORT int32_t SystemNative_GetGroupList(const char* name, uint32_t group, uint32_t* groups, int32_t* ngroups);
+
+/**
+* Gets and returns the real user's identity.
+* Implemented as shim to getuid(2).
+*
+* Always succeeds.
+*/
+DLLEXPORT uint32_t SystemNative_GetUid(void);

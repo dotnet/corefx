@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<root>
+﻿<root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -58,6 +57,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Argument_EncodeDestinationTooSmall" xml:space="preserve">
+    <value>The destination is too small to hold the encoded value.</value>
+  </data>
   <data name="Argument_InvalidOidValue" xml:space="preserve">
     <value>The OID value was invalid.</value>
   </data>
@@ -114,9 +116,6 @@
   </data>
   <data name="Cryptography_AsnSerializer_Optional_NonNullableField" xml:space="preserve">
     <value>Field '{0}' on type '{1}' is declared [OptionalValue], but it can not be assigned a null value.</value>
-  </data>
-  <data name="Cryptography_AsnSerializer_PopulateFriendlyNameOnString" xml:space="preserve">
-    <value>Field '{0}' on type '{1}' has [ObjectIdentifier].PopulateFriendlyName set to true, which is not applicable to a string.  Change the field to '{2}' or set PopulateFriendlyName to false.</value>
   </data>
   <data name="Cryptography_AsnSerializer_SetValueException" xml:space="preserve">
     <value>Unable to set field {0} on type {1}.</value>

@@ -24,9 +24,9 @@ namespace System.Security
             return bstr;
         }
 
-        override protected bool ReleaseHandle()
+        protected override bool ReleaseHandle()
         {
-            RuntimeImports.RhZeroMemory(handle, (UIntPtr)(Interop.OleAut32.SysStringLen(handle) * sizeof(char)));
+            RuntimeImports.RhZeroMemory(handle, (UIntPtr)Marshal.SysStringByteLen(handle));
             Interop.OleAut32.SysFreeString(handle);
             return true;
         }
@@ -37,7 +37,7 @@ namespace System.Security
             try
             {
                 AcquirePointer(ref bufferPtr);
-                RuntimeImports.RhZeroMemory((IntPtr)bufferPtr, (UIntPtr)(Interop.OleAut32.SysStringLen((IntPtr)bufferPtr) * sizeof(char)));
+                RuntimeImports.RhZeroMemory((IntPtr)bufferPtr, (UIntPtr)Marshal.SysStringByteLen((IntPtr)bufferPtr));
             }
             finally
             {

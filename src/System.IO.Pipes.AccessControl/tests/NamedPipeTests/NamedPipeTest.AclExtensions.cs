@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -28,7 +28,7 @@ namespace System.IO.Pipes.Tests
         }
 
         [Fact]
-        [ActiveIssue(22271, TargetFrameworkMonikers.UapNotUapAot)]
+        [ActiveIssue(22271, TargetFrameworkMonikers.Uap)]
         public void SetAccessControl_NamedPipeStream()
         {
             string pipeName = GetUniquePipeName();
@@ -60,7 +60,7 @@ namespace System.IO.Pipes.Tests
         }
 
         [Fact]
-        [ActiveIssue(22271, TargetFrameworkMonikers.UapNotUapAot)]
+        [ActiveIssue(22271, TargetFrameworkMonikers.Uap)]
         public void SetAccessControl_NamedPipeStream_ClientDisposed()
         {
             string pipeName = GetUniquePipeName();
@@ -81,7 +81,7 @@ namespace System.IO.Pipes.Tests
         }
 
         [Fact]
-        [ActiveIssue(22271, TargetFrameworkMonikers.UapNotUapAot)]
+        [ActiveIssue(22271, TargetFrameworkMonikers.Uap)]
         public void SetAccessControl_NamedPipeStream_ClientHandleClosed()
         {
             string pipeName = GetUniquePipeName();
@@ -102,7 +102,7 @@ namespace System.IO.Pipes.Tests
         }
 
         [Fact]
-        [ActiveIssue(22271, TargetFrameworkMonikers.UapNotUapAot)]
+        [ActiveIssue(22271, TargetFrameworkMonikers.Uap)]
         public void SetAccessControl_NamedPipeStream_ServerDisconnected()
         {
             string pipeName = GetUniquePipeName();
@@ -112,7 +112,7 @@ namespace System.IO.Pipes.Tests
             Task clientConnect = client.ConnectAsync();
             server.WaitForConnection();
             clientConnect.Wait();
-            
+
             // ServerStream.State = Disconnected, ClientStream.State = Broken
             server.Disconnect();
             Assert.Throws<IOException>(() => client.Write(new byte[] { 0 }, 0, 1));
@@ -123,7 +123,7 @@ namespace System.IO.Pipes.Tests
         }
 
         [Fact]
-        [ActiveIssue(22271, TargetFrameworkMonikers.UapNotUapAot)]
+        [ActiveIssue(22271, TargetFrameworkMonikers.Uap)]
         public void SetAccessControl_NamedPipeStream_ServerDisposed()
         {
             string pipeName = GetUniquePipeName();
@@ -144,7 +144,7 @@ namespace System.IO.Pipes.Tests
         }
 
         [Fact]
-        [ActiveIssue(22271, TargetFrameworkMonikers.UapNotUapAot)]
+        [ActiveIssue(22271, TargetFrameworkMonikers.Uap)]
         public void SetAccessControl_NamedPipeStream_ServerHandleClosed()
         {
             string pipeName = GetUniquePipeName();

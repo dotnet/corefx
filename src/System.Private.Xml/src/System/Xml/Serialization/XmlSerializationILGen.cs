@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#if !FEATURE_SERIALIZATION_UAPAOT
 namespace System.Xml.Serialization
 {
     using System;
@@ -18,21 +17,21 @@ namespace System.Xml.Serialization
         private int _nextMethodNumber = 0;
         private readonly Dictionary<TypeMapping, string> _methodNames = new Dictionary<TypeMapping, string>();
         // Lookup name->created Method
-        private Dictionary<string, MethodBuilderInfo> _methodBuilders = new Dictionary<string, MethodBuilderInfo>();
+        private readonly Dictionary<string, MethodBuilderInfo> _methodBuilders = new Dictionary<string, MethodBuilderInfo>();
         // Lookup name->created Type
         internal Dictionary<string, Type> CreatedTypes = new Dictionary<string, Type>();
         // Lookup name->class Member
         internal Dictionary<string, MemberInfo> memberInfos = new Dictionary<string, MemberInfo>();
-        private ReflectionAwareILGen _raCodeGen;
-        private TypeScope[] _scopes;
-        private TypeDesc _stringTypeDesc = null;
-        private TypeDesc _qnameTypeDesc = null;
-        private string _className;
+        private readonly ReflectionAwareILGen _raCodeGen;
+        private readonly TypeScope[] _scopes;
+        private readonly TypeDesc _stringTypeDesc = null;
+        private readonly TypeDesc _qnameTypeDesc = null;
+        private readonly string _className;
         private TypeMapping[] _referencedMethods;
         private int _references = 0;
         private readonly HashSet<TypeMapping> _generatedMethods = new HashSet<TypeMapping>();
         private ModuleBuilder _moduleBuilder;
-        private TypeAttributes _typeAttributes;
+        private readonly TypeAttributes _typeAttributes;
         protected TypeBuilder typeBuilder;
         protected CodeGenerator ilg;
 
@@ -66,7 +65,7 @@ namespace System.Xml.Serialization
         }
         internal TypeAttributes TypeAttributes { get { return _typeAttributes; } }
 
-        private static Dictionary<string, Regex> s_regexs = new Dictionary<string, Regex>();
+        private static readonly Dictionary<string, Regex> s_regexs = new Dictionary<string, Regex>();
         internal static Regex NewRegex(string pattern)
         {
             Regex regex;
@@ -214,7 +213,7 @@ namespace System.Xml.Serialization
             {
                 MethodInfo Hashtable_set_Item = typeof(Hashtable).GetMethod(
                     "set_Item",
-                    new Type[] { typeof(Object), typeof(Object) }
+                    new Type[] { typeof(object), typeof(object) }
                     );
                 for (int i = 0; i < methods.Length; i++)
                 {
@@ -327,7 +326,7 @@ namespace System.Xml.Serialization
 
             ilg = new CodeGenerator(typedSerializerTypeBuilder);
             ilg.BeginMethod(
-                typeof(Boolean),
+                typeof(bool),
                 "CanDeserialize",
                 new Type[] { typeof(XmlReader) },
                 new string[] { "xmlReader" },
@@ -345,7 +344,7 @@ namespace System.Xml.Serialization
                 MethodInfo XmlReader_IsStartElement = typeof(XmlReader).GetMethod(
                      "IsStartElement",
                      CodeGenerator.InstanceBindingFlags,
-                     new Type[] { typeof(String), typeof(String) }
+                     new Type[] { typeof(string), typeof(string) }
                      );
                 ilg.Ldarg(ilg.GetArg("xmlReader"));
                 ilg.Ldstr(GetCSharpString(mapping.Accessor.Name));
@@ -415,7 +414,7 @@ namespace System.Xml.Serialization
             MethodInfo Hashtable_Add = typeof(Hashtable).GetMethod(
                 "Add",
                 CodeGenerator.InstanceBindingFlags,
-                new Type[] { typeof(Object), typeof(Object) }
+                new Type[] { typeof(object), typeof(object) }
                 );
 
             foreach (string key in serializers.Keys)
@@ -596,4 +595,3 @@ namespace System.Xml.Serialization
         }
     }
 }
-#endif

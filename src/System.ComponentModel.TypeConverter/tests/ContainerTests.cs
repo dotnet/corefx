@@ -1,11 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
-// See the LICENSE file in the project root for more information. 
+// See the LICENSE file in the project root for more information.
 
 //
 // System.ComponentModel.Container test cases
 //
 // Authors:
-// 	Gonzalo Paniagua Javier (gonzalo@ximian.com)
+//  Gonzalo Paniagua Javier (gonzalo@ximian.com)
 //  Ivan N. Zlatev (contact i-nZ.net)
 
 // Copyright (c) 2006 Novell, Inc. (http://www.novell.com)
@@ -288,7 +288,7 @@ namespace System.ComponentModel.Tests
         {
             var container = new Container();
             var components = new Component[] { new Component(), new Component(), new Component(), new Component(), new Component() };
-            
+
             for (int i = 0; i < components.Length; i++)
             {
                 container.Add(components[i]);
@@ -321,12 +321,9 @@ namespace System.ComponentModel.Tests
             ex = AssertExtensions.Throws<ArgumentException>(null, () => container.Add(c2, "dup"));
             Assert.Equal(typeof(ArgumentException), ex.GetType());
             Assert.Null(ex.InnerException);
-            if (!PlatformDetection.IsNetNative) // .Net Native toolchain optimizes away exception messages and paramnames.
-            {
-                Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("'dup'") != -1);
-                Assert.Null(ex.ParamName);
-            }
+            Assert.NotNull(ex.Message);
+            Assert.True(ex.Message.IndexOf("'dup'") != -1);
+            Assert.Null(ex.ParamName);
             Assert.Equal(1, container.Components.Count);
 
             // new component, different case
@@ -336,12 +333,9 @@ namespace System.ComponentModel.Tests
             // unique and case-insensitive
             Assert.Equal(typeof(ArgumentException), ex.GetType());
             Assert.Null(ex.InnerException);
-            if (!PlatformDetection.IsNetNative) // .Net Native toolchain optimizes away exception messages and paramnames.
-            {
-                Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("'duP'") != -1);
-                Assert.Null(ex.ParamName);
-            }
+            Assert.NotNull(ex.Message);
+            Assert.True(ex.Message.IndexOf("'duP'") != -1);
+            Assert.Null(ex.ParamName);
             Assert.Equal(1, container.Components.Count);
 
             // existing component, same case
@@ -361,12 +355,9 @@ namespace System.ComponentModel.Tests
             // unique and case-insensitive
             Assert.Equal(typeof(ArgumentException), ex.GetType());
             Assert.Null(ex.InnerException);
-            if (!PlatformDetection.IsNetNative) // .Net Native toolchain optimizes away exception messages and paramnames.
-            {
-                Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("'dup'") != -1);
-                Assert.Null(ex.ParamName);
-            }
+            Assert.NotNull(ex.Message);
+            Assert.True(ex.Message.IndexOf("'dup'") != -1);
+            Assert.Null(ex.ParamName);
             Assert.Equal(2, container.Components.Count);
             Assert.Equal(1, container2.Components.Count);
             Assert.Same(c5, container2.Components[0]);
@@ -705,11 +696,8 @@ namespace System.ComponentModel.Tests
             ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() => _container.InvokeValidateName((IComponent)null, "A"));
             Assert.Equal(typeof(ArgumentNullException), ex.GetType());
             Assert.Null(ex.InnerException);
-            if (!PlatformDetection.IsNetNative) // .Net Native toolchain optimizes away exception messages and paramnames.
-            {
-                Assert.NotNull(ex.Message);
-                Assert.Equal("component", ex.ParamName);
-            }
+            Assert.NotNull(ex.Message);
+            Assert.Equal("component", ex.ParamName);
         }
 
         [Fact]
@@ -740,12 +728,9 @@ namespace System.ComponentModel.Tests
             // unique and case-insensitive
             Assert.Equal(typeof(ArgumentException), ex.GetType());
             Assert.Null(ex.InnerException);
-            if (!PlatformDetection.IsNetNative) // .Net Native toolchain optimizes away exception messages and paramnames.
-            {
-                Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("'dup'") != -1);
-                Assert.Null(ex.ParamName);
-            }
+            Assert.NotNull(ex.Message);
+            Assert.True(ex.Message.IndexOf("'dup'") != -1);
+            Assert.Null(ex.ParamName);
             Assert.Equal(2, _container.Components.Count);
             _container.InvokeValidateName(compB, "whatever");
 
@@ -756,12 +741,9 @@ namespace System.ComponentModel.Tests
             // unique and case-insensitive
             Assert.Equal(typeof(ArgumentException), ex.GetType());
             Assert.Null(ex.InnerException);
-            if (!PlatformDetection.IsNetNative) // .Net Native toolchain optimizes away exception messages and paramnames.
-            {
-                Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("'dup'") != -1);
-                Assert.Null(ex.ParamName);
-            }
+            Assert.NotNull(ex.Message);
+            Assert.True(ex.Message.IndexOf("'dup'") != -1);
+            Assert.Null(ex.ParamName);
             Assert.Equal(2, _container.Components.Count);
             _container.InvokeValidateName(compC, "whatever");
 
@@ -774,12 +756,9 @@ namespace System.ComponentModel.Tests
             // unique and case-insensitive
             Assert.Equal(typeof(ArgumentException), ex.GetType());
             Assert.Null(ex.InnerException);
-            if (!PlatformDetection.IsNetNative) // .Net Native toolchain optimizes away exception messages and paramnames.
-            {
-                Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("'dup'") != -1);
-                Assert.Null(ex.ParamName);
-            }
+            Assert.NotNull(ex.Message);
+            Assert.True(ex.Message.IndexOf("'dup'") != -1);
+            Assert.Null(ex.ParamName);
             Assert.Equal(2, _container.Components.Count);
             _container.InvokeValidateName(compD, "whatever");
             Assert.Equal(1, container2.Components.Count);

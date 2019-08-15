@@ -17,6 +17,7 @@ namespace System.IO
     internal sealed class StdInReader : TextReader
     {
         private static string s_moveLeftString; // string written to move the cursor to the left
+        private static string s_clearToEol;     // string written to clear from cursor to end of line
 
         private readonly StringBuilder _readLineSB; // SB that holds readLine output.  This is a field simply to enable reuse; it's only used in ReadLine.
         private readonly Stack<ConsoleKeyInfo> _tmpKeys = new Stack<ConsoleKeyInfo>(); // temporary working stack; should be empty outside of ReadLine
@@ -87,14 +88,13 @@ namespace System.IO
             Debug.Assert(_tmpKeys.Count == 0);
             string readLineStr = null;
 
-            // Disable echo and buffering.  These will be disabled for the duration of the line read.
-            Interop.Sys.InitializeConsoleBeforeRead(); 
+            Interop.Sys.InitializeConsoleBeforeRead();
             try
             {
                 // Read key-by-key until we've read a line.
-                while (true) 
+                while (true)
                 {
-                    // Read the next key.  This may come from previously read keys, from previously read but 
+                    // Read the next key.  This may come from previously read keys, from previously read but
                     // unprocessed data, or from an actual stdin read.
                     bool previouslyProcessed;
                     ConsoleKeyInfo keyInfo = ReadKey(out previouslyProcessed);
@@ -137,12 +137,31 @@ namespace System.IO
                             _readLineSB.Length = len - 1;
                             if (!previouslyProcessed)
                             {
-                                if (s_moveLeftString == null)
+                                // The ReadLine input may wrap accross terminal rows and we need to handle that.
+                                // note: ConsolePal will cache the cursor position to avoid making many slow cursor position fetch operations.
+                                if (ConsolePal.TryGetCursorPosition(out int left, out int top, reinitializeForRead: true) &&
+                                    left == 0 && top > 0)
                                 {
-                                    string moveLeft = ConsolePal.TerminalFormatStrings.Instance.CursorLeft;
-                                    s_moveLeftString = !string.IsNullOrEmpty(moveLeft) ? moveLeft + " " + moveLeft : string.Empty;
+                                    if (s_clearToEol == null)
+                                    {
+                                        s_clearToEol = ConsolePal.TerminalFormatStrings.Instance.ClrEol ?? string.Empty;
+                                    }
+
+                                    // Move to end of previous line
+                                    ConsolePal.SetCursorPosition(ConsolePal.WindowWidth - 1, top - 1);
+                                    // Clear from cursor to end of the line
+                                    ConsolePal.WriteStdoutAnsiString(s_clearToEol, mayChangeCursorPosition: false);
                                 }
-                                Console.Write(s_moveLeftString);
+                                else
+                                {
+                                    if (s_moveLeftString == null)
+                                    {
+                                        string moveLeft = ConsolePal.TerminalFormatStrings.Instance.CursorLeft;
+                                        s_moveLeftString = !string.IsNullOrEmpty(moveLeft) ? moveLeft + " " + moveLeft : string.Empty;
+                                    }
+
+                                    Console.Write(s_moveLeftString);
+                                }
                             }
                         }
                     }
@@ -214,8 +233,8 @@ namespace System.IO
 
         private static bool IsEol(char c)
         {
-            return 
-                c != ConsolePal.s_posixDisableValue && 
+            return
+                c != ConsolePal.s_posixDisableValue &&
                 (c == ConsolePal.s_veolCharacter || c == ConsolePal.s_veol2Character || c == ConsolePal.s_veofCharacter);
         }
 
@@ -340,7 +359,7 @@ namespace System.IO
 
         /// <summary>
         /// Try to intercept the key pressed.
-        /// 
+        ///
         /// Unlike Windows, Unix has no concept of virtual key codes.
         /// Hence, in case we do not recognize a key, we can't really
         /// get the ConsoleKey key code associated with it.
@@ -387,7 +406,7 @@ namespace System.IO
                             (ConsolePal.s_veolCharacter != ConsolePal.s_posixDisableValue ? ConsolePal.s_veolCharacter :
                              ConsolePal.s_veol2Character != ConsolePal.s_posixDisableValue ? ConsolePal.s_veol2Character :
                              ConsolePal.s_veofCharacter != ConsolePal.s_posixDisableValue ? ConsolePal.s_veofCharacter :
-                             0), 
+                             0),
                             default(ConsoleKey), false, false, false);
                     }
                 }

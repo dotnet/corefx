@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
@@ -11,7 +11,9 @@ namespace System.Drawing.Tests
 {
     public class bitmap_173x183_indexed_8bit { }
 
-    public class ToolboxBitmapAttributeTests : RemoteExecutorTestBase
+    public class Icon_toolboxBitmapAttributeTest { }
+
+    public class ToolboxBitmapAttributeTests
     {
         private static Size DefaultSize = new Size(16, 16);
         private void AssertDefaultSize(Image image)
@@ -24,7 +26,7 @@ namespace System.Drawing.Tests
             {
                 // On .NET Framework sometimes the size might be default or it might
                 // be disposed in which case Size property throws an ArgumentException
-                // so allow both cases see https://github.com/dotnet/corefx/issues/27361. 
+                // so allow both cases see https://github.com/dotnet/corefx/issues/27361.
                 if (PlatformDetection.IsFullFramework && ex is ArgumentException)
                 {
                     return;
@@ -42,7 +44,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Ctor_FileName_TestData))]
         public void Ctor_FileName(string fileName, Size size)
         {
@@ -62,7 +64,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(null, -1, -1)]
         [InlineData(typeof(ClassWithNoNamespace), -1, -1)]
         [InlineData(typeof(bitmap_173x183_indexed_8bit), 173, 183)]
@@ -84,7 +86,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(null, null, -1, -1)]
         [InlineData(null, "invalid.ico", -1, -1)]
         [InlineData(typeof(ClassWithNoNamespace), null, -1, -1)]
@@ -113,7 +115,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData("bitmap_173x183_indexed_8bit.bmp", 173, 183)]
         [InlineData("48x48_multiple_entries_4bit.ico", 16, 16)]
         public void GetImage_TypeFileNameBool_ReturnsExpected(string fileName, int width, int height)
@@ -131,7 +133,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void GetImage_NullComponent_ReturnsNull()
         {
             var attribute = new ToolboxBitmapAttribute((string)null);
@@ -139,7 +141,7 @@ namespace System.Drawing.Tests
             Assert.Null(attribute.GetImage((object)null, true));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void GetImage_Component_ReturnsExpected()
         {
             ToolboxBitmapAttribute attribute = new ToolboxBitmapAttribute((string)null);
@@ -156,7 +158,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void GetImage_Default_ReturnsExpected()
         {
             ToolboxBitmapAttribute attribute = ToolboxBitmapAttribute.Default;
@@ -172,6 +174,26 @@ namespace System.Drawing.Tests
             }
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Logical name with no extension is not supported in desktop framework")]
+        [InlineData(typeof(Icon_toolboxBitmapAttributeTest), 256, 256)]
+        public void GetImage_NoExtension(Type type, int width, int height)
+        {
+            var attribute = new ToolboxBitmapAttribute(type);
+            using (Image image = attribute.GetImage(type))
+            {
+                if (width == -1 && height == -1)
+                {
+                    AssertDefaultSize(image);
+                }
+                else
+                {
+                    Assert.Equal(new Size(width, height), image.Size);
+                }
+            }
+        }
+
         public static IEnumerable<object[]> Equals_TestData()
         {
             yield return new object[] { ToolboxBitmapAttribute.Default, ToolboxBitmapAttribute.Default, true };
@@ -182,7 +204,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Equals_TestData))]
         public void Equals_Other_ReturnsExpected(ToolboxBitmapAttribute attribute, object other, bool expected)
         {

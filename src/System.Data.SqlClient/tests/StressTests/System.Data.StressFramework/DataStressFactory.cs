@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -14,7 +14,7 @@ using System.Diagnostics;
 namespace Stress.Data
 {
     /// <summary>
-    /// Base class to generate utility objects required for stress tests to run. For example: connection strings, command texts, 
+    /// Base class to generate utility objects required for stress tests to run. For example: connection strings, command texts,
     /// data tables and views, and other information
     /// </summary>
     public abstract class DataStressFactory : IDisposable
@@ -27,7 +27,7 @@ namespace Stress.Data
         public static readonly string LargeStringParam = new string('p', 2000);
 
         // A temp table that when create puts the server session into a non-recoverable state until dropped.
-        private static readonly string s_tempTableName = String.Format("#stress_{0}", Guid.NewGuid().ToString("N"));
+        private static readonly string s_tempTableName = string.Format("#stress_{0}", Guid.NewGuid().ToString("N"));
 
         // The languages used for "SET LANGUAGE [language]" statements that modify the server session state.  Let's
         // keep error message readable so we're only using english languages.
@@ -86,7 +86,7 @@ namespace Stress.Data
 
         /// <summary>
         /// Creates a new connection and initializes it with random connection string generated from the factory's source
-        /// Note: if rnd is null, create a connection with minimal string required to connect to the target database        
+        /// Note: if rnd is null, create a connection with minimal string required to connect to the target database
         /// </summary>
         /// <param name="rnd">Randomizes Connection Pool enablement, the application Name to randomize connection pool</param>
         /// <param name="options"></param>
@@ -102,7 +102,7 @@ namespace Stress.Data
                 // Connection string and/or identity are randomized
 
                 // We implement this using the Application Name field in the connection string since this field
-                // should not affect behaviour other than connection pooling, since all connections in a pool 
+                // should not affect behaviour other than connection pooling, since all connections in a pool
                 // must have the exact same connection string (including Application Name)
 
                 if (rnd.NextBool(.1))
@@ -112,7 +112,7 @@ namespace Stress.Data
                 }
                 else if (rnd.NextBool(0.001))
                 {
-                    // Use a unique Application Name to get a new connection from a new pool. We do this in order to 
+                    // Use a unique Application Name to get a new connection from a new pool. We do this in order to
                     // stress the code that creates/deletes pools.
                     connectionString = string.Format("{0}; Pooling=true; Application Name=\"{1}\";", connectionString, GetRandomApplicationName());
 
@@ -257,7 +257,7 @@ namespace Stress.Data
         /// <summary>
         /// Returns a SELECT command that retrieves data from a table
         /// </summary>
-        private String GetSelectCommandForMultipleRows(Random rnd, DbCommand com, TableMetadata inputTable, bool isXml)
+        private string GetSelectCommandForMultipleRows(Random rnd, DbCommand com, TableMetadata inputTable, bool isXml)
         {
             int rowcount = rnd.Next(Depth);
 
@@ -281,7 +281,7 @@ namespace Stress.Data
             cmdText.Append("\" WITH(NOLOCK) WHERE PrimaryKey ");
 
             // We randomly pick an operator from '>' or '=' to allow for randomization
-            // of possible rows returned by this query. This approach *may* help 
+            // of possible rows returned by this query. This approach *may* help
             // in reducing the likelihood of multiple threads accessing same rows.
             // If multiple threads access same rows, there may be locking issues
             // which may be avoided because of this randomization.
@@ -303,7 +303,7 @@ namespace Stress.Data
         /// <summary>
         /// Returns a SELECT command that returns a single string parameter value.
         /// </summary>
-        private String GetSelectCommandForScalarValue(DbCommand com)
+        private string GetSelectCommandForScalarValue(DbCommand com)
         {
             string pName = GetParameterName("P1");
             StringBuilder cmdText = new StringBuilder();
@@ -370,7 +370,7 @@ namespace Stress.Data
 
         /// <summary>
         /// Returns a random UPDATE command
-        /// </summary>  
+        /// </summary>
         public DbCommand GetUpdateCommand(Random rnd, TableMetadata table, DataStressConnection conn)
         {
             DbCommand com = CreateCommand(rnd, conn);
@@ -424,7 +424,7 @@ namespace Stress.Data
 
         /// <summary>
         /// Returns a random INSERT command
-        /// </summary> 
+        /// </summary>
         public DbCommand GetInsertCommand(Random rnd, TableMetadata table, DataStressConnection conn)
         {
             DbCommand com = CreateCommand(rnd, conn);
@@ -495,7 +495,7 @@ namespace Stress.Data
 
         /// <summary>
         /// Returns a random DELETE command
-        /// </summary>    
+        /// </summary>
         public DbCommand GetDeleteCommand(Random rnd, TableMetadata table, DataStressConnection conn)
         {
             DbCommand com = CreateCommand(rnd, conn);
@@ -539,7 +539,7 @@ namespace Stress.Data
             switch (select)
             {
                 case 0:
-                    // Create a SET CONTEXT_INFO statement using a hex string of random data 
+                    // Create a SET CONTEXT_INFO statement using a hex string of random data
                     StringBuilder sb = new StringBuilder("0x");
                     int count = rnd.Next(1, 129);
                     for (int i = 0; i < count; i++)
@@ -556,7 +556,7 @@ namespace Stress.Data
                     break;
 
                 default:
-                    // Create a SET LANGUAGE statement 
+                    // Create a SET LANGUAGE statement
                     sessionStmt = string.Format("SET LANGUAGE N'{0}'", s_languages[rnd.Next(s_languages.Length)]);
                     break;
             }
@@ -627,17 +627,17 @@ namespace Stress.Data
                 case DbType.Byte:
                     return rnd.Next(byte.MinValue, byte.MaxValue + 1);
                 case DbType.Int16:
-                    return rnd.Next(Int16.MinValue, Int16.MaxValue + 1);
+                    return rnd.Next(short.MinValue, short.MaxValue + 1);
                 case DbType.Int32:
-                    return (rnd.Next(2) == 0 ? Int32.MaxValue / rnd.Next(1, 3) : Int32.MinValue / rnd.Next(1, 3));
+                    return (rnd.Next(2) == 0 ? int.MaxValue / rnd.Next(1, 3) : int.MinValue / rnd.Next(1, 3));
                 case DbType.Int64:
-                    return (rnd.Next(2) == 0 ? Int64.MaxValue / rnd.Next(1, 3) : Int64.MinValue / rnd.Next(1, 3));
+                    return (rnd.Next(2) == 0 ? long.MaxValue / rnd.Next(1, 3) : long.MinValue / rnd.Next(1, 3));
                 case DbType.Single:
-                    return rnd.NextDouble() * (rnd.Next(2) == 0 ? Single.MaxValue : Single.MinValue);
+                    return rnd.NextDouble() * (rnd.Next(2) == 0 ? float.MaxValue : float.MinValue);
                 case DbType.Double:
-                    return rnd.NextDouble() * (rnd.Next(2) == 0 ? Double.MaxValue : Double.MinValue);
+                    return rnd.NextDouble() * (rnd.Next(2) == 0 ? double.MaxValue : double.MinValue);
                 case DbType.Decimal:
-                    return rnd.Next(Int16.MinValue, Int16.MaxValue + 1);
+                    return rnd.Next(short.MinValue, short.MaxValue + 1);
                 case DbType.DateTime:
                 case DbType.DateTime2:
                     return DateTime.Now;
@@ -674,7 +674,7 @@ namespace Stress.Data
 
                         // The data is just a repeat of one character because to the managed provider
                         // it is only really the length that matters, not the content of the data
-                        char characterToUse = (char)rnd.Next((int)'@', (int)'~');  // Choosing random characters in this range to avoid special 
+                        char characterToUse = (char)rnd.Next((int)'@', (int)'~');  // Choosing random characters in this range to avoid special
                                                                                    // xml chars like '<' or '&'
                         int numRepeats = rnd.Next(0, maxLength - tagLength); // Case (2): tagLength == maxTargetLength
                                                                              // Case (3): tagLength < maxTargetLength <-- most common

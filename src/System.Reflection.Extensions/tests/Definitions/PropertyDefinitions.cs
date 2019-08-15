@@ -9,15 +9,15 @@ namespace System.Reflection.Tests
         public static int Members = 67;
         public static int MembersEverything = 73;
 
-        public static String[] DeclaredPropertyNames = new String[] { "SubPubprop1", "Pubprop1", "Pubprop2", "Pubprop3", "SubIntprop1", "Intprop1", "Intprop2", "Intprop3", "SubProprop1",
+        public static string[] DeclaredPropertyNames = new string[] { "SubPubprop1", "Pubprop1", "Pubprop2", "Pubprop3", "SubIntprop1", "Intprop1", "Intprop2", "Intprop3", "SubProprop1",
                                                                     "Proprop1", "Proprop2", "Proprop3", "SubProIntprop1", "ProIntprop1", "ProIntprop2", "ProIntprop3",
                                                                     };
 
-        public static String[] InheritedPropertyNames = new String[] { };
+        public static string[] InheritedPropertyNames = new string[] { };
 
-        public static String[] InheritedButHiddenPropertyNames = new String[] { };
+        public static string[] InheritedButHiddenPropertyNames = new string[] { };
 
-        public static String[] PublicPropertyNames = new String[] { "SubPubprop1", "Pubprop1", "Pubprop2", "Pubprop3" };
+        public static string[] PublicPropertyNames = new string[] { "SubPubprop1", "Pubprop1", "Pubprop2", "Pubprop3" };
 
         public string Pubprop1 { get { return ""; } set { } }
         public string SubPubprop1 { get { return ""; } set { } }
@@ -42,31 +42,31 @@ namespace System.Reflection.Tests
 
     internal class PropertyTestSubClass : PropertyTestBaseClass
     {
-        public new static int Members = 55;
-        public new static int MembersEverything = 89;
+        public static new int Members = 55;
+        public static new int MembersEverything = 89;
 
-        public new static String[] DeclaredPropertyNames = new String[] { "Pubprop1", "Pubprop2", "Pubprop3", "Intprop1", "Intprop2", "Intprop3",
+        public static new string[] DeclaredPropertyNames = new string[] { "Pubprop1", "Pubprop2", "Pubprop3", "Intprop1", "Intprop2", "Intprop3",
                                                                    "Proprop1", "Proprop2", "Proprop3", "ProIntprop1", "ProIntprop2", "ProIntprop3",
                                                                    };
 
-        public new static String[] InheritedPropertyNames = new String[] { "SubPubprop1", "SubIntprop1", "SubProprop1", "SubProIntprop1" };
+        public static new string[] InheritedPropertyNames = new string[] { "SubPubprop1", "SubIntprop1", "SubProprop1", "SubProIntprop1" };
 
-        public new static String[] InheritedButHiddenPropertyNames = new String[] { "Pubprop1", "Pubprop2", "Intprop1", "Intprop2",
+        public static new string[] InheritedButHiddenPropertyNames = new string[] { "Pubprop1", "Pubprop2", "Intprop1", "Intprop2",
                                                                                     "Proprop1", "Proprop2", "ProIntprop1", "ProIntprop2", };
 
-        public new static String[] PublicPropertyNames = new String[] { "Pubprop1", "Pubprop2", "Pubprop3" };
+        public static new string[] PublicPropertyNames = new string[] { "Pubprop1", "Pubprop2", "Pubprop3" };
 
         public new string Pubprop1 { get { return ""; } set { } }
         public new virtual string Pubprop2 { get { return ""; } set { } }
-        public new static string Pubprop3 { get { return ""; } set { } }
+        public static new string Pubprop3 { get { return ""; } set { } }
 
         internal new string Intprop1 { get { return ""; } set { } }
         internal new virtual string Intprop2 { get { return ""; } set { } }
-        internal new static string Intprop3 { get { return ""; } set { } }
+        internal static new string Intprop3 { get { return ""; } set { } }
 
         protected new string Proprop1 { get { return ""; } set { } }
         protected new virtual string Proprop2 { get { return ""; } set { } }
-        protected new static string Proprop3 { get { return ""; } set { } }
+        protected static new string Proprop3 { get { return ""; } set { } }
 
         protected new internal string ProIntprop1 { get { return ""; } set { } }
         protected new internal virtual string ProIntprop2 { get { return ""; } set { } }
@@ -78,10 +78,10 @@ namespace System.Reflection.Tests
         public static int Members = 16;
         public static int MembersEverything = 22;
 
-        public static String[] DeclaredPropertyNames = new String[] { "Item", "Item", "Item" };
-        public static String[] InheritedPropertyNames = new String[] { };
-        public static String[] InheritedButHiddenPropertyNames = new String[] { };
-        public static String[] PublicPropertyNames = new String[] { "Item", "Item", "Item" };
+        public static string[] DeclaredPropertyNames = new string[] { "Item", "Item", "Item" };
+        public static string[] InheritedPropertyNames = new string[] { };
+        public static string[] InheritedButHiddenPropertyNames = new string[] { };
+        public static string[] PublicPropertyNames = new string[] { "Item", "Item", "Item" };
 
         public int this[int i] { get { return 1; } set { } }
         public int this[string i] { get { return 1; } set { } }
@@ -90,13 +90,13 @@ namespace System.Reflection.Tests
 
     public class PropertyTestSubIndexerClass : PropertyTestBaseIndexerClass
     {
-        public new static int Members = 13;
-        public new static int MembersEverything = 26;
+        public static new int Members = 13;
+        public static new int MembersEverything = 26;
 
-        public new static String[] DeclaredPropertyNames = new String[] { "Item", "Item" };
-        public new static String[] InheritedPropertyNames = new String[] { "Item" };
-        public new static String[] InheritedButHiddenPropertyNames = new String[] { "Item", "Item" };
-        public new static String[] PublicPropertyNames = new String[] { "Item", "Item" };
+        public static new string[] DeclaredPropertyNames = new string[] { "Item", "Item" };
+        public static new string[] InheritedPropertyNames = new string[] { "Item" };
+        public static new string[] InheritedButHiddenPropertyNames = new string[] { "Item", "Item" };
+        public static new string[] PublicPropertyNames = new string[] { "Item", "Item" };
 
         public new int this[int i] { get { return 1; } set { } }
         public new int this[string i] { get { return 1; } set { } }
@@ -107,10 +107,10 @@ namespace System.Reflection.Tests
         public static int Members = 19;
         public static int MembersEverything = 25;
 
-        public static String[] DeclaredPropertyNames = new String[] { "prop1", "prop2", "prop3", "prop4" };
-        public static String[] InheritedPropertyNames = new String[] { };
-        public static String[] InheritedButHiddenPropertyNames = new String[] { };
-        public static String[] PublicPropertyNames = new String[] { "prop1" };
+        public static string[] DeclaredPropertyNames = new string[] { "prop1", "prop2", "prop3", "prop4" };
+        public static string[] InheritedPropertyNames = new string[] { };
+        public static string[] InheritedButHiddenPropertyNames = new string[] { };
+        public static string[] PublicPropertyNames = new string[] { "prop1" };
 
         public abstract string prop1 { get; set; }
         internal abstract string prop2 { get; set; }
@@ -120,13 +120,13 @@ namespace System.Reflection.Tests
 
     internal abstract class PropertyTestSubAbsClass : PropertyTestBaseAbsClass
     {
-        public new static int Members = 19;
-        public new static int MembersEverything = 25;
+        public static new int Members = 19;
+        public static new int MembersEverything = 25;
 
-        public new static String[] DeclaredPropertyNames = new String[] { "prop1", "prop2", "prop3", "prop4" };
-        public new static String[] InheritedPropertyNames = new String[] { };
-        public new static String[] InheritedButHiddenPropertyNames = new String[] { };
-        public new static String[] PublicPropertyNames = new String[] { "prop1" };
+        public static new string[] DeclaredPropertyNames = new string[] { "prop1", "prop2", "prop3", "prop4" };
+        public static new string[] InheritedPropertyNames = new string[] { };
+        public static new string[] InheritedButHiddenPropertyNames = new string[] { };
+        public static new string[] PublicPropertyNames = new string[] { "prop1" };
 
         public override abstract string prop1 { get; set; }
         internal abstract override string prop2 { get; set; }

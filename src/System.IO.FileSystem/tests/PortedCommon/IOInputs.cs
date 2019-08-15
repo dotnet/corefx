@@ -26,7 +26,7 @@ internal static class IOInputs
     // Does not include the trailing \0.
     // We now do the appropriate wrapping to allow creating longer directories. Like MaxPath, this is a legacy restriction.
     public static readonly int MaxDirectory = 247;
-    
+
     public const int MaxComponent = 255;
 
     public const string ExtendedPrefix = @"\\?\";
@@ -222,7 +222,7 @@ internal static class IOInputs
     }
 
     public static IEnumerable<string> GetReservedDeviceNames()
-    {   // See: http://msdn.microsoft.com/en-us/library/aa365247.aspx
+    {   // See: https://docs.microsoft.com/en-us/windows/desktop/FileIO/naming-a-file
         yield return "CON";
         yield return "AUX";
         yield return "NUL";

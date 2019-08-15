@@ -9,7 +9,7 @@ using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
-    partial class CompositionBatch
+    public partial class CompositionBatch
     {
         // Represents a part that exports a single export
         private class SingleExportComposablePart : ComposablePart
@@ -18,7 +18,10 @@ namespace System.ComponentModel.Composition.Hosting
 
             public SingleExportComposablePart(Export export)
             {
-                Assumes.NotNull(export);
+                if (export == null)
+                {
+                    throw new ArgumentNullException(nameof(export));
+                }
 
                 _export = export;
             }
@@ -44,7 +47,7 @@ namespace System.ComponentModel.Composition.Hosting
 
                 if (definition != _export.Definition)
                 {
-                    throw ExceptionBuilder.CreateExportDefinitionNotOnThisComposablePart("definition");
+                    throw ExceptionBuilder.CreateExportDefinitionNotOnThisComposablePart(nameof(definition));
                 }
 
                 return _export.Value;
@@ -53,9 +56,9 @@ namespace System.ComponentModel.Composition.Hosting
             public override void SetImport(ImportDefinition definition, IEnumerable<Export> exports)
             {
                 Requires.NotNull(definition, nameof(definition));
-                Requires.NotNullOrNullElements(exports, "exports");
+                Requires.NotNullOrNullElements(exports, nameof(exports));
 
-                throw ExceptionBuilder.CreateImportDefinitionNotOnThisComposablePart("definition");
+                throw ExceptionBuilder.CreateImportDefinitionNotOnThisComposablePart(nameof(definition));
             }
         }
     }

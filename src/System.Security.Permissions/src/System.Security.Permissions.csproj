@@ -1,18 +1,15 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{07390899-C8F6-4E83-A3A9-6867B8CB46A0}</ProjectGuid>
     <RootNamespace>System.Security.Permissions</RootNamespace>
     <AssemblyName>System.Security.Permissions</AssemblyName>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
+    <Configurations>net461-Debug;net461-Release;netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
+  <ItemGroup Condition="'$(TargetsNetFx)' != 'true'">
     <Compile Include="System\ApplicationIdentity.cs" />
+    <Compile Include="System\Configuration\ConfigurationPermission.cs" />
+    <Compile Include="System\Configuration\ConfigurationPermissionAttribute.cs" />
     <Compile Include="System\Data\Common\DBDataPermission.cs" />
     <Compile Include="System\Data\Common\DBDataPermissionAttribute.cs" />
     <Compile Include="System\Data\Odbc\OdbcPermission.cs" />
@@ -62,8 +59,10 @@
     <Compile Include="System\Security\HostSecurityManagerOptions.cs" />
     <Compile Include="System\Security\IEvidenceFactory.cs" />
     <Compile Include="System\Security\ISecurityPolicyEncodable.cs" />
-    <Compile Include="System\Security\IStackWalk.cs" />
     <Compile Include="System\Security\NamedPermissionSet.cs" />
+    <Compile Include="System\Security\Permissions\DataProtectionPermission.cs" />
+    <Compile Include="System\Security\Permissions\DataProtectionPermissionAttribute.cs" />
+    <Compile Include="System\Security\Permissions\DataProtectionPermissionFlags.cs" />
     <Compile Include="System\Security\Permissions\EnvironmentPermission.cs" />
     <Compile Include="System\Security\Permissions\EnvironmentPermissionAccess.cs" />
     <Compile Include="System\Security\Permissions\EnvironmentPermissionAttribute.cs" />
@@ -90,8 +89,8 @@
     <Compile Include="System\Security\Permissions\KeyContainerPermissionAccessEntryEnumerator.cs" />
     <Compile Include="System\Security\Permissions\KeyContainerPermissionAttribute.cs" />
     <Compile Include="System\Security\Permissions\KeyContainerPermissionFlags.cs" />
+    <Compile Include="System\Security\Permissions\MediaPermission.cs" />
     <Compile Include="System\Security\Permissions\PermissionSetAttribute.cs" />
-    <Compile Include="System\Security\Permissions\PermissionState.cs" />
     <Compile Include="System\Security\Permissions\PrincipalPermission.cs" />
     <Compile Include="System\Security\Permissions\PrincipalPermissionAttribute.cs" />
     <Compile Include="System\Security\Permissions\PublisherIdentityPermission.cs" />
@@ -122,9 +121,9 @@
     <Compile Include="System\Security\Permissions\UIPermissionWindow.cs" />
     <Compile Include="System\Security\Permissions\UrlIdentityPermission.cs" />
     <Compile Include="System\Security\Permissions\UrlIdentityPermissionAttribute.cs" />
+    <Compile Include="System\Security\Permissions\WebBrowserPermission.cs" />
     <Compile Include="System\Security\Permissions\ZoneIdentityPermission.cs" />
     <Compile Include="System\Security\Permissions\ZoneIdentityPermissionAttribute.cs" />
-    <Compile Include="System\Security\PermissionSet.cs" />
     <Compile Include="System\Security\Policy\AllMembershipCondition.cs" />
     <Compile Include="System\Security\Policy\ApplicationDirectory.cs" />
     <Compile Include="System\Security\Policy\ApplicationDirectoryMembershipCondition.cs" />
@@ -176,19 +175,61 @@
     <Compile Include="System\ServiceProcess\ServiceControllerPermissionEntryCollection.cs" />
     <Compile Include="System\Transactions\DistributedTransactionPermission.cs" />
     <Compile Include="System\Transactions\DistributedTransactionPermissionAttribute.cs" />
+    <Compile Include="System\Web\AspNetHostingPermission.cs" />
+    <Compile Include="System\Web\AspNetHostingPermissionAttribute.cs" />
+    <Compile Include="System\Web\AspNetHostingPermissionLevel.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="System\Xaml\Permissions\XamlLoadPermission.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
+    <Compile Include="$(CommonPath)\CoreLib\System\Security\IStackWalk.cs">
+      <Link>Common\CoreLib\System\Security\IStackWalk.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\Security\PermissionSet.cs">
+      <Link>Common\CoreLib\System\Security\PermissionSet.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\Security\Permissions\PermissionState.cs">
+      <Link>Common\CoreLib\System\Security\Permissions\PermissionState.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.OracleClient" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Net" />
-    <Reference Include="System.Transactions" />
+    <Reference Include="System.Security" />
     <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Security.AccessControl" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' or '$(TargetGroup)' == 'uap'">
+    <Reference Include="System.Collections" />
+    <Reference Include="System.Collections.NonGeneric" />
+    <Reference Include="System.ComponentModel.Primitives" />
+    <Reference Include="System.Data.Common" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Security.Principal" />
+    <Reference Include="System.Security.Cryptography.Algorithms" />
+    <Reference Include="System.Security.Cryptography.Csp" />
+    <Reference Include="System.Security.Cryptography.Primitives" />
+    <Reference Include="System.Security.Cryptography.X509Certificates" />
+    <Reference Include="System.Text.RegularExpressions" />
+    <Reference Include="System.Threading" />
+    <Reference Include="System.Threading.Thread" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Reference Include="System.Windows.Extensions" />
+  </ItemGroup>
 </Project>

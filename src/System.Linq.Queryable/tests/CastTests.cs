@@ -12,7 +12,7 @@ namespace System.Linq.Tests
         public void CastIntToLongThrows()
         {
             var q = from x in new[] { 9999, 0, 888, -1, 66, -777, 1, 2, -12345 }
-                    where x > Int32.MinValue
+                    where x > int.MinValue
                     select x;
 
             var rst = q.AsQueryable().Cast<long>();
@@ -47,7 +47,7 @@ namespace System.Linq.Tests
 
             Assert.Equal(expected, source.AsQueryable().Cast<int?>());
         }
-        
+
         [Fact]
         public void LongFromNullableIntInObjectsThrows()
         {
@@ -98,7 +98,7 @@ namespace System.Linq.Tests
             IQueryable<double> cast = source.AsQueryable().Cast<double>();
             Assert.Throws<InvalidCastException>(() => cast.ToList());
         }
-        
+
         private static void TestCastThrow<T>(object o)
         {
             byte? i = 10;

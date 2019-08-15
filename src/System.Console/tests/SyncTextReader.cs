@@ -8,7 +8,6 @@ using System.Text;
 using Xunit;
 
 
-[SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Issue https://github.com/dotnet/corefx/issues/18220")]
 public class SyncTextReader
 {
     // NOTE: These tests test the underlying SyncTextReader by
@@ -107,7 +106,7 @@ public class SyncTextReader
             // Then
             Assert.Equal(5, result);
             Assert.Equal(expected, buffer);
-            Assert.Equal(-1, Console.Read()); // We should be at EOF now. 
+            Assert.Equal(-1, Console.Read()); // We should be at EOF now.
         });
     }
 
@@ -170,7 +169,7 @@ public class SyncTextReader
             // Then
             Assert.Equal(5, result);
             Assert.Equal(expected, buffer);
-            Assert.Equal(-1, Console.Read()); // We should be at EOF now. 
+            Assert.Equal(-1, Console.Read()); // We should be at EOF now.
 
             // Invalid args
             Assert.Throws<ArgumentNullException>(() => { Console.In.ReadBlockAsync(null, 0, 0); });

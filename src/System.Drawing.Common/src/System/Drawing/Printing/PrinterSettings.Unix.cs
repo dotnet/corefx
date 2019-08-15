@@ -18,10 +18,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -249,7 +249,7 @@ namespace System.Drawing.Printing
 
                 if (printer_resolutions == null)
                 {
-                    printer_resolutions = new PrinterSettings.PrinterResolutionCollection(new PrinterResolution[] { });
+                    printer_resolutions = new PrinterSettings.PrinterResolutionCollection(Array.Empty<PrinterResolution>());
                     PrintingServices.LoadPrinterResolutions(printer_name, this);
                 }
 
@@ -303,74 +303,63 @@ namespace System.Drawing.Printing
             }
         }
 
-        //methods        
+        //methods
         public object Clone()
         {
             PrinterSettings ps = new PrinterSettings();
             return ps;
         }
 
-        [MonoTODO("PrinterSettings.CreateMeasurementGraphics")]
         public Graphics CreateMeasurementGraphics()
         {
             throw new NotImplementedException();
         }
-        [MonoTODO("PrinterSettings.CreateMeasurementGraphics")]
+
         public Graphics CreateMeasurementGraphics(bool honorOriginAtMargins)
         {
             throw new NotImplementedException();
         }
 
-        [MonoTODO("PrinterSettings.CreateMeasurementGraphics")]
         public Graphics CreateMeasurementGraphics(PageSettings pageSettings)
         {
             throw new NotImplementedException();
         }
 
-        [MonoTODO("PrinterSettings.CreateMeasurementGraphics")]
         public Graphics CreateMeasurementGraphics(PageSettings pageSettings, bool honorOriginAtMargins)
         {
             throw new NotImplementedException();
         }
 
-        [MonoTODO("PrinterSettings.GetHdevmode")]
         public IntPtr GetHdevmode()
         {
             throw new NotImplementedException();
         }
 
-        [MonoTODO("PrinterSettings.GetHdevmode")]
         public IntPtr GetHdevmode(PageSettings pageSettings)
         {
             throw new NotImplementedException();
         }
 
-        [MonoTODO("PrinterSettings.GetHdevname")]
         public IntPtr GetHdevnames()
         {
             throw new NotImplementedException();
         }
 
-
-        [MonoTODO("IsDirectPrintingSupported")]
         public bool IsDirectPrintingSupported(Image image)
         {
             throw new NotImplementedException();
         }
 
-        [MonoTODO("IsDirectPrintingSupported")]
         public bool IsDirectPrintingSupported(ImageFormat imageFormat)
         {
             throw new NotImplementedException();
         }
 
-        [MonoTODO("PrinterSettings.SetHdevmode")]
         public void SetHdevmode(IntPtr hdevmode)
         {
             throw new NotImplementedException();
         }
 
-        [MonoTODO("PrinterSettings.SetHdevnames")]
         public void SetHdevnames(IntPtr hdevnames)
         {
             throw new NotImplementedException();
@@ -390,7 +379,7 @@ namespace System.Drawing.Printing
 
         public class PaperSourceCollection : ICollection, IEnumerable
         {
-            ArrayList _PaperSources = new ArrayList();
+            private ArrayList _PaperSources = new ArrayList();
 
             public PaperSourceCollection(PaperSource[] array)
             {
@@ -435,7 +424,7 @@ namespace System.Drawing.Printing
 
         public class PaperSizeCollection : ICollection, IEnumerable
         {
-            ArrayList _PaperSizes = new ArrayList();
+            private ArrayList _PaperSizes = new ArrayList();
 
             public PaperSizeCollection(PaperSize[] array)
             {
@@ -479,7 +468,7 @@ namespace System.Drawing.Printing
 
         public class PrinterResolutionCollection : ICollection, IEnumerable
         {
-            ArrayList _PrinterResolutions = new ArrayList();
+            private ArrayList _PrinterResolutions = new ArrayList();
 
             public PrinterResolutionCollection(PrinterResolution[] array)
             {
@@ -523,7 +512,7 @@ namespace System.Drawing.Printing
 
         public class StringCollection : ICollection, IEnumerable
         {
-            ArrayList _Strings = new ArrayList();
+            private ArrayList _Strings = new ArrayList();
 
             public StringCollection(string[] array)
             {

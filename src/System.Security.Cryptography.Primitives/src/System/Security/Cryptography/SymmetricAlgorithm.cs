@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Internal.Cryptography;
+
 namespace System.Security.Cryptography
 {
     public abstract class SymmetricAlgorithm : IDisposable
@@ -184,7 +186,7 @@ namespace System.Security.Cryptography
             GC.SuppressFinalize(this);
         }
 
-        public void Clear() 
+        public void Clear()
         {
             (this as IDisposable).Dispose();
         }
@@ -217,7 +219,7 @@ namespace System.Security.Cryptography
                 return false;
             return bitLength.IsLegalSize(validSizes);
         }
-        
+
         protected CipherMode ModeValue;
         protected PaddingMode PaddingValue;
         protected byte[] KeyValue;

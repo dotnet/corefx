@@ -5,21 +5,64 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
-public partial class CancelKeyPressTests : RemoteExecutorTestBase
+public partial class CancelKeyPressTests
 {
+    [Fact]
+    [ActiveIssue(39172)]
     [PlatformSpecific(TestPlatforms.AnyUnix)]  // Uses P/Invokes
     public void HandlerInvokedForSigInt()
     {
         HandlerInvokedForSignal(SIGINT);
     }
 
+    [Fact]
+    [ActiveIssue(39172)]
     [PlatformSpecific(TestPlatforms.AnyUnix & ~TestPlatforms.OSX)] // Jenkins blocks SIGQUIT on OS X, causing the test to fail in CI
     public void HandlerInvokedForSigQuit()
     {
         HandlerInvokedForSignal(SIGQUIT);
+    }
+
+    [Fact]
+    [ActiveIssue(39172)]
+    [PlatformSpecific(TestPlatforms.AnyUnix)]  // events are triggered by Unix signals (SIGINT, SIGQUIT, SIGCHLD).
+    public void ExitDetectionNotBlockedByHandler()
+    {
+        RemoteExecutor.Invoke(() =>
+        {
+            var mre = new ManualResetEventSlim();
+            var tcs = new TaskCompletionSource<object>();
+
+            // CancelKeyPress is triggered by SIGINT/SIGQUIT
+            Console.CancelKeyPress += (sender, e) =>
+            {
+                tcs.SetResult(null);
+                // Block CancelKeyPress
+                Assert.True(mre.Wait(WaitFailTestTimeoutSeconds * 1000));
+            };
+
+            // Generate CancelKeyPress
+            Assert.Equal(0, kill(Process.GetCurrentProcess().Id, SIGINT));
+            // Wait till we block CancelKeyPress
+            Assert.True(tcs.Task.Wait(WaitFailTestTimeoutSeconds * 1000));
+
+            // Create a process and wait for it to exit.
+            using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(() => RemoteExecutor.SuccessExitCode))
+            {
+                // Process exit is detected on SIGCHLD
+                Assert.Equal(RemoteExecutor.SuccessExitCode, handle.ExitCode);
+            }
+
+            // Release CancelKeyPress
+            mre.Set();
+
+            return RemoteExecutor.SuccessExitCode;
+        }).Dispose();
     }
 
     private void HandlerInvokedForSignal(int signalOuter)
@@ -32,7 +75,7 @@ public partial class CancelKeyPressTests : RemoteExecutorTestBase
 
         // This test sends a SIGINT back to itself... if run in the xunit process, this would end
         // up canceling the rest of xunit's tests.  So we run the test itself in a separate process.
-        RemoteInvoke(signalStr =>
+        RemoteExecutor.Invoke(signalStr =>
         {
             var tcs = new TaskCompletionSource<ConsoleSpecialKey>();
 
@@ -57,7 +100,7 @@ public partial class CancelKeyPressTests : RemoteExecutorTestBase
                 Console.CancelKeyPress -= handler;
             }
 
-            return SuccessExitCode;
+            return RemoteExecutor.SuccessExitCode;
         }, signalOuter.ToString()).Dispose();
     }
 

@@ -11,7 +11,7 @@ using Xunit;
 
 namespace System.Collections.Immutable.Tests
 {
-    public class ImmutableSortedSetBuilderTest : ImmutablesTestBase
+    public partial class ImmutableSortedSetBuilderTest : ImmutablesTestBase
     {
         [Fact]
         public void CreateBuilder()
@@ -353,7 +353,6 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttributesValid()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableSortedSet.CreateBuilder<string>());
@@ -369,7 +368,6 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public static void TestDebuggerAttributes_Null()
         {
             Type proxyType = DebuggerAttributes.GetProxyType(ImmutableSortedSet.CreateBuilder<int>());
@@ -378,28 +376,28 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
-        public void ItemRef()
+        public void ToImmutableSortedSet()
         {
-            var array = new[] { 1, 2, 3 }.ToImmutableSortedSet();
-            var builder = new ImmutableSortedSet<int>.Builder(array);
+            ImmutableSortedSet<int>.Builder builder = ImmutableSortedSet.CreateBuilder<int>();
+            builder.Add(1);
+            builder.Add(5);
+            builder.Add(10);
 
-            ref readonly var safeRef = ref builder.ItemRef(1);
-            ref var unsafeRef = ref Unsafe.AsRef(safeRef);
+            var set = builder.ToImmutableSortedSet();
+            Assert.Equal(1, builder[0]);
+            Assert.Equal(5, builder[1]);
+            Assert.Equal(10, builder[2]);
 
-            Assert.Equal(2, builder.ItemRef(1));
+            builder.Remove(10);
+            Assert.False(builder.Contains(10));
+            Assert.True(set.Contains(10));
 
-            unsafeRef = 4;
+            builder.Clear();
+            Assert.True(builder.ToImmutableSortedSet().IsEmpty);
+            Assert.False(set.IsEmpty);
 
-            Assert.Equal(4, builder.ItemRef(1));
-        }
-
-        [Fact]
-        public void ItemRef_OutOfBounds()
-        {
-            var array = new[] { 1, 2, 3 }.ToImmutableSortedSet();
-            var builder = new ImmutableSortedSet<int>.Builder(array);
-
-            Assert.Throws<ArgumentOutOfRangeException> (() => builder.ItemRef(5));
+            ImmutableSortedSet<int>.Builder nullBuilder = null;
+            AssertExtensions.Throws<ArgumentNullException>("builder", () => nullBuilder.ToImmutableSortedSet());
         }
     }
 }

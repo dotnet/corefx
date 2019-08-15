@@ -8,29 +8,29 @@ namespace System.Xml
 {
     // Represents an entity reference node.
 
-    // <code>EntityReference</code> objects may be inserted into the structure 
-    // model when an entity reference is in the source document, or when the user 
-    // wishes to insert an entity reference. Note that  character references and 
-    // references to predefined entities are considered to be expanded by the 
-    // HTML or XML processor so that characters are represented by their Unicode 
-    // equivalent rather than by an entity reference. Moreover, the XML  
-    // processor may completely expand references to entities while building the 
-    // structure model, instead of providing <code>EntityReference</code> 
-    // objects. If it does provide such objects, then for a given 
-    // <code>EntityReference</code> node, it may be that there is no 
-    // <code>Entity</code> node representing the referenced entity; but if such 
-    // an <code>Entity</code> exists, then the child list of the 
-    // <code>EntityReference</code> node is the same as that of the 
-    // <code>Entity</code> node. As with the <code>Entity</code> node, all 
+    // <code>EntityReference</code> objects may be inserted into the structure
+    // model when an entity reference is in the source document, or when the user
+    // wishes to insert an entity reference. Note that  character references and
+    // references to predefined entities are considered to be expanded by the
+    // HTML or XML processor so that characters are represented by their Unicode
+    // equivalent rather than by an entity reference. Moreover, the XML
+    // processor may completely expand references to entities while building the
+    // structure model, instead of providing <code>EntityReference</code>
+    // objects. If it does provide such objects, then for a given
+    // <code>EntityReference</code> node, it may be that there is no
+    // <code>Entity</code> node representing the referenced entity; but if such
+    // an <code>Entity</code> exists, then the child list of the
+    // <code>EntityReference</code> node is the same as that of the
+    // <code>Entity</code> node. As with the <code>Entity</code> node, all
     // descendants of the <code>EntityReference</code> are readonly.
-    // <p>The resolution of the children of the <code>EntityReference</code> (the  
-    // replacement value of the referenced <code>Entity</code>) may be lazily  
-    // evaluated; actions by the user (such as calling the  
-    // <code>childNodes</code> method on the <code>EntityReference</code> node)  
+    // <p>The resolution of the children of the <code>EntityReference</code> (the
+    // replacement value of the referenced <code>Entity</code>) may be lazily
+    // evaluated; actions by the user (such as calling the
+    // <code>childNodes</code> method on the <code>EntityReference</code> node)
     // are assumed to trigger the evaluation.
     public class XmlEntityReference : XmlLinkedNode
     {
-        private string _name;
+        private readonly string _name;
         private XmlLinkedNode _lastChild;
 
         protected internal XmlEntityReference(string name, XmlDocument doc) : base(doc)
@@ -59,7 +59,7 @@ namespace System.Xml
         }
 
         // Gets or sets the value of the node.
-        public override String Value
+        public override string Value
         {
             get
             {
@@ -163,7 +163,7 @@ namespace System.Xml
                 n.WriteTo(w);
             } //still use the old code to generate the output
             /*
-            foreach( XmlNode n in this ) {
+            foreach ( XmlNode n in this ) {
                 if ( n.NodeType != XmlNodeType.EntityReference )
                 n.WriteTo( w );
                 else
@@ -171,7 +171,7 @@ namespace System.Xml
             }*/
         }
 
-        public override String BaseURI
+        public override string BaseURI
         {
             get
             {
@@ -193,7 +193,7 @@ namespace System.Xml
         }
 
         //childrenBaseURI returns where the entity reference node's children come from
-        internal String ChildBaseURI
+        internal string ChildBaseURI
         {
             get
             {
@@ -206,7 +206,7 @@ namespace System.Xml
                     else
                         return ent.BaseURI;
                 }
-                return String.Empty;
+                return string.Empty;
             }
         }
     }

@@ -13,10 +13,10 @@ namespace System.IO.IsolatedStorage
         private const string BackSlash = "\\";
         private const int DefaultBufferSize = 1024;
 
-        private FileStream _fs;
-        private IsolatedStorageFile _isf;
-        private string _givenPath;
-        private string _fullPath;
+        private readonly FileStream _fs;
+        private readonly IsolatedStorageFile _isf;
+        private readonly string _givenPath;
+        private readonly string _fullPath;
 
         public IsolatedStorageFileStream(string path, FileMode mode)
             : this(path, mode, (mode == FileMode.Append ? FileAccess.Write : FileAccess.ReadWrite), FileShare.None, null)
@@ -217,6 +217,14 @@ namespace System.IO.IsolatedStorage
             }
         }
 
+        public override ValueTask DisposeAsync()
+        {
+            return
+                GetType() != typeof(IsolatedStorageFileStream) ? base.DisposeAsync() :
+                _fs != null ? _fs.DisposeAsync() :
+                default;
+        }
+
         public override void Flush()
         {
             _fs.Flush();
@@ -314,7 +322,7 @@ namespace System.IO.IsolatedStorage
             _fs.EndWrite(asyncResult);
         }
 
-        [Obsolete("This property has been deprecated.  Please use IsolatedStorageFileStream's SafeFileHandle property instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("This property has been deprecated.  Please use IsolatedStorageFileStream's SafeFileHandle property instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public override IntPtr Handle
         {
             get { return _fs.Handle; }

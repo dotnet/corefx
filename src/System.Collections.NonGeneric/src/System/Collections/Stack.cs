@@ -24,17 +24,15 @@ namespace System.Collections
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class Stack : ICollection, ICloneable
     {
-        private Object[] _array; // Storage for stack elements. Do not rename (binary serialization)
+        private object[] _array; // Storage for stack elements. Do not rename (binary serialization)
         private int _size; // Number of items in the stack. Do not rename (binary serialization)
         private int _version; // Used to keep enumerator in sync w/ collection. Do not rename (binary serialization)
-        [NonSerialized]
-        private Object _syncRoot;
 
         private const int _defaultCapacity = 10;
 
         public Stack()
         {
-            _array = new Object[_defaultCapacity];
+            _array = new object[_defaultCapacity];
             _size = 0;
             _version = 0;
         }
@@ -48,7 +46,7 @@ namespace System.Collections
 
             if (initialCapacity < _defaultCapacity)
                 initialCapacity = _defaultCapacity;  // Simplify doubling logic in Push.
-            _array = new Object[initialCapacity];
+            _array = new object[initialCapacity];
             _size = 0;
             _version = 0;
         }
@@ -79,17 +77,7 @@ namespace System.Collections
             get { return false; }
         }
 
-        public virtual Object SyncRoot
-        {
-            get
-            {
-                if (_syncRoot == null)
-                {
-                    System.Threading.Interlocked.CompareExchange<Object>(ref _syncRoot, new Object(), null);
-                }
-                return _syncRoot;
-            }
-        }
+        public virtual object SyncRoot => this;
 
         // Removes all Objects from the Stack.
         public virtual void Clear()
@@ -99,7 +87,7 @@ namespace System.Collections
             _version++;
         }
 
-        public virtual Object Clone()
+        public virtual object Clone()
         {
             Stack s = new Stack(_size);
             s._size = _size;
@@ -108,7 +96,7 @@ namespace System.Collections
             return s;
         }
 
-        public virtual bool Contains(Object obj)
+        public virtual bool Contains(object obj)
         {
             int count = _size;
 
@@ -167,7 +155,7 @@ namespace System.Collections
 
         // Returns the top object on the stack without removing it.  If the stack
         // is empty, Peek throws an InvalidOperationException.
-        public virtual Object Peek()
+        public virtual object Peek()
         {
             if (_size == 0)
                 throw new InvalidOperationException(SR.InvalidOperation_EmptyStack);
@@ -177,24 +165,24 @@ namespace System.Collections
 
         // Pops an item from the top of the stack.  If the stack is empty, Pop
         // throws an InvalidOperationException.
-        public virtual Object Pop()
+        public virtual object Pop()
         {
             if (_size == 0)
                 throw new InvalidOperationException(SR.InvalidOperation_EmptyStack);
 
             _version++;
-            Object obj = _array[--_size];
+            object obj = _array[--_size];
             _array[_size] = null;     // Free memory quicker.
             return obj;
         }
 
         // Pushes an item to the top of the stack.
-        // 
-        public virtual void Push(Object obj)
+        //
+        public virtual void Push(object obj)
         {
             if (_size == _array.Length)
             {
-                Object[] newArray = new Object[2 * _array.Length];
+                object[] newArray = new object[2 * _array.Length];
                 Array.Copy(_array, 0, newArray, 0, _size);
                 _array = newArray;
             }
@@ -214,12 +202,12 @@ namespace System.Collections
 
 
         // Copies the Stack to an array, in the same order Pop would return the items.
-        public virtual Object[] ToArray()
+        public virtual object[] ToArray()
         {
             if (_size == 0)
-                return Array.Empty<Object>();
+                return Array.Empty<object>();
 
-            Object[] objArray = new Object[_size];
+            object[] objArray = new object[_size];
             int i = 0;
             while (i < _size)
             {
@@ -231,8 +219,8 @@ namespace System.Collections
 
         private class SyncStack : Stack
         {
-            private Stack _s;
-            private Object _root;
+            private readonly Stack _s;
+            private readonly object _root;
 
             internal SyncStack(Stack stack)
             {
@@ -245,7 +233,7 @@ namespace System.Collections
                 get { return true; }
             }
 
-            public override Object SyncRoot
+            public override object SyncRoot
             {
                 get
                 {
@@ -264,7 +252,7 @@ namespace System.Collections
                 }
             }
 
-            public override bool Contains(Object obj)
+            public override bool Contains(object obj)
             {
                 lock (_root)
                 {
@@ -272,7 +260,7 @@ namespace System.Collections
                 }
             }
 
-            public override Object Clone()
+            public override object Clone()
             {
                 lock (_root)
                 {
@@ -296,7 +284,7 @@ namespace System.Collections
                 }
             }
 
-            public override void Push(Object value)
+            public override void Push(object value)
             {
                 lock (_root)
                 {
@@ -304,7 +292,7 @@ namespace System.Collections
                 }
             }
 
-            public override Object Pop()
+            public override object Pop()
             {
                 lock (_root)
                 {
@@ -320,7 +308,7 @@ namespace System.Collections
                 }
             }
 
-            public override Object Peek()
+            public override object Peek()
             {
                 lock (_root)
                 {
@@ -328,7 +316,7 @@ namespace System.Collections
                 }
             }
 
-            public override Object[] ToArray()
+            public override object[] ToArray()
             {
                 lock (_root)
                 {
@@ -339,10 +327,10 @@ namespace System.Collections
 
         private class StackEnumerator : IEnumerator, ICloneable
         {
-            private Stack _stack;
+            private readonly Stack _stack;
             private int _index;
-            private int _version;
-            private Object _currentElement;
+            private readonly int _version;
+            private object _currentElement;
 
             internal StackEnumerator(Stack stack)
             {
@@ -379,7 +367,7 @@ namespace System.Collections
                 return retval;
             }
 
-            public virtual Object Current
+            public virtual object Current
             {
                 get
                 {
@@ -399,7 +387,7 @@ namespace System.Collections
 
         internal class StackDebugView
         {
-            private Stack _stack;
+            private readonly Stack _stack;
 
             public StackDebugView(Stack stack)
             {
@@ -410,7 +398,7 @@ namespace System.Collections
             }
 
             [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-            public Object[] Items
+            public object[] Items
             {
                 get
                 {

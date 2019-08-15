@@ -210,7 +210,7 @@ namespace System.Xml
         {
             try
             {
-                // lookup prefix / namespace  
+                // lookup prefix / namespace
                 if (prefix == null)
                 {
                     if (ns != null)
@@ -292,7 +292,7 @@ namespace System.Xml
                 if (top == _elemScopeStack.Length)
                 {
                     ElementScope[] newStack = new ElementScope[top * 2];
-                    Array.Copy(_elemScopeStack, newStack, top);
+                    Array.Copy(_elemScopeStack, 0, newStack, 0, top);
                     _elemScopeStack = newStack;
                 }
                 _elemScopeStack[top].Set(prefix, localName, ns, _nsTop);
@@ -489,7 +489,7 @@ namespace System.Xml
         {
             try
             {
-                // lookup prefix / namespace  
+                // lookup prefix / namespace
                 if (prefix == null)
                 {
                     if (namespaceName != null)
@@ -523,7 +523,7 @@ namespace System.Xml
                         {
                             throw new ArgumentException(SR.Xml_XmlnsPrefix);
                         }
-                        _curDeclPrefix = String.Empty;
+                        _curDeclPrefix = string.Empty;
                         SetSpecialAttribute(SpecialAttribute.DefaultXmlns);
                         goto SkipPushAndWrite;
                     }
@@ -883,7 +883,7 @@ namespace System.Xml
         {
             try
             {
-                if (Char.IsSurrogate(ch))
+                if (char.IsSurrogate(ch))
                 {
                     throw new ArgumentException(SR.Xml_InvalidSurrogateMissingLowChar);
                 }
@@ -909,7 +909,7 @@ namespace System.Xml
         {
             try
             {
-                if (!Char.IsSurrogatePair(highChar, lowChar))
+                if (!char.IsSurrogatePair(highChar, lowChar))
                 {
                     throw XmlConvert.CreateInvalidSurrogatePairException(lowChar, highChar);
                 }
@@ -1202,7 +1202,7 @@ namespace System.Xml
                 CheckNCName(localName);
 
                 await AdvanceStateAsync(Token.Text).ConfigureAwait(false);
-                string prefix = String.Empty;
+                string prefix = string.Empty;
                 if (ns != null && ns.Length != 0)
                 {
                     prefix = LookupPrefix(ns);
@@ -1433,7 +1433,7 @@ namespace System.Xml
 
 
                     default:
-                        Debug.Assert(false, "We should not get to this point.");
+                        Debug.Fail("We should not get to this point.");
                         break;
                 }
             }
@@ -1474,4 +1474,3 @@ namespace System.Xml
         }
     }
 }
-

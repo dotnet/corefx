@@ -55,16 +55,16 @@ namespace System.Xml
             WriteString,
         }
 
-        private DocumentXmlWriterType _type; // writer type
-        private XmlNode _start; // context node
-        private XmlDocument _document; // context document 
+        private readonly DocumentXmlWriterType _type; // writer type
+        private readonly XmlNode _start; // context node
+        private readonly XmlDocument _document; // context document
         private XmlNamespaceManager _namespaceManager; // context namespace manager
         private State _state; // current state
-        private XmlNode _write; // current node 
-        private List<XmlNode> _fragment; // top level node cache
-        private XmlWriterSettings _settings; // wrapping writer settings
-        private DocumentXPathNavigator _navigator; // context for replace 
-        private XmlNode _end; // context for replace 
+        private XmlNode _write; // current node
+        private readonly List<XmlNode> _fragment; // top level node cache
+        private readonly XmlWriterSettings _settings; // wrapping writer settings
+        private DocumentXPathNavigator _navigator; // context for replace
+        private XmlNode _end; // context for replace
 
         public DocumentXmlWriter(DocumentXmlWriterType type, XmlNode start, XmlDocument document)
         {
@@ -305,7 +305,7 @@ namespace System.Xml
 
         public override void WriteCharEntity(char ch)
         {
-            WriteString(new string(ch, 1));
+            WriteString(char.ToString(ch));
         }
 
         public override void WriteWhitespace(string text)
@@ -329,7 +329,8 @@ namespace System.Xml
 
         public override void WriteSurrogateCharEntity(char lowCh, char highCh)
         {
-            WriteString(new string(new char[] { highCh, lowCh }));
+            ReadOnlySpan<char> entity = stackalloc char[] { highCh, lowCh };
+            WriteString(new string(entity));
         }
 
         public override void WriteChars(char[] buffer, int index, int count)
@@ -557,41 +558,41 @@ namespace System.Xml
             return State.Content;
         }
 
-        private static State[] s_changeState = {
-//          State.Error,    State.Attribute,State.Prolog,   State.Fragment, State.Content,  
+        private static readonly State[] s_changeState = {
+//          State.Error,    State.Attribute,State.Prolog,   State.Fragment, State.Content,
 
 // Method.XmlDeclaration:
-            State.Error,    State.Error,    State.Prolog,   State.Content,  State.Error,    
+            State.Error,    State.Error,    State.Prolog,   State.Content,  State.Error,
 // Method.StartDocument:
-            State.Error,    State.Error,    State.Error,    State.Error,    State.Error,    
+            State.Error,    State.Error,    State.Error,    State.Error,    State.Error,
 // Method.EndDocument:
-            State.Error,    State.Error,    State.Error,    State.Error,    State.Error,    
+            State.Error,    State.Error,    State.Error,    State.Error,    State.Error,
 // Method.DocType:
-            State.Error,    State.Error,    State.Prolog,   State.Error,    State.Error,    
+            State.Error,    State.Error,    State.Prolog,   State.Error,    State.Error,
 // Method.StartElement:
-            State.Error,    State.Error,    State.Content,  State.Content,  State.Content,  
+            State.Error,    State.Error,    State.Content,  State.Content,  State.Content,
 // Method.EndElement:
-            State.Error,    State.Error,    State.Error,    State.Error,    State.Content,  
+            State.Error,    State.Error,    State.Error,    State.Error,    State.Content,
 // Method.FullEndElement:
-            State.Error,    State.Error,    State.Error,    State.Error,    State.Content,  
+            State.Error,    State.Error,    State.Error,    State.Error,    State.Content,
 // Method.StartAttribute:
-            State.Error,    State.Content,  State.Error,    State.Error,    State.Content,  
+            State.Error,    State.Content,  State.Error,    State.Error,    State.Content,
 // Method.EndAttribute:
-            State.Error,    State.Error,    State.Error,    State.Error,    State.Content,  
+            State.Error,    State.Error,    State.Error,    State.Error,    State.Content,
 // Method.StartNamespaceDeclaration:
-            State.Error,    State.Content,  State.Error,    State.Error,    State.Content,  
+            State.Error,    State.Content,  State.Error,    State.Error,    State.Content,
 // Method.EndNamespaceDeclaration:
-            State.Error,    State.Error,    State.Error,    State.Error,    State.Content,  
+            State.Error,    State.Error,    State.Error,    State.Error,    State.Content,
 // Method.CData:
-            State.Error,    State.Error,    State.Error,    State.Content,  State.Content,  
+            State.Error,    State.Error,    State.Error,    State.Content,  State.Content,
 // Method.Comment:
-            State.Error,    State.Error,    State.Prolog,   State.Content,  State.Content,  
+            State.Error,    State.Error,    State.Prolog,   State.Content,  State.Content,
 // Method.ProcessingInstruction:
-            State.Error,    State.Error,    State.Prolog,   State.Content,  State.Content,  
+            State.Error,    State.Error,    State.Prolog,   State.Content,  State.Content,
 // Method.EntityRef:
-            State.Error,    State.Error,    State.Error,    State.Content,  State.Content,  
+            State.Error,    State.Error,    State.Error,    State.Content,  State.Content,
 // Method.Whitespace:
-            State.Error,    State.Error,    State.Prolog,   State.Content,  State.Content,  
+            State.Error,    State.Error,    State.Prolog,   State.Content,  State.Content,
 // Method.String:
             State.Error,    State.Error,    State.Error,    State.Content,  State.Content,
         };

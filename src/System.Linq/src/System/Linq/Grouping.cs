@@ -98,22 +98,26 @@ namespace System.Linq
 
         bool ICollection<TElement>.IsReadOnly => true;
 
-        void ICollection<TElement>.Add(TElement item) => throw Error.NotSupported();
+        void ICollection<TElement>.Add(TElement item) => ThrowHelper.ThrowNotSupportedException();
 
-        void ICollection<TElement>.Clear() => throw Error.NotSupported();
+        void ICollection<TElement>.Clear() => ThrowHelper.ThrowNotSupportedException();
 
         bool ICollection<TElement>.Contains(TElement item) => Array.IndexOf(_elements, item, 0, _count) >= 0;
 
         void ICollection<TElement>.CopyTo(TElement[] array, int arrayIndex) =>
             Array.Copy(_elements, 0, array, arrayIndex, _count);
 
-        bool ICollection<TElement>.Remove(TElement item) => throw Error.NotSupported();
+        bool ICollection<TElement>.Remove(TElement item)
+        {
+            ThrowHelper.ThrowNotSupportedException();
+            return false;
+        }
 
         int IList<TElement>.IndexOf(TElement item) => Array.IndexOf(_elements, item, 0, _count);
 
-        void IList<TElement>.Insert(int index, TElement item) => throw Error.NotSupported();
+        void IList<TElement>.Insert(int index, TElement item) => ThrowHelper.ThrowNotSupportedException();
 
-        void IList<TElement>.RemoveAt(int index) => throw Error.NotSupported();
+        void IList<TElement>.RemoveAt(int index) => ThrowHelper.ThrowNotSupportedException();
 
         TElement IList<TElement>.this[int index]
         {
@@ -121,7 +125,7 @@ namespace System.Linq
             {
                 if (index < 0 || index >= _count)
                 {
-                    throw Error.ArgumentOutOfRange(nameof(index));
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index);
                 }
 
                 return _elements[index];
@@ -129,12 +133,12 @@ namespace System.Linq
 
             set
             {
-                throw Error.NotSupported();
+                ThrowHelper.ThrowNotSupportedException();
             }
         }
     }
 
-    internal sealed class GroupedResultEnumerable<TSource, TKey, TElement, TResult> : IIListProvider<TResult>
+    internal sealed partial class GroupedResultEnumerable<TSource, TKey, TElement, TResult> : IEnumerable<TResult>
     {
         private readonly IEnumerable<TSource> _source;
         private readonly Func<TSource, TKey> _keySelector;
@@ -144,11 +148,28 @@ namespace System.Linq
 
         public GroupedResultEnumerable(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, Func<TKey, IEnumerable<TElement>, TResult> resultSelector, IEqualityComparer<TKey> comparer)
         {
-            _source = source ?? throw Error.ArgumentNull(nameof(source));
-            _keySelector = keySelector ?? throw Error.ArgumentNull(nameof(keySelector));
-            _elementSelector = elementSelector ?? throw Error.ArgumentNull(nameof(elementSelector));
+            if (source is null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
+            }
+            if (keySelector is null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.keySelector);
+            }
+            if (elementSelector is null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.elementSelector);
+            }
+            if (resultSelector is null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.resultSelector);
+            }
+
+            _source = source;
+            _keySelector = keySelector;
+            _elementSelector = elementSelector;
             _comparer = comparer;
-            _resultSelector = resultSelector ?? throw Error.ArgumentNull(nameof(resultSelector));
+            _resultSelector = resultSelector;
         }
 
         public IEnumerator<TResult> GetEnumerator()
@@ -158,18 +179,9 @@ namespace System.Linq
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        public TResult[] ToArray() =>
-            Lookup<TKey, TElement>.Create(_source, _keySelector, _elementSelector, _comparer).ToArray(_resultSelector);
-
-        public List<TResult> ToList() =>
-            Lookup<TKey, TElement>.Create(_source, _keySelector, _elementSelector, _comparer).ToList(_resultSelector);
-
-        public int GetCount(bool onlyIfCheap) =>
-            onlyIfCheap ? -1 : Lookup<TKey, TElement>.Create(_source, _keySelector, _elementSelector, _comparer).Count;
     }
 
-    internal sealed class GroupedResultEnumerable<TSource, TKey, TResult> : IIListProvider<TResult>
+    internal sealed partial class GroupedResultEnumerable<TSource, TKey, TResult> : IEnumerable<TResult>
     {
         private readonly IEnumerable<TSource> _source;
         private readonly Func<TSource, TKey> _keySelector;
@@ -178,9 +190,22 @@ namespace System.Linq
 
         public GroupedResultEnumerable(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TKey, IEnumerable<TSource>, TResult> resultSelector, IEqualityComparer<TKey> comparer)
         {
-            _source = source ?? throw Error.ArgumentNull(nameof(source));
-            _keySelector = keySelector ?? throw Error.ArgumentNull(nameof(keySelector));
-            _resultSelector = resultSelector ?? throw Error.ArgumentNull(nameof(resultSelector));
+            if (source is null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
+            }
+            if (keySelector is null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.keySelector);
+            }
+            if (resultSelector is null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.resultSelector);
+            }
+
+            _source = source;
+            _keySelector = keySelector;
+            _resultSelector = resultSelector;
             _comparer = comparer;
         }
 
@@ -191,18 +216,9 @@ namespace System.Linq
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        public TResult[] ToArray() =>
-            Lookup<TKey, TSource>.Create(_source, _keySelector, _comparer).ToArray(_resultSelector);
-
-        public List<TResult> ToList() =>
-            Lookup<TKey, TSource>.Create(_source, _keySelector, _comparer).ToList(_resultSelector);
-
-        public int GetCount(bool onlyIfCheap) =>
-            onlyIfCheap ? -1 : Lookup<TKey, TSource>.Create(_source, _keySelector, _comparer).Count;
     }
 
-    internal sealed class GroupedEnumerable<TSource, TKey, TElement> : IIListProvider<IGrouping<TKey, TElement>>
+    internal sealed partial class GroupedEnumerable<TSource, TKey, TElement> : IEnumerable<IGrouping<TKey, TElement>>
     {
         private readonly IEnumerable<TSource> _source;
         private readonly Func<TSource, TKey> _keySelector;
@@ -211,9 +227,22 @@ namespace System.Linq
 
         public GroupedEnumerable(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer)
         {
-            _source = source ?? throw Error.ArgumentNull(nameof(source));
-            _keySelector = keySelector ?? throw Error.ArgumentNull(nameof(keySelector));
-            _elementSelector = elementSelector ?? throw Error.ArgumentNull(nameof(elementSelector));
+            if (source is null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
+            }
+            if (keySelector is null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.keySelector);
+            }
+            if (elementSelector is null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.elementSelector);
+            }
+
+            _source = source;
+            _keySelector = keySelector;
+            _elementSelector = elementSelector;
             _comparer = comparer;
         }
 
@@ -221,24 +250,9 @@ namespace System.Linq
             Lookup<TKey, TElement>.Create(_source, _keySelector, _elementSelector, _comparer).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        public IGrouping<TKey, TElement>[] ToArray()
-        {
-            IIListProvider<IGrouping<TKey, TElement>> lookup = Lookup<TKey, TElement>.Create(_source, _keySelector, _elementSelector, _comparer);
-            return lookup.ToArray();
-        }
-
-        public List<IGrouping<TKey, TElement>> ToList()
-        {
-            IIListProvider<IGrouping<TKey, TElement>> lookup = Lookup<TKey, TElement>.Create(_source, _keySelector, _elementSelector, _comparer);
-            return lookup.ToList();
-        }
-
-        public int GetCount(bool onlyIfCheap) =>
-            onlyIfCheap ? -1 : Lookup<TKey, TElement>.Create(_source, _keySelector, _elementSelector, _comparer).Count;
     }
 
-    internal sealed class GroupedEnumerable<TSource, TKey> : IIListProvider<IGrouping<TKey, TSource>>
+    internal sealed partial class GroupedEnumerable<TSource, TKey> : IEnumerable<IGrouping<TKey, TSource>>
     {
         private readonly IEnumerable<TSource> _source;
         private readonly Func<TSource, TKey> _keySelector;
@@ -246,8 +260,17 @@ namespace System.Linq
 
         public GroupedEnumerable(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer)
         {
-            _source = source ?? throw Error.ArgumentNull(nameof(source));
-            _keySelector = keySelector ?? throw Error.ArgumentNull(nameof(keySelector));
+            if (source is null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
+            }
+            if (keySelector is null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.keySelector);
+            }
+
+            _source = source;
+            _keySelector = keySelector;
             _comparer = comparer;
         }
 
@@ -255,20 +278,5 @@ namespace System.Linq
             Lookup<TKey, TSource>.Create(_source, _keySelector, _comparer).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        public IGrouping<TKey, TSource>[] ToArray()
-        {
-            IIListProvider<IGrouping<TKey, TSource>> lookup = Lookup<TKey, TSource>.Create(_source, _keySelector, _comparer);
-            return lookup.ToArray();
-        }
-
-        public List<IGrouping<TKey, TSource>> ToList()
-        {
-            IIListProvider<IGrouping<TKey, TSource>> lookup = Lookup<TKey, TSource>.Create(_source, _keySelector, _comparer);
-            return lookup.ToList();
-        }
-
-        public int GetCount(bool onlyIfCheap) =>
-            onlyIfCheap ? -1 : Lookup<TKey, TSource>.Create(_source, _keySelector, _comparer).Count;
     }
 }

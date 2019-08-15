@@ -10,7 +10,6 @@ namespace System.Threading.Tasks.Dataflow.Tests
     public class DebugAttributeTests
     {
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void TestDebuggerDisplaysAndTypeProxies()
         {
             // Test both canceled and non-canceled
@@ -211,7 +210,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
 
             public bool TryReceive(Predicate<T> filter, out T item) { item = default(T); return false; }
             public bool TryReceiveAll(out System.Collections.Generic.IList<T> items) { items = default(System.Collections.Generic.IList<T>); return false; }
-            public T ConsumeMessage(DataflowMessageHeader messageHeader, ITargetBlock<T> target, out Boolean messageConsumed) { messageConsumed = true; return default(T); }
+            public T ConsumeMessage(DataflowMessageHeader messageHeader, ITargetBlock<T> target, out bool messageConsumed) { messageConsumed = true; return default(T); }
             public bool ReserveMessage(DataflowMessageHeader messageHeader, ITargetBlock<T> target) { return false; }
             public void ReleaseReservation(DataflowMessageHeader messageHeader, ITargetBlock<T> target) { }
             public Task Completion { get { return null; } }

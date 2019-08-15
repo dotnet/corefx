@@ -32,7 +32,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
         internal static readonly Type s_typeofSystemVoid = typeof(void);
 
         // In netfx the default assembly is mscorlib.dll --> typeof(string).Assembly.
-        // In Core type string lives in System.Private.Corelib.dll which doesn't 
+        // In Core type string lives in System.Private.Corelib.dll which doesn't
         // contain all the types which are living in mscorlib in netfx. Therefore we
         // use our mscorlib facade which also contains manual type forwards for deserialization.
         internal static readonly Assembly s_urtAssembly = Assembly.Load("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
@@ -120,64 +120,6 @@ namespace System.Runtime.Serialization.Formatters.Binary
             }
         }
 
-        internal static InternalNameSpaceE GetNameSpaceEnum(InternalPrimitiveTypeE code, Type type, WriteObjectInfo objectInfo, out string typeName)
-        {
-            InternalNameSpaceE nameSpaceEnum = InternalNameSpaceE.None;
-            typeName = null;
-
-            if (code != InternalPrimitiveTypeE.Invalid)
-            {
-                switch (code)
-                {
-                    case InternalPrimitiveTypeE.Boolean:
-                    case InternalPrimitiveTypeE.Char:
-                    case InternalPrimitiveTypeE.Byte:
-                    case InternalPrimitiveTypeE.Double:
-                    case InternalPrimitiveTypeE.Int16:
-                    case InternalPrimitiveTypeE.Int32:
-                    case InternalPrimitiveTypeE.Int64:
-                    case InternalPrimitiveTypeE.SByte:
-                    case InternalPrimitiveTypeE.Single:
-                    case InternalPrimitiveTypeE.UInt16:
-                    case InternalPrimitiveTypeE.UInt32:
-                    case InternalPrimitiveTypeE.UInt64:
-                    case InternalPrimitiveTypeE.DateTime:
-                    case InternalPrimitiveTypeE.TimeSpan:
-                        nameSpaceEnum = InternalNameSpaceE.XdrPrimitive;
-                        typeName = "System." + ToComType(code);
-                        break;
-
-                    case InternalPrimitiveTypeE.Decimal:
-                        nameSpaceEnum = InternalNameSpaceE.UrtSystem;
-                        typeName = "System." + ToComType(code);
-                        break;
-                }
-            }
-
-            if ((nameSpaceEnum == InternalNameSpaceE.None) && type != null)
-            {
-                if (ReferenceEquals(type, s_typeofString))
-                {
-                    nameSpaceEnum = InternalNameSpaceE.XdrString;
-                }
-                else
-                {
-                    if (objectInfo == null)
-                    {
-                        typeName = type.FullName;
-                        nameSpaceEnum = type.Assembly == s_urtAssembly ? InternalNameSpaceE.UrtSystem : InternalNameSpaceE.UrtUser;
-                    }
-                    else
-                    {
-                        typeName = objectInfo.GetTypeFullName();
-                        nameSpaceEnum = objectInfo.GetAssemblyString().Equals(s_urtAssemblyString) ? InternalNameSpaceE.UrtSystem : InternalNameSpaceE.UrtUser;
-                    }
-                }
-            }
-
-            return nameSpaceEnum;
-        }
-
         internal static Type ToArrayType(InternalPrimitiveTypeE code)
         {
             if (s_arrayTypeA == null)
@@ -208,7 +150,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
             typeATemp[(int)InternalPrimitiveTypeE.UInt64] = s_typeofUInt64;
             s_typeA = typeATemp;
         }
-        
+
         private static void InitArrayTypeA()
         {
             var arrayTypeATemp = new Type[PrimitiveTypeEnumLength];
@@ -356,7 +298,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
             var codeATemp = new InternalPrimitiveTypeE[19];
             codeATemp[(int)TypeCode.Empty] = InternalPrimitiveTypeE.Invalid;
             codeATemp[(int)TypeCode.Object] = InternalPrimitiveTypeE.Invalid;
-            codeATemp[2] = InternalPrimitiveTypeE.Invalid; // TODO: Change 2 to (int)TypeCode.DBNull when it's available
+            codeATemp[(int)TypeCode.DBNull] = InternalPrimitiveTypeE.Invalid;
             codeATemp[(int)TypeCode.Boolean] = InternalPrimitiveTypeE.Boolean;
             codeATemp[(int)TypeCode.Char] = InternalPrimitiveTypeE.Char;
             codeATemp[(int)TypeCode.SByte] = InternalPrimitiveTypeE.SByte;

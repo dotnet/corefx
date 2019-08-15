@@ -11,7 +11,7 @@ namespace System.Net.Sockets
     // host process that listens for connections from TCP clients.
     public class TcpListener
     {
-        private IPEndPoint _serverSocketEP;
+        private readonly IPEndPoint _serverSocketEP;
         private Socket _serverSocket;
         private bool _active;
         private bool _exclusiveAddressUse;
@@ -49,7 +49,7 @@ namespace System.Net.Sockets
         }
 
         // Initiailizes a new instance of the TcpListener class that listens on the specified port.
-        [Obsolete("This method has been deprecated. Please use TcpListener(IPAddress localaddr, int port) instead. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("This method has been deprecated. Please use TcpListener(IPAddress localaddr, int port) instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         public TcpListener(int port)
         {
             if (!TcpValidationHelpers.ValidatePortNumber(port))
@@ -60,7 +60,7 @@ namespace System.Net.Sockets
             _serverSocketEP = new IPEndPoint(IPAddress.Any, port);
             _serverSocket = new Socket(_serverSocketEP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
         }
-        
+
         // Used by the class to provide the underlying network socket.
         public Socket Server
         {

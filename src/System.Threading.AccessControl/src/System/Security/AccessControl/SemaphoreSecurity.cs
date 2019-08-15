@@ -21,7 +21,7 @@ using Microsoft.Win32.SafeHandles;
 namespace System.Security.AccessControl
 {
     // Derive this list of values from winnt.h and MSDN docs:
-    // http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dllproc/base/synchronization_object_security_and_access_rights.asp
+    // https://docs.microsoft.com/en-us/windows/desktop/sync/synchronization-object-security-and-access-rights
 
     // Win32's interesting values are SEMAPHORE_MODIFY_STATE (0x2) and
     // SEMAPHORE_ALL_ACCESS (0x1F0003).  I don't know what 0x1 is.
@@ -46,7 +46,7 @@ namespace System.Security.AccessControl
         {
         }
 
-        public SemaphoreAccessRule(String identity, SemaphoreRights eventRights, AccessControlType type)
+        public SemaphoreAccessRule(string identity, SemaphoreRights eventRights, AccessControlType type)
             : this(new NTAccount(identity), (int)eventRights, false, InheritanceFlags.None, PropagationFlags.None, type)
         {
         }
@@ -103,7 +103,7 @@ namespace System.Security.AccessControl
         {
         }
 
-        public SemaphoreSecurity(String name, AccessControlSections includeSections)
+        public SemaphoreSecurity(string name, AccessControlSections includeSections)
             : base(true, ResourceType.KernelObject, name, includeSections, HandleErrorCode, null)
         {
             // Let the underlying ACL API's demand unmanaged code permission.

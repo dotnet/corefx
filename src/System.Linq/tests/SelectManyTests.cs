@@ -454,7 +454,7 @@ namespace System.Linq.Tests
 
             // .NET Core fixes an oversight where we wouldn't properly dispose
             // the SelectMany iterator. See https://github.com/dotnet/corefx/pull/13942.
-            int expectedCurrent = PlatformDetection.IsFullFramework ? subLength : 0;
+            int expectedCurrent = 0;
             Assert.Equal(expectedCurrent, e.Current);
             Assert.False(e.MoveNext());
             Assert.Equal(expectedCurrent, e.Current);
@@ -468,7 +468,7 @@ namespace System.Linq.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Core optimizes SelectMany and throws an OverflowException. On the full .NET Framework this takes a long time. See https://github.com/dotnet/corefx/pull/13942.")]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Netcoreapp, ".NET Core optimizes SelectMany and throws an OverflowException. On the full .NET Framework this takes a long time. See https://github.com/dotnet/corefx/pull/13942.")]
         [InlineData(new[] { int.MaxValue, 1 })]
         [InlineData(new[] { 2, int.MaxValue - 1 })]
         [InlineData(new[] { 123, 456, int.MaxValue - 100000, 123456 })]
@@ -492,7 +492,7 @@ namespace System.Linq.Tests
             }
         }
 
-        private static IEnumerable<object[]> GetToArrayDataSources()
+        public static IEnumerable<object[]> GetToArrayDataSources()
         {
             // Marker at the end
             yield return new object[]

@@ -14,7 +14,7 @@ namespace System.Linq.Tests
         public void CastIntToLongThrows()
         {
             var q = from x in new[] { 9999, 0, 888, -1, 66, -777, 1, 2, -12345 }
-                    where x > Int32.MinValue
+                    where x > int.MinValue
                     select x;
 
             var rst = q.Cast<long>();
@@ -109,7 +109,7 @@ namespace System.Linq.Tests
             IEnumerable<double> cast = source.Cast<double>();
             Assert.Throws<InvalidCastException>(() => cast.ToList());
         }
-        
+
         private static void TestCastThrow<T>(object o)
         {
             byte? i = 10;

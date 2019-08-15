@@ -22,8 +22,8 @@ namespace System
     public class ArithmeticException : SystemException
     {
         // Creates a new ArithmeticException with its message string set to
-        // the empty string, its HRESULT set to COR_E_ARITHMETIC, 
-        // and its ExceptionInfo reference set to null. 
+        // the empty string, its HRESULT set to COR_E_ARITHMETIC,
+        // and its ExceptionInfo reference set to null.
         public ArithmeticException()
             : base(SR.Arg_ArithmeticException)
         {
@@ -31,16 +31,16 @@ namespace System
         }
 
         // Creates a new ArithmeticException with its message string set to
-        // message, its HRESULT set to COR_E_ARITHMETIC, 
-        // and its ExceptionInfo reference set to null. 
-        // 
-        public ArithmeticException(String message)
+        // message, its HRESULT set to COR_E_ARITHMETIC,
+        // and its ExceptionInfo reference set to null.
+        //
+        public ArithmeticException(string? message)
             : base(message)
         {
             HResult = HResults.COR_E_ARITHMETIC;
         }
 
-        public ArithmeticException(String message, Exception innerException)
+        public ArithmeticException(string? message, Exception? innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_ARITHMETIC;

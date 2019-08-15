@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace System.IO
 {
-    /// <summary>Provides a <see cref="Stream"/> for the contents of a <see cref="ReadOnlyMemory{byte}"/>.</summary>
+    /// <summary>Provides a <see cref="Stream"/> for the contents of a <see cref="ReadOnlyMemory{Byte}"/>.</summary>
     internal sealed class ReadOnlyMemoryStream : Stream
     {
         private readonly ReadOnlyMemory<byte> _content;
@@ -36,7 +36,7 @@ namespace System.IO
                 _position = (int)value;
             }
         }
-        
+
         public override long Seek(long offset, SeekOrigin origin)
         {
             long pos =

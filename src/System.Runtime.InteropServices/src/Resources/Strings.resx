@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<root>
+﻿<root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -75,5 +74,8 @@
   </data>
   <data name="InvalidOperation_NoDispIdAttribute" xml:space="preserve">
     <value>Event invocation for COM objects requires event to be attributed with DispIdAttribute.</value>
+  </data>
+  <data name="StandardOleMarshalObjectGetMarshalerFailed" xml:space="preserve">
+    <value>Failed to get marshaler for IID {0}.</value>
   </data>
 </root>

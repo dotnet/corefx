@@ -3,11 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Net.Sockets;
-using System.Net.Test.Common;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 using Xunit;
@@ -121,9 +119,9 @@ namespace System.Net.Security.Tests
                         false));
 
                     Assert.NotNull(e.InnerException);
-                    Assert.True(e.InnerException.Message.Contains("SSL_ERROR_SSL"));
+                    Assert.Contains("SSL_ERROR_SSL", e.InnerException.Message);
                     Assert.NotNull(e.InnerException.InnerException);
-                    Assert.True(e.InnerException.InnerException.Message.Contains("protocol"));
+                    Assert.Contains("protocol", e.InnerException.InnerException.Message);
                 }
             }
 

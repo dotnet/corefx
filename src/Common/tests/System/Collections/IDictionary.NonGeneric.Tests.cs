@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -80,7 +80,7 @@ namespace System.Collections.Tests
         }
 
         /// <summary>
-        /// Used in IDictionary_NonGeneric_Values_ModifyingTheDictionaryUpdatesTheCollection and 
+        /// Used in IDictionary_NonGeneric_Values_ModifyingTheDictionaryUpdatesTheCollection and
         /// IDictionary_NonGeneric_Keys_ModifyingTheDictionaryUpdatesTheCollection.
         /// Some collections (e.g ConcurrentDictionary) use iterators in the Keys and Values properties,
         /// and do not respond to updates in the base collection.
@@ -88,7 +88,7 @@ namespace System.Collections.Tests
         protected virtual bool IDictionary_NonGeneric_Keys_Values_ModifyingTheDictionaryUpdatesTheCollection => true;
 
         /// <summary>
-        /// Used in IDictionary_NonGeneric_Values_Enumeration_ParentDictionaryModifiedInvalidatesEnumerator and 
+        /// Used in IDictionary_NonGeneric_Values_Enumeration_ParentDictionaryModifiedInvalidatesEnumerator and
         /// IDictionary_NonGeneric_Keys_Enumeration_ParentDictionaryModifiedInvalidatesEnumerator.
         /// Some collections (e.g. ConcurrentDictionary) do not throw an InvalidOperationException
         /// when enumerating the Keys or Values property and the parent is modified.
@@ -128,9 +128,9 @@ namespace System.Collections.Tests
         /// <summary>
         /// Returns a set of ModifyEnumerable delegates that modify the enumerable passed to them.
         /// </summary>
-        protected override IEnumerable<ModifyEnumerable> ModifyEnumerables
+        protected override IEnumerable<ModifyEnumerable> GetModifyEnumerables(ModifyOperation operations)
         {
-            get
+            if ((operations & ModifyOperation.Add) == ModifyOperation.Add)
             {
                 yield return (IEnumerable enumerable) =>
                 {
@@ -138,12 +138,18 @@ namespace System.Collections.Tests
                     casted.Add(CreateTKey(12), CreateTValue(5123));
                     return true;
                 };
+            }
+            if ((operations & ModifyOperation.Insert) == ModifyOperation.Insert)
+            {
                 yield return (IEnumerable enumerable) =>
                 {
                     IDictionary casted = ((IDictionary)enumerable);
                     casted[CreateTKey(541)] = CreateTValue(12);
                     return true;
                 };
+            }
+            if ((operations & ModifyOperation.Remove) == ModifyOperation.Remove)
+            {
                 yield return (IEnumerable enumerable) =>
                 {
                     IDictionary casted = ((IDictionary)enumerable);
@@ -151,10 +157,14 @@ namespace System.Collections.Tests
                     {
                         var keys = casted.Keys.GetEnumerator();
                         keys.MoveNext();
-                        casted.Remove(keys.Current); return true;
+                        casted.Remove(keys.Current);
+                        return true;
                     }
                     return false;
                 };
+            }
+            if ((operations & ModifyOperation.Clear) == ModifyOperation.Clear)
+            {
                 yield return (IEnumerable enumerable) =>
                 {
                     IDictionary casted = ((IDictionary)enumerable);
@@ -784,7 +794,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public virtual void IDictionary_NonGeneric_IDictionaryEnumerator_Current_ModifiedDuringEnumeration_UndefinedBehavior(int count)
         {
-            Assert.All(ModifyEnumerables, ModifyEnumerable =>
+            Assert.All(GetModifyEnumerables(ModifyEnumeratorThrows), ModifyEnumerable =>
             {
                 object current, key, value, entry;
                 IDictionary enumerable = NonGenericIDictionaryFactory(count);

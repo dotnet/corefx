@@ -12,17 +12,16 @@ namespace System.Tests
     public  class MarshalByRefObjectTest : MarshalByRefObject
     {
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void MarshalByRefObjectTests()
         {
             var obj = new MarshalByRefObjectTest();
             Assert.Throws<PlatformNotSupportedException>(() => obj.GetLifetimeService());
             Assert.Throws<PlatformNotSupportedException>(() => obj.InitializeLifetimeService());
-            
+
             var clone = obj.MemberwiseClone(false);
             Assert.NotNull(clone);
             Assert.NotSame(clone, obj);
-            
+
             var clone1 = obj.MemberwiseClone(false);
             Assert.NotNull(clone1);
             Assert.NotSame(clone1, obj);

@@ -2,14 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
-using System.Globalization;
-using System.Security.Permissions;
-
 namespace System.ComponentModel
 {
     /// <summary>
-    ///    <para>Specifies the editor to use to change a property. This class cannot be inherited.</para>
+    /// Specifies the editor to use to change a property. This class cannot be inherited.
     /// </summary>
     [AttributeUsage(AttributeTargets.All, AllowMultiple = true, Inherited = true)]
     public sealed class EditorAttribute : Attribute
@@ -17,8 +13,8 @@ namespace System.ComponentModel
         private string _typeId;
 
         /// <summary>
-        /// <para>Initializes a new instance of the <see cref='System.ComponentModel.EditorAttribute'/> class with the default editor, which is
-        ///    no editor.</para>
+        /// Initializes a new instance of the <see cref='System.ComponentModel.EditorAttribute'/> class
+        /// with the default editor, which is no editor.
         /// </summary>
         public EditorAttribute()
         {
@@ -27,57 +23,67 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        /// <para>Initializes a new instance of the <see cref='System.ComponentModel.EditorAttribute'/> class with the type name and base type
-        ///    name of the editor.</para>
+        /// Initializes a new instance of the <see cref='System.ComponentModel.EditorAttribute'/> class with the type name and base type
+        /// name of the editor.
         /// </summary>
         public EditorAttribute(string typeName, string baseTypeName)
         {
-            string temp = typeName.ToUpper(CultureInfo.InvariantCulture);
-            Debug.Assert(temp.IndexOf(".DLL") == -1, $"Came across: {typeName} . Please remove the .dll extension");
-            EditorTypeName = typeName;
+            EditorTypeName = typeName ?? throw new ArgumentNullException(nameof(typeName));
             EditorBaseTypeName = baseTypeName;
         }
 
         /// <summary>
-        /// <para>Initializes a new instance of the <see cref='System.ComponentModel.EditorAttribute'/> class.</para>
+        /// Initializes a new instance of the <see cref='System.ComponentModel.EditorAttribute'/> class.
         /// </summary>
         public EditorAttribute(string typeName, Type baseType)
         {
-            string temp = typeName.ToUpper(CultureInfo.InvariantCulture);
-            Debug.Assert(temp.IndexOf(".DLL") == -1, $"Came across: {typeName} . Please remove the .dll extension");
+            if (typeName == null)
+            {
+                throw new ArgumentNullException(nameof(typeName));
+            }
+            if (baseType == null)
+            {
+                throw new ArgumentNullException(nameof(baseType));
+            }
+
             EditorTypeName = typeName;
             EditorBaseTypeName = baseType.AssemblyQualifiedName;
         }
 
         /// <summary>
-        /// <para>Initializes a new instance of the <see cref='System.ComponentModel.EditorAttribute'/>
-        /// class.</para>
+        /// Initializes a new instance of the <see cref='System.ComponentModel.EditorAttribute'/> class.
         /// </summary>
         public EditorAttribute(Type type, Type baseType)
         {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+            if (baseType == null)
+            {
+                throw new ArgumentNullException(nameof(baseType));
+            }
+
             EditorTypeName = type.AssemblyQualifiedName;
             EditorBaseTypeName = baseType.AssemblyQualifiedName;
         }
 
         /// <summary>
-        ///    <para>Gets the name of the base class or interface serving as a lookup key for this editor.</para>
+        /// Gets the name of the base class or interface serving as a lookup key for this editor.
         /// </summary>
         public string EditorBaseTypeName { get; }
 
         /// <summary>
-        ///    <para>Gets the name of the editor class.</para>
+        /// Gets the name of the editor class.
         /// </summary>
         public string EditorTypeName { get; }
 
-        /// <internalonly/>
         /// <summary>
-        ///    <para>
-        ///       This defines a unique ID for this attribute type. It is used
-        ///       by filtering algorithms to identify two attributes that are
-        ///       the same type. For most attributes, this just returns the
-        ///       Type instance for the attribute. EditorAttribute overrides
-        ///       this to include the type of the editor base type.
-        ///    </para>
+        /// This defines a unique ID for this attribute type. It is used
+        /// by filtering algorithms to identify two attributes that are
+        /// the same type. For most attributes, this just returns the
+        /// Type instance for the attribute. EditorAttribute overrides
+        /// this to include the type of the editor base type.
         /// </summary>
         public override object TypeId
         {
@@ -85,7 +91,7 @@ namespace System.ComponentModel
             {
                 if (_typeId == null)
                 {
-                    string baseType = EditorBaseTypeName;
+                    string baseType = EditorBaseTypeName ?? string.Empty;
                     int comma = baseType.IndexOf(',');
                     if (comma != -1)
                     {
@@ -104,15 +110,11 @@ namespace System.ComponentModel
                 return true;
             }
 
-            EditorAttribute other = obj as EditorAttribute;
-
-            return (other != null) && other.EditorTypeName == EditorTypeName && other.EditorBaseTypeName == EditorBaseTypeName;
+            return obj is EditorAttribute other
+                && other.EditorTypeName == EditorTypeName
+                && other.EditorBaseTypeName == EditorBaseTypeName;
         }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
+        public override int GetHashCode() => base.GetHashCode();
     }
 }
-

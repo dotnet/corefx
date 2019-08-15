@@ -10,11 +10,11 @@ namespace System.Reflection.Emit.Tests
     public class MethodBuilderGetGenericArguments
     {
         [Fact]
-        public void GetGenericArguments_NonGenericMethod_ReturnsNull()
+        public void GetGenericArguments_NonGenericMethod_ReturnsEmptyArray()
         {
             TypeBuilder type = Helpers.DynamicType(TypeAttributes.Abstract);
             MethodBuilder method = type.DefineMethod("Name", MethodAttributes.Public);
-            Assert.Null(method.GetGenericArguments());
+            Assert.Equal(Array.Empty<Type>(), method.GetGenericArguments());
         }
 
         [Fact]
@@ -37,7 +37,7 @@ namespace System.Reflection.Emit.Tests
 
             VerifyGenericArguments(method, genericParams);
         }
-        
+
         [Fact]
         public void GetGenericArguments_SingleParameters()
         {

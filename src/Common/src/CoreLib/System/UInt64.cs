@@ -13,26 +13,26 @@ namespace System
     [CLSCompliant(false)]
     [StructLayout(LayoutKind.Sequential)]
     [TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public struct UInt64 : IComparable, IConvertible, IFormattable, IComparable<UInt64>, IEquatable<UInt64>, ISpanFormattable
+    public readonly struct UInt64 : IComparable, IConvertible, IFormattable, IComparable<ulong>, IEquatable<ulong>, ISpanFormattable
     {
-        private ulong m_value; // Do not rename (binary serialization)
+        private readonly ulong m_value; // Do not rename (binary serialization)
 
         public const ulong MaxValue = (ulong)0xffffffffffffffffL;
         public const ulong MinValue = 0x0;
 
         // Compares this object to another object, returning an integer that
-        // indicates the relationship. 
+        // indicates the relationship.
         // Returns a value less than zero if this  object
         // null is considered to be less than any instance.
         // If object is not of type UInt64, this method throws an ArgumentException.
-        // 
-        public int CompareTo(Object value)
+        //
+        public int CompareTo(object? value)
         {
             if (value == null)
             {
                 return 1;
             }
-            if (value is UInt64)
+            if (value is ulong)
             {
                 // Need to use compare because subtraction will wrap
                 // to positive for very large neg numbers, etc.
@@ -44,7 +44,7 @@ namespace System
             throw new ArgumentException(SR.Arg_MustBeUInt64);
         }
 
-        public int CompareTo(UInt64 value)
+        public int CompareTo(ulong value)
         {
             // Need to use compare because subtraction will wrap
             // to positive for very large neg numbers, etc.
@@ -53,17 +53,17 @@ namespace System
             return 0;
         }
 
-        public override bool Equals(Object obj)
+        public override bool Equals(object? obj)
         {
-            if (!(obj is UInt64))
+            if (!(obj is ulong))
             {
                 return false;
             }
-            return m_value == ((UInt64)obj).m_value;
+            return m_value == ((ulong)obj).m_value;
         }
 
         [NonVersionable]
-        public bool Equals(UInt64 obj)
+        public bool Equals(ulong obj)
         {
             return m_value == obj;
         }
@@ -74,40 +74,40 @@ namespace System
             return ((int)m_value) ^ (int)(m_value >> 32);
         }
 
-        public override String ToString()
+        public override string ToString()
         {
             return Number.FormatUInt64(m_value, null, null);
         }
 
-        public String ToString(IFormatProvider provider)
+        public string ToString(IFormatProvider? provider)
         {
             return Number.FormatUInt64(m_value, null, provider);
         }
 
-        public String ToString(String format)
+        public string ToString(string? format)
         {
             return Number.FormatUInt64(m_value, format, null);
         }
 
-        public String ToString(String format, IFormatProvider provider)
+        public string ToString(string? format, IFormatProvider? provider)
         {
             return Number.FormatUInt64(m_value, format, provider);
         }
 
-        public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider provider = null)
+        public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = null)
         {
             return Number.TryFormatUInt64(m_value, format, provider, destination, out charsWritten);
         }
 
         [CLSCompliant(false)]
-        public static ulong Parse(String s)
+        public static ulong Parse(string s)
         {
             if (s == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
             return Number.ParseUInt64(s, NumberStyles.Integer, NumberFormatInfo.CurrentInfo);
         }
 
         [CLSCompliant(false)]
-        public static ulong Parse(String s, NumberStyles style)
+        public static ulong Parse(string s, NumberStyles style)
         {
             NumberFormatInfo.ValidateParseStyleInteger(style);
             if (s == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
@@ -115,14 +115,14 @@ namespace System
         }
 
         [CLSCompliant(false)]
-        public static ulong Parse(string s, IFormatProvider provider)
+        public static ulong Parse(string s, IFormatProvider? provider)
         {
             if (s == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
             return Number.ParseUInt64(s, NumberStyles.Integer, NumberFormatInfo.GetInstance(provider));
         }
 
         [CLSCompliant(false)]
-        public static ulong Parse(String s, NumberStyles style, IFormatProvider provider)
+        public static ulong Parse(string s, NumberStyles style, IFormatProvider? provider)
         {
             NumberFormatInfo.ValidateParseStyleInteger(style);
             if (s == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
@@ -130,14 +130,14 @@ namespace System
         }
 
         [CLSCompliant(false)]
-        public static ulong Parse(ReadOnlySpan<char> s, NumberStyles style = NumberStyles.Integer, IFormatProvider provider = null)
+        public static ulong Parse(ReadOnlySpan<char> s, NumberStyles style = NumberStyles.Integer, IFormatProvider? provider = null)
         {
             NumberFormatInfo.ValidateParseStyleInteger(style);
             return Number.ParseUInt64(s, style, NumberFormatInfo.GetInstance(provider));
         }
 
         [CLSCompliant(false)]
-        public static Boolean TryParse(String s, out UInt64 result)
+        public static bool TryParse(string? s, out ulong result)
         {
             if (s == null)
             {
@@ -145,17 +145,17 @@ namespace System
                 return false;
             }
 
-            return Number.TryParseUInt64(s, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out result);
+            return Number.TryParseUInt64IntegerStyle(s, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out result) == Number.ParsingStatus.OK;
         }
 
         [CLSCompliant(false)]
         public static bool TryParse(ReadOnlySpan<char> s, out ulong result)
         {
-            return Number.TryParseUInt64(s, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out result);
+            return Number.TryParseUInt64IntegerStyle(s, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out result) == Number.ParsingStatus.OK;
         }
 
         [CLSCompliant(false)]
-        public static Boolean TryParse(String s, NumberStyles style, IFormatProvider provider, out UInt64 result)
+        public static bool TryParse(string? s, NumberStyles style, IFormatProvider? provider, out ulong result)
         {
             NumberFormatInfo.ValidateParseStyleInteger(style);
 
@@ -165,96 +165,96 @@ namespace System
                 return false;
             }
 
-            return Number.TryParseUInt64(s, style, NumberFormatInfo.GetInstance(provider), out result);
+            return Number.TryParseUInt64(s, style, NumberFormatInfo.GetInstance(provider), out result) == Number.ParsingStatus.OK;
         }
 
         [CLSCompliant(false)]
-        public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider provider, out ulong result)
+        public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider, out ulong result)
         {
             NumberFormatInfo.ValidateParseStyleInteger(style);
-            return Number.TryParseUInt64(s, style, NumberFormatInfo.GetInstance(provider), out result);
+            return Number.TryParseUInt64(s, style, NumberFormatInfo.GetInstance(provider), out result) == Number.ParsingStatus.OK;
         }
 
         //
         // IConvertible implementation
-        // 
+        //
 
         public TypeCode GetTypeCode()
         {
             return TypeCode.UInt64;
         }
 
-        bool IConvertible.ToBoolean(IFormatProvider provider)
+        bool IConvertible.ToBoolean(IFormatProvider? provider)
         {
             return Convert.ToBoolean(m_value);
         }
 
-        char IConvertible.ToChar(IFormatProvider provider)
+        char IConvertible.ToChar(IFormatProvider? provider)
         {
             return Convert.ToChar(m_value);
         }
 
-        sbyte IConvertible.ToSByte(IFormatProvider provider)
+        sbyte IConvertible.ToSByte(IFormatProvider? provider)
         {
             return Convert.ToSByte(m_value);
         }
 
-        byte IConvertible.ToByte(IFormatProvider provider)
+        byte IConvertible.ToByte(IFormatProvider? provider)
         {
             return Convert.ToByte(m_value);
         }
 
-        short IConvertible.ToInt16(IFormatProvider provider)
+        short IConvertible.ToInt16(IFormatProvider? provider)
         {
             return Convert.ToInt16(m_value);
         }
 
-        ushort IConvertible.ToUInt16(IFormatProvider provider)
+        ushort IConvertible.ToUInt16(IFormatProvider? provider)
         {
             return Convert.ToUInt16(m_value);
         }
 
-        int IConvertible.ToInt32(IFormatProvider provider)
+        int IConvertible.ToInt32(IFormatProvider? provider)
         {
             return Convert.ToInt32(m_value);
         }
 
-        uint IConvertible.ToUInt32(IFormatProvider provider)
+        uint IConvertible.ToUInt32(IFormatProvider? provider)
         {
             return Convert.ToUInt32(m_value);
         }
 
-        long IConvertible.ToInt64(IFormatProvider provider)
+        long IConvertible.ToInt64(IFormatProvider? provider)
         {
             return Convert.ToInt64(m_value);
         }
 
-        ulong IConvertible.ToUInt64(IFormatProvider provider)
+        ulong IConvertible.ToUInt64(IFormatProvider? provider)
         {
             return m_value;
         }
 
-        float IConvertible.ToSingle(IFormatProvider provider)
+        float IConvertible.ToSingle(IFormatProvider? provider)
         {
             return Convert.ToSingle(m_value);
         }
 
-        double IConvertible.ToDouble(IFormatProvider provider)
+        double IConvertible.ToDouble(IFormatProvider? provider)
         {
             return Convert.ToDouble(m_value);
         }
 
-        Decimal IConvertible.ToDecimal(IFormatProvider provider)
+        decimal IConvertible.ToDecimal(IFormatProvider? provider)
         {
             return Convert.ToDecimal(m_value);
         }
 
-        DateTime IConvertible.ToDateTime(IFormatProvider provider)
+        DateTime IConvertible.ToDateTime(IFormatProvider? provider)
         {
             throw new InvalidCastException(SR.Format(SR.InvalidCast_FromTo, "UInt64", "DateTime"));
         }
 
-        Object IConvertible.ToType(Type type, IFormatProvider provider)
+        object IConvertible.ToType(Type type, IFormatProvider? provider)
         {
             return Convert.DefaultToType((IConvertible)this, type, provider);
         }

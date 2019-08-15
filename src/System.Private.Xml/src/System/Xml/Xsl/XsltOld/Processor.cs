@@ -4,17 +4,16 @@
 
 namespace System.Xml.Xsl.XsltOld
 {
-    using System.Globalization;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Xml.XPath;
-    using MS.Internal.Xml.XPath;
-    using System.Text;
     using System.Collections;
     using System.Collections.Generic;
-    using System.Xml.Xsl.XsltOld.Debugger;
+    using System.Diagnostics;
+    using System.Globalization;
+    using System.IO;
     using System.Reflection;
-    using System.Security;
+    using System.Text;
+    using System.Xml.XPath;
+    using System.Xml.Xsl.XsltOld.Debugger;
+    using MS.Internal.Xml.XPath;
 
     internal sealed class Processor : IXsltProcessor
     {
@@ -50,23 +49,23 @@ namespace System.Xml.Xsl.XsltOld
         // Compiled stylesheet
         //
 
-        private Stylesheet _stylesheet;     // Root of import tree of template managers
-        private RootAction _rootAction;
-        private Key[] _keyList;
-        private List<TheQuery> _queryStore;
+        private readonly Stylesheet _stylesheet;     // Root of import tree of template managers
+        private readonly RootAction _rootAction;
+        private readonly Key[] _keyList;
+        private readonly List<TheQuery> _queryStore;
 
         //
         // Document Being transformed
         //
 
-        private XPathNavigator _document;
+        private readonly XPathNavigator _document;
 
         //
         // Execution action stack
         //
 
-        private HWStack _actionStack;
-        private HWStack _debuggerStack;
+        private readonly HWStack _actionStack;
+        private readonly HWStack _debuggerStack;
 
         //
         // Register for returning value from calling nested action
@@ -78,29 +77,29 @@ namespace System.Xml.Xsl.XsltOld
         // Output related member variables
         //
         private int _ignoreLevel;
-        private StateMachine _xsm;
+        private readonly StateMachine _xsm;
         private RecordBuilder _builder;
 
         private XsltOutput _output;
 
-        private XmlNameTable _nameTable = new NameTable();
+        private readonly XmlNameTable _nameTable = new NameTable();
 
-        private XmlResolver _resolver;
+        private readonly XmlResolver _resolver;
 
 #pragma warning disable 618
-        private XsltArgumentList _args;
+        private readonly XsltArgumentList _args;
 #pragma warning restore 618
-        private Hashtable _scriptExtensions;
+        private readonly Hashtable _scriptExtensions;
 
         private ArrayList _numberList;
         //
         // Template lookup action
         //
 
-        private TemplateLookupAction _templateLookup = new TemplateLookupAction();
+        private readonly TemplateLookupAction _templateLookup = new TemplateLookupAction();
 
-        private IXsltDebugger _debugger;
-        private Query[] _queryList;
+        private readonly IXsltDebugger _debugger;
+        private readonly Query[] _queryList;
 
         private ArrayList _sortArray;
 
@@ -175,7 +174,7 @@ namespace System.Xml.Xsl.XsltOld
                 _documentCache = new Hashtable();
             }
 
-            Object input = _resolver.GetEntity(ruri, null, null);
+            object input = _resolver.GetEntity(ruri, null, null);
             if (input is Stream)
             {
                 XmlTextReaderImpl tr = new XmlTextReaderImpl(ruri.ToString(), (Stream)input);
@@ -225,18 +224,18 @@ namespace System.Xml.Xsl.XsltOld
             if (
                 parameter is XPathNodeIterator ||
                 parameter is XPathNavigator ||
-                parameter is Boolean ||
-                parameter is Double ||
-                parameter is String
+                parameter is bool ||
+                parameter is double ||
+                parameter is string
             )
             {
                 // doing nothing
             }
             else if (
-              parameter is Int16 || parameter is UInt16 ||
-              parameter is Int32 || parameter is UInt32 ||
-              parameter is Int64 || parameter is UInt64 ||
-              parameter is Single || parameter is Decimal
+              parameter is short || parameter is ushort ||
+              parameter is int || parameter is uint ||
+              parameter is long || parameter is ulong ||
+              parameter is float || parameter is decimal
           )
             {
                 parameter = XmlConvert.ToXPathDouble(parameter);
@@ -396,7 +395,7 @@ namespace System.Xml.Xsl.XsltOld
 
         public void Execute(Stream stream)
         {
-            RecordOutput recOutput = null;
+            IRecordOutput recOutput = null;
 
             switch (_output.Method)
             {
@@ -416,7 +415,7 @@ namespace System.Xml.Xsl.XsltOld
 
         public void Execute(TextWriter writer)
         {
-            RecordOutput recOutput = null;
+            IRecordOutput recOutput = null;
 
             switch (_output.Method)
             {
@@ -596,7 +595,7 @@ namespace System.Xml.Xsl.XsltOld
             }
         }
 
-        internal String ValueOf(ActionFrame context, int key)
+        internal string ValueOf(ActionFrame context, int key)
         {
             string result;
 
@@ -616,7 +615,7 @@ namespace System.Xml.Xsl.XsltOld
             return result;
         }
 
-        internal String ValueOf(XPathNavigator n)
+        internal string ValueOf(XPathNavigator n)
         {
             if (_stylesheet.Whitespace && n.NodeType == XPathNodeType.Element)
             {
@@ -759,7 +758,7 @@ namespace System.Xml.Xsl.XsltOld
             return BeginEvent(nodeType, prefix, name, nspace, empty, null, true);
         }
 
-        internal bool BeginEvent(XPathNodeType nodeType, string prefix, string name, string nspace, bool empty, Object htmlProps, bool search)
+        internal bool BeginEvent(XPathNodeType nodeType, string prefix, string name, string nspace, bool empty, object htmlProps, bool search)
         {
             Debug.Assert(_xsm != null);
 
@@ -984,7 +983,7 @@ namespace System.Xml.Xsl.XsltOld
         //
         // Builder stack
         //
-        internal void PushOutput(RecordOutput output)
+        internal void PushOutput(IRecordOutput output)
         {
             Debug.Assert(output != null);
             _builder.OutputState = _xsm.State;
@@ -995,7 +994,7 @@ namespace System.Xml.Xsl.XsltOld
             _xsm.Reset();
         }
 
-        internal RecordOutput PopOutput()
+        internal IRecordOutput PopOutput()
         {
             Debug.Assert(_builder != null);
 
@@ -1123,17 +1122,6 @@ namespace System.Xml.Xsl.XsltOld
         {
             Debug.Assert(this.Debugger != null, "We don't generate calls this function if ! debugger");
             ((DebuggerFrame)_debuggerStack[_debuggerStack.Length - 1]).currentMode = mode;
-        }
-
-        // ----------------------- IXsltProcessor : --------------------
-        int IXsltProcessor.StackDepth
-        {
-            get { return _debuggerStack.Length; }
-        }
-
-        IStackFrame IXsltProcessor.GetStackFrame(int depth)
-        {
-            return ((DebuggerFrame)_debuggerStack[depth]).actionFrame;
         }
     }
 }

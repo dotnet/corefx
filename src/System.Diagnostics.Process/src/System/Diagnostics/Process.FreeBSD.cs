@@ -14,10 +14,10 @@ namespace System.Diagnostics
         {
             get
             {
-                EnsureState(State.HaveId);
+                EnsureState(State.HaveNonExitedId);
                 Interop.Process.proc_stats stat = Interop.Process.GetThreadInfo(_processId, 0);
 
-                return  new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(stat.startTime);
+                return new DateTime(DateTime.UnixEpoch.Ticks + (stat.startTime * TimeSpan.TicksPerSecond)).ToLocalTime();
             }
         }
 
@@ -30,7 +30,7 @@ namespace System.Diagnostics
         {
             get
             {
-                EnsureState(State.HaveId);
+                EnsureState(State.HaveNonExitedId);
                 Interop.Process.proc_stats stat = Interop.Process.GetThreadInfo(_processId, 0);
                 return Process.TicksToTimeSpan(stat.userTime + stat.systemTime);
             }
@@ -44,7 +44,7 @@ namespace System.Diagnostics
         {
             get
             {
-                EnsureState(State.HaveId);
+                EnsureState(State.HaveNonExitedId);
 
                 Interop.Process.proc_stats stat = Interop.Process.GetThreadInfo(_processId, 0);
                 return Process.TicksToTimeSpan(stat.userTime);
@@ -56,18 +56,22 @@ namespace System.Diagnostics
         {
             get
             {
-                EnsureState(State.HaveId);
+                EnsureState(State.HaveNonExitedId);
 
                 Interop.Process.proc_stats stat = Interop.Process.GetThreadInfo(_processId, 0);
                 return Process.TicksToTimeSpan(stat.systemTime);
             }
         }
 
+        /// <summary>Gets parent process ID</summary>
+        private int ParentProcessId =>
+            throw new PlatformNotSupportedException();
+
         // <summary>Gets execution path</summary>
         private string GetPathToOpenFile()
         {
             Interop.Sys.FileStatus stat;
-            if (Interop.Sys.Stat("/usr/local/bin/open", out stat) == 0 )
+            if (Interop.Sys.Stat("/usr/local/bin/open", out stat) == 0)
             {
                 return "/usr/local/bin/open";
             }

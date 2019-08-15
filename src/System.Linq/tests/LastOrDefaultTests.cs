@@ -14,7 +14,7 @@ namespace System.Linq.Tests
         public void SameResultsRepeatCallsIntQuery()
         {
             var q = from x in new[] { 9999, 0, 888, -1, 66, -777, 1, 2, -12345 }
-                             where x > Int32.MinValue
+                             where x > int.MinValue
                              select x;
 
             Assert.Equal(q.LastOrDefault(), q.LastOrDefault());
@@ -23,8 +23,8 @@ namespace System.Linq.Tests
         [Fact]
         public void SameResultsRepeatCallsStringQuery()
         {
-            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", String.Empty }
-                             where !String.IsNullOrEmpty(x)
+            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", string.Empty }
+                             where !string.IsNullOrEmpty(x)
                              select x;
 
             Assert.Equal(q.LastOrDefault(), q.LastOrDefault());
@@ -34,9 +34,9 @@ namespace System.Linq.Tests
         {
             T[] source = { };
             T expected = default(T);
-            
+
             Assert.IsAssignableFrom<IList<T>>(source);
-            
+
             Assert.Equal(expected, source.RunOnce().LastOrDefault());
         }
 
@@ -56,7 +56,7 @@ namespace System.Linq.Tests
             int expected = 5;
 
             Assert.IsAssignableFrom<IList<int>>(source);
-            
+
             Assert.Equal(expected, source.LastOrDefault());
         }
 
@@ -68,7 +68,7 @@ namespace System.Linq.Tests
             int? expected = null;
 
             Assert.IsAssignableFrom<IList<int?>>(source);
-            
+
             Assert.Equal(expected, source.LastOrDefault());
         }
 
@@ -79,7 +79,7 @@ namespace System.Linq.Tests
             int? expected = 19;
 
             Assert.IsAssignableFrom<IList<int?>>(source);
-            
+
             Assert.Equal(expected, source.LastOrDefault());
         }
 
@@ -92,9 +92,9 @@ namespace System.Linq.Tests
         {
             var source = EmptySource<T>();
             T expected = default(T);
-            
+
             Assert.Null(source as IList<T>);
-            
+
             Assert.Equal(expected, source.RunOnce().LastOrDefault());
         }
 
@@ -114,7 +114,7 @@ namespace System.Linq.Tests
             int expected = -5;
 
             Assert.Null(source as IList<int>);
-            
+
             Assert.Equal(expected, source.LastOrDefault());
         }
 
@@ -125,7 +125,7 @@ namespace System.Linq.Tests
             int expected = 12;
 
             Assert.Null(source as IList<int>);
-            
+
             Assert.Equal(expected, source.LastOrDefault());
         }
 
@@ -144,7 +144,7 @@ namespace System.Linq.Tests
             int[] source = { 4 };
             Func<int, bool> predicate = IsEven;
             int expected = 4;
-            
+
             Assert.Equal(expected, source.LastOrDefault(predicate));
         }
 

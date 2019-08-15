@@ -105,7 +105,7 @@ namespace System.Net
                 if (LookupLength >= Current.Prefix.Length)
                 {
                     // It is. See if these match.
-                    if (String.Compare(Current.Prefix,
+                    if (string.Compare(Current.Prefix,
                                        0,
                                        LookupUri,
                                        0,
@@ -258,12 +258,12 @@ namespace System.Net
                 // allowing other threads to still read from the original.
                 List<WebRequestPrefixElement> prefixList = new List<WebRequestPrefixElement>(PrefixList);
 
-                // As AbsoluteUri is used later for Create, account for formating changes 
+                // As AbsoluteUri is used later for Create, account for formating changes
                 // like Unicode escaping, default ports, etc.
                 Uri tempUri;
                 if (Uri.TryCreate(prefix, UriKind.Absolute, out tempUri))
                 {
-                    String cookedUri = tempUri.AbsoluteUri;
+                    string cookedUri = tempUri.AbsoluteUri;
 
                     // Special case for when a partial host matching is requested, drop the added trailing slash
                     // IE: http://host could match host or host.domain
@@ -525,14 +525,14 @@ namespace System.Net
         {
             throw NotImplemented.ByDesignWithMessage(SR.net_MethodNotImplementedException);
         }
-   
+
         public virtual Task<Stream> GetRequestStreamAsync()
         {
             // Offload to a different thread to avoid blocking the caller during request submission.
             // We use Task.Run rather than Task.Factory.StartNew even though StartNew would let us pass 'this'
             // as a state argument to avoid the closure to capture 'this' and the associated delegate.
             // This is because the task needs to call FromAsync and marshal the inner Task out, and
-            // Task.Run's implementation of this is sufficiently more efficient than what we can do with 
+            // Task.Run's implementation of this is sufficiently more efficient than what we can do with
             // Unwrap() that it's worth it to just rely on Task.Run and accept the closure/delegate.
             return Task.Run(() =>
                 Task<Stream>.Factory.FromAsync(
@@ -588,7 +588,7 @@ namespace System.Net
             {
                 throw NotImplemented.ByDesignWithMessage(SR.net_PropertyNotImplementedException);
             }
-        }    
+        }
 
         public virtual IWebProxy Proxy
         {

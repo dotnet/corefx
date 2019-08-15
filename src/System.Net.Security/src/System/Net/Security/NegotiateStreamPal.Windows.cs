@@ -2,15 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.ComponentModel;
 using System.Diagnostics;
-using System.Globalization;
-using System.IO;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Principal;
-using System.Threading;
-using System.ComponentModel;
-using System.Security.Authentication;
-using System.Security.Authentication.ExtendedProtection;
 
 namespace System.Net.Security
 {
@@ -64,10 +60,7 @@ namespace System.Net.Security
                 }
                 finally
                 {
-                    if (token != null)
-                    {
-                        token.Dispose();
-                    }
+                    token?.Dispose();
                 }
             }
 
@@ -78,9 +71,9 @@ namespace System.Net.Security
 
         internal static string QueryContextAssociatedName(SafeDeleteContext securityContext)
         {
-            return SSPIWrapper.QueryContextAttributes(GlobalSSPI.SSPIAuth, securityContext, Interop.SspiCli.ContextAttribute.SECPKG_ATTR_NAMES) as string;
+            return SSPIWrapper.QueryStringContextAttributes(GlobalSSPI.SSPIAuth, securityContext, Interop.SspiCli.ContextAttribute.SECPKG_ATTR_NAMES);
         }
-        
+
         internal static void ValidateImpersonationLevel(TokenImpersonationLevel impersonationLevel)
         {
             if (impersonationLevel != TokenImpersonationLevel.Identification &&
@@ -101,15 +94,13 @@ namespace System.Net.Security
             ref byte[] output,
             uint sequenceNumber)
         {
-            SecPkgContext_Sizes sizes = SSPIWrapper.QueryContextAttributes(
-                GlobalSSPI.SSPIAuth,
-                securityContext,
-                Interop.SspiCli.ContextAttribute.SECPKG_ATTR_SIZES
-                ) as SecPkgContext_Sizes;
+            SecPkgContext_Sizes sizes = default;
+            bool success = SSPIWrapper.QueryBlittableContextAttributes(GlobalSSPI.SSPIAuth, securityContext, Interop.SspiCli.ContextAttribute.SECPKG_ATTR_SIZES, ref sizes);
+            Debug.Assert(success);
 
             try
             {
-                int maxCount = checked(Int32.MaxValue - 4 - sizes.cbBlockSize - sizes.cbSecurityTrailer);
+                int maxCount = checked(int.MaxValue - 4 - sizes.cbBlockSize - sizes.cbSecurityTrailer);
 
                 if (count > maxCount || count < 0)
                 {
@@ -132,7 +123,8 @@ namespace System.Net.Security
             Buffer.BlockCopy(buffer, offset, output, 4 + sizes.cbSecurityTrailer, count);
 
             // Prepare buffers TOKEN(signature), DATA and Padding.
-            var securityBuffer = new SecurityBuffer[3];
+            ThreeSecurityBuffers buffers = default;
+            var securityBuffer = MemoryMarshal.CreateSpan(ref buffers._item0, 3);
             securityBuffer[0] = new SecurityBuffer(output, 4, sizes.cbSecurityTrailer, SecurityBufferType.SECBUFFER_TOKEN);
             securityBuffer[1] = new SecurityBuffer(output, 4 + sizes.cbSecurityTrailer, count, SecurityBufferType.SECBUFFER_DATA);
             securityBuffer[2] = new SecurityBuffer(output, 4 + sizes.cbSecurityTrailer + count, sizes.cbBlockSize, SecurityBufferType.SECBUFFER_PADDING);
@@ -216,7 +208,8 @@ namespace System.Net.Security
             //
             // Kerberos and up
             //
-            var securityBuffer = new SecurityBuffer[2];
+            TwoSecurityBuffers buffers = default;
+            var securityBuffer = MemoryMarshal.CreateSpan(ref buffers._item0, 2);
             securityBuffer[0] = new SecurityBuffer(buffer, offset, count, SecurityBufferType.SECBUFFER_STREAM);
             securityBuffer[1] = new SecurityBuffer(0, SecurityBufferType.SECBUFFER_DATA);
 
@@ -239,7 +232,7 @@ namespace System.Net.Security
 
             if (securityBuffer[1].type != SecurityBufferType.SECBUFFER_DATA)
             {
-                throw new InternalException();
+                throw new InternalException(securityBuffer[1].type);
             }
 
             newOffset = securityBuffer[1].offset;
@@ -263,7 +256,8 @@ namespace System.Net.Security
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
 
-            var securityBuffer = new SecurityBuffer[2];
+            TwoSecurityBuffers buffers = default;
+            var securityBuffer = MemoryMarshal.CreateSpan(ref buffers._item0, 2);
             securityBuffer[0] = new SecurityBuffer(buffer, offset, ntlmSignatureLength, SecurityBufferType.SECBUFFER_TOKEN);
             securityBuffer[1] = new SecurityBuffer(buffer, offset + ntlmSignatureLength, count - ntlmSignatureLength, SecurityBufferType.SECBUFFER_DATA);
 
@@ -290,7 +284,7 @@ namespace System.Net.Security
 
             if (securityBuffer[1].type != realDataType)
             {
-                throw new InternalException();
+                throw new InternalException(securityBuffer[1].type);
             }
 
             newOffset = securityBuffer[1].offset;

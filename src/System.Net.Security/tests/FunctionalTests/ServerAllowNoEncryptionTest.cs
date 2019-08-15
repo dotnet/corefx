@@ -33,7 +33,6 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
-        [ActiveIssue(16534, TestPlatforms.Windows)]
         public async Task ServerAllowNoEncryption_ClientRequireEncryption_ConnectWithEncryption()
         {
             using (var serverAllowNoEncryption = new DummyTcpServer(
@@ -54,7 +53,6 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
-        [ActiveIssue(16534, TestPlatforms.Windows)]
         public async Task ServerAllowNoEncryption_ClientAllowNoEncryption_ConnectWithEncryption()
         {
             using (var serverAllowNoEncryption = new DummyTcpServer(
@@ -75,7 +73,6 @@ namespace System.Net.Security.Tests
         }
 
         [ConditionalFact(nameof(SupportsNullEncryption))]
-        [ActiveIssue(16534, TestPlatforms.Windows)]
         public async Task ServerAllowNoEncryption_ClientNoEncryption_ConnectWithNoEncryption()
         {
             using (var serverAllowNoEncryption = new DummyTcpServer(
@@ -86,7 +83,8 @@ namespace System.Net.Security.Tests
 
                 using (var sslStream = new SslStream(client.GetStream(), false, AllowAnyServerCertificate, null, EncryptionPolicy.NoEncryption))
                 {
-                    await sslStream.AuthenticateAsClientAsync("localhost", null, SslProtocolSupport.DefaultSslProtocols, false);
+                    // null encryption is not permitted with Tls13
+                    await sslStream.AuthenticateAsClientAsync("localhost", null, SslProtocols.Tls | SslProtocols.Tls11 |  SslProtocols.Tls12, false);
                     _log.WriteLine("Client authenticated to server({0}) with encryption cipher: {1} {2}-bit strength",
                         serverAllowNoEncryption.RemoteEndPoint, sslStream.CipherAlgorithm, sslStream.CipherStrength);
 

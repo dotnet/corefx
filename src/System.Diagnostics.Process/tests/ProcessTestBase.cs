@@ -6,11 +6,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Diagnostics.Tests
 {
-    public partial class ProcessTestBase : RemoteExecutorTestBase
+    public partial class ProcessTestBase : FileCleanupTestBase
     {
         protected const int WaitInMS = 30 * 1000;
         protected Process _process;
@@ -29,11 +31,8 @@ namespace System.Diagnostics.Tests
             {
                 try
                 {
-                    if (!p.HasExited)
-                    {
-                        p.Kill();
-                        Assert.True(p.WaitForExit(WaitInMS));
-                    }
+                    p.Kill();
+                    Assert.True(p.WaitForExit(WaitInMS));
                 }
                 catch (InvalidOperationException) { } // in case it was never started
             }
@@ -52,7 +51,7 @@ namespace System.Diagnostics.Tests
         protected Process CreateProcess(Func<int> method = null)
         {
             Process p = null;
-            using (RemoteInvokeHandle handle = RemoteInvoke(method ?? (() => SuccessExitCode), new RemoteInvokeOptions { Start = false }))
+            using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(method ?? (() => RemoteExecutor.SuccessExitCode), new RemoteInvokeOptions { Start = false }))
             {
                 p = handle.Process;
                 handle.Process = null;
@@ -61,10 +60,24 @@ namespace System.Diagnostics.Tests
             return p;
         }
 
-        protected Process CreateProcess(Func<string, int> method, string arg)
+        protected Process CreateProcess(Func<string, int> method, string arg, bool autoDispose = true)
         {
             Process p = null;
-            using (RemoteInvokeHandle handle = RemoteInvoke(method, arg, new RemoteInvokeOptions { Start = false }))
+            using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(method, arg, new RemoteInvokeOptions { Start = false }))
+            {
+                p = handle.Process;
+                handle.Process = null;
+            }
+            if (autoDispose)
+                AddProcessForDispose(p);
+
+            return p;
+        }
+
+        protected Process CreateProcess(Func<string, Task<int>> method, string arg)
+        {
+            Process p = null;
+            using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(method, arg, new RemoteInvokeOptions { Start = false }))
             {
                 p = handle.Process;
                 handle.Process = null;
@@ -88,6 +101,16 @@ namespace System.Diagnostics.Tests
         /// <returns></returns>
         protected static bool IsProgramInstalled(string program)
         {
+            return GetProgramPath(program) != null;
+        }
+
+        /// <summary>
+        /// Return program path
+        /// </summary>
+        /// <param name="program"></param>
+        /// <returns></returns>
+        protected static string GetProgramPath(string program)
+        {
             string path;
             string pathEnvVar = Environment.GetEnvironmentVariable("PATH");
             char separator = PlatformDetection.IsWindows ? ';' : ':';
@@ -100,11 +123,11 @@ namespace System.Diagnostics.Tests
                     path = Path.Combine(subPath, program);
                     if (File.Exists(path))
                     {
-                        return true;
+                        return path;
                     }
                 }
             }
-            return false;
+            return null;
         }
     }
 }

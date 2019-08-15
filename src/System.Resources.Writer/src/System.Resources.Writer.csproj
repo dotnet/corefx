@@ -1,21 +1,17 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AssemblyName>System.Resources.Writer</AssemblyName>
     <RootNamespace>System.Resources</RootNamespace>
     <ProjectGuid>{98CA9A7F-AD5C-418B-BC22-735AC2BE21A6}</ProjectGuid>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System\Resources\__FastResourceComparer.cs" />
     <Compile Include="System\Resources\IResourceWriter.cs" />
-    <Compile Include="System\Resources\ResourceWriter.cs" />
-    <Compile Include="System\Runtime\Versioning\MultitargetingHelpers.cs" />
+    <Compile Include="System\Resources\ResourceWriter.core.cs" />
+    <Compile Include="$(CommonPath)\System\Resources\ResourceWriter.cs" Link="System\Resources\ResourceWriter.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\Resources\ResourceTypeCode.cs" Link="System\Resources\ResourceTypeCode.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../System.Resources.ResourceManager/ref/System.Resources.ResourceManager.csproj" />
@@ -28,5 +24,4 @@
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

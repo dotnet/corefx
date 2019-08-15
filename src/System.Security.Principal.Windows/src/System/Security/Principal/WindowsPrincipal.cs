@@ -24,7 +24,7 @@ namespace System.Security.Principal
 
     public class WindowsPrincipal : ClaimsPrincipal
     {
-        private WindowsIdentity _identity = null;
+        private readonly WindowsIdentity _identity = null;
 
         //
         // Constructors.
@@ -40,7 +40,7 @@ namespace System.Security.Principal
 
             _identity = ntIdentity;
         }
-        
+
         //
         // Properties.
         //
@@ -143,9 +143,9 @@ namespace System.Security.Principal
 
         // This method (with a SID parameter) is more general than the 2 overloads that accept a WindowsBuiltInRole or
         // a rid (as an int). It is also better from a performance standpoint than the overload that accepts a string.
-        // The aformentioned overloads remain in this class since we do not want to introduce a
+        // The aforementioned overloads remain in this class since we do not want to introduce a
         // breaking change. However, this method should be used in all new applications.
-        
+
         public virtual bool IsInRole(SecurityIdentifier sid)
         {
             if (sid == null)
@@ -187,5 +187,8 @@ namespace System.Security.Principal
             token.Dispose();
             return isMember;
         }
+
+        // This is called by AppDomain.GetThreadPrincipal() via reflection.
+        private static IPrincipal GetDefaultInstance() => new WindowsPrincipal(WindowsIdentity.GetCurrent());
     }
 }

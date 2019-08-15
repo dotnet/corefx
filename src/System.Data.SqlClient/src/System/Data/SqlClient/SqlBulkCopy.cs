@@ -29,7 +29,7 @@ namespace System.Data.SqlClient
 
     internal sealed class Row
     {
-        private object[] _dataFields;
+        private readonly object[] _dataFields;
 
         internal Row(int rowCount)
         {
@@ -174,8 +174,8 @@ namespace System.Data.SqlClient
 
         private bool _enableStreaming = false;
         private int _batchSize;
-        private bool _ownConnection;
-        private SqlBulkCopyOptions _copyOptions;
+        private readonly bool _ownConnection;
+        private readonly SqlBulkCopyOptions _copyOptions;
         private int _timeout = DefaultCommandTimeout;
         private string _destinationTableName;
         private int _rowsCopied;
@@ -193,7 +193,7 @@ namespace System.Data.SqlClient
 
         private SqlConnection _connection;
         private SqlTransaction _internalTransaction;
-        private SqlTransaction _externalTransaction;
+        private readonly SqlTransaction _externalTransaction;
 
         private ValueSourceType _rowSourceType = ValueSourceType.Unspecified;
         private DataRow _currentRow;
@@ -220,13 +220,13 @@ namespace System.Data.SqlClient
         internal static bool _setAlwaysTaskOnWrite = false; //when set and in DEBUG mode, TdsParser::WriteBulkCopyValue will always return a task
         internal static bool SetAlwaysTaskOnWrite
         {
-            set
-            {
-                _setAlwaysTaskOnWrite = value;
-            }
             get
             {
                 return _setAlwaysTaskOnWrite;
+            }
+            set
+            {
+                _setAlwaysTaskOnWrite = value;
             }
         }
 #endif
@@ -455,7 +455,7 @@ namespace System.Data.SqlClient
             string CatalogName = parts[MultipartIdentifier.CatalogIndex];
             if (isTempTable && string.IsNullOrEmpty(CatalogName))
             {
-                TDSCommand += String.Format((IFormatProvider)null, "exec tempdb..{0} N'{1}.{2}'",
+                TDSCommand += string.Format("exec tempdb..{0} N'{1}.{2}'",
                     TableCollationsStoredProc,
                     SchemaName,
                     TableName
@@ -468,7 +468,7 @@ namespace System.Data.SqlClient
                 {
                     CatalogName = SqlServerEscapeHelper.EscapeIdentifier(CatalogName);
                 }
-                TDSCommand += String.Format((IFormatProvider)null, "exec {0}..{1} N'{2}.{3}'",
+                TDSCommand += string.Format("exec {0}..{1} N'{2}.{3}'",
                     CatalogName,
                     TableCollationsStoredProc,
                     SchemaName,
@@ -552,7 +552,7 @@ namespace System.Data.SqlClient
 
                 // Check for excluded types
                 if ((metadata.type == SqlDbType.Timestamp)
-                    || ((metadata.isIdentity) && !IsCopyOption(SqlBulkCopyOptions.KeepIdentity)))
+                    || ((metadata.IsIdentity) && !IsCopyOption(SqlBulkCopyOptions.KeepIdentity)))
                 {
                     // Remove metadata for excluded columns
                     metaDataSet[i] = null;
@@ -869,7 +869,7 @@ namespace System.Data.SqlClient
                                     Debug.Assert(_SqlDataReaderRowSource != null, "Should not be reading row as an XmlReader if bulk copy source is not a SqlDataReader");
                                     return new XmlDataFeed(_SqlDataReaderRowSource.GetXmlReader(sourceOrdinal));
                                 default:
-                                    Debug.Fail(string.Format("Current column is marked as being a DataFeed, but no DataFeed compatible method was provided. Method: {0}", _currentRowMetadata[destRowIndex].Method));
+                                    Debug.Fail($"Current column is marked as being a DataFeed, but no DataFeed compatible method was provided. Method: {_currentRowMetadata[destRowIndex].Method}");
                                     isDataFeed = false;
                                     object columnValue = _DbDataReaderRowSource.GetValue(sourceOrdinal);
                                     ADP.IsNullOrSqlType(columnValue, out isNull, out isSqlType);
@@ -891,13 +891,13 @@ namespace System.Data.SqlClient
                                     value = _SqlDataReaderRowSource.GetSqlDecimal(sourceOrdinal);
                                     break;
                                 case ValueMethod.SqlTypeSqlDouble:
-                                    value = new SqlDecimal(_SqlDataReaderRowSource.GetSqlDouble(sourceOrdinal).Value);
+                                    value = (SqlDecimal)_SqlDataReaderRowSource.GetSqlDouble(sourceOrdinal); // use cast to handle IsNull correctly because no public constructor allows it
                                     break;
                                 case ValueMethod.SqlTypeSqlSingle:
-                                    value = new SqlDecimal(_SqlDataReaderRowSource.GetSqlSingle(sourceOrdinal).Value);
+                                    value = (SqlDecimal)_SqlDataReaderRowSource.GetSqlSingle(sourceOrdinal); // use cast to handle IsNull correctly because no public constructor allows it
                                     break;
                                 default:
-                                    Debug.Fail(string.Format("Current column is marked as being a SqlType, but no SqlType compatible method was provided. Method: {0}", _currentRowMetadata[destRowIndex].Method));
+                                    Debug.Fail($"Current column is marked as being a SqlType, but no SqlType compatible method was provided. Method: {_currentRowMetadata[destRowIndex].Method}");
                                     value = (INullable)_SqlDataReaderRowSource.GetSqlValue(sourceOrdinal);
                                     break;
                             }
@@ -1004,12 +1004,12 @@ namespace System.Data.SqlClient
                                         else
                                         {
                                             isSqlType = true;
-                                            return new SqlDecimal((Decimal)currentRowValue);
+                                            return new SqlDecimal((decimal)currentRowValue);
                                         }
                                     }
                                 default:
                                     {
-                                        Debug.Fail(string.Format("Current column is marked as being a SqlType, but no SqlType compatible method was provided. Method: {0}", _currentRowMetadata[destRowIndex].Method));
+                                        Debug.Fail($"Current column is marked as being a SqlType, but no SqlType compatible method was provided. Method: {_currentRowMetadata[destRowIndex].Method}");
                                         break;
                                     }
                             }
@@ -1125,11 +1125,11 @@ namespace System.Data.SqlClient
                         break;
                     default:
                         t = null;
-                        Debug.Fail(string.Format("Unknown value source: {0}", _rowSourceType));
+                        Debug.Fail($"Unknown value source: {_rowSourceType}");
                         break;
                 }
 
-                if (typeof(SqlDecimal) == t || typeof(Decimal) == t)
+                if (typeof(SqlDecimal) == t || typeof(decimal) == t)
                 {
                     isSqlType = true;
                     method = ValueMethod.SqlTypeSqlDecimal;  // Source Type Decimal
@@ -1386,7 +1386,7 @@ namespace System.Data.SqlClient
 
             if (isNull)
             {
-                if (!metadata.isNullable)
+                if (!metadata.IsNullable)
                 {
                     throw SQL.BulkLoadBulkLoadNotAllowDBNull(metadata.column);
                 }
@@ -1417,7 +1417,7 @@ namespace System.Data.SqlClient
                         }
                         else
                         {
-                            sqlValue = new SqlDecimal((Decimal)value);
+                            sqlValue = new SqlDecimal((decimal)value);
                         }
 
                         if (sqlValue.Scale != metadata.scale)
@@ -1841,9 +1841,12 @@ namespace System.Data.SqlClient
                         }
                         else
                         {
-                            AsyncHelper.ContinueTask(writeTask, tcs, () => tcs.SetResult(null));
+                            AsyncHelper.ContinueTaskWithState(writeTask, tcs,
+                                state: tcs,
+                                onSuccess: state => ((TaskCompletionSource<object>)state).SetResult(null)
+                            );
                         }
-                    }, ctoken); // We do not need to propagate exception, etc, from reconnect task, we just need to wait for it to finish.
+                    }, ctoken, TaskContinuationOptions.DenyChildAttach, TaskScheduler.Default); // We do not need to propagate exception, etc, from reconnect task, we just need to wait for it to finish.
                     return tcs.Task;
                 }
                 else
@@ -2054,7 +2057,7 @@ namespace System.Data.SqlClient
             bool isSqlType;
             bool isDataFeed;
             bool isNull;
-            Object value = GetValueFromSourceRow(col, out isSqlType, out isDataFeed, out isNull); //this will return Task/null in future: as rTask
+            object value = GetValueFromSourceRow(col, out isSqlType, out isDataFeed, out isNull); //this will return Task/null in future: as rTask
 
             _SqlMetaData metadata = _sortedColumnMappings[col]._metadata;
             if (!isDataFeed)
@@ -2153,17 +2156,17 @@ namespace System.Data.SqlClient
         private void CopyColumnsAsyncSetupContinuation(TaskCompletionSource<object> source, Task task, int i)
         {
             AsyncHelper.ContinueTask(task, source, () =>
-            {
-                if (i + 1 < _sortedColumnMappings.Count)
                 {
-                    CopyColumnsAsync(i + 1, source); //continue from the next column
+                    if (i + 1 < _sortedColumnMappings.Count)
+                    {
+                        CopyColumnsAsync(i + 1, source); //continue from the next column
+                    }
+                    else
+                    {
+                        source.SetResult(null);
+                    }
                 }
-                else
-                {
-                    source.SetResult(null);
-                }
-            },
-                _connection.GetOpenTdsConnection());
+            );
         }
 
         // The notification logic.
@@ -2257,24 +2260,6 @@ namespace System.Data.SqlClient
             }
         }
 
-        private TaskCompletionSource<object> ContinueTaskPend(Task task, TaskCompletionSource<object> source, Func<TaskCompletionSource<object>> action)
-        {
-            if (task == null)
-            {
-                return action();
-            }
-            else
-            {
-                Debug.Assert(source != null, "source should already be initialized if task is not null");
-                AsyncHelper.ContinueTask(task, source, () =>
-                {
-                    TaskCompletionSource<object> newSource = action();
-                    Debug.Assert(newSource == null, "Shouldn't create a new source when one already exists");
-                });
-            }
-            return null;
-        }
-
         // Copies all the rows in a batch.
         // Maintains state machine with state variable: rowSoFar.
         // Returned Task could be null in two cases: (1) _isAsyncBulkCopy == false, or (2) _isAsyncBulkCopy == true but all async writes finished synchronously.
@@ -2315,7 +2300,7 @@ namespace System.Data.SqlClient
                             }
                             resultTask = source.Task;
 
-                            AsyncHelper.ContinueTask(readTask, source, () => CopyRowsAsync(i + 1, totalRows, cts, source), connectionToDoom: _connection.GetOpenTdsConnection());
+                            AsyncHelper.ContinueTask(readTask, source, () => CopyRowsAsync(i + 1, totalRows, cts, source));
                             return resultTask; // Associated task will be completed when all rows are copied to server/exception/cancelled.
                         }
                     }
@@ -2325,19 +2310,20 @@ namespace System.Data.SqlClient
                         resultTask = source.Task;
 
                         AsyncHelper.ContinueTask(task, source, onSuccess: () =>
-                        {
-                            CheckAndRaiseNotification(); // Check for notification now as the current row copy is done at this moment.
+                            {
+                                CheckAndRaiseNotification(); // Check for notification now as the current row copy is done at this moment.
 
-                            Task readTask = ReadFromRowSourceAsync(cts);
-                            if (readTask == null)
-                            {
-                                CopyRowsAsync(i + 1, totalRows, cts, source);
+                                Task readTask = ReadFromRowSourceAsync(cts);
+                                if (readTask == null)
+                                {
+                                    CopyRowsAsync(i + 1, totalRows, cts, source);
+                                }
+                                else
+                                {
+                                    AsyncHelper.ContinueTask(readTask, source, onSuccess: () => CopyRowsAsync(i + 1, totalRows, cts, source));
+                                }
                             }
-                            else
-                            {
-                                AsyncHelper.ContinueTask(readTask, source, onSuccess: () => CopyRowsAsync(i + 1, totalRows, cts, source), connectionToDoom: _connection.GetOpenTdsConnection());
-                            }
-                        }, connectionToDoom: _connection.GetOpenTdsConnection());
+                        );
                         return resultTask;
                     }
                 }
@@ -2406,15 +2392,17 @@ namespace System.Data.SqlClient
                             source = new TaskCompletionSource<object>();
                         }
 
-                        AsyncHelper.ContinueTask(commandTask, source, () =>
-                        {
-                            Task continuedTask = CopyBatchesAsyncContinued(internalResults, updateBulkCommandText, cts, source);
-                            if (continuedTask == null)
+                        AsyncHelper.ContinueTask(commandTask, source,
+                            () =>
                             {
-                                // Continuation finished sync, recall into CopyBatchesAsync to continue
-                                CopyBatchesAsync(internalResults, updateBulkCommandText, cts, source);
+                                Task continuedTask = CopyBatchesAsyncContinued(internalResults, updateBulkCommandText, cts, source);
+                                if (continuedTask == null)
+                                {
+                                    // Continuation finished sync, recall into CopyBatchesAsync to continue
+                                    CopyBatchesAsync(internalResults, updateBulkCommandText, cts, source);
+                                }
                             }
-                        }, _connection.GetOpenTdsConnection());
+                        );
                         return source.Task;
                     }
                 }
@@ -2462,15 +2450,19 @@ namespace System.Data.SqlClient
                     {   // First time only
                         source = new TaskCompletionSource<object>();
                     }
-                    AsyncHelper.ContinueTask(task, source, () =>
-                    {
-                        Task continuedTask = CopyBatchesAsyncContinuedOnSuccess(internalResults, updateBulkCommandText, cts, source);
-                        if (continuedTask == null)
+                    AsyncHelper.ContinueTask(task, source,
+                        onSuccess: () =>
                         {
-                            // Continuation finished sync, recall into CopyBatchesAsync to continue
-                            CopyBatchesAsync(internalResults, updateBulkCommandText, cts, source);
-                        }
-                    }, _connection.GetOpenTdsConnection(), _ => CopyBatchesAsyncContinuedOnError(cleanupParser: false), () => CopyBatchesAsyncContinuedOnError(cleanupParser: true));
+                            Task continuedTask = CopyBatchesAsyncContinuedOnSuccess(internalResults, updateBulkCommandText, cts, source);
+                            if (continuedTask == null)
+                            {
+                                // Continuation finished sync, recall into CopyBatchesAsync to continue
+                                CopyBatchesAsync(internalResults, updateBulkCommandText, cts, source);
+                            }
+                        },
+                        onFailure: (_) => CopyBatchesAsyncContinuedOnError(cleanupParser: false),
+                        onCancellation: () => CopyBatchesAsyncContinuedOnError(cleanupParser: true)
+                    );
 
                     return source.Task;
                 }
@@ -2517,22 +2509,25 @@ namespace System.Data.SqlClient
                         source = new TaskCompletionSource<object>();
                     }
 
-                    AsyncHelper.ContinueTask(writeTask, source, () =>
-                    {
-                        try
+                    AsyncHelper.ContinueTask(writeTask, source,
+                        onSuccess: () =>
                         {
-                            RunParser();
-                            CommitTransaction();
-                        }
-                        catch (Exception)
-                        {
-                            CopyBatchesAsyncContinuedOnError(cleanupParser: false);
-                            throw;
-                        }
+                            try
+                            {
+                                RunParser();
+                                CommitTransaction();
+                            }
+                            catch (Exception)
+                            {
+                                CopyBatchesAsyncContinuedOnError(cleanupParser: false);
+                                throw;
+                            }
 
-                        // Always call back into CopyBatchesAsync
-                        CopyBatchesAsync(internalResults, updateBulkCommandText, cts, source);
-                    }, connectionToDoom: _connection.GetOpenTdsConnection(), onFailure: _ => CopyBatchesAsyncContinuedOnError(cleanupParser: false));
+                            // Always call back into CopyBatchesAsync
+                            CopyBatchesAsync(internalResults, updateBulkCommandText, cts, source);
+                        },
+                        onFailure: (_) => CopyBatchesAsyncContinuedOnError(cleanupParser: false)
+                    );
                     return source.Task;
                 }
             }
@@ -2597,7 +2592,7 @@ namespace System.Data.SqlClient
                 try
                 {
                     _stateObj.ResetBuffer();
-                    _stateObj._outputPacketNumber = 1;
+                    _stateObj.ResetPacketCounters();
                     // If _parser is closed, sending attention will raise debug assertion, so we avoid it (but not calling CancelRequest).
                     if (_parser.State == TdsParserState.OpenNotLoggedIn || _parser.State == TdsParserState.OpenLoggedIn)
                     {
@@ -2651,48 +2646,50 @@ namespace System.Data.SqlClient
                     {
                         source = new TaskCompletionSource<object>();
                     }
-                    AsyncHelper.ContinueTask(task, source, () =>
-                    {
-                        // Bulk copy task is completed at this moment.
-                        if (task.IsCanceled)
+                    AsyncHelper.ContinueTask(task, source,
+                        () =>
                         {
-                            _localColumnMappings = null;
-                            try
+                            // Bulk copy task is completed at this moment.
+                            if (task.IsCanceled)
                             {
-                                CleanUpStateObjectOnError();
-                            }
-                            finally
-                            {
-                                source.SetCanceled();
-                            }
-                        }
-                        else if (task.Exception != null)
-                        {
-                            source.SetException(task.Exception.InnerException);
-                        }
-                        else
-                        {
-                            _localColumnMappings = null;
-                            try
-                            {
-                                CleanUpStateObjectOnError();
-                            }
-                            finally
-                            {
-                                if (source != null)
+                                _localColumnMappings = null;
+                                try
                                 {
-                                    if (cts.IsCancellationRequested)
-                                    {   // We may get cancellation req even after the entire copy.
-                                        source.SetCanceled();
-                                    }
-                                    else
+                                    CleanUpStateObjectOnError();
+                                }
+                                finally
+                                {
+                                    source.SetCanceled();
+                                }
+                            }
+                            else if (task.Exception != null)
+                            {
+                                source.SetException(task.Exception.InnerException);
+                            }
+                            else
+                            {
+                                _localColumnMappings = null;
+                                try
+                                {
+                                    CleanUpStateObjectOnError();
+                                }
+                                finally
+                                {
+                                    if (source != null)
                                     {
-                                        source.SetResult(null);
+                                        if (cts.IsCancellationRequested)
+                                        {   // We may get cancellation req even after the entire copy.
+                                            source.SetCanceled();
+                                        }
+                                        else
+                                        {
+                                            source.SetResult(null);
+                                        }
                                     }
                                 }
                             }
                         }
-                    }, _connection.GetOpenTdsConnection());
+                    );
                     return;
                 }
                 else
@@ -2782,12 +2779,15 @@ namespace System.Data.SqlClient
                         {
                             regReconnectCancel = cts.Register(s => ((TaskCompletionSource<object>)s).TrySetCanceled(), cancellableReconnectTS);
                         }
-                        AsyncHelper.ContinueTask(reconnectTask, cancellableReconnectTS, () => { cancellableReconnectTS.SetResult(null); });
+                        AsyncHelper.ContinueTaskWithState(reconnectTask, cancellableReconnectTS,
+                            state: cancellableReconnectTS,
+                            onSuccess: (state) => { ((TaskCompletionSource<object>)state).SetResult(null); }
+                        );
                         // No need to cancel timer since SqlBulkCopy creates specific task source for reconnection.
                         AsyncHelper.SetTimeoutException(cancellableReconnectTS, BulkCopyTimeout,
                                 () => { return SQL.BulkLoadInvalidDestinationTable(_destinationTableName, SQL.CR_ReconnectTimeout()); }, CancellationToken.None);
                         AsyncHelper.ContinueTask(cancellableReconnectTS.Task, source,
-                            () =>
+                            onSuccess: () =>
                             {
                                 regReconnectCancel.Dispose();
                                 if (_parserLock != null)
@@ -2799,7 +2799,6 @@ namespace System.Data.SqlClient
                                 _parserLock.Wait(canReleaseFromAnyThread: true);
                                 WriteToServerInternalRestAsync(cts, source);
                             },
-                            connectionToAbort: _connection,
                             onFailure: (e) => { regReconnectCancel.Dispose(); },
                             onCancellation: () => { regReconnectCancel.Dispose(); },
                             exceptionConverter: (ex) => SQL.BulkLoadInvalidDestinationTable(_destinationTableName, ex));
@@ -2850,7 +2849,7 @@ namespace System.Data.SqlClient
 
                 if (internalResultsTask != null)
                 {
-                    AsyncHelper.ContinueTask(internalResultsTask, source, () => WriteToServerInternalRestContinuedAsync(internalResultsTask.Result, cts, source), _connection.GetOpenTdsConnection());
+                    AsyncHelper.ContinueTask(internalResultsTask, source, () => WriteToServerInternalRestContinuedAsync(internalResultsTask.Result, cts, source));
                 }
                 else
                 {
@@ -2921,17 +2920,19 @@ namespace System.Data.SqlClient
                 else
                 {
                     Debug.Assert(_isAsyncBulkCopy, "Read must not return a Task in the Sync mode");
-                    AsyncHelper.ContinueTask(readTask, source, () =>
-                    {
-                        if (!_hasMoreRowToCopy)
+                    AsyncHelper.ContinueTask(readTask, source,
+                        () =>
                         {
-                            source.SetResult(null); // No rows to copy!
+                            if (!_hasMoreRowToCopy)
+                            {
+                                source.SetResult(null); // No rows to copy!
+                            }
+                            else
+                            {
+                                WriteToServerInternalRestAsync(ctoken, source); // Passing the same completion which will be completed by the Callee.
+                            }
                         }
-                        else
-                        {
-                            WriteToServerInternalRestAsync(ctoken, source); // Passing the same completion which will be completed by the Callee.
-                        }
-                    }, _connection.GetOpenTdsConnection());
+                    );
                     return resultTask;
                 }
             }

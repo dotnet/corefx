@@ -8,12 +8,13 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
+#pragma warning disable CA1823 // analyzer incorrectly flags fixed buffer length const (https://github.com/dotnet/roslyn-analyzers/issues/2724)
 
 internal static partial class Interop
 {
     internal static partial class Process
     {
-        private const ulong SecondsToNanoSeconds = 1000000000;
+        private const ulong SecondsToNanoseconds = 1000000000;
 
         // Constants from sys/syslimits.h
         private const int PATH_MAX  = 1024;
@@ -41,7 +42,7 @@ internal static partial class Interop
         private const int KERN_PROC = 14;
         private const int KERN_PROC_PATHNAME = 12;
         private const int KERN_PROC_PROC = 8;
-        private const int KERN_PROC_ALL = 0; 
+        private const int KERN_PROC_ALL = 0;
         private const int KERN_PROC_PID  = 1;
         private const int KERN_PROC_INC_THREAD = 16;
 
@@ -85,7 +86,7 @@ internal static partial class Interop
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        struct vnode
+        private struct vnode
         {
             public long tv_sec;
             public long tv_usec;
@@ -225,7 +226,7 @@ internal static partial class Interop
                     throw new Win32Exception(SR.CantGetAllPids);
                 }
 
-                Span<kinfo_proc>  list = new Span<kinfo_proc>(entries, numProcesses);
+                var list = new ReadOnlySpan<kinfo_proc>(entries, numProcesses);
                 pids = new int[numProcesses];
                 idx = 0;
                 // walk through process list and skip kernel threads
@@ -314,7 +315,7 @@ internal static partial class Interop
                 kinfo = (kinfo_proc*)pBuffer;
                 if (kinfo->ki_structsize != sizeof(kinfo_proc))
                 {
-                    // failed consistency check 
+                    // failed consistency check
                     throw new ArgumentOutOfRangeException(nameof(pid));
                 }
 
@@ -337,7 +338,7 @@ internal static partial class Interop
         /// Returns a valid ProcessInfo struct for valid processes that the caller
         /// has permission to access; otherwise, returns null
         /// </returns>
-        static public unsafe ProcessInfo GetProcessInfoById(int pid)
+        public static unsafe ProcessInfo GetProcessInfoById(int pid)
         {
             kinfo_proc* kinfo = null;
             int count;
@@ -357,7 +358,7 @@ internal static partial class Interop
                     throw new ArgumentOutOfRangeException(nameof(pid));
                 }
 
-                Span<kinfo_proc> process = new Span<kinfo_proc>(kinfo, count);
+                var process = new ReadOnlySpan<kinfo_proc>(kinfo, count);
 
                 // Get the process information for the specified pid
                 info = new ProcessInfo();
@@ -366,9 +367,9 @@ internal static partial class Interop
                 info.BasePriority = kinfo->ki_nice;
                 info.VirtualBytes = (long)kinfo->ki_size;
                 info.WorkingSet = kinfo->ki_rssize;
-                info.SessionId = kinfo ->ki_sid;
+                info.SessionId = kinfo->ki_sid;
 
-                for(int i = 0; i < process.Length; i++)
+                for (int i = 0; i < process.Length; i++)
                 {
                     var ti = new ThreadInfo()
                     {
@@ -391,14 +392,13 @@ internal static partial class Interop
         /// <summary>
         /// Gets the process information for a given process
         /// </summary>
-        // 
         /// <param name="pid">The PID (process ID) of the process</param>
         /// <param name="tid">The TID (thread ID) of the process</param>
         /// <returns>
         /// Returns basic info about thread. If tis is 0, it will return
         /// info for process e.g. main thread.
         /// </returns>
-        public unsafe static proc_stats GetThreadInfo(int pid, int tid)
+        public static unsafe proc_stats GetThreadInfo(int pid, int tid)
         {
             proc_stats ret = new proc_stats();
             kinfo_proc* info = null;
@@ -413,20 +413,20 @@ internal static partial class Interop
                     {
                         ret.startTime = (int)info->ki_start.tv_sec;
                         ret.nice = info->ki_nice;
-                        ret.userTime = (ulong)info->ki_rusage.ru_utime.tv_sec * SecondsToNanoSeconds + (ulong)info->ki_rusage.ru_utime.tv_usec;
-                        ret.systemTime = (ulong)info->ki_rusage.ru_stime.tv_sec * SecondsToNanoSeconds + (ulong)info->ki_rusage.ru_stime.tv_usec;
+                        ret.userTime = (ulong)info->ki_rusage.ru_utime.tv_sec * SecondsToNanoseconds + (ulong)info->ki_rusage.ru_utime.tv_usec;
+                        ret.systemTime = (ulong)info->ki_rusage.ru_stime.tv_sec * SecondsToNanoseconds + (ulong)info->ki_rusage.ru_stime.tv_usec;
                     }
                     else
                     {
-                        Span<kinfo_proc> list = new Span<kinfo_proc>(info, count);
-                        for(int i = 0; i < list.Length; i++)
+                        var list = new ReadOnlySpan<kinfo_proc>(info, count);
+                        for (int i = 0; i < list.Length; i++)
                         {
                             if (list[i].ki_tid == tid)
                             {
                                 ret.startTime = (int)list[i].ki_start.tv_sec;
                                 ret.nice = list[i].ki_nice;
-                                ret.userTime = (ulong)list[i].ki_rusage.ru_utime.tv_sec * SecondsToNanoSeconds + (ulong)list[i].ki_rusage.ru_utime.tv_usec;
-                                ret.systemTime = (ulong)list[i].ki_rusage.ru_stime.tv_sec * SecondsToNanoSeconds + (ulong)list[i].ki_rusage.ru_stime.tv_usec;
+                                ret.userTime = (ulong)list[i].ki_rusage.ru_utime.tv_sec * SecondsToNanoseconds + (ulong)list[i].ki_rusage.ru_utime.tv_usec;
+                                ret.systemTime = (ulong)list[i].ki_rusage.ru_stime.tv_sec * SecondsToNanoseconds + (ulong)list[i].ki_rusage.ru_stime.tv_usec;
                                 break;
                             }
                         }

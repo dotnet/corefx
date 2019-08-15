@@ -21,12 +21,13 @@ namespace System.Net.Security
     //
     internal class NegoState
     {
-        private static readonly byte[] s_emptyMessage = new byte[0]; // used in reference comparisons
+#pragma warning disable CA1825 // used in reference comparison, requires unique object identity
+        private static readonly byte[] s_emptyMessage = new byte[0];
+#pragma warning restore CA1825
         private static readonly AsyncCallback s_readCallback = new AsyncCallback(ReadCallback);
         private static readonly AsyncCallback s_writeCallback = new AsyncCallback(WriteCallback);
 
-        private Stream _innerStream;
-        private bool _leaveStreamOpen;
+        private readonly Stream _innerStream;
 
         private Exception _exception;
 
@@ -51,15 +52,11 @@ namespace System.Net.Security
         // This is a state variable used to gracefully handle auth confirmation.
         private bool _remoteOk = false;
 
-        internal NegoState(Stream innerStream, bool leaveStreamOpen)
+        internal NegoState(Stream innerStream)
         {
-            if (innerStream == null)
-            {
-                throw new ArgumentNullException("stream");
-            }
+            Debug.Assert(innerStream != null);
 
             _innerStream = innerStream;
-            _leaveStreamOpen = leaveStreamOpen;
         }
 
         internal static string DefaultPackage
@@ -418,7 +415,7 @@ namespace System.Net.Security
 
             string clientSpn = _context.ClientSpecifiedSpn;
 
-            if (String.IsNullOrEmpty(clientSpn))
+            if (string.IsNullOrEmpty(clientSpn))
             {
                 if (_extendedProtectionPolicy.PolicyEnforcement == PolicyEnforcement.WhenSupported)
                 {
@@ -774,8 +771,7 @@ namespace System.Net.Security
 
         private unsafe byte[] GetOutgoingBlob(byte[] incomingBlob, ref Exception e)
         {
-            SecurityStatusPal statusCode;
-            byte[] message = _context.GetOutgoingBlob(incomingBlob, false, out statusCode);
+            byte[] message = _context.GetOutgoingBlob(incomingBlob, false, out SecurityStatusPal statusCode);
 
             if (IsError(statusCode))
             {

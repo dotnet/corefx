@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -6,11 +6,13 @@ using Xunit;
 using Xunit.Sdk;
 using System.Collections.Generic;
 
+#pragma warning disable xUnit1025 // reporting duplicate test cases due to not distinguishing 0.0 from -0.0
+
 namespace System.Tests
 {
     public static partial class MathTests
     {
-        // binary64 (double) has a machine epsilon of 2^-52 (approx. 2.22e-16). However, this 
+        // binary64 (double) has a machine epsilon of 2^-52 (approx. 2.22e-16). However, this
         // is slightly too accurate when writing tests meant to run against libm implementations
         // for various platforms. 2^-50 (approx. 8.88e-16) seems to be as accurate as we can get.
         //
@@ -20,7 +22,7 @@ namespace System.Tests
         //
         // For example, a test with an expect result in the format of 0.xxxxxxxxxxxxxxxxx will use
         // CrossPlatformMachineEpsilon for the variance, while an expected result in the format of 0.0xxxxxxxxxxxxxxxxx
-        // will use CrossPlatformMachineEpsilon / 10 and and expected result in the format of x.xxxxxxxxxxxxxxxx will
+        // will use CrossPlatformMachineEpsilon / 10 and expected result in the format of x.xxxxxxxxxxxxxxxx will
         // use CrossPlatformMachineEpsilon * 10.
         private const double CrossPlatformMachineEpsilon = 8.8817841970012523e-16;
 
@@ -43,7 +45,7 @@ namespace System.Tests
         /// <param name="actual">The value to be compared against</param>
         /// <param name="allowedVariance">The total variance allowed between the expected and actual results.</param>
         /// <exception cref="EqualException">Thrown when the values are not equal</exception>
-        public static void AssertEqual(double expected, double actual, double variance)
+        private static void AssertEqual(double expected, double actual, double variance)
         {
             if (double.IsNaN(expected))
             {
@@ -99,7 +101,7 @@ namespace System.Tests
                     throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
                 }
 
-                // When the variance is not ±0.0, then we are handling a case where
+                // When the variance is not +-0.0, then we are handling a case where
                 // the actual result is expected to not be exactly -0.0 on some platforms
                 // and we should fallback to checking if it is within the allowed variance instead.
             }
@@ -110,7 +112,7 @@ namespace System.Tests
                     throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
                 }
 
-                // When the variance is not ±0.0, then we are handling a case where
+                // When the variance is not +-0.0, then we are handling a case where
                 // the actual result is expected to not be exactly -0.0 on some platforms
                 // and we should fallback to checking if it is within the allowed variance instead.
             }
@@ -127,7 +129,7 @@ namespace System.Tests
                     throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
                 }
 
-                // When the variance is not ±0.0, then we are handling a case where
+                // When the variance is not +-0.0, then we are handling a case where
                 // the actual result is expected to not be exactly +0.0 on some platforms
                 // and we should fallback to checking if it is within the allowed variance instead.
             }
@@ -138,7 +140,7 @@ namespace System.Tests
                     throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
                 }
 
-                // When the variance is not ±0.0, then we are handling a case where
+                // When the variance is not +-0.0, then we are handling a case where
                 // the actual result is expected to not be exactly +0.0 on some platforms
                 // and we should fallback to checking if it is within the allowed variance instead.
             }
@@ -212,7 +214,7 @@ namespace System.Tests
                     throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
                 }
 
-                // When the variance is not ±0.0, then we are handling a case where
+                // When the variance is not +-0.0, then we are handling a case where
                 // the actual result is expected to not be exactly -0.0 on some platforms
                 // and we should fallback to checking if it is within the allowed variance instead.
             }
@@ -223,7 +225,7 @@ namespace System.Tests
                     throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
                 }
 
-                // When the variance is not ±0.0, then we are handling a case where
+                // When the variance is not +-0.0, then we are handling a case where
                 // the actual result is expected to not be exactly -0.0 on some platforms
                 // and we should fallback to checking if it is within the allowed variance instead.
             }
@@ -240,7 +242,7 @@ namespace System.Tests
                     throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
                 }
 
-                // When the variance is not ±0.0, then we are handling a case where
+                // When the variance is not +-0.0, then we are handling a case where
                 // the actual result is expected to not be exactly +0.0 on some platforms
                 // and we should fallback to checking if it is within the allowed variance instead.
             }
@@ -251,7 +253,7 @@ namespace System.Tests
                     throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
                 }
 
-                // When the variance is not ±0.0, then we are handling a case where
+                // When the variance is not +-0.0, then we are handling a case where
                 // the actual result is expected to not be exactly +0.0 on some platforms
                 // and we should fallback to checking if it is within the allowed variance instead.
             }
@@ -264,28 +266,28 @@ namespace System.Tests
             }
         }
 
-        private unsafe static bool IsNegativeZero(double value)
+        private static unsafe bool IsNegativeZero(double value)
         {
             return (*(ulong*)(&value)) == 0x8000000000000000;
         }
 
-        private unsafe static bool IsNegativeZero(float value)
+        private static unsafe bool IsNegativeZero(float value)
         {
             return (*(uint*)(&value)) == 0x80000000;
         }
 
-        private unsafe static bool IsPositiveZero(double value)
+        private static unsafe bool IsPositiveZero(double value)
         {
             return (*(ulong*)(&value)) == 0x0000000000000000;
         }
 
-        private unsafe static bool IsPositiveZero(float value)
+        private static unsafe bool IsPositiveZero(float value)
         {
             return (*(uint*)(&value)) == 0x00000000;
         }
 
-        // We have a custom ToString here to ensure that edge cases (specifically ±0.0,
-        // but also NaN and ±∞) are correctly and consistently represented.
+        // We have a custom ToString here to ensure that edge cases (specifically +-0.0,
+        // but also NaN and +-infinity) are correctly and consistently represented.
         private static string ToStringPadded(double value)
         {
             if (double.IsNaN(value))
@@ -294,11 +296,11 @@ namespace System.Tests
             }
             else if (double.IsPositiveInfinity(value))
             {
-                return "+∞".PadLeft(20);
+                return "+\u221E".PadLeft(20);
             }
             else if (double.IsNegativeInfinity(value))
             {
-                return "-∞".PadLeft(20);
+                return "-\u221E".PadLeft(20);
             }
             else if (IsNegativeZero(value))
             {
@@ -314,8 +316,8 @@ namespace System.Tests
             }
         }
 
-        // We have a custom ToString here to ensure that edge cases (specifically ±0.0,
-        // but also NaN and ±∞) are correctly and consistently represented.
+        // We have a custom ToString here to ensure that edge cases (specifically +-0.0,
+        // but also NaN and +-infinity) are correctly and consistently represented.
         private static string ToStringPadded(float value)
         {
             if (double.IsNaN(value))
@@ -324,11 +326,11 @@ namespace System.Tests
             }
             else if (double.IsPositiveInfinity(value))
             {
-                return "+∞".PadLeft(10);
+                return "+\u221E".PadLeft(10);
             }
             else if (double.IsNegativeInfinity(value))
             {
-                return "-∞".PadLeft(10);
+                return "-\u221E".PadLeft(10);
             }
             else if (IsNegativeZero(value))
             {
@@ -687,19 +689,7 @@ namespace System.Tests
         [InlineData( double.NegativeInfinity, double.PositiveInfinity, -0.78539816339744831, CrossPlatformMachineEpsilon)]         // expected: -(pi / 4)
         [InlineData( double.PositiveInfinity, double.NegativeInfinity,  2.3561944901923449,  CrossPlatformMachineEpsilon * 10)]    // expected:  (3 * pi / 4)
         [InlineData( double.PositiveInfinity, double.PositiveInfinity,  0.78539816339744831, CrossPlatformMachineEpsilon)]         // expected:  (pi / 4)
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void Atan2_IEEE(double y, double x, double expectedResult, double allowedVariance)
-        {
-            AssertEqual(expectedResult, Math.Atan2(y, x), allowedVariance);
-        }
-
-        [Theory]
-        [InlineData( double.NegativeInfinity, double.NegativeInfinity, double.NaN, 0.0)]
-        [InlineData( double.NegativeInfinity, double.PositiveInfinity, double.NaN, 0.0)]
-        [InlineData( double.PositiveInfinity, double.NegativeInfinity, double.NaN, 0.0)]
-        [InlineData( double.PositiveInfinity, double.PositiveInfinity, double.NaN, 0.0)]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public static void Atan2_IEEE_Legacy(double y, double x, double expectedResult, double allowedVariance)
         {
             AssertEqual(expectedResult, Math.Atan2(y, x), allowedVariance);
         }
@@ -722,12 +712,6 @@ namespace System.Tests
         [InlineData(-1.4142135623730950,     -1.0,                     0.0)]    // value: -(sqrt(2))
         [InlineData(-1.1283791670955126,     -1.0,                     0.0)]    // value: -(2 / sqrt(pi))
         [InlineData(-1.0,                    -1.0,                     0.0)]
-        [InlineData(-0.78539816339744831,    -0.0,                     0.0, Skip = "https://github.com/dotnet/coreclr/issues/10287")]    // value: -(pi / 4)
-        [InlineData(-0.70710678118654752,    -0.0,                     0.0, Skip = "https://github.com/dotnet/coreclr/issues/10287")]    // value: -(1 / sqrt(2))
-        [InlineData(-0.69314718055994531,    -0.0,                     0.0, Skip = "https://github.com/dotnet/coreclr/issues/10287")]    // value: -(ln(2))
-        [InlineData(-0.63661977236758134,    -0.0,                     0.0, Skip = "https://github.com/dotnet/coreclr/issues/10287")]    // value: -(2 / pi)
-        [InlineData(-0.43429448190325183,    -0.0,                     0.0, Skip = "https://github.com/dotnet/coreclr/issues/10287")]    // value: -(log10(e))
-        [InlineData(-0.31830988618379067,    -0.0,                     0.0, Skip = "https://github.com/dotnet/coreclr/issues/10287")]    // value: -(1 / pi)
         [InlineData(-0.0,                    -0.0,                     0.0)]
         [InlineData( double.NaN,              double.NaN,              0.0)]
         [InlineData( 0.0,                     0.0,                     0.0)]
@@ -747,6 +731,18 @@ namespace System.Tests
         [InlineData( 3.1415926535897932,      4.0,                     0.0)]    // value:  (pi)
         [InlineData(double.PositiveInfinity, double.PositiveInfinity,  0.0)]
         public static void Ceiling_Double(double value, double expectedResult, double allowedVariance)
+        {
+            AssertEqual(expectedResult, Math.Ceiling(value), allowedVariance);
+        }
+
+        [Theory]
+        [InlineData(-0.78539816339744831,    -0.0,                     0.0)]    // value: -(pi / 4)
+        [InlineData(-0.70710678118654752,    -0.0,                     0.0)]    // value: -(1 / sqrt(2))
+        [InlineData(-0.69314718055994531,    -0.0,                     0.0)]    // value: -(ln(2))
+        [InlineData(-0.63661977236758134,    -0.0,                     0.0)]    // value: -(2 / pi)
+        [InlineData(-0.43429448190325183,    -0.0,                     0.0)]    // value: -(log10(e))
+        [InlineData(-0.31830988618379067,    -0.0,                     0.0)]    // value: -(1 / pi)
+        public static void Ceiling_Double_IEEE(double value, double expectedResult, double allowedVariance)
         {
             AssertEqual(expectedResult, Math.Ceiling(value), allowedVariance);
         }
@@ -892,7 +888,6 @@ namespace System.Tests
         [InlineData(-0.63661977236758134,    -1.0,                     0.0)]    // value: -(2 / pi)
         [InlineData(-0.43429448190325183,    -1.0,                     0.0)]    // value: -(log10(e))
         [InlineData(-0.31830988618379067,    -1.0,                     0.0)]    // value: -(1 / pi)
-        [InlineData(-0.0,                    -0.0,                     0.0, Skip = "https://github.com/dotnet/coreclr/issues/10288")]
         [InlineData( double.NaN,              double.NaN,              0.0)]
         [InlineData( 0.0,                     0.0,                     0.0)]
         [InlineData( 0.31830988618379067,     0.0,                     0.0)]    // value:  (1 / pi)
@@ -911,6 +906,13 @@ namespace System.Tests
         [InlineData( 3.1415926535897932,      3.0,                     0.0)]    // value:  (pi)
         [InlineData(double.PositiveInfinity,  double.PositiveInfinity, 0.0)]
         public static void Floor_Double(double value, double expectedResult, double allowedVariance)
+        {
+            AssertEqual(expectedResult, Math.Floor(value), allowedVariance);
+        }
+
+        [Theory]
+        [InlineData(-0.0,                    -0.0,                     0.0)]
+        public static void Floor_Double_IEEE(double value, double expectedResult, double allowedVariance)
         {
             AssertEqual(expectedResult, Math.Floor(value), allowedVariance);
         }
@@ -1048,14 +1050,17 @@ namespace System.Tests
             Assert.Equal(decimal.MaxValue, Math.Max(decimal.MinValue, decimal.MaxValue));
         }
 
-        [Fact]
-        public static void Max_Double()
+        [Theory]
+        [InlineData(double.NegativeInfinity, double.PositiveInfinity, double.PositiveInfinity)]
+        [InlineData(double.MinValue, double.MaxValue, double.MaxValue)]
+        [InlineData(double.NaN, double.NaN, double.NaN)]
+        [InlineData(-0.0, 0.0, 0.0)]
+        [InlineData(2.0, -3.0, 2.0)]
+        [InlineData(3.0, -2.0, 3.0)]
+        [InlineData(double.PositiveInfinity, double.NaN, double.NaN)]
+        public static void Max_Double_NotNetFramework(double x, double y, double expectedResult)
         {
-            Assert.Equal(3.0, Math.Max(3.0, -2.0));
-            Assert.Equal(double.MaxValue, Math.Max(double.MinValue, double.MaxValue));
-            Assert.Equal(double.PositiveInfinity, Math.Max(double.NegativeInfinity, double.PositiveInfinity));
-            Assert.Equal(double.NaN, Math.Max(double.PositiveInfinity, double.NaN));
-            Assert.Equal(double.NaN, Math.Max(double.NaN, double.NaN));
+            AssertEqual(expectedResult, Math.Max(x, y), 0.0);
         }
 
         [Fact]
@@ -1086,14 +1091,17 @@ namespace System.Tests
             Assert.Equal(sbyte.MaxValue, Math.Max(sbyte.MinValue, sbyte.MaxValue));
         }
 
-        [Fact]
-        public static void Max_Single()
+        [Theory]
+        [InlineData(float.NegativeInfinity, float.PositiveInfinity, float.PositiveInfinity)]
+        [InlineData(float.MinValue, float.MaxValue, float.MaxValue)]
+        [InlineData(float.NaN, float.NaN, float.NaN)]
+        [InlineData(-0.0f, 0.0f, 0.0f)]
+        [InlineData(2.0f, -3.0f, 2.0f)]
+        [InlineData(3.0f, -2.0f, 3.0f)]
+        [InlineData(float.PositiveInfinity, float.NaN, float.NaN)]
+        public static void Max_Single_NotNetFramework(float x, float y, float expectedResult)
         {
-            Assert.Equal(3.0f, Math.Max(3.0f, -2.0f));
-            Assert.Equal(float.MaxValue, Math.Max(float.MinValue, float.MaxValue));
-            Assert.Equal(float.PositiveInfinity, Math.Max(float.NegativeInfinity, float.PositiveInfinity));
-            Assert.Equal(float.NaN, Math.Max(float.PositiveInfinity, float.NaN));
-            Assert.Equal(float.NaN, Math.Max(float.NaN, float.NaN));
+            AssertEqual(expectedResult, Math.Max(x, y), 0.0f);
         }
 
         [Fact]
@@ -1131,14 +1139,17 @@ namespace System.Tests
             Assert.Equal(decimal.MinValue, Math.Min(decimal.MinValue, decimal.MaxValue));
         }
 
-        [Fact]
-        public static void Min_Double()
+        [Theory]
+        [InlineData(double.NegativeInfinity, double.PositiveInfinity, double.NegativeInfinity)]
+        [InlineData(double.MinValue, double.MaxValue, double.MinValue)]
+        [InlineData(double.NaN, double.NaN, double.NaN)]
+        [InlineData(-0.0, 0.0, -0.0)]
+        [InlineData(2.0, -3.0, -3.0)]
+        [InlineData(3.0, -2.0, -2.0)]
+        [InlineData(double.PositiveInfinity, double.NaN, double.NaN)]
+        public static void Min_Double_NotNetFramework(double x, double y, double expectedResult)
         {
-            Assert.Equal(-2.0, Math.Min(3.0, -2.0));
-            Assert.Equal(double.MinValue, Math.Min(double.MinValue, double.MaxValue));
-            Assert.Equal(double.NegativeInfinity, Math.Min(double.NegativeInfinity, double.PositiveInfinity));
-            Assert.Equal(double.NaN, Math.Min(double.NegativeInfinity, double.NaN));
-            Assert.Equal(double.NaN, Math.Min(double.NaN, double.NaN));
+            AssertEqual(expectedResult, Math.Min(x, y), 0.0);
         }
 
         [Fact]
@@ -1169,14 +1180,17 @@ namespace System.Tests
             Assert.Equal(sbyte.MinValue, Math.Min(sbyte.MinValue, sbyte.MaxValue));
         }
 
-        [Fact]
-        public static void Min_Single()
+        [Theory]
+        [InlineData(float.NegativeInfinity, float.PositiveInfinity, float.NegativeInfinity)]
+        [InlineData(float.MinValue, float.MaxValue, float.MinValue)]
+        [InlineData(float.NaN, float.NaN, float.NaN)]
+        [InlineData(-0.0f, 0.0f, -0.0f)]
+        [InlineData(2.0f, -3.0f, -3.0f)]
+        [InlineData(3.0f, -2.0f, -2.0f)]
+        [InlineData(float.PositiveInfinity, float.NaN, float.NaN)]
+        public static void Min_Single_NotNetFramework(float x, float y, float expectedResult)
         {
-            Assert.Equal(-2.0f, Math.Min(3.0f, -2.0f));
-            Assert.Equal(float.MinValue, Math.Min(float.MinValue, float.MaxValue));
-            Assert.Equal(float.NegativeInfinity, Math.Min(float.NegativeInfinity, float.PositiveInfinity));
-            Assert.Equal(float.NaN, Math.Min(float.NegativeInfinity, float.NaN));
-            Assert.Equal(float.NaN, Math.Min(float.NaN, float.NaN));
+            AssertEqual(expectedResult, Math.Min(x, y), 0.0f);
         }
 
         [Fact]
@@ -1364,20 +1378,7 @@ namespace System.Tests
         [InlineData( double.NaN, -0.0,                     1.0, CrossPlatformMachineEpsilon * 10)]
         [InlineData( double.NaN,  0.0,                     1.0, CrossPlatformMachineEpsilon * 10)]
         [InlineData( 1.0,         double.NaN,              1.0, CrossPlatformMachineEpsilon * 10)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void Pow_IEEE(float x, float y, float expectedResult, float allowedVariance)
-        {
-            AssertEqual(expectedResult, Math.Pow(x, y), allowedVariance);
-        }
-
-        [Theory]
-        [InlineData(-1.0,         double.NegativeInfinity, double.NaN, 0.0)]
-        [InlineData(-1.0,         double.PositiveInfinity, double.NaN, 0.0)]
-        [InlineData( double.NaN, -0.0,                     double.NaN, 0.0)]
-        [InlineData( double.NaN,  0.0,                     double.NaN, 0.0)]
-        [InlineData( 1.0,         double.NaN,              double.NaN, 0.0)]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public static void Pow_IEEE_Legacy(float x, float y, float expectedResult, float allowedVariance)
         {
             AssertEqual(expectedResult, Math.Pow(x, y), allowedVariance);
         }
@@ -1649,17 +1650,7 @@ namespace System.Tests
         [Theory]
         [InlineData(-1.5707963267948966,      -16331239353195370.0,     0.0)]                               // value: -(pi / 2)
         [InlineData( 1.5707963267948966,       16331239353195370.0,     0.0)]                               // value:  (pi / 2)
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void Tan_PiOver2(double value, double expectedResult, double allowedVariance)
-        {
-            AssertEqual(expectedResult, Math.Tan(value), allowedVariance);
-        }
-
-        [Theory]
-        [InlineData(-1.5707963267948966,      -16331778728383844.0,     0.0)]                               // value: -(pi / 2)
-        [InlineData( 1.5707963267948966,       16331778728383844.0,     0.0)]                               // value:  (pi / 2)
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public static void Tan_PiOver2_Legacy(double value, double expectedResult, double allowedVariance)
         {
             AssertEqual(expectedResult, Math.Tan(value), allowedVariance);
         }

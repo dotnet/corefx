@@ -8,10 +8,10 @@ namespace System.Reflection
     public enum MethodImplAttributes
     {
         // code impl mask
-        CodeTypeMask = 0x0003,   // Flags about code type.   
+        CodeTypeMask = 0x0003,   // Flags about code type.
         IL = 0x0000,   // Method impl is IL.
-        Native = 0x0001,   // Method impl is native.     
-        OPTIL = 0x0002,   // Method impl is OPTIL 
+        Native = 0x0001,   // Method impl is native.
+        OPTIL = 0x0002,   // Method impl is OPTIL
         Runtime = 0x0003,   // Method impl is provided by the runtime.
                             // end code impl mask
 
@@ -31,6 +31,7 @@ namespace System.Reflection
         NoInlining = 0x0008,   // Method may not be inlined.
         AggressiveInlining = 0x0100,   // Method should be inlined if possible.
         NoOptimization = 0x0040,   // Method may not be optimized.
+        AggressiveOptimization = 0x0200, // Method may contain hot code and should be aggressively optimized.
 
         MaxMethodImplVal = 0xffff,
     }

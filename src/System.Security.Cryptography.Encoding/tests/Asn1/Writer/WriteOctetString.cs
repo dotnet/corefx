@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -50,7 +50,7 @@ namespace System.Security.Cryptography.Tests.Asn1
                 Verify(writer, expectedHex);
             }
         }
-        
+
         [Theory]
         [InlineData(1001, "2480048203E8", "0401")]
         [InlineData(1999, "2480048203E8", "048203E7")]
@@ -128,7 +128,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
                     Assert.True(writer.TryEncode(answerBuf, out _));
                 }
-                Assert.True(Asn1Tag.TryParse(answerBuf, out Asn1Tag writtenTag, out _));
+                Assert.True(Asn1Tag.TryDecode(answerBuf, out Asn1Tag writtenTag, out _));
 
                 if (expectConstructed)
                 {
@@ -159,6 +159,34 @@ namespace System.Security.Cryptography.Tests.Asn1
                 AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteOctetString(Asn1Tag.EndOfContents, new byte[1]));
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public static void WriteAfterDispose(bool empty)
+        {
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+            {
+                if (!empty)
+                {
+                    writer.WriteNull();
+                }
+
+                writer.Dispose();
+
+                Assert.Throws<ObjectDisposedException>(
+                    () => writer.WriteOctetString(ReadOnlySpan<byte>.Empty));
+
+                AssertExtensions.Throws<ArgumentException>(
+                    "tag",
+                    () => writer.WriteOctetString(Asn1Tag.Integer, ReadOnlySpan<byte>.Empty));
+
+                Assert.Throws<ObjectDisposedException>(
+                    () => writer.WriteOctetString(
+                        new Asn1Tag(TagClass.Private, 3),
+                        ReadOnlySpan<byte>.Empty));
             }
         }
     }

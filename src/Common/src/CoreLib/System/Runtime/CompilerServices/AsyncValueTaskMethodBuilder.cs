@@ -22,15 +22,9 @@ namespace System.Runtime.CompilerServices
         /// <summary>Creates an instance of the <see cref="AsyncValueTaskMethodBuilder"/> struct.</summary>
         /// <returns>The initialized instance.</returns>
         public static AsyncValueTaskMethodBuilder Create() =>
-#if CORERT
-            // corert's AsyncTaskMethodBuilder.Create() currently does additional debugger-related
-            // work, so we need to delegate to it.
-            new AsyncValueTaskMethodBuilder() { _methodBuilder = AsyncTaskMethodBuilder.Create() };
-#else
             // _methodBuilder should be initialized to AsyncTaskMethodBuilder.Create(), but on coreclr
             // that Create() is a nop, so we can just return the default here.
             default;
-#endif
 
         /// <summary>Begins running the builder with the associated state machine.</summary>
         /// <typeparam name="TStateMachine">The type of the state machine.</typeparam>
@@ -38,11 +32,7 @@ namespace System.Runtime.CompilerServices
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Start<TStateMachine>(ref TStateMachine stateMachine) where TStateMachine : IAsyncStateMachine =>
             // will provide the right ExecutionContext semantics
-#if netstandard
-            _methodBuilder.Start(ref stateMachine);
-#else
             AsyncMethodBuilderCore.Start(ref stateMachine);
-#endif
 
         /// <summary>Associates the builder with the specified state machine.</summary>
         /// <param name="stateMachine">The state machine instance to associate with the builder.</param>
@@ -100,7 +90,6 @@ namespace System.Runtime.CompilerServices
         /// <typeparam name="TStateMachine">The type of the state machine.</typeparam>
         /// <param name="awaiter">The awaiter.</param>
         /// <param name="stateMachine">The state machine.</param>
-        [SecuritySafeCritical]
         public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
             where TAwaiter : ICriticalNotifyCompletion
             where TStateMachine : IAsyncStateMachine
@@ -127,15 +116,9 @@ namespace System.Runtime.CompilerServices
         /// <summary>Creates an instance of the <see cref="AsyncValueTaskMethodBuilder{TResult}"/> struct.</summary>
         /// <returns>The initialized instance.</returns>
         public static AsyncValueTaskMethodBuilder<TResult> Create() =>
-#if CORERT
-            // corert's AsyncTaskMethodBuilder<TResult>.Create() currently does additional debugger-related
-            // work, so we need to delegate to it.
-            new AsyncValueTaskMethodBuilder<TResult>() { _methodBuilder = AsyncTaskMethodBuilder<TResult>.Create() };
-#else
             // _methodBuilder should be initialized to AsyncTaskMethodBuilder<TResult>.Create(), but on coreclr
             // that Create() is a nop, so we can just return the default here.
             default;
-#endif
 
         /// <summary>Begins running the builder with the associated state machine.</summary>
         /// <typeparam name="TStateMachine">The type of the state machine.</typeparam>
@@ -143,11 +126,7 @@ namespace System.Runtime.CompilerServices
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Start<TStateMachine>(ref TStateMachine stateMachine) where TStateMachine : IAsyncStateMachine =>
             // will provide the right ExecutionContext semantics
-#if netstandard
-            _methodBuilder.Start(ref stateMachine);
-#else
             AsyncMethodBuilderCore.Start(ref stateMachine);
-#endif
 
         /// <summary>Associates the builder with the specified state machine.</summary>
         /// <param name="stateMachine">The state machine instance to associate with the builder.</param>
@@ -207,9 +186,8 @@ namespace System.Runtime.CompilerServices
         /// <typeparam name="TStateMachine">The type of the state machine.</typeparam>
         /// <param name="awaiter">the awaiter</param>
         /// <param name="stateMachine">The state machine.</param>
-        [SecuritySafeCritical]
         public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
-            where TAwaiter : ICriticalNotifyCompletion 
+            where TAwaiter : ICriticalNotifyCompletion
             where TStateMachine : IAsyncStateMachine
         {
             _useBuilder = true;

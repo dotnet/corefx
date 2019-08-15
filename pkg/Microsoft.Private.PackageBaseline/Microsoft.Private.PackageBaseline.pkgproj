@@ -1,6 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+﻿<Project DefaultTargets="Build">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
   <PropertyGroup>
     <HarvestStablePackage>false</HarvestStablePackage>
     <SkipPackageFileCheck>true</SkipPackageFileCheck>
@@ -31,10 +30,10 @@
       <FrameworkLayout Include="$(UAPPackageRefPath)">
         <TargetFramework>$(UAPvNextTFM)</TargetFramework>
       </FrameworkLayout>
-      <FrameworkLayout Include="$(PackagesDir)$(NETStandardLibraryPackageId)\$(NETStandardLibraryPackageVersion)\build\netstandard2.0\ref">
+      <FrameworkLayout Include="$(NuGetPackageRoot)$(NETStandardLibraryPackageId)\$(NETStandardLibraryPackageVersion)\build\netstandard2.0\ref">
         <TargetFramework>netstandard2.0</TargetFramework>
       </FrameworkLayout>
-      <FrameworkLayout Include="$(PackagesDir)$(NETStandardLibraryPackageId)\$(NETStandardLibraryPackageVersion)\build\net461\ref">
+      <FrameworkLayout Include="$(NuGetPackageRoot)$(NETStandardLibraryPackageId)\$(NETStandardLibraryPackageVersion)\build\net461\ref">
         <TargetFramework>net461</TargetFramework>
       </FrameworkLayout>
     </ItemGroup>
@@ -43,5 +42,5 @@
                         Packages="@(AllPackages)"
                         InboxFrameworkLayoutFolders="@(FrameworkLayout)" />
   </Target>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
 </Project>

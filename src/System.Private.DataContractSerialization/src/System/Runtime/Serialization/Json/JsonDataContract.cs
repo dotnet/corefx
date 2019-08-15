@@ -12,7 +12,7 @@ namespace System.Runtime.Serialization.Json
 {
     internal class JsonDataContract
     {
-        private JsonDataContractCriticalHelper _helper;
+        private readonly JsonDataContractCriticalHelper _helper;
 
         protected JsonDataContract(DataContract traditionalDataContract)
         {
@@ -38,16 +38,7 @@ namespace System.Runtime.Serialization.Json
             // with the restructuring for multi-file, this is no longer true - instead
             // this has become a normal method
             JsonReadWriteDelegates result;
-#if uapaot
-            // The c passed in could be a clone which is different from the original key,
-            // We'll need to get the original key data contract from generated assembly.
-            DataContract keyDc = (c?.UnderlyingType != null) ?
-                DataContract.GetDataContractFromGeneratedAssembly(c.UnderlyingType)
-                : null;
-            return (keyDc != null && JsonReadWriteDelegates.GetJsonDelegates().TryGetValue(keyDc, out result)) ? result : null;
-#else
             return JsonReadWriteDelegates.GetJsonDelegates().TryGetValue(c, out result) ? result : null;
-#endif
         }
 
         internal static JsonReadWriteDelegates GetReadWriteDelegatesFromGeneratedAssembly(DataContract c)
@@ -55,7 +46,7 @@ namespace System.Runtime.Serialization.Json
             JsonReadWriteDelegates result = GetGeneratedReadWriteDelegates(c);
             if (result == null)
             {
-                throw new InvalidDataContractException(SR.Format(SR.SerializationCodeIsMissingForType, c.UnderlyingType.ToString()));
+                throw new InvalidDataContractException(SR.Format(SR.SerializationCodeIsMissingForType, c.UnderlyingType));
             }
             else
             {
@@ -136,17 +127,17 @@ namespace System.Runtime.Serialization.Json
 
         internal class JsonDataContractCriticalHelper
         {
-            private static object s_cacheLock = new object();
-            private static object s_createDataContractLock = new object();
+            private static readonly object s_cacheLock = new object();
+            private static readonly object s_createDataContractLock = new object();
 
             private static JsonDataContract[] s_dataContractCache = new JsonDataContract[32];
             private static int s_dataContractID = 0;
 
-            private static TypeHandleRef s_typeHandleRef = new TypeHandleRef();
-            private static Dictionary<TypeHandleRef, IntRef> s_typeToIDCache = new Dictionary<TypeHandleRef, IntRef>(new TypeHandleRefEqualityComparer());
+            private static readonly TypeHandleRef s_typeHandleRef = new TypeHandleRef();
+            private static readonly Dictionary<TypeHandleRef, IntRef> s_typeToIDCache = new Dictionary<TypeHandleRef, IntRef>(new TypeHandleRefEqualityComparer());
             private Dictionary<XmlQualifiedName, DataContract> _knownDataContracts;
-            private DataContract _traditionalDataContract;
-            private string _typeName;
+            private readonly DataContract _traditionalDataContract;
+            private readonly string _typeName;
 
             internal JsonDataContractCriticalHelper(DataContract traditionalDataContract)
             {
@@ -184,7 +175,7 @@ namespace System.Runtime.Serialization.Json
                         int value = s_dataContractID++;
                         if (value >= s_dataContractCache.Length)
                         {
-                            int newSize = (value < Int32.MaxValue / 2) ? value * 2 : Int32.MaxValue;
+                            int newSize = (value < int.MaxValue / 2) ? value * 2 : int.MaxValue;
                             if (newSize <= value)
                             {
                                 Fx.Assert("DataContract cache overflow");
@@ -312,14 +303,10 @@ namespace System.Runtime.Serialization.Json
         }
     }
 
-#if uapaot
-    public class JsonReadWriteDelegates
-#else
     internal class JsonReadWriteDelegates
-#endif
     {
         // this is the global dictionary for JSON delegates introduced for multi-file
-        private static Dictionary<DataContract, JsonReadWriteDelegates> s_jsonDelegates = new Dictionary<DataContract, JsonReadWriteDelegates>();
+        private static readonly Dictionary<DataContract, JsonReadWriteDelegates> s_jsonDelegates = new Dictionary<DataContract, JsonReadWriteDelegates>();
 
         public static Dictionary<DataContract, JsonReadWriteDelegates> GetJsonDelegates()
         {

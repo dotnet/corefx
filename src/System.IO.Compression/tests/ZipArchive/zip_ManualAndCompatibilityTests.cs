@@ -23,7 +23,6 @@ namespace System.IO.Compression.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Deflate64 zip support is a netcore feature not available on full framework.")]
         public static async Task Deflate64Zip()
         {
             IsZipSameAsDir(await StreamHelpers.CreateTempCopyStream(compat("deflate64.zip")), zfolder("normal"), ZipArchiveMode.Update, requireExplicit: true, checkTimes: true);

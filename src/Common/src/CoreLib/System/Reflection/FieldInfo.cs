@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace System.Reflection
 {
@@ -36,35 +37,44 @@ namespace System.Reflection
 
         public abstract RuntimeFieldHandle FieldHandle { get; }
 
-        public override bool Equals(object obj) => base.Equals(obj);
+        public override bool Equals(object? obj) => base.Equals(obj);
         public override int GetHashCode() => base.GetHashCode();
 
-        public static bool operator ==(FieldInfo left, FieldInfo right)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(FieldInfo? left, FieldInfo? right)
         {
-            if (object.ReferenceEquals(left, right))
+            // Test "right" first to allow branch elimination when inlined for null checks (== null)
+            // so it can become a simple test
+            if (right is null)
+            {
+                // return true/false not the test result https://github.com/dotnet/coreclr/issues/914
+                return (left is null) ? true : false;
+            }
+
+            // Try fast reference equality and opposite null check prior to calling the slower virtual Equals
+            if ((object?)left == (object)right)
+            {
                 return true;
+            }
 
-            if ((object)left == null || (object)right == null)
-                return false;
-
-            return left.Equals(right);
+            return (left is null) ? false : left.Equals(right);
         }
 
-        public static bool operator !=(FieldInfo left, FieldInfo right) => !(left == right);
+        public static bool operator !=(FieldInfo? left, FieldInfo? right) => !(left == right);
 
-        public abstract object GetValue(object obj);
+        public abstract object? GetValue(object? obj);
 
         [DebuggerHidden]
         [DebuggerStepThrough]
-        public void SetValue(object obj, object value) => SetValue(obj, value, BindingFlags.Default, Type.DefaultBinder, null);
-        public abstract void SetValue(object obj, object value, BindingFlags invokeAttr, Binder binder, CultureInfo culture);
+        public void SetValue(object? obj, object? value) => SetValue(obj, value, BindingFlags.Default, Type.DefaultBinder, null);
+        public abstract void SetValue(object? obj, object? value, BindingFlags invokeAttr, Binder? binder, CultureInfo? culture);
 
         [CLSCompliant(false)]
         public virtual void SetValueDirect(TypedReference obj, object value) { throw new NotSupportedException(SR.NotSupported_AbstractNonCLS); }
         [CLSCompliant(false)]
-        public virtual object GetValueDirect(TypedReference obj) { throw new NotSupportedException(SR.NotSupported_AbstractNonCLS); }
+        public virtual object? GetValueDirect(TypedReference obj) { throw new NotSupportedException(SR.NotSupported_AbstractNonCLS); }
 
-        public virtual object GetRawConstantValue() { throw new NotSupportedException(SR.NotSupported_AbstractNonCLS); }
+        public virtual object? GetRawConstantValue() { throw new NotSupportedException(SR.NotSupported_AbstractNonCLS); }
 
         public virtual Type[] GetOptionalCustomModifiers() { throw NotImplemented.ByDesign; }
         public virtual Type[] GetRequiredCustomModifiers() { throw NotImplemented.ByDesign; }

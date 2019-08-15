@@ -50,7 +50,7 @@ namespace System.Xml.Xsl.IlGen
     /// </summary>
     internal class XmlILConstructInfo : IQilAnnotation
     {
-        private QilNodeType _nodeType;
+        private readonly QilNodeType _nodeType;
         private PossibleXmlStates _xstatesInitial, _xstatesFinal, _xstatesBeginLoop, _xstatesEndLoop;
         private bool _isNmspInScope, _mightHaveNmsp, _mightHaveAttrs, _mightHaveDupAttrs, _mightHaveNmspAfterAttrs;
         private XmlILConstructMethod _constrMeth;
@@ -508,7 +508,7 @@ namespace System.Xml.Xsl.IlGen
                     case QilNodeType.Function: this.xstates = this.parentInfo.InitialStates; break;
                     case QilNodeType.RtfCtor: this.xstates = PossibleXmlStates.WithinContent; break;
                     case QilNodeType.Choice: this.xstates = PossibleXmlStates.Any; break;
-                    default: Debug.Assert(false, ndConstr.NodeType + " is not handled by XmlILStateAnalyzer."); break;
+                    default: Debug.Fail($"{ndConstr.NodeType} is not handled by XmlILStateAnalyzer."); break;
                 }
 
                 if (ndContent != null)
@@ -792,8 +792,8 @@ namespace System.Xml.Xsl.IlGen
     /// </summary>
     internal class XmlILElementAnalyzer : XmlILStateAnalyzer
     {
-        private NameTable _attrNames = new NameTable();
-        private ArrayList _dupAttrs = new ArrayList();
+        private readonly NameTable _attrNames = new NameTable();
+        private readonly ArrayList _dupAttrs = new ArrayList();
 
         /// <summary>
         /// Constructor.
@@ -942,7 +942,7 @@ namespace System.Xml.Xsl.IlGen
     /// </summary>
     internal class XmlILNamespaceAnalyzer
     {
-        private XmlNamespaceManager _nsmgr = new XmlNamespaceManager(new NameTable());
+        private readonly XmlNamespaceManager _nsmgr = new XmlNamespaceManager(new NameTable());
         private bool _addInScopeNmsp;
         private int _cntNmsp;
 

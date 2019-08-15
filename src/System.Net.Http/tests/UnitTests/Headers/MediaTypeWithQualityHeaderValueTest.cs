@@ -109,7 +109,7 @@ namespace System.Net.Http.Tests
         public void Quality_GreaterThanOne_Throw()
         {
             MediaTypeWithQualityHeaderValue mediaType = new MediaTypeWithQualityHeaderValue("application/xml");
-            
+
             Assert.Throws<ArgumentOutOfRangeException>(() => { mediaType.Quality = 1.01; });
         }
 
@@ -121,7 +121,7 @@ namespace System.Net.Http.Tests
             CheckValidParse("text/plain", expected);
 
             // We don't have to test all possible input strings, since most of the pieces are handled by other parsers.
-            // The purpose of this test is to verify that these other parsers are combined correctly to build a 
+            // The purpose of this test is to verify that these other parsers are combined correctly to build a
             // media-type parser.
             expected.CharSet = "utf-8";
             CheckValidParse("\r\n text   /  plain ;  charset =   utf-8 ", expected);
@@ -146,7 +146,7 @@ namespace System.Net.Http.Tests
             CheckInvalidParse("");
             CheckInvalidParse("  ");
             CheckInvalidParse(null);
-            CheckInvalidParse("text/plain会");
+            CheckInvalidParse("text/plain\u4F1A");
             CheckInvalidParse("text/plain ,");
             CheckInvalidParse("text/plain,");
             CheckInvalidParse("text/plain; charset=utf-8 ,");
@@ -167,7 +167,7 @@ namespace System.Net.Http.Tests
             CheckValidTryParse("text/plain", expected);
 
             // We don't have to test all possible input strings, since most of the pieces are handled by other parsers.
-            // The purpose of this test is to verify that these other parsers are combined correctly to build a 
+            // The purpose of this test is to verify that these other parsers are combined correctly to build a
             // media-type parser.
             expected.CharSet = "utf-8";
             CheckValidTryParse("\r\n text   /  plain ;  charset =   utf-8 ", expected);
@@ -192,7 +192,7 @@ namespace System.Net.Http.Tests
             CheckInvalidTryParse("");
             CheckInvalidTryParse("  ");
             CheckInvalidTryParse(null);
-            CheckInvalidTryParse("text/plain会");
+            CheckInvalidTryParse("text/plain\u4F1A");
             CheckInvalidTryParse("text/plain ,");
             CheckInvalidTryParse("text/plain,");
             CheckInvalidTryParse("text/plain; charset=utf-8 ,");

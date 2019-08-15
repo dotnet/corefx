@@ -4,8 +4,9 @@
 
 // Do not remove this, it is needed to retain calls to these conditional methods in release builds
 #define DEBUG
-using System.Diagnostics.Contracts;
-using System.Runtime.CompilerServices;
+
+using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 
 namespace System.Diagnostics
 {
@@ -14,25 +15,34 @@ namespace System.Diagnostics
     /// </summary>
     public static partial class Debug
     {
-        private static readonly object s_lock = new object();
+        private static volatile DebugProvider s_provider = new DebugProvider();
+
+        public static DebugProvider SetProvider(DebugProvider provider)
+        {
+            if (provider == null)
+                throw new ArgumentNullException(nameof(provider));
+
+            return Interlocked.Exchange(ref s_provider, provider);
+        }
 
         public static bool AutoFlush { get { return true; } set { } }
 
         [ThreadStatic]
-        private static int s_indentLevel;
+        private static int t_indentLevel;
         public static int IndentLevel
         {
             get
             {
-                return s_indentLevel;
+                return t_indentLevel;
             }
             set
             {
-                s_indentLevel = value < 0 ? 0 : value;
+                t_indentLevel = value < 0 ? 0 : value;
+                s_provider.OnIndentLevelChanged(t_indentLevel);
             }
         }
 
-        private static int s_indentSize = 4;
+        private static volatile int s_indentSize = 4;
         public static int IndentSize
         {
             get
@@ -42,6 +52,7 @@ namespace System.Diagnostics
             set
             {
                 s_indentSize = value < 0 ? 0 : value;
+                s_provider.OnIndentSizeChanged(s_indentSize);
             }
         }
 
@@ -64,144 +75,105 @@ namespace System.Diagnostics
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        public static void Print(string message)
+        public static void Print(string? message)
         {
-            Write(message);
+            WriteLine(message);
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        public static void Print(string format, params object[] args)
-        {
-            Write(string.Format(null, format, args));
-        }
-
-        [System.Diagnostics.Conditional("DEBUG")]
-        public static void Assert(bool condition)
-        {
-            Assert(condition, string.Empty, string.Empty);
-        }
-
-        [System.Diagnostics.Conditional("DEBUG")]
-        public static void Assert(bool condition, string message)
-        {
-            Assert(condition, message, string.Empty);
-        }
-
-        [System.Diagnostics.Conditional("DEBUG")]
-        public static void Assert(bool condition, string message, string detailMessage)
-        {
-            if (!condition)
-            {
-                string stackTrace;
-                try
-                {
-                    stackTrace = new StackTrace(0, true).ToString(System.Diagnostics.StackTrace.TraceFormat.Normal);
-                }
-                catch
-                {
-                    stackTrace = "";
-                }
-                WriteLine(FormatAssert(stackTrace, message, detailMessage));
-                s_ShowDialog(stackTrace, message, detailMessage, "Assertion Failed");
-            }
-        }
-
-        internal static void ContractFailure(bool condition, string message, string detailMessage, string failureKindMessage)
-        {
-            if (!condition)
-            {
-                string stackTrace;
-                try
-                {
-                    stackTrace = new StackTrace(2, true).ToString(System.Diagnostics.StackTrace.TraceFormat.Normal);
-                }
-                catch
-                {
-                    stackTrace = "";
-                }
-                WriteLine(FormatAssert(stackTrace, message, detailMessage));
-                s_ShowDialog(stackTrace, message, detailMessage, SR.GetResourceString(failureKindMessage));
-            }
-        }
-
-        [System.Diagnostics.Conditional("DEBUG")]
-        public static void Fail(string message)
-        {
-            Assert(false, message, string.Empty);
-        }
-
-        [System.Diagnostics.Conditional("DEBUG")]
-        public static void Fail(string message, string detailMessage)
-        {
-            Assert(false, message, detailMessage);
-        }
-
-        private static string FormatAssert(string stackTrace, string message, string detailMessage)
-        {
-            string newLine = GetIndentString() + Environment.NewLine;
-            return SR.DebugAssertBanner + newLine
-                   + SR.DebugAssertShortMessage + newLine
-                   + message + newLine
-                   + SR.DebugAssertLongMessage + newLine
-                   + detailMessage + newLine
-                   + stackTrace;
-        }
-
-        [System.Diagnostics.Conditional("DEBUG")]
-        public static void Assert(bool condition, string message, string detailMessageFormat, params object[] args)
-        {
-            Assert(condition, message, string.Format(detailMessageFormat, args));
-        }
-
-        [System.Diagnostics.Conditional("DEBUG")]
-        public static void WriteLine(string message)
-        {
-            Write(message + Environment.NewLine);
-        }
-
-        [System.Diagnostics.Conditional("DEBUG")]
-        public static void Write(string message)
-        {
-            lock (s_lock)
-            {
-                if (message == null)
-                {
-                    s_WriteCore(string.Empty);
-                    return;
-                }
-                if (s_needIndent)
-                {
-                    message = GetIndentString() + message;
-                    s_needIndent = false;
-                }
-                s_WriteCore(message);
-                if (message.EndsWith(Environment.NewLine))
-                {
-                    s_needIndent = true;
-                }
-            }
-        }
-
-        [System.Diagnostics.Conditional("DEBUG")]
-        public static void WriteLine(object value)
-        {
-            WriteLine(value?.ToString());
-        }
-
-        [System.Diagnostics.Conditional("DEBUG")]
-        public static void WriteLine(object value, string category)
-        {
-            WriteLine(value?.ToString(), category);
-        }
-
-        [System.Diagnostics.Conditional("DEBUG")]
-        public static void WriteLine(string format, params object[] args)
+        public static void Print(string format, params object?[] args)
         {
             WriteLine(string.Format(null, format, args));
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        public static void WriteLine(string message, string category)
+        public static void Assert([DoesNotReturnIf(false)] bool condition)
+        {
+            Assert(condition, string.Empty, string.Empty);
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        public static void Assert([DoesNotReturnIf(false)] bool condition, string? message)
+        {
+            Assert(condition, message, string.Empty);
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        public static void Assert([DoesNotReturnIf(false)] bool condition, string? message, string? detailMessage)
+        {
+            if (!condition)
+            {
+                Fail(message, detailMessage);
+            }
+        }
+
+        internal static void ContractFailure(string message, string detailMessage, string failureKindMessage)
+        {
+            string stackTrace;
+            try
+            {
+                stackTrace = new StackTrace(2, true).ToString(System.Diagnostics.StackTrace.TraceFormat.Normal);
+            }
+            catch
+            {
+                stackTrace = "";
+            }
+            s_provider.WriteAssert(stackTrace, message, detailMessage);
+            DebugProvider.FailCore(stackTrace, message, detailMessage, failureKindMessage);
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        [DoesNotReturn]
+        public static void Fail(string? message)
+        {
+            Fail(message, string.Empty);
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        [DoesNotReturn]
+        public static void Fail(string? message, string? detailMessage)
+        {
+            s_provider.Fail(message, detailMessage);
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        public static void Assert([DoesNotReturnIf(false)] bool condition, string? message, string detailMessageFormat, params object?[] args)
+        {
+            Assert(condition, message, string.Format(detailMessageFormat, args));
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        public static void WriteLine(string? message)
+        {
+            s_provider.WriteLine(message);
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        public static void Write(string? message)
+        {
+            s_provider.Write(message);
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        public static void WriteLine(object? value)
+        {
+            WriteLine(value?.ToString());
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        public static void WriteLine(object? value, string? category)
+        {
+            WriteLine(value?.ToString(), category);
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        public static void WriteLine(string format, params object?[] args)
+        {
+            WriteLine(string.Format(null, format, args));
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        public static void WriteLine(string? message, string? category)
         {
             if (category == null)
             {
@@ -209,18 +181,18 @@ namespace System.Diagnostics
             }
             else
             {
-                WriteLine(category + ":" + message);
+                WriteLine(category + ": " + message);
             }
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        public static void Write(object value)
+        public static void Write(object? value)
         {
             Write(value?.ToString());
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        public static void Write(string message, string category)
+        public static void Write(string? message, string? category)
         {
             if (category == null)
             {
@@ -228,18 +200,18 @@ namespace System.Diagnostics
             }
             else
             {
-                Write(category + ":" + message);
+                Write(category + ": " + message);
             }
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        public static void Write(object value, string category)
+        public static void Write(object? value, string? category)
         {
             Write(value?.ToString(), category);
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        public static void WriteIf(bool condition, string message)
+        public static void WriteIf(bool condition, string? message)
         {
             if (condition)
             {
@@ -248,7 +220,7 @@ namespace System.Diagnostics
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        public static void WriteIf(bool condition, object value)
+        public static void WriteIf(bool condition, object? value)
         {
             if (condition)
             {
@@ -257,7 +229,7 @@ namespace System.Diagnostics
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        public static void WriteIf(bool condition, string message, string category)
+        public static void WriteIf(bool condition, string? message, string? category)
         {
             if (condition)
             {
@@ -266,7 +238,7 @@ namespace System.Diagnostics
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        public static void WriteIf(bool condition, object value, string category)
+        public static void WriteIf(bool condition, object? value, string? category)
         {
             if (condition)
             {
@@ -275,7 +247,7 @@ namespace System.Diagnostics
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        public static void WriteLineIf(bool condition, object value)
+        public static void WriteLineIf(bool condition, object? value)
         {
             if (condition)
             {
@@ -284,7 +256,7 @@ namespace System.Diagnostics
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        public static void WriteLineIf(bool condition, object value, string category)
+        public static void WriteLineIf(bool condition, object? value, string? category)
         {
             if (condition)
             {
@@ -293,7 +265,7 @@ namespace System.Diagnostics
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        public static void WriteLineIf(bool condition, string message)
+        public static void WriteLineIf(bool condition, string? message)
         {
             if (condition)
             {
@@ -302,49 +274,12 @@ namespace System.Diagnostics
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        public static void WriteLineIf(bool condition, string message, string category)
+        public static void WriteLineIf(bool condition, string? message, string? category)
         {
             if (condition)
             {
                 WriteLine(message, category);
             }
         }
-
-        private static bool s_needIndent;
-
-        private static string s_indentString;
-
-        private static string GetIndentString()
-        {
-            int indentCount = IndentSize * IndentLevel;
-            if (s_indentString?.Length == indentCount)
-            {
-                return s_indentString;
-            }
-            return s_indentString = new string(' ', indentCount);
-        }
-
-        private sealed class DebugAssertException : Exception
-        {
-            internal DebugAssertException(string stackTrace) :
-                base(Environment.NewLine + stackTrace)
-            {
-            }
-
-            internal DebugAssertException(string message, string stackTrace) :
-                base(message + Environment.NewLine + Environment.NewLine + stackTrace)
-            {
-            }
-
-            internal DebugAssertException(string message, string detailMessage, string stackTrace) :
-                base(message + Environment.NewLine + detailMessage + Environment.NewLine + Environment.NewLine + stackTrace)
-            {
-            }
-        }
-
-        // internal and not readonly so that the tests can swap this out.
-        internal static Action<string, string, string, string> s_ShowDialog = ShowDialog;
-
-        internal static Action<string> s_WriteCore = WriteCore;
     }
 }

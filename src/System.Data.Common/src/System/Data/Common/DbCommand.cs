@@ -83,8 +83,8 @@ namespace System.Data.Common
         {
             // This method is used to route CancellationTokens to the Cancel method.
             // Cancellation is a suggestion, and exceptions should be ignored
-            // rather than allowed to be unhandled, as the exceptions cannot be 
-            // routed to the caller. These errors will be observed in the regular 
+            // rather than allowed to be unhandled, as the exceptions cannot be
+            // routed to the caller. These errors will be observed in the regular
             // method instead.
             try
             {
@@ -222,5 +222,29 @@ namespace System.Data.Common
         public abstract object ExecuteScalar();
 
         public abstract void Prepare();
+
+        public virtual Task PrepareAsync(CancellationToken cancellationToken = default)
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return Task.FromCanceled(cancellationToken);
+            }
+
+            try
+            {
+                Prepare();
+                return Task.CompletedTask;
+            }
+            catch (Exception e)
+            {
+                return Task.FromException(e);
+            }
+        }
+
+        public virtual ValueTask DisposeAsync()
+        {
+            Dispose();
+            return default;
+        }
     }
 }

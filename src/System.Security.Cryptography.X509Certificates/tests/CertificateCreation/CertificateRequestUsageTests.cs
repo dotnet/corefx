@@ -114,7 +114,10 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
                 "07BFD721B73DDB1751123F99D8FC0D533798C4DBD14719D5D8A85B00A144A367" +
                 "677B48891A9B56F045334811BACB7A";
 
-            Assert.Equal(expectedHex, cert.RawData.ByteArrayToHex());
+            using (cert)
+            {
+                Assert.Equal(expectedHex, cert.RawData.ByteArrayToHex());
+            }
         }
 
         [Theory]
@@ -296,8 +299,12 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
             }
         }
 
-        [Fact]
-        public static void SerialNumber_AlwaysPositive()
+        [Theory]
+        [InlineData("80", "0080")]
+        [InlineData("0080", "0080")]
+        [InlineData("00000080", "0080")]
+        [InlineData("00000000", "00")]
+        public static void SerialNumber_AlwaysPositive(string desiredSerial, string expectedSerial)
         {
             using (ECDsa ecdsa = ECDsa.Create(EccTestData.Secp521r1_DiminishedPublic_Data.KeyParameters))
             {
@@ -308,8 +315,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
                     generator.PublicKey,
                     HashAlgorithmName.SHA512);
 
-                byte[] desiredSerial = { 0x80 };
-
                 DateTimeOffset now = DateTimeOffset.UtcNow;
 
                 X509Certificate2 cert = request.Create(
@@ -317,11 +322,11 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
                     generator,
                     now,
                     now.AddDays(1),
-                    desiredSerial);
+                    desiredSerial.HexToByteArray());
 
                 using (cert)
                 {
-                    Assert.Equal("0080", cert.SerialNumber);
+                    Assert.Equal(expectedSerial, cert.SerialNumber);
                 }
             }
         }
@@ -474,6 +479,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
         [InlineData("Zero Tag", "0000")]
         public static void InvalidPublicKeyEncoding(string caseName, string parametersHex)
         {
+            _ = caseName;
+
             var generator = new InvalidSignatureGenerator(
                 Array.Empty<byte>(),
                 parametersHex.HexToByteArray(),
@@ -504,6 +511,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
         [InlineData("Dangling LengthLength", "300206035102013081")]
         public static void InvalidSignatureAlgorithmEncoding(string caseName, string sigAlgHex)
         {
+            _ = caseName;
+
             var generator = new InvalidSignatureGenerator(
                 Array.Empty<byte>(),
                 new byte[] { 0x05, 0x00 },
@@ -522,7 +531,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
 #if netcoreapp
             if (CultureInfo.CurrentCulture.Name == "en-US")
             {
-                Assert.Contains("ASN1", exception.Message);
+                Assert.Contains("ASN1", exception.Message, StringComparison.OrdinalIgnoreCase);
             }
 #endif
         }

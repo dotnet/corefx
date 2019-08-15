@@ -1,11 +1,11 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 //
 // ICO Codec class testing unit
 //
 // Authors:
-// 	Jordi Mas i Hernàndez (jordi@ximian.com)
-//	Sebastien Pouliot  <sebastien@ximian.com>
+//  Jordi Mas i Hernàndez (jordi@ximian.com)
+//  Sebastien Pouliot  <sebastien@ximian.com>
 //
 // Copyright (C) 2006-2007 Novell, Inc (http://www.novell.com)
 //
@@ -16,10 +16,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -29,6 +29,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -73,7 +74,7 @@ namespace MonoTests.System.Drawing.Imaging
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Image16_PaletteEntries_Windows()
         {
             string sInFile = Helpers.GetTestBitmapPath("16x16_one_entry_4bit.ico");
@@ -119,7 +120,7 @@ namespace MonoTests.System.Drawing.Imaging
         }
 
         [PlatformSpecific(TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Bitmap16Features_Palette_Entries_Unix()
         {
             string sInFile = Helpers.GetTestBitmapPath("48x48_multiple_entries_4bit.ico");
@@ -147,7 +148,8 @@ namespace MonoTests.System.Drawing.Imaging
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Flaky - ArgumentException")]
         public void Bitmap16Features_Palette_Entries_Windows()
         {
             string sInFile = Helpers.GetTestBitmapPath("48x48_multiple_entries_4bit.ico");
@@ -158,7 +160,7 @@ namespace MonoTests.System.Drawing.Imaging
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Bitmap16Pixels()
         {
             string sInFile = Helpers.GetTestBitmapPath("48x48_multiple_entries_4bit.ico");
@@ -184,7 +186,7 @@ namespace MonoTests.System.Drawing.Imaging
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsDrawingSupported), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35744)]
         public void Bitmap16Data()
         {
             string sInFile = Helpers.GetTestBitmapPath("48x48_multiple_entries_4bit.ico");
@@ -334,7 +336,7 @@ namespace MonoTests.System.Drawing.Imaging
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Bitmap32Features_PaletteEntries_Windows()
         {
             string sInFile = Helpers.GetTestBitmapPath("VisualPng.ico");
@@ -345,7 +347,7 @@ namespace MonoTests.System.Drawing.Imaging
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Bitmap32Pixels()
         {
             string sInFile = Helpers.GetTestBitmapPath("VisualPng.ico");
@@ -419,7 +421,7 @@ namespace MonoTests.System.Drawing.Imaging
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsDrawingSupported), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35744)]
         public void Bitmap32Data()
         {
             string sInFile = Helpers.GetTestBitmapPath("VisualPng.ico");
@@ -563,7 +565,7 @@ namespace MonoTests.System.Drawing.Imaging
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Bitmap48Features_Palette_Entries_Windows()
         {
             string sInFile = Helpers.GetTestBitmapPath("48x48_one_entry_1bit.ico");
@@ -574,7 +576,7 @@ namespace MonoTests.System.Drawing.Imaging
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Bitmap48Pixels()
         {
             string sInFile = Helpers.GetTestBitmapPath("48x48_one_entry_1bit.ico");
@@ -661,7 +663,7 @@ namespace MonoTests.System.Drawing.Imaging
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsDrawingSupported), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35744)]
         public void Bitmap48Data()
         {
             string sInFile = Helpers.GetTestBitmapPath("48x48_one_entry_1bit.ico");
@@ -807,7 +809,7 @@ namespace MonoTests.System.Drawing.Imaging
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Bitmap64Features_Palette_Entries_Windows()
         {
             string sInFile = Helpers.GetTestBitmapPath("64x64_one_entry_8bit.ico");
@@ -818,7 +820,7 @@ namespace MonoTests.System.Drawing.Imaging
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Bitmap64Pixels()
         {
             string sInFile = Helpers.GetTestBitmapPath("64x64_one_entry_8bit.ico");
@@ -887,7 +889,7 @@ namespace MonoTests.System.Drawing.Imaging
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsDrawingSupported), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35744)]
         public void Bitmap64Data()
         {
             string sInFile = Helpers.GetTestBitmapPath("64x64_one_entry_8bit.ico");
@@ -1684,7 +1686,7 @@ namespace MonoTests.System.Drawing.Imaging
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsDrawingSupported), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35744)]
         public void Bitmap96Data()
         {
             string sInFile = Helpers.GetTestBitmapPath("96x96_one_entry_8bit.ico");
@@ -1997,7 +1999,7 @@ namespace MonoTests.System.Drawing.Imaging
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Xp32bppIconFeatures()
         {
             string sInFile = Helpers.GetTestBitmapPath("48x48_multiple_entries_32bit.ico");
@@ -2034,7 +2036,7 @@ namespace MonoTests.System.Drawing.Imaging
         {
             string sOutFile = $"linerect-{expected}.ico";
 
-            // Save		
+            // Save
             Bitmap bmp = new Bitmap(100, 100, original);
             Graphics gr = Graphics.FromImage(bmp);
 
@@ -2046,7 +2048,7 @@ namespace MonoTests.System.Drawing.Imaging
 
             try
             {
-                // there's no encoder, so we're not saving a ICO but the alpha 
+                // there's no encoder, so we're not saving a ICO but the alpha
                 // bit get sets so it's not like saving a bitmap either
                 bmp.Save(sOutFile, ImageFormat.Icon);
 

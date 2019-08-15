@@ -164,6 +164,7 @@ namespace System.Collections.Specialized.Tests
         [MemberData(nameof(StringCollection_Duplicates_Data))]
         public static void AddRange_NullTest(StringCollection collection, string[] data)
         {
+            _ = data;
             AssertExtensions.Throws<ArgumentNullException>("value", () => collection.AddRange(null));
         }
 
@@ -639,7 +640,7 @@ namespace System.Collections.Specialized.Tests
         {
             object syncRoot = collection.SyncRoot;
             Assert.NotNull(syncRoot);
-            Assert.IsType<object>(syncRoot);
+            Assert.IsType<ArrayList>(syncRoot);
 
             Assert.Same(syncRoot, collection.SyncRoot);
             Assert.NotSame(syncRoot, new StringCollection().SyncRoot);

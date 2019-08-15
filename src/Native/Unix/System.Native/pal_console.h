@@ -5,9 +5,6 @@
 #pragma once
 
 #include "pal_compiler.h"
-
-BEGIN_EXTERN_C
-
 #include "pal_types.h"
 
 /**
@@ -37,20 +34,20 @@ enum
 /*
  * Window Size of the terminal
  */
-struct WinSize
+typedef struct
 {
     uint16_t Row;
     uint16_t Col;
     uint16_t XPixel;
     uint16_t YPixel;
-};
+} WinSize;
 
 /**
  * Gets the windows size of the terminal
  *
  * Returns 0 on success; otherwise, returns errorNo.
  */
-DLLEXPORT int32_t SystemNative_GetWindowSize(struct WinSize* windowsSize);
+DLLEXPORT int32_t SystemNative_GetWindowSize(WinSize* windowsSize);
 
 /**
  * Gets whether the specified file descriptor is for a terminal.
@@ -61,11 +58,11 @@ DLLEXPORT int32_t SystemNative_GetWindowSize(struct WinSize* windowsSize);
 DLLEXPORT int32_t SystemNative_IsATty(intptr_t fd);
 
 /**
- * Initializes the console for use by System.Console.
+ * Initializes signal handling and terminal for use by System.Console and System.Diagnostics.Process.
  *
  * Returns 1 on success; otherwise returns 0 and sets errno.
  */
-DLLEXPORT int32_t SystemNative_InitializeConsole(void);
+DLLEXPORT int32_t SystemNative_InitializeTerminalAndSignalHandling(void);
 
 /**
  * Stores the string that can be written to stdout to transition
@@ -93,14 +90,19 @@ DLLEXPORT void SystemNative_GetControlCharacters(
 DLLEXPORT int32_t SystemNative_StdinReady(void);
 
 /**
- * Initializes the terminal in preparation for a read operation.
+ * Configures the terminal for System.Console Read.
  */
 DLLEXPORT void SystemNative_InitializeConsoleBeforeRead(uint8_t minChars, uint8_t decisecondsTimeout);
 
 /**
- * Restores the terminal's attributes to what they were before InitializeConsoleBeforeRead was called.
+ * Configures the terminal after System.Console Read.
  */
 DLLEXPORT void SystemNative_UninitializeConsoleAfterRead(void);
+
+/**
+ * Configures the terminal for child processes.
+ */
+DLLEXPORT void SystemNative_ConfigureTerminalForChildProcess(int32_t enable);
 
 /**
  * Reads the number of bytes specified into the provided buffer from stdin.
@@ -122,21 +124,19 @@ DLLEXPORT int32_t SystemNative_GetSignalForBreak(void);
  */
 DLLEXPORT int32_t SystemNative_SetSignalForBreak(int32_t signalForBreak);
 
-enum CtrlCode
+typedef enum
 {
     Interrupt = 0,
     Break = 1
-};
+} CtrlCode;
 
-typedef int32_t (*CtrlCallback)(enum CtrlCode signalCode);
+typedef void (*CtrlCallback)(CtrlCode signalCode);
 /**
  * Called by pal_signal.cpp to reinitialize the console on SIGCONT/SIGCHLD.
  */
-void ReinitializeConsole(void);
+void ReinitializeTerminal(void);
 
 /**
  * Called by pal_signal.cpp to uninitialize the console on SIGINT/SIGQUIT.
  */
-void UninitializeConsole(void);
-
-END_EXTERN_C
+void UninitializeTerminal(void);

@@ -124,26 +124,25 @@ namespace System.Transactions
     internal class TransactionTable
     {
         // Use a timer to initiate looking for transactions that have timed out.
-        private Timer _timer;
+        private readonly Timer _timer;
 
         // Private storage noting if the timer is enabled.
         private bool _timerEnabled;
 
         // Store the timer interval
         private const int timerInternalExponent = 9;
-        private int _timerInterval;
+        private readonly int _timerInterval;
 
         // Store the number of ticks.  A tick is a mark of 1 timer interval.  By counting ticks
         // we can avoid expensive calls to get the current time for every transaction creation.
-        private const long TicksPerMillisecond = 10000;
         private long _ticks;
         private long _lastTimerTime;
 
         // Sets of arrays of transactions.
-        private BucketSet _headBucketSet;
+        private readonly BucketSet _headBucketSet;
 
         // Synchronize adding transactions with shutting off the timer and started events.
-        private CheapUnfairReaderWriterLock _rwLock;
+        private readonly CheapUnfairReaderWriterLock _rwLock;
 
         internal TransactionTable()
         {
@@ -220,7 +219,7 @@ namespace System.Transactions
         }
 
 
-        // Add a transaction to the table.  Transactions are added to the end of the list in sorted order based on their 
+        // Add a transaction to the table.  Transactions are added to the end of the list in sorted order based on their
         // absolute timeout.
         internal int Add(InternalTransaction txNew)
         {
@@ -342,7 +341,7 @@ namespace System.Transactions
                             BucketSet oldSet = (BucketSet)oldNextSetWeak.Target;
                             if (oldSet != null)
                             {
-                                // prev references are just there to root things for the GC.  If this object is 
+                                // prev references are just there to root things for the GC.  If this object is
                                 // gone we don't really care.
                                 oldSet.prevSet = newBucketSet;
                             }
@@ -382,7 +381,7 @@ namespace System.Transactions
 
 
         // Process a timer event
-        private void ThreadTimer(Object state)
+        private void ThreadTimer(object state)
         {
             //
             // Theory of operation.
@@ -431,7 +430,7 @@ namespace System.Transactions
                 _rwLock.EnterWriteLock();
                 try
                 {
-                    // Access the nextBucketSet again in writer lock to account for any race before disabling the timeout. 
+                    // Access the nextBucketSet again in writer lock to account for any race before disabling the timeout.
                     nextWeakSet = (WeakReference)currentBucketSet.nextSetWeak;
                     if (nextWeakSet != null)
                     {
@@ -465,7 +464,7 @@ namespace System.Transactions
             }
 
             // Note it is slightly subtle that we always skip the head node.  This is done
-            // on purpose because the head node contains transactions with essentially 
+            // on purpose because the head node contains transactions with essentially
             // an infinite timeout.
             do
             {
@@ -543,9 +542,9 @@ namespace System.Transactions
         internal object nextSetWeak;
         internal BucketSet prevSet;
 
-        private TransactionTable _table;
+        private readonly TransactionTable _table;
 
-        private long _absoluteTimeout;
+        private readonly long _absoluteTimeout;
 
         internal Bucket headBucket;
 
@@ -599,12 +598,12 @@ namespace System.Transactions
     {
         private bool _timedOut;
         private int _index;
-        private int _size;
-        private InternalTransaction[] _transactions;
+        private readonly int _size;
+        private readonly InternalTransaction[] _transactions;
         internal WeakReference nextBucketWeak;
         private Bucket _previous;
 
-        private BucketSet _owningSet;
+        private readonly BucketSet _owningSet;
 
         internal Bucket(BucketSet owningSet)
         {
@@ -623,7 +622,7 @@ namespace System.Transactions
             {
                 tx._tableBucket = this;
                 tx._bucketIndex = currentIndex;
-                Interlocked.MemoryBarrier(); // This data must be written before the transaction 
+                Interlocked.MemoryBarrier(); // This data must be written before the transaction
                                              // could be timed out.
                 _transactions[currentIndex] = tx;
 

@@ -45,13 +45,26 @@ namespace Internal.Cryptography.Pal
                 uint keyUsagesAsUint = 0;
                 encoded.DecodeObject(
                     CryptDecodeObjectStructType.X509_KEY_USAGE,
-                    delegate (void* pvDecoded)
+                    delegate (void* pvDecoded, int cbDecoded)
                     {
+                        Debug.Assert(cbDecoded >= sizeof(CRYPT_BIT_BLOB));
                         CRYPT_BIT_BLOB* pBlob = (CRYPT_BIT_BLOB*)pvDecoded;
                         keyUsagesAsUint = 0;
-                        if (pBlob->pbData != null)
+                        byte* pbData = pBlob->pbData;
+
+                        if (pbData != null)
                         {
-                            keyUsagesAsUint = *(uint*)(pBlob->pbData);
+                            Debug.Assert((uint)pBlob->cbData < 3, "Unexpected length for X509_KEY_USAGE data");
+
+                            switch (pBlob->cbData)
+                            {
+                                case 1:
+                                    keyUsagesAsUint = *pbData;
+                                    break;
+                                case 2:
+                                    keyUsagesAsUint = *(ushort*)(pbData);
+                                    break;
+                            }
                         }
                     }
                 );
@@ -89,8 +102,9 @@ namespace Internal.Cryptography.Pal
 
                 encoded.DecodeObject(
                     CryptDecodeObjectStructType.X509_BASIC_CONSTRAINTS,
-                    delegate (void* pvDecoded)
+                    delegate (void* pvDecoded, int cbDecoded)
                     {
+                        Debug.Assert(cbDecoded >= sizeof(CERT_BASIC_CONSTRAINTS_INFO));
                         CERT_BASIC_CONSTRAINTS_INFO* pBasicConstraints = (CERT_BASIC_CONSTRAINTS_INFO*)pvDecoded;
                         localCertificateAuthority = (pBasicConstraints->SubjectType.pbData[0] & CERT_BASIC_CONSTRAINTS_INFO.CERT_CA_SUBJECT_FLAG) != 0;
                         localHasPathLengthConstraint = pBasicConstraints->fPathLenConstraint != 0;
@@ -114,8 +128,9 @@ namespace Internal.Cryptography.Pal
 
                 encoded.DecodeObject(
                     CryptDecodeObjectStructType.X509_BASIC_CONSTRAINTS2,
-                    delegate (void* pvDecoded)
+                    delegate (void* pvDecoded, int cbDecoded)
                     {
+                        Debug.Assert(cbDecoded >= sizeof(CERT_BASIC_CONSTRAINTS2_INFO));
                         CERT_BASIC_CONSTRAINTS2_INFO* pBasicConstraints2 = (CERT_BASIC_CONSTRAINTS2_INFO*)pvDecoded;
                         localCertificateAuthority = pBasicConstraints2->fCA != 0;
                         localHasPathLengthConstraint = pBasicConstraints2->fPathLenConstraint != 0;
@@ -155,8 +170,9 @@ namespace Internal.Cryptography.Pal
             {
                 encoded.DecodeObject(
                     CryptDecodeObjectStructType.X509_ENHANCED_KEY_USAGE,
-                    delegate (void* pvDecoded)
+                    delegate (void* pvDecoded, int cbDecoded)
                     {
+                        Debug.Assert(cbDecoded >= sizeof(CERT_ENHKEY_USAGE));
                         CERT_ENHKEY_USAGE* pEnhKeyUsage = (CERT_ENHKEY_USAGE*)pvDecoded;
                         int count = pEnhKeyUsage->cUsageIdentifier;
                         for (int i = 0; i < count; i++)
@@ -192,8 +208,9 @@ namespace Internal.Cryptography.Pal
                 byte[] localSubjectKeyIdentifier = null;
                 encoded.DecodeObject(
                     Oids.SubjectKeyIdentifier,
-                    delegate (void* pvDecoded)
+                    delegate (void* pvDecoded, int cbDecoded)
                     {
+                        Debug.Assert(cbDecoded >= sizeof(CRYPTOAPI_BLOB));
                         CRYPTOAPI_BLOB* pBlob = (CRYPTOAPI_BLOB*)pvDecoded;
                         localSubjectKeyIdentifier = pBlob->ToByteArray();
                     }
@@ -248,4 +265,3 @@ namespace Internal.Cryptography.Pal
         }
     }
 }
-

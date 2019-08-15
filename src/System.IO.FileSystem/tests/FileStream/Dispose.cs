@@ -6,6 +6,7 @@ using Microsoft.Win32.SafeHandles;
 using System;
 using System.Diagnostics;
 using System.IO;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.IO.Tests
@@ -50,7 +51,7 @@ namespace System.IO.Tests
             {
                 DisposeMethod = disposeMethod;
             }
-            
+
             public Action<bool> DisposeMethod { get; set; }
 
             protected override void Dispose(bool disposing)
@@ -68,7 +69,7 @@ namespace System.IO.Tests
         [Fact]
         public void Dispose_CallsVirtualDisposeTrueArg_ThrowsDuringFlushWriteBuffer_DisposeThrows()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 string fileName = GetTestFilePath();
                 using (FileStream fscreate = new FileStream(fileName, FileMode.Create))
@@ -107,15 +108,14 @@ namespace System.IO.Tests
                     }
                     Assert.False(writeDisposeInvoked, "Expected finalizer to have been suppressed");
                 }
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Missing fix for https://github.com/dotnet/coreclr/pull/16250")]
         public void NoDispose_CallsVirtualDisposeFalseArg_ThrowsDuringFlushWriteBuffer_FinalizerWontThrow()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 string fileName = GetTestFilePath();
                 using (FileStream fscreate = new FileStream(fileName, FileMode.Create))
@@ -136,7 +136,7 @@ namespace System.IO.Tests
                         fswrite.WriteByte(0);
                     };
                     act();
-                    
+
                     // Dispose is not getting called here.
                     // instead, make sure finalizer gets called and doesnt throw exception
                     for (int i = 0; i < 2; i++)
@@ -146,11 +146,11 @@ namespace System.IO.Tests
                     }
                     Assert.True(writeDisposeInvoked, "Expected finalizer to be invoked but not throw exception");
                 }
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public void Dispose_CallsVirtualDispose_TrueArg()
         {
             bool disposeInvoked = false;
@@ -231,7 +231,7 @@ namespace System.IO.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public void FinalizeFlushesWriteBuffer()
         {
             string fileName = GetTestFilePath();

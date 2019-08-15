@@ -29,7 +29,7 @@ namespace System.Security.Cryptography.Pkcs
         protected abstract bool VerifyKeyType(AsymmetricAlgorithm key);
 
         internal abstract bool VerifySignature(
-#if netcoreapp
+#if netcoreapp || netstandard21
             ReadOnlySpan<byte> valueHash,
             ReadOnlyMemory<byte> signature,
 #else
@@ -42,7 +42,7 @@ namespace System.Security.Cryptography.Pkcs
             X509Certificate2 certificate);
 
         protected abstract bool Sign(
-#if netcoreapp
+#if netcoreapp || netstandard21
             ReadOnlySpan<byte> dataHash,
 #else
             byte[] dataHash,
@@ -70,7 +70,7 @@ namespace System.Security.Cryptography.Pkcs
         }
 
         internal static bool Sign(
-#if netcoreapp
+#if netcoreapp || netstandard21
             ReadOnlySpan<byte> dataHash,
 #else
             byte[] dataHash,
@@ -123,7 +123,7 @@ namespace System.Security.Cryptography.Pkcs
                 // partial-fill gymnastics.
                 ieeeSignature.Clear();
 
-                ReadOnlySpan<byte> val = sequence.GetIntegerBytes().Span;
+                ReadOnlySpan<byte> val = sequence.ReadIntegerBytes().Span;
 
                 if (val.Length > fieldSize && val[0] == 0)
                 {
@@ -135,7 +135,7 @@ namespace System.Security.Cryptography.Pkcs
                     val.CopyTo(ieeeSignature.Slice(fieldSize - val.Length, val.Length));
                 }
 
-                val = sequence.GetIntegerBytes().Span;
+                val = sequence.ReadIntegerBytes().Span;
 
                 if (val.Length > fieldSize && val[0] == 0)
                 {
@@ -167,7 +167,7 @@ namespace System.Security.Cryptography.Pkcs
             {
                 writer.PushSequence();
 
-#if netcoreapp
+#if netcoreapp || netstandard21
                 // r
                 BigInteger val = new BigInteger(
                     ieeeSignature.Slice(0, fieldSize),

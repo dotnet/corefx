@@ -1,29 +1,32 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{56F67E92-E606-435E-A00F-003CBFB26945}</ProjectGuid>
     <AssemblyName>System.Diagnostics.Debug.Tests</AssemblyName>
     <RootNamespace>System.Diagnostics.Tests</RootNamespace>
     <IgnoreArchitectureMismatches>true</IgnoreArchitectureMismatches>
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
+    <TestRuntime>true</TestRuntime>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
+    <DefaultReferenceExclusions Include="System.Diagnostics.Debug" />
+    <DefaultReferenceExclusions Include="System.Runtime.Extensions" />
+    <ReferenceFromRuntime Include="System.Private.CoreLib" />
+    <ReferenceFromRuntime Include="System.Runtime" />
+    <ReferenceFromRuntime Include="System.Threading" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="DebuggerTypeProxyAttributeTests.cs" />
     <Compile Include="DebuggerDisplayAttributeTests.cs" />
     <Compile Include="DebuggerBrowsableAttributeTests.cs" />
-    <Compile Include="DebuggerTests.cs" Condition="'$(TargetGroup)' == 'netcoreapp'" />
     <Compile Include="DebuggerVisualizerAttributeTests.cs" />
-    <Compile Include="DebugTests.cs" />
     <Compile Include="EmptyAttributeTests.cs" />
     <Compile Include="XunitAssemblyAttributes.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
-    <ReferenceFromRuntime Include="System.Runtime.InteropServices.RuntimeInformation" />
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
+    <Compile Include="DebuggerTests.cs" />
+    <Compile Include="DebugTests.cs" />
+    <Compile Include="DebugTestsNoListeners.cs" />
+    <Compile Include="DebugTestsUsingListeners.cs" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

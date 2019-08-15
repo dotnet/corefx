@@ -13,18 +13,17 @@ using System.Diagnostics;
 
 // Prevents compiler warnings/errors regarding the use of ref params in Interlocked methods
 
-#pragma warning disable 0420
 namespace System.Threading.Tasks
 {
     /// <summary>
-    /// Enables iterations of <see cref="T:System.Threading.Tasks.Parallel"/> loops to interact with
+    /// Enables iterations of <see cref="System.Threading.Tasks.Parallel"/> loops to interact with
     /// other iterations.
     /// </summary>
     [DebuggerDisplay("ShouldExitCurrentIteration = {ShouldExitCurrentIteration}")]
     public class ParallelLoopState
     {
         // Derived classes will track a ParallelStateFlags32 or ParallelStateFlags64.
-        // So this is slightly redundant, but it enables us to implement some 
+        // So this is slightly redundant, but it enables us to implement some
         // methods in this base class.
         private readonly ParallelLoopStateFlags _flagsBase;
 
@@ -121,7 +120,7 @@ namespace System.Threading.Tasks
         /// Communicates that the <see cref="Parallel"/> loop should cease execution at the system's earliest
         /// convenience.
         /// </summary>
-        /// <exception cref="T:System.InvalidOperationException">
+        /// <exception cref="System.InvalidOperationException">
         /// The <see cref="Break()"/> method was previously called.  <see cref="Break()"/> and <see
         /// cref="Stop()"/> may not be used in combination by iterations of the same loop.
         /// </exception>
@@ -154,7 +153,7 @@ namespace System.Threading.Tasks
         /// Communicates that the <see cref="Parallel"/> loop should cease execution at the system's earliest
         /// convenience of iterations beyond the current iteration.
         /// </summary>
-        /// <exception cref="T:System.InvalidOperationException">
+        /// <exception cref="System.InvalidOperationException">
         /// The <see cref="Stop()"/> method was previously called. <see cref="Break()"/> and <see cref="Stop()"/>
         /// may not be used in combination by iterations of the same loop.
         /// </exception>
@@ -313,7 +312,7 @@ namespace System.Threading.Tasks
         /// Communicates that parallel tasks should stop when they reach a specified iteration element.
         /// (which is CurrentIteration of the caller).
         /// </summary>
-        /// <exception cref="T:System.InvalidOperationException">Break() called after Stop().</exception>
+        /// <exception cref="System.InvalidOperationException">Break() called after Stop().</exception>
         /// <remarks>
         /// This is shared with all other concurrent threads in the system which are participating in the
         /// loop's execution. After calling Break(), no additional iterations will be executed on
@@ -381,10 +380,10 @@ namespace System.Threading.Tasks
         /// Communicates that parallel tasks should stop when they reach a specified iteration element.
         /// (which is CurrentIteration of the caller).
         /// </summary>
-        /// <exception cref="T:System.InvalidOperationException">Break() called after Stop().</exception>
+        /// <exception cref="System.InvalidOperationException">Break() called after Stop().</exception>
         /// <remarks>
-        /// Atomically sets shared StoppedBroken flag to BROKEN, then atomically sets shared 
-        /// LowestBreakIteration to CurrentIteration, but only if CurrentIteration is less than 
+        /// Atomically sets shared StoppedBroken flag to BROKEN, then atomically sets shared
+        /// LowestBreakIteration to CurrentIteration, but only if CurrentIteration is less than
         /// LowestBreakIteration.
         /// </remarks>
         internal override void InternalBreak()
@@ -466,7 +465,7 @@ namespace System.Threading.Tasks
         // Records the lowest iteration at which a Break() has been called,
         // or Int32.MaxValue if no break has been called.  Used directly
         // by Break().
-        internal volatile int _lowestBreakIteration = Int32.MaxValue;
+        internal volatile int _lowestBreakIteration = int.MaxValue;
 
         // Not strictly necessary, but maintains consistency with ParallelStateFlags64
         internal int LowestBreakIteration
@@ -479,7 +478,7 @@ namespace System.Threading.Tasks
         {
             get
             {
-                if (_lowestBreakIteration == Int32.MaxValue) return null;
+                if (_lowestBreakIteration == int.MaxValue) return null;
                 else
                 {
                     // protect against torn read of 64-bit value
@@ -502,7 +501,7 @@ namespace System.Threading.Tasks
         ///   (1) Stop() has been called by one or more tasks.
         ///   (2) An exception has been raised by one or more tasks.
         ///   (3) Break() has been called by one or more tasks, and
-        ///       CallerIteration exceeds the (lowest) iteration at which 
+        ///       CallerIteration exceeds the (lowest) iteration at which
         ///       Break() was called.
         ///   (4) The loop was canceled.
         /// </remarks>
@@ -532,7 +531,7 @@ namespace System.Threading.Tasks
         // Records the lowest iteration at which a Break() has been called,
         // or Int64.MaxValue if no break has been called.  Used directly
         // by Break().
-        internal long _lowestBreakIteration = Int64.MaxValue;
+        internal long _lowestBreakIteration = long.MaxValue;
 
         // Performs a conditionally interlocked read of _lowestBreakIteration.
         internal long LowestBreakIteration
@@ -549,7 +548,7 @@ namespace System.Threading.Tasks
         {
             get
             {
-                if (_lowestBreakIteration == Int64.MaxValue) return null;
+                if (_lowestBreakIteration == long.MaxValue) return null;
                 else
                 {
                     if (IntPtr.Size >= 8) return _lowestBreakIteration;
@@ -569,7 +568,7 @@ namespace System.Threading.Tasks
         ///   (1) Stop() has been called by one or more tasks.
         ///   (2) An exception has been raised by one or more tasks.
         ///   (3) Break() has been called by one or more tasks, and
-        ///       CallerIteration exceeds the (lowest) iteration at which 
+        ///       CallerIteration exceeds the (lowest) iteration at which
         ///       Break() was called.
         ///   (4) The loop has been canceled.
         /// </remarks>
@@ -624,5 +623,3 @@ namespace System.Threading.Tasks
         public long? LowestBreakIteration { get { return _lowestBreakIteration; } }
     }
 }
-
-#pragma warning restore 0420

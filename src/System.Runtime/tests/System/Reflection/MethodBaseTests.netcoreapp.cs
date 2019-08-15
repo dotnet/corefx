@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -11,8 +11,8 @@ namespace System.Reflection.Tests
         [Fact]
         public static void Test_GetCurrentMethod_ConstructedGenericMethod()
         {
-            MethodInfo mi = typeof(MethodBaseNetcoreTests).GetMethod(nameof(MyFakeGenericMethod));
-            MethodBase m = mi.MakeGenericMethod(typeof(Byte));
+            MethodInfo mi = typeof(MethodBaseNetcoreTests).GetMethod(nameof(MyFakeGenericMethod), BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodBase m = mi.MakeGenericMethod(typeof(byte));
 
             Assert.Equal(nameof(MyFakeGenericMethod), m.Name);
             Assert.Equal(typeof(MethodBaseNetcoreTests), m.ReflectedType);
@@ -20,13 +20,13 @@ namespace System.Reflection.Tests
             Assert.False(m.IsGenericMethodDefinition);
             Assert.True(m.IsConstructedGenericMethod);
             Assert.Equal(1, m.GetGenericArguments().Length);
-            Assert.Equal(typeof(Byte), m.GetGenericArguments()[0]);
+            Assert.Equal(typeof(byte), m.GetGenericArguments()[0]);
         }
 
         [Fact]
         public static void Test_GetCurrentMethod_GenericMethodDefinition()
         {
-            MethodBase m = typeof(MethodBaseNetcoreTests).GetMethod(nameof(MyFakeGenericMethod));
+            MethodBase m = typeof(MethodBaseNetcoreTests).GetMethod(nameof(MyFakeGenericMethod), BindingFlags.NonPublic | BindingFlags.Instance);
 
             Assert.Equal(nameof(MyFakeGenericMethod), m.Name);
             Assert.Equal(typeof(MethodBaseNetcoreTests), m.ReflectedType);
@@ -37,7 +37,7 @@ namespace System.Reflection.Tests
             Assert.Equal("T", m.GetGenericArguments()[0].Name);
         }
 
-        public void MyFakeGenericMethod<T>()
+        private void MyFakeGenericMethod<T>()
         {
         }
     }

@@ -24,7 +24,7 @@ public enum NodeFlags
     Indent = 512
 }
 
-abstract public class CXmlBase
+public abstract class CXmlBase
 {
     protected XmlNodeType pnType;
     protected string pstrName;
@@ -66,13 +66,13 @@ abstract public class CXmlBase
     //
     // Virtual Methods and Properties
     //
-    abstract public void Write(XmlWriter rXmlWriter);
+    public abstract void Write(XmlWriter rXmlWriter);
 
-    abstract public string Xml { get; }
+    public abstract string Xml { get; }
 
-    abstract public void WriteXml(TextWriter rTW);
+    public abstract void WriteXml(TextWriter rTW);
 
-    abstract public string Value { get; }
+    public abstract string Value { get; }
 
     //
     // Public Methods and Properties
@@ -181,7 +181,7 @@ public class CXmlAttribute : CXmlBase
     //
     // Public Methods and Properties (Override)
     //
-    override public void Write(XmlWriter rXmlWriter)
+    public override void Write(XmlWriter rXmlWriter)
     {
         CXmlBase rNode;
 
@@ -198,7 +198,7 @@ public class CXmlAttribute : CXmlBase
         }
     }
 
-    override public string Xml
+    public override string Xml
     {
         get
         {
@@ -208,7 +208,7 @@ public class CXmlAttribute : CXmlBase
         }
     }
 
-    override public void WriteXml(TextWriter rTW)
+    public override void WriteXml(TextWriter rTW)
     {
         if ((this.peFlags & NodeFlags.DefaultAttribute) == 0)
         {
@@ -226,7 +226,7 @@ public class CXmlAttribute : CXmlBase
     //
     // Public Methods and Properties
     //
-    override public string Value
+    public override string Value
     {
         get
         {
@@ -307,7 +307,7 @@ public class CXmlNode : CXmlBase
     //
     // Public Methods and Properties (Override)
     //
-    override public void Write(XmlWriter rXmlWriter)
+    public override void Write(XmlWriter rXmlWriter)
     {
         CXmlBase rNode;
         CXmlAttribute rAttribute;
@@ -403,7 +403,7 @@ public class CXmlNode : CXmlBase
         }
     }
 
-    override public string Xml
+    public override string Xml
     {
         get
         {
@@ -413,9 +413,9 @@ public class CXmlNode : CXmlBase
         }
     }
 
-    override public void WriteXml(TextWriter rTW)
+    public override void WriteXml(TextWriter rTW)
     {
-        String strXml;
+        string strXml;
         CXmlAttribute rAttribute;
         CXmlBase rNode;
 
@@ -508,7 +508,7 @@ public class CXmlNode : CXmlBase
         get { return _strValue; }
     }
 
-    override public string Value
+    public override string Value
     {
         get
         {
@@ -779,7 +779,7 @@ public class CXmlCache
         }
     }
 
-    virtual public string Xml
+    public virtual string Xml
     {
         get
         {
@@ -934,14 +934,14 @@ public class CXmlCache
             }
             else
             {
-                rNewNode.peFlags |= NodeFlags.Indent;		// Turn on Indent for current Node
+                rNewNode.peFlags |= NodeFlags.Indent;        // Turn on Indent for current Node
             }
 
             // Set all Depth 0 nodes to No Mixed Content and Indent True
             if (prXmlReader.Depth == 0)
             {
-                rNewNode.peFlags |= NodeFlags.Indent;			// Turn on Indent
-                rNewNode.peFlags &= ~NodeFlags.MixedContent;	// Turn off MixedContent
+                rNewNode.peFlags |= NodeFlags.Indent;        // Turn on Indent
+                rNewNode.peFlags &= ~NodeFlags.MixedContent; // Turn off MixedContent
             }
 
             rParentNode.InsertNode(rNewNode);
@@ -1021,17 +1021,17 @@ public class CXmlCache
                     {
                         rNewNode.peFlags = _eDefaultFlags | NodeFlags.AttributeTextNode;
                     }
-                    rNewNode.peFlags |= NodeFlags.MixedContent;		// turn on Mixed Content for current node
-                    rNewNode.peFlags &= ~NodeFlags.Indent;			// turn off Indent for current node
-                    rParentNode.peFlags |= NodeFlags.MixedContent;	// turn on Mixed Content for Parent Node
+                    rNewNode.peFlags |= NodeFlags.MixedContent;    // turn on Mixed Content for current node
+                    rNewNode.peFlags &= ~NodeFlags.Indent;         // turn off Indent for current node
+                    rParentNode.peFlags |= NodeFlags.MixedContent; // turn on Mixed Content for Parent Node
                     break;
 
                 case XmlNodeType.Whitespace:
                 case XmlNodeType.SignificantWhitespace:
                 case XmlNodeType.CDATA:
-                    rNewNode.peFlags |= NodeFlags.MixedContent;		// turn on Mixed Content for current node
-                    rNewNode.peFlags &= ~NodeFlags.Indent;			// turn off Indent for current node
-                    rParentNode.peFlags |= NodeFlags.MixedContent;	// turn on Mixed Content for Parent Node
+                    rNewNode.peFlags |= NodeFlags.MixedContent;    // turn on Mixed Content for current node
+                    rNewNode.peFlags &= ~NodeFlags.Indent;         // turn off Indent for current node
+                    rParentNode.peFlags |= NodeFlags.MixedContent; // turn on Mixed Content for Parent Node
                     break;
 
                 case XmlNodeType.Comment:
@@ -1070,7 +1070,7 @@ public class CXmlCache
 public class ChecksumWriter : TextWriter
 {
     private int _nPosition = 0;
-    private Decimal _dResult = 0;
+    private decimal _dResult = 0;
     private Encoding _encoding;
 
     // --------------------------------------------------------------------------------------------------
@@ -1084,7 +1084,7 @@ public class ChecksumWriter : TextWriter
     // --------------------------------------------------------------------------------------------------
     //    Properties
     // --------------------------------------------------------------------------------------------------
-    public Decimal CheckSum
+    public decimal CheckSum
     {
         get { return _dResult; }
     }
@@ -1097,7 +1097,7 @@ public class ChecksumWriter : TextWriter
     // --------------------------------------------------------------------------------------------------
     //    Public methods
     // --------------------------------------------------------------------------------------------------
-    override public void Write(String str)
+    public override void Write(string str)
     {
         int i;
         int m;
@@ -1109,7 +1109,7 @@ public class ChecksumWriter : TextWriter
         }
     }
 
-    override public void Write(Char[] rgch)
+    public override void Write(char[] rgch)
     {
         int i;
         int m;
@@ -1121,7 +1121,7 @@ public class ChecksumWriter : TextWriter
         }
     }
 
-    override public void Write(Char[] rgch, Int32 iOffset, Int32 iCount)
+    public override void Write(char[] rgch, int iOffset, int iCount)
     {
         int i;
         int m;
@@ -1133,9 +1133,9 @@ public class ChecksumWriter : TextWriter
         }
     }
 
-    override public void Write(Char ch)
+    public override void Write(char ch)
     {
-        _dResult += Math.Round((Decimal)(ch / (_nPosition + 1.0)), 10);
+        _dResult += Math.Round((decimal)(ch / (_nPosition + 1.0)), 10);
         _nPosition++;
     }
 
@@ -1151,7 +1151,7 @@ public class BufferWriter : TextWriter
     private int _nBufferSize = 0;
     private int _nBufferUsed = 0;
     private int _nBufferGrow = 1024;
-    private Char[] _rgchBuffer = null;
+    private char[] _rgchBuffer = null;
     private Encoding _encoding;
 
     // --------------------------------------------------------------------------------------------------
@@ -1165,9 +1165,9 @@ public class BufferWriter : TextWriter
     // --------------------------------------------------------------------------------------------------
     //    Properties
     // --------------------------------------------------------------------------------------------------
-    override public string ToString()
+    public override string ToString()
     {
-        return new String(_rgchBuffer, 0, _nBufferUsed);
+        return new string(_rgchBuffer, 0, _nBufferUsed);
     }
 
     public override Encoding Encoding
@@ -1179,7 +1179,7 @@ public class BufferWriter : TextWriter
     // --------------------------------------------------------------------------------------------------
     //    Public methods
     // --------------------------------------------------------------------------------------------------
-    override public void Write(String str)
+    public override void Write(string str)
     {
         int i;
         int m;
@@ -1191,7 +1191,7 @@ public class BufferWriter : TextWriter
         }
     }
 
-    override public void Write(Char[] rgch)
+    public override void Write(char[] rgch)
     {
         int i;
         int m;
@@ -1203,7 +1203,7 @@ public class BufferWriter : TextWriter
         }
     }
 
-    override public void Write(Char[] rgch, Int32 iOffset, Int32 iCount)
+    public override void Write(char[] rgch, int iOffset, int iCount)
     {
         int i;
         int m;
@@ -1215,11 +1215,11 @@ public class BufferWriter : TextWriter
         }
     }
 
-    override public void Write(Char ch)
+    public override void Write(char ch)
     {
         if (_nBufferUsed == _nBufferSize)
         {
-            Char[] rgchTemp = new Char[_nBufferSize + _nBufferGrow];
+            char[] rgchTemp = new char[_nBufferSize + _nBufferGrow];
             for (_nBufferUsed = 0; _nBufferUsed < _nBufferSize; _nBufferUsed++)
                 rgchTemp[_nBufferUsed] = _rgchBuffer[_nBufferUsed];
             _rgchBuffer = rgchTemp;
@@ -1236,4 +1236,3 @@ public class BufferWriter : TextWriter
         _nBufferUsed = 0;
     }
 }
-

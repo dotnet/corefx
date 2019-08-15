@@ -34,7 +34,7 @@ namespace System.Reflection
     //         The generated DispatchProxy proxy type does not need to generate implementation methods
     //         for the base type's interfaces, because the base type already must have implemented them.
     //  4. RealProxy required a proxy instance to hold a backpointer to the RealProxy instance to mirror
-    //     the .Net Remoting design that required the proxy and RealProxy to be separate instances.
+    //     the .NET Remoting design that required the proxy and RealProxy to be separate instances.
     //     But the DispatchProxy design encourages the proxy type to *be* an DispatchProxy.  Therefore,
     //     the proxy's 'this' becomes the equivalent of RealProxy's backpointer to RealProxy, so we were
     //     able to remove an extraneous field and ctor arg from the DispatchProxy proxies.
@@ -174,7 +174,7 @@ namespace System.Reflection
 
             internal static readonly Type[] PackedTypes = new Type[] { typeof(object), typeof(Type), typeof(int), typeof(object[]), typeof(Type[]), typeof(object) };
 
-            private object[] _args;
+            private readonly object[] _args;
             internal PackedArgs() : this(new object[PackedTypes.Length]) { }
             internal PackedArgs(object[] args) { _args = args; }
 
@@ -188,15 +188,15 @@ namespace System.Reflection
 
         private class ProxyAssembly
         {
-            private AssemblyBuilder _ab;
-            private ModuleBuilder _mb;
+            private readonly AssemblyBuilder _ab;
+            private readonly ModuleBuilder _mb;
             private int _typeId = 0;
 
             // Maintain a MethodBase-->int, int-->MethodBase mapping to permit generated code
             // to pass methods by token
-            private Dictionary<MethodBase, int> _methodToToken = new Dictionary<MethodBase, int>();
-            private List<MethodBase> _methodsByToken = new List<MethodBase>();
-            private HashSet<string> _ignoresAccessAssemblyNames = new HashSet<string>();
+            private readonly Dictionary<MethodBase, int> _methodToToken = new Dictionary<MethodBase, int>();
+            private readonly List<MethodBase> _methodsByToken = new List<MethodBase>();
+            private readonly HashSet<string> _ignoresAccessAssemblyNames = new HashSet<string>();
             private ConstructorInfo _ignoresAccessChecksToAttributeConstructor;
 
             public ProxyAssembly()
@@ -235,7 +235,7 @@ namespace System.Reflection
                 // Add this assembly level attribute:
                 // [assembly: System.Runtime.CompilerServices.IgnoresAccessChecksToAttribute(assemblyName)]
                 ConstructorInfo attributeConstructor = IgnoresAccessChecksAttributeConstructor;
-                CustomAttributeBuilder customAttributeBuilder = 
+                CustomAttributeBuilder customAttributeBuilder =
                     new CustomAttributeBuilder(attributeConstructor, new object[] { assemblyName });
                 _ab.SetCustomAttribute(customAttributeBuilder);
             }
@@ -280,10 +280,10 @@ namespace System.Reflection
         {
             private static readonly MethodInfo s_delegateInvoke = typeof(Action<object[]>).GetTypeInfo().GetDeclaredMethod("Invoke");
 
-            private ProxyAssembly _assembly;
-            private TypeBuilder _tb;
-            private Type _proxyBaseType;
-            private List<FieldBuilder> _fields;
+            private readonly ProxyAssembly _assembly;
+            private readonly TypeBuilder _tb;
+            private readonly Type _proxyBaseType;
+            private readonly List<FieldBuilder> _fields;
 
             internal ProxyBuilder(ProxyAssembly assembly, TypeBuilder tb, Type proxyBaseType)
             {
@@ -363,6 +363,11 @@ namespace System.Reflection
 
                 foreach (MethodInfo mi in iface.GetRuntimeMethods())
                 {
+                    // Skip regular/non-virtual instance methods, static methods, and methods that cannot be overriden
+                    // ("methods that cannot be overriden" includes default implementation of other interface methods).
+                    if (!mi.IsVirtual || mi.IsFinal)
+                        continue;
+
                     MethodBuilder mdb = AddMethodImpl(mi);
                     PropertyAccessorInfo associatedProperty;
                     if (propertyMap.TryGetValue(mi, out associatedProperty))
@@ -388,6 +393,13 @@ namespace System.Reflection
                 foreach (PropertyInfo pi in iface.GetRuntimeProperties())
                 {
                     PropertyAccessorInfo ai = propertyMap[pi.GetMethod ?? pi.SetMethod];
+
+                    // If we didn't make an overriden accessor above, this was a static property, non-virtual property,
+                    // or a default implementation of a property of a different interface. In any case, we don't need
+                    // to redeclare it.
+                    if (ai.GetMethodBuilder == null && ai.SetMethodBuilder == null)
+                        continue;
+
                     PropertyBuilder pb = _tb.DefineProperty(pi.Name, pi.Attributes, pi.PropertyType, pi.GetIndexParameters().Select(p => p.ParameterType).ToArray());
                     if (ai.GetMethodBuilder != null)
                         pb.SetGetMethod(ai.GetMethodBuilder);
@@ -398,6 +410,13 @@ namespace System.Reflection
                 foreach (EventInfo ei in iface.GetRuntimeEvents())
                 {
                     EventAccessorInfo ai = eventMap[ei.AddMethod ?? ei.RemoveMethod];
+
+                    // If we didn't make an overriden accessor above, this was a static event, non-virtual event,
+                    // or a default implementation of an event of a different interface. In any case, we don't
+                    // need to redeclare it.
+                    if (ai.AddMethodBuilder == null && ai.RemoveMethodBuilder == null && ai.RaiseMethodBuilder == null)
+                        continue;
+
                     EventBuilder eb = _tb.DefineEvent(ei.Name, ei.Attributes, ei.EventHandlerType);
                     if (ai.AddMethodBuilder != null)
                         eb.SetAddOnMethod(ai.AddMethodBuilder);
@@ -439,7 +458,9 @@ namespace System.Reflection
                 for (int i = 0; i < parameters.Length; i++)
                 {
                     // args[i] = argi;
-                    if (!parameters[i].IsOut)
+                    bool isOutRef = parameters[i].IsOut && parameters[i].ParameterType.IsByRef && !parameters[i].IsIn;
+
+                    if (!isOutRef)
                     {
                         argsArr.BeginSet(i);
                         args.Get(i);
@@ -468,7 +489,7 @@ namespace System.Reflection
                 // packed[PackedArgs.MethodTokenPosition] = iface method token;
                 packedArr.BeginSet(PackedArgs.MethodTokenPosition);
                 il.Emit(OpCodes.Ldc_I4, methodToken);
-                packedArr.EndSet(typeof(Int32));
+                packedArr.EndSet(typeof(int));
 
                 // packed[PackedArgs.ArgsPosition] = args;
                 packedArr.BeginSet(PackedArgs.ArgsPosition);
@@ -540,49 +561,49 @@ namespace System.Reflection
                 if (type == null)
                     return 0;   // TypeCode.Empty;
 
-                if (type == typeof(Boolean))
+                if (type == typeof(bool))
                     return 3;   // TypeCode.Boolean;
 
-                if (type == typeof(Char))
+                if (type == typeof(char))
                     return 4;   // TypeCode.Char;
 
-                if (type == typeof(SByte))
+                if (type == typeof(sbyte))
                     return 5;   // TypeCode.SByte;
 
-                if (type == typeof(Byte))
+                if (type == typeof(byte))
                     return 6;   // TypeCode.Byte;
 
-                if (type == typeof(Int16))
+                if (type == typeof(short))
                     return 7;   // TypeCode.Int16;
 
-                if (type == typeof(UInt16))
+                if (type == typeof(ushort))
                     return 8;   // TypeCode.UInt16;
 
-                if (type == typeof(Int32))
+                if (type == typeof(int))
                     return 9;   // TypeCode.Int32;
 
-                if (type == typeof(UInt32))
+                if (type == typeof(uint))
                     return 10;  // TypeCode.UInt32;
 
-                if (type == typeof(Int64))
+                if (type == typeof(long))
                     return 11;  // TypeCode.Int64;
 
-                if (type == typeof(UInt64))
+                if (type == typeof(ulong))
                     return 12;  // TypeCode.UInt64;
 
-                if (type == typeof(Single))
+                if (type == typeof(float))
                     return 13;  // TypeCode.Single;
 
-                if (type == typeof(Double))
+                if (type == typeof(double))
                     return 14;  // TypeCode.Double;
 
-                if (type == typeof(Decimal))
+                if (type == typeof(decimal))
                     return 15;  // TypeCode.Decimal;
 
                 if (type == typeof(DateTime))
                     return 16;  // TypeCode.DateTime;
 
-                if (type == typeof(String))
+                if (type == typeof(string))
                     return 18;  // TypeCode.String;
 
                 if (type.GetTypeInfo().IsEnum)
@@ -591,7 +612,7 @@ namespace System.Reflection
                 return 1;   // TypeCode.Object;
             }
 
-            private static OpCode[] s_convOpCodes = new OpCode[] {
+            private static readonly OpCode[] s_convOpCodes = new OpCode[] {
                 OpCodes.Nop,//Empty = 0,
                 OpCodes.Nop,//Object = 1,
                 OpCodes.Nop,//DBNull = 2,
@@ -613,7 +634,7 @@ namespace System.Reflection
                 OpCodes.Nop,//String = 18,
             };
 
-            private static OpCode[] s_ldindOpCodes = new OpCode[] {
+            private static readonly OpCode[] s_ldindOpCodes = new OpCode[] {
                 OpCodes.Nop,//Empty = 0,
                 OpCodes.Nop,//Object = 1,
                 OpCodes.Nop,//DBNull = 2,
@@ -635,7 +656,7 @@ namespace System.Reflection
                 OpCodes.Ldind_Ref,//String = 18,
             };
 
-            private static OpCode[] s_stindOpCodes = new OpCode[] {
+            private static readonly OpCode[] s_stindOpCodes = new OpCode[] {
                 OpCodes.Nop,//Empty = 0,
                 OpCodes.Nop,//Object = 1,
                 OpCodes.Nop,//DBNull = 2,
@@ -741,8 +762,8 @@ namespace System.Reflection
 
             private class ParametersArray
             {
-                private ILGenerator _il;
-                private Type[] _paramTypes;
+                private readonly ILGenerator _il;
+                private readonly Type[] _paramTypes;
                 internal ParametersArray(ILGenerator il, Type[] paramTypes)
                 {
                     _il = il;
@@ -770,8 +791,8 @@ namespace System.Reflection
 
             private class GenericArray<T>
             {
-                private ILGenerator _il;
-                private LocalBuilder _lb;
+                private readonly ILGenerator _il;
+                private readonly LocalBuilder _lb;
                 internal GenericArray(ILGenerator il, int len)
                 {
                     _il = il;

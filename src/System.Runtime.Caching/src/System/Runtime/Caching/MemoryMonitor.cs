@@ -1,12 +1,9 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections.Specialized;
-using System.Security;
-using System.Runtime.InteropServices;
-
+using System.Diagnostics;
+using System.Globalization;
 
 namespace System.Runtime.Caching
 {
@@ -14,7 +11,7 @@ namespace System.Runtime.Caching
     // types of monitors:  PhysicalMemoryMonitor and CacheMemoryMonitor.  The first monitors
     // the amount of physical memory used on the machine, and helps determine when we should
     // drop cache entries to avoid paging.  The second monitors the amount of memory used by
-    // the cache itself, and helps determine when we should drop cache entries to avoid 
+    // the cache itself, and helps determine when we should drop cache entries to avoid
     // exceeding the cache's memory limit.  Both are configurable (see ConfigUtil.cs).
     internal abstract partial class MemoryMonitor
     {
@@ -39,8 +36,10 @@ namespace System.Runtime.Caching
         protected int[] _pressureHist;
         protected int _pressureTotal;
 
-        private static long s_totalPhysical = 0;
-        private static long s_totalVirtual = 0;
+#pragma warning disable CA1802 // some builds initialize these to other values in a static cctor
+        private static readonly long s_totalPhysical = 0;
+        private static readonly long s_totalVirtual = 0;
+#pragma warning restore CA1802
 
         internal static long TotalPhysical => s_totalPhysical;
         internal static long TotalVirtual => s_totalVirtual;
@@ -60,9 +59,9 @@ namespace System.Runtime.Caching
 
         protected void InitHistory()
         {
-            Dbg.Assert(_pressureHigh > 0, "_pressureHigh > 0");
-            Dbg.Assert(_pressureLow > 0, "_pressureLow > 0");
-            Dbg.Assert(_pressureLow <= _pressureHigh, "_pressureLow <= _pressureHigh");
+            Debug.Assert(_pressureHigh > 0, "_pressureHigh > 0");
+            Debug.Assert(_pressureLow > 0, "_pressureLow > 0");
+            Debug.Assert(_pressureLow <= _pressureHigh, "_pressureLow <= _pressureHigh");
 
             int pressure = GetCurrentPressure();
 
@@ -84,12 +83,10 @@ namespace System.Runtime.Caching
             _pressureTotal += pressure;
             _pressureHist[_i0] = pressure;
 
-#if DEBUG
             Dbg.Trace("MemoryCacheStats", this.GetType().Name + ".Update: last=" + pressure
                         + ",high=" + PressureHigh
                         + ",low=" + PressureLow
-                        + " " + Dbg.FormatLocalDate(DateTime.Now));
-#endif
+                        + " " + DateTime.Now.ToString("o", CultureInfo.InvariantCulture));
         }
     }
 }

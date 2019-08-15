@@ -4,15 +4,14 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 
 namespace System.Net.Http.Headers
 {
     public class RangeItemHeaderValue : ICloneable
     {
-        private long? _from;
-        private long? _to;
+        private readonly long? _from;
+        private readonly long? _to;
 
         public long? From
         {
@@ -100,8 +99,6 @@ namespace System.Net.Http.Headers
         {
             Debug.Assert(rangeCollection != null);
             Debug.Assert(startIndex >= 0);
-            Contract.Ensures((Contract.Result<int>() == 0) || (rangeCollection.Count > 0),
-                "If we can parse the string, then we expect to have at least one range item.");
 
             if ((string.IsNullOrEmpty(input)) || (startIndex >= input.Length))
             {
@@ -133,7 +130,7 @@ namespace System.Net.Http.Headers
                 current = current + rangeLength;
                 current = HeaderUtilities.GetNextNonEmptyOrWhitespaceIndex(input, current, true, out separatorFound);
 
-                // If the string is not consumed, we must have a delimiter, otherwise the string is not a valid 
+                // If the string is not consumed, we must have a delimiter, otherwise the string is not a valid
                 // range list.
                 if ((current < input.Length) && !separatorFound)
                 {

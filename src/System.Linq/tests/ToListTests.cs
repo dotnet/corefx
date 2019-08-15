@@ -178,17 +178,17 @@ namespace System.Linq.Tests
         public void SameResultsRepeatCallsFromWhereOnIntQuery()
         {
             var q = from x in new[] { 9999, 0, 888, -1, 66, -777, 1, 2, -12345 }
-                    where x > Int32.MinValue
+                    where x > int.MinValue
                     select x;
 
             Assert.Equal(q.ToList(), q.ToList());
         }
-        
+
         [Fact]
         public void SameResultsRepeatCallsFromWhereOnStringQuery()
         {
-            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", String.Empty }
-                        where !String.IsNullOrEmpty(x)
+            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", string.Empty }
+                        where !string.IsNullOrEmpty(x)
                         select x;
 
             Assert.Equal(q.ToList(), q.ToList());
@@ -242,7 +242,7 @@ namespace System.Linq.Tests
             int?[] expected = { null, null, null, null, null };
 
             Assert.Null(source as ICollection<int>);
-    
+
             Assert.Equal(expected, source.ToList());
         }
 

@@ -341,6 +341,7 @@ namespace System.Net.Mail
                 if (newResult.CompletedSynchronously)
                 {
                     writer.EndGetContentStream(newResult).Close();
+                    result.InvokeCallback();
                 }
                 return result;
             }
@@ -560,7 +561,7 @@ namespace System.Net.Mail
                 string headerName = headers.GetKey(i);
 
                 //certain well-known values are encoded by PrepareHeaders and PrepareEnvelopeHeaders
-                //so we can ignore them because either we encoded them already or there is no 
+                //so we can ignore them because either we encoded them already or there is no
                 //way for the user to have set them.  If a header is well known and user settable then
                 //we should encode it here, otherwise we have already encoded it if necessary
                 if (!MailHeaderInfo.IsUserSettable(headerName))

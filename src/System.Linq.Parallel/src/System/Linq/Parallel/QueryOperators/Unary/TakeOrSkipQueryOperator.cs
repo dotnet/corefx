@@ -21,7 +21,7 @@ namespace System.Linq.Parallel
     /// find the 'count'th index from the input.  We do this in parallel by sharing a count-
     /// sized array.  Each thread races to populate the array with indices in ascending
     /// order.  This requires synchronization for inserts.  We use a simple heap, for decent
-    /// worst case performance.  After a thread has scanned ‘count’ elements, or its current
+    /// worst case performance.  After a thread has scanned 'count' elements, or its current
     /// index is greater than or equal to the maximum index in the array (and the array is
     /// fully populated), the thread can stop searching.  All threads issue a barrier before
     /// moving to the Yield phase.  When the Yield phase is entered, the count-1th element
@@ -145,7 +145,7 @@ namespace System.Linq.Parallel
         // The enumerator type responsible for executing the Take or Skip.
         //
 
-        class TakeOrSkipQueryOperatorEnumerator<TKey> : QueryOperatorEnumerator<TResult, TKey>
+        private class TakeOrSkipQueryOperatorEnumerator<TKey> : QueryOperatorEnumerator<TResult, TKey>
         {
             private readonly QueryOperatorEnumerator<TResult, TKey> _source; // The data source to enumerate.
             private readonly int _count; // The number of elements to take or skip.
@@ -323,10 +323,10 @@ namespace System.Linq.Parallel
         // results were indexable.
         //
 
-        class TakeOrSkipQueryOperatorResults : UnaryQueryOperatorResults
+        private class TakeOrSkipQueryOperatorResults : UnaryQueryOperatorResults
         {
-            private TakeOrSkipQueryOperator<TResult> _takeOrSkipOp; // The operator that generated the results
-            private int _childCount; // The number of elements in child results
+            private readonly TakeOrSkipQueryOperator<TResult> _takeOrSkipOp; // The operator that generated the results
+            private readonly int _childCount; // The number of elements in child results
 
             public static QueryResults<TResult> NewResults(
                 QueryResults<TResult> childQueryResults, TakeOrSkipQueryOperator<TResult> op,

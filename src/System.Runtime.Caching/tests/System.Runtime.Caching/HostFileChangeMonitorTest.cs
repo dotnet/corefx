@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 
 //
@@ -15,10 +15,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -64,7 +64,7 @@ namespace MonoTests.System.Runtime.Caching
             });
 
             paths.Clear();
-            paths.Add(String.Empty);
+            paths.Add(string.Empty);
             Assert.Throws<ArgumentException>(() =>
             {
                 new HostFileChangeMonitor(paths);
@@ -83,7 +83,7 @@ namespace MonoTests.System.Runtime.Caching
         }
 
         [Fact]
-        private static void Constructor_MissingFiles_Handler()
+        public static void Constructor_MissingFiles_Handler()
         {
             HostFileChangeMonitor monitor;
             string missingFile = Path.GetFullPath(Path.Combine(Guid.NewGuid().ToString("N"), "file", "path"));
@@ -168,7 +168,7 @@ namespace MonoTests.System.Runtime.Caching
         private static void CleanupMonitoring(Tuple<string, string, string, IList<string>> setup)
         {
             string testPath = setup != null ? setup.Item1 : null;
-            if (String.IsNullOrEmpty(testPath) || !Directory.Exists(testPath))
+            if (string.IsNullOrEmpty(testPath) || !Directory.Exists(testPath))
                 return;
 
             foreach (string f in Directory.EnumerateFiles(testPath))

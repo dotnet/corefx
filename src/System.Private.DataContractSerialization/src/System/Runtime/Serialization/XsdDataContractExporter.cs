@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -40,7 +40,7 @@ namespace System.Runtime.Serialization
             }
         }
 
-        XmlSchemaSet GetSchemaSet()
+        private XmlSchemaSet GetSchemaSet()
         {
             if (_schemas == null)
             {
@@ -50,7 +50,7 @@ namespace System.Runtime.Serialization
             return _schemas;
         }
 
-        DataContractSet DataContractSet
+        private DataContractSet DataContractSet
         {
             get
             {
@@ -61,15 +61,15 @@ namespace System.Runtime.Serialization
             }
         }
 
-        void TraceExportBegin()
+        private void TraceExportBegin()
         {
         }
 
-        void TraceExportEnd()
+        private void TraceExportEnd()
         {
         }
 
-        void TraceExportError(Exception exception)
+        private void TraceExportError(Exception exception)
         {
         }
 
@@ -250,7 +250,7 @@ namespace System.Runtime.Serialization
                     {
                         Type type = knownTypes[i];
                         if (type == null)
-                            throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(SR.Format(SR.CannotExportNullKnownType)));
+                            throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(SR.CannotExportNullKnownType));
                         AddType(type);
                     }
                 }
@@ -359,12 +359,12 @@ namespace System.Runtime.Serialization
 
 #if USE_REFEMIT
         //Returns warnings
-        public IList<string> GenerateCode(IList<Assembly> assemblies) 
+        public IList<string> GenerateCode(IList<Assembly> assemblies)
         {
             if (assemblies == null)
                 throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException(nameof(assemblies)));
             List<string> warnings = new List<string>();
- 
+
             DataContractSet oldValue = (dataContractSet == null) ? null : new DataContractSet(dataContractSet);
             try
             {
@@ -373,7 +373,7 @@ namespace System.Runtime.Serialization
                     Assembly assembly = assemblies[i];
                     if (assembly == null)
                         throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(SR.Format(SR.CannotExportNullAssembly, "assemblies")));
- 
+
                     Type[] types = assembly.GetTypes();
                     for (int j=0; j < types.Length; j++)
                     {
@@ -385,10 +385,10 @@ namespace System.Runtime.Serialization
                         {
                             warnings.Add("Error on exporting Type " + DataContract.GetClrTypeFullName(types[j]) + ". " + ex.Message);
                         }
-                        
+
                     }
                 }
- 
+
                 foreach (KeyValuePair<XmlQualifiedName, DataContract> pair in dataContractSet)
                 {
                     DataContract dataContract = pair.Value;

@@ -40,7 +40,7 @@ namespace System.Numerics.Tests
                 VerifyDivRemString(Print(tempByteArray1) + Print(tempByteArray2) + "bDivRem");
             }
         }
-        
+
         [Fact]
         public static void RunDivRem_OneSmallOneLargeBI()
         {
@@ -190,7 +190,7 @@ namespace System.Numerics.Tests
                     sc.VerifyOutParameter();
                 }
             }
-            catch(Exception e) when (!(e is DivideByZeroException))
+            catch (Exception e) when (!(e is DivideByZeroException))
             {
                 // Log the original parameters, so we can reproduce any failure given the log
                 throw new Exception($"VerifyDivRemString failed: {opstring} {e.ToString()}", e);
@@ -206,8 +206,8 @@ namespace System.Numerics.Tests
         {
             return MyBigIntImp.GetNonZeroRandomByteArray(random, size);
         }
-        
-        private static String Print(byte[] bytes)
+
+        private static string Print(byte[] bytes)
         {
             return MyBigIntImp.Print(bytes);
         }

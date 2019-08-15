@@ -288,7 +288,7 @@ namespace System.Net.Http
         {
             // Clone the settings to get a relatively consistent view that won't change after this point.
             // (This isn't entirely complete, as some of the collections it contains aren't currently deeply cloned.)
-            HttpConnectionSettings settings = _settings.Clone();
+            HttpConnectionSettings settings = _settings.CloneAndNormalize();
 
             HttpConnectionPoolManager poolManager = new HttpConnectionPoolManager(settings);
 
@@ -308,9 +308,9 @@ namespace System.Net.Http
                 // Just as with WinHttpHandler and CurlHandler, for security reasons, we do not support authentication on redirects
                 // if the credential is anything other than a CredentialCache.
                 // We allow credentials in a CredentialCache since they are specifically tied to URIs.
-                HttpMessageHandler redirectHandler = 
-                    (settings._credentials == null || settings._credentials is CredentialCache) ? 
-                    handler : 
+                HttpMessageHandler redirectHandler =
+                    (settings._credentials == null || settings._credentials is CredentialCache) ?
+                    handler :
                     new HttpConnectionHandler(poolManager);        // will not authenticate
 
                 handler = new RedirectHandler(settings._maxAutomaticRedirections, handler, redirectHandler);

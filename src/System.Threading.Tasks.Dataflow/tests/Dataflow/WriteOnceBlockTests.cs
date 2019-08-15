@@ -125,11 +125,11 @@ namespace System.Threading.Tasks.Dataflow.Tests
 
                 target = generator();
                 Assert.Equal(
-                    expected: DataflowMessageStatus.Accepted, 
+                    expected: DataflowMessageStatus.Accepted,
                     actual: ((ITargetBlock<int>)target).OfferMessage(new DataflowMessageHeader(1), 1, null, false));
                 Assert.Equal(
                     expected: DataflowMessageStatus.DecliningPermanently,
-                    actual: ((ITargetBlock<int>)target).OfferMessage(new DataflowMessageHeader(1), 1, null, false)); 
+                    actual: ((ITargetBlock<int>)target).OfferMessage(new DataflowMessageHeader(1), 1, null, false));
                 await target.Completion;
             }
         }
@@ -278,7 +278,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
 
                     IList<int> items;
                     Assert.True(((IReceivableSourceBlock<int>)wob).TryReceiveAll(out items));
-                    Assert.Equal(expected: items.Count, actual: 1);
+                    Assert.Equal(expected: 1, actual: items.Count);
                     Assert.Equal(expected: -data, actual: items[0]);
                 }
 

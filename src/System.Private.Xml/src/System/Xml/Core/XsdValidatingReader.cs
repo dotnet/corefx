@@ -57,22 +57,22 @@ namespace System.Xml
         }
         //Validation
         private XmlReader _coreReader;
-        private IXmlNamespaceResolver _coreReaderNSResolver;
-        private IXmlNamespaceResolver _thisNSResolver;
+        private readonly IXmlNamespaceResolver _coreReaderNSResolver;
+        private readonly IXmlNamespaceResolver _thisNSResolver;
         private XmlSchemaValidator _validator;
-        private XmlResolver _xmlResolver;
-        private ValidationEventHandler _validationEvent;
+        private readonly XmlResolver _xmlResolver;
+        private readonly ValidationEventHandler _validationEvent;
         private ValidatingReaderState _validationState;
         private XmlValueGetter _valueGetter;
 
         // namespace management
-        private XmlNamespaceManager _nsManager;
-        private bool _manageNamespaces;
-        private bool _processInlineSchema;
+        private readonly XmlNamespaceManager _nsManager;
+        private readonly bool _manageNamespaces;
+        private readonly bool _processInlineSchema;
         private bool _replayCache;
 
         //Current Node handling
-        private ValidatingReaderNodeData _cachedNode; //Used to cache current node when looking ahead or default attributes                           
+        private ValidatingReaderNodeData _cachedNode; //Used to cache current node when looking ahead or default attributes
         private AttributePSVIInfo _attributePSVI;
 
         //Attributes
@@ -93,7 +93,7 @@ namespace System.Xml
         private string _originalAtomicValueString;
 
         //cached coreReader information
-        private XmlNameTable _coreReaderNameTable;
+        private readonly XmlNameTable _coreReaderNameTable;
         private XsdCachingReader _cachingReader;
 
         //ReadAttributeValue TextNode
@@ -108,9 +108,6 @@ namespace System.Xml
         private string _xsdSchema;
         private string _xsiSchemaLocation;
         private string _xsiNoNamespaceSchemaLocation;
-
-        //XmlCharType instance
-        private XmlCharType _xmlCharType = XmlCharType.Instance;
 
         //Underlying reader's IXmlLineInfo
         private IXmlLineInfo _lineInfo;
@@ -156,7 +153,7 @@ namespace System.Xml
             _currentAttrIndex = -1;
             _attributePSVINodes = new AttributePSVIInfo[InitialAttributeCount];
             _valueGetter = new XmlValueGetter(GetStringValue);
-            s_typeOfString = typeof(System.String);
+            s_typeOfString = typeof(string);
             _xmlSchemaInfo = new XmlSchemaInfo();
 
             //Add common strings to be compared to NameTable
@@ -374,7 +371,7 @@ namespace System.Xml
             }
         }
 
-        // Gets the current xml:space scope. 
+        // Gets the current xml:space scope.
         public override XmlSpace XmlSpace
         {
             get
@@ -716,7 +713,7 @@ namespace System.Xml
             {
                 if (xmlType != null)
                 {
-                    // special-case convertions to DateTimeOffset; typedValue is by default a DateTime 
+                    // special-case convertions to DateTimeOffset; typedValue is by default a DateTime
                     // which cannot preserve time zone, so we need to convert from the original string
                     if (returnType == typeof(DateTimeOffset) && xmlType.Datatype is Datatype_dateTimeBase)
                     {
@@ -894,7 +891,7 @@ namespace System.Xml
             }
         }
 
-        public override Decimal ReadElementContentAsDecimal()
+        public override decimal ReadElementContentAsDecimal()
         {
             if (this.NodeType != XmlNodeType.Element)
             {
@@ -1011,13 +1008,13 @@ namespace System.Xml
 
             try
             {
-                if (xmlType != null)
+                if (xmlType != null && typedValue != null)
                 {
                     return xmlType.ValueConverter.ToString(typedValue);
                 }
                 else
                 {
-                    return typedValue as string;
+                    return typedValue as string ?? string.Empty;
                 }
             }
             catch (InvalidCastException e)
@@ -1049,7 +1046,7 @@ namespace System.Xml
             {
                 if (xmlType != null)
                 {
-                    // special-case convertions to DateTimeOffset; typedValue is by default a DateTime 
+                    // special-case convertions to DateTimeOffset; typedValue is by default a DateTime
                     // which cannot preserve time zone, so we need to convert from the original string
                     if (returnType == typeof(DateTimeOffset) && xmlType.Datatype is Datatype_dateTimeBase)
                     {
@@ -1380,7 +1377,7 @@ namespace System.Xml
                         goto case ValidatingReaderState.Read;
                     }
 
-                case ValidatingReaderState.ReadAhead: //Will enter here on calling Skip() 
+                case ValidatingReaderState.ReadAhead: //Will enter here on calling Skip()
                     ClearAttributesInfo();
                     ProcessReaderEvent();
                     _validationState = ValidatingReaderState.Read;
@@ -1939,9 +1936,6 @@ namespace System.Xml
             }
         }
 
-        // SxS: This function calls ValidateElement on XmlSchemaValidator which is annotated with ResourceExposure attribute.
-        // Since the resource names (namespace location) are not provided directly by the user (they are read from the source
-        // document) and the function does not expose any resources it is fine to suppress the SxS warning. 
         private void ProcessElementEvent()
         {
             if (_processInlineSchema && IsXSDRoot(_coreReader.LocalName, _coreReader.NamespaceURI) && _coreReader.Depth > 0)
@@ -2328,7 +2322,7 @@ namespace System.Xml
                     typedValue = _atomicValue;
                 }
                 originalString = _originalAtomicValueString;
-                xmlType = ElementXmlType; //Set this for default values 
+                xmlType = ElementXmlType; //Set this for default values
                 this.Read();
 
                 return typedValue;
@@ -2451,7 +2445,7 @@ namespace System.Xml
                 switch (_coreReader.NodeType)
                 {
                     case XmlNodeType.Element:
-                        Debug.Assert(false); //Should not happen as the caching reader does not cache elements in simple content
+                        Debug.Fail("Should not happen as the caching reader does not cache elements in simple content");
                         break;
 
                     case XmlNodeType.Text:
@@ -2504,7 +2498,7 @@ namespace System.Xml
                         switch (_coreReader.NodeType)
                         {
                             case XmlNodeType.Element:
-                                Debug.Assert(false); //Should not happen as the caching reader does not cache elements in simple content
+                                Debug.Fail("Should not happen as the caching reader does not cache elements in simple content");
                                 break;
 
                             case XmlNodeType.Text:
@@ -2632,4 +2626,3 @@ namespace System.Xml
         }
     }
 }
-

@@ -11,60 +11,60 @@ using Xunit;
 namespace System.Transactions.Tests
 {
     public enum CloneType { Normal, BlockingDependent, RollbackDependent };
-    public class CloneTxTests
+    public class CloneTxTests : IDisposable
     {
         public CloneTxTests()
         {
+            // Make sure we start with Transaction.Current = null.
+            Transaction.Current = null;
+        }
+
+        public void Dispose()
+        {
+            Transaction.Current = null;
         }
 
         [Theory]
-        [InlineData(CloneType.Normal, IsolationLevel.Serializable, false, false, TransactionStatus.Committed)]
-        [InlineData(CloneType.Normal, IsolationLevel.RepeatableRead, false, false, TransactionStatus.Committed)]
-        [InlineData(CloneType.Normal, IsolationLevel.ReadCommitted, false, false, TransactionStatus.Committed)]
-        [InlineData(CloneType.Normal, IsolationLevel.ReadUncommitted, false, false, TransactionStatus.Committed)]
-        [InlineData(CloneType.Normal, IsolationLevel.Snapshot, false, false, TransactionStatus.Committed)]
-        [InlineData(CloneType.Normal, IsolationLevel.Chaos, false, false, TransactionStatus.Committed)]
-        [InlineData(CloneType.Normal, IsolationLevel.Unspecified, false, false, TransactionStatus.Committed)]
-        [InlineData(CloneType.BlockingDependent, IsolationLevel.Serializable, false, false, TransactionStatus.Aborted)]
-        [InlineData(CloneType.BlockingDependent, IsolationLevel.RepeatableRead, false, false, TransactionStatus.Aborted)]
-        [InlineData(CloneType.BlockingDependent, IsolationLevel.ReadCommitted, false, false, TransactionStatus.Aborted)]
-        [InlineData(CloneType.BlockingDependent, IsolationLevel.ReadUncommitted, false, false, TransactionStatus.Aborted)]
-        [InlineData(CloneType.BlockingDependent, IsolationLevel.Snapshot, false, false, TransactionStatus.Aborted)]
-        [InlineData(CloneType.BlockingDependent, IsolationLevel.Chaos, false, false, TransactionStatus.Aborted)]
-        [InlineData(CloneType.BlockingDependent, IsolationLevel.Unspecified, false, false, TransactionStatus.Aborted)]
-        [InlineData(CloneType.RollbackDependent, IsolationLevel.Serializable, false, false, TransactionStatus.Aborted)]
-        [InlineData(CloneType.RollbackDependent, IsolationLevel.RepeatableRead, false, false, TransactionStatus.Aborted)]
-        [InlineData(CloneType.RollbackDependent, IsolationLevel.ReadCommitted, false, false, TransactionStatus.Aborted)]
-        [InlineData(CloneType.RollbackDependent, IsolationLevel.ReadUncommitted, false, false, TransactionStatus.Aborted)]
-        [InlineData(CloneType.RollbackDependent, IsolationLevel.Snapshot, false, false, TransactionStatus.Aborted)]
-        [InlineData(CloneType.RollbackDependent, IsolationLevel.Chaos, false, false, TransactionStatus.Aborted)]
-        [InlineData(CloneType.RollbackDependent, IsolationLevel.Unspecified, false, false, TransactionStatus.Aborted)]
+        [InlineData(CloneType.Normal, IsolationLevel.Serializable, false, TransactionStatus.Committed)]
+        [InlineData(CloneType.Normal, IsolationLevel.RepeatableRead, false, TransactionStatus.Committed)]
+        [InlineData(CloneType.Normal, IsolationLevel.ReadCommitted, false, TransactionStatus.Committed)]
+        [InlineData(CloneType.Normal, IsolationLevel.ReadUncommitted, false, TransactionStatus.Committed)]
+        [InlineData(CloneType.Normal, IsolationLevel.Snapshot, false, TransactionStatus.Committed)]
+        [InlineData(CloneType.Normal, IsolationLevel.Chaos, false, TransactionStatus.Committed)]
+        [InlineData(CloneType.Normal, IsolationLevel.Unspecified, false, TransactionStatus.Committed)]
+        [InlineData(CloneType.RollbackDependent, IsolationLevel.Serializable, false, TransactionStatus.Aborted)]
+        [InlineData(CloneType.RollbackDependent, IsolationLevel.RepeatableRead, false, TransactionStatus.Aborted)]
+        [InlineData(CloneType.RollbackDependent, IsolationLevel.ReadCommitted, false, TransactionStatus.Aborted)]
+        [InlineData(CloneType.RollbackDependent, IsolationLevel.ReadUncommitted, false, TransactionStatus.Aborted)]
+        [InlineData(CloneType.RollbackDependent, IsolationLevel.Snapshot, false, TransactionStatus.Aborted)]
+        [InlineData(CloneType.RollbackDependent, IsolationLevel.Chaos, false, TransactionStatus.Aborted)]
+        [InlineData(CloneType.RollbackDependent, IsolationLevel.Unspecified, false, TransactionStatus.Aborted)]
         // TODO: Issue #10353 - These variations need to be added once we have promotion support.
         /*
-        [InlineData(CloneType.Normal, true, true, TransactionStatus.Committed)]
-        [InlineData(CloneType.Normal, IsolationLevel.RepeatableRead, false, false, TransactionStatus.Committed)]
-        [InlineData(CloneType.Normal, IsolationLevel.ReadCommitted, false, false, TransactionStatus.Committed)]
-        [InlineData(CloneType.Normal, IsolationLevel.ReadUncommitted, false, false, TransactionStatus.Committed)]
-        [InlineData(CloneType.Normal, IsolationLevel.Snapshot, false, false, TransactionStatus.Committed)]
-        [InlineData(CloneType.Normal, IsolationLevel.Chaos, false, false, TransactionStatus.Committed)]
-        [InlineData(CloneType.Normal, IsolationLevel.Unspecified, false, false, TransactionStatus.Committed)]
-        [InlineData(CloneType.Normal, true, true, TransactionStatus.Committed)]
-        [InlineData(CloneType.BlockingDependent, IsolationLevel.Serializable, true, true, TransactionStatus.Committed)]
-        [InlineData(CloneType.BlockingDependent, IsolationLevel.RepeatableRead, true, true, TransactionStatus.Committed)]
-        [InlineData(CloneType.BlockingDependent, IsolationLevel.ReadCommitted, true, true, TransactionStatus.Committed)]
-        [InlineData(CloneType.BlockingDependent, IsolationLevel.ReadUncommitted, true, true, TransactionStatus.Committed)]
-        [InlineData(CloneType.BlockingDependent, IsolationLevel.Snapshot, true, true, TransactionStatus.Committed)]
-        [InlineData(CloneType.BlockingDependent, IsolationLevel.Chaos, true, true, TransactionStatus.Committed)]
-        [InlineData(CloneType.BlockingDependent, IsolationLevel.Unspecified, true, true, TransactionStatus.Committed)]
-        [InlineData(CloneType.RollbackDependent, IsolationLevel.Serializable, true, true, TransactionStatus.Committed)]
-        [InlineData(CloneType.RollbackDependent, IsolationLevel.RepeatableRead, true, true, TransactionStatus.Committed)]
-        [InlineData(CloneType.RollbackDependent, IsolationLevel.ReadCommitted, true, true, TransactionStatus.Committed)]
-        [InlineData(CloneType.RollbackDependent, IsolationLevel.ReadUncommitted, true, true, TransactionStatus.Committed)]
-        [InlineData(CloneType.RollbackDependent, IsolationLevel.Snapshot, true, true, TransactionStatus.Committed)]
-        [InlineData(CloneType.RollbackDependent, IsolationLevel.Chaos, true, true, TransactionStatus.Committed)]
-        [InlineData(CloneType.RollbackDependent, IsolationLevel.Unspecified, true, true, TransactionStatus.Committed)]
+        [InlineData(CloneType.Normal, true, TransactionStatus.Committed)]
+        [InlineData(CloneType.Normal, IsolationLevel.RepeatableRead, false, TransactionStatus.Committed)]
+        [InlineData(CloneType.Normal, IsolationLevel.ReadCommitted, false, TransactionStatus.Committed)]
+        [InlineData(CloneType.Normal, IsolationLevel.ReadUncommitted, false, TransactionStatus.Committed)]
+        [InlineData(CloneType.Normal, IsolationLevel.Snapshot, false, TransactionStatus.Committed)]
+        [InlineData(CloneType.Normal, IsolationLevel.Chaos, false, TransactionStatus.Committed)]
+        [InlineData(CloneType.Normal, IsolationLevel.Unspecified, false, TransactionStatus.Committed)]
+        [InlineData(CloneType.Normal, true, TransactionStatus.Committed)]
+        [InlineData(CloneType.BlockingDependent, IsolationLevel.Serializable, true, TransactionStatus.Committed)]
+        [InlineData(CloneType.BlockingDependent, IsolationLevel.RepeatableRead, true, TransactionStatus.Committed)]
+        [InlineData(CloneType.BlockingDependent, IsolationLevel.ReadCommitted, true, TransactionStatus.Committed)]
+        [InlineData(CloneType.BlockingDependent, IsolationLevel.ReadUncommitted, true, TransactionStatus.Committed)]
+        [InlineData(CloneType.BlockingDependent, IsolationLevel.Snapshot, true, TransactionStatus.Committed)]
+        [InlineData(CloneType.BlockingDependent, IsolationLevel.Chaos, true, TransactionStatus.Committed)]
+        [InlineData(CloneType.BlockingDependent, IsolationLevel.Unspecified, true, TransactionStatus.Committed)]
+        [InlineData(CloneType.RollbackDependent, IsolationLevel.Serializable, true, TransactionStatus.Committed)]
+        [InlineData(CloneType.RollbackDependent, IsolationLevel.RepeatableRead, true, TransactionStatus.Committed)]
+        [InlineData(CloneType.RollbackDependent, IsolationLevel.ReadCommitted, true, TransactionStatus.Committed)]
+        [InlineData(CloneType.RollbackDependent, IsolationLevel.ReadUncommitted, true, TransactionStatus.Committed)]
+        [InlineData(CloneType.RollbackDependent, IsolationLevel.Snapshot, true, TransactionStatus.Committed)]
+        [InlineData(CloneType.RollbackDependent, IsolationLevel.Chaos, true, TransactionStatus.Committed)]
+        [InlineData(CloneType.RollbackDependent, IsolationLevel.Unspecified, true, TransactionStatus.Committed)]
         */
-        public void Run(CloneType cloneType, IsolationLevel isoLevel, bool forcePromote, bool completeClone, TransactionStatus expectedStatus )
+        public void Run(CloneType cloneType, IsolationLevel isoLevel, bool forcePromote, TransactionStatus expectedStatus )
         {
             TransactionOptions options = new TransactionOptions
             {
@@ -126,7 +126,7 @@ namespace System.Transactions.Tests
             }
             catch (TransactionAbortedException ex)
             {
-                Assert.Equal(expectedStatus, TransactionStatus.Aborted);
+                Assert.Equal(TransactionStatus.Aborted, expectedStatus);
                 switch (cloneType)
                 {
                     case CloneType.Normal:
@@ -155,6 +155,20 @@ namespace System.Transactions.Tests
             }
 
             Assert.Equal(expectedStatus, tx.TransactionInformation.Status);
+        }
+
+        [OuterLoop] // transaction timeout of 1.5 seconds per InlineData invocation.
+        [Theory]
+        [InlineData(CloneType.BlockingDependent, IsolationLevel.Serializable, false, TransactionStatus.Aborted)]
+        [InlineData(CloneType.BlockingDependent, IsolationLevel.RepeatableRead, false, TransactionStatus.Aborted)]
+        [InlineData(CloneType.BlockingDependent, IsolationLevel.ReadCommitted, false, TransactionStatus.Aborted)]
+        [InlineData(CloneType.BlockingDependent, IsolationLevel.ReadUncommitted, false, TransactionStatus.Aborted)]
+        [InlineData(CloneType.BlockingDependent, IsolationLevel.Snapshot, false, TransactionStatus.Aborted)]
+        [InlineData(CloneType.BlockingDependent, IsolationLevel.Chaos, false, TransactionStatus.Aborted)]
+        [InlineData(CloneType.BlockingDependent, IsolationLevel.Unspecified, false, TransactionStatus.Aborted)]
+        public void RunOuterLoop(CloneType cloneType, IsolationLevel isoLevel, bool forcePromote, TransactionStatus expectedStatus)
+        {
+            Run(cloneType, isoLevel, forcePromote, expectedStatus);
         }
     }
 }

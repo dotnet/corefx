@@ -23,8 +23,7 @@ namespace System.Xml.Tests
 
         //-----------------------------------------------------------------------------------
         //[Variation(Desc = "v1 - Remove with null", Priority = 0)]
-        [InlineData()]
-        [Theory]
+        [Fact]
         public void v1()
         {
             try
@@ -42,8 +41,7 @@ namespace System.Xml.Tests
 
         //-----------------------------------------------------------------------------------
         //[Variation(Desc = "v2 - Remove with just added schema", Priority = 0)]
-        [InlineData()]
-        [Theory]
+        [Fact]
         public void v2()
         {
             XmlSchemaSet sc = new XmlSchemaSet();
@@ -61,8 +59,7 @@ namespace System.Xml.Tests
 
         //-----------------------------------------------------------------------------------
         //[Variation(Desc = "v3 - Remove first added schema, check the rest", Priority = 0)]
-        [InlineData()]
-        [Theory]
+        [Fact]
         public void v3()
         {
             XmlSchemaSet sc = new XmlSchemaSet();
@@ -151,8 +148,7 @@ namespace System.Xml.Tests
 
         //-----------------------------------------------------------------------------------
         //[Variation(Desc = "v6 - Remove: Add B(NONS) to a namespace, Add A(ns-a) which imports B, Remove B(nons)", Priority = 1)]
-        [InlineData()]
-        [Theory]
+        [Fact]
         public void v6()
         {
             XmlSchemaSet sc = new XmlSchemaSet();
@@ -168,7 +164,7 @@ namespace System.Xml.Tests
                 ICollection Col = sc.Schemas();
                 CError.Compare(Col.Count, 2, "ICollection.Count");
                 CError.Compare(sc.Contains("ns-b"), false, "Contains");
-                CError.Compare(sc.Contains(String.Empty), true, "Contains");
+                CError.Compare(sc.Contains(string.Empty), true, "Contains");
                 CError.Compare(sc.Contains("ns-a"), true, "Contains");
             }
             catch (Exception)
@@ -180,8 +176,7 @@ namespace System.Xml.Tests
 
         //-----------------------------------------------------------------------------------
         //[Variation(Desc = "v7 - Remove: Add B(NONS) to a namespace, Add A(ns-a) which improts B, Remove B(ns-b)", Priority = 1)]
-        [InlineData()]
-        [Theory]
+        [Fact]
         public void v7()
         {
             XmlSchemaSet sc = new XmlSchemaSet();
@@ -192,7 +187,7 @@ namespace System.Xml.Tests
                 XmlSchema Schema1 = sc.Add("ns-b", Path.Combine(TestData._Root, "import_v4_b.xsd"));
                 XmlSchema Schema2 = sc.Add(null, Path.Combine(TestData._Root, "import_v5_a.xsd")); // param as filename
                 sc.Compile();
-                ICollection col = sc.Schemas(String.Empty);
+                ICollection col = sc.Schemas(string.Empty);
                 foreach (XmlSchema schema in col)
                 {
                     sc.Remove(schema); //should remove just one
@@ -202,7 +197,7 @@ namespace System.Xml.Tests
                 ICollection Col = sc.Schemas();
                 CError.Compare(Col.Count, 2, "ICollection.Count");
                 CError.Compare(sc.Contains("ns-b"), true, "Contains");
-                CError.Compare(sc.Contains(String.Empty), false, "Contains");
+                CError.Compare(sc.Contains(string.Empty), false, "Contains");
                 CError.Compare(sc.Contains("ns-a"), true, "Contains");
             }
             catch (Exception)
@@ -309,8 +304,7 @@ namespace System.Xml.Tests
 
         //-----------------------------------------------------------------------------------
         //[Variation(Desc = "v10 - Import: B(ns-b) added, A(ns-a) imports B's NS", Priority = 2)]
-        [InlineData()]
-        [Theory]
+        [Fact]
         public void v10()
         {
             try
@@ -362,8 +356,7 @@ namespace System.Xml.Tests
         }
 
         //[Variation(Desc = "v20 - 358206 : Removing the last schema from the set should clear the global tables", Priority = 2)]
-        [InlineData()]
-        [Theory]
+        [Fact]
         public void v20()
         {
             XmlSchemaSet sc = new XmlSchemaSet();

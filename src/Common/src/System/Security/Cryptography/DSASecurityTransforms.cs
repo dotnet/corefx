@@ -2,9 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography.Apple;
+using System.Security.Cryptography.Asn1;
 using Internal.Cryptography;
 
 namespace System.Security.Cryptography
@@ -24,6 +27,7 @@ namespace System.Security.Cryptography
             public sealed partial class DSASecurityTransforms : DSA
             {
                 private SecKeyPair _keys;
+                private bool _disposed;
 
                 public DSASecurityTransforms()
                     : this(1024)
@@ -32,7 +36,7 @@ namespace System.Security.Cryptography
 
                 public DSASecurityTransforms(int keySize)
                 {
-                    KeySize = keySize;
+                    base.KeySize = keySize;
                 }
 
                 internal DSASecurityTransforms(SafeSecKeyRefHandle publicKey)
@@ -67,6 +71,8 @@ namespace System.Security.Cryptography
                         // Set the KeySize before freeing the key so that an invalid value doesn't throw away the key
                         base.KeySize = value;
 
+                        ThrowIfDisposed();
+
                         if (_keys != null)
                         {
                             _keys.Dispose();
@@ -77,41 +83,47 @@ namespace System.Security.Cryptography
 
                 public override DSAParameters ExportParameters(bool includePrivateParameters)
                 {
+                    // Apple requires all private keys to be exported encrypted, but since we're trying to export
+                    // as parsed structures we will need to decrypt it for the user.
+                    const string ExportPassword = "DotnetExportPassphrase";
                     SecKeyPair keys = GetKeys();
 
-                    if (keys.PublicKey == null ||
-                        (includePrivateParameters && keys.PrivateKey == null))
-                    { 
+                    if (includePrivateParameters && keys.PrivateKey == null)
+                    {
                         throw new CryptographicException(SR.Cryptography_OpenInvalidHandle);
                     }
 
-                    DSAParameters parameters = new DSAParameters();
+                    byte[] keyBlob = Interop.AppleCrypto.SecKeyExport(
+                        includePrivateParameters ? keys.PrivateKey : keys.PublicKey,
+                        exportPrivate: includePrivateParameters,
+                        password: ExportPassword);
 
-                    DerSequenceReader publicKeyReader =
-                        Interop.AppleCrypto.SecKeyExport(keys.PublicKey, exportPrivate: false);
-
-                    publicKeyReader.ReadSubjectPublicKeyInfo(ref parameters);
-
-                    if (includePrivateParameters)
+                    try
                     {
-                        DerSequenceReader privateKeyReader =
-                            Interop.AppleCrypto.SecKeyExport(keys.PrivateKey, exportPrivate: true);
-
-                        privateKeyReader.ReadPkcs8Blob(ref parameters);
+                        if (!includePrivateParameters)
+                        {
+                            DSAKeyFormatHelper.ReadSubjectPublicKeyInfo(
+                                keyBlob,
+                                out int localRead,
+                                out DSAParameters key);
+                            Debug.Assert(localRead == keyBlob.Length);
+                            return key;
+                        }
+                        else
+                        {
+                            DSAKeyFormatHelper.ReadEncryptedPkcs8(
+                                keyBlob,
+                                ExportPassword,
+                                out int localRead,
+                                out DSAParameters key);
+                            Debug.Assert(localRead == keyBlob.Length);
+                            return key;
+                        }
                     }
-
-                    KeyBlobHelpers.TrimPaddingByte(ref parameters.P);
-                    KeyBlobHelpers.TrimPaddingByte(ref parameters.Q);
-
-                    KeyBlobHelpers.PadOrTrim(ref parameters.G, parameters.P.Length);
-                    KeyBlobHelpers.PadOrTrim(ref parameters.Y, parameters.P.Length);
-
-                    if (includePrivateParameters)
+                    finally
                     {
-                        KeyBlobHelpers.PadOrTrim(ref parameters.X, parameters.Q.Length);
+                        CryptographicOperations.ZeroMemory(keyBlob);
                     }
-
-                    return parameters;
                 }
 
                 public override void ImportParameters(DSAParameters parameters)
@@ -141,6 +153,8 @@ namespace System.Security.Cryptography
                     if (parameters.Q.Length != 20)
                         throw new CryptographicException(SR.Cryptography_InvalidDsaParameters_QRestriction_ShortKey);
 
+                    ThrowIfDisposed();
+
                     if (hasPrivateKey)
                     {
                         SafeSecKeyRefHandle privateKey = ImportKey(parameters);
@@ -168,12 +182,80 @@ namespace System.Security.Cryptography
                     }
                 }
 
+                public override void ImportEncryptedPkcs8PrivateKey(
+                    ReadOnlySpan<byte> passwordBytes,
+                    ReadOnlySpan<byte> source,
+                    out int bytesRead)
+                {
+                    ThrowIfDisposed();
+                    base.ImportEncryptedPkcs8PrivateKey(passwordBytes, source, out bytesRead);
+                }
+
+                public override void ImportEncryptedPkcs8PrivateKey(
+                    ReadOnlySpan<char> password,
+                    ReadOnlySpan<byte> source,
+                    out int bytesRead)
+                {
+                    ThrowIfDisposed();
+                    base.ImportEncryptedPkcs8PrivateKey(password, source, out bytesRead);
+                }
+
                 private static SafeSecKeyRefHandle ImportKey(DSAParameters parameters)
                 {
-                    bool hasPrivateKey = parameters.X != null;
-                    byte[] blob = hasPrivateKey ? parameters.ToPrivateKeyBlob() : parameters.ToSubjectPublicKeyInfo();
+                    if (parameters.X != null)
+                    {
+                        // DSAPrivateKey ::= SEQUENCE(
+                        //   version INTEGER,
+                        //   p INTEGER,
+                        //   q INTEGER,
+                        //   g INTEGER,
+                        //   y INTEGER,
+                        //   x INTEGER,
+                        // )
 
-                    return Interop.AppleCrypto.ImportEphemeralKey(blob, hasPrivateKey);
+                        using (AsnWriter privateKeyWriter = new AsnWriter(AsnEncodingRules.DER))
+                        {
+                            privateKeyWriter.PushSequence();
+                            privateKeyWriter.WriteInteger(0);
+                            privateKeyWriter.WriteKeyParameterInteger(parameters.P);
+                            privateKeyWriter.WriteKeyParameterInteger(parameters.Q);
+                            privateKeyWriter.WriteKeyParameterInteger(parameters.G);
+                            privateKeyWriter.WriteKeyParameterInteger(parameters.Y);
+                            privateKeyWriter.WriteKeyParameterInteger(parameters.X);
+                            privateKeyWriter.PopSequence();
+                            return Interop.AppleCrypto.ImportEphemeralKey(privateKeyWriter.EncodeAsSpan(), true);
+                        }
+                    }
+                    else
+                    {
+                        using (AsnWriter writer = DSAKeyFormatHelper.WriteSubjectPublicKeyInfo(parameters))
+                        {
+                            return Interop.AppleCrypto.ImportEphemeralKey(writer.EncodeAsSpan(), false);
+                        }
+                    }
+                }
+
+                public override unsafe void ImportSubjectPublicKeyInfo(
+                    ReadOnlySpan<byte> source,
+                    out int bytesRead)
+                {
+                    ThrowIfDisposed();
+
+                    fixed (byte* ptr = &MemoryMarshal.GetReference(source))
+                    {
+                        using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
+                        {
+                            // Validate the DER value and get the number of bytes.
+                            DSAKeyFormatHelper.ReadSubjectPublicKeyInfo(
+                                manager.Memory,
+                                out int localRead);
+
+                            SafeSecKeyRefHandle publicKey = Interop.AppleCrypto.ImportEphemeralKey(source.Slice(0, localRead), false);
+                            SetKey(SecKeyPair.PublicOnly(publicKey));
+
+                            bytesRead = localRead;
+                        }
+                    }
                 }
 
                 public override byte[] CreateSignature(byte[] rgbHash)
@@ -247,13 +329,30 @@ namespace System.Security.Cryptography
                             _keys.Dispose();
                             _keys = null;
                         }
+
+                        _disposed = true;
                     }
 
                     base.Dispose(disposing);
                 }
 
+                private void ThrowIfDisposed()
+                {
+                    // The other SecurityTransforms types use _keys.PublicKey == null,
+                    // but since Apple doesn't provide DSA key generation we can't easily tell
+                    // if a failed attempt to generate a key happened, or we're in a pristine state.
+                    //
+                    // So this type uses an explicit field, rather than inferred state.
+                    if (_disposed)
+                    {
+                        throw new ObjectDisposedException(nameof(DSA));
+                    }
+                }
+
                 internal SecKeyPair GetKeys()
                 {
+                    ThrowIfDisposed();
+
                     SecKeyPair current = _keys;
 
                     if (current != null)
@@ -271,6 +370,8 @@ namespace System.Security.Cryptography
 
                 private void SetKey(SecKeyPair newKeyPair)
                 {
+                    ThrowIfDisposed();
+
                     SecKeyPair current = _keys;
                     _keys = newKeyPair;
                     current?.Dispose();
@@ -285,188 +386,5 @@ namespace System.Security.Cryptography
         }
 #if INTERNAL_ASYMMETRIC_IMPLEMENTATIONS
     }
-#else
-    internal static class KeySizeHelpers
-    {
-
-        public static bool IsLegalSize(this int size, KeySizes[] legalSizes)
-        {
-            for (int i = 0; i < legalSizes.Length; i++)
-            {
-                KeySizes currentSizes = legalSizes[i];
-
-                // If a cipher has only one valid key size, MinSize == MaxSize and SkipSize will be 0
-                if (currentSizes.SkipSize == 0)
-                {
-                    if (currentSizes.MinSize == size)
-                        return true;
-                }
-                else if (size >= currentSizes.MinSize && size <= currentSizes.MaxSize)
-                {
-                    // If the number is in range, check to see if it's a legal increment above MinSize
-                    int delta = size - currentSizes.MinSize;
-
-                    // While it would be unusual to see KeySizes { 10, 20, 5 } and { 11, 14, 1 }, it could happen.
-                    // So don't return false just because this one doesn't match.
-                    if (delta % currentSizes.SkipSize == 0)
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-    }
 #endif
-
-    internal static class DsaKeyBlobHelpers
-    {
-        private static readonly Oid s_idDsa = new Oid("1.2.840.10040.4.1");
-
-        internal static void ReadSubjectPublicKeyInfo(this DerSequenceReader keyInfo, ref DSAParameters parameters)
-        {
-            // SubjectPublicKeyInfo::= SEQUENCE  {
-            //    algorithm AlgorithmIdentifier,
-            //    subjectPublicKey     BIT STRING  }
-            DerSequenceReader algorithm = keyInfo.ReadSequence();
-            string algorithmOid = algorithm.ReadOidAsString();
-
-            // EC Public Key
-            if (algorithmOid != s_idDsa.Value)
-            {
-                throw new CryptographicException();
-            }
-
-            // Dss-Parms ::= SEQUENCE {
-            //   p INTEGER,
-            //   q INTEGER,
-            //   g INTEGER
-            // }
-
-            DerSequenceReader algParameters = algorithm.ReadSequence();
-            byte[] publicKeyBlob = keyInfo.ReadBitString();
-            // We don't care about the rest of the blob here, but it's expected to not exist.
-
-            ReadSubjectPublicKeyInfo(algParameters, publicKeyBlob, ref parameters);
-        }
-
-        internal static void ReadSubjectPublicKeyInfo(
-            this DerSequenceReader algParameters,
-            byte[] publicKeyBlob,
-            ref DSAParameters parameters)
-        {
-            parameters.P = algParameters.ReadIntegerBytes();
-            parameters.Q = algParameters.ReadIntegerBytes();
-            parameters.G = algParameters.ReadIntegerBytes();
-
-            DerSequenceReader privateKeyReader = DerSequenceReader.CreateForPayload(publicKeyBlob);
-            parameters.Y = privateKeyReader.ReadIntegerBytes();
-
-            KeyBlobHelpers.TrimPaddingByte(ref parameters.P);
-            KeyBlobHelpers.TrimPaddingByte(ref parameters.Q);
-
-            KeyBlobHelpers.PadOrTrim(ref parameters.G, parameters.P.Length);
-            KeyBlobHelpers.PadOrTrim(ref parameters.Y, parameters.P.Length);
-        }
-
-        internal static byte[] ToSubjectPublicKeyInfo(this DSAParameters parameters)
-        {
-            // SubjectPublicKeyInfo::= SEQUENCE  {
-            //    algorithm AlgorithmIdentifier,
-            //    subjectPublicKey     BIT STRING  }
-
-            // Dss-Parms ::= SEQUENCE {
-            //   p INTEGER,
-            //   q INTEGER,
-            //   g INTEGER
-            // }
-
-            return DerEncoder.ConstructSequence(
-                DerEncoder.ConstructSegmentedSequence(
-                    DerEncoder.SegmentedEncodeOid(s_idDsa),
-                    DerEncoder.ConstructSegmentedSequence(
-                        DerEncoder.SegmentedEncodeUnsignedInteger(parameters.P),
-                        DerEncoder.SegmentedEncodeUnsignedInteger(parameters.Q),
-                        DerEncoder.SegmentedEncodeUnsignedInteger(parameters.G)
-                    )
-                ),
-                DerEncoder.SegmentedEncodeBitString(
-                    DerEncoder.SegmentedEncodeUnsignedInteger(parameters.Y))
-            );
-        }
-
-        internal static void ReadPkcs8Blob(this DerSequenceReader reader, ref DSAParameters parameters)
-        {
-            // Since the PKCS#8 blob for DSS/DSA does not include the public key (Y) this
-            // structure is only read after filling the public half.
-            Debug.Assert(parameters.P != null);
-            Debug.Assert(parameters.Q != null);
-            Debug.Assert(parameters.G != null);
-            Debug.Assert(parameters.Y != null);
-
-            // OneAsymmetricKey ::= SEQUENCE {
-            //   version                   Version,
-            //   privateKeyAlgorithm       PrivateKeyAlgorithmIdentifier,
-            //   privateKey                PrivateKey,
-            //   attributes            [0] Attributes OPTIONAL,
-            //   ...,
-            //   [[2: publicKey        [1] PublicKey OPTIONAL ]],
-            //   ...
-            // }
-            //
-            // PrivateKeyInfo ::= OneAsymmetricKey
-            //
-            // PrivateKey ::= OCTET STRING
-
-            int version = reader.ReadInteger();
-
-            // We understand both version 0 and 1 formats,
-            // which are now known as v1 and v2, respectively.
-            if (version > 1)
-            {
-                throw new CryptographicException();
-            }
-
-            {
-                // Ensure we're reading DSA, extract the parameters
-                DerSequenceReader algorithm = reader.ReadSequence();
-
-                string algorithmOid = algorithm.ReadOidAsString();
-
-                if (algorithmOid != s_idDsa.Value)
-                {
-                    throw new CryptographicException();
-                }
-
-                // The Dss-Params SEQUENCE is present here, but not needed since
-                // we got it from the public key already.
-            }
-
-            byte[] privateKeyBlob = reader.ReadOctetString();
-            DerSequenceReader privateKeyReader = DerSequenceReader.CreateForPayload(privateKeyBlob);
-            parameters.X = privateKeyReader.ReadIntegerBytes();
-        }
-
-        internal static byte[] ToPrivateKeyBlob(this DSAParameters parameters)
-        {
-            Debug.Assert(parameters.X != null);
-
-            // DSAPrivateKey ::= SEQUENCE(
-            //   version INTEGER,
-            //   p INTEGER,
-            //   q INTEGER,
-            //   g INTEGER,
-            //   y INTEGER,
-            //   x INTEGER,
-            // )
-
-            return DerEncoder.ConstructSequence(
-                DerEncoder.SegmentedEncodeUnsignedInteger(new byte[] { 0 }),
-                DerEncoder.SegmentedEncodeUnsignedInteger(parameters.P),
-                DerEncoder.SegmentedEncodeUnsignedInteger(parameters.Q),
-                DerEncoder.SegmentedEncodeUnsignedInteger(parameters.G),
-                DerEncoder.SegmentedEncodeUnsignedInteger(parameters.Y),
-                DerEncoder.SegmentedEncodeUnsignedInteger(parameters.X));
-        }
-    }
 }

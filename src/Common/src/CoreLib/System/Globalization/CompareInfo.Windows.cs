@@ -4,9 +4,9 @@
 
 using System.Buffers;
 using System.Diagnostics;
-using System.Security;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+
+using Internal.Runtime.CompilerServices;
 
 namespace System.Globalization
 {
@@ -16,7 +16,7 @@ namespace System.Globalization
         {
             _sortName = culture.SortName;
 
-            if (_invariantMode)
+            if (GlobalizationMode.Invariant)
             {
                 _sortHandle = IntPtr.Zero;
             }
@@ -91,14 +91,15 @@ namespace System.Globalization
             return FindStringOrdinal(FIND_FROMSTART, source, startIndex, count, value, value.Length, ignoreCase);
         }
 
-        internal static int IndexOfOrdinalCore(ReadOnlySpan<char> source, ReadOnlySpan<char> value, bool ignoreCase)
+        internal static int IndexOfOrdinalCore(ReadOnlySpan<char> source, ReadOnlySpan<char> value, bool ignoreCase, bool fromBeginning)
         {
             Debug.Assert(!GlobalizationMode.Invariant);
 
             Debug.Assert(source.Length != 0);
             Debug.Assert(value.Length != 0);
 
-            return FindStringOrdinal(FIND_FROMSTART, source, value, ignoreCase);
+            uint positionFlag = fromBeginning ? (uint)FIND_FROMSTART : FIND_FROMEND;
+            return FindStringOrdinal(positionFlag, source, value, ignoreCase);
         }
 
         internal static int LastIndexOfOrdinalCore(string source, string value, int startIndex, int count, bool ignoreCase)
@@ -111,11 +112,9 @@ namespace System.Globalization
             return FindStringOrdinal(FIND_FROMEND, source, startIndex - count + 1, count, value, value.Length, ignoreCase);
         }
 
-        private unsafe int GetHashCodeOfStringCore(string source, CompareOptions options)
+        private unsafe int GetHashCodeOfStringCore(ReadOnlySpan<char> source, CompareOptions options)
         {
-            Debug.Assert(!_invariantMode);
-
-            Debug.Assert(source != null);
+            Debug.Assert(!GlobalizationMode.Invariant);
             Debug.Assert((options & (CompareOptions.Ordinal | CompareOptions.OrdinalIgnoreCase)) == 0);
 
             if (source.Length == 0)
@@ -129,7 +128,7 @@ namespace System.Globalization
             {
                 int sortKeyLength = Interop.Kernel32.LCMapStringEx(_sortHandle != IntPtr.Zero ? null : _sortName,
                                                   flags,
-                                                  pSource, source.Length,
+                                                  pSource, source.Length /* in chars */,
                                                   null, 0,
                                                   null, null, _sortHandle);
                 if (sortKeyLength == 0)
@@ -137,7 +136,12 @@ namespace System.Globalization
                     throw new ArgumentException(SR.Arg_ExternalException);
                 }
 
-                byte[] borrowedArr = null;
+                // Note in calls to LCMapStringEx below, the input buffer is specified in wchars (and wchar count),
+                // but the output buffer is specified in bytes (and byte count). This is because when generating
+                // sort keys, LCMapStringEx treats the output buffer as containing opaque binary data.
+                // See https://docs.microsoft.com/en-us/windows/desktop/api/winnls/nf-winnls-lcmapstringex.
+
+                byte[]? borrowedArr = null;
                 Span<byte> span = sortKeyLength <= 512 ?
                     stackalloc byte[512] :
                     (borrowedArr = ArrayPool<byte>.Shared.Rent(sortKeyLength));
@@ -146,7 +150,7 @@ namespace System.Globalization
                 {
                     if (Interop.Kernel32.LCMapStringEx(_sortHandle != IntPtr.Zero ? null : _sortName,
                                                       flags,
-                                                      pSource, source.Length,
+                                                      pSource, source.Length /* in chars */,
                                                       pSortKey, sortKeyLength,
                                                       null, null, _sortHandle) != sortKeyLength)
                     {
@@ -173,7 +177,7 @@ namespace System.Globalization
             fixed (char* char1 = &string1)
             fixed (char* char2 = &string2)
             {
-                // Use the OS to compare and then convert the result to expected value by subtracting 2 
+                // Use the OS to compare and then convert the result to expected value by subtracting 2
                 return Interop.Kernel32.CompareStringOrdinal(char1, count1, char2, count2, true) - 2;
             }
         }
@@ -184,10 +188,10 @@ namespace System.Globalization
         private unsafe int CompareString(ReadOnlySpan<char> string1, string string2, CompareOptions options)
         {
             Debug.Assert(string2 != null);
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
             Debug.Assert((options & (CompareOptions.Ordinal | CompareOptions.OrdinalIgnoreCase)) == 0);
 
-            string localeName = _sortHandle != IntPtr.Zero ? null : _sortName;
+            string? localeName = _sortHandle != IntPtr.Zero ? null : _sortName;
 
             fixed (char* pLocaleName = localeName)
             fixed (char* pString1 = &MemoryMarshal.GetReference(string1))
@@ -217,10 +221,10 @@ namespace System.Globalization
 
         private unsafe int CompareString(ReadOnlySpan<char> string1, ReadOnlySpan<char> string2, CompareOptions options)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
             Debug.Assert((options & (CompareOptions.Ordinal | CompareOptions.OrdinalIgnoreCase)) == 0);
 
-            string localeName = _sortHandle != IntPtr.Zero ? null : _sortName;
+            string? localeName = _sortHandle != IntPtr.Zero ? null : _sortName;
 
             fixed (char* pLocaleName = localeName)
             fixed (char* pString1 = &MemoryMarshal.GetReference(string1))
@@ -255,11 +259,11 @@ namespace System.Globalization
                     ReadOnlySpan<char> lpStringValue,
                     int* pcchFound)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
             Debug.Assert(!lpStringSource.IsEmpty);
             Debug.Assert(!lpStringValue.IsEmpty);
 
-            string localeName = _sortHandle != IntPtr.Zero ? null : _sortName;
+            string? localeName = _sortHandle != IntPtr.Zero ? null : _sortName;
 
             fixed (char* pLocaleName = localeName)
             fixed (char* pSource = &MemoryMarshal.GetReference(lpStringSource))
@@ -278,7 +282,7 @@ namespace System.Globalization
                                     _sortHandle);
             }
         }
-        
+
         private unsafe int FindString(
             uint dwFindNLSStringFlags,
             string lpStringSource,
@@ -289,11 +293,11 @@ namespace System.Globalization
             int cchValue,
             int* pcchFound)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
             Debug.Assert(lpStringSource != null);
             Debug.Assert(lpStringValue != null);
 
-            string localeName = _sortHandle != IntPtr.Zero ? null : _sortName;
+            string? localeName = _sortHandle != IntPtr.Zero ? null : _sortName;
 
             fixed (char* pLocaleName = localeName)
             fixed (char* pSource = lpStringSource)
@@ -316,64 +320,40 @@ namespace System.Globalization
             }
         }
 
-        internal unsafe int IndexOfCore(String source, String target, int startIndex, int count, CompareOptions options, int* matchLengthPtr)
+        internal unsafe int IndexOfCore(string source, string target, int startIndex, int count, CompareOptions options, int* matchLengthPtr)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
 
             Debug.Assert(source != null);
             Debug.Assert(target != null);
             Debug.Assert((options & CompareOptions.OrdinalIgnoreCase) == 0);
+            Debug.Assert((options & CompareOptions.Ordinal) == 0);
 
-            if (target.Length == 0)
+            int retValue = FindString(FIND_FROMSTART | (uint)GetNativeCompareFlags(options), source, startIndex, count,
+                                                            target, 0, target.Length, matchLengthPtr);
+            if (retValue >= 0)
             {
-                if (matchLengthPtr != null)
-                    *matchLengthPtr = 0;
-                return startIndex;
-            }
-
-            if (source.Length == 0)
-            {
-                return -1;
-            }
-
-            if ((options & CompareOptions.Ordinal) != 0)
-            {
-                int retValue = FastIndexOfString(source, target, startIndex, count, target.Length, findLastIndex: false);
-                if (retValue >= 0)
-                {
-                    if (matchLengthPtr != null)
-                        *matchLengthPtr = target.Length;
-                }
-                return retValue;
-            }
-            else
-            {
-                int retValue = FindString(FIND_FROMSTART | (uint)GetNativeCompareFlags(options), source, startIndex, count,
-                                                               target, 0, target.Length, matchLengthPtr);
-                if (retValue >= 0)
-                {
-                    return retValue + startIndex;
-                }
+                return retValue + startIndex;
             }
 
             return -1;
         }
 
-        internal unsafe int IndexOfCore(ReadOnlySpan<char> source, ReadOnlySpan<char> target, CompareOptions options, int* matchLengthPtr)
+        internal unsafe int IndexOfCore(ReadOnlySpan<char> source, ReadOnlySpan<char> target, CompareOptions options, int* matchLengthPtr, bool fromBeginning)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
 
             Debug.Assert(source.Length != 0);
             Debug.Assert(target.Length != 0);
             Debug.Assert((options == CompareOptions.None || options == CompareOptions.IgnoreCase));
 
-            int retValue = FindString(FIND_FROMSTART | (uint)GetNativeCompareFlags(options), source, target, matchLengthPtr);
-            return retValue;
+            uint positionFlag = fromBeginning ? (uint)FIND_FROMSTART : FIND_FROMEND;
+            return FindString(positionFlag | (uint)GetNativeCompareFlags(options), source, target, matchLengthPtr);
         }
 
         private unsafe int LastIndexOfCore(string source, string target, int startIndex, int count, CompareOptions options)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
 
             Debug.Assert(!string.IsNullOrEmpty(source));
             Debug.Assert(target != null);
@@ -384,7 +364,7 @@ namespace System.Globalization
 
             if ((options & CompareOptions.Ordinal) != 0)
             {
-                return FastIndexOfString(source, target, startIndex, count, target.Length, findLastIndex: true);
+                return FastLastIndexOfString(source, target, startIndex, count, target.Length);
             }
             else
             {
@@ -402,7 +382,7 @@ namespace System.Globalization
 
         private unsafe bool StartsWith(string source, string prefix, CompareOptions options)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
 
             Debug.Assert(!string.IsNullOrEmpty(source));
             Debug.Assert(!string.IsNullOrEmpty(prefix));
@@ -414,7 +394,7 @@ namespace System.Globalization
 
         private unsafe bool StartsWith(ReadOnlySpan<char> source, ReadOnlySpan<char> prefix, CompareOptions options)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
 
             Debug.Assert(!source.IsEmpty);
             Debug.Assert(!prefix.IsEmpty);
@@ -425,7 +405,7 @@ namespace System.Globalization
 
         private unsafe bool EndsWith(string source, string suffix, CompareOptions options)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
 
             Debug.Assert(!string.IsNullOrEmpty(source));
             Debug.Assert(!string.IsNullOrEmpty(suffix));
@@ -437,7 +417,7 @@ namespace System.Globalization
 
         private unsafe bool EndsWith(ReadOnlySpan<char> source, ReadOnlySpan<char> suffix, CompareOptions options)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
 
             Debug.Assert(!source.IsEmpty);
             Debug.Assert(!suffix.IsEmpty);
@@ -451,91 +431,59 @@ namespace System.Globalization
         private IntPtr _sortHandle;
 
         private const uint LCMAP_SORTKEY = 0x00000400;
-        private const uint LCMAP_HASH    = 0x00040000;
 
         private const int FIND_STARTSWITH = 0x00100000;
         private const int FIND_ENDSWITH = 0x00200000;
         private const int FIND_FROMSTART = 0x00400000;
         private const int FIND_FROMEND = 0x00800000;
 
-        // TODO: Instead of this method could we just have upstack code call IndexOfOrdinal with ignoreCase = false?
-        private static unsafe int FastIndexOfString(string source, string target, int startIndex, int sourceCount, int targetCount, bool findLastIndex)
+        // TODO: Instead of this method could we just have upstack code call LastIndexOfOrdinal with ignoreCase = false?
+        private static unsafe int FastLastIndexOfString(string source, string target, int startIndex, int sourceCount, int targetCount)
         {
             int retValue = -1;
 
-            int sourceStartIndex = findLastIndex ? startIndex - sourceCount + 1 : startIndex;
+            int sourceStartIndex = startIndex - sourceCount + 1;
 
             fixed (char* pSource = source, spTarget = target)
             {
                 char* spSubSource = pSource + sourceStartIndex;
 
-                if (findLastIndex)
+                int endPattern = sourceCount - targetCount;
+                if (endPattern < 0)
+                    return -1;
+
+                Debug.Assert(target.Length >= 1);
+                char patternChar0 = spTarget[0];
+                for (int ctrSrc = endPattern; ctrSrc >= 0; ctrSrc--)
                 {
-                    int startPattern = (sourceCount - 1) - targetCount + 1;
-                    if (startPattern < 0)
-                        return -1;
+                    if (spSubSource[ctrSrc] != patternChar0)
+                        continue;
 
-                    char patternChar0 = spTarget[0];
-                    for (int ctrSrc = startPattern; ctrSrc >= 0; ctrSrc--)
+                    int ctrPat;
+                    for (ctrPat = 1; ctrPat < targetCount; ctrPat++)
                     {
-                        if (spSubSource[ctrSrc] != patternChar0)
-                            continue;
-
-                        int ctrPat;
-                        for (ctrPat = 1; ctrPat < targetCount; ctrPat++)
-                        {
-                            if (spSubSource[ctrSrc + ctrPat] != spTarget[ctrPat])
-                                break;
-                        }
-                        if (ctrPat == targetCount)
-                        {
-                            retValue = ctrSrc;
+                        if (spSubSource[ctrSrc + ctrPat] != spTarget[ctrPat])
                             break;
-                        }
                     }
-
-                    if (retValue >= 0)
+                    if (ctrPat == targetCount)
                     {
-                        retValue += startIndex - sourceCount + 1;
+                        retValue = ctrSrc;
+                        break;
                     }
                 }
-                else
+
+                if (retValue >= 0)
                 {
-                    int endPattern = (sourceCount - 1) - targetCount + 1;
-                    if (endPattern < 0)
-                        return -1;
-
-                    char patternChar0 = spTarget[0];
-                    for (int ctrSrc = 0; ctrSrc <= endPattern; ctrSrc++)
-                    {
-                        if (spSubSource[ctrSrc] != patternChar0)
-                            continue;
-                        int ctrPat;
-                        for (ctrPat = 1; ctrPat < targetCount; ctrPat++)
-                        {
-                            if (spSubSource[ctrSrc + ctrPat] != spTarget[ctrPat])
-                                break;
-                        }
-                        if (ctrPat == targetCount)
-                        {
-                            retValue = ctrSrc;
-                            break;
-                        }
-                    }
-
-                    if (retValue >= 0)
-                    {
-                        retValue += startIndex;
-                    }
+                    retValue += startIndex - sourceCount + 1;
                 }
             }
 
             return retValue;
         }
 
-        private unsafe SortKey CreateSortKey(String source, CompareOptions options)
+        private unsafe SortKey CreateSortKey(string source, CompareOptions options)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
 
             if (source == null) { throw new ArgumentNullException(nameof(source)); }
 
@@ -544,9 +492,9 @@ namespace System.Globalization
                 throw new ArgumentException(SR.Argument_InvalidFlag, nameof(options));
             }
 
-            byte [] keyData = null;
+            byte [] keyData;
             if (source.Length == 0)
-            { 
+            {
                 keyData = Array.Empty<byte>();
             }
             else
@@ -632,7 +580,7 @@ namespace System.Globalization
 
         private unsafe SortVersion GetSortVersion()
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
 
             Interop.Kernel32.NlsVersionInfoEx nlsVersion = new Interop.Kernel32.NlsVersionInfoEx();
             nlsVersion.dwNLSVersionInfoSize = sizeof(Interop.Kernel32.NlsVersionInfoEx);

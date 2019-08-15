@@ -87,7 +87,7 @@ namespace System.Collections.Generic
         /// The total number of items in this builder, including reserved regions.
         /// </summary>
         public int Count => checked(_builder.Count + _reservedCount);
-        
+
         /// <summary>
         /// The list of reserved regions in this builder.
         /// </summary>
@@ -109,7 +109,7 @@ namespace System.Collections.Generic
         /// Copies the contents of this builder to the specified array.
         /// </summary>
         /// <param name="array">The destination array.</param>
-        /// <param name="arrayIndex">The index in <see cref="array"/> to start copying to.</param>
+        /// <param name="arrayIndex">The index in <paramref name="array"/> to start copying to.</param>
         /// <param name="count">The number of items to copy.</param>
         public void CopyTo(T[] array, int arrayIndex, int count)
         {
@@ -136,7 +136,7 @@ namespace System.Collections.Generic
                     copied += toCopy;
                     count -= toCopy;
                 }
-                
+
                 if (count == 0)
                 {
                     return;

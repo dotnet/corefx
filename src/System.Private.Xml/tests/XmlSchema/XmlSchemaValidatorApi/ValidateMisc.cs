@@ -35,7 +35,7 @@ namespace System.Xml.Tests
         [InlineData("simpleType", "stE064.xsd", 1, 1, 1, 0)]
         [InlineData("Wildcards", "wildG007.xsd", 1, 1, 2, 0)]
         [InlineData("Wildcards", "wildG010.xsd", 3, 1, 5, 0)]
-        public void v1(String testDir, String testFile, int expCount, int expCountGT, int expCountGE, int expCountGA)
+        public void v1(string testDir, string testFile, int expCount, int expCountGT, int expCountGE, int expCountGA)
         {
             Initialize();
             string xsd = Path.Combine(path, testDir, testFile);
@@ -63,7 +63,7 @@ namespace System.Xml.Tests
             ValidateSchemaSet(ss, expCount, true, expCountGT, expCountGE, expCountGA, "Validation after repr/comp");
             ValidateWithSchemaInfo(ss);
 
-            Assert.Equal(ss.RemoveRecursive(Schema), true);
+            Assert.True(ss.RemoveRecursive(Schema));
             ValidateSchemaSet(ss, 0, false, 1, 0, 0, "Validation after remRec");
             ValidateWithSchemaInfo(ss);
 
@@ -89,7 +89,7 @@ namespace System.Xml.Tests
         [InlineData("simpleType", "stE064", 1, 1, 1, 0)]
         [InlineData("Wildcards", "wildG007", 1, 1, 2, 0)]
         [InlineData("Wildcards", "wildG010", 3, 1, 5, 0)]
-        public void v2(String testDir, String testFile, int expCount, int expCountGT, int expCountGE, int expCountGA)
+        public void v2(string testDir, string testFile, int expCount, int expCountGT, int expCountGE, int expCountGA)
         {
             Initialize();
             string xsd = Path.Combine(path, testDir, testFile + ".xsd");
@@ -117,7 +117,7 @@ namespace System.Xml.Tests
             ValidateSchemaSet(ss, expCount, true, expCountGT, expCountGE, expCountGA, "Validation after repr/comp");
             ValidateWithXmlReader(ss, xml, xsd);
 
-            Assert.Equal(ss.RemoveRecursive(Schema), true);
+            Assert.True(ss.RemoveRecursive(Schema));
             ValidateSchemaSet(ss, 0, false, 1, 0, 0, "Validation after remRec");
             ValidateWithXmlReader(ss, xml, xsd);
 
@@ -154,7 +154,7 @@ namespace System.Xml.Tests
         [InlineData("simpleType", "stE064.xsd", 1, 1, 1, 0, 0, 0)]
         [InlineData("Wildcards", "wildG007.xsd", 1, 1, 2, 0, 0, 0)]
         [InlineData("Wildcards", "wildG010.xsd", 3, 1, 5, 0, 3, 1)]
-        public void v1(String testDir, String testFile, int expCount, int expCountGT, int expCountGE, int expCountGA, int expCountGER, int expCountGERC)
+        public void v1(string testDir, string testFile, int expCount, int expCountGT, int expCountGE, int expCountGA, int expCountGER, int expCountGERC)
         {
             Initialize();
             string xsd = Path.Combine(path, testDir, testFile);
@@ -192,7 +192,7 @@ namespace System.Xml.Tests
             ValidateSchemaSet(ss, expCount - 1, true, expCountGERC, expCountGER, 0, "Validation after repr");
             ValidateWithSchemaInfo(ss);
 
-            Assert.Equal(ss.RemoveRecursive(Schema), false);
+            Assert.False(ss.RemoveRecursive(Schema));
             ValidateSchemaSet(ss, expCount - 1, true, expCountGERC, expCountGER, 0, "Validation after add");
             ValidateWithSchemaInfo(ss);
 
@@ -218,7 +218,7 @@ namespace System.Xml.Tests
         [InlineData("simpleType", "stE064", 1, 1, 1, 0, 0, 0)]
         [InlineData("Wildcards", "wildG007", 1, 1, 2, 0, 0, 0)]
         [InlineData("Wildcards", "wildG010", 3, 1, 5, 0, 3, 1)]
-        public void v2(String testDir, String testFile, int expCount, int expCountGT, int expCountGE, int expCountGA, int expCountGER, int expCountGERC)
+        public void v2(string testDir, string testFile, int expCount, int expCountGT, int expCountGE, int expCountGA, int expCountGER, int expCountGERC)
         {
             Initialize();
             string xsd = Path.Combine(path, testDir, testFile + ".xsd");
@@ -257,7 +257,7 @@ namespace System.Xml.Tests
             ValidateSchemaSet(ss, expCount - 1, true, expCountGERC, expCountGER, 0, "Validation after repr");
             ValidateWithXmlReader(ss, xml, xsd);
 
-            Assert.Equal(ss.RemoveRecursive(Schema), false);
+            Assert.False(ss.RemoveRecursive(Schema));
             ValidateSchemaSet(ss, expCount - 1, true, expCountGERC, expCountGER, 0, "Validation after remRec");
             ValidateWithXmlReader(ss, xml, xsd);
 
@@ -290,7 +290,7 @@ namespace System.Xml.Tests
         [InlineData("simpleType", "stE064.xsd", 1)]
         [InlineData("Wildcards", "wildG007.xsd", 1)]
         [InlineData("Wildcards", "wildG010.xsd", 3)]
-        public void v1(String testDir, String TestFile, int expCount)
+        public void v1(string testDir, string TestFile, int expCount)
         {
             Initialize();
             string xsd = Path.Combine(path, testDir, TestFile);
@@ -323,9 +323,9 @@ namespace System.Xml.Tests
             Assert.Equal(ss.Count, expCount);
 
             ss.RemoveRecursive(Schema);
-            Assert.Equal(ss.Count, 0);
+            Assert.Equal(0, ss.Count);
             ss.Compile();
-            Assert.Equal(ss.Count, 0);
+            Assert.Equal(0, ss.Count);
 
             try
             {
@@ -335,7 +335,7 @@ namespace System.Xml.Tests
             catch (ArgumentException e)
             {
                 _output.WriteLine(e.Message);
-                Assert.Equal(ss.Count, 0);
+                Assert.Equal(0, ss.Count);
             }
             return;
         }
@@ -355,7 +355,7 @@ namespace System.Xml.Tests
         [InlineData("simpleType", "stE064", 1)]
         [InlineData("Wildcards", "wildG007", 1)]
         [InlineData("Wildcards", "wildG010", 3)]
-        public void v2(String testDir, String testFile, int expCount)
+        public void v2(string testDir, string testFile, int expCount)
         {
             Initialize();
             string xsd = Path.Combine(path, testDir, testFile + ".xsd");
@@ -387,9 +387,9 @@ namespace System.Xml.Tests
             Assert.Equal(ss.Count, expCount);
 
             ss.RemoveRecursive(schema);
-            Assert.Equal(ss.Count, 0);
+            Assert.Equal(0, ss.Count);
             ss.Compile();
-            Assert.Equal(ss.Count, 0);
+            Assert.Equal(0, ss.Count);
 
             try
             {
@@ -399,7 +399,7 @@ namespace System.Xml.Tests
             catch (ArgumentException e)
             {
                 _output.WriteLine(e.Message);
-                Assert.Equal(ss.Count, 0);
+                Assert.Equal(0, ss.Count);
             }
             return;
         }
@@ -423,7 +423,7 @@ namespace System.Xml.Tests
         [InlineData("SCHEMA", "schB1_a.xsd", 1, 3, 3)]
         [InlineData("SCHEMA", "schM2_a.xsd", 1, 3, 3)]
         [InlineData("SCHEMA", "schH2_a.xsd", 1, 3, 3)]
-        public void AddValid_Import_Include_Redefine(String testDir, String testFile, int expCount, int expCountGT, int expCountGE)
+        public void AddValid_Import_Include_Redefine(string testDir, string testFile, int expCount, int expCountGT, int expCountGE)
         {
             string xsd = Path.Combine(path, testDir, testFile);
 
@@ -450,7 +450,7 @@ namespace System.Xml.Tests
         [Theory]
         [InlineData("SCHEMA", "schE9.xsd", 1, 1)]
         [InlineData("SCHEMA", "schA7_a.xsd", 2, 2)]
-        public void AddEditInvalidImport(String testDir, String testFile, int expCountGT, int expCountGE)
+        public void AddEditInvalidImport(string testDir, string testFile, int expCountGT, int expCountGE)
         {
             string xsd = Path.Combine(path, testDir, testFile);
 
@@ -504,7 +504,7 @@ namespace System.Xml.Tests
         [Theory]
         [InlineData("include_v7_a.xsd", 4, 7)]
         [InlineData("include_v1_a.xsd", 3, 3)]
-        public void AddEditInvalidIncludeSchema(String testFile, int expCountGT, int expCountGE)
+        public void AddEditInvalidIncludeSchema(string testFile, int expCountGT, int expCountGE)
         {
             string xsd = Path.Combine(testData, testFile);
 
@@ -561,7 +561,7 @@ namespace System.Xml.Tests
         [InlineData("SCHEMA", "schE1i.xsd")]
         [InlineData("SCHEMA", "schB4_a.xsd")]
         [InlineData("SCHEMA", "schB1i.xsd")]
-        public void AddInvalid_Import_Include(String testDir, String testFile)
+        public void AddInvalid_Import_Include(string testDir, string testFile)
         {
             Initialize();
             string xsd = Path.Combine(path, testDir, testFile);
@@ -659,9 +659,9 @@ namespace System.Xml.Tests
             XmlSchema schema = XmlSchema.Read(new StringReader(schemaXml), null);
 
             ss.Add(schema);
-            Assert.Equal(ss.Count, 1);
+            Assert.Equal(1, ss.Count);
             ss.Compile();
-            Assert.Equal(ss.Count, 1);
+            Assert.Equal(1, ss.Count);
 
             XmlReaderSettings settings = new XmlReaderSettings();
             settings.Schemas = ss;
@@ -681,9 +681,9 @@ namespace System.Xml.Tests
             }
 
             XmlSchema removedSchema = ss.Remove(schema);
-            Assert.Equal(ss.Count, 0);
+            Assert.Equal(0, ss.Count);
             ss.Compile();
-            Assert.Equal(ss.Count, 0);
+            Assert.Equal(0, ss.Count);
 
             settings = new XmlReaderSettings();
             settings.Schemas = ss;
@@ -709,9 +709,9 @@ namespace System.Xml.Tests
             XmlSchema schema = XmlSchema.Read(new StringReader(schemaXml), null);
 
             ss.Add(schema);
-            Assert.Equal(ss.Count, 1);
+            Assert.Equal(1, ss.Count);
             ss.Compile();
-            Assert.Equal(ss.Count, 1);
+            Assert.Equal(1, ss.Count);
 
             XmlReaderSettings settings = new XmlReaderSettings();
             settings.Schemas = ss;
@@ -723,9 +723,9 @@ namespace System.Xml.Tests
             }
 
             XmlSchema removedSchema = ss.Remove(schema);
-            Assert.Equal(ss.Count, 0);
+            Assert.Equal(0, ss.Count);
             ss.Compile();
-            Assert.Equal(ss.Count, 0);
+            Assert.Equal(0, ss.Count);
 
             settings = new XmlReaderSettings();
             settings.Schemas = ss;
@@ -769,7 +769,7 @@ namespace System.Xml.Tests
  </sub>
 </root>";
 
-        public void CreateSchema1(string testDirectory)
+        private static void CreateSchema1(string testDirectory)
         {
             string commonxsd = @"<?xml version='1.0' encoding='utf-8'?>
 <Schema:schema  elementFormDefault='qualified'
@@ -821,7 +821,7 @@ namespace System.Xml.Tests
             }
         }
 
-        public void CreateSchema2(string testDirectory)
+        private static void CreateSchema2(string testDirectory)
         {
             string sub1 = @"<?xml version='1.0' encoding='utf-8'?>
 <Schema:schema targetNamespace='sub1'
@@ -912,8 +912,8 @@ namespace System.Xml.Tests
 
                 ValidationEventHandler valEventHandler = new ValidationEventHandler(ValidationCallback);
                 doc.Validate(valEventHandler);
-                Assert.Equal(warningCount, 0);
-                Assert.Equal(errorCount, 0);
+                Assert.Equal(0, warningCount);
+                Assert.Equal(0, errorCount);
             }
         }
 
@@ -937,8 +937,8 @@ namespace System.Xml.Tests
 
                 ValidationEventHandler valEventHandler = new ValidationEventHandler(ValidationCallback);
                 doc.Validate(valEventHandler);
-                Assert.Equal(warningCount, 0);
-                Assert.Equal(errorCount, 0);
+                Assert.Equal(0, warningCount);
+                Assert.Equal(0, errorCount);
             }
         }
 
@@ -947,8 +947,8 @@ namespace System.Xml.Tests
             if (string.IsNullOrEmpty(path))
                 throw new ArgumentException();
 
-            return path[path.Length - 1] == Path.DirectorySeparatorChar ? 
-                path : 
+            return path[path.Length - 1] == Path.DirectorySeparatorChar ?
+                path :
                 path + Path.DirectorySeparatorChar;
         }
 
@@ -999,8 +999,8 @@ namespace System.Xml.Tests
                 while (r.Read()) ;
             }
 
-            Assert.Equal(warningCount, 0);
-            Assert.Equal(errorCount, 0);
+            Assert.Equal(0, warningCount);
+            Assert.Equal(0, errorCount);
             return;
         }
 
@@ -1029,8 +1029,8 @@ namespace System.Xml.Tests
             xss.Add(schema);
             xss.Compile();
 
-            Assert.Equal(warningCount, 0);
-            Assert.Equal(errorCount, 0);
+            Assert.Equal(0, warningCount);
+            Assert.Equal(0, errorCount);
             return;
         }
 
@@ -1082,8 +1082,8 @@ namespace System.Xml.Tests
                 while (r.Read()) ;
             }
 
-            Assert.Equal(warningCount, 0);
-            Assert.Equal(errorCount, 2);
+            Assert.Equal(0, warningCount);
+            Assert.Equal(2, errorCount);
             return;
         }
 
@@ -1112,8 +1112,8 @@ namespace System.Xml.Tests
                 while (r.Read()) ;
             }
 
-            Assert.Equal(warningCount, 0);
-            Assert.Equal(errorCount, 1);
+            Assert.Equal(0, warningCount);
+            Assert.Equal(1, errorCount);
             return;
         }
     }

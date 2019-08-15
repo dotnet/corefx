@@ -159,7 +159,7 @@ namespace System.Data.Odbc
             get
             {
                 string value = _commandText;
-                return ((null != value) ? value : ADP.StrEmpty);
+                return ((null != value) ? value : string.Empty);
             }
             set
             {
@@ -713,7 +713,7 @@ namespace System.Data.Odbc
                         if ((localReader.IsBehavior(CommandBehavior.KeyInfo) || localReader.IsBehavior(CommandBehavior.SchemaOnly))
                             && (CommandType != CommandType.StoredProcedure))
                         {
-                            Int16 cColsAffected;
+                            short cColsAffected;
                             retcode = stmt.NumberOfResultColumns(out cColsAffected);
                             if (retcode == ODBC32.RetCode.SUCCESS || retcode == ODBC32.RetCode.SUCCESS_WITH_INFO)
                             {
@@ -786,17 +786,17 @@ namespace System.Data.Odbc
                                 retcode = stmt.Statistics((string)methodArguments[0],  //TableCatalog
                                     (string)methodArguments[1],  //TableSchema
                                     (string)methodArguments[2],  //TableName
-                                    (Int16)methodArguments[3],   //IndexTrpe
-                                    (Int16)methodArguments[4]);  //Accuracy
+                                    (short)methodArguments[3],   //IndexTrpe
+                                    (short)methodArguments[4]);  //Accuracy
                                 break;
 
                             case ODBC32.SQL_API.SQLGETTYPEINFO:
-                                retcode = stmt.GetTypeInfo((Int16)methodArguments[0]);  //SQL Type
+                                retcode = stmt.GetTypeInfo((short)methodArguments[0]);  //SQL Type
                                 break;
 
                             default:
                                 // this should NEVER happen
-                                Debug.Assert(false, "ExecuteReaderObjectcalled with unsupported ODBC API method.");
+                                Debug.Fail("ExecuteReaderObjectcalled with unsupported ODBC API method.");
                                 throw ADP.InvalidOperation(method.ToString());
                         }
 
@@ -819,7 +819,7 @@ namespace System.Data.Odbc
 
                 // XXXCommand.Execute should position reader on first row returning result
                 // any exceptions in the initial non-row returning results should be thrown
-                // from from ExecuteXXX not the DataReader
+                // from ExecuteXXX not the DataReader
                 if (!localReader.IsBehavior(CommandBehavior.SchemaOnly))
                 {
                     localReader.FirstResult();
@@ -1112,7 +1112,7 @@ namespace System.Data.Odbc
                 }
                 catch (Exception e)
                 {
-                    // 
+                    //
                     if (ADP.IsCatchableExceptionType(e))
                     {
                         _stmt = null;
@@ -1135,7 +1135,7 @@ namespace System.Data.Odbc
                 }
                 catch (Exception e)
                 {
-                    // 
+                    //
                     if (ADP.IsCatchableExceptionType(e))
                     {
                         _keyinfostmt = null;

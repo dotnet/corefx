@@ -16,6 +16,30 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
     public static partial class GeneralTests
     {
         public static bool SupportsDiffieHellman { get; } = KeyAgreeRecipientInfoTests.SupportsDiffieHellman;
+        public static bool SupportsRsaOaepCerts => PlatformDetection.IsWindows;
+
+        [Fact]
+        public static void DefaultEncryptionAlgorithm()
+        {
+            EnvelopedCms cms1 = new EnvelopedCms();
+            EnvelopedCms cms2 = new EnvelopedCms(new ContentInfo(Array.Empty<byte>()));
+
+            string[] supportedAlgorithms;
+
+            // net48 changes the default to AES-256-CBC, older versions (and quirk) are
+            // DES3-EDE-CBC
+            if (PlatformDetection.IsFullFramework)
+            {
+                supportedAlgorithms = new[] { Oids.TripleDesCbc, Oids.Aes256 };
+            }
+            else
+            {
+                supportedAlgorithms = new[] { Oids.Aes256 };
+            }
+
+            Assert.Contains(cms1.ContentEncryptionAlgorithm.Oid.Value, supportedAlgorithms);
+            Assert.Contains(cms2.ContentEncryptionAlgorithm.Oid.Value, supportedAlgorithms);
+        }
 
         [Fact]
         public static void DecodeVersion0_RoundTrip()
@@ -58,7 +82,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         public static void DecodeRecipients3_RoundTrip()
         {
             ContentInfo contentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
-            EnvelopedCms ecms = new EnvelopedCms(contentInfo);
+            EnvelopedCms ecms = new EnvelopedCms(contentInfo, KeyAgreeRecipientInfoTests.TripleDesAlgId);
             CmsRecipientCollection recipients = new CmsRecipientCollection();
             foreach (X509Certificate2 cert in s_certs)
             {
@@ -200,7 +224,7 @@ KoZIhvcNAwcECJ01qtX2EKx6oIAEEM7op+R2U3GQbYwlEj5X+h0AAAAAAAAAAAAA
             // Tests that the content is what it is expected to be, even if it's still encyrpted. This prevents from ambiguous definitions of content.
 
             // The encoded message was built in ASN.1 editor and tested in framework. It contains an enveloped message version 0 with one recipient of
-            // key transport type. The symmetric algorythm is 3DES and the contained type is data. 
+            // key transport type. The symmetric algorythm is 3DES and the contained type is data.
             byte[] encodedMessage =
                  ("3082010c06092a864886f70d010703a081fe3081fb0201003181c83081c5020100302e301a311830160603550403130f5253"
                 + "414b65795472616e7366657231021031d935fb63e8cfab48a0bf7b397b67c0300d06092a864886f70d010101050004818013"
@@ -286,6 +310,118 @@ KoZIhvcNAwcECJ01qtX2EKx6oIAEEM7op+R2U3GQbYwlEj5X+h0AAAAAAAAAAAAA
             Assert.Equal<byte>(contentInfo.Content, ecms.ContentInfo.Content);
         }
 
+        [ConditionalFact(nameof(SupportsRsaOaepCerts))]
+        [OuterLoop(/* Leaks key on disk if interrupted */)]
+        public static void RsaOaepCertificate_NullParameters_Throws()
+        {
+            ContentInfo contentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
+            EnvelopedCms ecms = new EnvelopedCms(contentInfo);
+            using (X509Certificate2 cert = Certificates.RsaOaep2048_NullParameters.GetCertificate())
+            {
+                CmsRecipient recipient = new CmsRecipient(cert);
+                Assert.ThrowsAny<CryptographicException>(() => ecms.Encrypt(recipient));
+            }
+        }
+
+        [ConditionalFact(nameof(SupportsRsaOaepCerts))]
+        [OuterLoop(/* Leaks key on disk if interrupted */)]
+        public static void RoundTrip_RsaOaepCertificate_Sha1KeyParameters()
+        {
+            Assert_Certificate_Roundtrip(Certificates.RsaOaep2048_Sha1Parameters);
+        }
+
+        [ConditionalFact(nameof(SupportsRsaOaepCerts))]
+        [OuterLoop(/* Leaks key on disk if interrupted */)]
+        public static void RoundTrip_RsaOaepCertificate_Sha256KeyParameters()
+        {
+            Assert_Certificate_Roundtrip(Certificates.RsaOaep2048_Sha256Parameters);
+        }
+
+        [ConditionalFact(nameof(SupportsRsaOaepCerts))]
+        [OuterLoop(/* Leaks key on disk if interrupted */)]
+        public static void RoundTrip_RsaOaepCertificate_NoParameters()
+        {
+            Assert_Certificate_Roundtrip(Certificates.RsaOaep2048_NoParameters);
+        }
+
+        [Fact]
+        public static void Encrypt_Data_DoesNotIncreaseInSize()
+        {
+            byte[] content = new byte[15]; // One short of AES block size boundary
+            ContentInfo contentInfo = new ContentInfo(content);
+            AlgorithmIdentifier identifier = new AlgorithmIdentifier(new Oid(Oids.Aes128));
+            EnvelopedCms ecms = new EnvelopedCms(contentInfo, identifier);
+
+            using (X509Certificate2 cert = Certificates.RSAKeyTransfer1.GetCertificate())
+            {
+                CmsRecipient recipient = new CmsRecipient(cert);
+                ecms.Encrypt(recipient);
+            }
+
+            byte[] encoded = ecms.Encode();
+            EnvelopedCms reDecoded = new EnvelopedCms();
+            reDecoded.Decode(encoded);
+            int expectedSize = PlatformDetection.IsFullFramework ? 22 : 16; //NetFx compat.
+            Assert.Equal(expectedSize, reDecoded.ContentInfo.Content.Length);
+        }
+
+        [Fact]
+        [OuterLoop(/* Leaks key on disk if interrupted */)]
+        [PlatformSpecific(~TestPlatforms.Windows)] /* Applies to managed PAL only. */
+        public static void FromManagedPal_CompatWithOctetStringWrappedContents_Decrypt()
+        {
+            byte[] expectedContent = new byte[] { 1, 2, 3 };
+            byte[] encodedMessage =
+                ("3082010C06092A864886F70D010703A081FE3081FB0201003181C83081C5020100302" +
+                 "E301A311830160603550403130F5253414B65795472616E7366657231021031D935FB" +
+                 "63E8CFAB48A0BF7B397B67C0300D06092A864886F70D0101010500048180586BCA530" +
+                 "9A74A211859714715D90B8E13A7712838746877DF7D68B0BCF36DE3F77854276C8EAD" +
+                 "389ADD8402697E4FFF215143E0E63676349592CB3A86FF556230D5F4AC4A9A6758219" +
+                 "9E65281A8B63DFBCFB7180E6B54C6E38BECAF09624C6B6D2B3058F280FE8F0BF8EBA3" +
+                 "57AECC1B9B177E98671A9659B034501AE3D58789302B06092A864886F70D010701301" +
+                 "406082A864886F70D0307040810B222648FDC0DE38008036BB59C8B6A784B").HexToByteArray();
+            EnvelopedCms ecms = new EnvelopedCms();
+            ecms.Decode(encodedMessage);
+
+            using (X509Certificate2 privateCert = Certificates.RSAKeyTransfer1.TryGetCertificateWithPrivateKey())
+            {
+                if (privateCert == null)
+                {
+                    return; //Private key not available.
+                }
+
+                ecms.Decrypt(new X509Certificate2Collection(privateCert));
+            }
+
+            Assert.Equal(expectedContent, ecms.ContentInfo.Content);
+        }
+
+        private static void Assert_Certificate_Roundtrip(CertLoader certificateLoader)
+        {
+            ContentInfo contentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
+            EnvelopedCms ecms = new EnvelopedCms(contentInfo);
+            using (X509Certificate2 cert = certificateLoader.GetCertificate())
+            {
+                CmsRecipient recipient = new CmsRecipient(cert);
+                ecms.Encrypt(recipient);
+            }
+
+            byte[] encodedMessage = ecms.Encode();
+
+            ecms = new EnvelopedCms();
+            ecms.Decode(encodedMessage);
+
+            using (X509Certificate2 privateCert = certificateLoader.TryGetCertificateWithPrivateKey())
+            {
+                if (privateCert == null)
+                    return; // CertLoader can't load the private certificate.
+
+                ecms.Decrypt(new X509Certificate2Collection(privateCert));
+            }
+            Assert.Equal(contentInfo.ContentType.Value, ecms.ContentInfo.ContentType.Value);
+            Assert.Equal<byte>(contentInfo.Content, ecms.ContentInfo.Content);
+        }
+
         private static X509Certificate2[] s_certs =
         {
             Certificates.RSAKeyTransfer1.GetCertificate(),
@@ -294,5 +430,3 @@ KoZIhvcNAwcECJ01qtX2EKx6oIAEEM7op+R2U3GQbYwlEj5X+h0AAAAAAAAAAAAA
         };
     }
 }
-
-

@@ -4,91 +4,94 @@
 
 /*============================================================
 **
-** 
-** 
+**
+**
 **
 **
 ** Purpose: CultureInfo-specific collection of resources.
 **
-** 
+**
 ===========================================================*/
 
-using System;
-using System.IO;
+#nullable enable
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Reflection;
-using System.Runtime.Versioning;
 using System.Diagnostics;
+using System.IO;
 
 namespace System.Resources
+#if RESOURCES_EXTENSIONS
+    .Extensions
+#endif
 {
-    // A RuntimeResourceSet stores all the resources defined in one 
+#if RESOURCES_EXTENSIONS
+    using ResourceReader = DeserializingResourceReader;
+#endif
+    // A RuntimeResourceSet stores all the resources defined in one
     // particular CultureInfo, with some loading optimizations.
     //
     // It is expected that nearly all the runtime's users will be satisfied with the
     // default resource file format, and it will be more efficient than most simple
     // implementations.  Users who would consider creating their own ResourceSets and/or
-    // ResourceReaders and ResourceWriters are people who have to interop with a 
-    // legacy resource file format, are creating their own resource file format 
-    // (using XML, for instance), or require doing resource lookups at runtime over 
-    // the network.  This group will hopefully be small, but all the infrastructure 
+    // ResourceReaders and ResourceWriters are people who have to interop with a
+    // legacy resource file format, are creating their own resource file format
+    // (using XML, for instance), or require doing resource lookups at runtime over
+    // the network.  This group will hopefully be small, but all the infrastructure
     // should be in place to let these users write & plug in their own tools.
     //
     // The Default Resource File Format
     //
     // The fundamental problems addressed by the resource file format are:
     //
-    // * Versioning - A ResourceReader could in theory support many different 
+    // * Versioning - A ResourceReader could in theory support many different
     // file format revisions.
     // * Storing intrinsic datatypes (ie, ints, Strings, DateTimes, etc) in a compact
     // format
     // * Support for user-defined classes - Accomplished using Serialization
-    // * Resource lookups should not require loading an entire resource file - If you 
+    // * Resource lookups should not require loading an entire resource file - If you
     // look up a resource, we only load the value for that resource, minimizing working set.
-    // 
-    // 
+    //
+    //
     // There are four sections to the default file format.  The first
     // is the Resource Manager header, which consists of a magic number
     // that identifies this as a Resource file, and a ResourceSet class name.
-    // The class name is written here to allow users to provide their own 
-    // implementation of a ResourceSet (and a matching ResourceReader) to 
+    // The class name is written here to allow users to provide their own
+    // implementation of a ResourceSet (and a matching ResourceReader) to
     // control policy.  If objects greater than a certain size or matching a
     // certain naming scheme shouldn't be stored in memory, users can tweak that
     // with their own subclass of ResourceSet.
-    // 
-    // The second section in the system default file format is the 
+    //
+    // The second section in the system default file format is the
     // RuntimeResourceSet specific header.  This contains a version number for
-    // the .resources file, the number of resources in this file, the number of 
-    // different types contained in the file, followed by a list of fully 
+    // the .resources file, the number of resources in this file, the number of
+    // different types contained in the file, followed by a list of fully
     // qualified type names.  After this, we include an array of hash values for
     // each resource name, then an array of virtual offsets into the name section
-    // of the file.  The hashes allow us to do a binary search on an array of 
+    // of the file.  The hashes allow us to do a binary search on an array of
     // integers to find a resource name very quickly without doing many string
     // compares (except for once we find the real type, of course).  If a hash
     // matches, the index into the array of hash values is used as the index
     // into the name position array to find the name of the resource.  The type
-    // table allows us to read multiple different classes from the same file, 
-    // including user-defined types, in a more efficient way than using 
-    // Serialization, at least when your .resources file contains a reasonable 
-    // proportion of base data types such as Strings or ints.  We use 
+    // table allows us to read multiple different classes from the same file,
+    // including user-defined types, in a more efficient way than using
+    // Serialization, at least when your .resources file contains a reasonable
+    // proportion of base data types such as Strings or ints.  We use
     // Serialization for all the non-instrinsic types.
-    // 
-    // The third section of the file is the name section.  It contains a 
+    //
+    // The third section of the file is the name section.  It contains a
     // series of resource names, written out as byte-length prefixed little
     // endian Unicode strings (UTF-16).  After each name is a four byte virtual
-    // offset into the data section of the file, pointing to the relevant 
+    // offset into the data section of the file, pointing to the relevant
     // string or serialized blob for this resource name.
     //
     // The fourth section in the file is the data section, which consists
-    // of a type and a blob of bytes for each item in the file.  The type is 
+    // of a type and a blob of bytes for each item in the file.  The type is
     // an integer index into the type table.  The data is specific to that type,
-    // but may be a number written in binary format, a String, or a serialized 
+    // but may be a number written in binary format, a String, or a serialized
     // Object.
-    // 
+    //
     // The system default file format (V1) is as follows:
-    // 
+    //
     //     What                                               Type of Data
     // ====================================================   ===========
     //
@@ -115,51 +118,51 @@ namespace System.Resources
     //
     //                     RuntimeResourceReader Data Section
     // Type and Value of each resource                Set of (Int32, blob of bytes) pairs
-    // 
+    //
     // This implementation, when used with the default ResourceReader class,
     // loads only the strings that you look up for.  It can do string comparisons
-    // without having to create a new String instance due to some memory mapped 
-    // file optimizations in the ResourceReader and FastResourceComparer 
-    // classes.  This keeps the memory we touch to a minimum when loading 
-    // resources. 
+    // without having to create a new String instance due to some memory mapped
+    // file optimizations in the ResourceReader and FastResourceComparer
+    // classes.  This keeps the memory we touch to a minimum when loading
+    // resources.
     //
     // If you use a different IResourceReader class to read a file, or if you
     // do case-insensitive lookups (and the case-sensitive lookup fails) then
     // we will load all the names of each resource and each resource value.
     // This could probably use some optimization.
-    // 
+    //
     // In addition, this supports object serialization in a similar fashion.
     // We build an array of class types contained in this file, and write it
     // to RuntimeResourceReader header section of the file.  Every resource
     // will contain its type (as an index into the array of classes) with the data
     // for that resource.  We will use the Runtime's serialization support for this.
-    // 
+    //
     // All strings in the file format are written with BinaryReader and
-    // BinaryWriter, which writes out the length of the String in bytes as an 
+    // BinaryWriter, which writes out the length of the String in bytes as an
     // Int32 then the contents as Unicode chars encoded in UTF-8.  In the name
     // table though, each resource name is written in UTF-16 so we can do a
     // string compare byte by byte against the contents of the file, without
-    // allocating objects.  Ideally we'd have a way of comparing UTF-8 bytes 
+    // allocating objects.  Ideally we'd have a way of comparing UTF-8 bytes
     // directly against a String object, but that may be a lot of work.
-    // 
-    // The offsets of each resource string are relative to the beginning 
-    // of the Data section of the file.  This way, if a tool decided to add 
-    // one resource to a file, it would only need to increment the number of 
+    //
+    // The offsets of each resource string are relative to the beginning
+    // of the Data section of the file.  This way, if a tool decided to add
+    // one resource to a file, it would only need to increment the number of
     // resources, add the hash &amp; location of last byte in the name section
     // to the array of resource hashes and resource name positions (carefully
-    // keeping these arrays sorted), add the name to the end of the name &amp; 
-    // offset list, possibly add the type list of types types (and increase 
-    // the number of items in the type table), and add the resource value at 
-    // the end of the file.  The other offsets wouldn't need to be updated to 
+    // keeping these arrays sorted), add the name to the end of the name &amp;
+    // offset list, possibly add the type list of types (and increase
+    // the number of items in the type table), and add the resource value at
+    // the end of the file.  The other offsets wouldn't need to be updated to
     // reflect the longer header section.
-    // 
-    // Resource files are currently limited to 2 gigabytes due to these 
+    //
+    // Resource files are currently limited to 2 gigabytes due to these
     // design parameters.  A future version may raise the limit to 4 gigabytes
-    // by using unsigned integers, or may use negative numbers to load items 
+    // by using unsigned integers, or may use negative numbers to load items
     // out of an assembly manifest.  Also, we may try sectioning the resource names
     // into smaller chunks, each of size sqrt(n), would be substantially better for
     // resource files containing thousands of resources.
-    // 
+    //
 #if CORERT
     public  // On CoreRT, this must be public because of need to whitelist past the ReflectionBlock.
 #else
@@ -173,38 +176,59 @@ namespace System.Resources
         // for arbitrarily long times, since the object is usually a string
         // literal that will live for the lifetime of the appdomain.  The
         // value is a ResourceLocator instance, which might cache the object.
-        private Dictionary<String, ResourceLocator> _resCache;
+        private Dictionary<string, ResourceLocator>? _resCache; // TODO-NULLABLE: Avoid nulling out in Dispose
 
 
-        // For our special load-on-demand reader, cache the cast.  The 
+        // For our special load-on-demand reader, cache the cast.  The
         // RuntimeResourceSet's implementation knows how to treat this reader specially.
-        private ResourceReader _defaultReader;
+        private ResourceReader? _defaultReader; // TODO-NULLABLE: Avoid nulling out in Dispose
 
         // This is a lookup table for case-insensitive lookups, and may be null.
         // Consider always using a case-insensitive resource cache, as we don't
         // want to fill this out if we can avoid it.  The problem is resource
-        // fallback will somewhat regularly cause us to look up resources that 
+        // fallback will somewhat regularly cause us to look up resources that
         // don't exist.
-        private Dictionary<String, ResourceLocator> _caseInsensitiveTable;
+        private Dictionary<string, ResourceLocator>? _caseInsensitiveTable;
 
         // If we're not using our custom reader, then enumerate through all
         // the resources once, adding them into the table.
         private bool _haveReadFromReader;
 
-        internal RuntimeResourceSet(String fileName) : base(false)
+#if !RESOURCES_EXTENSIONS
+        internal RuntimeResourceSet(string fileName) : base(false)
         {
-            _resCache = new Dictionary<String, ResourceLocator>(FastResourceComparer.Default);
+            _resCache = new Dictionary<string, ResourceLocator>(FastResourceComparer.Default);
             Stream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
-            _defaultReader = new ResourceReader(stream, _resCache);
+            _defaultReader = new ResourceReader(stream, _resCache, false);
             Reader = _defaultReader;
         }
 
-        internal RuntimeResourceSet(Stream stream) : base(false)
+        internal RuntimeResourceSet(Stream stream, bool permitDeserialization = false) : base(false)
         {
-            _resCache = new Dictionary<String, ResourceLocator>(FastResourceComparer.Default);
-            _defaultReader = new ResourceReader(stream, _resCache);
+            _resCache = new Dictionary<string, ResourceLocator>(FastResourceComparer.Default);
+            _defaultReader = new ResourceReader(stream, _resCache, permitDeserialization);
             Reader = _defaultReader;
         }
+#else
+        private IResourceReader Reader => _defaultReader!;
+
+        internal RuntimeResourceSet(IResourceReader reader) :
+            // explicitly do not call IResourceReader constructor since it caches all resources
+            // the purpose of RuntimeResourceSet is to lazily load and cache.
+            base()
+        {
+            if (reader == null)
+                throw new ArgumentNullException(nameof(reader));
+
+            _defaultReader = reader as DeserializingResourceReader ?? throw new ArgumentException(SR.Format(SR.NotSupported_WrongResourceReader_Type, reader.GetType()), nameof(reader));
+            _resCache = new Dictionary<string, ResourceLocator>(FastResourceComparer.Default);
+
+            // in the CoreLib version RuntimeResourceSet creates ResourceReader and passes this in,
+            // in the custom case ManifestBasedResourceReader creates the ResourceReader and passes it in
+            // so we must initialize the cache here.
+            _defaultReader._resCache = _resCache;
+        }
+#endif
 
         protected override void Dispose(bool disposing)
         {
@@ -256,36 +280,36 @@ namespace System.Resources
         }
 
 
-        public override String GetString(String key)
+        public override string? GetString(string key)
         {
-            Object o = GetObject(key, false, true);
-            return (String)o;
+            object? o = GetObject(key, false, true);
+            return (string?)o;
         }
 
-        public override String GetString(String key, bool ignoreCase)
+        public override string? GetString(string key, bool ignoreCase)
         {
-            Object o = GetObject(key, ignoreCase, true);
-            return (String)o;
+            object? o = GetObject(key, ignoreCase, true);
+            return (string?)o;
         }
 
-        public override Object GetObject(String key)
+        public override object? GetObject(string key)
         {
             return GetObject(key, false, false);
         }
 
-        public override Object GetObject(String key, bool ignoreCase)
+        public override object? GetObject(string key, bool ignoreCase)
         {
             return GetObject(key, ignoreCase, false);
         }
 
-        private Object GetObject(String key, bool ignoreCase, bool isString)
+        private object? GetObject(string key, bool ignoreCase, bool isString)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
             if (Reader == null || _resCache == null)
                 throw new ObjectDisposedException(null, SR.ObjectDisposed_ResourceSet);
 
-            Object value = null;
+            object? value = null;
             ResourceLocator resLocation;
 
             lock (Reader)
@@ -313,7 +337,7 @@ namespace System.Resources
                         Debug.Assert(dataPos >= 0, "data section offset cannot be negative!");
                         // Normally calling LoadString or LoadObject requires
                         // taking a lock.  Note that in this case, we took a
-                        // lock on the entire RuntimeResourceSet, which is 
+                        // lock on the entire RuntimeResourceSet, which is
                         // sufficient since we never pass this ResourceReader
                         // to anyone else.
                         ResourceTypeCode typeCode;
@@ -348,7 +372,7 @@ namespace System.Resources
                     // If necessary, init our case insensitive hash table.
                     if (ignoreCase && _caseInsensitiveTable == null)
                     {
-                        _caseInsensitiveTable = new Dictionary<String, ResourceLocator>(StringComparer.OrdinalIgnoreCase);
+                        _caseInsensitiveTable = new Dictionary<string, ResourceLocator>(StringComparer.OrdinalIgnoreCase);
                     }
 
                     if (_defaultReader == null)
@@ -357,11 +381,14 @@ namespace System.Resources
                         while (en.MoveNext())
                         {
                             DictionaryEntry entry = en.Entry;
-                            String readKey = (String)entry.Key;
+                            string readKey = (string)entry.Key;
                             ResourceLocator resLoc = new ResourceLocator(-1, entry.Value);
                             _resCache.Add(readKey, resLoc);
                             if (ignoreCase)
+                            {
+                                Debug.Assert(_caseInsensitiveTable != null);
                                 _caseInsensitiveTable.Add(readKey, resLoc);
+                            }
                         }
                         // Only close the reader if it is NOT our default one,
                         // since we need it around to resolve ResourceLocators.
@@ -371,11 +398,12 @@ namespace System.Resources
                     else
                     {
                         Debug.Assert(ignoreCase, "This should only happen for case-insensitive lookups");
+                        Debug.Assert(_caseInsensitiveTable != null);
                         ResourceReader.ResourceEnumerator en = _defaultReader.GetEnumeratorInternal();
                         while (en.MoveNext())
                         {
                             // Note: Always ask for the resource key before the data position.
-                            String currentKey = (String)en.Key;
+                            string currentKey = (string)en.Key;
                             int dataPos = en.DataPosition;
                             ResourceLocator resLoc = new ResourceLocator(dataPos, null);
                             _caseInsensitiveTable.Add(currentKey, resLoc);
@@ -383,7 +411,7 @@ namespace System.Resources
                     }
                     _haveReadFromReader = true;
                 }
-                Object obj = null;
+                object? obj = null;
                 bool found = false;
                 bool keyInWrongCase = false;
                 if (_defaultReader != null)
@@ -396,6 +424,7 @@ namespace System.Resources
                 }
                 if (!found && ignoreCase)
                 {
+                    Debug.Assert(_caseInsensitiveTable != null);
                     if (_caseInsensitiveTable.TryGetValue(key, out resLocation))
                     {
                         found = true;
@@ -407,19 +436,20 @@ namespace System.Resources
             } // lock(Reader)
         }
 
-        // The last parameter indicates whether the lookup required a 
-        // case-insensitive lookup to succeed, indicating we shouldn't add 
+        // The last parameter indicates whether the lookup required a
+        // case-insensitive lookup to succeed, indicating we shouldn't add
         // the ResourceLocation to our case-sensitive cache.
-        private Object ResolveResourceLocator(ResourceLocator resLocation, String key, Dictionary<String, ResourceLocator> copyOfCache, bool keyInWrongCase)
+        private object? ResolveResourceLocator(ResourceLocator resLocation, string key, Dictionary<string, ResourceLocator> copyOfCache, bool keyInWrongCase)
         {
             // We need to explicitly resolve loosely linked manifest
             // resources, and we need to resolve ResourceLocators with null objects.
-            Object value = resLocation.Value;
+            object? value = resLocation.Value;
             if (value == null)
             {
                 ResourceTypeCode typeCode;
                 lock (Reader)
                 {
+                    Debug.Assert(_defaultReader != null);
                     value = _defaultReader.LoadObject(resLocation.DataPosition, out typeCode);
                 }
                 if (!keyInWrongCase && ResourceLocator.CanCache(typeCode))

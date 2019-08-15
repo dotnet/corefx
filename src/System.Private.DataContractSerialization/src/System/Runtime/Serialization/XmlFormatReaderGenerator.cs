@@ -11,10 +11,11 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Security;
+using System.Runtime.CompilerServices;
 
 namespace System.Runtime.Serialization
 {
-#if USE_REFEMIT || uapaot
+#if USE_REFEMIT
     public delegate object XmlFormatClassReaderDelegate(XmlReaderDelegator xmlReader, XmlObjectSerializerReadContext context, XmlDictionaryString[] memberNames, XmlDictionaryString[] memberNamespaces);
     public delegate object XmlFormatCollectionReaderDelegate(XmlReaderDelegator xmlReader, XmlObjectSerializerReadContext context, XmlDictionaryString itemName, XmlDictionaryString itemNamespace, CollectionDataContract collectionContract);
     public delegate void XmlFormatGetOnlyCollectionReaderDelegate(XmlReaderDelegator xmlReader, XmlObjectSerializerReadContext context, XmlDictionaryString itemName, XmlDictionaryString itemNamespace, CollectionDataContract collectionContract);
@@ -28,7 +29,7 @@ namespace System.Runtime.Serialization
     internal sealed class XmlFormatReaderGenerator
 #endif
     {
-        private CriticalHelper _helper;
+        private readonly CriticalHelper _helper;
 
         public XmlFormatReaderGenerator()
         {
@@ -57,7 +58,6 @@ namespace System.Runtime.Serialization
         /// </SecurityNote>
         private class CriticalHelper
         {
-#if !uapaot
             private CodeGenerator _ilg;
             private LocalBuilder _objectLocal;
             private Type _objectType;
@@ -66,25 +66,20 @@ namespace System.Runtime.Serialization
             private ArgBuilder _memberNamesArg;
             private ArgBuilder _memberNamespacesArg;
             private ArgBuilder _collectionContractArg;
-#endif
+
+            private XmlFormatClassReaderDelegate CreateReflectionXmlClassReader(ClassDataContract classContract)
+            {
+                return new ReflectionXmlClassReader(classContract).ReflectionReadClass;
+            }
 
             public XmlFormatClassReaderDelegate GenerateClassReader(ClassDataContract classContract)
             {
                 if (DataContractSerializer.Option == SerializationOption.ReflectionOnly)
                 {
-                    return new ReflectionXmlClassReader(classContract).ReflectionReadClass;
+                    return CreateReflectionXmlClassReader(classContract);
                 }
-#if uapaot
-                else if (DataContractSerializer.Option == SerializationOption.ReflectionAsBackup)
-                {
-                    return new ReflectionXmlClassReader(classContract).ReflectionReadClass;
-                }
-#endif
                 else
                 {
-#if uapaot
-                    throw new InvalidOperationException("Cannot generate class reader");
-#else
                     _ilg = new CodeGenerator();
                     bool memberAccessFlag = classContract.RequiresMemberAccessForRead(null);
                     try
@@ -145,7 +140,7 @@ namespace System.Runtime.Serialization
                             _ilg.Call(XmlFormatGeneratorStatics.GetDateTimeOffsetMethod);
                             _ilg.ConvertValue(Globals.TypeOfDateTimeOffset, _ilg.CurrentMethod.ReturnType);
                         }
-                        //Copy the KeyValuePairAdapter<K,T> to a KeyValuePair<K,T>. 
+                        //Copy the KeyValuePairAdapter<K,T> to a KeyValuePair<K,T>.
                         else if (classContract.IsKeyValuePairAdapter)
                         {
                             _ilg.Call(classContract.GetKeyValuePairMethodInfo);
@@ -157,61 +152,49 @@ namespace System.Runtime.Serialization
                         }
                     }
                     return (XmlFormatClassReaderDelegate)_ilg.EndMethod();
-#endif
                 }
+            }
+
+            private XmlFormatCollectionReaderDelegate CreateReflectionXmlCollectionReader()
+            {
+                return new ReflectionXmlCollectionReader().ReflectionReadCollection;
             }
 
             public XmlFormatCollectionReaderDelegate GenerateCollectionReader(CollectionDataContract collectionContract)
             {
                 if (DataContractSerializer.Option == SerializationOption.ReflectionOnly)
                 {
-                    return new ReflectionXmlCollectionReader().ReflectionReadCollection;
+                    return CreateReflectionXmlCollectionReader();
                 }
-#if uapaot
-                else if (DataContractSerializer.Option == SerializationOption.ReflectionAsBackup)
-                {
-                    return new ReflectionXmlCollectionReader().ReflectionReadCollection;
-                }
-#endif
                 else
                 {
-#if uapaot
-                    throw new InvalidOperationException("Cannot generate class reader");
-#else
                     _ilg = GenerateCollectionReaderHelper(collectionContract, false /*isGetOnlyCollection*/);
                     ReadCollection(collectionContract);
                     _ilg.Load(_objectLocal);
                     _ilg.ConvertValue(_objectLocal.LocalType, _ilg.CurrentMethod.ReturnType);
                     return (XmlFormatCollectionReaderDelegate)_ilg.EndMethod();
-#endif
                 }
+            }
+
+            private XmlFormatGetOnlyCollectionReaderDelegate CreateReflectionReadGetOnlyCollectionReader()
+            {
+                return new ReflectionXmlCollectionReader().ReflectionReadGetOnlyCollection;
             }
 
             public XmlFormatGetOnlyCollectionReaderDelegate GenerateGetOnlyCollectionReader(CollectionDataContract collectionContract)
             {
                 if (DataContractSerializer.Option == SerializationOption.ReflectionOnly)
                 {
-                    return new ReflectionXmlCollectionReader().ReflectionReadGetOnlyCollection;
+                    return CreateReflectionReadGetOnlyCollectionReader();
                 }
-#if uapaot
-                else if (DataContractSerializer.Option == SerializationOption.ReflectionAsBackup)
-                {
-                    return new ReflectionXmlCollectionReader().ReflectionReadGetOnlyCollection;
-                }
-#endif
                 else
                 {
-#if uapaot
-                    throw new InvalidOperationException("Cannot generate class reader");
-#else
                     _ilg = GenerateCollectionReaderHelper(collectionContract, true /*isGetOnlyCollection*/);
                     ReadGetOnlyCollection(collectionContract);
                     return (XmlFormatGetOnlyCollectionReaderDelegate)_ilg.EndMethod();
-#endif
                 }
             }
 
-#if !uapaot
             private CodeGenerator GenerateCollectionReaderHelper(CollectionDataContract collectionContract, bool isGetOnlyCollection)
             {
                 _ilg = new CodeGenerator();
@@ -431,7 +414,7 @@ namespace System.Runtime.Serialization
                     }
 
 #if FEATURE_LEGACYNETCF
-                    // The DataContractSerializer in the full framework doesn't support unordered elements: 
+                    // The DataContractSerializer in the full framework doesn't support unordered elements:
                     // deserialization will fail if the data members in the XML are not sorted alphabetically.
                     // But the NetCF DataContractSerializer does support unordered element. To maintain compatibility
                     // with Mango we always search for the member from the beginning of the member list.
@@ -674,7 +657,7 @@ namespace System.Runtime.Serialization
                     _ilg.Stloc(growingCollection);
                 }
                 LocalBuilder i = _ilg.DeclareLocal(Globals.TypeOfInt, "i");
-                object forLoop = _ilg.For(i, 0, Int32.MaxValue);
+                object forLoop = _ilg.For(i, 0, int.MaxValue);
                 IsStartElement(_memberNamesArg, _memberNamespacesArg);
                 _ilg.If();
                 _ilg.Call(_contextArg, XmlFormatGeneratorStatics.IncrementItemCountMethod, 1);
@@ -770,7 +753,7 @@ namespace System.Runtime.Serialization
                 _ilg.Call(_contextArg, XmlFormatGeneratorStatics.AddNewObjectMethod, _objectLocal);
 
                 LocalBuilder i = _ilg.DeclareLocal(Globals.TypeOfInt, "i");
-                object forLoop = _ilg.For(i, 0, Int32.MaxValue);
+                object forLoop = _ilg.For(i, 0, int.MaxValue);
                 IsStartElement(_memberNamesArg, _memberNamespacesArg);
                 _ilg.If();
                 _ilg.Call(_contextArg, XmlFormatGeneratorStatics.IncrementItemCountMethod, 1);
@@ -950,7 +933,6 @@ namespace System.Runtime.Serialization
                 _ilg.Call(XmlFormatGeneratorStatics.CreateSerializationExceptionMethod);
                 _ilg.Throw();
             }
-#endif
         }
 
         internal static object UnsafeGetUninitializedObject(Type type)
@@ -960,8 +942,8 @@ namespace System.Runtime.Serialization
 
         /// <SecurityNote>
         /// Critical - Elevates by calling GetUninitializedObject which has a LinkDemand
-        /// Safe - marked as such so that it's callable from transparent generated IL. Takes id as parameter which 
-        ///        is guaranteed to be in internal serialization cache. 
+        /// Safe - marked as such so that it's callable from transparent generated IL. Takes id as parameter which
+        ///        is guaranteed to be in internal serialization cache.
         /// </SecurityNote>
 #if USE_REFEMIT
         public static object UnsafeGetUninitializedObject(int id)

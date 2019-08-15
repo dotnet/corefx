@@ -12,16 +12,16 @@ namespace System.DirectoryServices.AccountManagement
 {
     internal class ADEntriesSet : ResultSet
     {
-        private SearchResultCollection _searchResults;
-        private ADStoreCtx _storeCtx;
+        private readonly SearchResultCollection _searchResults;
+        private readonly ADStoreCtx _storeCtx;
 
-        private IEnumerator _enumerator;
+        private readonly IEnumerator _enumerator;
         private SearchResult _current = null;
         private bool _endReached = false;
 
         private bool _disposed = false;
 
-        private object _discriminant = null;
+        private readonly object _discriminant = null;
 
         internal ADEntriesSet(SearchResultCollection src, ADStoreCtx storeCtx)
         {
@@ -41,7 +41,7 @@ namespace System.DirectoryServices.AccountManagement
 
         // Return the principal we're positioned at as a Principal object.
         // Need to use our StoreCtx's GetAsPrincipal to convert the native object to a Principal
-        override internal object CurrentAsPrincipal
+        internal override object CurrentAsPrincipal
         {
             get
             {
@@ -58,7 +58,7 @@ namespace System.DirectoryServices.AccountManagement
         // Advance the enumerator to the next principal in the result set, pulling in additional pages
         // of results as needed.
         // Returns true if successful, false if no more results to return.
-        override internal bool MoveNext()
+        internal override bool MoveNext()
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "ADEntriesSet", "MoveNext");
 
@@ -82,7 +82,7 @@ namespace System.DirectoryServices.AccountManagement
         // operation, e.g., if doing a paged search, may need to re-retrieve the first page of results.
         // As a special case, if the ResultSet is already at the very beginning, this is guaranteed to be
         // a no-op.
-        override internal void Reset()
+        internal override void Reset()
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "ADEntriesSet", "Reset");
 

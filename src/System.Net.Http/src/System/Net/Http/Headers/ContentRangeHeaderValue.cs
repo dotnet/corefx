@@ -157,9 +157,9 @@ namespace System.Net.Http.Headers
 
             if (HasRange)
             {
-                sb.Append(_from.Value.ToString(NumberFormatInfo.InvariantInfo));
+                sb.Append(_from.Value);
                 sb.Append('-');
-                sb.Append(_to.Value.ToString(NumberFormatInfo.InvariantInfo));
+                sb.Append(_to.Value);
             }
             else
             {
@@ -169,7 +169,7 @@ namespace System.Net.Http.Headers
             sb.Append('/');
             if (HasLength)
             {
-                sb.Append(_length.Value.ToString(NumberFormatInfo.InvariantInfo));
+                sb.Append(_length.Value);
             }
             else
             {
@@ -307,7 +307,7 @@ namespace System.Net.Http.Headers
             toStartIndex = 0;
             toLength = 0;
 
-            // Check if we have a value like 'bytes */133'. If yes, skip the range part and continue parsing the 
+            // Check if we have a value like 'bytes */133'. If yes, skip the range part and continue parsing the
             // length separator '/'.
             if (input[current] == '*')
             {

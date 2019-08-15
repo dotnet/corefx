@@ -61,7 +61,7 @@ namespace System
         //
         // This method returns a non null parsingError if Uri being created is invalid:
         //
-        protected virtual void InitializeAndValidate(Uri uri, out UriFormatException parsingError)
+        protected virtual void InitializeAndValidate(Uri uri, out UriFormatException? parsingError)
         {
             parsingError = uri.ParseMinimal();
         }
@@ -75,18 +75,18 @@ namespace System
         // This method returns:
         // The result Uri value used to represent a new Uri
         //
-        protected virtual string Resolve(Uri baseUri, Uri relativeUri, out UriFormatException parsingError)
+        protected virtual string? Resolve(Uri baseUri, Uri? relativeUri, out UriFormatException? parsingError)
         {
             if (baseUri.UserDrivenParsing)
-                throw new InvalidOperationException(SR.Format(SR.net_uri_UserDrivenParsing, this.GetType().ToString()));
+                throw new InvalidOperationException(SR.Format(SR.net_uri_UserDrivenParsing, this.GetType()));
 
             if (!baseUri.IsAbsoluteUri)
                 throw new InvalidOperationException(SR.net_uri_NotAbsolute);
 
 
-            string newUriString = null;
+            string? newUriString = null;
             bool userEscaped = false;
-            Uri result = Uri.ResolveHelper(baseUri, relativeUri, ref newUriString, ref userEscaped, out parsingError);
+            Uri? result = Uri.ResolveHelper(baseUri, relativeUri, ref newUriString, ref userEscaped, out parsingError);
 
             if (parsingError != null)
                 return null;
@@ -123,7 +123,7 @@ namespace System
                 throw new ArgumentOutOfRangeException(nameof(format));
 
             if (uri.UserDrivenParsing)
-                throw new InvalidOperationException(SR.Format(SR.net_uri_UserDrivenParsing, this.GetType().ToString()));
+                throw new InvalidOperationException(SR.Format(SR.net_uri_UserDrivenParsing, this.GetType()));
 
             if (!uri.IsAbsoluteUri)
                 throw new InvalidOperationException(SR.net_uri_NotAbsolute);
@@ -146,19 +146,19 @@ namespace System
         {
             if (uriParser == null)
                 throw new ArgumentNullException(nameof(uriParser));
- 
+
             if (schemeName == null)
                 throw new ArgumentNullException(nameof(schemeName));
- 
+
             if (schemeName.Length == 1)
                 throw new ArgumentOutOfRangeException(nameof(schemeName));
- 
+
             if (!Uri.CheckSchemeName(schemeName))
                 throw new ArgumentOutOfRangeException(nameof(schemeName));
- 
+
             if ((defaultPort >= 0xFFFF || defaultPort < 0) && defaultPort != -1)
                 throw new ArgumentOutOfRangeException(nameof(defaultPort));
- 
+
             schemeName = schemeName.ToLower();
             FetchSyntax(uriParser, schemeName, defaultPort);
         }
@@ -174,7 +174,7 @@ namespace System
             if (!Uri.CheckSchemeName(schemeName))
                 throw new ArgumentOutOfRangeException(nameof(schemeName));
 
-            UriParser syntax = UriParser.GetSyntax(schemeName.ToLowerInvariant());
+            UriParser? syntax = UriParser.GetSyntax(schemeName.ToLowerInvariant());
             return syntax != null && syntax.NotAny(UriSyntaxFlags.V1_UnknownUri);
         }
     }

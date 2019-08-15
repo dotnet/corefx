@@ -46,7 +46,7 @@ namespace System.Collections.Immutable
             /// The number of elements contained by this subtree starting at this node.
             /// </summary>
             /// <remarks>
-            /// If this node would benefit from saving 4 bytes, we could have only a few nodes 
+            /// If this node would benefit from saving 4 bytes, we could have only a few nodes
             /// scattered throughout the graph actually record the count of nodes beneath them.
             /// Those without the count could query their descendants, which would often short-circuit
             /// when they hit a node that *does* include a count field.
@@ -69,8 +69,8 @@ namespace System.Collections.Immutable
             /// </summary>
             private Node()
             {
-                Contract.Ensures(this.IsEmpty);
                 _frozen = true; // the empty node is *always* frozen.
+                Debug.Assert(this.IsEmpty);
             }
 
             /// <summary>
@@ -86,7 +86,6 @@ namespace System.Collections.Immutable
                 Requires.NotNull(left, nameof(left));
                 Requires.NotNull(right, nameof(right));
                 Debug.Assert(!frozen || (left._frozen && right._frozen));
-                Contract.Ensures(!this.IsEmpty);
 
                 _key = key;
                 _left = left;
@@ -94,6 +93,8 @@ namespace System.Collections.Immutable
                 _height = ParentHeight(left, right);
                 _count = ParentCount(left, right);
                 _frozen = frozen;
+
+                Debug.Assert(!this.IsEmpty);
             }
 
             /// <summary>
@@ -106,7 +107,6 @@ namespace System.Collections.Immutable
             {
                 get
                 {
-                    Contract.Ensures(Contract.Result<bool>() == (_left == null));
                     Debug.Assert(!(_left == null ^ _right == null));
                     return _left == null;
                 }
@@ -187,7 +187,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-#if FEATURE_ITEMREFAPI
+#if !NETSTANDARD10
             /// <summary>
             /// Gets a read-only reference to the element of the set at the given index.
             /// </summary>
@@ -384,7 +384,7 @@ namespace System.Collections.Immutable
                 Node result = this;
                 if (index == _left._count)
                 {
-                    // We have a match. If this is a leaf, just remove it 
+                    // We have a match. If this is a leaf, just remove it
                     // by returning Empty.  If we have only one child,
                     // replace the node with the child.
                     if (_right.IsEmpty && _left.IsEmpty)
@@ -441,7 +441,6 @@ namespace System.Collections.Immutable
             internal Node RemoveAll(Predicate<T> match)
             {
                 Requires.NotNull(match, nameof(match));
-                Contract.Ensures(Contract.Result<Node>() != null);
 
                 var result = this;
                 var enumerator = new Enumerator(result);
@@ -467,6 +466,7 @@ namespace System.Collections.Immutable
                     enumerator.Dispose();
                 }
 
+                Debug.Assert(result != null);
                 return result;
             }
 
@@ -484,7 +484,7 @@ namespace System.Collections.Immutable
                 Node result = this;
                 if (index == _left._count)
                 {
-                    // We have a match. 
+                    // We have a match.
                     result = this.MutateKey(value);
                 }
                 else if (index < _left._count)
@@ -511,7 +511,7 @@ namespace System.Collections.Immutable
             /// Reverses the order of the elements in the specified range.
             /// </summary>
             /// <param name="index">The zero-based starting index of the range to reverse.</param>
-            /// <param name="count">The number of elements in the range to reverse.</param> 
+            /// <param name="count">The number of elements in the range to reverse.</param>
             /// <returns>The reversed list.</returns>
             internal Node Reverse(int index, int count)
             {
@@ -524,7 +524,7 @@ namespace System.Collections.Immutable
                 int end = index + count - 1;
                 while (start < end)
                 {
-#if FEATURE_ITEMREFAPI
+#if !NETSTANDARD10
                     T a = result.ItemRef(start);
                     T b = result.ItemRef(end);
 #else
@@ -558,7 +558,6 @@ namespace System.Collections.Immutable
             internal Node Sort(Comparison<T> comparison)
             {
                 Requires.NotNull(comparison, nameof(comparison));
-                Contract.Ensures(Contract.Result<Node>() != null);
 
                 // PERF: Eventually this might be reimplemented in a way that does not require allocating an array.
                 var array = new T[this.Count];
@@ -659,7 +658,7 @@ namespace System.Collections.Immutable
                     return result < 0 ? result - offset : result + offset;
                 }
 
-                // We're definitely in the caller's designated range now. 
+                // We're definitely in the caller's designated range now.
                 // Any possible match will be a descendant of this node (or this immediate one).
                 // Some descendants may not be in range, but if we hit any it means no match was found,
                 // and a negative response would come back from the above code to the below code.
@@ -1018,7 +1017,6 @@ namespace System.Collections.Immutable
             internal ImmutableList<T> FindAll(Predicate<T> match)
             {
                 Requires.NotNull(match, nameof(match));
-                Contract.Ensures(Contract.Result<ImmutableList<T>>() != null);
 
                 if (this.IsEmpty)
                 {
@@ -1060,7 +1058,6 @@ namespace System.Collections.Immutable
             internal int FindIndex(Predicate<T> match)
             {
                 Requires.NotNull(match, nameof(match));
-                Contract.Ensures(Contract.Result<int>() >= -1);
 
                 return this.FindIndex(0, _count, match);
             }
@@ -1168,7 +1165,6 @@ namespace System.Collections.Immutable
             internal int FindLastIndex(Predicate<T> match)
             {
                 Requires.NotNull(match, nameof(match));
-                Contract.Ensures(Contract.Result<int>() >= -1);
 
                 return this.IsEmpty ? -1 : this.FindLastIndex(this.Count - 1, this.Count, match);
             }
@@ -1259,7 +1255,6 @@ namespace System.Collections.Immutable
             {
                 Debug.Assert(!this.IsEmpty);
                 Debug.Assert(!_right.IsEmpty);
-                Contract.Ensures(Contract.Result<Node>() != null);
 
                 return _right.MutateLeft(this.MutateRight(_right._left));
             }
@@ -1272,7 +1267,6 @@ namespace System.Collections.Immutable
             {
                 Debug.Assert(!this.IsEmpty);
                 Debug.Assert(!_left.IsEmpty);
-                Contract.Ensures(Contract.Result<Node>() != null);
 
                 return _left.MutateRight(this.MutateLeft(_left._right));
             }
@@ -1286,7 +1280,6 @@ namespace System.Collections.Immutable
                 Debug.Assert(!this.IsEmpty);
                 Debug.Assert(!_right.IsEmpty);
                 Debug.Assert(!_right._left.IsEmpty);
-                Contract.Ensures(Contract.Result<Node>() != null);
 
                 // The following is an optimized version of rotating the right child right, then rotating the parent left.
                 Node right = _right;
@@ -1305,7 +1298,6 @@ namespace System.Collections.Immutable
                 Debug.Assert(!this.IsEmpty);
                 Debug.Assert(!_left.IsEmpty);
                 Debug.Assert(!_left._right.IsEmpty);
-                Contract.Ensures(Contract.Result<Node>() != null);
 
                 // The following is an optimized version of rotating the left child left, then rotating the parent right.
                 Node left = _left;

@@ -6,12 +6,11 @@ namespace System.Runtime.Serialization
 {
     using System;
     using System.Security;
-    using System.Security.Permissions;
     using System.Runtime.CompilerServices;
 
     internal sealed class SurrogateDataContract : DataContract
     {
-        private SurrogateDataContractCriticalHelper _helper;
+        private readonly SurrogateDataContractCriticalHelper _helper;
 
         internal SurrogateDataContract(Type type, ISerializationSurrogate serializationSurrogate)
             : base(new SurrogateDataContractCriticalHelper(type, serializationSurrogate))
@@ -77,7 +76,7 @@ namespace System.Runtime.Serialization
 
         private class SurrogateDataContractCriticalHelper : DataContract.DataContractCriticalHelper
         {
-            ISerializationSurrogate serializationSurrogate;
+            private readonly ISerializationSurrogate serializationSurrogate;
 
             internal SurrogateDataContractCriticalHelper(Type type, ISerializationSurrogate serializationSurrogate)
                 : base(type)

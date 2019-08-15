@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -155,9 +155,9 @@ namespace System.Collections.Tests
         /// <summary>
         /// Returns a set of ModifyEnumerable delegates that modify the enumerable passed to them.
         /// </summary>
-        protected override IEnumerable<ModifyEnumerable> ModifyEnumerables
+        protected override IEnumerable<ModifyEnumerable> GetModifyEnumerables(ModifyOperation operations)
         {
-            get
+            if ((operations & ModifyOperation.Add) == ModifyOperation.Add)
             {
                 yield return (IEnumerable<KeyValuePair<TKey, TValue>> enumerable) =>
                 {
@@ -165,12 +165,18 @@ namespace System.Collections.Tests
                     casted.Add(CreateTKey(12), CreateTValue(5123));
                     return true;
                 };
+            }
+            if ((operations & ModifyOperation.Insert) == ModifyOperation.Insert)
+            {
                 yield return (IEnumerable<KeyValuePair<TKey, TValue>> enumerable) =>
                 {
                     IDictionary<TKey, TValue> casted = ((IDictionary<TKey, TValue>)enumerable);
                     casted[CreateTKey(541)] = CreateTValue(12);
                     return true;
                 };
+            }
+            if ((operations & ModifyOperation.Remove) == ModifyOperation.Remove)
+            {
                 yield return (IEnumerable<KeyValuePair<TKey, TValue>> enumerable) =>
                 {
                     IDictionary<TKey, TValue> casted = ((IDictionary<TKey, TValue>)enumerable);
@@ -183,6 +189,9 @@ namespace System.Collections.Tests
                     }
                     return false;
                 };
+            }
+            if ((operations & ModifyOperation.Clear) == ModifyOperation.Clear)
+            {
                 yield return (IEnumerable<KeyValuePair<TKey, TValue>> enumerable) =>
                 {
                     IDictionary<TKey, TValue> casted = ((IDictionary<TKey, TValue>)enumerable);
@@ -194,10 +203,11 @@ namespace System.Collections.Tests
                     return false;
                 };
             }
+            //throw new InvalidOperationException(string.Format("{0:G}", operations));
         }
 
         /// <summary>
-        /// Used in IDictionary_Generic_Values_Enumeration_ParentDictionaryModifiedInvalidates and 
+        /// Used in IDictionary_Generic_Values_Enumeration_ParentDictionaryModifiedInvalidates and
         /// IDictionary_Generic_Keys_Enumeration_ParentDictionaryModifiedInvalidates.
         /// Some collections (e.g. ConcurrentDictionary) do not throw an InvalidOperationException
         /// when enumerating the Keys or Values property and the parent is modified.
@@ -205,7 +215,7 @@ namespace System.Collections.Tests
         protected virtual bool IDictionary_Generic_Keys_Values_Enumeration_ThrowsInvalidOperation_WhenParentModified => true;
 
         /// <summary>
-        /// Used in IDictionary_Generic_Values_ModifyingTheDictionaryUpdatesTheCollection and 
+        /// Used in IDictionary_Generic_Values_ModifyingTheDictionaryUpdatesTheCollection and
         /// IDictionary_Generic_Keys_ModifyingTheDictionaryUpdatesTheCollection.
         /// Some collections (e.g ConcurrentDictionary) use iterators in the Keys and Values properties,
         /// and do not respond to updates in the base collection.

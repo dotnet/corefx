@@ -3,7 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Diagnostics;
 using System.IO;
+using System.Numerics;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.Asn1;
+using Internal.Cryptography;
 
 namespace System.Security.Cryptography
 {
@@ -54,9 +59,9 @@ namespace System.Security.Cryptography
 
         // DSA does not encode the algorithm identifier into the signature blob, therefore CreateSignature and
         // VerifySignature do not need the HashAlgorithmName value, only SignData and VerifyData do.
-        abstract public byte[] CreateSignature(byte[] rgbHash);
+        public abstract byte[] CreateSignature(byte[] rgbHash);
 
-        abstract public bool VerifySignature(byte[] rgbHash, byte[] rgbSignature);
+        public abstract bool VerifySignature(byte[] rgbHash, byte[] rgbSignature);
 
         protected virtual byte[] HashData(byte[] data, int offset, int count, HashAlgorithmName hashAlgorithm)
         {
@@ -147,6 +152,7 @@ namespace System.Security.Cryptography
 
         protected virtual bool TryHashData(ReadOnlySpan<byte> data, Span<byte> destination, HashAlgorithmName hashAlgorithm, out int bytesWritten)
         {
+            // Use ArrayPool.Shared instead of CryptoPool because the array is passed out.
             byte[] array = ArrayPool<byte>.Shared.Rent(data.Length);
             try
             {
@@ -195,23 +201,34 @@ namespace System.Security.Cryptography
                 throw HashAlgorithmNameNullOrEmpty();
             }
 
-            for (int i = 256; ; i = checked(i * 2))
+            // The biggest hash algorithm supported is SHA512, which is only 64 bytes (512 bits).
+            // So this should realistically never hit the fallback
+            // (it'd require a derived type to add support for a different hash algorithm, and that
+            // algorithm to have a large output.)
+            Span<byte> buf = stackalloc byte[128];
+            ReadOnlySpan<byte> hash = stackalloc byte[0];
+
+            if (TryHashData(data, buf, hashAlgorithm, out int hashLength))
             {
-                int hashLength = 0;
-                byte[] hash = ArrayPool<byte>.Shared.Rent(i);
+                hash = buf.Slice(0, hashLength);
+            }
+            else
+            {
+                // Use ArrayPool.Shared instead of CryptoPool because the array is passed out.
+                byte[] array = ArrayPool<byte>.Shared.Rent(data.Length);
                 try
                 {
-                    if (TryHashData(data, hash, hashAlgorithm, out hashLength))
-                    {
-                        return VerifySignature(new ReadOnlySpan<byte>(hash, 0, hashLength), signature);
-                    }
+                    data.CopyTo(array);
+                    hash = HashData(array, 0, data.Length, hashAlgorithm);
                 }
                 finally
                 {
-                    Array.Clear(hash, 0, hashLength);
-                    ArrayPool<byte>.Shared.Return(hash);
+                    Array.Clear(array, 0, data.Length);
+                    ArrayPool<byte>.Shared.Return(array);
                 }
             }
+
+            return VerifySignature(hash, signature);
         }
 
         public virtual bool VerifySignature(ReadOnlySpan<byte> hash, ReadOnlySpan<byte> signature) =>
@@ -222,5 +239,185 @@ namespace System.Security.Cryptography
 
         internal static Exception HashAlgorithmNameNullOrEmpty() =>
             new ArgumentException(SR.Cryptography_HashAlgorithmNameNullOrEmpty, "hashAlgorithm");
+
+        public override bool TryExportEncryptedPkcs8PrivateKey(
+            ReadOnlySpan<byte> passwordBytes,
+            PbeParameters pbeParameters,
+            Span<byte> destination,
+            out int bytesWritten)
+        {
+            if (pbeParameters == null)
+                throw new ArgumentNullException(nameof(pbeParameters));
+
+            PasswordBasedEncryption.ValidatePbeParameters(
+                pbeParameters,
+                ReadOnlySpan<char>.Empty,
+                passwordBytes);
+
+            using (AsnWriter pkcs8PrivateKey = WritePkcs8())
+            using (AsnWriter writer = KeyFormatHelper.WriteEncryptedPkcs8(
+                passwordBytes,
+                pkcs8PrivateKey,
+                pbeParameters))
+            {
+                return writer.TryEncode(destination, out bytesWritten);
+            }
+        }
+
+        public override bool TryExportEncryptedPkcs8PrivateKey(
+            ReadOnlySpan<char> password,
+            PbeParameters pbeParameters,
+            Span<byte> destination,
+            out int bytesWritten)
+        {
+            if (pbeParameters == null)
+                throw new ArgumentNullException(nameof(pbeParameters));
+
+            PasswordBasedEncryption.ValidatePbeParameters(
+                pbeParameters,
+                password,
+                ReadOnlySpan<byte>.Empty);
+
+            using (AsnWriter pkcs8PrivateKey = WritePkcs8())
+            using (AsnWriter writer = KeyFormatHelper.WriteEncryptedPkcs8(
+                password,
+                pkcs8PrivateKey,
+                pbeParameters))
+            {
+                return writer.TryEncode(destination, out bytesWritten);
+            }
+        }
+
+        public override bool TryExportPkcs8PrivateKey(
+            Span<byte> destination,
+            out int bytesWritten)
+        {
+            using (AsnWriter writer = WritePkcs8())
+            {
+                return writer.TryEncode(destination, out bytesWritten);
+            }
+        }
+
+        public override bool TryExportSubjectPublicKeyInfo(
+            Span<byte> destination,
+            out int bytesWritten)
+        {
+            using (AsnWriter writer = WriteSubjectPublicKeyInfo())
+            {
+                return writer.TryEncode(destination, out bytesWritten);
+            }
+        }
+
+        private unsafe AsnWriter WritePkcs8()
+        {
+            DSAParameters dsaParameters = ExportParameters(true);
+
+            fixed (byte* privPin = dsaParameters.X)
+            {
+                try
+                {
+                    return DSAKeyFormatHelper.WritePkcs8(dsaParameters);
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(dsaParameters.X);
+                }
+            }
+        }
+
+        private AsnWriter WriteSubjectPublicKeyInfo()
+        {
+            DSAParameters dsaParameters = ExportParameters(false);
+            return DSAKeyFormatHelper.WriteSubjectPublicKeyInfo(dsaParameters);
+        }
+
+        public override unsafe void ImportEncryptedPkcs8PrivateKey(
+            ReadOnlySpan<byte> passwordBytes,
+            ReadOnlySpan<byte> source,
+            out int bytesRead)
+        {
+            DSAKeyFormatHelper.ReadEncryptedPkcs8(
+                source,
+                passwordBytes,
+                out int localRead,
+                out DSAParameters ret);
+
+            fixed (byte* privPin = ret.X)
+            {
+                try
+                {
+                    ImportParameters(ret);
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(ret.X);
+                }
+            }
+
+            bytesRead = localRead;
+        }
+
+        public override unsafe void ImportEncryptedPkcs8PrivateKey(
+            ReadOnlySpan<char> password,
+            ReadOnlySpan<byte> source,
+            out int bytesRead)
+        {
+            DSAKeyFormatHelper.ReadEncryptedPkcs8(
+                source,
+                password,
+                out int localRead,
+                out DSAParameters ret);
+
+            fixed (byte* privPin = ret.X)
+            {
+                try
+                {
+                    ImportParameters(ret);
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(ret.X);
+                }
+            }
+
+            bytesRead = localRead;
+        }
+
+        public override unsafe void ImportPkcs8PrivateKey(
+            ReadOnlySpan<byte> source,
+            out int bytesRead)
+        {
+            DSAKeyFormatHelper.ReadPkcs8(
+                source,
+                out int localRead,
+                out DSAParameters key);
+
+            fixed (byte* privPin = key.X)
+            {
+                try
+                {
+                    ImportParameters(key);
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(key.X);
+                }
+            }
+
+            bytesRead = localRead;
+        }
+
+        public override void ImportSubjectPublicKeyInfo(
+            ReadOnlySpan<byte> source,
+            out int bytesRead)
+        {
+            DSAKeyFormatHelper.ReadSubjectPublicKeyInfo(
+                source,
+                out int localRead,
+                out DSAParameters key);
+
+            ImportParameters(key);
+            bytesRead = localRead;
+        }
     }
 }

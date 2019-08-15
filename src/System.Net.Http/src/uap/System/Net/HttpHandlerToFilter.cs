@@ -48,7 +48,7 @@ namespace System.Net.Http
             _filter = filter;
             _filterMaxVersionSet = 0;
             _handler = handler;
-            
+
             _filterWithNoCredentials = new Lazy<RTHttpBaseProtocolFilter>(InitFilterWithNoCredentials);
         }
 
@@ -116,7 +116,8 @@ namespace System.Net.Http
                     response.StatusCode != HttpStatusCode.MovedPermanently &&
                     response.StatusCode != HttpStatusCode.Redirect &&
                     response.StatusCode != HttpStatusCode.RedirectMethod &&
-                    response.StatusCode != HttpStatusCode.RedirectKeepVerb)
+                    response.StatusCode != HttpStatusCode.RedirectKeepVerb &&
+                    response.StatusCode != HttpStatusCode.PermanentRedirect)
                 {
                     break;
                 }
@@ -151,10 +152,11 @@ namespace System.Net.Http
                 }
 
                 // Follow HTTP RFC 7231 rules. In general, 3xx responses
-                // except for 307 will keep verb except POST becomes GET.
-                // 307 responses have all verbs stay the same.
+                // except for 307 and 308 will keep verb except POST becomes GET.
+                // 307 and 308 responses have all verbs stay the same.
                 // https://tools.ietf.org/html/rfc7231#section-6.4
                 if (response.StatusCode != HttpStatusCode.RedirectKeepVerb &&
+                    response.StatusCode != HttpStatusCode.PermanentRedirect &&
                     requestHttpMethod == HttpMethod.Post)
                 {
                     requestHttpMethod = HttpMethod.Get;
@@ -283,7 +285,7 @@ namespace System.Net.Http
                 {
                     maxVersion = RTHttpVersion.Http11;
                 }
-                
+
                 // The default for WinRT HttpBaseProtocolFilter.MaxVersion is HttpVersion.Http20.
                 // So, we only have to change it if we don't want HTTP/2.0.
                 if (maxVersion !=  RTHttpVersion.Http20)
@@ -291,7 +293,7 @@ namespace System.Net.Http
                     _filter.MaxVersion = maxVersion;
                 }
             }
-            
+
             // Headers
             foreach (KeyValuePair<string, IEnumerable<string>> headerPair in request.Headers)
             {
@@ -345,7 +347,7 @@ namespace System.Net.Http
             else
             {
                 Stream contentStream = await content.ReadAsStreamAsync().ConfigureAwait(false);
-                
+
                 if (contentStream is RTIInputStream)
                 {
                     rtContent = new RTHttpStreamContent((RTIInputStream)contentStream);
@@ -396,7 +398,7 @@ namespace System.Net.Http
                 {
                     if (!rtContent.Headers.TryAppendWithoutValidation(headerPair.Key, value))
                     {
-                        // rtContent headers are restricted to a white-list of allowed headers, while System.Net.HttpClient's content headers 
+                        // rtContent headers are restricted to a white-list of allowed headers, while System.Net.HttpClient's content headers
                         // will allow custom headers.  If something is not successfully added to the content headers, try adding them to the standard headers.
                         bool success = rtHeaderCollection.TryAppendWithoutValidation(headerPair.Key, value);
                         Debug.Assert(success);
@@ -436,13 +438,13 @@ namespace System.Net.Http
             {
                 if (headerPair.Key.Equals(HttpKnownHeaderNames.SetCookie, StringComparison.OrdinalIgnoreCase))
                 {
-                    // The Set-Cookie header always comes back with all of the cookies concatenated together. 
+                    // The Set-Cookie header always comes back with all of the cookies concatenated together.
                     // For example if the response contains the following:
                     //     Set-Cookie A=1
                     //     Set-Cookie B=2
-                    // Then we will have a single header KeyValuePair of Key=Set-Cookie, Value=A=1, B=2. 
-                    // However clients expect these headers to be separated(i.e. 
-                    // httpResponseMessage.Headers.GetValues("Set-Cookie") should return two cookies not one 
+                    // Then we will have a single header KeyValuePair of Key=Set-Cookie, Value=A=1, B=2.
+                    // However clients expect these headers to be separated(i.e.
+                    // httpResponseMessage.Headers.GetValues("Set-Cookie") should return two cookies not one
                     // concatenated together).
                     success = response.Headers.TryAddWithoutValidation(headerPair.Key, CookieHelper.GetCookiesFromHeader(headerPair.Value));
                 }

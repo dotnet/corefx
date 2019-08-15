@@ -18,8 +18,60 @@ namespace System.Xml
     // Represents an entire document. An XmlDocument contains XML data.
     public class XmlDocument : XmlNode
     {
-        private XmlImplementation _implementation;
-        private DomNameTable _domNameTable; // hash table of XmlName
+        private const string DocumentName = "#document";
+        private const string DocumentFragmentName = "#document-fragment";
+        private const string CommentName = "#comment";
+        private const string TextName = "#text";
+        private const string CDataSectionName = "#cdata-section";
+        private const string EntityName = "#entity";
+        private const string ID = "id";
+        private const string Xmlns = "xmlns";
+        private const string Xml = "xml";
+        private const string Space = "space";
+        private const string Lang = "lang";
+        private const string NonSignificantWhitespaceName = "#whitespace";
+        private const string SignificantWhitespaceName = "#significant-whitespace";
+
+        // The seed index below requires that the constant strings above and the seed array below are
+        // kept in the same order.
+        private const int DocumentNameSeedIndex = 0;
+        private const int DocumentFragmentNameSeedIndex = 1;
+        private const int CommentNameSeedIndex = 2;
+        private const int TextNameSeedIndex = 3;
+        private const int CDataSectionNameSeedIndex = 4;
+        private const int EntityNameSeedIndex = 5;
+        private const int IDSeedIndex = 6;
+        private const int XmlnsSeedIndex = 7;
+        private const int XmlSeedIndex = 8;
+        private const int SpaceSeedIndex = 9;
+        private const int LangSeedIndex = 10;
+        private const int NonSignificantWhitespaceNameSeedIndex = 11;
+        private const int SignificantWhitespaceNameSeedIndex = 12;
+        private const int NsXmlNsSeedIndex = 13;
+        private const int NsXmlSeedIndex = 14;
+
+        // If changing the array below ensure that the seed indexes before match
+        private static readonly (string key, int hash)[] s_nameTableSeeds = new[]
+            {
+                (DocumentName, System.Xml.NameTable.ComputeHash32(DocumentName)),
+                (DocumentFragmentName, System.Xml.NameTable.ComputeHash32(DocumentFragmentName)),
+                (CommentName, System.Xml.NameTable.ComputeHash32(CommentName)),
+                (TextName, System.Xml.NameTable.ComputeHash32(TextName)),
+                (CDataSectionName, System.Xml.NameTable.ComputeHash32(CDataSectionName)),
+                (EntityName, System.Xml.NameTable.ComputeHash32(EntityName)),
+                (ID, System.Xml.NameTable.ComputeHash32(ID)),
+                (Xmlns, System.Xml.NameTable.ComputeHash32(Xmlns)),
+                (Xml, System.Xml.NameTable.ComputeHash32(Xml)),
+                (Space, System.Xml.NameTable.ComputeHash32(Space)),
+                (Lang, System.Xml.NameTable.ComputeHash32(Lang)),
+                (NonSignificantWhitespaceName, System.Xml.NameTable.ComputeHash32(NonSignificantWhitespaceName)),
+                (SignificantWhitespaceName, System.Xml.NameTable.ComputeHash32(SignificantWhitespaceName)),
+                (XmlReservedNs.NsXmlNs, System.Xml.NameTable.ComputeHash32(XmlReservedNs.NsXmlNs)),
+                (XmlReservedNs.NsXml, System.Xml.NameTable.ComputeHash32(XmlReservedNs.NsXml))
+            };
+
+        private readonly XmlImplementation _implementation;
+        private readonly DomNameTable _domNameTable; // hash table of XmlName
         private XmlLinkedNode _lastChild;
         private XmlNamedNodeMap _entities;
         private Hashtable _htElementIdMap;
@@ -58,14 +110,13 @@ namespace System.Xml
         internal string strXml;
         internal string strSpace;
         internal string strLang;
-        internal string strEmpty;
 
         internal string strNonSignificantWhitespaceName;
         internal string strSignificantWhitespaceName;
         internal string strReservedXmlns;
         internal string strReservedXml;
 
-        internal String baseURI;
+        internal string baseURI;
 
         private XmlResolver _resolver;
         internal bool bSetResolver;
@@ -94,28 +145,53 @@ namespace System.Xml
             _implementation = imp;
             _domNameTable = new DomNameTable(this);
 
-            // force the following string instances to be default in the nametable
-            XmlNameTable nt = this.NameTable;
-            nt.Add(string.Empty);
-            strDocumentName = nt.Add("#document");
-            strDocumentFragmentName = nt.Add("#document-fragment");
-            strCommentName = nt.Add("#comment");
-            strTextName = nt.Add("#text");
-            strCDataSectionName = nt.Add("#cdata-section");
-            strEntityName = nt.Add("#entity");
-            strID = nt.Add("id");
-            strNonSignificantWhitespaceName = nt.Add("#whitespace");
-            strSignificantWhitespaceName = nt.Add("#significant-whitespace");
-            strXmlns = nt.Add("xmlns");
-            strXml = nt.Add("xml");
-            strSpace = nt.Add("space");
-            strLang = nt.Add("lang");
-            strReservedXmlns = nt.Add(XmlReservedNs.NsXmlNs);
-            strReservedXml = nt.Add(XmlReservedNs.NsXml);
-            strEmpty = nt.Add(String.Empty);
-            baseURI = String.Empty;
-
+            strXmlns = Xmlns;
+            strXml = Xml;
+            strReservedXmlns = XmlReservedNs.NsXmlNs;
+            strReservedXml = XmlReservedNs.NsXml;
+            baseURI = string.Empty;
             objLock = new object();
+
+            if (imp.NameTable.GetType() == typeof(NameTable))
+            {
+                // When the name table being used is of type NameTable avoid re-calculating the hash codes.
+                NameTable nt = (NameTable)imp.NameTable;
+
+                strDocumentName = nt.GetOrAddEntry(s_nameTableSeeds[DocumentNameSeedIndex].key, s_nameTableSeeds[DocumentNameSeedIndex].hash);
+                strDocumentFragmentName = nt.GetOrAddEntry(s_nameTableSeeds[DocumentFragmentNameSeedIndex].key, s_nameTableSeeds[DocumentFragmentNameSeedIndex].hash);
+                strCommentName = nt.GetOrAddEntry(s_nameTableSeeds[CommentNameSeedIndex].key, s_nameTableSeeds[CommentNameSeedIndex].hash);
+                strTextName = nt.GetOrAddEntry(s_nameTableSeeds[TextNameSeedIndex].key, s_nameTableSeeds[TextNameSeedIndex].hash);
+                strCDataSectionName = nt.GetOrAddEntry(s_nameTableSeeds[CDataSectionNameSeedIndex].key, s_nameTableSeeds[CDataSectionNameSeedIndex].hash);
+                strEntityName = nt.GetOrAddEntry(s_nameTableSeeds[EntityNameSeedIndex].key, s_nameTableSeeds[EntityNameSeedIndex].hash);
+                strID = nt.GetOrAddEntry(s_nameTableSeeds[IDSeedIndex].key, s_nameTableSeeds[IDSeedIndex].hash);
+                strNonSignificantWhitespaceName = nt.GetOrAddEntry(s_nameTableSeeds[NonSignificantWhitespaceNameSeedIndex].key, s_nameTableSeeds[NonSignificantWhitespaceNameSeedIndex].hash);
+                strSignificantWhitespaceName = nt.GetOrAddEntry(s_nameTableSeeds[SignificantWhitespaceNameSeedIndex].key, s_nameTableSeeds[SignificantWhitespaceNameSeedIndex].hash);
+                strXmlns = nt.GetOrAddEntry(s_nameTableSeeds[XmlnsSeedIndex].key, s_nameTableSeeds[XmlnsSeedIndex].hash);
+                strXml = nt.GetOrAddEntry(s_nameTableSeeds[XmlSeedIndex].key, s_nameTableSeeds[XmlSeedIndex].hash);
+                strSpace = nt.GetOrAddEntry(s_nameTableSeeds[SpaceSeedIndex].key, s_nameTableSeeds[SpaceSeedIndex].hash);
+                strLang = nt.GetOrAddEntry(s_nameTableSeeds[LangSeedIndex].key, s_nameTableSeeds[LangSeedIndex].hash);
+                strReservedXmlns = nt.GetOrAddEntry(s_nameTableSeeds[NsXmlNsSeedIndex].key, s_nameTableSeeds[NsXmlNsSeedIndex].hash);
+                strReservedXml = nt.GetOrAddEntry(s_nameTableSeeds[NsXmlSeedIndex].key, s_nameTableSeeds[NsXmlSeedIndex].hash);
+            }
+            else
+            {
+                XmlNameTable customNameTable = imp.NameTable;
+                strDocumentName = customNameTable.Add(DocumentName);
+                strDocumentFragmentName = customNameTable.Add(DocumentFragmentName);
+                strCommentName = customNameTable.Add(CommentName);
+                strTextName = customNameTable.Add(TextName);
+                strCDataSectionName = customNameTable.Add(CDataSectionName);
+                strEntityName = customNameTable.Add(EntityName);
+                strID = customNameTable.Add(ID);
+                strNonSignificantWhitespaceName = customNameTable.Add(NonSignificantWhitespaceName);
+                strSignificantWhitespaceName = customNameTable.Add(SignificantWhitespaceName);
+                strXmlns = customNameTable.Add(Xmlns);
+                strXml = customNameTable.Add(Xml);
+                strSpace = customNameTable.Add(Space);
+                strLang = customNameTable.Add(Lang);
+                strReservedXmlns = customNameTable.Add(XmlReservedNs.NsXmlNs);
+                strReservedXml = customNameTable.Add(XmlReservedNs.NsXml);
+            }
         }
 
         internal SchemaInfo DtdSchemaInfo
@@ -125,7 +201,7 @@ namespace System.Xml
         }
 
         // NOTE: This does not correctly check start name char, but we cannot change it since it would be a breaking change.
-        internal static void CheckName(String name)
+        internal static void CheckName(string name)
         {
             int endPos = ValidateNames.ParseNmtoken(name, 0);
             if (endPos < name.Length)
@@ -165,7 +241,7 @@ namespace System.Xml
                 object oPrefix = xmlName.Prefix;
                 object oNamespaceURI = xmlName.NamespaceURI;
                 object oLocalName = xmlName.LocalName;
-                if ((oPrefix == (object)strXmlns || (oPrefix == (object)strEmpty && oLocalName == (object)strXmlns)) ^ (oNamespaceURI == (object)strReservedXmlns))
+                if ((oPrefix == (object)strXmlns || (xmlName.Prefix.Length == 0 && oLocalName == (object)strXmlns)) ^ (oNamespaceURI == (object)strReservedXmlns))
                     throw new ArgumentException(SR.Format(SR.Xdom_Attr_Reserved_XmlNS, namespaceURI));
             }
             return xmlName;
@@ -173,7 +249,7 @@ namespace System.Xml
 
         internal bool AddIdInfo(XmlName eleName, XmlName attrName)
         {
-            //when XmlLoader call XmlDocument.AddInfo, the element.XmlName and attr.XmlName 
+            //when XmlLoader call XmlDocument.AddInfo, the element.XmlName and attr.XmlName
             //have already been replaced with the ones that don't have namespace values (or just
             //string.Empty) because in DTD, the namespace is not supported
             if (_htElementIDAttrDecl == null || _htElementIDAttrDecl[eleName] == null)
@@ -188,7 +264,7 @@ namespace System.Xml
 
         private XmlName GetIDInfoByElement_(XmlName eleName)
         {
-            //When XmlDocument is getting the IDAttribute for a given element, 
+            //When XmlDocument is getting the IDAttribute for a given element,
             //we need only compare the prefix and localname of element.XmlName with
             //the registered htElementIDAttrDecl.
             XmlName newName = GetXmlName(eleName.Prefix, eleName.LocalName, string.Empty, null);
@@ -310,13 +386,13 @@ namespace System.Xml
         }
 
         // Gets the name of the node.
-        public override String Name
+        public override string Name
         {
             get { return strDocumentName; }
         }
 
         // Gets the name of the current node without the namespace prefix.
-        public override String LocalName
+        public override string LocalName
         {
             get { return strDocumentName; }
         }
@@ -531,11 +607,11 @@ namespace System.Xml
         }
 
         // Creates an XmlAttribute with the specified name.
-        public XmlAttribute CreateAttribute(String name)
+        public XmlAttribute CreateAttribute(string name)
         {
-            String prefix = String.Empty;
-            String localName = String.Empty;
-            String namespaceURI = String.Empty;
+            string prefix = string.Empty;
+            string localName = string.Empty;
+            string namespaceURI = string.Empty;
 
             SplitName(name, out prefix, out localName);
 
@@ -544,7 +620,7 @@ namespace System.Xml
             return CreateAttribute(prefix, localName, namespaceURI);
         }
 
-        internal void SetDefaultNamespace(String prefix, String localName, ref String namespaceURI)
+        internal void SetDefaultNamespace(string prefix, string localName, ref string namespaceURI)
         {
             if (prefix == strXmlns || (prefix.Length == 0 && localName == strXmlns))
             {
@@ -557,14 +633,14 @@ namespace System.Xml
         }
 
         // Creates a XmlCDataSection containing the specified data.
-        public virtual XmlCDataSection CreateCDataSection(String data)
+        public virtual XmlCDataSection CreateCDataSection(string data)
         {
             fCDataNodesPresent = true;
             return new XmlCDataSection(data, this);
         }
 
         // Creates an XmlComment containing the specified data.
-        public virtual XmlComment CreateComment(String data)
+        public virtual XmlComment CreateComment(string data)
         {
             return new XmlComment(data, this);
         }
@@ -582,10 +658,10 @@ namespace System.Xml
         }
 
         // Creates an element with the specified name.
-        public XmlElement CreateElement(String name)
+        public XmlElement CreateElement(string name)
         {
-            string prefix = String.Empty;
-            string localName = String.Empty;
+            string prefix = string.Empty;
+            string localName = string.Empty;
             SplitName(name, out prefix, out localName);
             return CreateElement(prefix, localName, string.Empty);
         }
@@ -656,26 +732,26 @@ namespace System.Xml
         }
 
         // Creates an XmlEntityReference with the specified name.
-        public virtual XmlEntityReference CreateEntityReference(String name)
+        public virtual XmlEntityReference CreateEntityReference(string name)
         {
             return new XmlEntityReference(name, this);
         }
 
         // Creates a XmlProcessingInstruction with the specified name
         // and data strings.
-        public virtual XmlProcessingInstruction CreateProcessingInstruction(String target, String data)
+        public virtual XmlProcessingInstruction CreateProcessingInstruction(string target, string data)
         {
             return new XmlProcessingInstruction(target, data, this);
         }
 
         // Creates a XmlDeclaration node with the specified values.
-        public virtual XmlDeclaration CreateXmlDeclaration(String version, string encoding, string standalone)
+        public virtual XmlDeclaration CreateXmlDeclaration(string version, string encoding, string standalone)
         {
             return new XmlDeclaration(version, encoding, standalone, this);
         }
 
         // Creates an XmlText with the specified text.
-        public virtual XmlText CreateTextNode(String text)
+        public virtual XmlText CreateTextNode(string text)
         {
             return new XmlText(text, this);
         }
@@ -826,7 +902,7 @@ namespace System.Xml
 
         // Returns an XmlNodeList containing
         // a list of all descendant elements that match the specified name.
-        public virtual XmlNodeList GetElementsByTagName(String name)
+        public virtual XmlNodeList GetElementsByTagName(string name)
         {
             return new XmlElementList(this, name);
         }
@@ -835,10 +911,10 @@ namespace System.Xml
 
         // Creates an XmlAttribute with the specified LocalName
         // and NamespaceURI.
-        public XmlAttribute CreateAttribute(String qualifiedName, String namespaceURI)
+        public XmlAttribute CreateAttribute(string qualifiedName, string namespaceURI)
         {
-            string prefix = String.Empty;
-            string localName = String.Empty;
+            string prefix = string.Empty;
+            string localName = string.Empty;
 
             SplitName(qualifiedName, out prefix, out localName);
             return CreateAttribute(prefix, localName, namespaceURI);
@@ -846,17 +922,17 @@ namespace System.Xml
 
         // Creates an XmlElement with the specified LocalName and
         // NamespaceURI.
-        public XmlElement CreateElement(String qualifiedName, String namespaceURI)
+        public XmlElement CreateElement(string qualifiedName, string namespaceURI)
         {
-            string prefix = String.Empty;
-            string localName = String.Empty;
+            string prefix = string.Empty;
+            string localName = string.Empty;
             SplitName(qualifiedName, out prefix, out localName);
             return CreateElement(prefix, localName, namespaceURI);
         }
 
         // Returns a XmlNodeList containing
         // a list of all descendant elements that match the specified name.
-        public virtual XmlNodeList GetElementsByTagName(String localName, String namespaceURI)
+        public virtual XmlNodeList GetElementsByTagName(string localName, string namespaceURI)
         {
             return new XmlElementList(this, localName, namespaceURI);
         }
@@ -953,7 +1029,7 @@ namespace System.Xml
                         break;
 
                     default:
-                        throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, SR.Xdom_Import, node.NodeType.ToString()));
+                        throw new InvalidOperationException(SR.Format(CultureInfo.InvariantCulture, SR.Xdom_Import, node.NodeType));
                 }
             }
 
@@ -1264,7 +1340,7 @@ namespace System.Xml
                 IsLoading = false;
                 _actualLoadingStatus = false;
 
-                // Ensure the bit is still on after loading a dtd 
+                // Ensure the bit is still on after loading a dtd
                 _reportValidity = true;
             }
         }
@@ -1363,7 +1439,7 @@ namespace System.Xml
         }
 
         // Saves the XML document to the specified XmlWriter.
-        // 
+        //
         //Saves out the file with xmldeclaration which has encoding value equal to
         //that of textwriter's encoding
         public virtual void Save(XmlWriter w)
@@ -1397,7 +1473,7 @@ namespace System.Xml
         }
 
         // Saves the node to the specified XmlWriter.
-        // 
+        //
         //Writes out the to the file with exact content in the XmlDocument.
         public override void WriteTo(XmlWriter w)
         {
@@ -1405,7 +1481,7 @@ namespace System.Xml
         }
 
         // Saves all the children of the node to the specified XmlWriter.
-        // 
+        //
         //Writes out the to the file with exact content in the XmlDocument.
         public override void WriteContentTo(XmlWriter xw)
         {
@@ -1634,7 +1710,7 @@ namespace System.Xml
             return null;
         }
 
-        internal String Version
+        internal string Version
         {
             get
             {
@@ -1645,7 +1721,7 @@ namespace System.Xml
             }
         }
 
-        internal String Encoding
+        internal string Encoding
         {
             get
             {
@@ -1656,7 +1732,7 @@ namespace System.Xml
             }
         }
 
-        internal String Standalone
+        internal string Standalone
         {
             get
             {
@@ -1667,7 +1743,7 @@ namespace System.Xml
             }
         }
 
-        internal XmlEntity GetEntityNode(String name)
+        internal XmlEntity GetEntityNode(string name)
         {
             if (DocumentType != null)
             {
@@ -1700,12 +1776,12 @@ namespace System.Xml
             }
         }
 
-        public override String BaseURI
+        public override string BaseURI
         {
             get { return baseURI; }
         }
 
-        internal void SetBaseURI(String inBaseURI)
+        internal void SetBaseURI(string inBaseURI)
         {
             baseURI = inBaseURI;
         }

@@ -13,7 +13,7 @@ namespace System.Globalization
         {
             if (GlobalizationMode.Invariant)
             {
-                // In Invariant mode we assume all characters are normalized. 
+                // In Invariant mode we assume all characters are normalized.
                 // This is because we don't support any linguistic operation on the strings
                 return true;
             }
@@ -34,7 +34,7 @@ namespace System.Globalization
         {
             if (GlobalizationMode.Invariant)
             {
-                // In Invariant mode we assume all characters are normalized. 
+                // In Invariant mode we assume all characters are normalized.
                 // This is because we don't support any linguistic operation on the strings
                 return strInput;
             }
@@ -95,7 +95,7 @@ namespace System.Globalization
             for (int i = 0; i < s.Length; i++)
             {
                 char c = s[i];
-                
+
                 if (c < '\ud800')
                 {
                     continue;

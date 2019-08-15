@@ -63,7 +63,6 @@ namespace System.IO.Tests
         }
 
         [Theory,
-            InlineData(@" C:\dir/baz", @" C:\dir"),
             InlineData(@" C:\dir/baz", @" C:\dir")]
         public void GetDirectoryName_SkipSpaces(string path, string expected)
         {
@@ -157,7 +156,7 @@ namespace System.IO.Tests
                 }
                 else
                 {
-                    Assert.True(Path.GetFullPath(bad).EndsWith(bad));
+                    Assert.EndsWith(bad, Path.GetFullPath(bad));
                 }
                 Assert.Equal(string.Empty, Path.GetPathRoot(bad));
                 Assert.False(Path.IsPathRooted(bad));
@@ -207,7 +206,7 @@ namespace System.IO.Tests
         [Theory,
             MemberData(nameof(TestData_Wildcards)),
             MemberData(nameof(TestData_ExtendedWildcards))]
-        public void GetFullPath_Wildcards(char wildcard)
+        public void GetFullPath_Wildcards(string wildcard)
         {
             string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + wildcard + "ing");
             Assert.Equal(path, Path.GetFullPath(path));
@@ -237,7 +236,7 @@ namespace System.IO.Tests
         };
 
         [Theory,
-    MemberData(nameof(GetFullPathBasePath_ArgumentException))]
+            MemberData(nameof(GetFullPathBasePath_ArgumentException))]
         public static void GetFullPath_BasePath_Input(string path, string basePath, string paramName)
         {
             Assert.Throws<ArgumentException>(paramName, () => Path.GetFullPath(path, basePath));

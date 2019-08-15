@@ -56,13 +56,13 @@ namespace System.Reflection.Tests
             VerifySetMethod(property, property.GetSetMethod(), hasSetter && !nonPublicSetter, nonPublicSetter);
             Assert.Equal(property.GetSetMethod(), property.GetSetMethod(false));
             VerifySetMethod(property, property.GetSetMethod(true), hasSetter, nonPublicSetter);
-            
+
             Assert.Equal(ExcludeNulls(property.GetGetMethod(), property.GetSetMethod()), property.GetAccessors());
             Assert.Equal(property.GetAccessors(), property.GetAccessors(false));
             Assert.Equal(ExcludeNulls(property.GetGetMethod(true), property.GetSetMethod(true)), property.GetAccessors(true));
         }
 
-        public static void VerifyGetMethod(PropertyInfo property, MethodInfo method, bool exists, bool nonPublic)
+        private static void VerifyGetMethod(PropertyInfo property, MethodInfo method, bool exists, bool nonPublic)
         {
             Assert.Equal(exists, method != null);
             if (exists)
@@ -76,7 +76,7 @@ namespace System.Reflection.Tests
             }
         }
 
-        public static void VerifySetMethod(PropertyInfo property, MethodInfo method, bool exists, bool nonPublic)
+        private static void VerifySetMethod(PropertyInfo property, MethodInfo method, bool exists, bool nonPublic)
         {
             Assert.Equal(exists, method != null);
             if (exists)

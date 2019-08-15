@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.IO;
 using Xunit;
 
 namespace System.Drawing.Imaging.Tests
@@ -57,6 +58,17 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
+        public static IEnumerable<object[]> ImageFromFileToStringTestData
+        {
+            get
+            {
+                yield return new object[] { Path.Combine("bitmaps", "nature24bits.gif"), "Gif" };
+                yield return new object[] { Path.Combine("bitmaps", "nature24bits.jpg"), "Jpeg" };
+                yield return new object[] { Path.Combine("bitmaps", "VisualPng.ico"), "Icon"};
+                yield return new object[] { Path.Combine("bitmaps", "almogaver32bits.tif"), "Tiff" };
+            }
+        }
+
         public static IEnumerable<object[]> ImageFormatEqualsTestData
         {
             get
@@ -68,28 +80,37 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(ImageFormatGuidTestData))]
         public void Guid_ReturnsExpected(Guid expectedGuid, ImageFormat imageFormat)
         {
             Assert.Equal(expectedGuid, imageFormat.Guid);
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(ImageFormatToStringTestData))]
         public void ToString_ReturnsExpected(string expected, ImageFormat imageFormat)
         {
             Assert.Equal(expected, imageFormat.ToString());
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Bug fix in .NET Core that is not in NETFX yet, dotnet/corefx 16463")]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
+        [MemberData(nameof(ImageFromFileToStringTestData))]
+        public void Image_RawFormat_ToString(string path, string expected)
+        {
+            var img = Image.FromFile(path);
+            Assert.Same(expected, img.RawFormat.ToString());
+        }
+
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(ImageFormatEqualsTestData))]
         public void Equals_Object_ReturnsExpected(ImageFormat imageFormat, object obj, bool result)
         {
             Assert.Equal(result, imageFormat.Equals(obj));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void GetHashCode_Success()
         {
             Guid guid = Guid.NewGuid();

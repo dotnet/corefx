@@ -383,7 +383,6 @@ namespace System.Threading.Tests
 
         [Fact]
         [OuterLoop]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Hangs in desktop, issue dotnet/corefx#3364 is not fixed there")]
         public static void ReleaseReadersWhenWaitingWriterTimesOut()
         {
             using (var rwls = new ReaderWriterLockSlim())
@@ -508,7 +507,7 @@ namespace System.Threading.Tests
                 rwls.ExitUpgradeableReadLock();
                 // At this point, the waiting writer should be released, and the waiting reader should not
 
-                foreach(var thread in threads)
+                foreach (var thread in threads)
                     thread.Join();
                 // Typical order of execution: 5
             }

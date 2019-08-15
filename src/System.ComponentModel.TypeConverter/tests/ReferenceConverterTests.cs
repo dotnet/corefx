@@ -1,5 +1,5 @@
 // Licensed to the .NET Foundation under one or more agreements.
-// See the LICENSE file in the project root for more information. 
+// See the LICENSE file in the project root for more information.
 
 //
 // MonoTests.System.ComponentModel.ReferenceConverterTest
@@ -18,10 +18,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -35,11 +35,12 @@ using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Globalization;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.ComponentModel.Tests
 {
-    public class ReferenceConverterTest : RemoteExecutorTestBase
+    public class ReferenceConverterTest
     {
 
         class TestReferenceService : IReferenceService
@@ -199,7 +200,7 @@ namespace System.ComponentModel.Tests
         [Fact]
         public void ConvertTo()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
 
@@ -212,7 +213,7 @@ namespace System.ComponentModel.Tests
             TestComponent component = new TestComponent();
 
             // no context
-            Assert.Equal(String.Empty, (string)converter.ConvertTo(null, null, component, typeof(string)));
+            Assert.Equal(string.Empty, (string)converter.ConvertTo(null, null, component, typeof(string)));
 
             // context with IReferenceService
             TestReferenceService referenceService = new TestReferenceService();

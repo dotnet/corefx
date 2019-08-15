@@ -22,12 +22,12 @@ namespace Internal.Cryptography.Pal
     /// </summary>
     internal sealed partial class X509Pal : IX509Pal
     {
-        const string BCRYPT_ECC_CURVE_NAME_PROPERTY = "ECCCurveName";
-        const string BCRYPT_ECC_PARAMETERS_PROPERTY = "ECCParameters";
+        private const string BCRYPT_ECC_CURVE_NAME_PROPERTY = "ECCCurveName";
+        private const string BCRYPT_ECC_PARAMETERS_PROPERTY = "ECCParameters";
 
         public AsymmetricAlgorithm DecodePublicKey(Oid oid, byte[] encodedKeyValue, byte[] encodedParameters, ICertificatePal certificatePal)
         {
-            if (oid.Value == Oids.Ecc && certificatePal != null)
+            if (oid.Value == Oids.EcPublicKey && certificatePal != null)
             {
                 return DecodeECDsaPublicKey((CertificatePal)certificatePal);
             }
@@ -137,7 +137,7 @@ namespace Internal.Cryptography.Pal
             Array.Resize(ref keyBlob, numBytesNeeded);
             return keyBlob;
         }
-        
+
         private static void ExportNamedCurveParameters(ref ECParameters ecParams, byte[] ecBlob, bool includePrivateParameters)
         {
             // We now have a buffer laid out as follows:
@@ -260,8 +260,9 @@ namespace Internal.Cryptography.Pal
 
                 encodedKeyValue.DecodeObject(
                     CryptDecodeObjectStructType.X509_DSS_PUBLICKEY,
-                    delegate (void* pvDecoded)
+                    delegate (void* pvDecoded, int cbDecoded)
                     {
+                        Debug.Assert(cbDecoded >= sizeof(CRYPTOAPI_BLOB));
                         CRYPTOAPI_BLOB* pBlob = (CRYPTOAPI_BLOB*)pvDecoded;
                         decodedKeyValue = pBlob->ToByteArray();
                     }
@@ -281,8 +282,9 @@ namespace Internal.Cryptography.Pal
             {
                 encodedParameters.DecodeObject(
                     CryptDecodeObjectStructType.X509_DSS_PARAMETERS,
-                    delegate (void* pvDecoded)
+                    delegate (void* pvDecoded, int cbDecoded)
                     {
+                        Debug.Assert(cbDecoded >= sizeof(CERT_DSS_PARAMETERS));
                         CERT_DSS_PARAMETERS* pCertDssParameters = (CERT_DSS_PARAMETERS*)pvDecoded;
                         pLocal = pCertDssParameters->p.ToByteArray();
                         qLocal = pCertDssParameters->q.ToByteArray();
@@ -348,4 +350,3 @@ namespace Internal.Cryptography.Pal
         }
     }
 }
-

@@ -66,7 +66,6 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NetFX doesn't allow concurrent FileStream access when using overlapped IO.")]
         public async Task ThrowWhenHandlePositionIsChanged_async()
         {
             await ThrowWhenHandlePositionIsChanged(useAsync: true);
@@ -97,11 +96,11 @@ namespace System.IO.Tests
 
                     // Put data in FS write buffer and update position from FSR
                     fs.WriteByte(0);
-                    fsr.Position = 0; 
+                    fsr.Position = 0;
                     Assert.Throws<IOException>(() => fs.Position);
 
                     fs.WriteByte(0);
-                    fsr.Position++; 
+                    fsr.Position++;
                     Assert.Throws<IOException>(() => fs.Read(new byte[1], 0, 1));
 
                     fs.WriteByte(0);
@@ -116,15 +115,15 @@ namespace System.IO.Tests
                     }
 
                     fs.WriteByte(0);
-                    fsr.Position++; 
+                    fsr.Position++;
                     Assert.Throws<IOException>(() => fs.ReadByte());
 
                     fs.WriteByte(0);
-                    fsr.Position++; 
+                    fsr.Position++;
                     Assert.Throws<IOException>(() => fs.Seek(0, SeekOrigin.End));
 
                     fs.WriteByte(0);
-                    fsr.Position++; 
+                    fsr.Position++;
                     Assert.Throws<IOException>(() => fs.SetLength(2));
 
                     fs.WriteByte(0);

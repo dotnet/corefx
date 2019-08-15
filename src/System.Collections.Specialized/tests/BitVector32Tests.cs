@@ -133,12 +133,10 @@ namespace System.Collections.Specialized.Tests
         public static void Constructor_DefaultTest()
         {
             BitVector32 bv = new BitVector32();
-            Assert.NotNull(bv);
             Assert.Equal(0, bv.Data);
 
             // Copy constructor results in item with same data.
             BitVector32 copied = new BitVector32(bv);
-            Assert.NotNull(bv);
             Assert.Equal(0, copied.Data);
         }
 
@@ -163,12 +161,10 @@ namespace System.Collections.Specialized.Tests
         public static void Constructor_DataTest(int data)
         {
             BitVector32 bv = new BitVector32(data);
-            Assert.NotNull(bv);
             Assert.Equal(data, bv.Data);
 
             // Copy constructor results in item with same data.
             BitVector32 copied = new BitVector32(bv);
-            Assert.NotNull(bv);
             Assert.Equal(data, copied.Data);
         }
 
@@ -303,6 +299,8 @@ namespace System.Collections.Specialized.Tests
         [MemberData(nameof(Mask_SetUnset_Multiple_Data))]
         public static void Set_Mask_MultipleTest(int expected, int start, int[] maskPositions)
         {
+            _ = expected;
+            _ = start;
             int mask = maskPositions.Sum(x => 1 << (x - 1));
 
             BitVector32 blank = new BitVector32();
@@ -325,6 +323,8 @@ namespace System.Collections.Specialized.Tests
         [MemberData(nameof(Mask_SetUnset_Multiple_Data))]
         public static void Set_Mask_Multiple_UnsetTest(int start, int expected, int[] maskPositions)
         {
+            _ = start;
+            _ = expected;
             int mask = maskPositions.Sum(x => 1 << (x - 1));
 
             BitVector32 set = new BitVector32();
@@ -451,7 +451,7 @@ namespace System.Collections.Specialized.Tests
             // The next section would be created "off the end"
             //     - the current offset is 30, and the current mask requires more than the remaining 1 bit.
             Assert.InRange(CountBitsRequired(overflow.Mask), 2, 15);
-            
+
             Assert.Throws<InvalidOperationException>(() => BitVector32.CreateSection(invalid, overflow));
         }
 
@@ -496,10 +496,11 @@ namespace System.Collections.Specialized.Tests
             Assert.Equal(left.GetHashCode(), right.GetHashCode());
         }
 
+        [Fact]
         public static void Section_ToStringTest()
         {
             Random random = new Random(-55);
-            
+
             short maxValue = (short)random.Next(1, short.MaxValue);
             BitVector32.Section section1 = BitVector32.CreateSection(maxValue);
             BitVector32.Section section2 = BitVector32.CreateSection(maxValue);

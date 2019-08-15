@@ -13,11 +13,11 @@ namespace System.ComponentModel.Composition.Primitives
         ///     Gets the display name of the composition element.
         /// </summary>
         /// <value>
-        ///     A <see cref="String"/> containing a human-readable display name of the <see cref="ICompositionElement"/>.
+        ///     A <see cref="string"/> containing a human-readable display name of the <see cref="ICompositionElement"/>.
         /// </value>
         /// <remarks>
         ///     <note type="implementnotes">
-        ///         Implementors of this property should never return <see langword="null"/> or an empty 
+        ///         Implementors of this property should never return <see langword="null"/> or an empty
         ///         string ("").
         ///     </note>
         /// </remarks>
@@ -31,8 +31,8 @@ namespace System.ComponentModel.Composition.Primitives
         ///     originated.
         /// </summary>
         /// <value>
-        ///     A <see cref="ICompositionElement"/> from which the current 
-        ///     <see cref="ICompositionElement"/> originated, or <see langword="null"/> 
+        ///     A <see cref="ICompositionElement"/> from which the current
+        ///     <see cref="ICompositionElement"/> originated, or <see langword="null"/>
         ///     if the <see cref="ICompositionElement"/> is the root composition element.
         /// </value>
         ICompositionElement Origin

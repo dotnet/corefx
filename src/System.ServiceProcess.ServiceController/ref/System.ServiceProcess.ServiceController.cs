@@ -9,15 +9,15 @@ namespace System.ServiceProcess
 {
     public enum PowerBroadcastStatus
     {
-        BatteryLow = 9,
-        OemEvent = 11,
-        PowerStatusChange = 10,
         QuerySuspend = 0,
         QuerySuspendFailed = 2,
-        ResumeAutomatic = 18,
+        Suspend = 4,
         ResumeCritical = 6,
         ResumeSuspend = 7,
-        Suspend = 4,
+        BatteryLow = 9,
+        PowerStatusChange = 10,
+        OemEvent = 11,
+        ResumeAutomatic = 18,
     }
     public partial class ServiceBase : System.ComponentModel.Component
     {
@@ -36,7 +36,7 @@ namespace System.ServiceProcess
         public bool CanStop { get { throw null; } set { } }
         public virtual System.Diagnostics.EventLog EventLog { get { throw null; } }
         public int ExitCode { get { throw null; } set { } }
-        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
         protected System.IntPtr ServiceHandle { get { throw null; } }
         public string ServiceName { get { throw null; } set { } }
         protected override void Dispose(bool disposing) { }
@@ -51,7 +51,7 @@ namespace System.ServiceProcess
         public void RequestAdditionalTime(int milliseconds) { }
         public static void Run(System.ServiceProcess.ServiceBase service) { }
         public static void Run(System.ServiceProcess.ServiceBase[] services) { }
-        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         public void ServiceMainCallback(int argCount, System.IntPtr argPointer) { }
         public void Stop() { }
     }
@@ -90,42 +90,42 @@ namespace System.ServiceProcess
     }
     public enum ServiceControllerStatus
     {
-        ContinuePending = 5,
-        Paused = 7,
-        PausePending = 6,
-        Running = 4,
-        StartPending = 2,
         Stopped = 1,
+        StartPending = 2,
         StopPending = 3,
+        Running = 4,
+        ContinuePending = 5,
+        PausePending = 6,
+        Paused = 7,
+    }
+    [System.AttributeUsageAttribute(System.AttributeTargets.All)]
+    public partial class ServiceProcessDescriptionAttribute : System.ComponentModel.DescriptionAttribute
+    {
+        public ServiceProcessDescriptionAttribute(string description) { }
+        public override string Description { get { throw null; } }
     }
     public enum ServiceStartMode
     {
-        Automatic = 2,
         Boot = 0,
-        Disabled = 4,
-        Manual = 3,
         System = 1,
-    }
-    [AttributeUsage(AttributeTargets.All)]
-    public partial class ServiceProcessDescriptionAttribute : System.ComponentModel.DescriptionAttribute
-    {
-        public ServiceProcessDescriptionAttribute(string description) : base(description) { }
-        public override string Description { get { throw null; } }
+        Automatic = 2,
+        Manual = 3,
+        Disabled = 4,
     }
     [System.FlagsAttribute]
     public enum ServiceType
     {
-        Adapter = 4,
-        FileSystemDriver = 2,
-        InteractiveProcess = 256,
         KernelDriver = 1,
+        FileSystemDriver = 2,
+        Adapter = 4,
         RecognizerDriver = 8,
         Win32OwnProcess = 16,
         Win32ShareProcess = 32,
+        InteractiveProcess = 256,
     }
     public readonly partial struct SessionChangeDescription
     {
-        private readonly int _dummy;
+        private readonly int _dummyPrimitive;
         public System.ServiceProcess.SessionChangeReason Reason { get { throw null; } }
         public int SessionId { get { throw null; } }
         public override bool Equals(object obj) { throw null; }
@@ -140,11 +140,11 @@ namespace System.ServiceProcess
         ConsoleDisconnect = 2,
         RemoteConnect = 3,
         RemoteDisconnect = 4,
-        SessionLock = 7,
-        SessionLogoff = 6,
         SessionLogon = 5,
-        SessionRemoteControl = 9,
+        SessionLogoff = 6,
+        SessionLock = 7,
         SessionUnlock = 8,
+        SessionRemoteControl = 9,
     }
     public partial class TimeoutException : System.SystemException
     {

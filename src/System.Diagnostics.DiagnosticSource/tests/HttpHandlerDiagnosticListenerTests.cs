@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -16,7 +17,7 @@ namespace System.Diagnostics.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    public class HttpHandlerDiagnosticListenerTests : RemoteExecutorTestBase
+    public class HttpHandlerDiagnosticListenerTests
     {
         /// <summary>
         /// A simple test to make sure the Http Diagnostic Source is added into the list of DiagnosticListeners.
@@ -54,7 +55,7 @@ namespace System.Diagnostics.Tests
                     client.GetAsync(Configuration.Http.RemoteEchoServer).Result.Dispose();
                 }
 
-                // Just make sure some events are written, to confirm we successfully subscribed to it. 
+                // Just make sure some events are written, to confirm we successfully subscribed to it.
                 // We should have exactly one Start and one Stop event
                 Assert.Equal(2, eventRecords.Records.Count);
             }
@@ -76,7 +77,7 @@ namespace System.Diagnostics.Tests
                     client.GetAsync(Configuration.Http.RemoteEchoServer).Result.Dispose();
                 }
 
-                // Just make sure some events are written, to confirm we successfully subscribed to it. 
+                // Just make sure some events are written, to confirm we successfully subscribed to it.
                 // We should have exactly one Start and one Stop event
                 Assert.Equal(2, eventRecords.Records.Count);
             }
@@ -98,7 +99,7 @@ namespace System.Diagnostics.Tests
                     client.GetAsync(Configuration.Http.RemoteEchoServer).Result.Dispose();
                 }
 
-                // Just make sure some events are written, to confirm we successfully subscribed to it. 
+                // Just make sure some events are written, to confirm we successfully subscribed to it.
                 // We should have exactly one Start and one Stop event
                 Assert.Equal(2, eventRecords.Records.Count);
             }
@@ -124,13 +125,15 @@ namespace System.Diagnostics.Tests
                 Assert.Equal(1, eventRecords.Records.Count(rec => rec.Key.EndsWith("Stop")));
                 Assert.Equal(2, eventRecords.Records.Count);
 
-                // Check to make sure: The first record must be a request, the next record must be a response. 
+                // Check to make sure: The first record must be a request, the next record must be a response.
                 KeyValuePair<string, object> startEvent;
                 Assert.True(eventRecords.Records.TryDequeue(out startEvent));
                 Assert.Equal("System.Net.Http.Desktop.HttpRequestOut.Start", startEvent.Key);
                 HttpWebRequest startRequest = ReadPublicProperty<HttpWebRequest>(startEvent.Value, "Request");
                 Assert.NotNull(startRequest);
                 Assert.NotNull(startRequest.Headers["Request-Id"]);
+                Assert.Null(startRequest.Headers["traceparent"]);
+                Assert.Null(startRequest.Headers["tracestate"]);
 
                 KeyValuePair<string, object> stopEvent;
                 Assert.True(eventRecords.Records.TryDequeue(out stopEvent));
@@ -139,6 +142,142 @@ namespace System.Diagnostics.Tests
                 Assert.Equal(startRequest, stopRequest);
                 HttpWebResponse response = ReadPublicProperty<HttpWebResponse>(stopEvent.Value, "Response");
                 Assert.NotNull(response);
+            }
+        }
+
+        [OuterLoop]
+        [Fact]
+        public async Task TestW3CHeaders()
+        {
+            try
+            {
+                using (var eventRecords = new EventObserverAndRecorder())
+                {
+                    Activity.DefaultIdFormat = ActivityIdFormat.W3C;
+                    Activity.ForceDefaultIdFormat = true;
+                    // Send a random Http request to generate some events
+                    using (var client = new HttpClient())
+                    {
+                        (await client.GetAsync(Configuration.Http.RemoteEchoServer)).Dispose();
+                    }
+
+                    // Check to make sure: The first record must be a request, the next record must be a response.
+                    KeyValuePair<string, object> startEvent;
+                    Assert.True(eventRecords.Records.TryDequeue(out startEvent));
+                    Assert.Equal("System.Net.Http.Desktop.HttpRequestOut.Start", startEvent.Key);
+                    HttpWebRequest startRequest = ReadPublicProperty<HttpWebRequest>(startEvent.Value, "Request");
+                    Assert.NotNull(startRequest);
+
+                    var traceparent = startRequest.Headers["traceparent"];
+                    Assert.NotNull(traceparent);
+                    Assert.Matches("^[0-9a-f][0-9a-f]-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f][0-9a-f]$", traceparent);
+                    Assert.Null(startRequest.Headers["tracestate"]);
+                    Assert.Null(startRequest.Headers["Request-Id"]);
+                }
+            }
+            finally
+            {
+                CleanUp();
+            }
+        }
+
+        [OuterLoop]
+        [Fact]
+        public async Task TestW3CHeadersTraceStateAndCorrelationContext()
+        {
+            try
+            {
+                using (var eventRecords = new EventObserverAndRecorder())
+                {
+                    var parent = new Activity("w3c activity");
+                    parent.SetParentId(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom());
+                    parent.TraceStateString = "some=state";
+                    parent.AddBaggage("k", "v");
+                    parent.Start();
+
+                    // Send a random Http request to generate some events
+                    using (var client = new HttpClient())
+                    {
+                        (await client.GetAsync(Configuration.Http.RemoteEchoServer)).Dispose();
+                    }
+
+                    parent.Stop();
+
+                    // Check to make sure: The first record must be a request, the next record must be a response.
+                    Assert.True(eventRecords.Records.TryDequeue(out var evnt));
+                    Assert.Equal("System.Net.Http.Desktop.HttpRequestOut.Start", evnt.Key);
+                    HttpWebRequest startRequest = ReadPublicProperty<HttpWebRequest>(evnt.Value, "Request");
+                    Assert.NotNull(startRequest);
+
+                    var traceparent = startRequest.Headers["traceparent"];
+                    var tracestate = startRequest.Headers["tracestate"];
+                    var correlationContext = startRequest.Headers["Correlation-Context"];
+                    Assert.NotNull(traceparent);
+                    Assert.Equal("some=state", tracestate);
+                    Assert.Equal("k=v", correlationContext);
+                    Assert.StartsWith($"00-{parent.TraceId.ToHexString()}-", traceparent);
+                    Assert.Matches("^[0-9a-f]{2}-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f]{2}$", traceparent);
+                    Assert.Null(startRequest.Headers["Request-Id"]);
+                }
+            }
+            finally
+            {
+                CleanUp();
+            }
+        }
+
+
+        [OuterLoop]
+        [Fact]
+        public async Task DoNotInjectRequestIdWhenPresent()
+        {
+            using (var eventRecords = new EventObserverAndRecorder())
+            {
+                // Send a random Http request to generate some events
+                using (var client = new HttpClient())
+                using (var request = new HttpRequestMessage(HttpMethod.Get, Configuration.Http.RemoteEchoServer))
+                {
+                    request.Headers.Add("Request-Id", "|rootId.1.");
+                    (await client.SendAsync(request)).Dispose();
+                }
+
+                // Check to make sure: The first record must be a request, the next record must be a response.
+                Assert.True(eventRecords.Records.TryDequeue(out var evnt));
+                HttpWebRequest startRequest = ReadPublicProperty<HttpWebRequest>(evnt.Value, "Request");
+                Assert.NotNull(startRequest);
+                Assert.Equal("|rootId.1.", startRequest.Headers["Request-Id"]);
+            }
+        }
+
+        [OuterLoop]
+        [Fact]
+        public async Task DoNotInjectTraceParentWhenPresent()
+        {
+            try
+            {
+                using (var eventRecords = new EventObserverAndRecorder())
+                {
+                    Activity.DefaultIdFormat = ActivityIdFormat.W3C;
+                    Activity.ForceDefaultIdFormat = true;
+                    // Send a random Http request to generate some events
+                    using (var client = new HttpClient())
+                    using (var request = new HttpRequestMessage(HttpMethod.Get, Configuration.Http.RemoteEchoServer))
+                    {
+                        request.Headers.Add("traceparent", "00-abcdef0123456789abcdef0123456789-abcdef0123456789-01");
+                        (await client.SendAsync(request)).Dispose();
+                    }
+
+                    // Check to make sure: The first record must be a request, the next record must be a response.
+                    Assert.True(eventRecords.Records.TryDequeue(out var evnt));
+                    HttpWebRequest startRequest = ReadPublicProperty<HttpWebRequest>(evnt.Value, "Request");
+                    Assert.NotNull(startRequest);
+
+                    Assert.Equal("00-abcdef0123456789abcdef0123456789-abcdef0123456789-01", startRequest.Headers["traceparent"]);
+                }
+            }
+            finally
+            {
+                CleanUp();
             }
         }
 
@@ -162,7 +301,7 @@ namespace System.Diagnostics.Tests
                 Assert.Equal(1, eventRecords.Records.Count(rec => rec.Key.EndsWith("Stop")));
                 Assert.Equal(2, eventRecords.Records.Count);
 
-                // Check to make sure: The first record must be a request, the next record must be a response. 
+                // Check to make sure: The first record must be a request, the next record must be a response.
                 KeyValuePair<string, object> startEvent;
                 Assert.True(eventRecords.Records.TryDequeue(out startEvent));
                 Assert.Equal("System.Net.Http.Desktop.HttpRequestOut.Start", startEvent.Key);
@@ -176,7 +315,7 @@ namespace System.Diagnostics.Tests
                 HttpWebRequest stopRequest = ReadPublicProperty<HttpWebRequest>(stopEvent.Value, "Request");
                 Assert.Equal(startRequest, stopRequest);
                 HttpStatusCode status = ReadPublicProperty<HttpStatusCode>(stopEvent.Value, "StatusCode");
-                Assert.NotNull(status);
+                Assert.Equal(HttpStatusCode.OK, status);
 
                 WebHeaderCollection headers = ReadPublicProperty<WebHeaderCollection>(stopEvent.Value, "Headers");
                 Assert.NotNull(headers);
@@ -195,7 +334,7 @@ namespace System.Diagnostics.Tests
                 using (var client = new HttpClient())
                 {
                     Uri uriWithRedirect =
-                        Configuration.Http.RedirectUriForDestinationUri(true, 302, Configuration.Http.RemoteEchoServer, 10);
+                        Configuration.Http.RemoteSecureHttp11Server.RedirectUriForDestinationUri(302, Configuration.Http.RemoteEchoServer, 10);
                     (await client.GetAsync(uriWithRedirect)).Dispose();
                 }
 
@@ -237,7 +376,7 @@ namespace System.Diagnostics.Tests
         public async Task TestCanceledRequest()
         {
             CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-            using (var eventRecords = new EventObserverAndRecorder( _ => { cts.Cancel();}))
+            using (var eventRecords = new EventObserverAndRecorder(_ => { cts.Cancel(); }))
             {
                 using (var client = new HttpClient())
                 {
@@ -274,10 +413,41 @@ namespace System.Diagnostics.Tests
                 var correlationContext = thisRequest.Headers["Correlation-Context"];
 
                 Assert.NotNull(requestId);
-                Assert.True(requestId.StartsWith(parentActivity.Id));
+                Assert.StartsWith(parentActivity.Id, requestId);
 
                 Assert.NotNull(correlationContext);
                 Assert.True(correlationContext == "k1=v1,k2=v2" || correlationContext == "k2=v2,k1=v1");
+            }
+            parentActivity.Stop();
+        }
+
+
+        [OuterLoop]
+        [Fact]
+        public async Task TestInvalidBaggage()
+        {
+            var parentActivity = new Activity("parent")
+                .AddBaggage("key", "value")
+                .AddBaggage("bad/key", "value")
+                .AddBaggage("goodkey", "bad/value")
+                .Start();
+            using (var eventRecords = new EventObserverAndRecorder())
+            {
+                using (var client = new HttpClient())
+                {
+                    (await client.GetAsync(Configuration.Http.RemoteEchoServer)).Dispose();
+                }
+
+                Assert.Equal(1, eventRecords.Records.Count(rec => rec.Key.EndsWith("Start")));
+                Assert.Equal(1, eventRecords.Records.Count(rec => rec.Key.EndsWith("Stop")));
+
+                WebRequest thisRequest = ReadPublicProperty<WebRequest>(eventRecords.Records.First().Value, "Request");
+                string[] correlationContext = thisRequest.Headers["Correlation-Context"].Split(',');
+
+                Assert.Equal(3, correlationContext.Length);
+                Assert.True(correlationContext.Contains("key=value"));
+                Assert.True(correlationContext.Contains("bad%2Fkey=value"));
+                Assert.True(correlationContext.Contains("goodkey=bad%2Fvalue"));
             }
             parentActivity.Stop();
         }
@@ -371,7 +541,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestMultipleConcurrentRequests()
         {
-            ServicePointManager.DefaultConnectionLimit = Int32.MaxValue;
+            ServicePointManager.DefaultConnectionLimit = int.MaxValue;
             var parentActivity = new Activity("parent").Start();
             using (var eventRecords = new EventObserverAndRecorder())
             {
@@ -380,7 +550,7 @@ namespace System.Diagnostics.Tests
                 for (int i = 0; i < 10; i++)
                 {
                     Uri uriWithRedirect =
-                        Configuration.Http.RedirectUriForDestinationUri(true, 302, new Uri($"{Configuration.Http.RemoteEchoServer}?q={i}"), 3);
+                        Configuration.Http.RemoteSecureHttp11Server.RedirectUriForDestinationUri(302, new Uri($"{Configuration.Http.RemoteEchoServer}?q={i}"), 3);
 
                     requestData[uriWithRedirect] = null;
                 }
@@ -406,7 +576,7 @@ namespace System.Diagnostics.Tests
 
                 // Examine the result. Make sure we got all successful requests.
 
-                // Just make sure some events are written, to confirm we successfully subscribed to it. We should have 
+                // Just make sure some events are written, to confirm we successfully subscribed to it. We should have
                 // exactly 1 Start event per request and exaclty 1 Stop event per response (if request succeeded)
                 var successfulTasks = tasks.Where(t => t.Value.Status == TaskStatus.RanToCompletion);
 
@@ -424,7 +594,7 @@ namespace System.Diagnostics.Tests
                         "An unexpected event of name " + pair.Key + "was received");
 
                     WebRequest request = ReadPublicProperty<WebRequest>(eventFields, "Request");
-                    Assert.Equal(request.GetType().Name, "HttpWebRequest");
+                    Assert.Equal("HttpWebRequest", request.GetType().Name);
 
                     if (pair.Key == "System.Net.Http.Desktop.HttpRequestOut.Start")
                     {
@@ -437,7 +607,7 @@ namespace System.Diagnostics.Tests
 
                         // all requests have Request-Id with proper parent Id
                         var requestId = request.Headers["Request-Id"];
-                        Assert.True(requestId.StartsWith(parentActivity.Id));
+                        Assert.StartsWith(parentActivity.Id, requestId);
                         // all request activities are siblings:
                         var childSuffix = requestId.Substring(0, parentActivity.Id.Length);
                         Assert.True(childSuffix.IndexOf('.') == childSuffix.Length - 1);
@@ -450,7 +620,7 @@ namespace System.Diagnostics.Tests
                     {
                         // This must be the response.
                         WebResponse response = ReadPublicProperty<WebResponse>(eventFields, "Response");
-                        Assert.Equal(response.GetType().Name, "HttpWebResponse");
+                        Assert.Equal("HttpWebResponse", response.GetType().Name);
 
                         // By the time we see the response, the request object may already have been redirected with a different
                         // url. Hence, it's not reliable to just look up requestData by the URL/hostname. Instead, we have to look
@@ -486,6 +656,18 @@ namespace System.Diagnostics.Tests
             }
         }
 
+
+        private void CleanUp()
+        {
+            Activity.DefaultIdFormat = ActivityIdFormat.Hierarchical;
+            Activity.ForceDefaultIdFormat = false;
+
+            while (Activity.Current != null)
+            {
+                Activity.Current.Stop();
+            }
+        }
+
         private static T ReadPublicProperty<T>(object obj, string propertyName)
         {
             Type type = obj.GetType();
@@ -495,8 +677,8 @@ namespace System.Diagnostics.Tests
 
         /// <summary>
         /// CallbackObserver is an adapter class that creates an observer (which you can pass
-        /// to IObservable.Subscribe), and calls the given callback every time the 'next' 
-        /// operation on the IObserver happens. 
+        /// to IObservable.Subscribe), and calls the given callback every time the 'next'
+        /// operation on the IObserver happens.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         private class CallbackObserver<T> : IObserver<T>

@@ -1,26 +1,14 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{E1114510-844C-4BB2-BBAD-8595BD16E24B}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants Condition="'$(TargetsWindows)' == 'true'">$(DefineConstants);TargetsWindows</DefineConstants>
+    <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="$(CommonPath)\System\PasteArguments.cs">
-      <Link>Common\System\PasteArguments.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\PasteArguments.cs">
+      <Link>Common\CoreLib\System\PasteArguments.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\IO\StringParser.cs">
       <Link>Common\System\IO\StringParser.cs</Link>
@@ -31,6 +19,7 @@
     <Compile Include="$(CommonTestPath)\Microsoft\Win32\TempRegistryKey.cs">
       <Link>Common\Microsoft\Win32\TempRegistryKey.cs</Link>
     </Compile>
+    <Compile Include="Helpers.cs" />
     <Compile Include="Interop.cs" />
     <Compile Include="Interop.Unix.cs" Condition="'$(TargetsWindows)' != 'true'" />
     <Compile Include="ProcessCollectionTests.cs" />
@@ -39,37 +28,33 @@
     <Compile Include="ProcessStartInfoTests.cs" />
     <Compile Include="ProcessStreamReadTests.cs" />
     <Compile Include="ProcessTestBase.cs" />
-    <Compile Condition="'$(TargetGroup)' != 'uap'" Include="ProcessTestBase.NonUap.cs" />
-    <Compile Condition="'$(TargetGroup)' == 'uap'" Include="ProcessTestBase.Uap.cs" />
+    <Compile Condition="'$(TargetsUap)' != 'true'" Include="ProcessTestBase.NonUap.cs" />
+    <Compile Condition="'$(TargetsUap)' == 'true'" Include="ProcessTestBase.Uap.cs" />
     <Compile Include="ProcessTests.cs" />
-    <Compile Include="ProcessTests.Unix.cs" Condition="'$(TargetsWindows)' != 'true'" />
     <Compile Include="ProcessThreadTests.cs" />
     <Compile Include="ProcessWaitingTests.cs" />
     <Compile Include="RemotelyInvokable.cs" />
     <Compile Include="XunitAssemblyAttributes.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' or '$(TargetGroup)' == 'uap'">
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true' or '$(TargetsUap)' == 'true'">
     <Compile Include="ProcessStartInfoTests.netcoreapp.cs" />
     <Compile Include="ProcessStreamReadTests.netcoreapp.cs" />
     <Compile Include="ProcessTests.netcoreapp.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
-      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
-      <Name>RemoteExecutorConsoleApp</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <!-- WINDOWS: Shared CoreCLR and .NET Native -->
+  <!-- WINDOWS: Shared CoreCLR -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
-    <Compile Include="..\..\Common\src\System\PasteArguments.Windows.cs">
-      <Link>Common\System\PasteArguments.Windows.cs</Link>
+    <Compile Include="ProcessTests.Windows.cs" />
+    <Compile Include="ProcessThreadTests.Windows.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\PasteArguments.Windows.cs">
+      <Link>Common\CoreLib\System\PasteArguments.Windows.cs</Link>
     </Compile>
   </ItemGroup>
   <!-- UNIX -->
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
-    <Compile Include="..\..\Common\src\System\PasteArguments.Unix.cs">
-      <Link>Common\System\PasteArguments.Unix.cs</Link>
+    <Compile Include="ProcessTests.Unix.cs" />
+    <Compile Include="ProcessThreadTests.Unix.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\PasteArguments.Unix.cs">
+      <Link>Common\CoreLib\System\PasteArguments.Unix.cs</Link>
     </Compile>
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -22,7 +22,7 @@ namespace System.Net
         // If the host name is 255 chars, the last char must be a dot.
         private const int MaxHostName = 255;
 
-        [Obsolete("GetHostByName is obsoleted for this type, please use GetHostEntry instead. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("GetHostByName is obsoleted for this type, please use GetHostEntry instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         public static IPHostEntry GetHostByName(string hostName)
         {
             NameResolutionPal.EnsureSocketsAreInitialized();
@@ -57,7 +57,7 @@ namespace System.Net
             IPHostEntry ipHostEntry = null;
 
             ValidateHostName(hostName);
-           
+
             int nativeErrorCode;
             SocketError errorCode = NameResolutionPal.TryGetAddrInfo(hostName, out ipHostEntry, out nativeErrorCode);
             if (errorCode != SocketError.Success)
@@ -69,7 +69,7 @@ namespace System.Net
             return ipHostEntry;
         } // GetHostByName
 
-        [Obsolete("GetHostByAddress is obsoleted for this type, please use GetHostEntry instead. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("GetHostByAddress is obsoleted for this type, please use GetHostEntry instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         public static IPHostEntry GetHostByAddress(string address)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(null, address);
@@ -86,7 +86,7 @@ namespace System.Net
             return ipHostEntry;
         } // GetHostByAddress
 
-        [Obsolete("GetHostByAddress is obsoleted for this type, please use GetHostEntry instead. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("GetHostByAddress is obsoleted for this type, please use GetHostEntry instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         public static IPHostEntry GetHostByAddress(IPAddress address)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(null, address);
@@ -102,7 +102,7 @@ namespace System.Net
             if (NetEventSource.IsEnabled) NetEventSource.Exit(null, ipHostEntry);
             return ipHostEntry;
         } // GetHostByAddress
-        
+
         // Does internal IPAddress reverse and then forward lookups (for Legacy and current public methods).
         private static IPHostEntry InternalGetHostByAddress(IPAddress address)
         {
@@ -141,7 +141,7 @@ namespace System.Net
             }
 
             throw SocketExceptionFactory.CreateSocketException(errorCode, nativeErrorCode);
-            
+
         } // InternalGetHostByAddress
 
         /*****************************************************************************
@@ -166,7 +166,7 @@ namespace System.Net
             return NameResolutionPal.GetHostName();
         }
 
-        [Obsolete("Resolve is obsoleted for this type, please use GetHostEntry instead. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("Resolve is obsoleted for this type, please use GetHostEntry instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         public static IPHostEntry Resolve(string hostName)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(null, hostName);
@@ -361,7 +361,7 @@ namespace System.Net
             return (IPHostEntry)castedResult.Result;
         }
 
-        [Obsolete("BeginGetHostByName is obsoleted for this type, please use BeginGetHostEntry instead. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("BeginGetHostByName is obsoleted for this type, please use BeginGetHostEntry instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         public static IAsyncResult BeginGetHostByName(string hostName, AsyncCallback requestCallback, object stateObject)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(null, hostName);
@@ -374,7 +374,7 @@ namespace System.Net
             return asyncResult;
         } // BeginGetHostByName
 
-        [Obsolete("EndGetHostByName is obsoleted for this type, please use EndGetHostEntry instead. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("EndGetHostByName is obsoleted for this type, please use EndGetHostEntry instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         public static IPHostEntry EndGetHostByName(IAsyncResult asyncResult)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(null, asyncResult);
@@ -523,7 +523,7 @@ namespace System.Net
             return ipHostEntry.AddressList;
         } // EndResolveToAddresses
 
-        [Obsolete("BeginResolve is obsoleted for this type, please use BeginGetHostEntry instead. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("BeginResolve is obsoleted for this type, please use BeginGetHostEntry instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         public static IAsyncResult BeginResolve(string hostName, AsyncCallback requestCallback, object stateObject)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(null, hostName);
@@ -537,7 +537,7 @@ namespace System.Net
         } // BeginResolve
 
 
-        [Obsolete("EndResolve is obsoleted for this type, please use EndGetHostEntry instead. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("EndResolve is obsoleted for this type, please use EndGetHostEntry instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         public static IPHostEntry EndResolve(IAsyncResult asyncResult)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(null, asyncResult);

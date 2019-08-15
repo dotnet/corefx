@@ -2,15 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
-using System.Composition;
-using System.Composition.Convention.UnitTests;
 using System.Linq;
-using System.Composition.Convention;
 using System.Reflection;
 using Xunit;
 
-namespace System.Composition.Convention
+namespace System.Composition.Convention.Tests
 {
     public class ExportBuilderTests
     {
@@ -25,9 +21,9 @@ namespace System.Composition.Convention
             var builder = new ConventionBuilder();
             builder.ForType<FooImpl>().Export<IFoo>();
 
-            var exports = builder.GetCustomAttributes(typeof(FooImpl), typeof(FooImpl).GetTypeInfo()).Where<Attribute>(e => e is ExportAttribute).Cast<ExportAttribute>();
+            Collections.Generic.IEnumerable<ExportAttribute> exports = builder.GetCustomAttributes(typeof(FooImpl), typeof(FooImpl).GetTypeInfo()).Where<Attribute>(e => e is ExportAttribute).Cast<ExportAttribute>();
             Assert.Equal(1, exports.Count());
-            Assert.Equal(exports.First().ContractType, typeof(IFoo));
+            Assert.Equal(typeof(IFoo), exports.First().ContractType);
         }
 
         [Fact]
@@ -36,9 +32,9 @@ namespace System.Composition.Convention
             var builder = new ConventionBuilder();
             builder.ForType(typeof(FooImpl)).Export((c) => c.AsContractType(typeof(IFoo)));
 
-            var exports = builder.GetDeclaredAttributes(typeof(FooImpl), typeof(FooImpl).GetTypeInfo()).Where<Attribute>(e => e is ExportAttribute).Cast<ExportAttribute>();
+            Collections.Generic.IEnumerable<ExportAttribute> exports = builder.GetDeclaredAttributes(typeof(FooImpl), typeof(FooImpl).GetTypeInfo()).Where<Attribute>(e => e is ExportAttribute).Cast<ExportAttribute>();
             Assert.Equal(1, exports.Count());
-            Assert.Equal(exports.First().ContractType, typeof(IFoo));
+            Assert.Equal(typeof(IFoo), exports.First().ContractType);
         }
 
 
@@ -121,14 +117,14 @@ namespace System.Composition.Convention
 
         private static ExportAttribute GetExportAttribute(ConventionBuilder builder)
         {
-            var list = builder.GetDeclaredAttributes(typeof(FooImpl), typeof(FooImpl).GetTypeInfo());
+            Attribute[] list = builder.GetDeclaredAttributes(typeof(FooImpl), typeof(FooImpl).GetTypeInfo());
             Assert.Equal(1, list.Length);
             return list[0] as ExportAttribute;
         }
 
         private static ExportMetadataAttribute GetExportMetadataAttribute(ConventionBuilder builder)
         {
-            var list = builder.GetDeclaredAttributes(typeof(FooImpl), typeof(FooImpl).GetTypeInfo());
+            Attribute[] list = builder.GetDeclaredAttributes(typeof(FooImpl), typeof(FooImpl).GetTypeInfo());
             Assert.Equal(2, list.Length);
             return list[1] as ExportMetadataAttribute;
         }

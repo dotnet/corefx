@@ -150,6 +150,23 @@ namespace System.IO.Compression
             }
         }
 
+        public override ValueTask DisposeAsync()
+        {
+            if (GetType() != typeof(GZipStream))
+            {
+                return base.DisposeAsync();
+            }
+
+            DeflateStream ds = _deflateStream;
+            if (ds != null)
+            {
+                _deflateStream = null;
+                return ds.DisposeAsync();
+            }
+
+            return default;
+        }
+
         public Stream BaseStream => _deflateStream?.BaseStream;
 
         public override Task<int> ReadAsync(byte[] array, int offset, int count, CancellationToken cancellationToken)
@@ -216,7 +233,6 @@ namespace System.IO.Compression
             }
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void ThrowStreamClosedException()
         {
             throw new ObjectDisposedException(null, SR.ObjectDisposed_StreamClosed);

@@ -9,8 +9,19 @@ namespace System.Transactions.Tests
 {
     // Ported from Mono
 
-    public class TransactionScopeTest
+    public class TransactionScopeTest : IDisposable
     {
+        public TransactionScopeTest()
+        {
+            // Make sure we start with Transaction.Current = null.
+            Transaction.Current = null;
+        }
+
+        public void Dispose()
+        {
+            Transaction.Current = null;
+        }
+
         [Fact]
         public void TransactionScopeWithInvalidTimeSpanThrows()
         {
@@ -106,7 +117,7 @@ namespace System.Transactions.Tests
 
             Assert.Null(Transaction.Current);
             /* Value = 2, got committed */
-            Assert.Equal(irm.Value, 2);
+            Assert.Equal(2, irm.Value);
             irm.Check(1, 1, 0, 0, "irm");
         }
 
@@ -124,7 +135,7 @@ namespace System.Transactions.Tests
 
             Assert.Null(Transaction.Current);
             /* Value = 2, got rolledback */
-            Assert.Equal(irm.Value, 1);
+            Assert.Equal(1, irm.Value);
             irm.Check(0, 0, 1, 0, "irm");
         }
 
@@ -151,8 +162,8 @@ namespace System.Transactions.Tests
 
             Assert.Null(Transaction.Current);
             /* Both got committed */
-            Assert.Equal(irm.Value, 2);
-            Assert.Equal(irm2.Value, 20);
+            Assert.Equal(2, irm.Value);
+            Assert.Equal(20, irm2.Value);
             irm.Check(1, 1, 0, 0, "irm");
             irm2.Check(1, 1, 0, 0, "irm2");
         }
@@ -184,8 +195,8 @@ namespace System.Transactions.Tests
 
             Assert.Null(Transaction.Current);
 
-            Assert.Equal(irm.Value, 1);
-            Assert.Equal(irm2.Value, 10);
+            Assert.Equal(1, irm.Value);
+            Assert.Equal(10, irm2.Value);
             irm.Check(0, 0, 1, 0, "irm");
         }
 
@@ -208,13 +219,13 @@ namespace System.Transactions.Tests
 
                 Assert.Equal(TransactionStatus.Active, Transaction.Current.TransactionInformation.Status);
                 /* Not completing outer scope
-				scope.Complete (); */
+                scope.Complete (); */
             }
 
             Assert.Null(Transaction.Current);
 
-            Assert.Equal(irm.Value, 1);
-            Assert.Equal(irm2.Value, 10);
+            Assert.Equal(1, irm.Value);
+            Assert.Equal(10, irm2.Value);
             irm.Check(0, 0, 1, 0, "irm");
             irm2.Check(0, 0, 1, 0, "irm2");
         }
@@ -237,7 +248,7 @@ namespace System.Transactions.Tests
                 }
                 /* vr2, committed */
                 irm2.Check(1, 1, 0, 0, "irm2");
-                Assert.Equal(irm2.Value, 20);
+                Assert.Equal(20, irm2.Value);
 
                 Assert.Equal(TransactionStatus.Active, Transaction.Current.TransactionInformation.Status);
 
@@ -245,7 +256,7 @@ namespace System.Transactions.Tests
             }
 
             Assert.Null(Transaction.Current);
-            Assert.Equal(irm.Value, 2);
+            Assert.Equal(2, irm.Value);
             irm.Check(1, 1, 0, 0, "irm");
         }
 
@@ -263,13 +274,13 @@ namespace System.Transactions.Tests
                 using (TransactionScope scope2 = new TransactionScope(TransactionScopeOption.RequiresNew))
                 {
                     irm2.Value = 20;
-                    /* Not completing 
-					 scope2.Complete();*/
+                    /* Not completing
+                     scope2.Complete();*/
                 }
 
                 /* irm2, rolled back*/
                 irm2.Check(0, 0, 1, 0, "irm2");
-                Assert.Equal(irm2.Value, 10);
+                Assert.Equal(10, irm2.Value);
 
                 Assert.Equal(TransactionStatus.Active, Transaction.Current.TransactionInformation.Status);
 
@@ -278,7 +289,7 @@ namespace System.Transactions.Tests
 
             Assert.Null(Transaction.Current);
             /* ..But irm got committed */
-            Assert.Equal(irm.Value, 2);
+            Assert.Equal(2, irm.Value);
             irm.Check(1, 1, 0, 0, "irm");
         }
 
@@ -307,7 +318,7 @@ namespace System.Transactions.Tests
             }
 
             Assert.Null(Transaction.Current);
-            Assert.Equal(irm.Value, 2);
+            Assert.Equal(2, irm.Value);
             irm.Check(1, 1, 0, 0, "irm");
         }
 
@@ -365,15 +376,15 @@ namespace System.Transactions.Tests
 
                 /* vr's value has changed as the inner scope committed = 6 */
                 irm.Check(1, 1, 0, 0, "irm");
-                Assert.Equal(irm.Value, 6);
-                Assert.Equal(irm.Actual, 6);
+                Assert.Equal(6, irm.Value);
+                Assert.Equal(6, irm.Actual);
                 Assert.Equal(TransactionStatus.Active, Transaction.Current.TransactionInformation.Status);
 
                 scope.Complete();
             }
 
             Assert.Null(Transaction.Current);
-            Assert.Equal(irm.Value, 6);
+            Assert.Equal(6, irm.Value);
             irm.Check(2, 2, 0, 0, "irm");
         }
 
@@ -393,14 +404,14 @@ namespace System.Transactions.Tests
                    {
                        irm.Value = 4;
                        /* Not completing this, so the transaction will
-                        * get aborted 
+                        * get aborted
                        scope2.Complete (); */
                    }
 
                    using (TransactionScope scope3 = new TransactionScope())
                    {
                        /* Aborted transaction cannot be used for another
-                        * TransactionScope 
+                        * TransactionScope
                         */
                    }
                }
@@ -421,15 +432,15 @@ namespace System.Transactions.Tests
                 {
                     irm.Value = 4;
                     /* Not completing this, so the transaction will
-					 * get aborted 
-					scope2.Complete (); */
+                     * get aborted
+                    scope2.Complete (); */
                 }
 
                 using (TransactionScope scope3 = new TransactionScope(TransactionScopeOption.RequiresNew))
                 {
                     /* Using RequiresNew here, so outer transaction
-					 * being aborted doesn't matter
-					 */
+                     * being aborted doesn't matter
+                     */
                     scope3.Complete();
                 }
             }
@@ -451,7 +462,7 @@ namespace System.Transactions.Tests
                    {
                        irm.Value = 4;
                        /* Not completing this, so the transaction will
-                        * get aborted 
+                        * get aborted
                        scope2.Complete (); */
                    }
 
@@ -480,8 +491,8 @@ namespace System.Transactions.Tests
                     irm3.Value = 24;
 
                     /* Make second RM fail to prepare, this should throw
-					 * TransactionAbortedException when the scope ends 
-					 */
+                     * TransactionAbortedException when the scope ends
+                     */
                     irm2.FailPrepare = true;
                     scope.Complete();
                 }
@@ -513,9 +524,9 @@ namespace System.Transactions.Tests
                     irm3.Value = 24;
 
                     /* irm2 won't call Prepared or ForceRollback in
-					 * its Prepare (), so TransactionManager will timeout
-					 * waiting for it 
-					 */
+                     * its Prepare (), so TransactionManager will timeout
+                     * waiting for it
+                     */
                     irm2.IgnorePrepare = true;
                     scope.Complete();
                 }
@@ -680,9 +691,9 @@ namespace System.Transactions.Tests
             CommittableTransaction ct = new CommittableTransaction();
             Transaction oldTransaction = Transaction.Current;
 
-            /* Not setting ambient transaction 
-			 Transaction.Current = ct; 
-			 */
+            /* Not setting ambient transaction
+             Transaction.Current = ct;
+             */
 
             IntResourceManager irm = new IntResourceManager(1);
 
@@ -712,9 +723,9 @@ namespace System.Transactions.Tests
             CommittableTransaction ct = new CommittableTransaction();
             Transaction oldTransaction = Transaction.Current;
 
-            /* Not setting ambient transaction 
-			 Transaction.Current = ct; 
-			 */
+            /* Not setting ambient transaction
+             Transaction.Current = ct;
+             */
 
             IntResourceManager irm = new IntResourceManager(1);
 
@@ -725,7 +736,7 @@ namespace System.Transactions.Tests
                 irm.Value = 2;
 
                 /* Not completing this scope
-				scope.Complete (); */
+                scope.Complete (); */
             }
 
             Assert.Equal(oldTransaction, Transaction.Current);
@@ -761,7 +772,7 @@ namespace System.Transactions.Tests
                 irm.Value = 2;
                 ct.Commit();
 
-                /* Using an already committed transaction in a new 
+                /* Using an already committed transaction in a new
                  * TransactionScope
                  */
                 TransactionScope scope = new TransactionScope(ct);

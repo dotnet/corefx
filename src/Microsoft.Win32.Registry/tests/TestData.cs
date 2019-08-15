@@ -54,7 +54,7 @@ namespace Microsoft.Win32.RegistryTests
                 new object[] { 0, (byte)rand.Next(byte.MinValue, byte.MaxValue), RegistryValueKind.String },
                 new object[] { 1, (sbyte)rand.Next(sbyte.MinValue, sbyte.MaxValue), RegistryValueKind.String },
                 new object[] { 2, (short)rand.Next(short.MinValue, short.MaxValue), RegistryValueKind.String },
-                new object[] { 3, (ushort)rand.Next(ushort.MinValue, UInt16.MaxValue), RegistryValueKind.String },
+                new object[] { 3, (ushort)rand.Next(ushort.MinValue, ushort.MaxValue), RegistryValueKind.String },
                 new object[] { 4, (char)rand.Next(char.MinValue, char.MaxValue), RegistryValueKind.String },
                 new object[] { 5, (int)rand.Next(int.MinValue, int.MaxValue), RegistryValueKind.DWord },
                 // Random Numbers that can fit into Int32
@@ -107,28 +107,56 @@ namespace Microsoft.Win32.RegistryTests
             const string sysRootVar = "%Systemroot%";
             const string pathVar = "%path%";
             const string tmpVar = "%tmp%";
+
             s_testExpandableStrings = new[]
             {
                 new object[]
                 {
                     sysRootVar + @"\mydrive\mydirectory\myfile.xxx",
-                    Environment.ExpandEnvironmentVariables(sysRootVar) + @"\mydrive\mydirectory\myfile.xxx"
+                    Environment.ExpandEnvironmentVariables(sysRootVar) + @"\mydrive\mydirectory\myfile.xxx",
+                    RegistryValueOptions.None,
+                },
+                new object[]
+                {
+                    sysRootVar + @"\mydrive\mydirectory\myfile.xxx",
+                    sysRootVar + @"\mydrive\mydirectory\myfile.xxx",
+                    RegistryValueOptions.DoNotExpandEnvironmentNames,
                 },
                 new object[]
                 {
                     tmpVar + @"\gfdhghdfgk\fsdfds\dsd.yyy",
-                    Environment.ExpandEnvironmentVariables(tmpVar) + @"\gfdhghdfgk\fsdfds\dsd.yyy"
+                    Environment.ExpandEnvironmentVariables(tmpVar) + @"\gfdhghdfgk\fsdfds\dsd.yyy",
+                    RegistryValueOptions.None,
+                },
+                new object[]
+                {
+                    tmpVar + @"\gfdhghdfgk\fsdfds\dsd.yyy",
+                    tmpVar + @"\gfdhghdfgk\fsdfds\dsd.yyy",
+                    RegistryValueOptions.DoNotExpandEnvironmentNames,
                 },
                 new object[]
                 {
                     pathVar + @"\rwerew.zzz",
-                    Environment.ExpandEnvironmentVariables(pathVar) + @"\rwerew.zzz"
+                    Environment.ExpandEnvironmentVariables(pathVar) + @"\rwerew.zzz",
+                    RegistryValueOptions.None,
+                },
+                new object[]
+                {
+                    pathVar + @"\rwerew.zzz",
+                    pathVar + @"\rwerew.zzz",
+                    RegistryValueOptions.DoNotExpandEnvironmentNames,
                 },
                 new object[]
                 {
                     sysRootVar + @"\mydrive\" + pathVar + @"\myfile.xxx",
-                    Environment.ExpandEnvironmentVariables(sysRootVar) + @"\mydrive\" +
-                    Environment.ExpandEnvironmentVariables(pathVar) + @"\myfile.xxx"
+                    Environment.ExpandEnvironmentVariables(sysRootVar) + @"\mydrive\" + Environment.ExpandEnvironmentVariables(pathVar) + @"\myfile.xxx",
+                    RegistryValueOptions.None,
+                },
+                new object[]
+                {
+                    sysRootVar + @"\mydrive\" + pathVar + @"\myfile.xxx",
+                    sysRootVar + @"\mydrive\" + pathVar + @"\myfile.xxx",
+                    RegistryValueOptions.DoNotExpandEnvironmentNames,
                 }
             };
 

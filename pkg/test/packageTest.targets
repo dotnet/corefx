@@ -1,14 +1,19 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project>
 
   <PropertyGroup>
     <_targetFrameworkVersionIndex>$(TargetFramework.IndexOfAny(".-0123456789"))</_targetFrameworkVersionIndex>
     <_targetFrameworkIdentifier Condition="'$(_runtimeOSVersionIndex)' != '-1'">$(TargetFramework.SubString(0, $(_targetFrameworkVersionIndex)))</_targetFrameworkIdentifier>
     <ToolsDir>$(MSBuildThisFileDirectory)tools\</ToolsDir>
+
+    <RestoreSources>
+      https://api.nuget.org/v3/index.json;
+      https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
+      $(LocalPackagesPath)
+    </RestoreSources>
   </PropertyGroup>
 
-  <Import Project="tools\Packaging.common.targets" />
-  <Import Project="tools\dependencies.props" />
+  <Import Project="tools\build\Packaging.common.targets" />
+  <Import Project="tools\eng\Versions.props" />
   <Import Project="frameworkSettings\$(_targetFrameworkIdentifier)\*.targets" />
   <Import Project="frameworkSettings\$(TargetFramework)\*.targets" />
   <Import Project="packageSettings\$(TestPackageId)\*.targets" />
@@ -88,18 +93,18 @@
   </Target>
 
   <PropertyGroup>
-    <TestDependsOn>
+    <_testDependsOn>
       LogBeginTest;
       VerifyReferenceClosure;
       VerifyReferenceTypes;
       VerifyRuntimeClosure;
       VerifyRuntimeTypes;
-    </TestDependsOn>
+    </_testDependsOn>
   </PropertyGroup>
   
   <!-- inner target to be called by outer Test Target -->
   <Target Name="_test"
-          DependsOnTargets="$(TestDependsOn)">
+          DependsOnTargets="$(_testDependsOn)">
     <MakeDir Directories="$(IntermediateOutputPath)" />
     <Touch AlwaysCreate="true" Files="$(IntermediateOutputPath)\$(RuntimeIdentifier).testComplete" />
   </Target>

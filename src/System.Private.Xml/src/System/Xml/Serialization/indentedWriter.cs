@@ -2,21 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#if !FEATURE_SERIALIZATION_UAPAOT
 namespace System.Xml.Serialization
 {
     using System.IO;
 
-    /// <include file='doc\IndentedWriter.uex' path='docs/doc[@for="IndentedWriter"]/*' />
-    /// <devdoc>
-    ///     This class will write to a stream and manage indentation.
-    /// </devdoc>
+    /// <summary>
+    /// This class will write to a stream and manage indentation.
+    /// </summary>
     internal class IndentedWriter
     {
-        private TextWriter _writer;
+        private readonly TextWriter _writer;
         private bool _needIndent;
         private int _indentLevel;
-        private bool _compact;
+        private readonly bool _compact;
 
         internal IndentedWriter(TextWriter writer, bool compact)
         {
@@ -74,4 +72,3 @@ namespace System.Xml.Serialization
         }
     }
 }
-#endif

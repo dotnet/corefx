@@ -3,14 +3,24 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Globalization;
+using System.Runtime.InteropServices;
+#if HAS_INTRINSICS
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
+#endif
 
 namespace System.Numerics
 {
     /// <summary>
     /// A structure encapsulating a 4x4 matrix.
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct Matrix4x4 : IEquatable<Matrix4x4>
     {
+        private const float BillboardEpsilon = 1e-4f;
+        private const float BillboardMinAngle = 1.0f - (0.1f * (MathF.PI / 180.0f)); // 0.1 degrees
+        private const float DecomposeEpsilon = 0.0001f;
+
         #region Public Fields
         /// <summary>
         /// Value at row 1, column 1 of the matrix.
@@ -100,7 +110,7 @@ namespace System.Numerics
         /// <summary>
         /// Returns whether the matrix is the identity matrix.
         /// </summary>
-        public bool IsIdentity
+        public readonly bool IsIdentity
         {
             get
             {
@@ -117,7 +127,7 @@ namespace System.Numerics
         /// </summary>
         public Vector3 Translation
         {
-            get
+            readonly get
             {
                 return new Vector3(M41, M42, M43);
             }
@@ -192,8 +202,6 @@ namespace System.Numerics
         /// <returns>The created billboard matrix</returns>
         public static Matrix4x4 CreateBillboard(Vector3 objectPosition, Vector3 cameraPosition, Vector3 cameraUpVector, Vector3 cameraForwardVector)
         {
-            const float epsilon = 1e-4f;
-
             Vector3 zaxis = new Vector3(
                 objectPosition.X - cameraPosition.X,
                 objectPosition.Y - cameraPosition.Y,
@@ -201,7 +209,7 @@ namespace System.Numerics
 
             float norm = zaxis.LengthSquared();
 
-            if (norm < epsilon)
+            if (norm < BillboardEpsilon)
             {
                 zaxis = -cameraForwardVector;
             }
@@ -248,9 +256,6 @@ namespace System.Numerics
         /// <returns>The created billboard matrix.</returns>
         public static Matrix4x4 CreateConstrainedBillboard(Vector3 objectPosition, Vector3 cameraPosition, Vector3 rotateAxis, Vector3 cameraForwardVector, Vector3 objectForwardVector)
         {
-            const float epsilon = 1e-4f;
-            const float minAngle = 1.0f - (0.1f * (MathF.PI / 180.0f)); // 0.1 degrees
-
             // Treat the case when object and camera positions are too close.
             Vector3 faceDir = new Vector3(
                 objectPosition.X - cameraPosition.X,
@@ -259,7 +264,7 @@ namespace System.Numerics
 
             float norm = faceDir.LengthSquared();
 
-            if (norm < epsilon)
+            if (norm < BillboardEpsilon)
             {
                 faceDir = -cameraForwardVector;
             }
@@ -275,16 +280,16 @@ namespace System.Numerics
             // Treat the case when angle between faceDir and rotateAxis is too close to 0.
             float dot = Vector3.Dot(rotateAxis, faceDir);
 
-            if (MathF.Abs(dot) > minAngle)
+            if (MathF.Abs(dot) > BillboardMinAngle)
             {
                 zaxis = objectForwardVector;
 
                 // Make sure passed values are useful for compute.
                 dot = Vector3.Dot(rotateAxis, zaxis);
 
-                if (MathF.Abs(dot) > minAngle)
+                if (MathF.Abs(dot) > BillboardMinAngle)
                 {
-                    zaxis = (MathF.Abs(rotateAxis.Z) > minAngle) ? new Vector3(1, 0, 0) : new Vector3(0, 0, -1);
+                    zaxis = (MathF.Abs(rotateAxis.Z) > BillboardMinAngle) ? new Vector3(1, 0, 0) : new Vector3(0, 0, -1);
                 }
 
                 xaxis = Vector3.Normalize(Vector3.Cross(rotateAxis, zaxis));
@@ -863,7 +868,7 @@ namespace System.Numerics
         }
 
         /// <summary>
-        /// Creates a perspective projection matrix based on a field of view, aspect ratio, and near and far view plane distances. 
+        /// Creates a perspective projection matrix based on a field of view, aspect ratio, and near and far view plane distances.
         /// </summary>
         /// <param name="fieldOfView">Field of view in the y direction, in radians.</param>
         /// <param name="aspectRatio">Aspect ratio, defined as view space width divided by height.</param>
@@ -1255,7 +1260,7 @@ namespace System.Numerics
         /// Calculates the determinant of the matrix.
         /// </summary>
         /// <returns>The determinant of the matrix.</returns>
-        public float GetDeterminant()
+        public readonly float GetDeterminant()
         {
             // | a b c d |     | f g h |     | e g h |     | e f h |     | e f g |
             // | e f g h | = a | j k l | - b | i k l | + c | i j l | - d | i j k |
@@ -1266,9 +1271,9 @@ namespace System.Numerics
             // a | j k l | = a ( f ( kp - lo ) - g ( jp - ln ) + h ( jo - kn ) )
             //   | n o p |
             //
-            //   | e g h |     
+            //   | e g h |
             // b | i k l | = b ( e ( kp - lo ) - g ( ip - lm ) + h ( io - km ) )
-            //   | m o p |     
+            //   | m o p |
             //
             //   | e f h |
             // c | i j l | = c ( e ( jp - ln ) - f ( ip - lm ) + h ( in - jm ) )
@@ -1313,7 +1318,7 @@ namespace System.Numerics
             //                                       -1
             // If you have matrix M, inverse Matrix M   can compute
             //
-            //     -1       1      
+            //     -1       1
             //    M   = --------- A
             //            det(M)
             //
@@ -1470,7 +1475,7 @@ namespace System.Numerics
         }
 
 
-        struct CanonicalBasis
+        private struct CanonicalBasis
         {
             public Vector3 Row0;
             public Vector3 Row1;
@@ -1478,7 +1483,7 @@ namespace System.Numerics
         };
 
 
-        struct VectorBasis
+        private struct VectorBasis
         {
             public unsafe Vector3* Element0;
             public unsafe Vector3* Element1;
@@ -1503,7 +1508,6 @@ namespace System.Numerics
                 fixed (Vector3* scaleBase = &scale)
                 {
                     float* pfScales = (float*)scaleBase;
-                    const float EPSILON = 0.0001f;
                     float det;
 
                     VectorBasis vectorBasis;
@@ -1587,14 +1591,14 @@ namespace System.Numerics
                     }
                     #endregion
 
-                    if (pfScales[a] < EPSILON)
+                    if (pfScales[a] < DecomposeEpsilon)
                     {
                         *(pVectorBasis[a]) = pCanonicalBasis[a];
                     }
 
                     *pVectorBasis[a] = Vector3.Normalize(*pVectorBasis[a]);
 
-                    if (pfScales[b] < EPSILON)
+                    if (pfScales[b] < DecomposeEpsilon)
                     {
                         uint cc;
                         float fAbsX, fAbsY, fAbsZ;
@@ -1647,7 +1651,7 @@ namespace System.Numerics
 
                     *pVectorBasis[b] = Vector3.Normalize(*pVectorBasis[b]);
 
-                    if (pfScales[c] < EPSILON)
+                    if (pfScales[c] < DecomposeEpsilon)
                     {
                         *pVectorBasis[c] = Vector3.Cross(*pVectorBasis[a], *pVectorBasis[b]);
                     }
@@ -1669,7 +1673,7 @@ namespace System.Numerics
                     det -= 1.0f;
                     det *= det;
 
-                    if ((EPSILON < det))
+                    if ((DecomposeEpsilon < det))
                     {
                         // Non-SRT matrix encountered
                         rotation = Quaternion.Identity;
@@ -1755,8 +1759,29 @@ namespace System.Numerics
         /// </summary>
         /// <param name="matrix">The source matrix.</param>
         /// <returns>The transposed matrix.</returns>
-        public static Matrix4x4 Transpose(Matrix4x4 matrix)
+        public static unsafe Matrix4x4 Transpose(Matrix4x4 matrix)
         {
+#if HAS_INTRINSICS
+            if (Sse.IsSupported)
+            {
+                var row1 = Sse.LoadVector128(&matrix.M11);
+                var row2 = Sse.LoadVector128(&matrix.M21);
+                var row3 = Sse.LoadVector128(&matrix.M31);
+                var row4 = Sse.LoadVector128(&matrix.M41);
+
+                var l12 = Sse.UnpackLow(row1, row2);
+                var l34 = Sse.UnpackLow(row3, row4);
+                var h12 = Sse.UnpackHigh(row1, row2);
+                var h34 = Sse.UnpackHigh(row3, row4);
+
+                Sse.Store(&matrix.M11, Sse.MoveLowToHigh(l12, l34));
+                Sse.Store(&matrix.M21, Sse.MoveHighToLow(l34, l12));
+                Sse.Store(&matrix.M31, Sse.MoveLowToHigh(h12, h34));
+                Sse.Store(&matrix.M41, Sse.MoveHighToLow(h34, h12));
+
+                return matrix;
+            }
+#endif
             Matrix4x4 result;
 
             result.M11 = matrix.M11;
@@ -1786,8 +1811,19 @@ namespace System.Numerics
         /// <param name="matrix2">The second source matrix.</param>
         /// <param name="amount">The relative weight of the second source matrix.</param>
         /// <returns>The interpolated matrix.</returns>
-        public static Matrix4x4 Lerp(Matrix4x4 matrix1, Matrix4x4 matrix2, float amount)
+        public static unsafe Matrix4x4 Lerp(Matrix4x4 matrix1, Matrix4x4 matrix2, float amount)
         {
+#if HAS_INTRINSICS
+            if (Sse.IsSupported)
+            {
+                Vector128<float> amountVec = Vector128.Create(amount);
+                Sse.Store(&matrix1.M11, VectorMath.Lerp(Sse.LoadVector128(&matrix1.M11), Sse.LoadVector128(&matrix2.M11), amountVec));
+                Sse.Store(&matrix1.M21, VectorMath.Lerp(Sse.LoadVector128(&matrix1.M21), Sse.LoadVector128(&matrix2.M21), amountVec));
+                Sse.Store(&matrix1.M31, VectorMath.Lerp(Sse.LoadVector128(&matrix1.M31), Sse.LoadVector128(&matrix2.M31), amountVec));
+                Sse.Store(&matrix1.M41, VectorMath.Lerp(Sse.LoadVector128(&matrix1.M41), Sse.LoadVector128(&matrix2.M41), amountVec));
+                return matrix1;
+            }
+#endif
             Matrix4x4 result;
 
             // First row
@@ -1822,29 +1858,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="value">The source matrix.</param>
         /// <returns>The negated matrix.</returns>
-        public static Matrix4x4 Negate(Matrix4x4 value)
-        {
-            Matrix4x4 result;
-
-            result.M11 = -value.M11;
-            result.M12 = -value.M12;
-            result.M13 = -value.M13;
-            result.M14 = -value.M14;
-            result.M21 = -value.M21;
-            result.M22 = -value.M22;
-            result.M23 = -value.M23;
-            result.M24 = -value.M24;
-            result.M31 = -value.M31;
-            result.M32 = -value.M32;
-            result.M33 = -value.M33;
-            result.M34 = -value.M34;
-            result.M41 = -value.M41;
-            result.M42 = -value.M42;
-            result.M43 = -value.M43;
-            result.M44 = -value.M44;
-
-            return result;
-        }
+        public static Matrix4x4 Negate(Matrix4x4 value) => -value;
 
         /// <summary>
         /// Adds two matrices together.
@@ -1852,29 +1866,7 @@ namespace System.Numerics
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The resulting matrix.</returns>
-        public static Matrix4x4 Add(Matrix4x4 value1, Matrix4x4 value2)
-        {
-            Matrix4x4 result;
-
-            result.M11 = value1.M11 + value2.M11;
-            result.M12 = value1.M12 + value2.M12;
-            result.M13 = value1.M13 + value2.M13;
-            result.M14 = value1.M14 + value2.M14;
-            result.M21 = value1.M21 + value2.M21;
-            result.M22 = value1.M22 + value2.M22;
-            result.M23 = value1.M23 + value2.M23;
-            result.M24 = value1.M24 + value2.M24;
-            result.M31 = value1.M31 + value2.M31;
-            result.M32 = value1.M32 + value2.M32;
-            result.M33 = value1.M33 + value2.M33;
-            result.M34 = value1.M34 + value2.M34;
-            result.M41 = value1.M41 + value2.M41;
-            result.M42 = value1.M42 + value2.M42;
-            result.M43 = value1.M43 + value2.M43;
-            result.M44 = value1.M44 + value2.M44;
-
-            return result;
-        }
+        public static Matrix4x4 Add(Matrix4x4 value1, Matrix4x4 value2) => value1 + value2;
 
         /// <summary>
         /// Subtracts the second matrix from the first.
@@ -1882,29 +1874,7 @@ namespace System.Numerics
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The result of the subtraction.</returns>
-        public static Matrix4x4 Subtract(Matrix4x4 value1, Matrix4x4 value2)
-        {
-            Matrix4x4 result;
-
-            result.M11 = value1.M11 - value2.M11;
-            result.M12 = value1.M12 - value2.M12;
-            result.M13 = value1.M13 - value2.M13;
-            result.M14 = value1.M14 - value2.M14;
-            result.M21 = value1.M21 - value2.M21;
-            result.M22 = value1.M22 - value2.M22;
-            result.M23 = value1.M23 - value2.M23;
-            result.M24 = value1.M24 - value2.M24;
-            result.M31 = value1.M31 - value2.M31;
-            result.M32 = value1.M32 - value2.M32;
-            result.M33 = value1.M33 - value2.M33;
-            result.M34 = value1.M34 - value2.M34;
-            result.M41 = value1.M41 - value2.M41;
-            result.M42 = value1.M42 - value2.M42;
-            result.M43 = value1.M43 - value2.M43;
-            result.M44 = value1.M44 - value2.M44;
-
-            return result;
-        }
+        public static Matrix4x4 Subtract(Matrix4x4 value1, Matrix4x4 value2) => value1 - value2;
 
         /// <summary>
         /// Multiplies a matrix by another matrix.
@@ -1912,36 +1882,7 @@ namespace System.Numerics
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The result of the multiplication.</returns>
-        public static Matrix4x4 Multiply(Matrix4x4 value1, Matrix4x4 value2)
-        {
-            Matrix4x4 result;
-
-            // First row
-            result.M11 = value1.M11 * value2.M11 + value1.M12 * value2.M21 + value1.M13 * value2.M31 + value1.M14 * value2.M41;
-            result.M12 = value1.M11 * value2.M12 + value1.M12 * value2.M22 + value1.M13 * value2.M32 + value1.M14 * value2.M42;
-            result.M13 = value1.M11 * value2.M13 + value1.M12 * value2.M23 + value1.M13 * value2.M33 + value1.M14 * value2.M43;
-            result.M14 = value1.M11 * value2.M14 + value1.M12 * value2.M24 + value1.M13 * value2.M34 + value1.M14 * value2.M44;
-
-            // Second row
-            result.M21 = value1.M21 * value2.M11 + value1.M22 * value2.M21 + value1.M23 * value2.M31 + value1.M24 * value2.M41;
-            result.M22 = value1.M21 * value2.M12 + value1.M22 * value2.M22 + value1.M23 * value2.M32 + value1.M24 * value2.M42;
-            result.M23 = value1.M21 * value2.M13 + value1.M22 * value2.M23 + value1.M23 * value2.M33 + value1.M24 * value2.M43;
-            result.M24 = value1.M21 * value2.M14 + value1.M22 * value2.M24 + value1.M23 * value2.M34 + value1.M24 * value2.M44;
-
-            // Third row
-            result.M31 = value1.M31 * value2.M11 + value1.M32 * value2.M21 + value1.M33 * value2.M31 + value1.M34 * value2.M41;
-            result.M32 = value1.M31 * value2.M12 + value1.M32 * value2.M22 + value1.M33 * value2.M32 + value1.M34 * value2.M42;
-            result.M33 = value1.M31 * value2.M13 + value1.M32 * value2.M23 + value1.M33 * value2.M33 + value1.M34 * value2.M43;
-            result.M34 = value1.M31 * value2.M14 + value1.M32 * value2.M24 + value1.M33 * value2.M34 + value1.M34 * value2.M44;
-
-            // Fourth row
-            result.M41 = value1.M41 * value2.M11 + value1.M42 * value2.M21 + value1.M43 * value2.M31 + value1.M44 * value2.M41;
-            result.M42 = value1.M41 * value2.M12 + value1.M42 * value2.M22 + value1.M43 * value2.M32 + value1.M44 * value2.M42;
-            result.M43 = value1.M41 * value2.M13 + value1.M42 * value2.M23 + value1.M43 * value2.M33 + value1.M44 * value2.M43;
-            result.M44 = value1.M41 * value2.M14 + value1.M42 * value2.M24 + value1.M43 * value2.M34 + value1.M44 * value2.M44;
-
-            return result;
-        }
+        public static Matrix4x4 Multiply(Matrix4x4 value1, Matrix4x4 value2) => value1 * value2;
 
         /// <summary>
         /// Multiplies a matrix by a scalar value.
@@ -1949,37 +1890,27 @@ namespace System.Numerics
         /// <param name="value1">The source matrix.</param>
         /// <param name="value2">The scaling factor.</param>
         /// <returns>The scaled matrix.</returns>
-        public static Matrix4x4 Multiply(Matrix4x4 value1, float value2)
-        {
-            Matrix4x4 result;
-
-            result.M11 = value1.M11 * value2;
-            result.M12 = value1.M12 * value2;
-            result.M13 = value1.M13 * value2;
-            result.M14 = value1.M14 * value2;
-            result.M21 = value1.M21 * value2;
-            result.M22 = value1.M22 * value2;
-            result.M23 = value1.M23 * value2;
-            result.M24 = value1.M24 * value2;
-            result.M31 = value1.M31 * value2;
-            result.M32 = value1.M32 * value2;
-            result.M33 = value1.M33 * value2;
-            result.M34 = value1.M34 * value2;
-            result.M41 = value1.M41 * value2;
-            result.M42 = value1.M42 * value2;
-            result.M43 = value1.M43 * value2;
-            result.M44 = value1.M44 * value2;
-
-            return result;
-        }
+        public static Matrix4x4 Multiply(Matrix4x4 value1, float value2) => value1 * value2;
 
         /// <summary>
         /// Returns a new matrix with the negated elements of the given matrix.
         /// </summary>
         /// <param name="value">The source matrix.</param>
         /// <returns>The negated matrix.</returns>
-        public static Matrix4x4 operator -(Matrix4x4 value)
+        public static unsafe Matrix4x4 operator -(Matrix4x4 value)
         {
+#if HAS_INTRINSICS
+            if (Sse.IsSupported)
+            {
+                Vector128<float> zero = Vector128<float>.Zero;
+                Sse.Store(&value.M11, Sse.Subtract(zero, Sse.LoadVector128(&value.M11)));
+                Sse.Store(&value.M21, Sse.Subtract(zero, Sse.LoadVector128(&value.M21)));
+                Sse.Store(&value.M31, Sse.Subtract(zero, Sse.LoadVector128(&value.M31)));
+                Sse.Store(&value.M41, Sse.Subtract(zero, Sse.LoadVector128(&value.M41)));
+
+                return value;
+            }
+#endif
             Matrix4x4 m;
 
             m.M11 = -value.M11;
@@ -2008,8 +1939,18 @@ namespace System.Numerics
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The resulting matrix.</returns>
-        public static Matrix4x4 operator +(Matrix4x4 value1, Matrix4x4 value2)
+        public static unsafe Matrix4x4 operator +(Matrix4x4 value1, Matrix4x4 value2)
         {
+#if HAS_INTRINSICS
+            if (Sse.IsSupported)
+            {
+                Sse.Store(&value1.M11, Sse.Add(Sse.LoadVector128(&value1.M11), Sse.LoadVector128(&value2.M11)));
+                Sse.Store(&value1.M21, Sse.Add(Sse.LoadVector128(&value1.M21), Sse.LoadVector128(&value2.M21)));
+                Sse.Store(&value1.M31, Sse.Add(Sse.LoadVector128(&value1.M31), Sse.LoadVector128(&value2.M31)));
+                Sse.Store(&value1.M41, Sse.Add(Sse.LoadVector128(&value1.M41), Sse.LoadVector128(&value2.M41)));
+                return value1;
+            }
+#endif
             Matrix4x4 m;
 
             m.M11 = value1.M11 + value2.M11;
@@ -2038,8 +1979,18 @@ namespace System.Numerics
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The result of the subtraction.</returns>
-        public static Matrix4x4 operator -(Matrix4x4 value1, Matrix4x4 value2)
+        public static unsafe Matrix4x4 operator -(Matrix4x4 value1, Matrix4x4 value2)
         {
+#if HAS_INTRINSICS
+            if (Sse.IsSupported)
+            {
+                Sse.Store(&value1.M11, Sse.Subtract(Sse.LoadVector128(&value1.M11), Sse.LoadVector128(&value2.M11)));
+                Sse.Store(&value1.M21, Sse.Subtract(Sse.LoadVector128(&value1.M21), Sse.LoadVector128(&value2.M21)));
+                Sse.Store(&value1.M31, Sse.Subtract(Sse.LoadVector128(&value1.M31), Sse.LoadVector128(&value2.M31)));
+                Sse.Store(&value1.M41, Sse.Subtract(Sse.LoadVector128(&value1.M41), Sse.LoadVector128(&value2.M41)));
+                return value1;
+            }
+#endif
             Matrix4x4 m;
 
             m.M11 = value1.M11 - value2.M11;
@@ -2068,8 +2019,44 @@ namespace System.Numerics
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The result of the multiplication.</returns>
-        public static Matrix4x4 operator *(Matrix4x4 value1, Matrix4x4 value2)
+        public static unsafe Matrix4x4 operator *(Matrix4x4 value1, Matrix4x4 value2)
         {
+#if HAS_INTRINSICS
+            if (Sse.IsSupported)
+            {
+                var row = Sse.LoadVector128(&value1.M11);
+                Sse.Store(&value1.M11,
+                    Sse.Add(Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0x00), Sse.LoadVector128(&value2.M11)),
+                                    Sse.Multiply(Sse.Shuffle(row, row, 0x55), Sse.LoadVector128(&value2.M21))),
+                            Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0xAA), Sse.LoadVector128(&value2.M31)),
+                                    Sse.Multiply(Sse.Shuffle(row, row, 0xFF), Sse.LoadVector128(&value2.M41)))));
+
+                // 0x00 is _MM_SHUFFLE(0,0,0,0), 0x55 is _MM_SHUFFLE(1,1,1,1), etc.
+                // TODO: Replace with a method once it's added to the API.
+
+                row = Sse.LoadVector128(&value1.M21);
+                Sse.Store(&value1.M21,
+                    Sse.Add(Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0x00), Sse.LoadVector128(&value2.M11)),
+                                    Sse.Multiply(Sse.Shuffle(row, row, 0x55), Sse.LoadVector128(&value2.M21))),
+                            Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0xAA), Sse.LoadVector128(&value2.M31)),
+                                    Sse.Multiply(Sse.Shuffle(row, row, 0xFF), Sse.LoadVector128(&value2.M41)))));
+
+                row = Sse.LoadVector128(&value1.M31);
+                Sse.Store(&value1.M31,
+                    Sse.Add(Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0x00), Sse.LoadVector128(&value2.M11)),
+                                    Sse.Multiply(Sse.Shuffle(row, row, 0x55), Sse.LoadVector128(&value2.M21))),
+                            Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0xAA), Sse.LoadVector128(&value2.M31)),
+                                    Sse.Multiply(Sse.Shuffle(row, row, 0xFF), Sse.LoadVector128(&value2.M41)))));
+
+                row = Sse.LoadVector128(&value1.M41);
+                Sse.Store(&value1.M41,
+                    Sse.Add(Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0x00), Sse.LoadVector128(&value2.M11)),
+                                    Sse.Multiply(Sse.Shuffle(row, row, 0x55), Sse.LoadVector128(&value2.M21))),
+                            Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0xAA), Sse.LoadVector128(&value2.M31)),
+                                    Sse.Multiply(Sse.Shuffle(row, row, 0xFF), Sse.LoadVector128(&value2.M41)))));
+                return value1;
+            }
+#endif
             Matrix4x4 m;
 
             // First row
@@ -2105,8 +2092,19 @@ namespace System.Numerics
         /// <param name="value1">The source matrix.</param>
         /// <param name="value2">The scaling factor.</param>
         /// <returns>The scaled matrix.</returns>
-        public static Matrix4x4 operator *(Matrix4x4 value1, float value2)
+        public static unsafe Matrix4x4 operator *(Matrix4x4 value1, float value2)
         {
+#if HAS_INTRINSICS
+            if (Sse.IsSupported)
+            {
+                Vector128<float> value2Vec = Vector128.Create(value2);
+                Sse.Store(&value1.M11, Sse.Multiply(Sse.LoadVector128(&value1.M11), value2Vec));
+                Sse.Store(&value1.M21, Sse.Multiply(Sse.LoadVector128(&value1.M21), value2Vec));
+                Sse.Store(&value1.M31, Sse.Multiply(Sse.LoadVector128(&value1.M31), value2Vec));
+                Sse.Store(&value1.M41, Sse.Multiply(Sse.LoadVector128(&value1.M41), value2Vec));
+                return value1;
+            }
+#endif
             Matrix4x4 m;
 
             m.M11 = value1.M11 * value2;
@@ -2134,13 +2132,22 @@ namespace System.Numerics
         /// <param name="value1">The first matrix to compare.</param>
         /// <param name="value2">The second matrix to compare.</param>
         /// <returns>True if the given matrices are equal; False otherwise.</returns>
-        public static bool operator ==(Matrix4x4 value1, Matrix4x4 value2)
+        public static unsafe bool operator ==(Matrix4x4 value1, Matrix4x4 value2)
         {
+#if HAS_INTRINSICS
+            if (Sse.IsSupported)
+            {
+                return
+                    VectorMath.Equal(Sse.LoadVector128(&value1.M11), Sse.LoadVector128(&value2.M11)) &&
+                    VectorMath.Equal(Sse.LoadVector128(&value1.M21), Sse.LoadVector128(&value2.M21)) &&
+                    VectorMath.Equal(Sse.LoadVector128(&value1.M31), Sse.LoadVector128(&value2.M31)) &&
+                    VectorMath.Equal(Sse.LoadVector128(&value1.M41), Sse.LoadVector128(&value2.M41));
+            }
+#endif
             return (value1.M11 == value2.M11 && value1.M22 == value2.M22 && value1.M33 == value2.M33 && value1.M44 == value2.M44 && // Check diagonal element first for early out.
-                                                value1.M12 == value2.M12 && value1.M13 == value2.M13 && value1.M14 == value2.M14 &&
-                    value1.M21 == value2.M21 && value1.M23 == value2.M23 && value1.M24 == value2.M24 &&
-                    value1.M31 == value2.M31 && value1.M32 == value2.M32 && value1.M34 == value2.M34 &&
-                    value1.M41 == value2.M41 && value1.M42 == value2.M42 && value1.M43 == value2.M43);
+                    value1.M12 == value2.M12 && value1.M13 == value2.M13 && value1.M14 == value2.M14 && value1.M21 == value2.M21 &&
+                    value1.M23 == value2.M23 && value1.M24 == value2.M24 && value1.M31 == value2.M31 && value1.M32 == value2.M32 &&
+                    value1.M34 == value2.M34 && value1.M41 == value2.M41 && value1.M42 == value2.M42 && value1.M43 == value2.M43);
         }
 
         /// <summary>
@@ -2149,8 +2156,18 @@ namespace System.Numerics
         /// <param name="value1">The first matrix to compare.</param>
         /// <param name="value2">The second matrix to compare.</param>
         /// <returns>True if the given matrices are not equal; False if they are equal.</returns>
-        public static bool operator !=(Matrix4x4 value1, Matrix4x4 value2)
+        public static unsafe bool operator !=(Matrix4x4 value1, Matrix4x4 value2)
         {
+#if HAS_INTRINSICS
+            if (Sse.IsSupported)
+            {
+                return
+                    VectorMath.NotEqual(Sse.LoadVector128(&value1.M11), Sse.LoadVector128(&value2.M11)) ||
+                    VectorMath.NotEqual(Sse.LoadVector128(&value1.M21), Sse.LoadVector128(&value2.M21)) ||
+                    VectorMath.NotEqual(Sse.LoadVector128(&value1.M31), Sse.LoadVector128(&value2.M31)) ||
+                    VectorMath.NotEqual(Sse.LoadVector128(&value1.M41), Sse.LoadVector128(&value2.M41));
+            }
+#endif
             return (value1.M11 != value2.M11 || value1.M12 != value2.M12 || value1.M13 != value2.M13 || value1.M14 != value2.M14 ||
                     value1.M21 != value2.M21 || value1.M22 != value2.M22 || value1.M23 != value2.M23 || value1.M24 != value2.M24 ||
                     value1.M31 != value2.M31 || value1.M32 != value2.M32 || value1.M33 != value2.M33 || value1.M34 != value2.M34 ||
@@ -2162,50 +2179,33 @@ namespace System.Numerics
         /// </summary>
         /// <param name="other">The matrix to compare this instance to.</param>
         /// <returns>True if the matrices are equal; False otherwise.</returns>
-        public bool Equals(Matrix4x4 other)
-        {
-            return (M11 == other.M11 && M22 == other.M22 && M33 == other.M33 && M44 == other.M44 && // Check diagonal element first for early out.
-                                        M12 == other.M12 && M13 == other.M13 && M14 == other.M14 &&
-                    M21 == other.M21 && M23 == other.M23 && M24 == other.M24 &&
-                    M31 == other.M31 && M32 == other.M32 && M34 == other.M34 &&
-                    M41 == other.M41 && M42 == other.M42 && M43 == other.M43);
-        }
+        public readonly bool Equals(Matrix4x4 other) => this == other;
 
         /// <summary>
         /// Returns a boolean indicating whether the given Object is equal to this matrix instance.
         /// </summary>
         /// <param name="obj">The Object to compare against.</param>
         /// <returns>True if the Object is equal to this matrix; False otherwise.</returns>
-        public override bool Equals(object obj)
-        {
-            if (obj is Matrix4x4)
-            {
-                return Equals((Matrix4x4)obj);
-            }
-
-            return false;
-        }
+        public override readonly bool Equals(object? obj) => (obj is Matrix4x4 other) && (this == other);
 
         /// <summary>
         /// Returns a String representing this matrix instance.
         /// </summary>
         /// <returns>The string representation.</returns>
-        public override string ToString()
+        public override readonly string ToString()
         {
-            CultureInfo ci = CultureInfo.CurrentCulture;
-
-            return String.Format(ci, "{{ {{M11:{0} M12:{1} M13:{2} M14:{3}}} {{M21:{4} M22:{5} M23:{6} M24:{7}}} {{M31:{8} M32:{9} M33:{10} M34:{11}}} {{M41:{12} M42:{13} M43:{14} M44:{15}}} }}",
-                                 M11.ToString(ci), M12.ToString(ci), M13.ToString(ci), M14.ToString(ci),
-                                 M21.ToString(ci), M22.ToString(ci), M23.ToString(ci), M24.ToString(ci),
-                                 M31.ToString(ci), M32.ToString(ci), M33.ToString(ci), M34.ToString(ci),
-                                 M41.ToString(ci), M42.ToString(ci), M43.ToString(ci), M44.ToString(ci));
+            return string.Format(CultureInfo.CurrentCulture, "{{ {{M11:{0} M12:{1} M13:{2} M14:{3}}} {{M21:{4} M22:{5} M23:{6} M24:{7}}} {{M31:{8} M32:{9} M33:{10} M34:{11}}} {{M41:{12} M42:{13} M43:{14} M44:{15}}} }}",
+                                 M11, M12, M13, M14,
+                                 M21, M22, M23, M24,
+                                 M31, M32, M33, M34,
+                                 M41, M42, M43, M44);
         }
 
         /// <summary>
         /// Returns the hash code for this instance.
         /// </summary>
         /// <returns>The hash code.</returns>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             unchecked
             {

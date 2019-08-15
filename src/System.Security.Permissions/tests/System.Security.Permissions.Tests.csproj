@@ -1,33 +1,25 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <ProjectGuid>{7517F1E9-EEB4-4676-A054-CE4A44A66B66}</ProjectGuid>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
-  <!-- .NET Framework has actual implementation, not stubs -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
+  <ItemGroup>
     <Compile Include="ApplicationTrustTests.cs" />
     <Compile Include="CodeConnectAccessTests.cs" />
-    <Compile Include="EvidenceTests.cs" />
     <Compile Include="CodeGroupTests.cs" />
-    <Compile Include="MembershipConditionTests.cs" />
     <Compile Include="EvidenceBaseTests.cs" />
-    <Compile Include="PolicyTests.cs" />
-    <Compile Include="TrustManagerContextTests.cs" />
+    <Compile Include="EvidenceTests.cs" />
+    <Compile Include="HostProtectionTests.cs" />
+    <Compile Include="HostSecurityManagerTests.cs" />
+    <Compile Include="MembershipConditionTests.cs" />
     <Compile Include="PermissionSetTests.cs" />
     <Compile Include="PermissionTests.cs" />
+    <Compile Include="PolicyTests.cs" />
     <Compile Include="PrincipalPermissionTests.cs" />
     <Compile Include="SecurityElementTests.cs" />
-    <Compile Include="HostSecurityManagerTests.cs" />
-    <Compile Include="HostProtectionTests.cs" />
+    <Compile Include="TrustManagerContextTests.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' And '$(TargetsWindows)' == 'true'">
+    <Compile Include="XamlLoadPermissionTests.cs"/>
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

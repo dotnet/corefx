@@ -11,7 +11,6 @@ namespace System.Data.ProviderBase
 {
     internal class DbMetaDataFactory
     {
-
         private DataSet _metaDataCollectionsDataSet;
         private string _normalizedServerVersion;
         private string _serverVersionString;
@@ -23,7 +22,6 @@ namespace System.Data.ProviderBase
         private const string _minimumVersion = "MinimumVersion";
         private const string _dataSourceProductVersionNormalized = "DataSourceProductVersionNormalized";
         private const string _dataSourceProductVersion = "DataSourceProductVersion";
-        private const string _restrictionDefault = "RestrictionDefault";
         private const string _restrictionNumber = "RestrictionNumber";
         private const string _numberOfRestrictions = "NumberOfRestrictions";
         private const string _restrictionName = "RestrictionName";
@@ -36,9 +34,9 @@ namespace System.Data.ProviderBase
 
         public DbMetaDataFactory(Stream xmlStream, string serverVersion, string normalizedServerVersion)
         {
-            ADP.CheckArgumentNull(xmlStream, "xmlStream");
-            ADP.CheckArgumentNull(serverVersion, "serverVersion");
-            ADP.CheckArgumentNull(normalizedServerVersion, "normalizedServerVersion");
+            ADP.CheckArgumentNull(xmlStream, nameof(xmlStream));
+            ADP.CheckArgumentNull(serverVersion, nameof(serverVersion));
+            ADP.CheckArgumentNull(normalizedServerVersion, nameof(normalizedServerVersion));
 
             LoadDataSetFromXml(xmlStream);
 
@@ -173,7 +171,7 @@ namespace System.Data.ProviderBase
                 schemaTable = reader.GetSchemaTable();
                 foreach (DataRow row in schemaTable.Rows)
                 {
-                    resultTable.Columns.Add(row["ColumnName"] as string, (Type)row["DataType"] as Type);
+                    resultTable.Columns.Add(row["ColumnName"] as string, (Type)row["DataType"]);
                 }
                 object[] values = new object[resultTable.Columns.Count];
                 while (reader.Read())
@@ -240,7 +238,7 @@ namespace System.Data.ProviderBase
 
             DataColumn collectionNameColumn = metaDataCollectionsTable.Columns[DbMetaDataColumnNames.CollectionName];
 
-            if ((null == collectionNameColumn) || (typeof(System.String) != collectionNameColumn.DataType))
+            if ((null == collectionNameColumn) || (typeof(string) != collectionNameColumn.DataType))
             {
                 throw ADP.InvalidXmlMissingColumn(DbMetaDataCollectionNames.MetaDataCollections, DbMetaDataColumnNames.CollectionName);
             }
@@ -509,7 +507,7 @@ namespace System.Data.ProviderBase
             _metaDataCollectionsDataSet.ReadXml(XmlStream);
         }
 
-        protected virtual DataTable PrepareCollection(string collectionName, String[] restrictions, DbConnection connection)
+        protected virtual DataTable PrepareCollection(string collectionName, string[] restrictions, DbConnection connection)
         {
             throw ADP.NotSupported();
         }
@@ -519,7 +517,7 @@ namespace System.Data.ProviderBase
             bool result = true;
             DataColumnCollection tableColumns = requestedCollectionRow.Table.Columns;
             DataColumn versionColumn;
-            Object version;
+            object version;
 
             // check the minimum version first
             versionColumn = tableColumns[_minimumVersion];

@@ -5,7 +5,6 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Win32.SafeHandles;
 
@@ -97,9 +96,9 @@ internal static partial class Interop
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_GetX509RootStoreFile")]
         private static extern IntPtr GetX509RootStoreFile_private();
 
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SetX509ChainVerifyTime")]
-        private static extern int SetX509ChainVerifyTime(
-            SafeX509StoreCtxHandle ctx,
+        [DllImport(Libraries.CryptoNative)]
+        private static extern int CryptoNative_X509StoreSetVerifyTime(
+            SafeX509StoreHandle ctx,
             int year,
             int month,
             int day,
@@ -137,13 +136,13 @@ internal static partial class Interop
             return GetDynamicBuffer((handle, buf, i) => GetX509PublicKeyParameterBytes(handle, buf, i), x509);
         }
 
-        internal static void SetX509ChainVerifyTime(SafeX509StoreCtxHandle ctx, DateTime verifyTime)
+        internal static void X509StoreSetVerifyTime(SafeX509StoreHandle ctx, DateTime verifyTime)
         {
             // OpenSSL is going to convert our input time to universal, so we should be in Local or
             // Unspecified (local-assumed).
             Debug.Assert(verifyTime.Kind != DateTimeKind.Utc, "UTC verifyTime should have been normalized to Local");
-            
-            int succeeded = SetX509ChainVerifyTime(
+
+            int succeeded = CryptoNative_X509StoreSetVerifyTime(
                 ctx,
                 verifyTime.Year,
                 verifyTime.Month,

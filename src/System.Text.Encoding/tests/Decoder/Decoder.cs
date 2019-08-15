@@ -25,9 +25,9 @@ namespace System.Text.Encodings.Tests
             byte [] bytes2 = utf8.GetBytes(s2);
             byte [] bytes3 = utf8.GetBytes(s3);
 
-	        int bytesUsed;
-	        int charsUsed;
-	        bool completed;
+            int bytesUsed;
+            int charsUsed;
+            bool completed;
 
             fixed (byte *pBytes1 = bytes1)
             fixed (byte *pBytes2 = bytes2)
@@ -38,42 +38,42 @@ namespace System.Text.Encodings.Tests
                 string s = new string(chars, 0, charsUsed);
                 Assert.Equal(bytes1.Length, bytesUsed);
                 Assert.Equal(s1.Length, charsUsed);
-                Assert.True(completed, "Expected to have the full operation compeleted with bytes1");                
+                Assert.True(completed, "Expected to have the full operation compeleted with bytes1");
                 Assert.Equal(s1, s);
 
                 decoder.Convert(pBytes2, bytes2.Length, pChars, chars.Length, true, out bytesUsed, out charsUsed, out completed);
                 s = new string(chars, 0, charsUsed);
                 Assert.Equal(bytes2.Length, bytesUsed);
                 Assert.Equal(s2.Length, charsUsed);
-                Assert.True(completed, "Expected to have the full operation compeleted with bytes2");                
+                Assert.True(completed, "Expected to have the full operation compeleted with bytes2");
                 Assert.Equal(s2, s);
 
                 decoder.Convert(pBytes3, bytes3.Length, pChars, chars.Length, true, out bytesUsed, out charsUsed, out completed);
                 s = new string(chars, 0, charsUsed);
                 Assert.Equal(bytes3.Length, bytesUsed);
                 Assert.Equal(s3.Length, charsUsed);
-                Assert.True(completed, "Expected to have the full operation compeleted with bytes3");                
+                Assert.True(completed, "Expected to have the full operation compeleted with bytes3");
                 Assert.Equal(s3, s);
 
                 decoder.Convert(pBytes3 + bytes1.Length, bytes3.Length - bytes1.Length, pChars, chars.Length, true, out bytesUsed, out charsUsed, out completed);
                 s = new string(chars, 0, charsUsed);
                 Assert.Equal(bytes2.Length, bytesUsed);
                 Assert.Equal(s2.Length, charsUsed);
-                Assert.True(completed, "Expected to have the full operation compeleted with bytes3+bytes1.Length");                
+                Assert.True(completed, "Expected to have the full operation compeleted with bytes3+bytes1.Length");
                 Assert.Equal(s2, s);
 
                 decoder.Convert(pBytes3 + bytes1.Length, bytes3.Length - bytes1.Length, pChars, 2, true, out bytesUsed, out charsUsed, out completed);
                 s = new string(chars, 0, charsUsed);
                 Assert.True(bytes2.Length > bytesUsed, "Expected to use less bytes when there is not enough char buffer");
                 Assert.Equal(2, charsUsed);
-                Assert.False(completed, "Expected to have the operation not fully completed");                
+                Assert.False(completed, "Expected to have the operation not fully completed");
                 Assert.Equal(s2.Substring(0, 2), s);
 
                 int encodedBytes = bytesUsed;
                 decoder.Convert(pBytes3 + bytes1.Length + bytesUsed, bytes3.Length - bytes1.Length - encodedBytes, pChars, 1, true, out bytesUsed, out charsUsed, out completed);
                 Assert.Equal(bytes3.Length - bytes1.Length - encodedBytes, bytesUsed);
                 Assert.Equal(1, charsUsed);
-                Assert.True(completed, "expected to flush the remaining character");                
+                Assert.True(completed, "expected to flush the remaining character");
                 Assert.Equal(s2[s2.Length - 1], pChars[0]);
             }
         }
@@ -82,9 +82,9 @@ namespace System.Text.Encodings.Tests
         public static unsafe void ConvertNegativeTest()
         {
             Decoder decoder = Encoding.UTF8.GetDecoder();
-	        int bytesUsed;
-	        int charsUsed;
-	        bool completed;
+            int bytesUsed;
+            int charsUsed;
+            bool completed;
 
             byte [] bytes = Encoding.UTF8.GetBytes("\u0D800\uDC00");
 
@@ -110,7 +110,7 @@ namespace System.Text.Encodings.Tests
             {
                 byte *pBytes = bytesPtr;
                 char *pChars = charsPtr;
-                
+
                 Assert.Throws<DecoderFallbackException>(() => decoder.Convert(pBytes, 2, pChars, 2, true, out bytesUsed, out charsUsed, out completed));
             }
         }
@@ -191,7 +191,7 @@ namespace System.Text.Encodings.Tests
             {
                 byte *pBytes = bytesPtr;
                 char *pChars = charsPtr;
-                
+
                 Assert.Throws<DecoderFallbackException>(() => decoder.GetChars(pBytes, 2, pChars, 2, true));
                 Assert.Throws<DecoderFallbackException>(() => decoder.GetCharCount(pBytes, 2, true));
             }
@@ -221,6 +221,37 @@ namespace System.Text.Encodings.Tests
 
             Assert.Equal(0, fallbackBuffer.Remaining);
             Assert.Equal('\u0000', fallbackBuffer.GetNextChar());
+        }
+
+        [Theory]
+        [InlineData(new byte[] { 0xF1 }, new byte[] { 0xF1 }, -1)]
+        [InlineData(new byte[] { 0xF1 }, new byte[] { 0x80 }, -1)]
+        [InlineData(new byte[] { 0xF1, 0x80 }, new byte[] { }, -2)]
+        [InlineData(new byte[] { 0xF1, 0x80 }, new byte[] { 0x60 }, -2)]
+        [InlineData(new byte[] { 0xF1, 0x80 }, new byte[] { 0x80 }, -2)]
+        [InlineData(new byte[] { 0xF1, 0x80, 0x80 }, new byte[] { 0x60 }, -3)]
+        [InlineData(new byte[] { 0xF1, 0x80, 0x80 }, new byte[] { 0x80, 0x81 }, 1)]
+        public static void DecoderFallbackExceptionIndexTests(byte[] firstPayload, byte[] secondPayload, int expectedIndex)
+        {
+            UTF8Encoding encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
+
+            // First test GetChars / GetChars
+
+            Decoder decoder = encoding.GetDecoder();
+            Assert.Equal(0, decoder.GetChars(firstPayload, 0, firstPayload.Length, new char[0], 0, flush: false));
+
+            DecoderFallbackException ex = Assert.Throws<DecoderFallbackException>(
+                () => decoder.GetChars(secondPayload, 0, secondPayload.Length, new char[8], 0, flush: true));
+            Assert.Equal(expectedIndex, ex.Index);
+
+            // Then test GetChars / GetCharCount
+
+            decoder = encoding.GetDecoder();
+            Assert.Equal(0, decoder.GetChars(firstPayload, 0, firstPayload.Length, new char[0], 0, flush: false));
+
+            ex = Assert.Throws<DecoderFallbackException>(
+                () => decoder.GetCharCount(secondPayload, 0, secondPayload.Length, flush: true));
+            Assert.Equal(expectedIndex, ex.Index);
         }
 
         [Fact]

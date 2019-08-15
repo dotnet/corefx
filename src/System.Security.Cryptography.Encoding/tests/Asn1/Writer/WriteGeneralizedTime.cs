@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -32,7 +32,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             },
             new object[]
             {
-                new DateTimeOffset(1999, 12, 31, 23, 59, 59, 999, TimeSpan.Zero), 
+                new DateTimeOffset(1999, 12, 31, 23, 59, 59, 999, TimeSpan.Zero),
                 false,
                 "1331393939313233313233353935392E3939395A"
             },
@@ -253,6 +253,44 @@ namespace System.Security.Cryptography.Tests.Asn1
                 writer.WriteGeneralizedTime(new Asn1Tag(UniversalTagNumber.GeneralizedTime, true), value);
                 writer.WriteGeneralizedTime(new Asn1Tag(TagClass.ContextSpecific, 3, true), value);
                 Verify(writer, "180F32303137313131363137333530315A" + "830F32303137313131363137333530315A");
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public static void WriteAfterDispose(bool empty)
+        {
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+            {
+                if (!empty)
+                {
+                    writer.WriteNull();
+                }
+
+                writer.Dispose();
+
+                Assert.Throws<ObjectDisposedException>(
+                    () => writer.WriteGeneralizedTime(DateTimeOffset.UtcNow));
+
+                Assert.Throws<ObjectDisposedException>(
+                    () => writer.WriteGeneralizedTime(DateTimeOffset.UtcNow, true));
+
+                AssertExtensions.Throws<ArgumentException>(
+                    "tag",
+                    () => writer.WriteGeneralizedTime(Asn1Tag.Integer, DateTimeOffset.Now));
+
+                AssertExtensions.Throws<ArgumentException>(
+                    "tag",
+                    () => writer.WriteGeneralizedTime(Asn1Tag.Integer, DateTimeOffset.Now, true));
+
+                Asn1Tag tag = new Asn1Tag(TagClass.ContextSpecific, 18);
+
+                Assert.Throws<ObjectDisposedException>(
+                    () => writer.WriteGeneralizedTime(tag, DateTimeOffset.Now));
+
+                Assert.Throws<ObjectDisposedException>(
+                    () => writer.WriteGeneralizedTime(tag, DateTimeOffset.Now, true));
             }
         }
     }

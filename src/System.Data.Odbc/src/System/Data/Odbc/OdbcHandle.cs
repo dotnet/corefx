@@ -12,7 +12,7 @@ namespace System.Data.Odbc
 {
     internal abstract class OdbcHandle : SafeHandle
     {
-        private ODBC32.SQL_HANDLE _handleType;
+        private readonly ODBC32.SQL_HANDLE _handleType;
         private OdbcHandle _parentHandle;
 
         protected OdbcHandle(ODBC32.SQL_HANDLE handleType, OdbcHandle parentHandle) : base(IntPtr.Zero, true)
@@ -43,7 +43,7 @@ namespace System.Data.Odbc
                         break;
                     //              case ODBC32.SQL_HANDLE.DESC:
                     default:
-                        Debug.Assert(false, "unexpected handleType");
+                        Debug.Fail("unexpected handleType");
                         break;
                 }
             }
@@ -73,7 +73,7 @@ namespace System.Data.Odbc
 
             if ((ADP.PtrZero == base.handle) || (ODBC32.RetCode.SUCCESS != retcode))
             {
-                // 
+                //
                 throw ODBC.CantAllocateEnvironmentHandle(retcode);
             }
         }
@@ -151,7 +151,7 @@ namespace System.Data.Odbc
                     // Disconnect happens in OdbcConnectionHandle.ReleaseHandle
                     case ODBC32.SQL_HANDLE.ENV:
                     case ODBC32.SQL_HANDLE.STMT:
-                        ODBC32.RetCode retcode = Interop.Odbc.SQLFreeHandle(handleType, handle);
+                        Interop.Odbc.SQLFreeHandle(handleType, handle);
                         break;
 
                     case ODBC32.SQL_HANDLE.DESC:
@@ -197,7 +197,7 @@ namespace System.Data.Odbc
             }
             else
             {
-                sqlState = ADP.StrEmpty;
+                sqlState = string.Empty;
             }
             return retcode;
         }
@@ -215,7 +215,7 @@ namespace System.Data.Odbc
             }
             else
             {
-                sqlState = ADP.StrEmpty;
+                sqlState = string.Empty;
             }
             return retcode;
         }
@@ -249,4 +249,3 @@ namespace System.Data.Odbc
         }
     }
 }
-

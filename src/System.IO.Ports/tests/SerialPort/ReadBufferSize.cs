@@ -11,6 +11,7 @@ using Xunit;
 
 namespace System.IO.Ports.Tests
 {
+    [KnownFailure]
     public class ReadBufferSize_Property : PortsTest
     {
         private const int MAX_RANDOM_BUFFER_SIZE = 1024 * 16;
@@ -128,9 +129,9 @@ namespace System.IO.Ports.Tests
             Random rndGen = new Random(-55);
             uint newReadBufferSize = (uint)rndGen.Next(MAX_RANDOM_BUFFER_SIZE);
 
-            newReadBufferSize &= 0xFFFFFFFE; //Make sure the new buffer size is even by clearing the lowest order bit    
+            newReadBufferSize &= 0xFFFFFFFE; //Make sure the new buffer size is even by clearing the lowest order bit
 
-            //		if(!VerifyReadBufferSize((int)newReadBufferSize)){
+            //        if (!VerifyReadBufferSize((int)newReadBufferSize)){
             VerifyReadBufferSize(11620);
         }
 
@@ -359,4 +360,3 @@ namespace System.IO.Ports.Tests
         #endregion
     }
 }
-

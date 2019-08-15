@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,6 +23,11 @@ namespace System.IO.Compression
         {
             ValidateParameters(buffer, offset, count);
             WriteCore(new ReadOnlySpan<byte>(buffer, offset, count));
+        }
+
+        public override void WriteByte(byte value)
+        {
+            WriteCore(MemoryMarshal.CreateReadOnlySpan(ref value, 1));
         }
 
         public override void Write(ReadOnlySpan<byte> buffer)
@@ -75,7 +81,7 @@ namespace System.IO.Compression
                 WriteAsyncMemoryCore(buffer, cancellationToken));
         }
 
-        private async Task WriteAsyncMemoryCore(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
+        private async Task WriteAsyncMemoryCore(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken, bool isFinalBlock = false)
         {
             AsyncOperationStarting();
             try
@@ -86,7 +92,7 @@ namespace System.IO.Compression
                     Memory<byte> output = new Memory<byte>(_buffer);
                     int bytesConsumed = 0;
                     int bytesWritten = 0;
-                    lastResult = _encoder.Compress(buffer, output, out bytesConsumed, out bytesWritten, isFinalBlock: false);
+                    lastResult = _encoder.Compress(buffer, output, out bytesConsumed, out bytesWritten, isFinalBlock);
                     if (lastResult == OperationStatus.InvalidData)
                         throw new InvalidOperationException(SR.BrotliStream_Compress_InvalidData);
                     if (bytesConsumed > 0)

@@ -22,8 +22,8 @@ namespace System
     public class ArrayTypeMismatchException : SystemException
     {
         // Creates a new ArrayMismatchException with its message string set to
-        // the empty string, its HRESULT set to COR_E_ARRAYTYPEMISMATCH, 
-        // and its ExceptionInfo reference set to null. 
+        // the empty string, its HRESULT set to COR_E_ARRAYTYPEMISMATCH,
+        // and its ExceptionInfo reference set to null.
         public ArrayTypeMismatchException()
             : base(SR.Arg_ArrayTypeMismatchException)
         {
@@ -31,16 +31,16 @@ namespace System
         }
 
         // Creates a new ArrayMismatchException with its message string set to
-        // message, its HRESULT set to COR_E_ARRAYTYPEMISMATCH, 
-        // and its ExceptionInfo reference set to null. 
-        // 
-        public ArrayTypeMismatchException(String message)
+        // message, its HRESULT set to COR_E_ARRAYTYPEMISMATCH,
+        // and its ExceptionInfo reference set to null.
+        //
+        public ArrayTypeMismatchException(string? message)
             : base(message)
         {
             HResult = HResults.COR_E_ARRAYTYPEMISMATCH;
         }
 
-        public ArrayTypeMismatchException(String message, Exception innerException)
+        public ArrayTypeMismatchException(string? message, Exception? innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_ARRAYTYPEMISMATCH;

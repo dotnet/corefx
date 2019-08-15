@@ -1,9 +1,10 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using Xunit;
 
 namespace System.Diagnostics.Tests
@@ -33,7 +34,7 @@ namespace System.Diagnostics.Tests
                 using (EventLog eventLog = new EventLog())
                 {
                     eventLog.Source = source;
-                    eventLog.Clear();
+                    Helpers.RetryOnWin7(() => eventLog.Clear());
                     Assert.Equal(0, Helpers.RetryOnWin7((() => eventLog.Entries.Count)));
                     Helpers.RetryOnWin7(() => eventLog.WriteEntry("Writing to event log."));
                     Helpers.WaitForEventLog(eventLog, 1);
@@ -52,7 +53,7 @@ namespace System.Diagnostics.Tests
         {
             using (EventLog eventLog = new EventLog("Application"))
             {
-                Assert.InRange(Helpers.RetryOnWin7((() => eventLog.Entries.Count)), 1, Int32.MaxValue);
+                Assert.InRange(Helpers.RetryOnWin7((() => eventLog.Entries.Count)), 1, int.MaxValue);
             }
         }
 
@@ -124,7 +125,6 @@ namespace System.Diagnostics.Tests
             Assert.Throws<ArgumentException>(() => EventLog.GetEventLogs(""));
             EventLog[] eventLogCollection = EventLog.GetEventLogs();
             Assert.Contains(eventLogCollection, eventlog => eventlog.Log.Equals("Application"));
-            Assert.Contains(eventLogCollection, eventlog => eventlog.Log.Equals("Security"));
             Assert.Contains(eventLogCollection, eventlog => eventlog.Log.Equals("System"));
         }
 
@@ -348,6 +348,25 @@ namespace System.Diagnostics.Tests
                 eventlog.Source = "Security";
                 Assert.Contains("", eventlog.Entries.LastOrDefault()?.Message ?? "");
             }
+        }
+
+        [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndSupportsEventLogs))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void GetEventLogEntriesTest()
+        {
+            foreach (var eventLog in EventLog.GetEventLogs())
+            {
+                // Accessing eventlog properties should not throw.
+                Assert.True(Helpers.RetryOnWin7(() => eventLog.Entries.Count) >= 0);
+            }
+        }
+
+        [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void GetEventLogContainsSecurityLogTest()
+        {
+            EventLog[] eventlogs = EventLog.GetEventLogs();
+            Assert.True(eventlogs.Select(t => t.Log).Contains("Security", StringComparer.OrdinalIgnoreCase));
         }
     }
 }

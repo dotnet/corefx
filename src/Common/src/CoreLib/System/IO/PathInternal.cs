@@ -11,28 +11,20 @@ namespace System.IO
     internal static partial class PathInternal
     {
         /// <summary>
-        /// Returns true if the path ends in a directory separator.
-        /// </summary>
-        internal static bool EndsInDirectorySeparator(ReadOnlySpan<char> path)
-            => path.Length > 0 && IsDirectorySeparator(path[path.Length - 1]);
-
-        /// <summary>
         /// Returns true if the path starts in a directory separator.
         /// </summary>
         internal static bool StartsWithDirectorySeparator(ReadOnlySpan<char> path) => path.Length > 0 && IsDirectorySeparator(path[0]);
 
+#if MS_IO_REDIST
         internal static string EnsureTrailingSeparator(string path)
             => EndsInDirectorySeparator(path) ? path : path + DirectorySeparatorCharAsString;
 
-        internal static string TrimEndingDirectorySeparator(string path) =>
-            EndsInDirectorySeparator(path) && !IsRoot(path) ?
-                path.Substring(0, path.Length - 1) :
-                path;
-
-        internal static ReadOnlySpan<char> TrimEndingDirectorySeparator(ReadOnlySpan<char> path) =>
-            EndsInDirectorySeparator(path) && !IsRoot(path) ?
-                path.Slice(0, path.Length - 1) :
-                path;
+        internal static bool EndsInDirectorySeparator(string path)
+            => !string.IsNullOrEmpty(path) && IsDirectorySeparator(path[path.Length - 1]);
+#else
+        internal static string EnsureTrailingSeparator(string path)
+            => Path.EndsInDirectorySeparator(path.AsSpan()) ? path : path + DirectorySeparatorCharAsString;
+#endif
 
         internal static bool IsRoot(ReadOnlySpan<char> path)
             => path.Length == GetRootLength(path);
@@ -97,8 +89,8 @@ namespace System.IO
         /// </summary>
         internal static bool AreRootsEqual(string first, string second, StringComparison comparisonType)
         {
-            int firstRootLength = GetRootLength(first);
-            int secondRootLength = GetRootLength(second);
+            int firstRootLength = GetRootLength(first.AsSpan());
+            int secondRootLength = GetRootLength(second.AsSpan());
 
             return firstRootLength == secondRootLength
                 && string.Compare(
@@ -113,8 +105,30 @@ namespace System.IO
         /// <summary>
         /// Try to remove relative segments from the given path (without combining with a root).
         /// </summary>
+        /// <param name="path">Input path</param>
         /// <param name="rootLength">The length of the root of the given path</param>
         internal static string RemoveRelativeSegments(string path, int rootLength)
+        {
+            Span<char> initialBuffer = stackalloc char[260 /* PathInternal.MaxShortPath */];
+            ValueStringBuilder sb = new ValueStringBuilder(initialBuffer);
+
+            if (RemoveRelativeSegments(path.AsSpan(), rootLength, ref sb))
+            {
+                path = sb.ToString();
+            }
+
+            sb.Dispose();
+            return path;
+        }
+
+        /// <summary>
+        /// Try to remove relative segments from the given path (without combining with a root).
+        /// </summary>
+        /// <param name="path">Input path</param>
+        /// <param name="rootLength">The length of the root of the given path</param>
+        /// <param name="sb">String builder that will store the result</param>
+        /// <returns>"true" if the path was modified</returns>
+        internal static bool RemoveRelativeSegments(ReadOnlySpan<char> path, int rootLength, ref ValueStringBuilder sb)
         {
             Debug.Assert(rootLength > 0);
             bool flippedSeparator = false;
@@ -126,15 +140,12 @@ namespace System.IO
             if (PathInternal.IsDirectorySeparator(path[skip - 1]))
                 skip--;
 
-            Span<char> initialBuffer = stackalloc char[260 /* PathInternal.MaxShortPath */];
-            ValueStringBuilder sb = new ValueStringBuilder(initialBuffer);
-
-            // Remove "//", "/./", and "/../" from the path by copying each character to the output, 
-            // except the ones we're removing, such that the builder contains the normalized path 
+            // Remove "//", "/./", and "/../" from the path by copying each character to the output,
+            // except the ones we're removing, such that the builder contains the normalized path
             // at the end.
             if (skip > 0)
             {
-                sb.Append(path.AsSpan(0, skip));
+                sb.Append(path.Slice(0, skip));
             }
 
             for (int i = skip; i < path.Length; i++)
@@ -182,7 +193,7 @@ namespace System.IO
 
                         i += 2;
                         continue;
-                    }
+                   }
                 }
 
                 // Normalize the directory separator if needed
@@ -198,11 +209,16 @@ namespace System.IO
             // If we haven't changed the source path, return the original
             if (!flippedSeparator && sb.Length == path.Length)
             {
-                sb.Dispose();
-                return path;
+                return false;
             }
 
-            return sb.Length < rootLength ? path.Substring(0, rootLength) : sb.ToString();
+            // We may have eaten the trailing separator from the root when we started and not replaced it
+            if (skip != rootLength && sb.Length < rootLength)
+            {
+                sb.Append(path[rootLength - 1]);
+            }
+
+            return true;
         }
     }
 }

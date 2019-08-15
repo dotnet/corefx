@@ -17,12 +17,26 @@ namespace System.IO.Tests
         [InlineData(@"C:\", @"C:\b", @"b")]
         [InlineData(@"C:\a", @"C:\b", @"..\b")]
         [InlineData(@"C:\a", @"C:\b\", @"..\b\")]
+        [InlineData(@"C:\a\b", @"C:\a", @"..")]
+        [InlineData(@"C:\a\b", @"C:\a\", @"..")]
+        [InlineData(@"C:\a\b\", @"C:\a", @"..")]
+        [InlineData(@"C:\a\b\", @"C:\a\", @"..")]
+        [InlineData(@"C:\a\b\c", @"C:\a\b", @"..")]
+        [InlineData(@"C:\a\b\c", @"C:\a\b\", @"..")]
+        [InlineData(@"C:\a\b\c", @"C:\a", @"..\..")]
+        [InlineData(@"C:\a\b\c", @"C:\a\", @"..\..")]
+        [InlineData(@"C:\a\b\c\", @"C:\a\b", @"..")]
+        [InlineData(@"C:\a\b\c\", @"C:\a\b\", @"..")]
+        [InlineData(@"C:\a\b\c\", @"C:\a", @"..\..")]
+        [InlineData(@"C:\a\b\c\", @"C:\a\", @"..\..")]
         [InlineData(@"C:\a\", @"C:\b", @"..\b")]
         [InlineData(@"C:\a", @"C:\a\b", @"b")]
         [InlineData(@"C:\a", @"C:\A\b", @"b")]
         [InlineData(@"C:\a", @"C:\b\c", @"..\b\c")]
         [InlineData(@"C:\a\", @"C:\a\b", @"b")]
+        [InlineData(@"C:\", @"D:\", @"D:\")]
         [InlineData(@"C:\", @"D:\b", @"D:\b")]
+        [InlineData(@"C:\", @"D:\b\", @"D:\b\")]
         [InlineData(@"C:\a", @"D:\b", @"D:\b")]
         [InlineData(@"C:\a\", @"D:\b", @"D:\b")]
         [InlineData(@"C:\ab", @"C:\a", @"..\a")]
@@ -133,6 +147,13 @@ namespace System.IO.Tests
                 ignoreCase: true,
                 ignoreLineEndingDifferences: false,
                 ignoreWhiteSpaceDifferences: false);
+        }
+
+        [Fact]
+        public static void GetRelativePath_InvalidArgs()
+        {
+            AssertExtensions.Throws<ArgumentNullException>("relativeTo", null, () => Path.GetRelativePath(null, "."));
+            AssertExtensions.Throws<ArgumentException>("relativeTo", null, () => Path.GetRelativePath(string.Empty, "."));
         }
     }
 }

@@ -13,7 +13,7 @@ using System.Reflection;
 
 namespace System.Data.Common
 {
-    internal static class DbConnectionStringBuilderUtil
+    internal static partial class DbConnectionStringBuilderUtil
     {
         internal static bool ConvertToBoolean(object value)
         {
@@ -33,7 +33,7 @@ namespace System.Data.Common
                     else if (StringComparer.OrdinalIgnoreCase.Equals(tmp, "false") || StringComparer.OrdinalIgnoreCase.Equals(tmp, "no"))
                         return false;
                 }
-                return Boolean.Parse(svalue);
+                return bool.Parse(svalue);
             }
             try
             {
@@ -41,7 +41,7 @@ namespace System.Data.Common
             }
             catch (InvalidCastException e)
             {
-                throw ADP.ConvertFailed(value.GetType(), typeof(Boolean), e);
+                throw ADP.ConvertFailed(value.GetType(), typeof(bool), e);
             }
         }
 
@@ -63,7 +63,7 @@ namespace System.Data.Common
                     else if (StringComparer.OrdinalIgnoreCase.Equals(tmp, "false") || StringComparer.OrdinalIgnoreCase.Equals(tmp, "no"))
                         return false;
                 }
-                return Boolean.Parse(svalue);
+                return bool.Parse(svalue);
             }
             try
             {
@@ -71,7 +71,7 @@ namespace System.Data.Common
             }
             catch (InvalidCastException e)
             {
-                throw ADP.ConvertFailed(value.GetType(), typeof(Boolean), e);
+                throw ADP.ConvertFailed(value.GetType(), typeof(bool), e);
             }
         }
 
@@ -83,7 +83,7 @@ namespace System.Data.Common
             }
             catch (InvalidCastException e)
             {
-                throw ADP.ConvertFailed(value.GetType(), typeof(Int32), e);
+                throw ADP.ConvertFailed(value.GetType(), typeof(int), e);
             }
         }
 
@@ -95,7 +95,7 @@ namespace System.Data.Common
             }
             catch (InvalidCastException e)
             {
-                throw ADP.ConvertFailed(value.GetType(), typeof(String), e);
+                throw ADP.ConvertFailed(value.GetType(), typeof(string), e);
             }
         }
 
@@ -149,7 +149,7 @@ namespace System.Data.Common
         /// * if the value is from type ApplicationIntent, it will be used as is
         /// * if the value is from integral type (SByte, Int16, Int32, Int64, Byte, UInt16, UInt32, or UInt64), it will be converted to enum
         /// * if the value is another enum or any other type, it will be blocked with an appropriate ArgumentException
-        /// 
+        ///
         /// in any case above, if the converted value is out of valid range, the method raises ArgumentOutOfRangeException.
         /// </summary>
         /// <returns>application intent value in the valid range</returns>
@@ -205,7 +205,7 @@ namespace System.Data.Common
                     }
                     catch (ArgumentException e)
                     {
-                        // to be consistent with the messages we send in case of wrong type usage, replace 
+                        // to be consistent with the messages we send in case of wrong type usage, replace
                         // the error with our exception, and keep the original one as inner one for troubleshooting
                         throw ADP.ConvertFailed(value.GetType(), typeof(ApplicationIntent), e);
                     }
@@ -306,6 +306,9 @@ namespace System.Data.Common
         internal const string MaxPoolSize = "Max Pool Size";
         internal const string Pooling = "Pooling";
         internal const string MinPoolSize = "Min Pool Size";
+#if netcoreapp
+        internal const string PoolBlockingPeriod = "PoolBlockingPeriod";
+#endif
     }
 
     internal static class DbConnectionStringSynonyms

@@ -1,13 +1,12 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{C3C70597-F192-430D-9BA6-287B1A974BF7}</ProjectGuid>
+    <!-- this assembly is inbox in desktop, do not version it unless you
+         plan on shipping a new desktop version out of band. Instead add API
+         to a different assembly. -->
+    <AssemblyVersion>4.0.0.0</AssemblyVersion>
+    <Configurations>netstandard-Debug;netstandard-Release;netstandard1.1-Debug;netstandard1.1-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard1.1-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard1.1-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System.Reflection.Context.cs" />
   </ItemGroup>
@@ -15,5 +14,4 @@
     <Reference Include="System.Runtime" />
     <Reference Include="System.Reflection" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

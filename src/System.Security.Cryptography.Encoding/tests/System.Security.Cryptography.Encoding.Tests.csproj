@@ -1,15 +1,14 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{0581E9FA-D639-4B88-96D8-D092760F90B0}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
+  <Import Project="$(CommonPath)\System\Security\Cryptography\Asn1Reader\System.Security.Cryptography.Asn1Reader.Shared.projitems" />
   <ItemGroup>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\CryptoPool.cs">
+      <Link>Common\System\Security\Cryptography\CryptoPool.cs</Link>
+    </Compile>
     <Compile Include="Asn1\Reader\Asn1ReaderTests.cs" />
     <Compile Include="Asn1\Reader\ComprehensiveReadTests.cs" />
     <Compile Include="Asn1\Reader\ParseTag.cs" />
@@ -28,12 +27,10 @@
     <Compile Include="Asn1\Reader\ReadOctetString.cs" />
     <Compile Include="Asn1\Reader\ReadSequence.cs" />
     <Compile Include="Asn1\Reader\ReadSetOf.cs" />
+    <Compile Include="Asn1\Reader\ReadT61String.cs" />
     <Compile Include="Asn1\Reader\ReadUtcTime.cs" />
     <Compile Include="Asn1\Reader\ReadUTF8String.cs" />
     <Compile Include="Asn1\Reader\ReaderStateTests.cs" />
-    <Compile Include="Asn1\Serializer\SimpleDeserialize.cs" />
-    <Compile Include="Asn1\Serializer\SimpleSerialize.cs" />
-    <Compile Include="Asn1\Serializer\X509DeserializeTests.cs" />
     <Compile Include="Asn1\Writer\Asn1WriterTests.cs" />
     <Compile Include="Asn1\Writer\ComprehensiveWriteTest.cs" />
     <Compile Include="Asn1\Writer\PushPopSequence.cs" />
@@ -55,31 +52,13 @@
     <Compile Include="AsnEncodedData.cs" />
     <Compile Include="AsnEncodedDataCollectionTests.cs" />
     <Compile Include="Base64TransformsTests.cs" />
-    <Compile Include="DerEncoderTests.cs" />
-    <Compile Include="DerSequenceReaderTests.cs" />
     <Compile Include="Oid.cs" />
     <Compile Include="OidCollectionTests.cs" />
-    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1V2.cs">
-      <Link>Common\System\Security\Cryptography\Asn1V2.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1V2.Serializer.cs">
-      <Link>Common\System\Security\Cryptography\Asn1V2.Serializer.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Security\Cryptography\AsnReader.cs">
-      <Link>Common\System\Security\Cryptography\AsnReader.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Security\Cryptography\AsnWriter.cs">
-      <Link>Common\System\Security\Cryptography\AsnWriter.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Security\Cryptography\DerEncoder.cs">
-      <Link>Common\System\Security\Cryptography\DerEncoder.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Security\Cryptography\DerSequenceReader.cs">
-      <Link>Common\System\Security\Cryptography\DerSequenceReader.cs</Link>
-    </Compile>
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\ByteUtils.cs">
       <Link>CommonTest\System\Security\Cryptography\ByteUtils.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Memory\PointerMemoryManager.cs">
+      <Link>Common\System\Memory\PointerMemoryManager.cs</Link>
+    </Compile>
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

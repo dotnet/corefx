@@ -4,6 +4,7 @@
 
 using System.Collections;
 using System.Security.Authentication.ExtendedProtection;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace System.Net
@@ -13,12 +14,12 @@ namespace System.Net
         public delegate ExtendedProtectionPolicy ExtendedProtectionSelector(HttpListenerRequest request);
 
         private readonly object _internalLock;
-        private volatile State _state; // _state is set only within lock blocks, but often read outside locks. 
+        private volatile State _state; // _state is set only within lock blocks, but often read outside locks.
         private readonly HttpListenerPrefixCollection _prefixes;
         internal Hashtable _uriPrefixes = new Hashtable();
         private bool _ignoreWriteExceptions;
-        private ServiceNameStore _defaultServiceNames;
-        private HttpListenerTimeoutManager _timeoutManager;
+        private readonly ServiceNameStore _defaultServiceNames;
+        private readonly HttpListenerTimeoutManager _timeoutManager;
         private ExtendedProtectionPolicy _extendedProtectionPolicy;
         private AuthenticationSchemeSelector _authenticationDelegate;
         private AuthenticationSchemes _authenticationScheme = AuthenticationSchemes.Anonymous;
@@ -38,7 +39,7 @@ namespace System.Net
             _timeoutManager = new HttpListenerTimeoutManager(this);
             _prefixes = new HttpListenerPrefixCollection(this);
 
-            // default: no CBT checks on any platform (appcompat reasons); applies also to PolicyEnforcement 
+            // default: no CBT checks on any platform (appcompat reasons); applies also to PolicyEnforcement
             // config element
             _extendedProtectionPolicy = new ExtendedProtectionPolicy(PolicyEnforcement.Never);
 
@@ -163,16 +164,22 @@ namespace System.Net
                 {
                     throw new ArgumentException(SR.net_listener_slash, nameof(uriPrefix));
                 }
-                registeredPrefix = uriPrefix[j] == ':' ? String.Copy(uriPrefix) : uriPrefix.Substring(0, j) + (i == 7 ? ":80" : ":443") + uriPrefix.Substring(j);
-                fixed (char* pChar = registeredPrefix)
+                StringBuilder registeredPrefixBuilder = new StringBuilder();
+                if (uriPrefix[j] == ':')
                 {
-                    i = 0;
-                    while (pChar[i] != ':')
-                    {
-                        pChar[i] = (char)CaseInsensitiveAscii.AsciiToLower[(byte)pChar[i]];
-                        i++;
-                    }
+                    registeredPrefixBuilder.Append(uriPrefix);
                 }
+                else
+                {
+                    registeredPrefixBuilder.Append(uriPrefix, 0, j);
+                    registeredPrefixBuilder.Append(i == 7 ? ":80" : ":443");
+                    registeredPrefixBuilder.Append(uriPrefix, j, uriPrefix.Length - j);
+                }
+                for (i = 0; registeredPrefixBuilder[i] != ':'; i++)
+                {
+                    registeredPrefixBuilder[i] = (char)CaseInsensitiveAscii.AsciiToLower[(byte)registeredPrefixBuilder[i]];
+                }
+                registeredPrefix = registeredPrefixBuilder.ToString();
                 if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"mapped uriPrefix: {uriPrefix} to registeredPrefix: {registeredPrefix}");
                 if (_state == State.Started)
                 {
@@ -191,7 +198,7 @@ namespace System.Net
                 if (NetEventSource.IsEnabled) NetEventSource.Exit(this, $"prefix: {registeredPrefix}");
             }
         }
-        
+
         internal bool ContainsPrefix(string uriPrefix) => _uriPrefixes.Contains(uriPrefix);
 
         internal bool RemovePrefix(string uriPrefix)

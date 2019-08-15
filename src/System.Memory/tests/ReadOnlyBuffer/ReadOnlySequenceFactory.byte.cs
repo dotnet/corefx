@@ -124,14 +124,14 @@ namespace System.Memory.Tests
 
             BufferSegment<T> last = null;
             BufferSegment<T> first = null;
-            foreach(ReadOnlyMemory<T> input in inputs)
+            foreach (ReadOnlyMemory<T> input in inputs)
             {
                 int length = input.Length;
                 int dataOffset = length / 2;
-                
+
                 Memory<T> memory = new Memory<T>(new T[length * 2], dataOffset, length);
                 input.CopyTo(memory);
-                
+
                 if (first == null)
                 {
                     first = new BufferSegment<T>(memory);

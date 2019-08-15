@@ -145,9 +145,9 @@ internal static partial class Interop
 
         /// <summary>
         /// A less error-prone wrapper for CertEnumCertificatesInStore().
-        /// 
+        ///
         /// To begin the enumeration, set pCertContext to null. Each iteration replaces pCertContext with
-        /// the next certificate in the iteration. The final call sets pCertContext to an invalid SafeCertStoreHandle 
+        /// the next certificate in the iteration. The final call sets pCertContext to an invalid SafeCertStoreHandle
         /// and returns "false" to indicate the end of the store has been reached.
         /// </summary>
         public static bool CertEnumCertificatesInStore(SafeCertStoreHandle hCertStore, ref SafeCertContextHandle pCertContext)
@@ -178,19 +178,8 @@ internal static partial class Interop
         [DllImport(Libraries.Crypt32, CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern bool PFXExportCertStore(SafeCertStoreHandle hStore, [In, Out] ref CRYPTOAPI_BLOB pPFX, SafePasswordHandle szPassword, PFXExportFlags dwFlags);
 
-        [DllImport(Libraries.Crypt32, CharSet = CharSet.Unicode, SetLastError = true, EntryPoint = "CertNameToStrW")]
-        public static extern unsafe int CertNameToStr(CertEncodingType dwCertEncodingType, [In] ref CRYPTOAPI_BLOB pName, CertNameStrTypeAndFlags dwStrType, char* psz, int csz);
-
         [DllImport(Libraries.Crypt32, CharSet = CharSet.Unicode, SetLastError = true, EntryPoint = "CertStrToNameW")]
         public static extern bool CertStrToName(CertEncodingType dwCertEncodingType, string pszX500, CertNameStrTypeAndFlags dwStrType, IntPtr pvReserved, [Out] byte[] pbEncoded, [In, Out] ref int pcbEncoded, IntPtr ppszError);
-
-        public static unsafe bool CryptFormatObject(CertEncodingType dwCertEncodingType, FormatObjectType dwFormatType, FormatObjectStringType dwFormatStrType, IntPtr pFormatStruct, FormatObjectStructType lpszStructType, byte[] pbEncoded, int cbEncoded, byte* pbFormat, ref int pcbFormat)
-        {
-            return CryptFormatObject(dwCertEncodingType, dwFormatType, dwFormatStrType, pFormatStruct, (IntPtr)lpszStructType, pbEncoded, cbEncoded, pbFormat, ref pcbFormat);
-        }
-
-        [DllImport(Libraries.Crypt32, CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern unsafe bool CryptFormatObject(CertEncodingType dwCertEncodingType, FormatObjectType dwFormatType, FormatObjectStringType dwFormatStrType, IntPtr pFormatStruct, IntPtr lpszStructType, [In] byte[] pbEncoded, int cbEncoded, byte* pbFormat, [In, Out] ref int pcbFormat);
 
         public static bool CryptDecodeObject(CertEncodingType dwCertEncodingType, CryptDecodeObjectStructType lpszStructType, byte[] pbEncoded, int cbEncoded, CryptDecodeObjectFlags dwFlags, byte[] pvStructInfo, ref int pcbStructInfo)
         {
@@ -264,9 +253,9 @@ internal static partial class Interop
 
         /// <summary>
         /// A less error-prone wrapper for CertEnumCertificatesInStore().
-        /// 
+        ///
         /// To begin the enumeration, set pCertContext to null. Each iteration replaces pCertContext with
-        /// the next certificate in the iteration. The final call sets pCertContext to an invalid SafeCertStoreHandle 
+        /// the next certificate in the iteration. The final call sets pCertContext to an invalid SafeCertStoreHandle
         /// and returns "false" to indicate the end of the store has been reached.
         /// </summary>
         public static unsafe bool CertFindCertificateInStore(SafeCertStoreHandle hCertStore, CertFindType dwFindType, void* pvFindPara, ref SafeCertContextHandle pCertContext)
@@ -312,20 +301,9 @@ internal static partial class Interop
         private static extern bool CertVerifyCertificateChainPolicy(IntPtr pszPolicyOID, SafeX509ChainHandle pChainContext, [In] ref CERT_CHAIN_POLICY_PARA pPolicyPara, [In, Out] ref CERT_CHAIN_POLICY_STATUS pPolicyStatus);
 
         [DllImport(Libraries.Crypt32, CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern bool CertFreeCertificateContext(IntPtr pCertContext);
-
-        [DllImport(Libraries.Crypt32, CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern bool CertCloseStore(IntPtr hCertStore, int dwFlags);
-
-        [DllImport(Libraries.Crypt32, CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern bool CryptMsgClose(IntPtr hCryptMsg);
-        
-        [DllImport(Libraries.Crypt32, CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern unsafe bool CryptImportPublicKeyInfoEx2(CertEncodingType dwCertEncodingType, CERT_PUBLIC_KEY_INFO* pInfo, int dwFlags, void* pvAuxInfo, out SafeBCryptKeyHandle phKey);
 
         [DllImport(Libraries.Crypt32, CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern bool CryptAcquireCertificatePrivateKey(SafeCertContextHandle pCert, CryptAcquireFlags dwFlags, IntPtr pvParameters, out SafeNCryptKeyHandle phCryptProvOrNCryptKey, out int pdwKeySpec, out bool pfCallerFreeProvOrNCryptKey);
     }
 }
-
-

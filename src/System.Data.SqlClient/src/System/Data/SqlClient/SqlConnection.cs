@@ -34,9 +34,10 @@ namespace System.Data.SqlClient
         private SqlCredential _credential;
         private string _connectionString;
         private int _connectRetryCount;
+        private string _accessToken; // Access Token to be used for token based authententication
 
         // connection resiliency
-        private object _reconnectLock = new object();
+        private readonly object _reconnectLock = new object();
         internal Task _currentReconnectionTask;
         private Task _asyncWaitingForReconnection; // current async task waiting for reconnection in non-MARS connections
         private Guid _originalConnectionId = Guid.Empty;
@@ -50,7 +51,7 @@ namespace System.Data.SqlClient
 
         // Transient Fault handling flag. This is needed to convey to the downstream mechanism of connection establishment, if Transient Fault handling should be used or not
         // The downstream handling of Connection open is the same for idle connection resiliency. Currently we want to apply transient fault handling only to the connections opened
-        // using SqlConnection.Open() method. 
+        // using SqlConnection.Open() method.
         internal bool _applyTransientFaultHandling = false;
 
         public SqlConnection(string connectionString) : this()
@@ -97,10 +98,11 @@ namespace System.Data.SqlClient
                 _credential = new SqlCredential(connection._credential.UserId, password);
             }
 
+            _accessToken = connection._accessToken;
             CacheConnectionStringProperties();
         }
 
-        // This method will be called once connection string is set or changed. 
+        // This method will be called once connection string is set or changed.
         private void CacheConnectionStringProperties()
         {
             SqlConnectionString connString = ConnectionOptions as SqlConnectionString;
@@ -222,12 +224,19 @@ namespace System.Data.SqlClient
             }
             set
             {
-                if (_credential != null)
+                if (_credential != null || _accessToken != null)
                 {
                     SqlConnectionString connectionOptions = new SqlConnectionString(value);
-                    CheckAndThrowOnInvalidCombinationOfConnectionStringAndSqlCredential(connectionOptions);
+                    if (_credential != null)
+                    {
+                        CheckAndThrowOnInvalidCombinationOfConnectionStringAndSqlCredential(connectionOptions);
+                    }
+                    else
+                    {
+                        CheckAndThrowOnInvalidCombinationOfConnectionOptionAndAccessToken(connectionOptions);
+                    }
                 }
-                ConnectionString_Set(new SqlConnectionPoolKey(value, _credential));
+                ConnectionString_Set(new SqlConnectionPoolKey(value, _credential, _accessToken));
                 _connectionString = value;  // Change _connectionString value only after value is validated
                 CacheConnectionStringProperties();
             }
@@ -239,6 +248,36 @@ namespace System.Data.SqlClient
             {
                 SqlConnectionString constr = (SqlConnectionString)ConnectionOptions;
                 return ((null != constr) ? constr.ConnectTimeout : SqlConnectionString.DEFAULT.Connect_Timeout);
+            }
+        }
+
+        // AccessToken: To be used for token based authentication
+        public string AccessToken
+        {
+            get
+            {
+                // When a connection is connecting or is ever opened, make AccessToken available only if "Persist Security Info" is set to true
+                // otherwise, return null
+                SqlConnectionString connectionOptions = (SqlConnectionString)UserConnectionOptions;
+                return InnerConnection.ShouldHidePassword && connectionOptions != null && !connectionOptions.PersistSecurityInfo ? null : _accessToken;
+            }
+            set
+            {
+                // If a connection is connecting or is ever opened, AccessToken cannot be set
+                if (!InnerConnection.AllowSetConnectionString)
+                {
+                    throw ADP.OpenConnectionPropertySet("AccessToken", InnerConnection.State);
+                }
+
+                if (value != null)
+                {
+                    // Check if the usage of AccessToken has any conflict with the keys used in connection string and credential
+                    CheckAndThrowOnInvalidCombinationOfConnectionOptionAndAccessToken((SqlConnectionString)ConnectionOptions);
+                }
+
+                // Need to call ConnectionString_Set to do proper pool group check
+                ConnectionString_Set(new SqlConnectionPoolKey(_connectionString, credential: _credential, accessToken: value));
+                _accessToken = value;
             }
         }
 
@@ -396,12 +435,16 @@ namespace System.Data.SqlClient
                 if (value != null)
                 {
                     CheckAndThrowOnInvalidCombinationOfConnectionStringAndSqlCredential((SqlConnectionString)ConnectionOptions);
+                    if (_accessToken != null)
+                    {
+                        throw ADP.InvalidMixedUsageOfCredentialAndAccessToken();
+                    }
                 }
 
                 _credential = value;
 
                 // Need to call ConnectionString_Set to do proper pool group check
-                ConnectionString_Set(new SqlConnectionPoolKey(_connectionString, _credential));
+                ConnectionString_Set(new SqlConnectionPoolKey(_connectionString, _credential, accessToken: _accessToken));
             }
         }
 
@@ -419,6 +462,29 @@ namespace System.Data.SqlClient
             if (UsesIntegratedSecurity(connectionOptions))
             {
                 throw ADP.InvalidMixedUsageOfSecureCredentialAndIntegratedSecurity();
+            }
+        }
+
+        // CheckAndThrowOnInvalidCombinationOfConnectionOptionAndAccessToken: check if the usage of AccessToken has any conflict
+        //  with the keys used in connection string and credential
+        //  If there is any conflict, it throws InvalidOperationException
+        //  This is to be used setter of ConnectionString and AccessToken properties
+        private void CheckAndThrowOnInvalidCombinationOfConnectionOptionAndAccessToken(SqlConnectionString connectionOptions)
+        {
+            if (UsesClearUserIdOrPassword(connectionOptions))
+            {
+                throw ADP.InvalidMixedUsageOfAccessTokenAndUserIDPassword();
+            }
+
+            if (UsesIntegratedSecurity(connectionOptions))
+            {
+                throw ADP.InvalidMixedUsageOfAccessTokenAndIntegratedSecurity();
+            }
+
+            // Check if the usage of AccessToken has the conflict with credential
+            if (_credential != null)
+            {
+                throw ADP.InvalidMixedUsageOfCredentialAndAccessToken();
             }
         }
 
@@ -461,13 +527,13 @@ namespace System.Data.SqlClient
         // PUBLIC METHODS
         //
 
-        new public SqlTransaction BeginTransaction()
+        public new SqlTransaction BeginTransaction()
         {
             // this is just a delegate. The actual method tracks executiontime
             return BeginTransaction(IsolationLevel.Unspecified, null);
         }
 
-        new public SqlTransaction BeginTransaction(IsolationLevel iso)
+        public new SqlTransaction BeginTransaction(IsolationLevel iso)
         {
             // this is just a delegate. The actual method tracks executiontime
             return BeginTransaction(iso, null);
@@ -483,11 +549,11 @@ namespace System.Data.SqlClient
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2004:RemoveCallsToGCKeepAlive")]
-        override protected DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
+        protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
         {
             DbTransaction transaction = BeginTransaction(isolationLevel);
 
-            //   InnerConnection doesn't maintain a ref on the outer connection (this) and 
+            //   InnerConnection doesn't maintain a ref on the outer connection (this) and
             //   subsequently leaves open the possibility that the outer connection could be GC'ed before the SqlTransaction
             //   is fully hooked up (leaving a DbTransaction with a null connection property). Ensure that this is reachable
             //   until the completion of BeginTransaction with KeepAlive
@@ -564,7 +630,7 @@ namespace System.Data.SqlClient
         {
             // CloseConnection() now handles the lock
 
-            // The SqlInternalConnectionTds is set to OpenBusy during close, once this happens the cast below will fail and 
+            // The SqlInternalConnectionTds is set to OpenBusy during close, once this happens the cast below will fail and
             // the command will no longer be cancelable.  It might be desirable to be able to cancel the close operation, but this is
             // outside of the scope of Whidbey RTM.  See (SqlCommand::Cancel) for other lock.
             InnerConnection.CloseConnection(this, ConnectionFactory);
@@ -576,15 +642,15 @@ namespace System.Data.SqlClient
             Guid operationId = default(Guid);
             Guid clientConnectionId = default(Guid);
 
-            // during the call to Dispose() there is a redundant call to 
-            // Close(). because of this, the second time Close() is invoked the 
-            // connection is already in a closed state. this doesn't seem to be a 
+            // during the call to Dispose() there is a redundant call to
+            // Close(). because of this, the second time Close() is invoked the
+            // connection is already in a closed state. this doesn't seem to be a
             // problem except for logging, as we'll get duplicate Before/After/Error
             // log entries
             if (previousState != ConnectionState.Closed)
-            { 
+            {
                 operationId = s_diagnosticListener.WriteConnectionCloseBefore(this);
-                // we want to cache the ClientConnectionId for After/Error logging, as when the connection 
+                // we want to cache the ClientConnectionId for After/Error logging, as when the connection
                 // is closed then we will lose this identifier
                 //
                 // note: caching this is only for diagnostics logging purposes
@@ -608,7 +674,7 @@ namespace System.Data.SqlClient
                     }
                     AsyncHelper.WaitForCompletion(reconnectTask, 0, null, rethrowExceptions: false); // we do not need to deal with possible exceptions in reconnection
                     if (State != ConnectionState.Open)
-                    {// if we cancelled before the connection was opened 
+                    {// if we cancelled before the connection was opened
                         OnStateChange(DbConnectionInternal.StateChangeClosed);
                     }
                 }
@@ -630,10 +696,10 @@ namespace System.Data.SqlClient
             {
                 SqlStatistics.StopTimer(statistics);
 
-                // we only want to log this if the previous state of the 
+                // we only want to log this if the previous state of the
                 // connection is open, as that's the valid use-case
                 if (previousState != ConnectionState.Closed)
-                { 
+                {
                     if (e != null)
                     {
                         s_diagnosticListener.WriteConnectionCloseError(operationId, clientConnectionId, this, e);
@@ -646,7 +712,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        new public SqlCommand CreateCommand()
+        public new SqlCommand CreateCommand()
         {
             return new SqlCommand(null, this);
         }
@@ -654,10 +720,11 @@ namespace System.Data.SqlClient
         private void DisposeMe(bool disposing)
         {
             _credential = null;
+            _accessToken = null;
 
             if (!disposing)
             {
-                // For non-pooled connections we need to make sure that if the SqlConnection was not closed, 
+                // For non-pooled connections we need to make sure that if the SqlConnection was not closed,
                 // then we release the GCHandle on the stateObject to allow it to be GCed
                 // For pooled connections, we will rely on the pool reclaiming the connection
                 var innerConnection = (InnerConnection as SqlInternalConnectionTds);
@@ -705,7 +772,7 @@ namespace System.Data.SqlClient
                     s_diagnosticListener.WriteConnectionOpenError(operationId, this, e);
                 }
                 else
-                { 
+                {
                     s_diagnosticListener.WriteConnectionOpenAfter(operationId, this);
                 }
             }
@@ -719,7 +786,7 @@ namespace System.Data.SqlClient
             }
             Interlocked.CompareExchange(ref _asyncWaitingForReconnection, waitingTask, null);
             if (_asyncWaitingForReconnection != waitingTask)
-            { // somebody else managed to register 
+            { // somebody else managed to register
                 throw SQL.MARSUnspportedOnConnection();
             }
         }
@@ -780,7 +847,7 @@ namespace System.Data.SqlClient
                 _recoverySessionData = null;
                 _suppressStateChangeForReconnection = false;
             }
-            Debug.Assert(false, "Should not reach this point");
+            Debug.Fail("Should not reach this point");
         }
 
         internal Task ValidateAndReconnect(Action beforeDisconnect, int timeout)
@@ -808,7 +875,7 @@ namespace System.Data.SqlClient
                             {
                                 if (tdsConn.Parser._sessionPool.ActiveSessionsCount > 0)
                                 {
-                                    // >1 MARS session 
+                                    // >1 MARS session
                                     if (beforeDisconnect != null)
                                     {
                                         beforeDisconnect();
@@ -843,7 +910,8 @@ namespace System.Data.SqlClient
                                             catch (SqlException)
                                             {
                                             }
-                                            runningReconnect = Task.Run(() => ReconnectAsync(timeout));
+                                            // use Task.Factory.StartNew with state overload instead of Task.Run to avoid anonymous closure context capture in method scope and avoid the unneeded allocation
+                                            runningReconnect = Task.Factory.StartNew(state => ReconnectAsync((int)state), timeout, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
                                             // if current reconnect is not null, somebody already started reconnection task - some kind of race condition
                                             Debug.Assert(_currentReconnectionTask == null, "Duplicate reconnection tasks detected");
                                             _currentReconnectionTask = runningReconnect;
@@ -868,7 +936,7 @@ namespace System.Data.SqlClient
                                 OnError(SQL.CR_UnrecoverableServer(ClientConnectionId), true, null);
                             }
                         } // ValidateSNIConnection
-                    } // sessionRecoverySupported                  
+                    } // sessionRecoverySupported
                 } // connectRetryCount>0
             }
             else
@@ -923,7 +991,7 @@ namespace System.Data.SqlClient
             Guid operationId = s_diagnosticListener.WriteConnectionOpenBefore(this);
 
             PrepareStatisticsForNewConnection();
-            
+
             SqlStatistics statistics = null;
             try
             {
@@ -935,7 +1003,7 @@ namespace System.Data.SqlClient
 
                 if (s_diagnosticListener.IsEnabled(SqlClientDiagnosticListenerExtensions.SqlAfterOpenConnection) ||
                     s_diagnosticListener.IsEnabled(SqlClientDiagnosticListenerExtensions.SqlErrorOpenConnection))
-                { 
+                {
                     result.Task.ContinueWith((t) =>
                     {
                         if (t.Exception != null)
@@ -943,7 +1011,7 @@ namespace System.Data.SqlClient
                             s_diagnosticListener.WriteConnectionOpenError(operationId, this, t.Exception);
                         }
                         else
-                        { 
+                        {
                             s_diagnosticListener.WriteConnectionOpenAfter(operationId, this);
                         }
                     }, TaskScheduler.Default);
@@ -1016,10 +1084,10 @@ namespace System.Data.SqlClient
 
         private class OpenAsyncRetry
         {
-            private SqlConnection _parent;
-            private TaskCompletionSource<DbConnectionInternal> _retry;
-            private TaskCompletionSource<object> _result;
-            private CancellationTokenRegistration _registration;
+            private readonly SqlConnection _parent;
+            private readonly TaskCompletionSource<DbConnectionInternal> _retry;
+            private readonly TaskCompletionSource<object> _result;
+            private readonly CancellationTokenRegistration _registration;
 
             public OpenAsyncRetry(SqlConnection parent, TaskCompletionSource<DbConnectionInternal> retry, TaskCompletionSource<object> result, CancellationTokenRegistration registration)
             {
@@ -1041,7 +1109,6 @@ namespace System.Data.SqlClient
 
                         if (retryTask.IsFaulted)
                         {
-                            Exception e = retryTask.Exception.InnerException;
                             _parent.CloseInnerConnection();
                             _parent._currentCompletion = null;
                             _result.SetException(retryTask.Exception.InnerException);
@@ -1360,7 +1427,7 @@ namespace System.Data.SqlClient
                 throw ADP.InvalidArgumentLength(nameof(newPassword), TdsEnums.MAXLEN_NEWPASSWORD);
             }
 
-            SqlConnectionPoolKey key = new SqlConnectionPoolKey(connectionString, credential: null);
+            SqlConnectionPoolKey key = new SqlConnectionPoolKey(connectionString, credential: null, accessToken: null);
 
             SqlConnectionString connectionOptions = SqlConnectionFactory.FindSqlConnectionOptions(key);
             if (connectionOptions.IntegratedSecurity)
@@ -1403,7 +1470,7 @@ namespace System.Data.SqlClient
                 throw ADP.InvalidArgumentLength(nameof(newSecurePassword), TdsEnums.MAXLEN_NEWPASSWORD);
             }
 
-            SqlConnectionPoolKey key = new SqlConnectionPoolKey(connectionString, credential);
+            SqlConnectionPoolKey key = new SqlConnectionPoolKey(connectionString, credential, accessToken: null);
 
             SqlConnectionString connectionOptions = SqlConnectionFactory.FindSqlConnectionOptions(key);
 
@@ -1441,7 +1508,7 @@ namespace System.Data.SqlClient
                 if (con != null)
                     con.Dispose();
             }
-            SqlConnectionPoolKey key = new SqlConnectionPoolKey(connectionString, credential);
+            SqlConnectionPoolKey key = new SqlConnectionPoolKey(connectionString, credential, accessToken: null);
 
             SqlConnectionFactory.SingletonInstance.ClearPool(key);
         }
@@ -1508,7 +1575,7 @@ namespace System.Data.SqlClient
             ADP.CheckArgumentNull(connection, nameof(connection));
             _userConnectionOptions = connection.UserConnectionOptions;
             _poolGroup = connection.PoolGroup;
-            
+
             if (DbConnectionClosedNeverOpened.SingletonInstance == connection._innerConnection)
             {
                 _innerConnection = DbConnectionClosedNeverOpened.SingletonInstance;
@@ -1523,7 +1590,7 @@ namespace System.Data.SqlClient
         private Assembly ResolveTypeAssembly(AssemblyName asmRef, bool throwOnError)
         {
             Debug.Assert(TypeSystemAssemblyVersion != null, "TypeSystemAssembly should be set !");
-            if (string.Compare(asmRef.Name, "Microsoft.SqlServer.Types", StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Equals(asmRef.Name, "Microsoft.SqlServer.Types", StringComparison.OrdinalIgnoreCase))
             {
                 asmRef.Version = TypeSystemAssemblyVersion;
             }
@@ -1546,16 +1613,16 @@ namespace System.Data.SqlClient
 
         internal void CheckGetExtendedUDTInfo(SqlMetaDataPriv metaData, bool fThrow)
         {
-            if (metaData.udtType == null)
+            if (metaData.udt?.Type == null)
             { // If null, we have not obtained extended info.
-                Debug.Assert(!string.IsNullOrEmpty(metaData.udtAssemblyQualifiedName), "Unexpected state on GetUDTInfo");
+                Debug.Assert(!string.IsNullOrEmpty(metaData.udt?.AssemblyQualifiedName), "Unexpected state on GetUDTInfo");
                 // Parameter throwOnError determines whether exception from Assembly.Load is thrown.
-                metaData.udtType =
-                    Type.GetType(typeName: metaData.udtAssemblyQualifiedName, assemblyResolver: asmRef => ResolveTypeAssembly(asmRef, fThrow), typeResolver: null, throwOnError: fThrow);
+                metaData.udt.Type =
+                    Type.GetType(typeName: metaData.udt.AssemblyQualifiedName, assemblyResolver: asmRef => ResolveTypeAssembly(asmRef, fThrow), typeResolver: null, throwOnError: fThrow);
 
-                if (fThrow && metaData.udtType == null)
+                if (fThrow && metaData.udt.Type == null)
                 {
-                    throw SQL.UDTUnexpectedResult(metaData.udtAssemblyQualifiedName);
+                    throw SQL.UDTUnexpectedResult(metaData.udt.AssemblyQualifiedName);
                 }
             }
         }
@@ -1572,9 +1639,9 @@ namespace System.Data.SqlClient
             // Since the serializer doesn't handle nulls...
             if (ADP.IsNull(value))
             {
-                Type t = metaData.udtType;
+                Type t = metaData.udt?.Type;
                 Debug.Assert(t != null, "Unexpected null of udtType on GetUdtValue!");
-                o = t.InvokeMember("Null", BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Static, null, null, new object[] { }, CultureInfo.InvariantCulture);
+                o = t.InvokeMember("Null", BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Static, null, null, Array.Empty<object>(), CultureInfo.InvariantCulture);
                 Debug.Assert(o != null);
                 return o;
             }
@@ -1583,7 +1650,7 @@ namespace System.Data.SqlClient
 
                 MemoryStream stm = new MemoryStream((byte[])value);
 
-                o = SerializationHelperSql9.Deserialize(stm, metaData.udtType);
+                o = SerializationHelperSql9.Deserialize(stm, metaData.udt?.Type);
 
                 Debug.Assert(o != null, "object could NOT be created");
                 return o;
@@ -1639,5 +1706,3 @@ namespace System.Data.SqlClient
         }
     }
 }
-
-

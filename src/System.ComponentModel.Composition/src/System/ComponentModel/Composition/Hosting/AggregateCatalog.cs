@@ -5,7 +5,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading;
 using Microsoft.Internal;
@@ -13,14 +12,14 @@ using Microsoft.Internal;
 namespace System.ComponentModel.Composition.Hosting
 {
     /// <summary>
-    ///     A mutable collection of <see cref="ComposablePartCatalog"/>s.  
+    ///     A mutable collection of <see cref="ComposablePartCatalog"/>s.
     /// </summary>
     /// <remarks>
     ///     This type is thread safe.
     /// </remarks>
     public class AggregateCatalog : ComposablePartCatalog, INotifyComposablePartCatalogChanged
     {
-        private ComposablePartCatalogCollection _catalogs = null;
+        private readonly ComposablePartCatalogCollection _catalogs = null;
         private volatile int _isDisposed = 0;
 
         /// <summary>
@@ -32,11 +31,11 @@ namespace System.ComponentModel.Composition.Hosting
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="AggregateCatalog"/> class 
+        ///     Initializes a new instance of the <see cref="AggregateCatalog"/> class
         ///     with the specified catalogs.
         /// </summary>
         /// <param name="catalogs">
-        ///     An <see cref="Array"/> of <see cref="ComposablePartCatalog"/> objects to add to the 
+        ///     An <see cref="Array"/> of <see cref="ComposablePartCatalog"/> objects to add to the
         ///     <see cref="AggregateCatalog"/>.
         /// </param>
         /// <exception cref="ArgumentNullException">
@@ -56,7 +55,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </summary>
         /// <param name="catalogs">
         ///     An <see cref="IEnumerable{T}"/> of <see cref="ComposablePartCatalog"/> objects to add
-        ///     to the <see cref="AggregateCatalog"/>; or <see langword="null"/> to 
+        ///     to the <see cref="AggregateCatalog"/>; or <see langword="null"/> to
         ///     create an <see cref="AggregateCatalog"/> that is empty.
         /// </param>
         /// <exception cref="ArgumentException">
@@ -64,7 +63,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public AggregateCatalog(IEnumerable<ComposablePartCatalog> catalogs)
         {
-            Requires.NullOrNotNullElements(catalogs, "catalogs");
+            Requires.NullOrNotNullElements(catalogs, nameof(catalogs));
 
             _catalogs = new ComposablePartCatalogCollection(catalogs, OnChanged, OnChanging);
         }
@@ -103,13 +102,13 @@ namespace System.ComponentModel.Composition.Hosting
         ///     Returns the export definitions that match the constraint defined by the specified definition.
         /// </summary>
         /// <param name="definition">
-        ///     The <see cref="ImportDefinition"/> that defines the conditions of the 
+        ///     The <see cref="ImportDefinition"/> that defines the conditions of the
         ///     <see cref="ExportDefinition"/> objects to return.
         /// </param>
         /// <returns>
-        ///     An <see cref="IEnumerable{T}"/> of <see cref="Tuple{T1, T2}"/> containing the 
-        ///     <see cref="ExportDefinition"/> objects and their associated 
-        ///     <see cref="ComposablePartDefinition"/> for objects that match the constraint defined 
+        ///     An <see cref="IEnumerable{T}"/> of <see cref="Tuple{T1, T2}"/> containing the
+        ///     <see cref="ExportDefinition"/> objects and their associated
+        ///     <see cref="ComposablePartDefinition"/> for objects that match the constraint defined
         ///     by <paramref name="definition"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
@@ -134,7 +133,7 @@ namespace System.ComponentModel.Composition.Hosting
                 var catalogExports = catalog.GetExports(definition);
                 if (catalogExports != ComposablePartCatalog._EmptyExportsList)
                 {
-                    // ideally this is is the case we will always hit
+                    // ideally this is the case we will always hit
                     if (result == null)
                     {
                         result = catalogExports;
@@ -169,7 +168,7 @@ namespace System.ComponentModel.Composition.Hosting
             get
             {
                 ThrowIfDisposed();
-                Contract.Ensures(Contract.Result<ICollection<ComposablePartCatalog>>() != null);
+                Debug.Assert(_catalogs != null);
 
                 return _catalogs;
             }
@@ -181,10 +180,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 if (disposing)
                 {
-                    // NOTE : According to http://msdn.microsoft.com/en-us/library/4bw5ewxy.aspx, the warning is bogus when used with Interlocked API.
-#pragma warning disable 420
                     if (Interlocked.CompareExchange(ref _isDisposed, 1, 0) == 0)
-#pragma warning restore 420
                     {
                         _catalogs.Dispose();
                     }

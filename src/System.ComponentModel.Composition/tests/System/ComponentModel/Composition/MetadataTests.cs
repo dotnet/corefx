@@ -104,7 +104,7 @@ namespace System.ComponentModel.Composition
 
             var export = container.GetExport<SimpleMetadataExporterWithNullReferenceValue, ISimpleMetadataView>();
 
-            Assert.Equal(null, export.Metadata.String);
+            Assert.Null(export.Metadata.String);
             Assert.Equal(42, export.Metadata.Int);
             Assert.Equal(42.0f, export.Metadata.Float);
             Assert.Equal(SimpleEnum.First, export.Metadata.Enum);
@@ -260,7 +260,7 @@ namespace System.ComponentModel.Composition
                 var metadata = export.Metadata;
             });
 
-            Assert.True(ex.Message.Contains("DuplicateMetadataName"));
+            Assert.Contains("DuplicateMetadataName", ex.Message);
         }
 
         [PartNotDiscoverable]
@@ -283,7 +283,7 @@ namespace System.ComponentModel.Composition
                 var metadata = export.Metadata;
             });
 
-            Assert.True(ex.Message.Contains("DuplicateMetadataName"));
+            Assert.Contains("DuplicateMetadataName", ex.Message);
         }
 
         [Export]
@@ -353,7 +353,7 @@ namespace System.ComponentModel.Composition
                 var metadata = export.Metadata;
             });
 
-            Assert.True(ex.Message.Contains(CompositionConstants.PartCreationPolicyMetadataName));
+            Assert.Contains(CompositionConstants.PartCreationPolicyMetadataName, ex.Message);
         }
 
         #endregion
@@ -581,7 +581,7 @@ namespace System.ComponentModel.Composition
             SelectiveImportBySTMThroughCatalog1(container);
         }
 
-        public void SelectiveImportBySTMThroughCatalog1(CompositionContainer container)
+        private static void SelectiveImportBySTMThroughCatalog1(CompositionContainer container)
         {
             Assert.NotNull(container.GetExport<IMyExporter, IMetadataView>());
             var result2 = container.GetExports<IMyExporter, IMetadataView>();
@@ -595,7 +595,7 @@ namespace System.ComponentModel.Composition
             SelectiveImportBySTMThroughCatalog2(container);
         }
 
-        public void SelectiveImportBySTMThroughCatalog2(CompositionContainer container)
+        private static void SelectiveImportBySTMThroughCatalog2(CompositionContainer container)
         {
             throw new NotImplementedException();
 
@@ -661,7 +661,7 @@ namespace System.ComponentModel.Composition
             var exports = container.GetExports<OptionalFooIsInt, IMetadataView>();
             Assert.Equal(1, exports.Count());
             var export = exports.Single();
-            Assert.Equal(null, export.Metadata.OptionalFoo);
+            Assert.Null(export.Metadata.OptionalFoo);
         }
 
         #endregion
@@ -740,12 +740,12 @@ namespace System.ComponentModel.Composition
         [Export]
         [ExportMetadata("Data", null, IsMultiple = true)]
         [ExportMetadata("Data", false, IsMultiple = true)]
-        [ExportMetadata("Data", Int16.MaxValue, IsMultiple = true)]
-        [ExportMetadata("Data", Int32.MaxValue, IsMultiple = true)]
-        [ExportMetadata("Data", Int64.MaxValue, IsMultiple = true)]
-        [ExportMetadata("Data", UInt16.MaxValue, IsMultiple = true)]
-        [ExportMetadata("Data", UInt32.MaxValue, IsMultiple = true)]
-        [ExportMetadata("Data", UInt64.MaxValue, IsMultiple = true)]
+        [ExportMetadata("Data", short.MaxValue, IsMultiple = true)]
+        [ExportMetadata("Data", int.MaxValue, IsMultiple = true)]
+        [ExportMetadata("Data", long.MaxValue, IsMultiple = true)]
+        [ExportMetadata("Data", ushort.MaxValue, IsMultiple = true)]
+        [ExportMetadata("Data", uint.MaxValue, IsMultiple = true)]
+        [ExportMetadata("Data", ulong.MaxValue, IsMultiple = true)]
         [ExportMetadata("Data", "String", IsMultiple = true)]
         [ExportMetadata("Data", typeof(ClassWithLotsOfDifferentMetadataTypes), IsMultiple = true)]
         [ExportMetadata("Data", CreationPolicy.NonShared, IsMultiple = true)]

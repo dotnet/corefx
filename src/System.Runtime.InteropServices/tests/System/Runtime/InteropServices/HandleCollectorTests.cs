@@ -54,7 +54,7 @@ namespace System.Runtime.InteropServices
         [Fact]
         public static void Ctor_InitialThresholdGreaterThanMaximumThreshold_ThrowsArgumentException()
         {
-            AssertExtensions.Throws<ArgumentException>(null, () => new HandleCollector("InitialGreaterThanMax", 100, 1));
+            AssertExtensions.Throws<ArgumentException>("initialThreshold", null, () => new HandleCollector("InitialGreaterThanMax", 100, 1));
         }
 
         [Fact]
@@ -88,7 +88,6 @@ namespace System.Runtime.InteropServices
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot,"Reflects on private member handleCount")]
         public static void Add_Overflows_ThrowsInvalidOperationException()
         {
             HandleCollector collector = new HandleCollector("CountOverflow", int.MaxValue);

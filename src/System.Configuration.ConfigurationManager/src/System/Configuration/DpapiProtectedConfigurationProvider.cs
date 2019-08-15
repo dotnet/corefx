@@ -11,8 +11,6 @@ namespace System.Configuration
 {
     public sealed class DpapiProtectedConfigurationProvider : ProtectedConfigurationProvider
     {
-        private const int CRYPTPROTECT_UI_FORBIDDEN = 0x1;
-        private const int CRYPTPROTECT_LOCAL_MACHINE = 0x4;
         private bool _useMachineProtection = true;
         private string _keyEntropy;
 
@@ -98,7 +96,7 @@ namespace System.Configuration
             _keyEntropy = configurationValues["keyEntropy"];
             configurationValues.Remove("keyEntropy");
             if (configurationValues.Count > 0)
-                throw new ConfigurationErrorsException(string.Format(SR.Unrecognized_initialization_value, configurationValues.GetKey(0)));
+                throw new ConfigurationErrorsException(SR.Format(SR.Unrecognized_initialization_value, configurationValues.GetKey(0)));
         }
 
         private static XmlNode TraverseToChild(XmlNode node, string name, bool onlyChild)
@@ -131,7 +129,7 @@ namespace System.Configuration
                 return true;
             if (s == "false")
                 return false;
-            throw new ConfigurationErrorsException(string.Format(SR.Config_invalid_boolean_attribute, valueName));
+            throw new ConfigurationErrorsException(SR.Format(SR.Config_invalid_boolean_attribute, valueName));
         }
     }
 }

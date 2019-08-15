@@ -59,7 +59,6 @@ namespace System.IO.Pipes.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "There is a bug in netfx around async read on a broken PipeStream. See #2601 and #2899. This bug is fixed in netcore.")]
         public virtual async Task ReadFromPipeWithClosedPartner_Span_ReadNoBytes()
         {
             using (ServerClientPair pair = CreateServerClientPair())
@@ -68,7 +67,7 @@ namespace System.IO.Pipes.Tests
                 byte[] buffer = new byte[] { 0, 0, 0, 0 };
 
                 // The pipe won't be marked as Broken until the first read, so prime it
-                // to test both the case where it's not yet marked as "Broken" and then 
+                // to test both the case where it's not yet marked as "Broken" and then
                 // where it is.
                 Assert.Equal(0, pair.readablePipe.Read(new Span<byte>(buffer)));
 

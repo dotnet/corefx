@@ -8,22 +8,14 @@ namespace System.Xml.Schema
     using System.ComponentModel;
     using System.Xml.Serialization;
 
-    /// <include file='doc\XmlSchemaIdentityConstraint.uex' path='docs/doc[@for="XmlSchemaIdentityConstraint"]/*' />
-    /// <devdoc>
-    ///    <para>[To be supplied.]</para>
-    /// </devdoc>
     public class XmlSchemaIdentityConstraint : XmlSchemaAnnotated
     {
         private string _name;
         private XmlSchemaXPath _selector;
-        private XmlSchemaObjectCollection _fields = new XmlSchemaObjectCollection();
+        private readonly XmlSchemaObjectCollection _fields = new XmlSchemaObjectCollection();
         private XmlQualifiedName _qualifiedName = XmlQualifiedName.Empty;
         private CompiledIdentityConstraint _compiledConstraint = null;
 
-        /// <include file='doc\XmlSchemaIdentityConstraint.uex' path='docs/doc[@for="XmlSchemaIdentityConstraint.Name"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         [XmlAttribute("name")]
         public string Name
         {
@@ -31,10 +23,6 @@ namespace System.Xml.Schema
             set { _name = value; }
         }
 
-        /// <include file='doc\XmlSchemaIdentityConstraint.uex' path='docs/doc[@for="XmlSchemaIdentityConstraint.Selector"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         [XmlElement("selector", typeof(XmlSchemaXPath))]
         public XmlSchemaXPath Selector
         {
@@ -42,20 +30,12 @@ namespace System.Xml.Schema
             set { _selector = value; }
         }
 
-        /// <include file='doc\XmlSchemaIdentityConstraint.uex' path='docs/doc[@for="XmlSchemaIdentityConstraint.Fields"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         [XmlElement("field", typeof(XmlSchemaXPath))]
         public XmlSchemaObjectCollection Fields
         {
             get { return _fields; }
         }
 
-        /// <include file='doc\XmlSchemaIdentityConstraint.uex' path='docs/doc[@for="XmlSchemaIdentityConstraint.QualifiedName"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         [XmlIgnore]
         public XmlQualifiedName QualifiedName
         {
@@ -82,17 +62,10 @@ namespace System.Xml.Schema
         }
     }
 
-    /// <include file='doc\XmlSchemaIdentityConstraint.uex' path='docs/doc[@for="XmlSchemaXPath"]/*' />
-    /// <devdoc>
-    ///    <para>[To be supplied.]</para>
-    /// </devdoc>
     public class XmlSchemaXPath : XmlSchemaAnnotated
     {
         private string _xpath;
-        /// <include file='doc\XmlSchemaIdentityConstraint.uex' path='docs/doc[@for="XmlSchemaXPath.XPath"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
+
         [XmlAttribute("xpath"), DefaultValue("")]
         public string XPath
         {
@@ -101,34 +74,18 @@ namespace System.Xml.Schema
         }
     }
 
-    /// <include file='doc\XmlSchemaIdentityConstraint.uex' path='docs/doc[@for="XmlSchemaUnique"]/*' />
-    /// <devdoc>
-    ///    <para>[To be supplied.]</para>
-    /// </devdoc>
     public class XmlSchemaUnique : XmlSchemaIdentityConstraint
     {
     }
 
-    /// <include file='doc\XmlSchemaIdentityConstraint.uex' path='docs/doc[@for="XmlSchemaKey"]/*' />
-    /// <devdoc>
-    ///    <para>[To be supplied.]</para>
-    /// </devdoc>
     public class XmlSchemaKey : XmlSchemaIdentityConstraint
     {
     }
 
-    /// <include file='doc\XmlSchemaIdentityConstraint.uex' path='docs/doc[@for="XmlSchemaKeyref"]/*' />
-    /// <devdoc>
-    ///    <para>[To be supplied.]</para>
-    /// </devdoc>
     public class XmlSchemaKeyref : XmlSchemaIdentityConstraint
     {
         private XmlQualifiedName _refer = XmlQualifiedName.Empty;
 
-        /// <include file='doc\XmlSchemaIdentityConstraint.uex' path='docs/doc[@for="XmlSchemaKeyref.Refer"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         [XmlAttribute("refer")]
         public XmlQualifiedName Refer
         {

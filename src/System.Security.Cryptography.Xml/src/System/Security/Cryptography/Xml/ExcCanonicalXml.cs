@@ -13,8 +13,8 @@ namespace System.Security.Cryptography.Xml
 {
     internal class ExcCanonicalXml
     {
-        private CanonicalXmlDocument _c14nDoc;
-        private ExcAncestralNamespaceContextManager _ancMgr;
+        private readonly CanonicalXmlDocument _c14nDoc;
+        private readonly ExcAncestralNamespaceContextManager _ancMgr;
 
         internal ExcCanonicalXml(Stream inputStream, bool includeComments, string inclusiveNamespacesPrefixList, XmlResolver resolver, string strBaseUri)
         {
@@ -45,7 +45,7 @@ namespace System.Security.Cryptography.Xml
 
             XmlDocument doc = Utils.GetOwnerDocument(nodeList);
             if (doc == null)
-                throw new ArgumentException("nodeList");
+                throw new ArgumentException(nameof(nodeList));
 
             _c14nDoc = new CanonicalXmlDocument(false, includeComments);
             _c14nDoc.XmlResolver = resolver;

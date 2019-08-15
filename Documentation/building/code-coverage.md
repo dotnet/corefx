@@ -1,7 +1,7 @@
 Code Coverage
 =============
 
-"Code coverage" is a measure that indicates how much of our library code is exercised by our test suites.  We measure code coverage using the [OpenCover](https://github.com/opencover/opencover), and a report of our latest code coverage results can be seen by clicking the coverage badge on the [CoreFX home page](https://github.com/dotnet/corefx), linking to the latest [Coverage Report](https://ci.dot.net/job/dotnet_corefx/job/master/job/code_coverage_windows/Code_Coverage_Report/).
+"Code coverage" is a measure that indicates how much of our library code is exercised by our test suites. We measure code coverage using the [Coverlet](https://github.com/tonerdo/coverlet) global tool and use [ReportGenerator](https://github.com/danielpalme/ReportGenerator) to visualize that data. Daily/regular reports are currently not available.
 
 This report shows each library currently being tested with code coverage and provides statistics around the quality of the code coverage for the library.  It also provides a line-by-line breakdown of what lines are being covered and what lines are not.
 
@@ -22,63 +22,42 @@ Our default, somewhat-arbitrary initial goal for a library is 90% code coverage.
 
 Issues are opened for a library when a cursory examination of its code coverage reveal that there are likely still some meaningful gaps that need to be addressed.  We welcome contributions to our test suites to help address these gaps and close these issues.  Many of these issues are marked as [up-for-grabs](https://github.com/dotnet/corefx/labels/up-for-grabs).
 
-An issue need not be addressed in its entirety.  We happily accept contributions that improve our tests and work towards improving code coverage numbers even if they only incrementally improve the situation.
-
-## Automated Code Coverage Runs
-
-Code coverage runs are performed by Jenkins approximately twice a day.  The results of these runs are all available from the site linked to by the code coverage badge on the home page.
-
-## PR Code Coverage Runs
-
-Jenkins can create a coverage report using your PR. Ask for it using `@dotnet-bot test code coverage please`.
-
-After it's done the report can be found in the build log, it looks like eg
-`https://ci.dot.net/job/dotnet_corefx/job/master/job/code_coverage_windows_prtest/16/artifact/bin/tests/coverage`
-then add index.htm on the end:
-`https://ci.dot.net/job/dotnet_corefx/job/master/job/code_coverage_windows_prtest/16/artifact/bin/tests/coverage/index.htm`
-You can navigate to this from your PR by clicking the "Details" link to the right of the code coverage job listed at the bottom of the PR after having issued the above request to dotnet-bot.  In the Jenkins UI for the resulting build, click the "Build Artifacts" link and navigate through the resulting hierarchy to the index.htm file.
+An issue need not be addressed in its entirety. We happily accept contributions that improve our tests and work towards improving code coverage numbers even if they only incrementally improve the situation.
 
 ## Local Code Coverage Runs
 
-You can perform code coverage runs locally on your own machine.  Normally to build your entire CoreFX repo, from the root of your repo you'd run:
+You can perform code coverage runs for the entire repository locally by adding the `coverage` switch (assuming that  source and test assemblies are already built):
 
-    build
-    build-tests
+    build -test -coverage
 
-To include code coverage in this run, augment the `build-tests` call with the `coverage` argument:
+This runs the tests and generates the full code coverage report. The resulting index.htm file providing the results of the run should be available at:
 
-    build
-    build-tests -coverage
+    artifacts\coverage\index.htm
 
-This will do the build and testing as with the normal ```build```, but it will run the tests using the OpenCover tool.  A resulting index.htm file providing the results of the run will be available at:
+You can also build and test with code coverage for a particular test project rather than for the whole repo with the ```/p:Coverage=true``` argument:
 
-    bin\tests\coverage\index.htm
-
-You can also build and test with code coverage for a particular test project rather than for the whole repo.  Normally to build and test a particular test suite, from the same directory as that test suite's .csproj, you'd run:
-
-    msbuild /t:BuildAndTest
-
-To do so with code coverage, append the ```/p:Coverage=true``` argument:
-
-    msbuild /t:BuildAndTest /p:Coverage=true
+    dotnet msbuild /t:BuildAndTest /p:Coverage=true
 
 The results for this one library will then show up in the aforementioned index.htm file. For example, to build, test, and get code coverage results for the System.Diagnostics.Debug library, from the root of the repo one can do:
 
     cd src\System.Diagnostics.Debug\tests\
-    msbuild /t:BuildAndTest /p:Coverage=true
-    
+    dotnet msbuild /t:BuildAndTest /p:Coverage=true
+
 And then once the run completes:
-    
-    ..\..\..\bin\tests\coverage\index.htm
+
+    $(TestPath)\report\index.htm
+
+**Note:** If you only want to measure the coverage of your local changes (that haven't been pushed to git), run:
+
+    dotnet msbuild /t:BuildAndTest /p:Coverage=true /p:CoverageSourceLink=false
+
 
 ## Code coverage with System.Private.CoreLib code
 
-Some of the libraries for which contracts and tests live in the corefx repo are actually fully or partially implemented in the core runtime library in another repo, e.g. the implementation that backs the System.Runtime contract is in System.Private.CoreLib.dll in either the coreclr or corert repo. To run coverage reports for these projects, you need to build System.Private.CoreLib locally from the coreclr repo. To get coverage of System.Private.CoreLib while running the tests for a particular library:
+Some of the libraries for which contracts and tests live in the corefx repo are actually fully or partially implemented in the core runtime library in another repo, e.g. the implementation that backs the System.Runtime contract is in System.Private.CoreLib.dll in either the coreclr or corert repo. Test projects for code that lives, fully or partially, in System.Private.CoreLib, should have the property `TestRuntime` set to `true` in order to obtain proper code coverage reports.
 
-1. Follow the steps outlined at [Testing with Private CoreClr Bits](https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/developer-guide.md#testing-with-private-coreclr-bits).  Make sure to include the optional steps listed as being required for code coverage.
-2. Add /p:CodeCoverageAssemblies="System.Private.CoreLib" to the previously discussed msbuild command, e.g. msbuild /t:BuildAndTest /p:Coverage=true /p:CodeCoverageAssemblies="System.Private.CoreLib"
+If the test project does not set the property `TestRuntime` to `true` and you want to collect code coverage that includes types in System.Private.CoreLib.dll add `/p:TestRuntime=true` to the coverage build command listed above.
 
-Note that you will also want to copy the System.Private.CoreLib.pdb along with the System.Private.CoreLib.dll.  As of 10/2017 this PDB must be a windows PDB (Hopefully by early 2018 OpenCOver will directly support portable PDBs.  
-You can determine if it is a windows PDB by doing 'more System.Private.CoreLib.pdb.  If it begins with 'Microsoft C/C++ MSF 7.00' it is a windows PDB)  If you need a windows PDB the Pdb2Pdb tool will convert (or you can do a msbuild /t:rebuild /p:DebugType=full in the src\mscorlib)
+If you want to get coverage report against a private build of System.Private.CoreLib follow the steps outlined at [Testing with Private CoreClr Bits](https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/developer-guide.md#testing-with-private-coreclr-bits).
 
-The resulting code coverage report should now also include details for System.Private.CoreLib.
+The build and test projects take care of copying assemblies and PDBs as needed for coverage runs. The resulting code coverage report should now also include details for System.Private.CoreLib.

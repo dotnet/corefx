@@ -12,8 +12,8 @@ namespace System.Xml.Xsl.Runtime
     /// </summary>
     internal sealed class EarlyBoundInfo
     {
-        private string _namespaceUri;            // Namespace Uri mapped to these early bound functions
-        private ConstructorInfo _constrInfo;     // Constructor for the early bound function object
+        private readonly string _namespaceUri;            // Namespace Uri mapped to these early bound functions
+        private readonly ConstructorInfo _constrInfo;     // Constructor for the early bound function object
 
         public EarlyBoundInfo(string namespaceUri, Type ebType)
         {
@@ -38,7 +38,7 @@ namespace System.Xml.Xsl.Runtime
         /// <summary>
         /// Create an instance of the early bound object.
         /// </summary>
-        public object CreateObject() { return _constrInfo.Invoke(new object[] { }); }
+        public object CreateObject() { return _constrInfo.Invoke(Array.Empty<object>()); }
 
         /// <summary>
         /// Override Equals method so that EarlyBoundInfo to implement value comparison.
@@ -61,4 +61,3 @@ namespace System.Xml.Xsl.Runtime
         }
     }
 }
-

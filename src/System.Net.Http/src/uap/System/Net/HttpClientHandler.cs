@@ -35,7 +35,6 @@ namespace System.Net.Http
     {
         private const string RequestMessageLookupKey = "System.Net.Http.HttpRequestMessage";
         private const string SavedExceptionDispatchInfoLookupKey = "System.Runtime.ExceptionServices.ExceptionDispatchInfo";
-        private const string ClientAuthenticationOID = "1.3.6.1.5.5.7.3.2";
         private static Oid s_serverAuthOid = new Oid("1.3.6.1.5.5.7.3.1", "1.3.6.1.5.5.7.3.1");
         private static readonly Lazy<bool> s_RTCookieUsageBehaviorSupported =
             new Lazy<bool>(InitRTCookieUsageBehaviorSupported);
@@ -63,7 +62,7 @@ namespace System.Net.Http
         private ICredentials _credentials;
         private IWebProxy _proxy;
         private X509Certificate2Collection _clientCertificates;
-        private IDictionary<String, Object> _properties; // Only create dictionary when required.
+        private IDictionary<string, object> _properties; // Only create dictionary when required.
         private Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> _serverCertificateCustomValidationCallback;
 
         #endregion Fields
@@ -106,7 +105,7 @@ namespace System.Net.Http
                 }
                 if (!UseCookies)
                 {
-                    throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture,
+                    throw new InvalidOperationException(SR.Format(CultureInfo.InvariantCulture,
                         SR.net_http_invalid_enable_first, nameof(UseCookies), "true"));
                 }
                 CheckDisposedOrStarted();
@@ -157,7 +156,7 @@ namespace System.Net.Http
         public IWebProxy Proxy
         {
             // We don't actually support setting a different proxy because our Http stack in NETNative
-            // layers on top of the WinRT HttpClient which uses Wininet.  And that API layer simply 
+            // layers on top of the WinRT HttpClient which uses Wininet.  And that API layer simply
             // uses the proxy information in the registry (and the same that Internet Explorer uses).
             // However, we can't throw PlatformNotSupportedException because the .NET Desktop stack
             // does support this and doing so would break apps. So, we'll just let this get/set work
@@ -200,10 +199,10 @@ namespace System.Net.Http
                 CheckDisposedOrStarted();
                 if (value != null && value != CredentialCache.DefaultCredentials && !(value is NetworkCredential))
                 {
-                    throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
+                    throw new PlatformNotSupportedException(SR.Format(CultureInfo.InvariantCulture,
                         SR.net_http_value_not_supported, value, nameof(Credentials)));
                 }
-                
+
                 _credentials = value;
             }
         }
@@ -219,10 +218,10 @@ namespace System.Net.Http
                 CheckDisposedOrStarted();
                 if (value != null && value != CredentialCache.DefaultCredentials && !(value is NetworkCredential))
                 {
-                    throw new PlatformNotSupportedException(String.Format(CultureInfo.InvariantCulture,
+                    throw new PlatformNotSupportedException(SR.Format(CultureInfo.InvariantCulture,
                         SR.net_http_value_not_supported, value, nameof(DefaultProxyCredentials)));
                 }
-                
+
                 _defaultProxyCredentials = value;;
             }
         }
@@ -306,7 +305,7 @@ namespace System.Net.Http
                 {
                     if (!RTServerCustomValidationRequestedSupported)
                     {
-                        throw new PlatformNotSupportedException(string.Format(CultureInfo.InvariantCulture,
+                        throw new PlatformNotSupportedException(SR.Format(CultureInfo.InvariantCulture,
                             SR.net_http_feature_requires_Windows10Version1607));
                     }
                 }
@@ -337,13 +336,13 @@ namespace System.Net.Http
             }
         }
 
-        public IDictionary<String, Object> Properties
+        public IDictionary<string, object> Properties
         {
             get
             {
                 if (_properties == null)
                 {
-                    _properties = new Dictionary<String, object>();
+                    _properties = new Dictionary<string, object>();
                 }
 
                 return _properties;
@@ -399,7 +398,7 @@ namespace System.Net.Http
             filter.CacheControl.ReadBehavior = RTNoCacheSupported ?
                 RTHttpCacheReadBehavior.NoCache : RTHttpCacheReadBehavior.MostRecent;
             filter.CacheControl.WriteBehavior = RTHttpCacheWriteBehavior.NoCache;
-            
+
             return filter;
         }
 
@@ -430,7 +429,7 @@ namespace System.Net.Http
         private async Task ConfigureRequest(HttpRequestMessage request)
         {
             ApplyDecompressionSettings(request);
-            
+
             await ApplyClientCertificateSettings().ConfigureAwait(false);
         }
 
@@ -477,7 +476,7 @@ namespace System.Net.Http
                     RTCertificate rtClientCert = await CertificateHelper.ConvertDotNetClientCertToWinRtClientCertAsync(clientCert).ConfigureAwait(false);
                     if (rtClientCert == null)
                     {
-                        throw new PlatformNotSupportedException(string.Format(CultureInfo.InvariantCulture,
+                        throw new PlatformNotSupportedException(SR.Format(CultureInfo.InvariantCulture,
                             SR.net_http_feature_UWPClientCertSupportRequiresCertInPersonalCertificateStore));
                     }
 
@@ -594,13 +593,13 @@ namespace System.Net.Http
                 if (string.Equals(request.Method.Method, HttpMethod.Trace.Method, StringComparison.OrdinalIgnoreCase))
                 {
                     // https://github.com/dotnet/corefx/issues/22161
-                    throw new PlatformNotSupportedException(string.Format(CultureInfo.InvariantCulture,
+                    throw new PlatformNotSupportedException(SR.Format(CultureInfo.InvariantCulture,
                         SR.net_http_httpmethod_notsupported_error, request.Method.Method));
                 }
 
                 await ConfigureRequest(request).ConfigureAwait(false);
 
-                Task<HttpResponseMessage> responseTask = DiagnosticsHandler.IsEnabled() ? 
+                Task<HttpResponseMessage> responseTask = DiagnosticsHandler.IsEnabled() ?
                     _diagnosticsPipeline.SendAsync(request, cancellationToken) :
                     _handlerToFilter.SendAsync(request, cancellationToken);
 
@@ -638,7 +637,7 @@ namespace System.Net.Http
                     // considered "extra" validation. We need to explicitly ignore errors so that the callback
                     // will get called.
                     //
-                    // In addition, the WinRT layer restricts some errors so that they cannot be ignored, such 
+                    // In addition, the WinRT layer restricts some errors so that they cannot be ignored, such
                     // as "Revoked". This will result in behavior differences between UWP and other platforms.
                     // The following errors cannot be ignored right now in the WinRT layer:
                     //

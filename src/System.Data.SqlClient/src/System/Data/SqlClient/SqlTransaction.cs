@@ -18,7 +18,7 @@ namespace System.Data.SqlClient
         internal readonly IsolationLevel _isolationLevel = IsolationLevel.ReadCommitted;
 
         private SqlInternalTransaction _internalTransaction;
-        private SqlConnection _connection;
+        private readonly SqlConnection _connection;
 
         private bool _isFromAPI;
 
@@ -44,7 +44,7 @@ namespace System.Data.SqlClient
         // PROPERTIES
         ////////////////////////////////////////////////////////////////////////////////////////
 
-        new public SqlConnection Connection
+        public new SqlConnection Connection
         {
             get
             {
@@ -59,7 +59,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override protected DbConnection DbConnection
+        protected override DbConnection DbConnection
         {
             get
             {
@@ -75,7 +75,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override public IsolationLevel IsolationLevel
+        public override IsolationLevel IsolationLevel
         {
             get
             {
@@ -120,7 +120,7 @@ namespace System.Data.SqlClient
         // PUBLIC METHODS
         ////////////////////////////////////////////////////////////////////////////////////////
 
-        override public void Commit()
+        public override void Commit()
         {
             Exception e = null;
             Guid operationId = s_diagnosticListener.WriteTransactionCommitBefore(_isolationLevel, _connection);
@@ -170,7 +170,7 @@ namespace System.Data.SqlClient
             base.Dispose(disposing);
         }
 
-        override public void Rollback()
+        public override void Rollback()
         {
             Exception e = null;
             Guid operationId = s_diagnosticListener.WriteTransactionRollbackBefore(_isolationLevel, _connection, null);
@@ -279,7 +279,7 @@ namespace System.Data.SqlClient
             // For Yukon, we have to defer "zombification" until
             //                 we get past the users' next rollback, else we'll
             //                 throw an exception there that is a breaking change.
-            //                 Of course, if the connection is already closed, 
+            //                 Of course, if the connection is already closed,
             //                 then we're free to zombify...
             SqlInternalConnection internalConnection = (_connection.InnerConnection as SqlInternalConnection);
             if (internalConnection == null || _isFromAPI)
@@ -307,4 +307,3 @@ namespace System.Data.SqlClient
         }
     }
 }
-

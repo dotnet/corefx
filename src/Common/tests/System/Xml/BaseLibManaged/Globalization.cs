@@ -93,11 +93,11 @@ namespace WebData.BaseLib
                 0x309D, 0x309E, 0x30FC, 0x30FE
             };
 
-        public static String GetIllegalXmlString(int iMaxChar, bool bAbsolute)
+        public static string GetIllegalXmlString(int iMaxChar, bool bAbsolute)
         {
             return WebData.BaseLib.StringGen.GetIllegalXmlStringWithSeed(iMaxChar, bAbsolute, 0);
         }
-        public static String GetIllegalXmlStringWithSeed(int iMaxChar, bool bAbsolute, int iSeed)
+        public static string GetIllegalXmlStringWithSeed(int iMaxChar, bool bAbsolute, int iSeed)
         {
             int i = 0;
             Random cRandom;
@@ -110,14 +110,14 @@ namespace WebData.BaseLib
             {
                 cRandom = new Random();
             }
-            String sResult = String.Empty;
+            string sResult = string.Empty;
             int iStrLen = bAbsolute ? iMaxChar : cRandom.Next(1, iMaxChar);
 
             //get the maximum number of illegal characters in the valid range.
             int iSum = 0;
             for (i = 0; i < cBaseCharMap.Length; i += 2)
             {
-                //special processing for 0 
+                //special processing for 0
                 if (i == 0)
                 {
                     iSum += cBaseCharMap[i] - 1;

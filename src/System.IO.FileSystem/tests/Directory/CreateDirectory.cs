@@ -1,15 +1,17 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using System.Linq;
+using Microsoft.DotNet.RemoteExecutor;
+using Microsoft.DotNet.XUnitExtensions;
 using Xunit;
 
 namespace System.IO.Tests
 {
     public class Directory_CreateDirectory : FileSystemTest
     {
-        public static TheoryData ReservedDeviceNames = IOInputs.GetReservedDeviceNames().ToTheoryData(); 
+        public static TheoryData ReservedDeviceNames = IOInputs.GetReservedDeviceNames().ToTheoryData();
         #region Utilities
 
         public virtual DirectoryInfo Create(string path)
@@ -27,7 +29,7 @@ namespace System.IO.Tests
         public void FileNameIsToString_NotFullPath()
         {
             // We're checking that we're maintaining the original path
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 Environment.CurrentDirectory = TestDirectory;
                 string subdir = Path.GetRandomFileName();
@@ -42,16 +44,7 @@ namespace System.IO.Tests
             string subdir = Path.GetRandomFileName();
             string fullPath = Path.Combine(TestDirectory, subdir);
             DirectoryInfo info = Create(fullPath);
-            if (PlatformDetection.IsFullFramework && IsDirectoryCreate)
-            {
-                // I think this was accidental. In Core we want to be consistent with constructing
-                // an Info manually then calling Create on it.
-                Assert.Equal(subdir, info.ToString());
-            }
-            else
-            {
-                Assert.Equal(fullPath, info.ToString());
-            }
+            Assert.Equal(fullPath, info.ToString());
         }
 
         [Fact]
@@ -67,14 +60,6 @@ namespace System.IO.Tests
         }
 
         [Theory, MemberData(nameof(PathsWithInvalidCharacters))]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public void PathWithInvalidCharactersAsPath_Desktop(string invalidPath)
-        {
-            Assert.Throws<ArgumentException>(() => Create(invalidPath));
-        }
-
-        [Theory, MemberData(nameof(PathsWithInvalidCharacters))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void PathWithInvalidCharactersAsPath_Core(string invalidPath)
         {
             if (invalidPath.Contains('\0'))
@@ -114,7 +99,14 @@ namespace System.IO.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsInAppContainer))] // Can't read root in appcontainer
+        public void RootPath_AppContainer()
+        {
+            string dirName = Path.GetPathRoot(Directory.GetCurrentDirectory());
+            Assert.Throws<DirectoryNotFoundException>(() => Create(dirName));
+        }
+
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotInAppContainer))] // Can't read root in appcontainer
         public void RootPath()
         {
             string dirName = Path.GetPathRoot(Directory.GetCurrentDirectory());
@@ -225,16 +217,7 @@ namespace System.IO.Tests
             MemberData(nameof(PathsWithComponentLongerThanMaxComponent))]
         public void DirectoryWithComponentLongerThanMaxComponentAsPath_ThrowsException(string path)
         {
-            // While paths themselves can be up to 260 characters including trailing null, file systems
-            // limit each components of the path to a total of 255 characters on Desktop.
-            if (PlatformDetection.IsFullFramework)
-            {
-                Assert.Throws<PathTooLongException>(() => Create(path));
-            }
-            else
-            {
-                AssertExtensions.ThrowsAny<IOException, DirectoryNotFoundException, PathTooLongException>(() => Create(path));
-            }
+            AssertExtensions.ThrowsAny<IOException, DirectoryNotFoundException, PathTooLongException>(() => Create(path));
         }
 
         #endregion
@@ -243,22 +226,6 @@ namespace System.IO.Tests
 
         [Theory, MemberData(nameof(PathsWithInvalidColons))]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public void PathWithInvalidColons_ThrowsNotSupportedException_Desktop(string invalidPath)
-        {
-            if (PathFeatures.IsUsingLegacyPathNormalization())
-            {
-                Assert.Throws<ArgumentException>(() => Create(invalidPath));
-            }
-            else
-            {
-                Assert.Throws<NotSupportedException>(() => Create(invalidPath));
-            }
-        }
-
-        [Theory, MemberData(nameof(PathsWithInvalidColons))]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void PathsWithInvalidColons_ThrowIOException_Core(string invalidPath)
         {
             // You can't actually create a directory with a colon in it. It was a preemptive
@@ -297,22 +264,8 @@ namespace System.IO.Tests
         {
             var paths = IOInputs.GetPathsLongerThanMaxLongPath(GetTestFilePath(), useExtendedSyntax: true);
 
-            // Long directory path with extended syntax throws PathTooLongException on Desktop.
-            // Everywhere else, it may be either PathTooLongException or DirectoryNotFoundException
-            if (PlatformDetection.IsFullFramework)
-            {
-                Assert.All(paths, path => { Assert.Throws<PathTooLongException>(() => Create(path)); });
-            }
-            else
-            {
-                Assert.All(paths,
-                    path =>
-                    {
-                        AssertExtensions
-                            .ThrowsAny<PathTooLongException, DirectoryNotFoundException>(
-                                () => Create(path));
-                    });
-            }
+            Assert.All(paths, path =>
+                AssertExtensions.ThrowsAny<PathTooLongException, DirectoryNotFoundException>(() => Create(path)));
         }
 
         [ConditionalFact(nameof(LongPathsAreNotBlocked), nameof(UsingNewNormalization))]
@@ -374,16 +327,6 @@ namespace System.IO.Tests
         [Theory,
             MemberData(nameof(ControlWhiteSpace))]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public void WindowsControlWhiteSpaceAsPath_ThrowsArgumentException_Desktop(string path)
-        {
-            Assert.Throws<ArgumentException>(() => Create(path));
-        }
-
-        [Theory,
-            MemberData(nameof(ControlWhiteSpace))]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void WindowsWhiteSpaceAsPath_ThrowsIOException_Core(string path)
         {
             Assert.Throws<IOException>(() => Create(path));
@@ -401,24 +344,8 @@ namespace System.IO.Tests
         }
 
         [Theory,
-            MemberData(nameof(ControlWhiteSpace))]
-        [PlatformSpecific(TestPlatforms.Windows)]  // trailing whitespace in path is removed on Windows
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)] // e.g. NetFX only
-        public void TrailingWhiteSpace_Trimmed(string component)
-        {
-            // On desktop, we trim a number of whitespace characters 
-            DirectoryInfo testDir = Create(GetTestFilePath());
-            string path = IOServices.RemoveTrailingSlash(testDir.FullName) + component;
-            DirectoryInfo result = Create(path);
-
-            Assert.True(Directory.Exists(result.FullName));
-            Assert.Equal(testDir.FullName, IOServices.RemoveTrailingSlash(result.FullName));
-        }
-
-        [Theory,
             MemberData(nameof(NonControlWhiteSpace))]
         [PlatformSpecific(TestPlatforms.Windows)]  // trailing whitespace in path is removed on Windows
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // Not NetFX
         public void TrailingWhiteSpace_NotTrimmed(string component)
         {
             // In CoreFX we don't trim anything other than space (' ')
@@ -433,7 +360,6 @@ namespace System.IO.Tests
         [Theory,
             MemberData(nameof(SimpleWhiteSpace))] //*Just Spaces*
         [PlatformSpecific(TestPlatforms.Windows)]  // trailing whitespace in path is removed on Windows
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // Not NetFX
         public void TrailingSpace_NotTrimmed(string component)
         {
             DirectoryInfo testDir = Create(GetTestFilePath());
@@ -474,19 +400,16 @@ namespace System.IO.Tests
         [Theory,
             MemberData(nameof(PathsWithColons))]
         [PlatformSpecific(TestPlatforms.Windows)] // alternate data streams
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public void PathWithColons_ThrowsNotSupportedException_Desktop(string path)
-        {
-            Assert.Throws<NotSupportedException>(() => Create(path));
-        }
-
-        [Theory,
-            MemberData(nameof(PathsWithColons))]
-        [PlatformSpecific(TestPlatforms.Windows)] // alternate data streams
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void PathWithColons_ThrowsIOException_Core(string path)
         {
-            Assert.ThrowsAny<IOException>(() => Create(Path.Combine(TestDirectory, path)));
+            if (PlatformDetection.IsInAppContainer)
+            {
+                AssertExtensions.ThrowsAny<DirectoryNotFoundException, IOException, UnauthorizedAccessException>(() => Create(Path.Combine(TestDirectory, path)));
+            }
+            else
+            {
+                Assert.ThrowsAny<IOException>(() => Create(Path.Combine(TestDirectory, path)));
+            }
         }
 
         [Theory,
@@ -510,16 +433,6 @@ namespace System.IO.Tests
         [Theory,
             MemberData(nameof(UncPathsWithoutShareName))]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public void UncPathWithoutShareNameAsPath_ThrowsArgumentException_Desktop(string path)
-        {
-            Assert.Throws<ArgumentException>(() => Create(path));
-        }
-
-        [Theory,
-            MemberData(nameof(UncPathsWithoutShareName))]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void UncPathWithoutShareNameAsPath_ThrowsIOException_Core(string path)
         {
             Assert.ThrowsAny<IOException>(() => Create(path));
@@ -527,15 +440,6 @@ namespace System.IO.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public void UNCPathWithOnlySlashes_Desktop()
-        {
-            Assert.Throws<ArgumentException>(() => Create("//"));
-        }
-
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void UNCPathWithOnlySlashes_Core()
         {
             Assert.ThrowsAny<IOException>(() => Create("//"));
@@ -584,7 +488,7 @@ namespace System.IO.Tests
             try
             {
                 // If this test is inherited then it's possible this call will fail due to the "C:" directory
-                // being deleted in that other test before this call. What we care about testing (proper path 
+                // being deleted in that other test before this call. What we care about testing (proper path
                 // handling) is unaffected by this race condition.
                 Directory.Delete("C:");
             }
@@ -668,4 +572,3 @@ namespace System.IO.Tests
         #endregion
     }
 }
-

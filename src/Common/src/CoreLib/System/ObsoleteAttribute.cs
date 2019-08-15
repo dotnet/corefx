@@ -8,26 +8,24 @@
 **
 ** Purpose: Attribute for functions, etc that will be removed.
 **
-** 
+**
 ===========================================================*/
-
-using System;
 
 namespace System
 {
     // This attribute is attached to members that are not to be used any longer.
     // Message is some human readable explanation of what to use
     // Error indicates if the compiler should treat usage of such a method as an
-    //   error. (this would be used if the actual implementation of the obsolete 
+    //   error. (this would be used if the actual implementation of the obsolete
     //   method's implementation had changed).
-    // 
+    //
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum |
-        AttributeTargets.Interface | AttributeTargets.Constructor | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Event | AttributeTargets.Delegate
-        , Inherited = false)]
+        AttributeTargets.Interface | AttributeTargets.Constructor | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Event | AttributeTargets.Delegate,
+        Inherited = false)]
     public sealed class ObsoleteAttribute : Attribute
     {
-        private String _message;
-        private bool _error;
+        private readonly string? _message;
+        private readonly bool _error;
 
         public ObsoleteAttribute()
         {
@@ -35,19 +33,19 @@ namespace System
             _error = false;
         }
 
-        public ObsoleteAttribute(String message)
+        public ObsoleteAttribute(string? message)
         {
             _message = message;
             _error = false;
         }
 
-        public ObsoleteAttribute(String message, bool error)
+        public ObsoleteAttribute(string? message, bool error)
         {
             _message = message;
             _error = error;
         }
 
-        public String Message
+        public string? Message
         {
             get { return _message; }
         }

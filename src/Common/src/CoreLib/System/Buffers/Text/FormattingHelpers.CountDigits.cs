@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace System.Buffers.Text
@@ -103,30 +104,35 @@ namespace System.Buffers.Text
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int CountHexDigits(ulong value)
         {
-            // TODO: When x86 intrinsic support comes online, experiment with implementing this using lzcnt.
-            // return 16 - (int)((uint)Lzcnt.LeadingZeroCount(value | 1) >> 3);
+            return (64 - BitOperations.LeadingZeroCount(value | 1) + 3) >> 2;
+        }
 
-            int digits = 1;
+        // Counts the number of trailing '0' digits in a decimal number.
+        // e.g., value =      0 => retVal = 0, valueWithoutTrailingZeros = 0
+        //       value =   1234 => retVal = 0, valueWithoutTrailingZeros = 1234
+        //       value = 320900 => retVal = 2, valueWithoutTrailingZeros = 3209
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int CountDecimalTrailingZeros(uint value, out uint valueWithoutTrailingZeros)
+        {
+            int zeroCount = 0;
 
-            if (value > 0xFFFFFFFF)
+            if (value != 0)
             {
-                digits += 8;
-                value >>= 0x20;
-            }
-            if (value > 0xFFFF)
-            {
-                digits += 4;
-                value >>= 0x10;
-            }
-            if (value > 0xFF)
-            {
-                digits += 2;
-                value >>= 0x8;
-            }
-            if (value > 0xF)
-                digits++;
+                while (true)
+                {
+                    uint temp = value / 10;
+                    if (value != (temp * 10))
+                    {
+                        break;
+                    }
 
-            return digits;
+                    value = temp;
+                    zeroCount++;
+                }
+            }
+
+            valueWithoutTrailingZeros = value;
+            return zeroCount;
         }
     }
 }

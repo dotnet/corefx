@@ -24,7 +24,12 @@ namespace System.Linq
     {
         public SystemCore_EnumerableDebugView(IEnumerable<T> enumerable)
         {
-            _enumerable = enumerable ?? throw Error.ArgumentNull(nameof(enumerable));
+            if (enumerable is null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.enumerable);
+            }
+
+            _enumerable = enumerable;
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
@@ -43,7 +48,7 @@ namespace System.Linq
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private IEnumerable<T> _enumerable;
+        private readonly IEnumerable<T> _enumerable;
     }
 
     internal sealed class SystemCore_EnumerableDebugViewEmptyException : Exception
@@ -55,7 +60,12 @@ namespace System.Linq
     {
         public SystemCore_EnumerableDebugView(IEnumerable enumerable)
         {
-            _enumerable = enumerable ?? throw Error.ArgumentNull(nameof(enumerable));
+            if (enumerable is null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.enumerable);
+            }
+
+            _enumerable = enumerable;
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
@@ -79,7 +89,7 @@ namespace System.Linq
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private IEnumerable _enumerable;
+        private readonly IEnumerable _enumerable;
     }
 
     internal sealed class SystemLinq_GroupingDebugView<TKey, TElement>

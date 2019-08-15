@@ -131,7 +131,7 @@ namespace System.Data.SqlClient
             InnerConnection.AddWeakReference(value, tag);
         }
 
-        override protected DbCommand CreateDbCommand()
+        protected override DbCommand CreateDbCommand()
         {
             DbCommand command = null;
             DbProviderFactory providerFactory = ConnectionFactory.ProviderFactory;
@@ -141,7 +141,7 @@ namespace System.Data.SqlClient
         }
 
 
-        override protected void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
@@ -237,7 +237,7 @@ namespace System.Data.SqlClient
             }
             else
             {
-                Debug.Assert(false, "unexpected state switch");
+                Debug.Fail("unexpected state switch");
                 if (originalState != currentState)
                 {
                     OnStateChange(new StateChangeEventArgs(originalState, currentState));
@@ -262,4 +262,3 @@ namespace System.Data.SqlClient
         }
     }
 }
-

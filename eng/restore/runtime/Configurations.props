@@ -1,0 +1,11 @@
+﻿<Project>
+  <PropertyGroup>
+    <BuildConfigurations>
+      netcoreapp-Windows_NT;
+      netcoreapp-Unix;
+      uap10.0.16299;
+      uap;
+      mono;
+    </BuildConfigurations>
+  </PropertyGroup>
+</Project>

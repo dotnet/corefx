@@ -26,10 +26,10 @@ namespace System.Net
 
         private WebHeaderCollection _webHeaderCollection = new WebHeaderCollection();
 
-        private Uri _requestUri;
+        private readonly Uri _requestUri;
         private string _originVerb = HttpMethod.Get.Method;
 
-        // We allow getting and setting this (to preserve app-compat). But we don't do anything with it 
+        // We allow getting and setting this (to preserve app-compat). But we don't do anything with it
         // as the underlying System.Net.Http API doesn't support it.
         private int _continueTimeout = DefaultContinueTimeout;
 
@@ -93,14 +93,12 @@ namespace System.Net
         }
         private const string ContinueHeader = "100-continue";
         private const string ChunkedHeader = "chunked";
-        private const string GZipHeader = "gzip";
-        private const string DeflateHeader = "deflate";
 
         public HttpWebRequest()
         {
         }
 
-        [Obsolete("Serialization is obsoleted for this type.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("Serialization is obsoleted for this type.  https://go.microsoft.com/fwlink/?linkid=14202")]
         protected HttpWebRequest(SerializationInfo serializationInfo, StreamingContext streamingContext) : base(serializationInfo, streamingContext)
         {
             throw new PlatformNotSupportedException();
@@ -187,7 +185,7 @@ namespace System.Net
             }
         }
 
-        public override String ContentType
+        public override string ContentType
         {
             get
             {
@@ -299,7 +297,7 @@ namespace System.Net
                 }
 
                 Uri hostUri;
-                if ((value.IndexOf('/') != -1) || (!TryGetHostUri(value, out hostUri)))
+                if ((value.Contains('/')) || (!TryGetHostUri(value, out hostUri)))
                 {
                     throw new ArgumentException(SR.net_invalid_host, nameof(value));
                 }
@@ -311,7 +309,7 @@ namespace System.Net
                 {
                     _hostHasPort = true;
                 }
-                else if (value.IndexOf(':') == -1)
+                else if (!value.Contains(':'))
                 {
                     _hostHasPort = false;
                 }
@@ -394,8 +392,7 @@ namespace System.Net
                     //
                     // if not check if the user is trying to set chunked:
                     //
-                    string newValue = value.ToLower();
-                    fChunked = (newValue.IndexOf(ChunkedHeader) != -1);
+                    fChunked = (value.IndexOf(ChunkedHeader, StringComparison.OrdinalIgnoreCase) != -1);
 
                     //
                     // prevent them from adding chunked, or from adding an Encoding without
@@ -421,7 +418,6 @@ namespace System.Net
             }
         }
 
-
         public bool KeepAlive { get; set; } = true;
 
         public bool UnsafeAuthenticatedConnectionSharing
@@ -442,7 +438,6 @@ namespace System.Net
                 }
             }
         }
-
 
         public DecompressionMethods AutomaticDecompression
         {
@@ -541,10 +536,8 @@ namespace System.Net
                         return;
                     }
 
-                    string newValue = value.ToLower();
-
-                    fKeepAlive = (newValue.IndexOf("keep-alive") != -1);
-                    fClose = (newValue.IndexOf("close") != -1);
+                    fKeepAlive = (value.IndexOf("keep-alive", StringComparison.OrdinalIgnoreCase) != -1);
+                    fClose = (value.IndexOf("close", StringComparison.OrdinalIgnoreCase) != -1);
 
                     //
                     // Prevent keep-alive and close from being added
@@ -565,7 +558,6 @@ namespace System.Net
 #endif
             }
         }
-
 
         /*
             Accessor:   Expect
@@ -606,9 +598,7 @@ namespace System.Net
                     // Prevent 100-continues from being added
                     //
 
-                    string newValue = value.ToLower();
-
-                    fContinue100 = (newValue.IndexOf(ContinueHeader) != -1);
+                    fContinue100 = (value.IndexOf(ContinueHeader, StringComparison.OrdinalIgnoreCase) != -1);
 
                     if (fContinue100)
                     {
@@ -652,7 +642,6 @@ namespace System.Net
         }
 
         public static new RequestCachePolicy DefaultCachePolicy { get; set; } = new RequestCachePolicy(RequestCacheLevel.BypassCache);
-
 
         public DateTime IfModifiedSince
         {
@@ -756,7 +745,6 @@ namespace System.Net
                 _clientCertificates = value;
             }
         }
-
 
         // HTTP Version
         /// <devdoc>
@@ -863,7 +851,7 @@ namespace System.Net
                 // Handle the case where their object tries to change
                 //  name, value pairs after they call set, so therefore,
                 //  we need to clone their headers.
-                foreach (String headerName in webHeaders.AllKeys)
+                foreach (string headerName in webHeaders.AllKeys)
                 {
                     newWebHeaders[headerName] = webHeaders[headerName];
                 }
@@ -1056,7 +1044,7 @@ namespace System.Net
             return GetRequestStream();
         }
 
-        public override IAsyncResult BeginGetRequestStream(AsyncCallback callback, Object state)
+        public override IAsyncResult BeginGetRequestStream(AsyncCallback callback, object state)
         {
             CheckAbort();
 
@@ -1138,13 +1126,31 @@ namespace System.Net
 
                 Debug.Assert(handler.UseProxy); // Default of handler.UseProxy is true.
                 Debug.Assert(handler.Proxy == null); // Default of handler.Proxy is null.
+
+                // HttpClientHandler default is to use a proxy which is the system proxy.
+                // This is indicated by the properties 'UseProxy == true' and 'Proxy == null'.
+                //
+                // However, HttpWebRequest doesn't have a separate 'UseProxy' property. Instead,
+                // the default of the 'Proxy' property is a non-null IWebProxy object which is the
+                // system default proxy object. If the 'Proxy' property were actually null, then
+                // that means don't use any proxy.
+                //
+                // So, we need to map the desired HttpWebRequest proxy settings to equivalent
+                // HttpClientHandler settings.
                 if (_proxy == null)
                 {
                     handler.UseProxy = false;
                 }
-                else
+                else if (!object.ReferenceEquals(_proxy, WebRequest.GetSystemWebProxy()))
                 {
                     handler.Proxy = _proxy;
+                }
+                else
+                {
+                    // Since this HttpWebRequest is using the default system proxy, we need to
+                    // pass any proxy credentials that the developer might have set via the
+                    // WebRequest.DefaultWebProxy.Credentials property.
+                    handler.DefaultProxyCredentials = _proxy.Credentials;
                 }
 
                 handler.ClientCertificates.AddRange(ClientCertificates);
@@ -1321,7 +1327,6 @@ namespace System.Net
 
         public void AddRange(string rangeSpecifier, long from, long to)
         {
-
             //
             // Do some range checking before assembling the header
             //
@@ -1371,7 +1376,6 @@ namespace System.Net
 
         private bool AddRange(string rangeSpecifier, string from, string to)
         {
-
             string curRange = _webHeaderCollection[HttpKnownHeaderNames.Range];
 
             if ((curRange == null) || (curRange.Length == 0))
@@ -1380,7 +1384,7 @@ namespace System.Net
             }
             else
             {
-                if (String.Compare(curRange.Substring(0, curRange.IndexOf('=')), rangeSpecifier, StringComparison.OrdinalIgnoreCase) != 0)
+                if (!string.Equals(curRange.Substring(0, curRange.IndexOf('=')), rangeSpecifier, StringComparison.OrdinalIgnoreCase))
                 {
                     return false;
                 }
@@ -1394,7 +1398,6 @@ namespace System.Net
             _webHeaderCollection[HttpKnownHeaderNames.Range] = curRange;
             return true;
         }
-
 
         private bool RequestSubmitted
         {
@@ -1450,7 +1453,14 @@ namespace System.Net
                 {
                     return DateTime.MinValue; // MinValue means header is not present
                 }
-                return HttpDateParse.StringToDate(headerValue);
+                if (HttpDateParser.TryStringToDate(headerValue, out DateTimeOffset dateTimeOffset))
+                {
+                    return dateTimeOffset.LocalDateTime;
+                }
+                else
+                {
+                    throw new ProtocolViolationException(SR.net_baddate);
+                }
 #if DEBUG
             }
 #endif
@@ -1465,17 +1475,10 @@ namespace System.Net
                 if (dateTime == DateTime.MinValue)
                     SetSpecialHeaders(headerName, null); // remove header
                 else
-                    SetSpecialHeaders(headerName, DateToString(dateTime));
+                    SetSpecialHeaders(headerName, HttpDateParser.DateToString(dateTime.ToUniversalTime()));
 #if DEBUG
             }
 #endif
-        }
-
-        // convert Date to String using RFC 1123 pattern
-        private static string DateToString(DateTime D)
-        {
-            DateTimeFormatInfo dateFormat = new DateTimeFormatInfo();
-            return D.ToUniversalTime().ToString("R", dateFormat);
         }
 
         private bool TryGetHostUri(string hostName, out Uri hostUri)

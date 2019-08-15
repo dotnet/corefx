@@ -4,17 +4,14 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Reflection;
 
 namespace System.ComponentModel
 {
     /// <summary>
-    ///    <para>
-    ///       Declares an array of attributes for a member and defines
-    ///       the properties and methods that give you access to the attributes in the array.
-    ///       All attributes must derive from <see cref='System.Attribute'/>.
-    ///    </para>
+    /// Declares an array of attributes for a member and defines
+    /// the properties and methods that give you access to the attributes in the array.
+    /// All attributes must derive from <see cref='System.Attribute'/>.
     /// </summary>
     public abstract class MemberDescriptor
     {
@@ -29,27 +26,27 @@ namespace System.ComponentModel
         private int _metadataVersion;
         private string _category;
         private string _description;
-        private object _lockCookie = new object();
+        private readonly object _lockCookie = new object();
 
         /// <summary>
-        ///    <para>
-        ///       Initializes a new instance of the <see cref='System.ComponentModel.MemberDescriptor'/> class with the specified <paramref name="name"/> and no attributes.
-        ///    </para>
+        /// Initializes a new instance of the <see cref='System.ComponentModel.MemberDescriptor'/> class with the specified <paramref name="name"/> and no attributes.
         /// </summary>
         protected MemberDescriptor(string name) : this(name, null)
         {
         }
 
         /// <summary>
-        ///    <para>
-        ///       Initializes a new instance of the <see cref='System.ComponentModel.MemberDescriptor'/> class with the specified <paramref name="name"/> and <paramref name="attributes "/> array.
-        ///    </para>
+        /// Initializes a new instance of the <see cref='System.ComponentModel.MemberDescriptor'/> class with the specified <paramref name="name"/> and <paramref name="attributes "/> array.
         /// </summary>
         protected MemberDescriptor(string name, Attribute[] attributes)
         {
-            if (name == null || name.Length == 0)
+            if (name == null)
             {
-                throw new ArgumentException(SR.InvalidMemberName);
+                throw new ArgumentNullException(nameof(name));
+            }
+            if (name.Length == 0)
+            {
+                throw new ArgumentException(SR.InvalidMemberName, nameof(name));
             }
 
             _name = name;
@@ -66,15 +63,18 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///    <para>
-        ///       Initializes a new instance of the <see cref='System.ComponentModel.MemberDescriptor'/> class with the specified <see cref='System.ComponentModel.MemberDescriptor'/>.
-        ///    </para>
+        /// Initializes a new instance of the <see cref='System.ComponentModel.MemberDescriptor'/> class with the specified <see cref='System.ComponentModel.MemberDescriptor'/>.
         /// </summary>
         protected MemberDescriptor(MemberDescriptor descr)
         {
+            if (descr == null)
+            {
+                throw new ArgumentNullException(nameof(descr));
+            }
+
             _name = descr.Name;
             _displayName = _name;
-            _nameHash = _name.GetHashCode();
+            _nameHash = _name?.GetHashCode() ?? 0;
 
             _attributes = new Attribute[descr.Attributes.Count];
             descr.Attributes.CopyTo(_attributes, 0);
@@ -85,14 +85,17 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///    <para>
-        ///       Initializes a new instance of the <see cref='System.ComponentModel.MemberDescriptor'/> class with the name in the specified
-        ///    <see cref='System.ComponentModel.MemberDescriptor'/> and the attributes 
-        ///       in both the old <see cref='System.ComponentModel.MemberDescriptor'/> and the <see cref='System.Attribute'/> array.
-        ///    </para>
+        /// Initializes a new instance of the <see cref='System.ComponentModel.MemberDescriptor'/> class with the name in the specified
+        /// <see cref='System.ComponentModel.MemberDescriptor'/> and the attributes
+        /// in both the old <see cref='System.ComponentModel.MemberDescriptor'/> and the <see cref='System.Attribute'/> array.
         /// </summary>
         protected MemberDescriptor(MemberDescriptor oldMemberDescriptor, Attribute[] newAttributes)
         {
+            if (oldMemberDescriptor == null)
+            {
+                throw new ArgumentNullException(nameof(oldMemberDescriptor));
+            }
+
             _name = oldMemberDescriptor.Name;
             _displayName = oldMemberDescriptor.DisplayName;
             _nameHash = _name.GetHashCode();
@@ -123,10 +126,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///    <para>
-        ///       Gets or sets an array of
-        ///       attributes.
-        ///    </para>
+        /// Gets or sets an array of attributes.
         /// </summary>
         protected virtual Attribute[] AttributeArray
         {
@@ -149,9 +149,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///    <para>
-        ///       Gets the collection of attributes for this member.
-        ///    </para>
+        /// Gets the collection of attributes for this member.
         /// </summary>
         public virtual AttributeCollection Attributes
         {
@@ -172,66 +170,47 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///    <para>
-        ///       Gets the name of the category that the member belongs to, as specified 
-        ///       in the <see cref='System.ComponentModel.CategoryAttribute'/>.
-        ///    </para>
+        /// Gets the name of the category that the member belongs to, as specified
+        /// in the <see cref='System.ComponentModel.CategoryAttribute'/>.
         /// </summary>
         public virtual string Category => _category ?? (_category = ((CategoryAttribute) Attributes[typeof(CategoryAttribute)]).Category);
 
         /// <summary>
-        ///    <para>
-        ///       Gets the description of
-        ///       the member as specified in the <see cref='System.ComponentModel.DescriptionAttribute'/>.
-        ///    </para>
+        /// Gets the description of the member as specified in the <see cref='System.ComponentModel.DescriptionAttribute'/>.
         /// </summary>
         public virtual string Description => _description ??
                                              (_description = ((DescriptionAttribute) Attributes[typeof(DescriptionAttribute)]).Description);
 
         /// <summary>
-        ///    <para>
-        ///       Gets a value indicating whether the member is browsable as specified in the
-        ///    <see cref='System.ComponentModel.BrowsableAttribute'/>. 
-        ///    </para>
+        /// Gets a value indicating whether the member is browsable as specified in the
+        /// <see cref='System.ComponentModel.BrowsableAttribute'/>.
         /// </summary>
         public virtual bool IsBrowsable => ((BrowsableAttribute)Attributes[typeof(BrowsableAttribute)]).Browsable;
 
         /// <summary>
-        ///    <para>
-        ///       Gets the
-        ///       name of the member.
-        ///    </para>
+        /// Gets the name of the member.
         /// </summary>
         public virtual string Name => _name ?? "";
 
         /// <summary>
-        ///    <para>
-        ///       Gets the hash
-        ///       code for the name of the member as specified in <see cref='System.String.GetHashCode'/>.
-        ///    </para>
+        /// Gets the hash code for the name of the member as specified in <see cref='string.GetHashCode()'/>.
         /// </summary>
         protected virtual int NameHashCode => _nameHash;
 
         /// <summary>
-        ///    <para>
-        ///       Determines whether this member should be set only at
-        ///       design time as specified in the <see cref='System.ComponentModel.DesignOnlyAttribute'/>.
-        ///    </para>
+        /// Determines whether this member should be set only at
+        /// design time as specified in the <see cref='System.ComponentModel.DesignOnlyAttribute'/>.
         /// </summary>
         public virtual bool DesignTimeOnly => (DesignOnlyAttribute.Yes.Equals(Attributes[typeof(DesignOnlyAttribute)]));
 
         /// <summary>
-        ///    <para>
-        ///       Gets the name that can be displayed in a window like a
-        ///       properties window.
-        ///    </para>
+        /// Gets the name that can be displayed in a window like a properties window.
         /// </summary>
         public virtual string DisplayName
         {
             get
             {
-                DisplayNameAttribute displayNameAttr = Attributes[typeof(DisplayNameAttribute)] as DisplayNameAttribute;
-                if (displayNameAttr == null || displayNameAttr.IsDefaultAttribute())
+                if (!(Attributes[typeof(DisplayNameAttribute)] is DisplayNameAttribute displayNameAttr) || displayNameAttr.IsDefaultAttribute())
                 {
                     return _displayName;
                 }
@@ -240,9 +219,9 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Called each time we access the attributes on
-        ///     this member descriptor to give deriving classes
-        ///     a chance to change them on the fly.
+        /// Called each time we access the attributes on
+        /// this member descriptor to give deriving classes
+        /// a chance to change them on the fly.
         /// </summary>
         private void CheckAttributesValid()
         {
@@ -258,10 +237,8 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///    <para>
-        ///       Creates a collection of attributes using the
-        ///       array of attributes that you passed to the constructor.
-        ///    </para>
+        /// Creates a collection of attributes using the
+        /// array of attributes that you passed to the constructor.
         /// </summary>
         protected virtual AttributeCollection CreateAttributeCollection()
         {
@@ -269,10 +246,8 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///    <para>
-        ///       Compares this instance to the specified <see cref='System.ComponentModel.MemberDescriptor'/> to see if they are equivalent.
-        ///       NOTE: If you make a change here, you likely need to change GetHashCode() as well.
-        ///    </para>
+        /// Compares this instance to the specified <see cref='System.ComponentModel.MemberDescriptor'/> to see if they are equivalent.
+        /// NOTE: If you make a change here, you likely need to change GetHashCode() as well.
         /// </summary>
         public override bool Equals(object obj)
         {
@@ -337,14 +312,17 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///    <para>
-        ///       In an inheriting class, adds the attributes of the inheriting class to the
-        ///       specified list of attributes in the parent class.  For duplicate attributes,
-        ///       the last one added to the list will be kept.
-        ///    </para>
+        /// In an inheriting class, adds the attributes of the inheriting class to the
+        /// specified list of attributes in the parent class. For duplicate attributes,
+        /// the last one added to the list will be kept.
         /// </summary>
         protected virtual void FillAttributes(IList attributeList)
         {
+            if (attributeList == null)
+            {
+                throw new ArgumentNullException(nameof(attributeList));
+            }
+
             if (_originalAttributes != null)
             {
                 foreach (Attribute attr in _originalAttributes)
@@ -367,9 +345,8 @@ namespace System.ComponentModel
                     {
                         FillAttributes(list);
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
-                        Debug.Fail($"{_name}>>{e}");
                     }
                 }
                 else
@@ -382,8 +359,12 @@ namespace System.ComponentModel
                 for (int i = 0; i < list.Count;)
                 {
                     int savedIndex = -1;
-                    object typeId = list[i].TypeId;
-                    if (!map.TryGetValue(typeId, out savedIndex))
+                    object typeId = list[i]?.TypeId;
+                    if (typeId == null)
+                    {
+                        list.RemoveAt(i);
+                    }
+                    else if (!map.TryGetValue(typeId, out savedIndex))
                     {
                         map.Add(typeId, i);
                         i++;
@@ -408,9 +389,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///    <para>
-        ///       Finds the given method through reflection.  This method only looks for public methods.
-        ///    </para>
+        /// Finds the given method through reflection. This method only looks for public methods.
         /// </summary>
         protected static MethodInfo FindMethod(Type componentClass, string name, Type[] args, Type returnType)
         {
@@ -418,23 +397,22 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///    <para>
-        ///       Finds the given method through reflection.
-        ///    </para>
+        /// Finds the given method through reflection.
         /// </summary>
         protected static MethodInfo FindMethod(Type componentClass, string name, Type[] args, Type returnType, bool publicOnly)
         {
-            MethodInfo result = null;
+            if (componentClass == null)
+            {
+                throw new ArgumentNullException(nameof(componentClass));
+            }
 
+            MethodInfo result = null;
             if (publicOnly)
             {
                 result = componentClass.GetMethod(name, args);
             }
             else
             {
-                // The original impementation requires the method https://msdn.microsoft.com/en-us/library/5fed8f59(v=vs.110).aspx which is not 
-                // available on .NET Core. The replacement will use the default BindingFlags, which may miss some methods that had been found
-                // on .NET Framework.
                 result = componentClass.GetMethod(name, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, null, args, null);
             }
             if (result != null && !result.ReturnType.IsEquivalentTo(returnType))
@@ -445,19 +423,16 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Try to keep this reasonable in [....] with Equals(). Specifically, 
-        ///     if A.Equals(B) returns true, A & B should have the same hash code.
+        /// Try to keep this reasonable in [....] with Equals(). Specifically,
+        /// if A.Equals(B) returns true, A &amp; B should have the same hash code.
         /// </summary>
-        public override int GetHashCode()
-        {
-            return _nameHash;
-        }
+        public override int GetHashCode() => _nameHash;
 
         /// <summary>
-        ///     This method returns the object that should be used during invocation of members.
-        ///     Normally the return value will be the same as the instance passed in.  If
-        ///     someone associated another object with this instance, or if the instance is a
-        ///     custom type descriptor, GetInvocationTarget may return a different value.
+        /// This method returns the object that should be used during invocation of members.
+        /// Normally the return value will be the same as the instance passed in. If
+        /// someone associated another object with this instance, or if the instance is a
+        /// custom type descriptor, GetInvocationTarget may return a different value.
         /// </summary>
         protected virtual object GetInvocationTarget(Type type, object instance)
         {
@@ -475,17 +450,11 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///    <para>
-        ///       Gets a component site
-        ///       for the given component.
-        ///    </para>
+        /// Gets a component site for the given component.
         /// </summary>
-        protected static ISite GetSite(object component)
-        {
-            return (component as IComponent)?.Site;
-        }
+        protected static ISite GetSite(object component) => (component as IComponent)?.Site;
 
-        [Obsolete("This method has been deprecated. Use GetInvocationTarget instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("This method has been deprecated. Use GetInvocationTarget instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected static object GetInvokee(Type componentClass, object component) {
 
             if (componentClass == null)

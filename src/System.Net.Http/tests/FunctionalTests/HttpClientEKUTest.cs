@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -10,23 +10,24 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    public abstract class HttpClientEKUTest : HttpClientTestBase
+    public abstract class HttpClientEKUTest : HttpClientHandlerTestBase
     {
         // Curl + OSX SecureTransport doesn't support the custom certificate callback.
         private static bool BackendSupportsCustomCertificateHandling =>
 #if TargetsWindows
             true;
 #else
-            Interop.Http.GetSslVersionDescription()?.StartsWith(Interop.Http.OpenSsl10Description, StringComparison.OrdinalIgnoreCase) ?? false;
+            TestHelper.NativeHandlerSupportsSslConfiguration();
 #endif
 
         private static bool CanTestCertificates =>
-            Capability.IsTrustedRootCertificateInstalled() && 
+            Capability.IsTrustedRootCertificateInstalled() &&
             (BackendSupportsCustomCertificateHandling || Capability.AreHostsFileNamesInstalled());
 
         private static bool CanTestClientCertificates =>
@@ -44,6 +45,8 @@ namespace System.Net.Http.Functional.Tests
 
         private VerboseTestLogging _log = VerboseTestLogging.GetInstance();
 
+        public HttpClientEKUTest(ITestOutputHelper output) : base(output) { }
+
         [ConditionalFact(nameof(CanTestCertificates))]
         public async Task HttpClient_NoEKUServerAuth_Ok()
         {
@@ -52,7 +55,7 @@ namespace System.Net.Http.Functional.Tests
 
             using (var server = new HttpsTestServer(options))
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 server.Start();
 
@@ -74,7 +77,7 @@ namespace System.Net.Http.Functional.Tests
 
             using (var server = new HttpsTestServer(options))
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 server.Start();
 
@@ -97,7 +100,7 @@ namespace System.Net.Http.Functional.Tests
 
             using (var server = new HttpsTestServer(options))
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 server.Start();
 
@@ -121,7 +124,7 @@ namespace System.Net.Http.Functional.Tests
 
             using (var server = new HttpsTestServer(options))
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 server.Start();
 
@@ -134,7 +137,7 @@ namespace System.Net.Http.Functional.Tests
 
                 // Server aborts the TCP channel.
                 await Assert.ThrowsAsync<HttpRequestException>(() => tasks[1]);
-                
+
                 await Assert.ThrowsAsync<AuthenticationException>(() => tasks[0]);
             }
         }

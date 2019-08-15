@@ -135,8 +135,8 @@ namespace System.Tests
             object[] args = new object[] { null };
             d.DynamicInvoke(args);
             MyStruct s = (MyStruct)(args[0]);
-            Assert.Equal(s.X, 7);
-            Assert.Equal(s.Y, 8);
+            Assert.Equal(7, s.X);
+            Assert.Equal(8, s.Y);
         }
 
         [Fact]
@@ -165,7 +165,7 @@ namespace System.Tests
             Delegate d = new EnumEnumDelegate(EnumEnumMethod);
             d.DynamicInvoke(o1, o2);
         }
-        
+
         [Fact]
         public static void DynamicInvoke_SizePreservingNonVauePreservingConversion_ThrowsArgumentException()
         {
@@ -221,13 +221,13 @@ namespace System.Tests
                         (byte)102,
                         (sbyte)-101,
                         (short)-103,
-                        (UInt16)104,
+                        (ushort)104,
                         (int)-105,
-                        (UInt32)106,
+                        (uint)106,
                         (long)-107,
-                        (UInt64)108,
-                        (Single)109.1,
-                        (Double)111.12
+                        (ulong)108,
+                        (float)109.1,
+                        (double)111.12
                     }
                     ));
         }
@@ -246,13 +246,13 @@ namespace System.Tests
                         Type.Missing,
                         (sbyte)-101,
                         Type.Missing,
-                        (UInt16)104,
+                        (ushort)104,
                         Type.Missing,
-                        (UInt32)106,
+                        (uint)106,
                         Type.Missing,
-                        (UInt64)108,
+                        (ulong)108,
                         Type.Missing,
-                        (Double)111.12
+                        (double)111.12
                     }
                     ));
         }
@@ -447,8 +447,8 @@ namespace System.Tests
 
         private static void ValueTypeMethod(MyStruct s)
         {
-            Assert.Equal(s.X, 0);
-            Assert.Equal(s.Y, 0);
+            Assert.Equal(0, s.X);
+            Assert.Equal(0, s.Y);
         }
 
         private delegate void ValueTypeDelegate(MyStruct s);
@@ -456,24 +456,24 @@ namespace System.Tests
         private static void NullableMethod(int? n)
         {
             Assert.True(n.HasValue);
-            Assert.Equal(n.Value, 7);
+            Assert.Equal(7, n.Value);
         }
 
         private delegate void NullableDelegate(int? s);
 
-        private enum ShortEnum : short
+        public enum ShortEnum : short
         {
             One = 1,
             Seven = 7,
         }
 
-        private enum IntEnum : int
+        public enum IntEnum : int
         {
             One = 1,
             Seven = 7,
         }
 
-        private enum U4 : uint
+        public enum U4 : uint
         {
             One = 1,
             Seven = 7,
@@ -485,14 +485,14 @@ namespace System.Tests
             char character = 'c',
             byte unsignedbyte = 2,
             sbyte signedbyte = -1,
-            Int16 int16 = -3,
-            UInt16 uint16 = 4,
-            Int32 int32 = -5,
-            UInt32 uint32 = 6,
-            Int64 int64 = -7,
-            UInt64 uint64 = 8,
-            Single single = (Single)9.1,
-            Double dbl = 11.12);
+            short int16 = -3,
+            ushort uint16 = 4,
+            int int32 = -5,
+            uint uint32 = 6,
+            long int64 = -7,
+            ulong uint64 = 8,
+            float single = (float)9.1,
+            double dbl = 11.12);
 
         private static string AllPrimitivesMethod(
             bool boolean,
@@ -500,14 +500,14 @@ namespace System.Tests
             char character,
             byte unsignedbyte,
             sbyte signedbyte,
-            Int16 int16,
-            UInt16 uint16,
-            Int32 int32,
-            UInt32 uint32,
-            Int64 int64,
-            UInt64 uint64,
-            Single single,
-            Double dbl)
+            short int16,
+            ushort uint16,
+            int int32,
+            uint uint32,
+            long int64,
+            ulong uint64,
+            float single,
+            double dbl)
         {
             return FormattableString.Invariant($"{boolean}, {str}, {character}, {unsignedbyte}, {signedbyte}, {int16}, {uint16}, {int32}, {uint32}, {int64}, {uint64}, {single}, {dbl}");
         }
@@ -682,11 +682,10 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/coreclr#15196")]
         public static void CreateDelegate2_Target_GenericTypeParameter()
         {
 
-            Type theT = typeof(G<>).GetTypeInfo().GenericTypeParameters[0];
+            Type theT = typeof(DummyGenericClassForDelegateTests<>).GetTypeInfo().GenericTypeParameters[0];
             Type delegateType = typeof(Func<object, object, bool>);
             AssertExtensions.Throws<ArgumentException>("target", () => Delegate.CreateDelegate(delegateType, theT, "ReferenceEquals"));
         }
@@ -1158,7 +1157,7 @@ namespace System.Tests
             {
             }
 
-            public new static int DoRun(C x)
+            public static new int DoRun(C x)
             {
                 return 107;
             }
@@ -1199,3 +1198,5 @@ namespace System.Tests
         #endregion Test Setup
     }
 }
+
+internal class DummyGenericClassForDelegateTests<T> { }

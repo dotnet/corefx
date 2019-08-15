@@ -9,13 +9,13 @@ using System.Globalization;
 namespace System.Diagnostics
 {
     /// <summary>
-    ///     A collection containing all the instance data for a counter.  This collection is contained in the 
-    ///     <see cref='System.Diagnostics.InstanceDataCollectionCollection'/> when using the 
-    ///     <see cref='System.Diagnostics.PerformanceCounterCategory.ReadCategory'/> method.  
-    /// </summary>    
+    ///     A collection containing all the instance data for a counter.  This collection is contained in the
+    ///     <see cref='System.Diagnostics.InstanceDataCollectionCollection'/> when using the
+    ///     <see cref='System.Diagnostics.PerformanceCounterCategory.ReadCategory'/> method.
+    /// </summary>
     public class InstanceDataCollection : DictionaryBase
     {
-        [Obsolete("This constructor has been deprecated.  Please use System.Diagnostics.InstanceDataCollectionCollection.get_Item to get an instance of this collection instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("This constructor has been deprecated.  Please use System.Diagnostics.InstanceDataCollectionCollection.get_Item to get an instance of this collection instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public InstanceDataCollection(string counterName)
         {
             if (counterName == null)
@@ -74,5 +74,3 @@ namespace System.Diagnostics
         }
     }
 }
-
-

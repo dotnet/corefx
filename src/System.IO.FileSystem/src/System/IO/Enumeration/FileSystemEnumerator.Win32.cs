@@ -2,10 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.IO;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
+#if MS_IO_REDIST
+namespace Microsoft.IO.Enumeration
+#else
 namespace System.IO.Enumeration
+#endif
 {
     public partial class FileSystemEnumerator<TResult>
     {
@@ -22,7 +28,7 @@ namespace System.IO.Enumeration
                 ApcContext: IntPtr.Zero,
                 IoStatusBlock: out Interop.NtDll.IO_STATUS_BLOCK statusBlock,
                 FileInformation: _buffer,
-                Length: (uint)_buffer.Length,
+                Length: (uint)_bufferLength,
                 FileInformationClass: Interop.NtDll.FILE_INFORMATION_CLASS.FileFullDirectoryInformation,
                 ReturnSingleEntry: Interop.BOOLEAN.FALSE,
                 FileName: null,
@@ -49,7 +55,7 @@ namespace System.IO.Enumeration
             }
         }
 
-        private IntPtr CreateRelativeDirectoryHandle(ReadOnlySpan<char> relativePath, string fullPath)
+        private unsafe IntPtr CreateRelativeDirectoryHandle(ReadOnlySpan<char> relativePath, string fullPath)
         {
             (int status, IntPtr handle) = Interop.NtDll.CreateFile(
                 relativePath,
@@ -64,13 +70,17 @@ namespace System.IO.Enumeration
                 case Interop.StatusOptions.STATUS_SUCCESS:
                     return handle;
                 default:
+                    // Note that there are numerous cases where multiple NT status codes convert to a single Win32 System Error codes,
+                    // such as ERROR_ACCESS_DENIED. As we want to replicate Win32 handling/reporting and the mapping isn't documented,
+                    // we should always do our logic on the converted code, not the NTSTATUS.
+
                     int error = (int)Interop.NtDll.RtlNtStatusToDosError(status);
 
-                    // Note that there are many NT status codes that convert to ERROR_ACCESS_DENIED.
-                    if ((error == Interop.Errors.ERROR_ACCESS_DENIED && _options.IgnoreInaccessible) || ContinueOnError(error))
+                    if (ContinueOnDirectoryError(error, ignoreNotFound: true))
                     {
                         return IntPtr.Zero;
                     }
+
                     throw Win32Marshal.GetExceptionForWin32Error(error, fullPath);
             }
         }

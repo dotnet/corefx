@@ -15,7 +15,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
@@ -32,7 +32,7 @@ namespace System.Collections.Concurrent
     /// </remarks>
     [DebuggerTypeProxy(typeof(IDictionaryDebugView<,>))]
     [DebuggerDisplay("Count = {Count}")]
-    public class ConcurrentDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue>
+    public class ConcurrentDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue> where TKey : notnull
     {
         /// <summary>
         /// Tables that hold the internal state of the ConcurrentDictionary
@@ -55,7 +55,7 @@ namespace System.Collections.Concurrent
         }
 
         private volatile Tables _tables; // Internal tables of the dictionary
-        private IEqualityComparer<TKey> _comparer; // Key equality comparer
+        private readonly IEqualityComparer<TKey> _comparer; // Key equality comparer
         private readonly bool _growLockArray; // Whether to dynamically increase the size of the striped lock
         private int _budget; // The maximum number of elements per lock before a resize operation is triggered
 
@@ -129,53 +129,53 @@ namespace System.Collections.Concurrent
         /// <param name="capacity">The initial number of elements that the <see
         /// cref="ConcurrentDictionary{TKey,TValue}"/>
         /// can contain.</param>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="concurrencyLevel"/> is
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="concurrencyLevel"/> is
         /// less than 1.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"> <paramref name="capacity"/> is less than
+        /// <exception cref="System.ArgumentOutOfRangeException"> <paramref name="capacity"/> is less than
         /// 0.</exception>
         public ConcurrentDictionary(int concurrencyLevel, int capacity) : this(concurrencyLevel, capacity, false, null) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConcurrentDictionary{TKey,TValue}"/>
         /// class that contains elements copied from the specified <see
-        /// cref="T:System.Collections.IEnumerable{KeyValuePair{TKey,TValue}}"/>, has the default concurrency
+        /// cref="System.Collections.Generic.IEnumerable{T}"/>, has the default concurrency
         /// level, has the default initial capacity, and uses the default comparer for the key type.
         /// </summary>
         /// <param name="collection">The <see
-        /// cref="T:System.Collections.IEnumerable{KeyValuePair{TKey,TValue}}"/> whose elements are copied to
+        /// cref="System.Collections.Generic.IEnumerable{T}"/> whose elements are copied to
         /// the new
         /// <see cref="ConcurrentDictionary{TKey,TValue}"/>.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="collection"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="collection"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
-        /// <exception cref="T:System.ArgumentException"><paramref name="collection"/> contains one or more
+        /// <exception cref="System.ArgumentException"><paramref name="collection"/> contains one or more
         /// duplicate keys.</exception>
         public ConcurrentDictionary(IEnumerable<KeyValuePair<TKey, TValue>> collection) : this(collection, null) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConcurrentDictionary{TKey,TValue}"/>
         /// class that is empty, has the specified concurrency level and capacity, and uses the specified
-        /// <see cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/>.
+        /// <see cref="System.Collections.Generic.IEqualityComparer{TKey}"/>.
         /// </summary>
-        /// <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/>
+        /// <param name="comparer">The <see cref="System.Collections.Generic.IEqualityComparer{TKey}"/>
         /// implementation to use when comparing keys.</param>
-        public ConcurrentDictionary(IEqualityComparer<TKey> comparer) : this(DefaultConcurrencyLevel, DefaultCapacity, true, comparer) { }
+        public ConcurrentDictionary(IEqualityComparer<TKey>? comparer) : this(DefaultConcurrencyLevel, DefaultCapacity, true, comparer) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConcurrentDictionary{TKey,TValue}"/>
         /// class that contains elements copied from the specified <see
-        /// cref="T:System.Collections.IEnumerable"/>, has the default concurrency level, has the default
+        /// cref="System.Collections.IEnumerable"/>, has the default concurrency level, has the default
         /// initial capacity, and uses the specified
-        /// <see cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/>.
+        /// <see cref="System.Collections.Generic.IEqualityComparer{TKey}"/>.
         /// </summary>
         /// <param name="collection">The <see
-        /// cref="T:System.Collections.IEnumerable{KeyValuePair{TKey,TValue}}"/> whose elements are copied to
+        /// cref="System.Collections.Generic.IEnumerable{T}"/> whose elements are copied to
         /// the new
         /// <see cref="ConcurrentDictionary{TKey,TValue}"/>.</param>
-        /// <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/>
+        /// <param name="comparer">The <see cref="System.Collections.Generic.IEqualityComparer{TKey}"/>
         /// implementation to use when comparing keys.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="collection"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="collection"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
-        public ConcurrentDictionary(IEnumerable<KeyValuePair<TKey, TValue>> collection, IEqualityComparer<TKey> comparer)
+        public ConcurrentDictionary(IEnumerable<KeyValuePair<TKey, TValue>> collection, IEqualityComparer<TKey>? comparer)
             : this(comparer)
         {
             if (collection == null) throw new ArgumentNullException(nameof(collection));
@@ -184,26 +184,26 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConcurrentDictionary{TKey,TValue}"/> 
-        /// class that contains elements copied from the specified <see cref="T:System.Collections.IEnumerable"/>, 
-        /// has the specified concurrency level, has the specified initial capacity, and uses the specified 
-        /// <see cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/>.
+        /// Initializes a new instance of the <see cref="ConcurrentDictionary{TKey,TValue}"/>
+        /// class that contains elements copied from the specified <see cref="System.Collections.IEnumerable"/>,
+        /// has the specified concurrency level, has the specified initial capacity, and uses the specified
+        /// <see cref="System.Collections.Generic.IEqualityComparer{TKey}"/>.
         /// </summary>
-        /// <param name="concurrencyLevel">The estimated number of threads that will update the 
+        /// <param name="concurrencyLevel">The estimated number of threads that will update the
         /// <see cref="ConcurrentDictionary{TKey,TValue}"/> concurrently.</param>
-        /// <param name="collection">The <see cref="T:System.Collections.IEnumerable{KeyValuePair{TKey,TValue}}"/> whose elements are copied to the new 
+        /// <param name="collection">The <see cref="System.Collections.Generic.IEnumerable{T}"/> whose elements are copied to the new
         /// <see cref="ConcurrentDictionary{TKey,TValue}"/>.</param>
-        /// <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/> implementation to use 
+        /// <param name="comparer">The <see cref="System.Collections.Generic.IEqualityComparer{TKey}"/> implementation to use
         /// when comparing keys.</param>
-        /// <exception cref="T:System.ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// <paramref name="collection"/> is a null reference (Nothing in Visual Basic).
         /// </exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException">
+        /// <exception cref="System.ArgumentOutOfRangeException">
         /// <paramref name="concurrencyLevel"/> is less than 1.
         /// </exception>
-        /// <exception cref="T:System.ArgumentException"><paramref name="collection"/> contains one or more duplicate keys.</exception>
+        /// <exception cref="System.ArgumentException"><paramref name="collection"/> contains one or more duplicate keys.</exception>
         public ConcurrentDictionary(
-            int concurrencyLevel, IEnumerable<KeyValuePair<TKey, TValue>> collection, IEqualityComparer<TKey> comparer)
+            int concurrencyLevel, IEnumerable<KeyValuePair<TKey, TValue>> collection, IEqualityComparer<TKey>? comparer)
             : this(concurrencyLevel, DefaultCapacity, false, comparer)
         {
             if (collection == null) throw new ArgumentNullException(nameof(collection));
@@ -233,25 +233,25 @@ namespace System.Collections.Concurrent
         /// <summary>
         /// Initializes a new instance of the <see cref="ConcurrentDictionary{TKey,TValue}"/>
         /// class that is empty, has the specified concurrency level, has the specified initial capacity, and
-        /// uses the specified <see cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/>.
+        /// uses the specified <see cref="System.Collections.Generic.IEqualityComparer{TKey}"/>.
         /// </summary>
         /// <param name="concurrencyLevel">The estimated number of threads that will update the
         /// <see cref="ConcurrentDictionary{TKey,TValue}"/> concurrently.</param>
         /// <param name="capacity">The initial number of elements that the <see
         /// cref="ConcurrentDictionary{TKey,TValue}"/>
         /// can contain.</param>
-        /// <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/>
+        /// <param name="comparer">The <see cref="System.Collections.Generic.IEqualityComparer{TKey}"/>
         /// implementation to use when comparing keys.</param>
-        /// <exception cref="T:System.ArgumentOutOfRangeException">
+        /// <exception cref="System.ArgumentOutOfRangeException">
         /// <paramref name="concurrencyLevel"/> is less than 1. -or-
         /// <paramref name="capacity"/> is less than 0.
         /// </exception>
-        public ConcurrentDictionary(int concurrencyLevel, int capacity, IEqualityComparer<TKey> comparer)
+        public ConcurrentDictionary(int concurrencyLevel, int capacity, IEqualityComparer<TKey>? comparer)
             : this(concurrencyLevel, capacity, false, comparer)
         {
         }
 
-        internal ConcurrentDictionary(int concurrencyLevel, int capacity, bool growLockArray, IEqualityComparer<TKey> comparer)
+        internal ConcurrentDictionary(int concurrencyLevel, int capacity, bool growLockArray, IEqualityComparer<TKey>? comparer)
         {
             if (concurrencyLevel < 1)
             {
@@ -294,9 +294,9 @@ namespace System.Collections.Concurrent
         /// <returns>true if the key/value pair was added to the <see cref="ConcurrentDictionary{TKey,
         /// TValue}"/>
         /// successfully; otherwise, false.</returns>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is null reference
         /// (Nothing in Visual Basic).</exception>
-        /// <exception cref="T:System.OverflowException">The <see cref="ConcurrentDictionary{TKey, TValue}"/>
+        /// <exception cref="System.OverflowException">The <see cref="ConcurrentDictionary{TKey, TValue}"/>
         /// contains too many elements.</exception>
         public bool TryAdd(TKey key, TValue value)
         {
@@ -313,7 +313,7 @@ namespace System.Collections.Concurrent
         /// TValue}"/>.</param>
         /// <returns>true if the <see cref="ConcurrentDictionary{TKey, TValue}"/> contains an element with
         /// the specified key; otherwise, false.</returns>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
         public bool ContainsKey(TKey key)
         {
@@ -333,13 +333,13 @@ namespace System.Collections.Concurrent
         /// name="TValue"/>
         /// if the operation failed.</param>
         /// <returns>true if an object was removed successfully; otherwise, false.</returns>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
-        public bool TryRemove(TKey key, out TValue value)
+        public bool TryRemove(TKey key, [MaybeNullWhen(false)] out TValue value)
         {
             if (key == null) ThrowKeyNullException();
 
-            return TryRemoveInternal(key, out value, false, default(TValue));
+            return TryRemoveInternal(key, out value, false, default);
         }
 
         /// <summary>
@@ -352,7 +352,7 @@ namespace System.Collections.Concurrent
         /// <param name="matchValue">Whether removal of the key is conditional on its value.</param>
         /// <param name="oldValue">The conditional value to compare against if <paramref name="matchValue"/> is true</param>
         /// <returns></returns>
-        private bool TryRemoveInternal(TKey key, out TValue value, bool matchValue, TValue oldValue)
+        private bool TryRemoveInternal(TKey key, [MaybeNullWhen(false)] out TValue value, bool matchValue, [AllowNull] TValue oldValue)
         {
             int hashcode = _comparer.GetHashCode(key);
             while (true)
@@ -371,10 +371,10 @@ namespace System.Collections.Concurrent
                         continue;
                     }
 
-                    Node prev = null;
+                    Node? prev = null;
                     for (Node curr = tables._buckets[bucketNo]; curr != null; curr = curr._next)
                     {
-                        Debug.Assert((prev == null && curr == tables._buckets[bucketNo]) || prev._next == curr);
+                        Debug.Assert((prev == null && curr == tables._buckets[bucketNo]) || prev!._next == curr);
 
                         if (hashcode == curr._hashcode && _comparer.Equals(curr._key, key))
                         {
@@ -383,7 +383,7 @@ namespace System.Collections.Concurrent
                                 bool valuesMatch = EqualityComparer<TValue>.Default.Equals(oldValue, curr._value);
                                 if (!valuesMatch)
                                 {
-                                    value = default(TValue);
+                                    value = default(TValue)!;
                                     return false;
                                 }
                             }
@@ -405,7 +405,7 @@ namespace System.Collections.Concurrent
                     }
                 }
 
-                value = default(TValue);
+                value = default(TValue)!;
                 return false;
             }
         }
@@ -421,18 +421,18 @@ namespace System.Collections.Concurrent
         /// <typeparamref name="TValue"/>, if the operation failed.</param>
         /// <returns>true if the key was found in the <see cref="ConcurrentDictionary{TKey,TValue}"/>;
         /// otherwise, false.</returns>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
-        public bool TryGetValue(TKey key, out TValue value)
+        public bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value)
         {
             if (key == null) ThrowKeyNullException();
             return TryGetValueInternal(key, _comparer.GetHashCode(key), out value);
         }
 
-        private bool TryGetValueInternal(TKey key, int hashcode, out TValue value)
+        private bool TryGetValueInternal(TKey key, int hashcode, [MaybeNullWhen(false)] out TValue value)
         {
             Debug.Assert(_comparer.GetHashCode(key) == hashcode);
-            
+
             // We must capture the _buckets field in a local variable. It is set to a new table on each table resize.
             Tables tables = _tables;
 
@@ -453,7 +453,7 @@ namespace System.Collections.Concurrent
                 n = n._next;
             }
 
-            value = default(TValue);
+            value = default(TValue)!;
             return false;
         }
 
@@ -470,7 +470,7 @@ namespace System.Collections.Concurrent
         /// <returns>true if the value with <paramref name="key"/> was equal to <paramref
         /// name="comparisonValue"/> and replaced with <paramref name="newValue"/>; otherwise,
         /// false.</returns>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null
+        /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is a null
         /// reference.</exception>
         public bool TryUpdate(TKey key, TValue newValue, TValue comparisonValue)
         {
@@ -492,14 +492,14 @@ namespace System.Collections.Concurrent
         /// <returns>true if the value with <paramref name="key"/> was equal to <paramref
         /// name="comparisonValue"/> and replaced with <paramref name="newValue"/>; otherwise,
         /// false.</returns>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null
+        /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is a null
         /// reference.</exception>
         private bool TryUpdateInternal(TKey key, int hashcode, TValue newValue, TValue comparisonValue)
         {
             Debug.Assert(_comparer.GetHashCode(key) == hashcode);
 
             IEqualityComparer<TValue> valueComparer = EqualityComparer<TValue>.Default;
-            
+
             while (true)
             {
                 int bucketNo;
@@ -518,10 +518,10 @@ namespace System.Collections.Concurrent
                     }
 
                     // Try to find this key in the bucket
-                    Node prev = null;
+                    Node? prev = null;
                     for (Node node = tables._buckets[bucketNo]; node != null; node = node._next)
                     {
-                        Debug.Assert((prev == null && node == tables._buckets[bucketNo]) || prev._next == node);
+                        Debug.Assert((prev == null && node == tables._buckets[bucketNo]) || prev!._next == node);
                         if (hashcode == node._hashcode && _comparer.Equals(node._key, key))
                         {
                             if (valueComparer.Equals(node._value, comparisonValue))
@@ -580,24 +580,24 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
-        /// Copies the elements of the <see cref="T:System.Collections.Generic.ICollection"/> to an array of
-        /// type <see cref="T:System.Collections.Generic.KeyValuePair{TKey,TValue}"/>, starting at the
+        /// Copies the elements of the <see cref="System.Collections.Generic.ICollection{T}"/> to an array of
+        /// type <see cref="System.Collections.Generic.KeyValuePair{TKey,TValue}"/>, starting at the
         /// specified array index.
         /// </summary>
         /// <param name="array">The one-dimensional array of type <see
-        /// cref="T:System.Collections.Generic.KeyValuePair{TKey,TValue}"/>
+        /// cref="System.Collections.Generic.KeyValuePair{TKey,TValue}"/>
         /// that is the destination of the <see
-        /// cref="T:System.Collections.Generic.KeyValuePair{TKey,TValue}"/> elements copied from the <see
-        /// cref="T:System.Collections.ICollection"/>. The array must have zero-based indexing.</param>
+        /// cref="System.Collections.Generic.KeyValuePair{TKey,TValue}"/> elements copied from the <see
+        /// cref="System.Collections.ICollection"/>. The array must have zero-based indexing.</param>
         /// <param name="index">The zero-based index in <paramref name="array"/> at which copying
         /// begins.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="array"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="array"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index"/> is less than
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="index"/> is less than
         /// 0.</exception>
-        /// <exception cref="T:System.ArgumentException"><paramref name="index"/> is equal to or greater than
+        /// <exception cref="System.ArgumentException"><paramref name="index"/> is equal to or greater than
         /// the length of the <paramref name="array"/>. -or- The number of elements in the source <see
-        /// cref="T:System.Collections.ICollection"/>
+        /// cref="System.Collections.ICollection"/>
         /// is greater than the available space from <paramref name="index"/> to the end of the destination
         /// <paramref name="array"/>.</exception>
         void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int index)
@@ -668,7 +668,7 @@ namespace System.Collections.Concurrent
 
         /// <summary>
         /// Copy dictionary contents to an array - shared implementation between ToArray and CopyTo.
-        /// 
+        ///
         /// Important: the caller must hold all locks in _locks before calling CopyToPairs.
         /// </summary>
         private void CopyToPairs(KeyValuePair<TKey, TValue>[] array, int index)
@@ -686,7 +686,7 @@ namespace System.Collections.Concurrent
 
         /// <summary>
         /// Copy dictionary contents to an array - shared implementation between ToArray and CopyTo.
-        /// 
+        ///
         /// Important: the caller must hold all locks in _locks before calling CopyToEntries.
         /// </summary>
         private void CopyToEntries(DictionaryEntry[] array, int index)
@@ -704,7 +704,7 @@ namespace System.Collections.Concurrent
 
         /// <summary>
         /// Copy dictionary contents to an array - shared implementation between ToArray and CopyTo.
-        /// 
+        ///
         /// Important: the caller must hold all locks in _locks before calling CopyToObjects.
         /// </summary>
         private void CopyToObjects(object[] array, int index)
@@ -778,10 +778,10 @@ namespace System.Collections.Concurrent
                     }
 
                     // Try to find this key in the bucket
-                    Node prev = null;
+                    Node? prev = null;
                     for (Node node = tables._buckets[bucketNo]; node != null; node = node._next)
                     {
-                        Debug.Assert((prev == null && node == tables._buckets[bucketNo]) || prev._next == node);
+                        Debug.Assert((prev == null && node == tables._buckets[bucketNo]) || prev!._next == node);
                         if (hashcode == node._hashcode && _comparer.Equals(node._key, key))
                         {
                             // The key was found in the dictionary. If updates are allowed, update the value for that key.
@@ -863,11 +863,11 @@ namespace System.Collections.Concurrent
         /// <param name="key">The key of the value to get or set.</param>
         /// <value>The value associated with the specified key. If the specified key is not found, a get
         /// operation throws a
-        /// <see cref="T:System.Collections.Generic.KeyNotFoundException"/>, and a set operation creates a new
+        /// <see cref="System.Collections.Generic.KeyNotFoundException"/>, and a set operation creates a new
         /// element with the specified key.</value>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
-        /// <exception cref="T:System.Collections.Generic.KeyNotFoundException">The property is retrieved and
+        /// <exception cref="System.Collections.Generic.KeyNotFoundException">The property is retrieved and
         /// <paramref name="key"/>
         /// does not exist in the collection.</exception>
         public TValue this[TKey key]
@@ -893,23 +893,43 @@ namespace System.Collections.Concurrent
         // as these are uncommonly needed and when inlined are observed to prevent the inlining
         // of important methods like TryGetValue and ContainsKey.
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void ThrowKeyNotFoundException(object key)
         {
             throw new KeyNotFoundException(SR.Format(SR.Arg_KeyNotFoundWithKey, key.ToString()));
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void ThrowKeyNullException()
         {
             throw new ArgumentNullException("key");
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void ThrowIfInvalidObjectValue(object? value)
+        {
+            if (value != null)
+            {
+                if (!(value is TValue))
+                {
+                    ThrowValueNullException();
+                }
+            }
+            else if (default(TValue)! != null) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
+            {
+                ThrowValueNullException();
+            }
+        }
+
+        private static void ThrowValueNullException()
+        {
+            throw new ArgumentException(SR.ConcurrentDictionary_TypeOfValueIncorrect);
         }
 
         /// <summary>
         /// Gets the number of key/value pairs contained in the <see
         /// cref="ConcurrentDictionary{TKey,TValue}"/>.
         /// </summary>
-        /// <exception cref="T:System.OverflowException">The dictionary contains too many
+        /// <exception cref="System.OverflowException">The dictionary contains too many
         /// elements.</exception>
         /// <value>The number of key/value pairs contained in the <see
         /// cref="ConcurrentDictionary{TKey,TValue}"/>.</value>
@@ -941,7 +961,7 @@ namespace System.Collections.Concurrent
         /// cref="ConcurrentDictionary{TKey,TValue}"/>. Should only be used after all locks
         /// have been acquired.
         /// </summary>
-        /// <exception cref="T:System.OverflowException">The dictionary contains too many
+        /// <exception cref="System.OverflowException">The dictionary contains too many
         /// elements.</exception>
         /// <value>The number of key/value pairs contained in the <see
         /// cref="ConcurrentDictionary{TKey,TValue}"/>.</value>
@@ -962,16 +982,16 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
-        /// Adds a key/value pair to the <see cref="ConcurrentDictionary{TKey,TValue}"/> 
+        /// Adds a key/value pair to the <see cref="ConcurrentDictionary{TKey,TValue}"/>
         /// if the key does not already exist.
         /// </summary>
         /// <param name="key">The key of the element to add.</param>
         /// <param name="valueFactory">The function used to generate a value for the key</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="valueFactory"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="valueFactory"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
-        /// <exception cref="T:System.OverflowException">The dictionary contains too many
+        /// <exception cref="System.OverflowException">The dictionary contains too many
         /// elements.</exception>
         /// <returns>The value for the key.  This will be either the existing value for the key if the
         /// key is already in the dictionary, or the new value for the key as returned by valueFactory
@@ -992,17 +1012,17 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
-        /// Adds a key/value pair to the <see cref="ConcurrentDictionary{TKey,TValue}"/> 
+        /// Adds a key/value pair to the <see cref="ConcurrentDictionary{TKey,TValue}"/>
         /// if the key does not already exist.
         /// </summary>
         /// <param name="key">The key of the element to add.</param>
         /// <param name="valueFactory">The function used to generate a value for the key</param>
         /// <param name="factoryArgument">An argument value to pass into <paramref name="valueFactory"/>.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="valueFactory"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="valueFactory"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
-        /// <exception cref="T:System.OverflowException">The dictionary contains too many
+        /// <exception cref="System.OverflowException">The dictionary contains too many
         /// elements.</exception>
         /// <returns>The value for the key.  This will be either the existing value for the key if the
         /// key is already in the dictionary, or the new value for the key as returned by valueFactory
@@ -1023,16 +1043,16 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
-        /// Adds a key/value pair to the <see cref="ConcurrentDictionary{TKey,TValue}"/> 
+        /// Adds a key/value pair to the <see cref="ConcurrentDictionary{TKey,TValue}"/>
         /// if the key does not already exist.
         /// </summary>
         /// <param name="key">The key of the element to add.</param>
         /// <param name="value">the value to be added, if the key does not already exist</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
-        /// <exception cref="T:System.OverflowException">The dictionary contains too many
+        /// <exception cref="System.OverflowException">The dictionary contains too many
         /// elements.</exception>
-        /// <returns>The value for the key.  This will be either the existing value for the key if the 
+        /// <returns>The value for the key.  This will be either the existing value for the key if the
         /// key is already in the dictionary, or the new value if the key was not in the dictionary.</returns>
         public TValue GetOrAdd(TKey key, TValue value)
         {
@@ -1049,8 +1069,8 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
-        /// Adds a key/value pair to the <see cref="ConcurrentDictionary{TKey,TValue}"/> if the key does not already 
-        /// exist, or updates a key/value pair in the <see cref="ConcurrentDictionary{TKey,TValue}"/> if the key 
+        /// Adds a key/value pair to the <see cref="ConcurrentDictionary{TKey,TValue}"/> if the key does not already
+        /// exist, or updates a key/value pair in the <see cref="ConcurrentDictionary{TKey,TValue}"/> if the key
         /// already exists.
         /// </summary>
         /// <param name="key">The key to be added or whose value should be updated</param>
@@ -1058,15 +1078,15 @@ namespace System.Collections.Concurrent
         /// <param name="updateValueFactory">The function used to generate a new value for an existing key
         /// based on the key's existing value</param>
         /// <param name="factoryArgument">An argument to pass into <paramref name="addValueFactory"/> and <paramref name="updateValueFactory"/>.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="addValueFactory"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="addValueFactory"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="updateValueFactory"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="updateValueFactory"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
-        /// <exception cref="T:System.OverflowException">The dictionary contains too many
+        /// <exception cref="System.OverflowException">The dictionary contains too many
         /// elements.</exception>
-        /// <returns>The new value for the key.  This will be either be the result of addValueFactory (if the key was 
+        /// <returns>The new value for the key.  This will be either be the result of addValueFactory (if the key was
         /// absent) or the result of updateValueFactory (if the key was present).</returns>
         public TValue AddOrUpdate<TArg>(
             TKey key, Func<TKey, TArg, TValue> addValueFactory, Func<TKey, TValue, TArg, TValue> updateValueFactory, TArg factoryArgument)
@@ -1102,23 +1122,23 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
-        /// Adds a key/value pair to the <see cref="ConcurrentDictionary{TKey,TValue}"/> if the key does not already 
-        /// exist, or updates a key/value pair in the <see cref="ConcurrentDictionary{TKey,TValue}"/> if the key 
+        /// Adds a key/value pair to the <see cref="ConcurrentDictionary{TKey,TValue}"/> if the key does not already
+        /// exist, or updates a key/value pair in the <see cref="ConcurrentDictionary{TKey,TValue}"/> if the key
         /// already exists.
         /// </summary>
         /// <param name="key">The key to be added or whose value should be updated</param>
         /// <param name="addValueFactory">The function used to generate a value for an absent key</param>
         /// <param name="updateValueFactory">The function used to generate a new value for an existing key
         /// based on the key's existing value</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="addValueFactory"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="addValueFactory"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="updateValueFactory"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="updateValueFactory"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
-        /// <exception cref="T:System.OverflowException">The dictionary contains too many
+        /// <exception cref="System.OverflowException">The dictionary contains too many
         /// elements.</exception>
-        /// <returns>The new value for the key.  This will be either the result of addValueFactory (if the key was 
+        /// <returns>The new value for the key.  This will be either the result of addValueFactory (if the key was
         /// absent) or the result of updateValueFactory (if the key was present).</returns>
         public TValue AddOrUpdate(TKey key, Func<TKey, TValue> addValueFactory, Func<TKey, TValue, TValue> updateValueFactory)
         {
@@ -1140,7 +1160,7 @@ namespace System.Collections.Concurrent
                         return newValue;
                     }
                 }
-                else 
+                else
                 {
                     // key doesn't exist, try to add
                     TValue resultingValue;
@@ -1153,21 +1173,21 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
-        /// Adds a key/value pair to the <see cref="ConcurrentDictionary{TKey,TValue}"/> if the key does not already 
-        /// exist, or updates a key/value pair in the <see cref="ConcurrentDictionary{TKey,TValue}"/> if the key 
+        /// Adds a key/value pair to the <see cref="ConcurrentDictionary{TKey,TValue}"/> if the key does not already
+        /// exist, or updates a key/value pair in the <see cref="ConcurrentDictionary{TKey,TValue}"/> if the key
         /// already exists.
         /// </summary>
         /// <param name="key">The key to be added or whose value should be updated</param>
         /// <param name="addValue">The value to be added for an absent key</param>
-        /// <param name="updateValueFactory">The function used to generate a new value for an existing key based on 
+        /// <param name="updateValueFactory">The function used to generate a new value for an existing key based on
         /// the key's existing value</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="updateValueFactory"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="updateValueFactory"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
-        /// <exception cref="T:System.OverflowException">The dictionary contains too many
+        /// <exception cref="System.OverflowException">The dictionary contains too many
         /// elements.</exception>
-        /// <returns>The new value for the key.  This will be either the value of addValue (if the key was 
+        /// <returns>The new value for the key.  This will be either the value of addValue (if the key was
         /// absent) or the result of updateValueFactory (if the key was present).</returns>
         public TValue AddOrUpdate(TKey key, TValue addValue, Func<TKey, TValue, TValue> updateValueFactory)
         {
@@ -1188,7 +1208,7 @@ namespace System.Collections.Concurrent
                         return newValue;
                     }
                 }
-                else 
+                else
                 {
                     // key doesn't exist, try to add
                     TValue resultingValue;
@@ -1209,19 +1229,24 @@ namespace System.Collections.Concurrent
         {
             get
             {
+                // Check if any buckets are non-empty, without acquiring any locks.
+                // This fast path should generally suffice as collections are usually not empty.
+                if (!AreAllBucketsEmpty())
+                {
+                    return false;
+                }
+
+                // We didn't see any buckets containing items, however we can't be sure
+                // the collection was actually empty at any point in time as items may have been
+                // added and removed while iterating over the buckets such that we never saw an
+                // empty bucket, but there was always an item present in at least one bucket.
                 int acquiredLocks = 0;
                 try
                 {
                     // Acquire all locks
                     AcquireAllLocks(ref acquiredLocks);
 
-                    for (int i = 0; i < _tables._countPerLock.Length; i++)
-                    {
-                        if (_tables._countPerLock[i] != 0)
-                        {
-                            return false;
-                        }
-                    }
+                    return AreAllBucketsEmpty();
                 }
                 finally
                 {
@@ -1229,7 +1254,20 @@ namespace System.Collections.Concurrent
                     ReleaseLocks(0, acquiredLocks);
                 }
 
-                return true;
+                bool AreAllBucketsEmpty()
+                {
+                    int[] countPerLock = _tables._countPerLock;
+
+                    for (int i = 0; i < countPerLock.Length; i++)
+                    {
+                        if (countPerLock[i] != 0)
+                        {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
             }
         }
 
@@ -1237,15 +1275,15 @@ namespace System.Collections.Concurrent
 
         /// <summary>
         /// Adds the specified key and value to the <see
-        /// cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/>.
+        /// cref="System.Collections.Generic.IDictionary{TKey,TValue}"/>.
         /// </summary>
         /// <param name="key">The object to use as the key of the element to add.</param>
         /// <param name="value">The object to use as the value of the element to add.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
-        /// <exception cref="T:System.OverflowException">The dictionary contains too many
+        /// <exception cref="System.OverflowException">The dictionary contains too many
         /// elements.</exception>
-        /// <exception cref="T:System.ArgumentException">
+        /// <exception cref="System.ArgumentException">
         /// An element with the same key already exists in the <see
         /// cref="ConcurrentDictionary{TKey,TValue}"/>.</exception>
         void IDictionary<TKey, TValue>.Add(TKey key, TValue value)
@@ -1258,15 +1296,15 @@ namespace System.Collections.Concurrent
 
         /// <summary>
         /// Removes the element with the specified key from the <see
-        /// cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/>.
+        /// cref="System.Collections.Generic.IDictionary{TKey,TValue}"/>.
         /// </summary>
         /// <param name="key">The key of the element to remove.</param>
         /// <returns>true if the element is successfully remove; otherwise false. This method also returns
         /// false if
         /// <paramref name="key"/> was not found in the original <see
-        /// cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/>.
+        /// cref="System.Collections.Generic.IDictionary{TKey,TValue}"/>.
         /// </returns>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
         bool IDictionary<TKey, TValue>.Remove(TKey key)
         {
@@ -1276,21 +1314,21 @@ namespace System.Collections.Concurrent
 
         /// <summary>
         /// Gets a collection containing the keys in the <see
-        /// cref="T:System.Collections.Generic.Dictionary{TKey,TValue}"/>.
+        /// cref="System.Collections.Generic.Dictionary{TKey,TValue}"/>.
         /// </summary>
-        /// <value>An <see cref="T:System.Collections.Generic.ICollection{TKey}"/> containing the keys in the
-        /// <see cref="T:System.Collections.Generic.Dictionary{TKey,TValue}"/>.</value>
+        /// <value>An <see cref="System.Collections.Generic.ICollection{TKey}"/> containing the keys in the
+        /// <see cref="System.Collections.Generic.Dictionary{TKey,TValue}"/>.</value>
         public ICollection<TKey> Keys
         {
             get { return GetKeys(); }
         }
 
         /// <summary>
-        /// Gets an <see cref="T:System.Collections.Generic.IEnumerable{TKey}"/> containing the keys of
-        /// the <see cref="T:System.Collections.Generic.IReadOnlyDictionary{TKey,TValue}"/>.
+        /// Gets an <see cref="System.Collections.Generic.IEnumerable{TKey}"/> containing the keys of
+        /// the <see cref="System.Collections.Generic.IReadOnlyDictionary{TKey,TValue}"/>.
         /// </summary>
-        /// <value>An <see cref="T:System.Collections.Generic.IEnumerable{TKey}"/> containing the keys of
-        /// the <see cref="T:System.Collections.Generic.IReadOnlyDictionary{TKey,TValue}"/>.</value>
+        /// <value>An <see cref="System.Collections.Generic.IEnumerable{TKey}"/> containing the keys of
+        /// the <see cref="System.Collections.Generic.IReadOnlyDictionary{TKey,TValue}"/>.</value>
         IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys
         {
             get { return GetKeys(); }
@@ -1298,22 +1336,22 @@ namespace System.Collections.Concurrent
 
         /// <summary>
         /// Gets a collection containing the values in the <see
-        /// cref="T:System.Collections.Generic.Dictionary{TKey,TValue}"/>.
+        /// cref="System.Collections.Generic.Dictionary{TKey,TValue}"/>.
         /// </summary>
-        /// <value>An <see cref="T:System.Collections.Generic.ICollection{TValue}"/> containing the values in
+        /// <value>An <see cref="System.Collections.Generic.ICollection{TValue}"/> containing the values in
         /// the
-        /// <see cref="T:System.Collections.Generic.Dictionary{TKey,TValue}"/>.</value>
+        /// <see cref="System.Collections.Generic.Dictionary{TKey,TValue}"/>.</value>
         public ICollection<TValue> Values
         {
             get { return GetValues(); }
         }
 
         /// <summary>
-        /// Gets an <see cref="T:System.Collections.Generic.IEnumerable{TValue}"/> containing the values
-        /// in the <see cref="T:System.Collections.Generic.IReadOnlyDictionary{TKey,TValue}"/>.
+        /// Gets an <see cref="System.Collections.Generic.IEnumerable{TValue}"/> containing the values
+        /// in the <see cref="System.Collections.Generic.IReadOnlyDictionary{TKey,TValue}"/>.
         /// </summary>
-        /// <value>An <see cref="T:System.Collections.Generic.IEnumerable{TValue}"/> containing the
-        /// values in the <see cref="T:System.Collections.Generic.IReadOnlyDictionary{TKey,TValue}"/>.</value>
+        /// <value>An <see cref="System.Collections.Generic.IEnumerable{TValue}"/> containing the
+        /// values in the <see cref="System.Collections.Generic.IReadOnlyDictionary{TKey,TValue}"/>.</value>
         IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values
         {
             get { return GetValues(); }
@@ -1323,33 +1361,33 @@ namespace System.Collections.Concurrent
         #region ICollection<KeyValuePair<TKey,TValue>> Members
 
         /// <summary>
-        /// Adds the specified value to the <see cref="T:System.Collections.Generic.ICollection{TValue}"/>
+        /// Adds the specified value to the <see cref="System.Collections.Generic.ICollection{TValue}"/>
         /// with the specified key.
         /// </summary>
-        /// <param name="keyValuePair">The <see cref="T:System.Collections.Generic.KeyValuePair{TKey,TValue}"/>
+        /// <param name="keyValuePair">The <see cref="System.Collections.Generic.KeyValuePair{TKey,TValue}"/>
         /// structure representing the key and value to add to the <see
-        /// cref="T:System.Collections.Generic.Dictionary{TKey,TValue}"/>.</param>
-        /// <exception cref="T:System.ArgumentNullException">The <paramref name="keyValuePair"/> of <paramref
+        /// cref="System.Collections.Generic.Dictionary{TKey,TValue}"/>.</param>
+        /// <exception cref="System.ArgumentNullException">The <paramref name="keyValuePair"/> of <paramref
         /// name="keyValuePair"/> is null.</exception>
-        /// <exception cref="T:System.OverflowException">The <see
-        /// cref="T:System.Collections.Generic.Dictionary{TKey,TValue}"/>
+        /// <exception cref="System.OverflowException">The <see
+        /// cref="System.Collections.Generic.Dictionary{TKey,TValue}"/>
         /// contains too many elements.</exception>
-        /// <exception cref="T:System.ArgumentException">An element with the same key already exists in the
-        /// <see cref="T:System.Collections.Generic.Dictionary{TKey,TValue}"/></exception>
+        /// <exception cref="System.ArgumentException">An element with the same key already exists in the
+        /// <see cref="System.Collections.Generic.Dictionary{TKey,TValue}"/></exception>
         void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> keyValuePair)
         {
             ((IDictionary<TKey, TValue>)this).Add(keyValuePair.Key, keyValuePair.Value);
         }
 
         /// <summary>
-        /// Determines whether the <see cref="T:System.Collections.Generic.ICollection{TKey,TValue}"/>
+        /// Determines whether the <see cref="System.Collections.Generic.ICollection{T}"/>
         /// contains a specific key and value.
         /// </summary>
-        /// <param name="keyValuePair">The <see cref="T:System.Collections.Generic.KeyValuePair{TKey,TValue}"/>
+        /// <param name="keyValuePair">The <see cref="System.Collections.Generic.KeyValuePair{TKey,TValue}"/>
         /// structure to locate in the <see
-        /// cref="T:System.Collections.Generic.ICollection{TValue}"/>.</param>
+        /// cref="System.Collections.Generic.ICollection{TValue}"/>.</param>
         /// <returns>true if the <paramref name="keyValuePair"/> is found in the <see
-        /// cref="T:System.Collections.Generic.ICollection{TKey,TValue}"/>; otherwise, false.</returns>
+        /// cref="System.Collections.Generic.ICollection{T}"/>; otherwise, false.</returns>
         bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> keyValuePair)
         {
             TValue value;
@@ -1363,9 +1401,9 @@ namespace System.Collections.Concurrent
         /// <summary>
         /// Gets a value indicating whether the dictionary is read-only.
         /// </summary>
-        /// <value>true if the <see cref="T:System.Collections.Generic.ICollection{TKey,TValue}"/> is
+        /// <value>true if the <see cref="System.Collections.Generic.ICollection{T}"/> is
         /// read-only; otherwise, false. For <see
-        /// cref="T:System.Collections.Generic.Dictionary{TKey,TValue}"/>, this property always returns
+        /// cref="System.Collections.Generic.Dictionary{TKey,TValue}"/>, this property always returns
         /// false.</value>
         bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly
         {
@@ -1376,12 +1414,12 @@ namespace System.Collections.Concurrent
         /// Removes a key and value from the dictionary.
         /// </summary>
         /// <param name="keyValuePair">The <see
-        /// cref="T:System.Collections.Generic.KeyValuePair{TKey,TValue}"/>
+        /// cref="System.Collections.Generic.KeyValuePair{TKey,TValue}"/>
         /// structure representing the key and value to remove from the <see
-        /// cref="T:System.Collections.Generic.Dictionary{TKey,TValue}"/>.</param>
+        /// cref="System.Collections.Generic.Dictionary{TKey,TValue}"/>.</param>
         /// <returns>true if the key and value represented by <paramref name="keyValuePair"/> is successfully
         /// found and removed; otherwise, false.</returns>
-        /// <exception cref="T:System.ArgumentNullException">The Key property of <paramref
+        /// <exception cref="System.ArgumentNullException">The Key property of <paramref
         /// name="keyValuePair"/> is a null reference (Nothing in Visual Basic).</exception>
         bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> keyValuePair)
         {
@@ -1418,45 +1456,36 @@ namespace System.Collections.Concurrent
         /// </summary>
         /// <param name="key">The object to use as the key.</param>
         /// <param name="value">The object to use as the value.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
-        /// <exception cref="T:System.OverflowException">The dictionary contains too many
+        /// <exception cref="System.OverflowException">The dictionary contains too many
         /// elements.</exception>
-        /// <exception cref="T:System.ArgumentException">
+        /// <exception cref="System.ArgumentException">
         /// <paramref name="key"/> is of a type that is not assignable to the key type <typeparamref
-        /// name="TKey"/> of the <see cref="T:System.Collections.Generic.Dictionary{TKey,TValue}"/>. -or-
+        /// name="TKey"/> of the <see cref="System.Collections.Generic.Dictionary{TKey,TValue}"/>. -or-
         /// <paramref name="value"/> is of a type that is not assignable to <typeparamref name="TValue"/>,
-        /// the type of values in the <see cref="T:System.Collections.Generic.Dictionary{TKey,TValue}"/>.
+        /// the type of values in the <see cref="System.Collections.Generic.Dictionary{TKey,TValue}"/>.
         /// -or- A value with the same key already exists in the <see
-        /// cref="T:System.Collections.Generic.Dictionary{TKey,TValue}"/>.
+        /// cref="System.Collections.Generic.Dictionary{TKey,TValue}"/>.
         /// </exception>
-        void IDictionary.Add(object key, object value)
+        void IDictionary.Add(object key, object? value)
         {
             if (key == null) ThrowKeyNullException();
             if (!(key is TKey)) throw new ArgumentException(SR.ConcurrentDictionary_TypeOfKeyIncorrect);
+            ThrowIfInvalidObjectValue(value);
 
-            TValue typedValue;
-            try
-            {
-                typedValue = (TValue)value;
-            }
-            catch (InvalidCastException)
-            {
-                throw new ArgumentException(SR.ConcurrentDictionary_TypeOfValueIncorrect);
-            }
-
-            ((IDictionary<TKey, TValue>)this).Add((TKey)key, typedValue);
+            ((IDictionary<TKey, TValue>)this).Add((TKey)key, (TValue)value!);
         }
 
         /// <summary>
-        /// Gets whether the <see cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/> contains an
+        /// Gets whether the <see cref="System.Collections.IDictionary"/> contains an
         /// element with the specified key.
         /// </summary>
         /// <param name="key">The key to locate in the <see
-        /// cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/>.</param>
-        /// <returns>true if the <see cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/> contains
+        /// cref="System.Collections.IDictionary"/>.</param>
+        /// <returns>true if the <see cref="System.Collections.IDictionary"/> contains
         /// an element with the specified key; otherwise, false.</returns>
-        /// <exception cref="T:System.ArgumentNullException"> <paramref name="key"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"> <paramref name="key"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
         bool IDictionary.Contains(object key)
         {
@@ -1465,10 +1494,10 @@ namespace System.Collections.Concurrent
             return (key is TKey) && this.ContainsKey((TKey)key);
         }
 
-        /// <summary>Provides an <see cref="T:System.Collections.Generics.IDictionaryEnumerator"/> for the
-        /// <see cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/>.</summary>
-        /// <returns>An <see cref="T:System.Collections.Generics.IDictionaryEnumerator"/> for the <see
-        /// cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/>.</returns>
+        /// <summary>Provides an <see cref="System.Collections.IDictionaryEnumerator"/> for the
+        /// <see cref="System.Collections.IDictionary"/>.</summary>
+        /// <returns>An <see cref="System.Collections.IDictionaryEnumerator"/> for the <see
+        /// cref="System.Collections.IDictionary"/>.</returns>
         IDictionaryEnumerator IDictionary.GetEnumerator()
         {
             return new DictionaryEnumerator(this);
@@ -1476,11 +1505,11 @@ namespace System.Collections.Concurrent
 
         /// <summary>
         /// Gets a value indicating whether the <see
-        /// cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/> has a fixed size.
+        /// cref="System.Collections.IDictionary"/> has a fixed size.
         /// </summary>
-        /// <value>true if the <see cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/> has a
+        /// <value>true if the <see cref="System.Collections.IDictionary"/> has a
         /// fixed size; otherwise, false. For <see
-        /// cref="T:System.Collections.Generic.ConcurrentDictionary{TKey,TValue}"/>, this property always
+        /// cref="System.Collections.Concurrent.ConcurrentDictionary{TKey,TValue}"/>, this property always
         /// returns false.</value>
         bool IDictionary.IsFixedSize
         {
@@ -1489,11 +1518,11 @@ namespace System.Collections.Concurrent
 
         /// <summary>
         /// Gets a value indicating whether the <see
-        /// cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/> is read-only.
+        /// cref="System.Collections.IDictionary"/> is read-only.
         /// </summary>
-        /// <value>true if the <see cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/> is
+        /// <value>true if the <see cref="System.Collections.IDictionary"/> is
         /// read-only; otherwise, false. For <see
-        /// cref="T:System.Collections.Generic.ConcurrentDictionary{TKey,TValue}"/>, this property always
+        /// cref="System.Collections.Concurrent.ConcurrentDictionary{TKey,TValue}"/>, this property always
         /// returns false.</value>
         bool IDictionary.IsReadOnly
         {
@@ -1501,11 +1530,11 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
-        /// Gets an <see cref="T:System.Collections.ICollection"/> containing the keys of the <see
-        /// cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/>.
+        /// Gets an <see cref="System.Collections.ICollection"/> containing the keys of the <see
+        /// cref="System.Collections.IDictionary"/>.
         /// </summary>
-        /// <value>An <see cref="T:System.Collections.ICollection"/> containing the keys of the <see
-        /// cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/>.</value>
+        /// <value>An <see cref="System.Collections.ICollection"/> containing the keys of the <see
+        /// cref="System.Collections.IDictionary"/>.</value>
         ICollection IDictionary.Keys
         {
             get { return GetKeys(); }
@@ -1513,10 +1542,10 @@ namespace System.Collections.Concurrent
 
         /// <summary>
         /// Removes the element with the specified key from the <see
-        /// cref="T:System.Collections.IDictionary"/>.
+        /// cref="System.Collections.IDictionary"/>.
         /// </summary>
         /// <param name="key">The key of the element to remove.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
         void IDictionary.Remove(object key)
         {
@@ -1530,11 +1559,11 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
-        /// Gets an <see cref="T:System.Collections.ICollection"/> containing the values in the <see
-        /// cref="T:System.Collections.IDictionary"/>.
+        /// Gets an <see cref="System.Collections.ICollection"/> containing the values in the <see
+        /// cref="System.Collections.IDictionary"/>.
         /// </summary>
-        /// <value>An <see cref="T:System.Collections.ICollection"/> containing the values in the <see
-        /// cref="T:System.Collections.IDictionary"/>.</value>
+        /// <value>An <see cref="System.Collections.ICollection"/> containing the values in the <see
+        /// cref="System.Collections.IDictionary"/>.</value>
         ICollection IDictionary.Values
         {
             get { return GetValues(); }
@@ -1547,18 +1576,18 @@ namespace System.Collections.Concurrent
         /// <value>The value associated with the specified key, or a null reference (Nothing in Visual Basic)
         /// if <paramref name="key"/> is not in the dictionary or <paramref name="key"/> is of a type that is
         /// not assignable to the key type <typeparamref name="TKey"/> of the <see
-        /// cref="T:System.Collections.Generic.ConcurrentDictionary{TKey,TValue}"/>.</value>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+        /// cref="System.Collections.Concurrent.ConcurrentDictionary{TKey,TValue}"/>.</value>
+        /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
-        /// <exception cref="T:System.ArgumentException">
+        /// <exception cref="System.ArgumentException">
         /// A value is being assigned, and <paramref name="key"/> is of a type that is not assignable to the
         /// key type <typeparamref name="TKey"/> of the <see
-        /// cref="T:System.Collections.Generic.ConcurrentDictionary{TKey,TValue}"/>. -or- A value is being
+        /// cref="System.Collections.Concurrent.ConcurrentDictionary{TKey,TValue}"/>. -or- A value is being
         /// assigned, and <paramref name="key"/> is of a type that is not assignable to the value type
         /// <typeparamref name="TValue"/> of the <see
-        /// cref="T:System.Collections.Generic.ConcurrentDictionary{TKey,TValue}"/>
+        /// cref="System.Collections.Concurrent.ConcurrentDictionary{TKey,TValue}"/>
         /// </exception>
-        object IDictionary.this[object key]
+        object? IDictionary.this[object key]
         {
             get
             {
@@ -1577,9 +1606,9 @@ namespace System.Collections.Concurrent
                 if (key == null) ThrowKeyNullException();
 
                 if (!(key is TKey)) throw new ArgumentException(SR.ConcurrentDictionary_TypeOfKeyIncorrect);
-                if (!(value is TValue)) throw new ArgumentException(SR.ConcurrentDictionary_TypeOfValueIncorrect);
+                ThrowIfInvalidObjectValue(value);
 
-                ((ConcurrentDictionary<TKey, TValue>)this)[(TKey)key] = (TValue)value;
+                ((ConcurrentDictionary<TKey, TValue>)this)[(TKey)key] = (TValue)value!;
             }
         }
 
@@ -1588,21 +1617,21 @@ namespace System.Collections.Concurrent
         #region ICollection Members
 
         /// <summary>
-        /// Copies the elements of the <see cref="T:System.Collections.ICollection"/> to an array, starting
+        /// Copies the elements of the <see cref="System.Collections.ICollection"/> to an array, starting
         /// at the specified array index.
         /// </summary>
         /// <param name="array">The one-dimensional array that is the destination of the elements copied from
-        /// the <see cref="T:System.Collections.ICollection"/>. The array must have zero-based
+        /// the <see cref="System.Collections.ICollection"/>. The array must have zero-based
         /// indexing.</param>
         /// <param name="index">The zero-based index in <paramref name="array"/> at which copying
         /// begins.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="array"/> is a null reference
+        /// <exception cref="System.ArgumentNullException"><paramref name="array"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index"/> is less than
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="index"/> is less than
         /// 0.</exception>
-        /// <exception cref="T:System.ArgumentException"><paramref name="index"/> is equal to or greater than
+        /// <exception cref="System.ArgumentException"><paramref name="index"/> is equal to or greater than
         /// the length of the <paramref name="array"/>. -or- The number of elements in the source <see
-        /// cref="T:System.Collections.ICollection"/>
+        /// cref="System.Collections.ICollection"/>
         /// is greater than the available space from <paramref name="index"/> to the end of the destination
         /// <paramref name="array"/>.</exception>
         void ICollection.CopyTo(Array array, int index)
@@ -1634,21 +1663,21 @@ namespace System.Collections.Concurrent
                 //    - an array of DictionaryEntry structs
                 //    - an array of objects
 
-                KeyValuePair<TKey, TValue>[] pairs = array as KeyValuePair<TKey, TValue>[];
+                KeyValuePair<TKey, TValue>[]? pairs = array as KeyValuePair<TKey, TValue>[];
                 if (pairs != null)
                 {
                     CopyToPairs(pairs, index);
                     return;
                 }
 
-                DictionaryEntry[] entries = array as DictionaryEntry[];
+                DictionaryEntry[]? entries = array as DictionaryEntry[];
                 if (entries != null)
                 {
                     CopyToEntries(entries, index);
                     return;
                 }
 
-                object[] objects = array as object[];
+                object[]? objects = array as object[];
                 if (objects != null)
                 {
                     CopyToObjects(objects, index);
@@ -1664,12 +1693,12 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
-        /// Gets a value indicating whether access to the <see cref="T:System.Collections.ICollection"/> is
+        /// Gets a value indicating whether access to the <see cref="System.Collections.ICollection"/> is
         /// synchronized with the SyncRoot.
         /// </summary>
-        /// <value>true if access to the <see cref="T:System.Collections.ICollection"/> is synchronized
+        /// <value>true if access to the <see cref="System.Collections.ICollection"/> is synchronized
         /// (thread safe); otherwise, false. For <see
-        /// cref="T:System.Collections.Concurrent.ConcurrentDictionary{TKey,TValue}"/>, this property always
+        /// cref="System.Collections.Concurrent.ConcurrentDictionary{TKey,TValue}"/>, this property always
         /// returns false.</value>
         bool ICollection.IsSynchronized
         {
@@ -1678,9 +1707,9 @@ namespace System.Collections.Concurrent
 
         /// <summary>
         /// Gets an object that can be used to synchronize access to the <see
-        /// cref="T:System.Collections.ICollection"/>. This property is not supported.
+        /// cref="System.Collections.ICollection"/>. This property is not supported.
         /// </summary>
-        /// <exception cref="T:System.NotSupportedException">The SyncRoot property is not supported.</exception>
+        /// <exception cref="System.NotSupportedException">The SyncRoot property is not supported.</exception>
         object ICollection.SyncRoot
         {
             get
@@ -1774,7 +1803,7 @@ namespace System.Collections.Concurrent
                     // We want to make sure that GrowTable will not be called again, since table is at the maximum size.
                     // To achieve that, we set the budget to int.MaxValue.
                     //
-                    // (There is one special case that would allow GrowTable() to be called in the future: 
+                    // (There is one special case that would allow GrowTable() to be called in the future:
                     // calling Clear() on the ConcurrentDictionary will shrink the table and lower the budget.)
                     _budget = int.MaxValue;
                 }
@@ -1833,7 +1862,7 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
-        /// Computes the bucket for a particular key. 
+        /// Computes the bucket for a particular key.
         /// </summary>
         private static int GetBucket(int hashcode, int bucketCount)
         {
@@ -1843,7 +1872,7 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
-        /// Computes the bucket and lock number for a particular key. 
+        /// Computes the bucket and lock number for a particular key.
         /// </summary>
         private static void GetBucketAndLockNo(int hashcode, out int bucketNo, out int lockNo, int bucketCount, int lockCount)
         {
@@ -2007,12 +2036,12 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
-        /// A private class to represent enumeration over the dictionary that implements the 
+        /// A private class to represent enumeration over the dictionary that implements the
         /// IDictionaryEnumerator interface.
         /// </summary>
         private sealed class DictionaryEnumerator : IDictionaryEnumerator
         {
-            IEnumerator<KeyValuePair<TKey, TValue>> _enumerator; // Enumerator over the dictionary.
+            private readonly IEnumerator<KeyValuePair<TKey, TValue>> _enumerator; // Enumerator over the dictionary.
 
             internal DictionaryEnumerator(ConcurrentDictionary<TKey, TValue> dictionary)
             {
@@ -2029,7 +2058,7 @@ namespace System.Collections.Concurrent
                 get { return _enumerator.Current.Key; }
             }
 
-            public object Value
+            public object? Value
             {
                 get { return _enumerator.Current.Value; }
             }
@@ -2051,7 +2080,7 @@ namespace System.Collections.Concurrent
         }
     }
 
-    internal sealed class IDictionaryDebugView<K, V>
+    internal sealed class IDictionaryDebugView<K, V> where K : notnull
     {
         private readonly IDictionary<K, V> _dictionary;
 

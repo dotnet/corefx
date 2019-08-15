@@ -12,13 +12,13 @@ internal partial class Interop
         // https://msdn.microsoft.com/en-us/library/windows/hardware/ff556633.aspx
         // https://msdn.microsoft.com/en-us/library/windows/hardware/ff567047.aspx
         [DllImport(Libraries.NtDll, CharSet = CharSet.Unicode, ExactSpelling = true)]
-        public unsafe static extern int NtQueryDirectoryFile(
+        public static extern unsafe int NtQueryDirectoryFile(
             IntPtr FileHandle,
             IntPtr Event,
             IntPtr ApcRoutine,
             IntPtr ApcContext,
             out IO_STATUS_BLOCK IoStatusBlock,
-            byte[] FileInformation,
+            IntPtr FileInformation,
             uint Length,
             FILE_INFORMATION_CLASS FileInformationClass,
             BOOLEAN ReturnSingleEntry,

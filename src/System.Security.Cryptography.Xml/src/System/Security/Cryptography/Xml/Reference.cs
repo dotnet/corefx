@@ -24,8 +24,8 @@ namespace System.Security.Cryptography.Xml
         private string _digestMethod;
         private byte[] _digestValue;
         private HashAlgorithm _hashAlgorithm;
-        private object _refTarget;
-        private ReferenceTargetType _refTargetType;
+        private readonly object _refTarget;
+        private readonly ReferenceTargetType _refTargetType;
         private XmlElement _cachedXml;
         private SignedXml _signedXml = null;
         internal CanonicalXmlNodeList _namespaces = null;
@@ -334,10 +334,8 @@ namespace System.Security.Cryptography.Xml
             DigestValue = CalculateHashValue(document, refList);
         }
 
-        // What we want to do is pump the input throug the TransformChain and then 
+        // What we want to do is pump the input throug the TransformChain and then
         // hash the output of the chain document is the document context for resolving relative references
-        [ResourceExposure(ResourceScope.None)]
-        [ResourceConsumption(ResourceScope.Machine, ResourceScope.Machine)]
         internal byte[] CalculateHashValue(XmlDocument document, CanonicalXmlNodeList refList)
         {
             // refList is a list of elements that might be targets of references
@@ -380,7 +378,7 @@ namespace System.Security.Cryptography.Xml
                             // This is the self-referential case. First, check that we have a document context.
                             // The Enveloped Signature does not discard comments as per spec; those will be omitted during the transform chain process
                             if (document == null)
-                                throw new CryptographicException(string.Format(CultureInfo.CurrentCulture, SR.Cryptography_Xml_SelfReferenceRequiresContext, _uri));
+                                throw new CryptographicException(SR.Format(SR.Cryptography_Xml_SelfReferenceRequiresContext, _uri));
 
                             // Normalize the containing document
                             resolver = (SignedXml.ResolverSet ? SignedXml._xmlResolver : new XmlSecureResolver(new XmlUrlResolver(), baseUri));
@@ -397,7 +395,7 @@ namespace System.Security.Cryptography.Xml
                             {
                                 // This is a self referencial case
                                 if (document == null)
-                                    throw new CryptographicException(string.Format(CultureInfo.CurrentCulture, SR.Cryptography_Xml_SelfReferenceRequiresContext, _uri));
+                                    throw new CryptographicException(SR.Format(SR.Cryptography_Xml_SelfReferenceRequiresContext, _uri));
 
                                 // We should not discard comments here!!!
                                 resolver = (SignedXml.ResolverSet ? SignedXml._xmlResolver : new XmlSecureResolver(new XmlUrlResolver(), baseUri));

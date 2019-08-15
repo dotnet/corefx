@@ -1,21 +1,12 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ProjectGuid>{484C92C6-6D2C-45BC-A5E2-4A12BA228E1E}</ProjectGuid>
-    <DefineConstants Condition="'$(TargetGroup)' == 'uap'">$(DefineConstants);uap</DefineConstants>
-    <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <TestRuntime>true</TestRuntime>
+    <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="CharUnicodeInfo\CharUnicodeInfoTestData.cs" />
-    <Compile Include="CharUnicodeInfo\CharUnicodeInfoTests.cs" />
     <Compile Include="CompareInfo\CompareInfoTests.cs" />
     <Compile Include="CompareInfo\CompareInfoTests.IndexOf.cs" />
     <Compile Include="CompareInfo\CompareInfoTests.IsPrefix.cs" />
@@ -44,8 +35,6 @@
     <Compile Include="NumberFormatInfo\NumberFormatInfoPercentNegativePattern.cs" />
     <Compile Include="NumberFormatInfo\NumberFormatInfoPercentGroupSizes.cs" />
     <Compile Include="NumberFormatInfo\NumberFormatInfoPercentPositivePattern.cs" />
-    <Compile Include="RegionInfo\RegionInfoTests.Methods.cs" />
-    <Compile Include="RegionInfo\RegionInfoTests.Properties.cs" />
     <Compile Include="CultureInfo\CultureInfoAll.cs" />
     <Compile Include="CultureInfo\CultureInfoAsync.cs" />
     <Compile Include="CultureInfo\CultureInfoCalendar.cs" />
@@ -64,7 +53,6 @@
     <Compile Include="CultureInfo\CultureInfoReadOnly.cs" />
     <Compile Include="CultureInfo\CultureInfoTwoLetterISOLanguageName.cs" />
     <Compile Include="CultureInfo\CultureInfoCurrentCulture.cs" />
-    <Compile Include="CultureNotFoundException\CultureNotFoundExceptionTests.cs" />
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoAbbreviatedDayNames.cs" />
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoAbbreviatedMonthGenitiveNames.cs" />
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoAbbreviatedMonthNames.cs" />
@@ -100,7 +88,6 @@
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoTests.cs" />
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoUniversalSortableDateTimePattern.cs" />
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoYearMonthPattern.cs" />
-    <Compile Include="DateTimeStyles\DateTimeStylesTests.cs" />
     <Compile Include="NumberFormatInfo\NumberFormatInfoClone.cs" />
     <Compile Include="NumberFormatInfo\NumberFormatInfoCurrencyDecimalDigits.cs" />
     <Compile Include="NumberFormatInfo\NumberFormatInfoCurrencyDecimalSeparator.cs" />
@@ -112,36 +99,25 @@
     <Compile Include="NumberFormatInfo\NumberFormatInfoGetInstance.cs" />
     <Compile Include="NumberFormatInfo\NumberFormatInfoReadOnly.cs" />
     <Compile Include="NumberFormatInfo\NumberFormatInfoTests.cs" />
-    <Compile Include="NumberStyles\NumberStylesTests.cs" />
-    <Compile Include="SortVersion\SortVersionTests.cs" />
-    <Compile Include="StringInfo\StringInfoCtor.cs" />
-    <Compile Include="StringInfo\StringInfoEquals.cs" />
-    <Compile Include="StringInfo\StringInfoGetNextTextElement.cs" />
-    <Compile Include="StringInfo\StringInfoGetTextElementEnumerator.cs" />
-    <Compile Include="StringInfo\StringInfoParseCombiningCharacters.cs" />
-    <Compile Include="StringInfo\StringInfoString.cs" />
-    <Compile Include="StringInfo\StringInfoTests.cs" />
-    <Compile Include="TextElementEnumerator\TextElementEnumeratorTests.cs" />
-    <Compile Include="TextInfo\TextInfoCultureName.cs" />
-    <Compile Include="TextInfo\TextInfoEquals.cs" />
-    <Compile Include="TextInfo\TextInfoIsRightToLeft.cs" />
-    <Compile Include="TextInfo\TextInfoIsReadOnly.cs" />
-    <Compile Include="TextInfo\TextInfoListSeparator.cs" />
-    <Compile Include="TextInfo\TextInfoTests.cs" />
-    <Compile Include="TextInfo\TextInfoToLower.cs" />
-    <Compile Include="TextInfo\TextInfoToString.cs" />
-    <Compile Include="TextInfo\TextInfoToUpper.cs" />
-    <Compile Include="UnicodeCategory\UnicodeCategoryTests.cs" />
+    <Compile Include="System\Globalization\CharUnicodeInfoTestData.cs" />
+    <Compile Include="System\Globalization\CharUnicodeInfoTests.cs" />
+    <Compile Include="System\Globalization\CultureNotFoundExceptionTests.cs" />
+    <Compile Include="System\Globalization\RegionInfoTests.cs" />
+    <Compile Include="System\Globalization\StringInfoTests.cs" />
+    <Compile Include="System\Globalization\SortVersionTests.cs" />
+    <Compile Include="System\Globalization\TextInfoTests.cs" />
+    <Compile Include="System\Globalization\TextElementEnumeratorTests.cs" />
+    <Compile Include="System\Globalization\UnicodeCategoryTests.cs" />
     <!-- Helpers -->
     <Compile Include="$(CommonTestPath)\System\RandomDataGenerator.cs">
       <Link>Common\System\RandomDataGenerator.cs</Link>
     </Compile>
-    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
-      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
-      <Name>RemoteExecutorConsoleApp</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="$(CommonTestPath)\Data\UnicodeData.11.0.txt">
+      <Link>CharUnicodeInfo\UnicodeData.11.0.txt</Link>
+      <LogicalName>UnicodeData.11.0.txt</LogicalName>
+    </EmbeddedResource>
     <EmbeddedResource Include="$(CommonTestPath)\Data\UnicodeData.8.0.txt">
       <Link>CharUnicodeInfo\UnicodeData8.0.txt</Link>
       <LogicalName>UnicodeData.8.0.txt</LogicalName>
@@ -151,5 +127,4 @@
       <LogicalName>UnicodeData6.3.txt</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

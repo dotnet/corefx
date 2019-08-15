@@ -13,13 +13,9 @@ using System.Security;
 
 namespace System.Runtime.Serialization
 {
-#if uapaot
-    public class DataMember
-#else
     internal class DataMember
-#endif
     {
-        private CriticalHelper _helper;
+        private readonly CriticalHelper _helper;
 
         public DataMember()
         {
@@ -166,7 +162,7 @@ namespace System.Runtime.Serialization
             private bool _emitDefaultValue;
             private bool _isNullable;
             private bool _isGetOnlyCollection = false;
-            private MemberInfo _memberInfo;
+            private readonly MemberInfo _memberInfo;
             private bool _hasConflictingNameAndType;
             private DataMember _conflictingMember;
 

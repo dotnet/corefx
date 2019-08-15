@@ -36,11 +36,12 @@ using System.Diagnostics;
 using System.Text;
 using System.IO;
 using System.Collections.Specialized;
+using Gdip = System.Drawing.SafeNativeMethods.Gdip;
 
 namespace System.Drawing.Printing
 {
     /// <summary>
-    /// This class is designed to cache the values retrieved by the 
+    /// This class is designed to cache the values retrieved by the
     /// native printing services, as opposed to GlobalPrintingServices, which
     /// doesn't cache any values.
     /// </summary>
@@ -48,21 +49,10 @@ namespace System.Drawing.Printing
     {
         #region Private Fields
 
-        private static Hashtable doc_info = new Hashtable();
-        private static bool cups_installed;
-
-        private static Hashtable installed_printers;
-        private static string default_printer = String.Empty;
-
-        #endregion
-
-        #region Constructor
-
-        static PrintingServices()
-        {
-            installed_printers = new Hashtable();
-            CheckCupsInstalled();
-        }
+        private static readonly Hashtable doc_info = new Hashtable();
+        private static readonly bool cups_installed = CheckCupsInstalled();
+        private static readonly Hashtable installed_printers = new Hashtable();
+        private static string default_printer = string.Empty;
 
         #endregion
 
@@ -73,7 +63,7 @@ namespace System.Drawing.Printing
             get
             {
                 LoadPrinters();
-                PrinterSettings.StringCollection list = new PrinterSettings.StringCollection(new string[] { });
+                PrinterSettings.StringCollection list = new PrinterSettings.StringCollection(Array.Empty<string>());
                 foreach (object key in installed_printers.Keys)
                 {
                     list.Add(key.ToString());
@@ -100,7 +90,7 @@ namespace System.Drawing.Printing
         /// <summary>
         /// Do a cups call to check if it is installed
         /// </summary>
-        private static void CheckCupsInstalled()
+        private static bool CheckCupsInstalled()
         {
             try
             {
@@ -113,11 +103,10 @@ namespace System.Drawing.Printing
 #else
                 Console.WriteLine("libcups not found. To have printing support, you need cups installed");
 #endif
-                cups_installed = false;
-                return;
+                return false;
             }
 
-            cups_installed = true;
+            return true;
         }
 
         /// <summary>
@@ -190,10 +179,10 @@ namespace System.Drawing.Printing
         /// <summary>
         /// Checks if a printer has a valid PPD file. Caches the result unless force is true
         /// </summary>
-        /// <param name="force">Does the check disregarding the last cached value if true</param>
+        /// <param name="printer">Printer name</param>
         internal static bool IsPrinterValid(string printer)
         {
-            if (!cups_installed || printer == null | printer == String.Empty)
+            if (!cups_installed || printer == null | printer == string.Empty)
                 return false;
 
             return installed_printers.Contains(printer);
@@ -206,7 +195,7 @@ namespace System.Drawing.Printing
         /// <param name="settings">PrinterSettings object to initialize</param>
         internal static void LoadPrinterSettings(string printer, PrinterSettings settings)
         {
-            if (cups_installed == false || (printer == null) || (printer == String.Empty))
+            if (cups_installed == false || (printer == null) || (printer == string.Empty))
                 return;
 
             if (installed_printers.Count == 0)
@@ -230,7 +219,7 @@ namespace System.Drawing.Printing
             settings.PrinterCapabilities.Clear();
 
             IntPtr dests = IntPtr.Zero, ptr = IntPtr.Zero, ptr_printer, ppd_handle = IntPtr.Zero;
-            string name = String.Empty;
+            string name = string.Empty;
             CUPS_DESTS printer_dest;
             PPD_FILE ppd;
             int ret = 0, cups_dests_size;
@@ -275,12 +264,12 @@ namespace System.Drawing.Printing
                     paper_sources, out defsource);
 
                 if (settings.paper_sizes == null)
-                    settings.paper_sizes = new PrinterSettings.PaperSizeCollection(new PaperSize[] { });
+                    settings.paper_sizes = new PrinterSettings.PaperSizeCollection(Array.Empty<PaperSize>());
                 else
                     settings.paper_sizes.Clear();
 
                 if (settings.paper_sources == null)
-                    settings.paper_sources = new PrinterSettings.PaperSourceCollection(new PaperSource[] { });
+                    settings.paper_sources = new PrinterSettings.PaperSourceCollection(Array.Empty<PaperSource>());
                 else
                     settings.paper_sources.Clear();
 
@@ -348,7 +337,7 @@ namespace System.Drawing.Printing
         }
 
         /// <summary>
-        /// Loads the global options of a printer. 
+        /// Loads the global options of a printer.
         /// </summary>
         /// <param name="options">The options field of a printer's CUPS_DESTS structure</param>
         /// <param name="numOptions">The number of options of the printer</param>
@@ -436,7 +425,7 @@ namespace System.Drawing.Printing
         /// </summary>
         private static PrinterResolution ParseResolution(string resolution)
         {
-            if (String.IsNullOrEmpty(resolution))
+            if (string.IsNullOrEmpty(resolution))
                 return null;
 
             int dpiIndex = resolution.IndexOf("dpi");
@@ -450,7 +439,7 @@ namespace System.Drawing.Printing
             int x_resolution, y_resolution;
             try
             {
-                if (resolution.Contains("x"))
+                if (resolution.Contains("x")) // string.Contains(char) is .NetCore2.1+ specific
                 {
                     string[] resolutions = resolution.Split(new[] { 'x' });
                     x_resolution = Convert.ToInt32(resolutions[0]);
@@ -561,7 +550,7 @@ namespace System.Drawing.Printing
             PrinterSettings settings, IntPtr ppd_handle)
         {
             if (settings.printer_resolutions == null)
-                settings.printer_resolutions = new PrinterSettings.PrinterResolutionCollection(new PrinterResolution[] { });
+                settings.printer_resolutions = new PrinterSettings.PrinterResolutionCollection(Array.Empty<PrinterResolution>());
             else
                 settings.printer_resolutions.Clear();
 
@@ -586,8 +575,6 @@ namespace System.Drawing.Printing
 
         /// <summary>
         /// </summary>
-        /// <param name="load"></param>
-        /// <param name="def_printer"></param>
         private static void LoadPrinters()
         {
             installed_printers.Clear();
@@ -599,7 +586,7 @@ namespace System.Drawing.Printing
             int n_printers = 0;
             int cups_dests_size = Marshal.SizeOf(typeof(CUPS_DESTS));
             string name, first, type, status, comment;
-            first = type = status = comment = String.Empty;
+            first = type = status = comment = string.Empty;
             int state = 0;
 
             try
@@ -615,13 +602,13 @@ namespace System.Drawing.Printing
                     if (printer.is_default == 1)
                         default_printer = name;
 
-                    if (first.Equals(String.Empty))
+                    if (first.Equals(string.Empty))
                         first = name;
 
                     NameValueCollection options = LoadPrinterOptions(printer.options, printer.num_options);
 
                     if (options["printer-state"] != null)
-                        state = Int32.Parse(options["printer-state"]);
+                        state = int.Parse(options["printer-state"]);
 
                     if (options["printer-comment"] != null)
                         comment = options["printer-state"];
@@ -639,7 +626,7 @@ namespace System.Drawing.Printing
                             break;
                     }
 
-                    installed_printers.Add(name, new SysPrn.Printer(String.Empty, type, status, comment));
+                    installed_printers.Add(name, new SysPrn.Printer(string.Empty, type, status, comment));
 
                     ptr_printers = (IntPtr)((long)ptr_printers + cups_dests_size);
                 }
@@ -650,7 +637,7 @@ namespace System.Drawing.Printing
                 CloseDests(ref dests, n_printers);
             }
 
-            if (default_printer.Equals(String.Empty))
+            if (default_printer.Equals(string.Empty))
                 default_printer = first;
         }
 
@@ -701,7 +688,7 @@ namespace System.Drawing.Printing
                 NameValueCollection options = LoadPrinterOptions(cups_dests.options, cups_dests.num_options);
 
                 if (options["printer-state"] != null)
-                    state = Int32.Parse(options["printer-state"]);
+                    state = int.Parse(options["printer-state"]);
 
                 if (options["printer-comment"] != null)
                     comment = options["printer-state"];
@@ -810,7 +797,7 @@ namespace System.Drawing.Printing
 
         #region Print job methods
 
-        static string tmpfile;
+        private static string tmpfile;
 
         /// <summary>
         /// Gets a pointer to an options list parsed from the printer's current settings, to use when setting up the printing job
@@ -826,21 +813,23 @@ namespace System.Drawing.Printing
             int width = size.Width * 72 / 100;
             int height = size.Height * 72 / 100;
 
-            StringBuilder sb = new StringBuilder();
-            sb.Append(
-                "copies=" + printer_settings.Copies + " " +
-                "Collate=" + printer_settings.Collate + " " +
-                "ColorModel=" + (page_settings.Color ? "Color" : "Black") + " " +
-                "PageSize=" + String.Format("Custom.{0}x{1}", width, height) + " " +
-                "landscape=" + page_settings.Landscape
-            );
+            var sb = new StringBuilder();
+            sb.Append("copies=").Append(printer_settings.Copies).Append(' ')
+                .Append("Collate=").Append(printer_settings.Collate).Append(' ')
+                .Append("ColorModel=").Append(page_settings.Color ? "Color" : "Black").Append(' ')
+                .Append("PageSize=Custom.").Append(width).Append('x').Append(height).Append(' ')
+                .Append("landscape=").Append(page_settings.Landscape);
 
             if (printer_settings.CanDuplex)
             {
                 if (printer_settings.Duplex == Duplex.Simplex)
+                {
                     sb.Append(" Duplex=None");
+                }
                 else
+                {
                     sb.Append(" Duplex=DuplexNoTumble");
+                }
             }
 
             return LibcupsNative.cupsParseOptions(sb.ToString(), 0, ref options);
@@ -881,7 +870,7 @@ namespace System.Drawing.Printing
 
         internal static bool EndPage(GraphicsPrinter gr)
         {
-            SafeNativeMethods.Gdip.GdipGetPostScriptSavePage(gr.Hdc);
+            Gdip.GdipGetPostScriptSavePage(gr.Hdc);
             return true;
         }
 
@@ -915,7 +904,7 @@ namespace System.Drawing.Printing
                 height = psize.Height;
             }
 
-            SafeNativeMethods.Gdip.GdipGetPostScriptGraphicsContext(name,
+            Gdip.GdipGetPostScriptGraphicsContext(name,
                 width * 72 / 100,
                 height * 72 / 100,
                 default_page_settings.PrinterResolution.X,

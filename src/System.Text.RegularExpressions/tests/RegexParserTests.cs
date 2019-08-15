@@ -15,12 +15,8 @@ namespace System.Text.RegularExpressions.Tests
 
         static RegexParserTests()
         {
-            // On Full Framework RegexParseException doesn't exist and on uapaot reflection is blocked.
-            if (!PlatformDetection.IsNetNative && !PlatformDetection.IsFullFramework)
-            {
-                s_parseExceptionType = typeof(Regex).Assembly.GetType("System.Text.RegularExpressions.RegexParseException", true);
-                s_parseErrorField = s_parseExceptionType.GetField("_error", BindingFlags.NonPublic | BindingFlags.Instance);
-            }
+            s_parseExceptionType = typeof(Regex).Assembly.GetType("System.Text.RegularExpressions.RegexParseException", true);
+            s_parseErrorField = s_parseExceptionType.GetField("_error", BindingFlags.NonPublic | BindingFlags.Instance);
         }
 
         [Theory]
@@ -595,7 +591,6 @@ namespace System.Text.RegularExpressions.Tests
         [InlineData(@"[^", RegexOptions.None, RegexParseError.UnterminatedBracket)]
         [InlineData(@"[cat", RegexOptions.None, RegexParseError.UnterminatedBracket)]
         [InlineData(@"[^cat", RegexOptions.None, RegexParseError.UnterminatedBracket)]
-        [InlineData(@"\p{", RegexOptions.None, RegexParseError.IncompleteSlashP)]
         [InlineData(@"\p{cat", RegexOptions.None, RegexParseError.IncompleteSlashP)]
         [InlineData(@"\k<cat", RegexOptions.None, RegexParseError.UnrecognizedEscape)]
         [InlineData(@"\p{cat}", RegexOptions.None, RegexParseError.UnknownUnicodeProperty)]
@@ -704,68 +699,9 @@ namespace System.Text.RegularExpressions.Tests
         // Scan control
         [InlineData("(cat)(\\c\0*)(dog)", RegexOptions.None, RegexParseError.UnrecognizedControl)]
         [InlineData(@"(cat)(\c\[*)(dog)", RegexOptions.None, RegexParseError.UnterminatedBracket)]
-        // Nested quantifiers
-        [InlineData("^[abcd]{0,16}*$", RegexOptions.None, RegexParseError.NestedQuantify)]
-        [InlineData("^[abcd]{1,}*$", RegexOptions.None, RegexParseError.NestedQuantify)]
-        [InlineData("^[abcd]{1}*$", RegexOptions.None, RegexParseError.NestedQuantify)]
-        [InlineData("^[abcd]{0,16}?*$", RegexOptions.None, RegexParseError.NestedQuantify)]
-        [InlineData("^[abcd]{1,}?*$", RegexOptions.None, RegexParseError.NestedQuantify)]
-        [InlineData("^[abcd]{1}?*$", RegexOptions.None, RegexParseError.NestedQuantify)]
-        [InlineData("^[abcd]*+$", RegexOptions.None, RegexParseError.NestedQuantify)]
-        [InlineData("^[abcd]+*$", RegexOptions.None, RegexParseError.NestedQuantify)]
-        [InlineData("^[abcd]?*$", RegexOptions.None, RegexParseError.NestedQuantify)]
-        [InlineData("^[abcd]*?+$", RegexOptions.None, RegexParseError.NestedQuantify)]
-        [InlineData("^[abcd]+?*$", RegexOptions.None, RegexParseError.NestedQuantify)]
-        [InlineData("^[abcd]??*$", RegexOptions.None, RegexParseError.NestedQuantify)]
-        [InlineData("^[abcd]*{0,5}$", RegexOptions.None, RegexParseError.NestedQuantify)]
-        [InlineData("^[abcd]+{0,5}$", RegexOptions.None, RegexParseError.NestedQuantify)]
-        [InlineData("^[abcd]?{0,5}$", RegexOptions.None, RegexParseError.NestedQuantify)]
-        // Invalid character class
-        [InlineData("[", RegexOptions.None, RegexParseError.UnterminatedBracket)]
-        [InlineData("[]", RegexOptions.None, RegexParseError.UnterminatedBracket)]
-        [InlineData("[a", RegexOptions.None, RegexParseError.UnterminatedBracket)]
-        [InlineData("[^", RegexOptions.None, RegexParseError.UnterminatedBracket)]
-        [InlineData("[cat", RegexOptions.None, RegexParseError.UnterminatedBracket)]
-        [InlineData("[^cat", RegexOptions.None, RegexParseError.UnterminatedBracket)]
-        [InlineData("[a-", RegexOptions.None, RegexParseError.UnterminatedBracket)]
         // Invalid grouping constructs
         [InlineData("(?<", RegexOptions.None, RegexParseError.UnrecognizedGrouping)]
-        [InlineData("(?<cat>", RegexOptions.None, RegexParseError.NotEnoughParentheses)]
-        [InlineData("(?'cat'", RegexOptions.None, RegexParseError.NotEnoughParentheses)]
-        [InlineData("(?imn", RegexOptions.None, RegexParseError.UnrecognizedGrouping)]
-        [InlineData("(?imn )", RegexOptions.None, RegexParseError.UnrecognizedGrouping)]
         [InlineData("(?>-", RegexOptions.None, RegexParseError.NotEnoughParentheses)]
-        [InlineData("(?<)", RegexOptions.None, RegexParseError.InvalidGroupName)]
-        [InlineData("(?')", RegexOptions.None, RegexParseError.InvalidGroupName)]
-        // Invalid alternation constructs
-        [InlineData("(?(", RegexOptions.None, RegexParseError.NotEnoughParentheses)]
-        [InlineData("(?()|", RegexOptions.None, RegexParseError.NotEnoughParentheses)]
-        [InlineData("(?(cat", RegexOptions.None, RegexParseError.NotEnoughParentheses)]
-        [InlineData("(?(cat)|", RegexOptions.None, RegexParseError.NotEnoughParentheses)]
-        // Regex with 0 numeric names
-        [InlineData("foo(?<0>bar)", RegexOptions.None, RegexParseError.CapnumNotZero)]
-        [InlineData("foo(?'0'bar)", RegexOptions.None, RegexParseError.CapnumNotZero)]
-        // Regex without closing >
-        [InlineData("foo(?<1bar)", RegexOptions.None, RegexParseError.InvalidGroupName)]
-        [InlineData("foo(?'1bar)", RegexOptions.None, RegexParseError.InvalidGroupName)]
-        // Misc
-        [InlineData("(?r:cat)", RegexOptions.None, RegexParseError.UnrecognizedGrouping)]
-        [InlineData("(?c:cat)", RegexOptions.None, RegexParseError.UnrecognizedGrouping)]
-        [InlineData("(??e:cat)", RegexOptions.None, RegexParseError.UnrecognizedGrouping)]
-        // Character class subtraction
-        [InlineData("[a-f-[]]+", RegexOptions.None, RegexParseError.UnterminatedBracket)]
-        //// Not character class substraction
-        [InlineData("[A-[]+", RegexOptions.None, RegexParseError.UnterminatedBracket)]
-        // Invalid testgroup
-        [InlineData("(?(?e))", RegexOptions.None, RegexParseError.UnrecognizedGrouping)]
-        [InlineData("(?(?a)", RegexOptions.None, RegexParseError.UnrecognizedGrouping)]
-        [InlineData("(?(?", RegexOptions.None, RegexParseError.UnrecognizedGrouping)]
-        [InlineData("?(a)", RegexOptions.None, RegexParseError.QuantifyAfterNothing)]
-        [InlineData("?(a|b)", RegexOptions.None, RegexParseError.QuantifyAfterNothing)]
-        [InlineData("?((a)", RegexOptions.None, RegexParseError.QuantifyAfterNothing)]
-        [InlineData("?((a)a", RegexOptions.None, RegexParseError.QuantifyAfterNothing)]
-        [InlineData("?((a)a|", RegexOptions.None, RegexParseError.QuantifyAfterNothing)]
-        [InlineData("?((a)a|b", RegexOptions.None, RegexParseError.QuantifyAfterNothing)]
         // Testgroup with options
         [InlineData("())", RegexOptions.None, RegexParseError.TooManyParentheses)]
         [InlineData("[a-z-[aeiuo]", RegexOptions.None, RegexParseError.UnterminatedBracket)]
@@ -789,7 +725,6 @@ namespace System.Text.RegularExpressions.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "fixes not ported to netfx RegexParser")]
         // OutOfMemoryException
         [InlineData("a{2147483647}", RegexOptions.None, null)]
         [InlineData("a{2147483647,}", RegexOptions.None, null)]
@@ -862,6 +797,8 @@ namespace System.Text.RegularExpressions.Tests
         [InlineData("a{2147483648,}", RegexOptions.None, RegexParseError.CaptureGroupOutOfRange)]
         [InlineData("a{0,2147483647}", RegexOptions.None, null)]
         [InlineData("a{0,2147483648}", RegexOptions.None, RegexParseError.CaptureGroupOutOfRange)]
+        // Surrogate pair which is parsed as [char,char-char,char] as we operate on UTF-16 code units.
+        [InlineData("[\uD82F\uDCA0-\uD82F\uDCA3]", RegexOptions.IgnoreCase, RegexParseError.ReversedCharRange)]
         public void Parse_NotNetFramework(string pattern, RegexOptions options, object error)
         {
             Parse(pattern, options, error);
@@ -920,14 +857,6 @@ namespace System.Text.RegularExpressions.Tests
         /// <param name="action">The action to invoke.</param>
         private static void Throws(RegexParseError error, Action action)
         {
-            // If no specific error is supplied, or we are running on full framework where RegexParseException
-            // doesn't exist or we are running on uapaot where reflection is blocked we expect an ArgumentException.
-            if (PlatformDetection.IsNetNative || PlatformDetection.IsFullFramework)
-            {
-                Assert.ThrowsAny<ArgumentException>(action);
-                return;
-            }
-
             try
             {
                 action();

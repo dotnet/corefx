@@ -7,7 +7,6 @@ using System.Runtime.Caching.Configuration;
 using System.Runtime.Caching.Hosting;
 using System.Diagnostics;
 using System.Security;
-using System.Security.Permissions;
 using System.Threading;
 
 namespace System.Runtime.Caching
@@ -26,9 +25,9 @@ namespace System.Runtime.Caching
         private static long s_autoPrivateBytesLimit = -1;
         private static long s_effectiveProcessMemoryLimit = -1;
 
-        private MemoryCache _memoryCache;
-        private long[] _cacheSizeSamples;
-        private DateTime[] _cacheSizeSampleTimes;
+        private readonly MemoryCache _memoryCache;
+        private readonly long[] _cacheSizeSamples;
+        private readonly DateTime[] _cacheSizeSampleTimes;
         private int _idx;
         private SRefMultiple _sizedRefMultiple;
         private int _gen2Count;
@@ -164,7 +163,7 @@ namespace System.Runtime.Caching
         {
             // Call GetUpdatedTotalCacheSize to update the total
             // cache size, if there has been a recent Gen 2 Collection.
-            // This update must happen, otherwise the CacheManager won't 
+            // This update must happen, otherwise the CacheManager won't
             // know the total cache size.
             int gen2Count = GC.CollectionCount(2);
             SRefMultiple sref = _sizedRefMultiple;
@@ -176,15 +175,13 @@ namespace System.Runtime.Caching
                 // the SizedRef is only updated after a Gen2 Collection
 
                 // increment the index (it's either 1 or 0)
-                Dbg.Assert(SAMPLE_COUNT == 2);
+                Debug.Assert(SAMPLE_COUNT == 2);
                 _idx = _idx ^ 1;
                 // remember the sample time
                 _cacheSizeSampleTimes[_idx] = DateTime.UtcNow;
                 // remember the sample value
                 _cacheSizeSamples[_idx] = sref.ApproximateSize;
-#if DEBUG
                 Dbg.Trace("MemoryCacheStats", "SizedRef.ApproximateSize=" + _cacheSizeSamples[_idx]);
-#endif
                 IMemoryCacheManager memoryCacheManager = s_memoryCacheManager;
                 if (memoryCacheManager != null)
                 {
@@ -228,7 +225,7 @@ namespace System.Runtime.Caching
                 }
 
 #if PERF
-                Debug.WriteLine(String.Format("CacheMemoryMonitor.GetPercentToTrim: percent={0:N}, lastTrimPercent={1:N}\n",
+                Debug.WriteLine(string.Format("CacheMemoryMonitor.GetPercentToTrim: percent={0:N}, lastTrimPercent={1:N}{Environment.NewLine}",
                                                     percent,
                                                     lastTrimPercent));
 #endif

@@ -20,13 +20,13 @@ namespace System.Drawing
         {
             private const int PropertyTagFrameDelay = 0x5100;
 
-            private Image _image;
+            private readonly Image _image;
             private int _frame;
-            private int _frameCount;
+            private readonly int _frameCount;
             private bool _frameDirty;
-            private bool _animated;
+            private readonly bool _animated;
             private EventHandler _onFrameChangedHandler;
-            private int[] _frameDelay;
+            private readonly int[] _frameDelay;
             private int _frameTimer;
 
             public ImageInfo(Image image)
@@ -40,7 +40,7 @@ namespace System.Drawing
 
                     PropertyItem frameDelayItem = image.GetPropertyItem(PropertyTagFrameDelay);
 
-                    // If the image does not have a frame delay, we just return 0.                                     
+                    // If the image does not have a frame delay, we just return 0.
                     //
                     if (frameDelayItem != null)
                     {
@@ -91,7 +91,7 @@ namespace System.Drawing
                     {
                         if (value < 0 || value >= FrameCount)
                         {
-                            throw new ArgumentException(SR.Format(SR.InvalidFrame), "value");
+                            throw new ArgumentException(SR.InvalidFrame, nameof(value));
                         }
 
                         if (Animated)

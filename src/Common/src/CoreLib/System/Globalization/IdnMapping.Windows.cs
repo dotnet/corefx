@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
 namespace System.Globalization
@@ -114,15 +115,15 @@ namespace System.Globalization
             }
         }
 
+        [DoesNotReturn]
         private static void ThrowForZeroLength(bool unicode)
         {
             int lastError = Marshal.GetLastWin32Error();
 
             throw new ArgumentException(
-                lastError == Interop.Errors.ERROR_INVALID_NAME ? SR.Argument_IdnIllegalName : 
+                lastError == Interop.Errors.ERROR_INVALID_NAME ? SR.Argument_IdnIllegalName :
                     (unicode ? SR.Argument_InvalidCharSequenceNoIndex : SR.Argument_IdnBadPunycode),
                 unicode ? "unicode" : "ascii");
         }
     }
 }
-

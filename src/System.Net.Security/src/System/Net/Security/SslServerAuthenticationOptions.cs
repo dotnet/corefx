@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -64,6 +64,12 @@ namespace System.Net.Security
                 _encryptionPolicy = value;
             }
         }
+
+        /// <summary>
+        /// Specifies cipher suites allowed to be used for TLS.
+        /// When set to null operating system default will be used.
+        /// Use extreme caution when changing this setting.
+        /// </summary>
+        public CipherSuitesPolicy CipherSuitesPolicy { get; set; }
     }
 }
-

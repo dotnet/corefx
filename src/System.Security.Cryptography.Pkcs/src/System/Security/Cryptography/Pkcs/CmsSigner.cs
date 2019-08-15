@@ -14,14 +14,27 @@ namespace System.Security.Cryptography.Pkcs
     public sealed class CmsSigner
     {
         private static readonly Oid s_defaultAlgorithm = Oid.FromOidValue(Oids.Sha256, OidGroup.HashAlgorithm);
+
+        private SubjectIdentifierType _signerIdentifierType;
+
         public X509Certificate2 Certificate { get; set; }
         public AsymmetricAlgorithm PrivateKey { get; set; }
-        public X509Certificate2Collection Certificates { get; set; } = new X509Certificate2Collection();
+        public X509Certificate2Collection Certificates { get; private set; } = new X509Certificate2Collection();
         public Oid DigestAlgorithm { get; set; }
         public X509IncludeOption IncludeOption { get; set; }
-        public CryptographicAttributeObjectCollection SignedAttributes { get; set; } = new CryptographicAttributeObjectCollection();
-        public SubjectIdentifierType SignerIdentifierType { get; set; }
-        public CryptographicAttributeObjectCollection UnsignedAttributes { get; set; } = new CryptographicAttributeObjectCollection();
+        public CryptographicAttributeObjectCollection SignedAttributes { get; private set; } = new CryptographicAttributeObjectCollection();
+        public CryptographicAttributeObjectCollection UnsignedAttributes { get; private set; } = new CryptographicAttributeObjectCollection();
+
+        public SubjectIdentifierType SignerIdentifierType
+        {
+            get { return _signerIdentifierType; }
+            set
+            {
+                if (value < SubjectIdentifierType.IssuerAndSerialNumber || value > SubjectIdentifierType.NoSignature)
+                    throw new ArgumentException(SR.Format(SR.Cryptography_Cms_Invalid_Subject_Identifier_Type, value));
+                _signerIdentifierType = value;
+            }
+        }
 
         public CmsSigner()
             : this(SubjectIdentifierType.IssuerAndSerialNumber, null)
@@ -58,23 +71,23 @@ namespace System.Security.Cryptography.Pkcs
             switch (signerIdentifierType)
             {
                 case SubjectIdentifierType.Unknown:
-                    SignerIdentifierType = SubjectIdentifierType.IssuerAndSerialNumber;
+                    _signerIdentifierType = SubjectIdentifierType.IssuerAndSerialNumber;
                     IncludeOption = X509IncludeOption.ExcludeRoot;
                     break;
                 case SubjectIdentifierType.IssuerAndSerialNumber:
-                    SignerIdentifierType = signerIdentifierType;
+                    _signerIdentifierType = signerIdentifierType;
                     IncludeOption = X509IncludeOption.ExcludeRoot;
                     break;
                 case SubjectIdentifierType.SubjectKeyIdentifier:
-                    SignerIdentifierType = signerIdentifierType;
+                    _signerIdentifierType = signerIdentifierType;
                     IncludeOption = X509IncludeOption.ExcludeRoot;
                     break;
                 case SubjectIdentifierType.NoSignature:
-                    SignerIdentifierType = signerIdentifierType;
+                    _signerIdentifierType = signerIdentifierType;
                     IncludeOption = X509IncludeOption.None;
                     break;
                 default:
-                    SignerIdentifierType = SubjectIdentifierType.IssuerAndSerialNumber;
+                    _signerIdentifierType = SubjectIdentifierType.IssuerAndSerialNumber;
                     IncludeOption = X509IncludeOption.ExcludeRoot;
                     break;
             }
@@ -108,7 +121,7 @@ namespace System.Security.Cryptography.Pkcs
             bool silent,
             out X509Certificate2Collection chainCerts)
         {
-            HashAlgorithmName hashAlgorithmName = Helpers.GetDigestAlgorithm(DigestAlgorithm);
+            HashAlgorithmName hashAlgorithmName = PkcsHelpers.GetDigestAlgorithm(DigestAlgorithm);
             IncrementalHash hasher = IncrementalHash.CreateHash(hashAlgorithmName);
 
             hasher.AppendData(data.Span);
@@ -117,21 +130,21 @@ namespace System.Security.Cryptography.Pkcs
             SignerInfoAsn newSignerInfo = new SignerInfoAsn();
             newSignerInfo.DigestAlgorithm.Algorithm = DigestAlgorithm;
 
-            if ((SignedAttributes != null && SignedAttributes.Count > 0) || contentTypeOid == null)
+            // If the user specified attributes (not null, count > 0) we need attributes.
+            // If the content type is null we're counter-signing, and need the message digest attr.
+            // If the content type is otherwise not-data we need to record it as the content-type attr.
+            if (SignedAttributes?.Count > 0 || contentTypeOid != Oids.Pkcs7Data)
             {
                 List<AttributeAsn> signedAttrs = BuildAttributes(SignedAttributes);
 
                 using (var writer = new AsnWriter(AsnEncodingRules.DER))
                 {
-                    writer.PushSetOf();
                     writer.WriteOctetString(dataHash);
-                    writer.PopSetOf();
-
                     signedAttrs.Add(
                         new AttributeAsn
                         {
                             AttrType = new Oid(Oids.MessageDigest, Oids.MessageDigest),
-                            AttrValues = writer.Encode(),
+                            AttrValues = new[] { new ReadOnlyMemory<byte>(writer.Encode()) },
                         });
                 }
 
@@ -139,27 +152,30 @@ namespace System.Security.Cryptography.Pkcs
                 {
                     using (var writer = new AsnWriter(AsnEncodingRules.DER))
                     {
-                        writer.PushSetOf();
                         writer.WriteObjectIdentifier(contentTypeOid);
-                        writer.PopSetOf();
-
                         signedAttrs.Add(
                             new AttributeAsn
                             {
                                 AttrType = new Oid(Oids.ContentType, Oids.ContentType),
-                                AttrValues = writer.Encode(),
+                                AttrValues = new[] { new ReadOnlyMemory<byte>(writer.Encode()) },
                             });
                     }
                 }
 
                 // Use the serializer/deserializer to DER-normalize the attribute order.
-                newSignerInfo.SignedAttributes = Helpers.NormalizeSet(
+                SignedAttributesSet signedAttrsSet = new SignedAttributesSet();
+                signedAttrsSet.SignedAttributes = PkcsHelpers.NormalizeAttributeSet(
                     signedAttrs.ToArray(),
-                    normalized =>
-                    {
-                        AsnReader reader = new AsnReader(normalized, AsnEncodingRules.DER);
-                        hasher.AppendData(reader.PeekContentBytes().Span);
-                    });
+                    normalized => hasher.AppendData(normalized));
+
+                // Since this contains user data in a context where BER is permitted, use BER.
+                // There shouldn't be any observable difference here between BER and DER, though,
+                // since the top level fields were written by NormalizeSet.
+                using (AsnWriter attrsWriter = new AsnWriter(AsnEncodingRules.BER))
+                {
+                    signedAttrsSet.Encode(attrsWriter);
+                    newSignerInfo.SignedAttributes = attrsWriter.Encode();
+                }
 
                 dataHash = hasher.GetHashAndReset();
             }
@@ -179,7 +195,7 @@ namespace System.Security.Cryptography.Pkcs
                     newSignerInfo.Version = 1;
                     break;
                 case SubjectIdentifierType.SubjectKeyIdentifier:
-                    newSignerInfo.Sid.SubjectKeyIdentifier = Certificate.GetSubjectKeyIdentifier();
+                    newSignerInfo.Sid.SubjectKeyIdentifier = PkcsPal.Instance.GetSubjectKeyIdentifier(Certificate);
                     newSignerInfo.Version = 3;
                     break;
                 case SubjectIdentifierType.NoSignature:
@@ -199,17 +215,30 @@ namespace System.Security.Cryptography.Pkcs
             {
                 List<AttributeAsn> attrs = BuildAttributes(UnsignedAttributes);
 
-                newSignerInfo.UnsignedAttributes = Helpers.NormalizeSet(attrs.ToArray());
+                newSignerInfo.UnsignedAttributes = PkcsHelpers.NormalizeAttributeSet(attrs.ToArray());
             }
 
-            bool signed = CmsSignature.Sign(
-                dataHash,
-                hashAlgorithmName,
-                Certificate,
-                PrivateKey,
-                silent,
-                out Oid signatureAlgorithm,
-                out ReadOnlyMemory<byte> signatureValue);
+            bool signed;
+            Oid signatureAlgorithm;
+            ReadOnlyMemory<byte> signatureValue;
+
+            if (SignerIdentifierType == SubjectIdentifierType.NoSignature)
+            {
+                signatureAlgorithm = new Oid(Oids.NoSignature, null);
+                signatureValue = dataHash;
+                signed = true;
+            }
+            else
+            {
+                signed = CmsSignature.Sign(
+                    dataHash,
+                    hashAlgorithmName,
+                    Certificate,
+                    PrivateKey,
+                    silent,
+                    out signatureAlgorithm,
+                    out signatureValue);
+            }
 
             if (!signed)
             {
@@ -286,25 +315,18 @@ namespace System.Security.Cryptography.Pkcs
 
             foreach (CryptographicAttributeObject attributeObject in attributes)
             {
-                using (var writer = new AsnWriter(AsnEncodingRules.DER))
+                AttributeAsn newAttr = new AttributeAsn
                 {
-                    writer.PushSetOf();
+                    AttrType = attributeObject.Oid,
+                    AttrValues = new ReadOnlyMemory<byte>[attributeObject.Values.Count],
+                };
 
-                    foreach (AsnEncodedData objectValue in attributeObject.Values)
-                    {
-                        writer.WriteEncodedValue(objectValue.RawData);
-                    }
-
-                    writer.PopSetOf();
-
-                    AttributeAsn newAttr = new AttributeAsn
-                    {
-                        AttrType = attributeObject.Oid,
-                        AttrValues = writer.Encode(),
-                    };
-
-                    signedAttrs.Add(newAttr);
+                for (int i = 0; i < attributeObject.Values.Count; i++)
+                {
+                    newAttr.AttrValues[i] = attributeObject.Values[i].RawData;
                 }
+
+                signedAttrs.Add(newAttr);
             }
 
             return signedAttrs;

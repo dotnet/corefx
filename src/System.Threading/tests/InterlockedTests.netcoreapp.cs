@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -6,13 +6,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.Threading.Tests
 {
     public partial class InterlockedTests
     {
-        // Taking this lock on the same thread repeatedly is very fast because it has no interlocked operations. 
+        // Taking this lock on the same thread repeatedly is very fast because it has no interlocked operations.
         // Switching the thread where the lock is taken is expensive because of allocation and FlushProcessWriteBuffers.
         private class AsymmetricLock
         {
@@ -58,7 +59,7 @@ namespace System.Threading.Tests
                     // If other thread started stealing the ownership, we need to take slow path.
                     //
                     // Make sure that the compiler won't reorder the read with the above write by wrapping the read in no-inline method.
-                    // RyuJIT won't reorder them today, but more advanced optimizers might. Regular Volatile.Read would be too big of 
+                    // RyuJIT won't reorder them today, but more advanced optimizers might. Regular Volatile.Read would be too big of
                     // a hammer because of it will result into memory barrier on ARM that we do not need here.
                     //
                     //
@@ -82,7 +83,7 @@ namespace System.Threading.Tests
                     var oldEntry = _current;
                     _current = new LockCookie(Environment.CurrentManagedThreadId);
 
-                    // After MemoryBarrierProcessWide, we can be sure that the Volatile.Read done by the fast thread will see that it is not a fast 
+                    // After MemoryBarrierProcessWide, we can be sure that the Volatile.Read done by the fast thread will see that it is not a fast
                     // thread anymore, and thus it will not attempt to enter the lock.
                     Interlocked.MemoryBarrierProcessWide();
 
@@ -97,7 +98,7 @@ namespace System.Threading.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(38400)]
         public void MemoryBarrierProcessWide()
         {
             // Stress MemoryBarrierProcessWide correctness using a simple AsymmetricLock

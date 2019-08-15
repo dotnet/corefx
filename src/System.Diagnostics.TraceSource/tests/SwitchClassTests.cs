@@ -10,9 +10,9 @@ namespace System.Diagnostics.TraceSourceTests
     {
         class TestSwitch : Switch
         {
-            public TestSwitch(String description = null) : base(null, description) { }
+            public TestSwitch(string description = null) : base(null, description) { }
 
-            public String SwitchValue
+            public string SwitchValue
             {
                 get { return this.Value; }
                 set { this.Value = value; }
@@ -43,7 +43,7 @@ namespace System.Diagnostics.TraceSourceTests
             return new WeakReference(new TestSwitch());
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public void PruneTest()
         {
             var strongSwitch = new TestSwitch();

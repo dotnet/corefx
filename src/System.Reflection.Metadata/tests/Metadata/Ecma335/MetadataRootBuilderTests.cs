@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -95,10 +95,10 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 // --------
                 // #~
                 // --------
-                
+
                 // Reserved (0)
                 0x00, 0x00, 0x00, 0x00,
-                
+
                 // Major Version (2)
                 0x02,
 
@@ -115,7 +115,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 
                 // Sorted tables
-                0x00, 0xFA, 0x01, 0x33, 0x00, 0x16, 0x00, 0x00, 
+                0x00, 0xFA, 0x01, 0x33, 0x00, 0x16, 0x00, 0x00,
 
                 // Rows (empty)
                 // Tables (empty)
@@ -208,10 +208,10 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 // --------
                 // #-
                 // --------
-                
+
                 // Reserved (0)
                 0x00, 0x00, 0x00, 0x00,
-                
+
                 // Major Version (2)
                 0x02,
 
@@ -228,7 +228,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00,
 
                 // Sorted tables
-                0x00, 0xFA, 0x01, 0x33, 0x00, 0x16, 0x00, 0x00, 
+                0x00, 0xFA, 0x01, 0x33, 0x00, 0x16, 0x00, 0x00,
 
                 // Rows
                 0x01, 0x00, 0x00, 0x00,
@@ -263,7 +263,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 // --------
 
                 0x00, 0x00, 0x00, 0x00,
-                
+
                 // --------
                 // #JTD
                 // --------
@@ -281,7 +281,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             var builder = new BlobBuilder();
             rootBuilder.Serialize(builder, 0, 0);
 
-            AssertEx.Equal(new byte[] 
+            AssertEx.Equal(new byte[]
             {
                 // padded version length:
                 0x0C, 0x00, 0x00, 0x00,
@@ -377,11 +377,24 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 0x08, 0x00, 0x00, 0x00,
 
                 // padded version:
+                // [ E1 88 B4 ] -> U+1234
+                // [ ED ] -> invalid (ED cannot be followed by A0) -> U+FFFD
+                // [ A0 ] -> invalid (not ASCII, not valid leading byte) -> U+FFFD
+                // [ 80 ] -> invalid (not ASCII, not valid leading byte) -> U+FFFD
                 0xE1, 0x88, 0xB4, 0xED, 0xA0, 0x80, 0x00, 0x00,
             }, builder.Slice(12, -132));
 
             // the default decoder replaces bad byte sequences by U+FFFD
-            Assert.Equal("\u1234\ufffd\ufffd", ReadVersion(builder));
+            if (PlatformDetection.IsNetCore)
+            {
+                Assert.Equal("\u1234\ufffd\ufffd\ufffd", ReadVersion(builder));
+            }
+            else
+            {
+                // Versions of .NET prior to Core 3.0 didn't follow Unicode recommendations for U+FFFD substitution,
+                // so they sometimes emitted too few replacement chars.
+                Assert.Equal("\u1234\ufffd\ufffd", ReadVersion(builder));
+            }
         }
     }
 }

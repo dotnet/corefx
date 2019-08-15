@@ -243,10 +243,9 @@ namespace System.Xml.Schema
                 if (request < nRequiredLength)
                     request = nRequiredLength;
                 uint[] newBits = new uint[request];
-                Array.Copy(_bits, newBits, _bits.Length);
+                Array.Copy(_bits, 0, newBits, 0, _bits.Length);
                 _bits = newBits;
             }
         }
     };
 }
-

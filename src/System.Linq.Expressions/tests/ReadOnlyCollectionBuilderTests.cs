@@ -728,8 +728,9 @@ namespace System.Linq.Expressions.Tests
 
         [Theory]
         [MemberData(nameof(Versioning))]
-        public void ReadOnlyCollectionBuilder_IEnumeratorOfT_Versioning_MoveNext(int index, Action<ReadOnlyCollectionBuilder<int>> edit)
+        public void ReadOnlyCollectionBuilder_IEnumeratorOfT_Versioning_MoveNext(int theoryIndex, Action<ReadOnlyCollectionBuilder<int>> edit)
         {
+            _ = theoryIndex;
             var rocb = new ReadOnlyCollectionBuilder<int>(new[] { 1, 2, 3 });
 
             IEnumerator<int> enumerator = rocb.GetEnumerator();
@@ -743,8 +744,9 @@ namespace System.Linq.Expressions.Tests
 
         [Theory]
         [MemberData(nameof(Versioning))]
-        public void ReadOnlyCollectionBuilder_IEnumeratorOfT_Versioning_Reset(int index, Action<ReadOnlyCollectionBuilder<int>> edit)
+        public void ReadOnlyCollectionBuilder_IEnumeratorOfT_Versioning_Reset(int theoryIndex, Action<ReadOnlyCollectionBuilder<int>> edit)
         {
+            _ = theoryIndex;
             var rocb = new ReadOnlyCollectionBuilder<int>(new[] { 1, 2, 3 });
 
             IEnumerator<int> enumerator = rocb.GetEnumerator();
@@ -758,8 +760,9 @@ namespace System.Linq.Expressions.Tests
 
         [Theory]
         [MemberData(nameof(Versioning))]
-        public void ReadOnlyCollectionBuilder_IEnumerator_Versioning_MoveNext(int index, Action<ReadOnlyCollectionBuilder<int>> edit)
+        public void ReadOnlyCollectionBuilder_IEnumerator_Versioning_MoveNext(int theoryIndex, Action<ReadOnlyCollectionBuilder<int>> edit)
         {
+            _ = theoryIndex;
             var rocb = new ReadOnlyCollectionBuilder<int>(new[] { 1, 2, 3 });
 
             IEnumerator enumerator = ((IEnumerable)rocb).GetEnumerator();
@@ -773,8 +776,9 @@ namespace System.Linq.Expressions.Tests
 
         [Theory]
         [MemberData(nameof(Versioning))]
-        public void ReadOnlyCollectionBuilder_IEnumerator_Versioning_Reset(int index, Action<ReadOnlyCollectionBuilder<int>> edit)
+        public void ReadOnlyCollectionBuilder_IEnumerator_Versioning_Reset(int theoryIndex, Action<ReadOnlyCollectionBuilder<int>> edit)
         {
+            _ = theoryIndex;
             var rocb = new ReadOnlyCollectionBuilder<int>(new[] { 1, 2, 3 });
 
             IEnumerator enumerator = ((IEnumerable)rocb).GetEnumerator();
@@ -870,7 +874,7 @@ namespace System.Linq.Expressions.Tests
             Assert.False(e.MoveNext());
         }
 
-        private static IEnumerable<object[]> InitialCollections() =>
+        public static IEnumerable<object[]> InitialCollections() =>
             new IEnumerable<int>[]
             {
                 new int[0],
@@ -895,9 +899,9 @@ namespace System.Linq.Expressions.Tests
                 Enumerable.Range(1, 5),
             }.Select(x => new object[] { x });
 
-        private static IEnumerable<object[]> Lengths() => Enumerable.Range(0, 10).Select(i => new object[] { i });
+        public static IEnumerable<object[]> Lengths() => Enumerable.Range(0, 10).Select(i => new object[] { i });
 
-        private static IEnumerable<object[]> Versioning() =>
+        public static IEnumerable<object[]> Versioning() =>
             new Action<ReadOnlyCollectionBuilder<int>>[]
             {
                 e => e.Add(1),
@@ -910,6 +914,6 @@ namespace System.Linq.Expressions.Tests
                 e => ((IList)e).Remove(1),
                 e => e.RemoveAt(0),
                 e => e.Reverse(),
-            }.Select((x, i) => new object[] { i, x });
+            }.Select((x, i) => new object[] { i, x }); // index used to help identify which item was the cause of a theory failure
     }
 }

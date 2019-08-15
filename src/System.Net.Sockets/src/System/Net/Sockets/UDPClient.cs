@@ -15,7 +15,7 @@ namespace System.Net.Sockets
 
         private Socket _clientSocket;
         private bool _active;
-        private byte[] _buffer = new byte[MaxUDPSize];
+        private readonly byte[] _buffer = new byte[MaxUDPSize];
         private AddressFamily _family = AddressFamily.InterNetwork;
 
         // Initializes a new instance of the System.Net.Sockets.UdpClientclass.
@@ -89,7 +89,7 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentNullException(nameof(localEP));
             }
-            
+
             // IPv6 Changes: Set the AddressFamily of this object before
             //               creating the client socket.
             _family = localEP.AddressFamily;
@@ -222,6 +222,22 @@ namespace System.Net.Sockets
             _cleanedUp = true;
         }
 
+        private bool IsAddressFamilyCompatible(AddressFamily family)
+        {
+            // Check if the provided address family is compatible with the socket address family
+            if (family == _family)
+            {
+                return true;
+            }
+
+            if (family == AddressFamily.InterNetwork)
+            {
+                return _family == AddressFamily.InterNetworkV6 && _clientSocket.DualMode;
+            }
+
+            return false;
+        }
+
         public void Dispose()
         {
             Dispose(true);
@@ -311,10 +327,10 @@ namespace System.Net.Sockets
             IPEndPoint ipEndPoint = null;
             if (hostname != null && port != 0)
             {
-                IPAddress[] addresses = Dns.GetHostAddressesAsync(hostname).GetAwaiter().GetResult();
+                IPAddress[] addresses = Dns.GetHostAddresses(hostname);
 
                 int i = 0;
-                for (; i < addresses.Length && addresses[i].AddressFamily != _family; i++)
+                for (; i < addresses.Length && !IsAddressFamilyCompatible(addresses[i].AddressFamily); i++)
                 {
                 }
 
@@ -424,6 +440,8 @@ namespace System.Net.Sockets
 
             // IPv6 Changes: we need to create the correct MulticastOption and
             //               must also check for address family compatibility.
+            // Note: we cannot reliably use IPv4 multicast over IPv6 in DualMode
+            // as such we keep the compatibility explicit between IP stack versions
             if (multicastAddr.AddressFamily != _family)
             {
                 throw new ArgumentException(SR.Format(SR.net_protocol_invalid_multicast_family, "UDP"), nameof(multicastAddr));
@@ -489,7 +507,7 @@ namespace System.Net.Sockets
                 throw new ArgumentException(SR.net_value_cannot_be_negative, nameof(ifindex));
             }
 
-            // Ensure that this is an IPv6 client, otherwise throw WinSock 
+            // Ensure that this is an IPv6 client, otherwise throw WinSock
             // Operation not supported socked exception.
             if (_family != AddressFamily.InterNetworkV6)
             {
@@ -590,7 +608,7 @@ namespace System.Net.Sockets
                 throw new ArgumentException(SR.net_value_cannot_be_negative, nameof(ifindex));
             }
 
-            // Ensure that this is an IPv6 client, otherwise throw WinSock 
+            // Ensure that this is an IPv6 client, otherwise throw WinSock
             // Operation not supported socked exception.
             if (_family != AddressFamily.InterNetworkV6)
             {
@@ -680,7 +698,7 @@ namespace System.Net.Sockets
             }
 
             // NOTE: Need to create different kinds of sockets based on the addresses
-            //       returned from DNS. As a result, we defer the creation of the 
+            //       returned from DNS. As a result, we defer the creation of the
             //       socket until the Connect method.
 
             Connect(hostname, port);
@@ -706,8 +724,8 @@ namespace System.Net.Sockets
                 throw new ArgumentOutOfRangeException(nameof(port));
             }
 
-            // We must now look for addresses that use a compatible address family to the client socket. However, in the 
-            // case of the <hostname,port> constructor we will have deferred creating the socket and will do that here 
+            // We must now look for addresses that use a compatible address family to the client socket. However, in the
+            // case of the <hostname,port> constructor we will have deferred creating the socket and will do that here
             // instead.
 
             IPAddress[] addresses = Dns.GetHostAddresses(hostname);
@@ -764,7 +782,7 @@ namespace System.Net.Sockets
                             _active = true;
                             break;
                         }
-                        else if (address.AddressFamily == _family)
+                        else if (IsAddressFamilyCompatible(address.AddressFamily))
                         {
                             // Only use addresses with a matching family
                             Connect(new IPEndPoint(address, port));
@@ -868,7 +886,7 @@ namespace System.Net.Sockets
                 throw new ObjectDisposedException(this.GetType().FullName);
             }
 
-            // this is a fix due to the nature of the ReceiveFrom() call and the 
+            // this is a fix due to the nature of the ReceiveFrom() call and the
             // ref parameter convention, we need to cast an IPEndPoint to it's base
             // class EndPoint and cast it back down to IPEndPoint. ugly but it works.
             //
@@ -953,7 +971,7 @@ namespace System.Net.Sockets
             IPAddress[] addresses = Dns.GetHostAddresses(hostname);
 
             int i = 0;
-            for (; i < addresses.Length && addresses[i].AddressFamily != _family; i++)
+            for (; i < addresses.Length && !IsAddressFamilyCompatible(addresses[i].AddressFamily); i++)
             {
                 ; // just count the addresses
             }

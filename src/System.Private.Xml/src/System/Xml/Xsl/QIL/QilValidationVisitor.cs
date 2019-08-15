@@ -27,8 +27,9 @@ namespace System.Xml.Xsl.Qil
     ///
     internal class QilValidationVisitor : QilScopedVisitor
     {
-        private SubstitutionList _subs = new SubstitutionList();
-        private QilTypeChecker _typeCheck = new QilTypeChecker();
+#if DEBUG
+        private readonly QilTypeChecker _typeCheck = new QilTypeChecker();
+#endif
 
         //-----------------------------------------------
         // Entry
@@ -188,7 +189,7 @@ namespace System.Xml.Xsl.Qil
                 message = s + "\n" + message;
             }
             n.Annotation = message;
-            Debug.Assert(false, message);
+            Debug.Fail(message);
         }
     }
 }

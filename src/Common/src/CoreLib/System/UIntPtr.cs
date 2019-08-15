@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Runtime.Versioning;
 
+#pragma warning disable SA1121 // explicitly using type aliases instead of built-in types
 #if BIT64
 using nuint = System.UInt64;
 #else
@@ -18,9 +19,9 @@ namespace System
     [Serializable]
     [CLSCompliant(false)]
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public struct UIntPtr : IEquatable<UIntPtr>, ISerializable
+    public readonly struct UIntPtr : IEquatable<UIntPtr>, ISerializable
     {
-        private unsafe void* _value; // Do not rename (binary serialization)
+        private readonly unsafe void* _value; // Do not rename (binary serialization)
 
         [Intrinsic]
         public static readonly UIntPtr Zero;
@@ -60,7 +61,7 @@ namespace System
             _value = (void*)l;
         }
 
-        unsafe void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+        void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
             if (info == null)
                 throw new ArgumentNullException(nameof(info));
@@ -68,7 +69,7 @@ namespace System
             info.AddValue("value", ToUInt64());
         }
 
-        public unsafe override bool Equals(Object obj)
+        public override unsafe bool Equals(object? obj)
         {
             if (obj is UIntPtr)
             {
@@ -82,7 +83,7 @@ namespace System
             return _value == other._value;
         }
 
-        public unsafe override int GetHashCode()
+        public override unsafe int GetHashCode()
         {
 #if BIT64
             ulong l = (ulong)_value;
@@ -196,7 +197,7 @@ namespace System
             return new UIntPtr((nuint)pointer._value - (nuint)offset);
         }
 
-        public static unsafe int Size
+        public static int Size
         {
             [Intrinsic]
             [NonVersionable]
@@ -213,7 +214,7 @@ namespace System
             return _value;
         }
 
-        public unsafe override string ToString()
+        public override unsafe string ToString()
         {
             return ((nuint)_value).ToString(CultureInfo.InvariantCulture);
         }

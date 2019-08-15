@@ -4,28 +4,133 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net.Cache;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Net.Test.Common;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace System.Net.Tests
 {
-    public partial class HttpWebRequestTest : RemoteExecutorTestBase
+    using Configuration = System.Net.Test.Common.Configuration;
+
+    public partial class HttpWebRequestTest
     {
         private const string RequestBody = "This is data to POST.";
         private readonly byte[] _requestBodyBytes = Encoding.UTF8.GetBytes(RequestBody);
         private readonly NetworkCredential _explicitCredential = new NetworkCredential("user", "password", "domain");
         private readonly ITestOutputHelper _output;
 
-        public static readonly object[][] EchoServers = System.Net.Test.Common.Configuration.Http.EchoServers;
+        public static readonly object[][] EchoServers = Configuration.Http.EchoServers;
+
+        public static IEnumerable<object[]> Dates_ReadValue_Data()
+        {
+            var zero_formats = new[]
+            {
+                // RFC1123
+                "R",
+                // RFC1123 - UTC
+                "ddd, dd MMM yyyy HH:mm:ss 'UTC'",
+                // RFC850
+                "dddd, dd-MMM-yy HH:mm:ss 'GMT'",
+                // RFC850 - UTC
+                "dddd, dd-MMM-yy HH:mm:ss 'UTC'",
+                // ANSI
+                "ddd MMM d HH:mm:ss yyyy",
+            };
+
+            var offset_formats = new[]
+            {
+                // RFC1123 - Offset
+                "ddd, dd MMM yyyy HH:mm:ss zzz",
+                // RFC850 - Offset
+                "dddd, dd-MMM-yy HH:mm:ss zzz",
+            };
+
+            var dates = new[]
+            {
+                new DateTimeOffset(2018, 1, 1, 12, 1, 14, TimeSpan.Zero),
+                new DateTimeOffset(2018, 1, 3, 15, 0, 0, TimeSpan.Zero),
+                new DateTimeOffset(2015, 5, 6, 20, 45, 38, TimeSpan.Zero),
+            };
+
+            foreach (var date in dates)
+            {
+                var expected = date.LocalDateTime;
+
+                foreach (var format in zero_formats.Concat(offset_formats))
+                {
+                    var formatted = date.ToString(format, CultureInfo.InvariantCulture);
+                    yield return new object[] { formatted, expected };
+                }
+            }
+
+            foreach (var format in offset_formats)
+            {
+                foreach (var date in dates.SelectMany(d => new[] { d.ToOffset(TimeSpan.FromHours(5)), d.ToOffset(TimeSpan.FromHours(-5)) }))
+                {
+                    var formatted = date.ToString(format, CultureInfo.InvariantCulture);
+                    var expected = date.LocalDateTime;
+                    yield return new object[] { formatted, expected };
+                    yield return new object[] { formatted.ToLowerInvariant(), expected };
+                }
+            }
+        }
+
+        public static IEnumerable<object[]> Dates_Invalid_Data()
+        {
+            yield return new object[] { "not a valid date here" };
+            yield return new object[] { "Sun, 32 Nov 2018 16:33:01 GMT" };
+            yield return new object[] { "Sun, 25 Car 2018 16:33:01 UTC" };
+            yield return new object[] { "Sun, 25 Nov 1234567890 33:77:80 GMT" };
+            yield return new object[] { "Sun, 25 Nov 2018 55:33:01+05:00" };
+            yield return new object[] { "Sunday, 25-Nov-18 16:77:01 GMT" };
+            yield return new object[] { "Sunday, 25-Nov-18 16:33:65 UTC" };
+            yield return new object[] { "Broken, 25-Nov-18 21:33:01+05:00" };
+            yield return new object[] { "Always Nov 25 21:33:01 2018" };
+
+            // Sat/Saturday is invalid, because 2018/3/25 is Sun/Sunday...
+            yield return new object[] { "Sat, 25 Mar 2018 16:33:01 GMT" };
+            yield return new object[] { "Sat, 25 Mar 2018 16:33:01 UTC" };
+            yield return new object[] { "Sat, 25 Mar 2018 21:33:01+05:00" };
+            yield return new object[] { "Saturday, 25-Mar-18 16:33:01 GMT" };
+            yield return new object[] { "Saturday, 25-Mar-18 16:33:01 UTC" };
+            yield return new object[] { "Saturday, 25-Mar-18 21:33:01+05:00" };
+            yield return new object[] { "Sat Mar 25 21:33:01 2018" };
+            // Invalid day-of-week values
+            yield return new object[] { "Sue, 25 Nov 2018 16:33:01 GMT" };
+            yield return new object[] { "Sue, 25 Nov 2018 16:33:01 UTC" };
+            yield return new object[] { "Sue, 25 Nov 2018 21:33:01+05:00" };
+            yield return new object[] { "Surprise, 25-Nov-18 16:33:01 GMT" };
+            yield return new object[] { "Surprise, 25-Nov-18 16:33:01 UTC" };
+            yield return new object[] { "Surprise, 25-Nov-18 21:33:01+05:00" };
+            yield return new object[] { "Sue Nov 25 21:33:01 2018" };
+            // Invalid month values
+            yield return new object[] { "Sun, 25 Not 2018 16:33:01 GMT" };
+            yield return new object[] { "Sun, 25 Not 2018 16:33:01 UTC" };
+            yield return new object[] { "Sun, 25 Not 2018 21:33:01+05:00" };
+            yield return new object[] { "Sunday, 25-Not-18 16:33:01 GMT" };
+            yield return new object[] { "Sunday, 25-Not-18 16:33:01 UTC" };
+            yield return new object[] { "Sunday, 25-Not-18 21:33:01+05:00" };
+            yield return new object[] { "Sun Not 25 21:33:01 2018" };
+            // Strange separators
+            yield return new object[] { "Sun? 25 Nov 2018 16:33:01 GMT" };
+            yield return new object[] { "Sun, 25*Nov 2018 16:33:01 UTC" };
+            yield return new object[] { "Sun, 25 Nov{2018 21:33:01+05:00" };
+            yield return new object[] { "Sunday, 25-Nov-18]16:33:01 GMT" };
+            yield return new object[] { "Sunday, 25-Nov-18 16/33:01 UTC" };
+            yield return new object[] { "Sunday, 25-Nov-18 21:33|01+05:00" };
+            yield return new object[] { "Sun=Not 25 21:33:01 2018" };
+        }
 
         public HttpWebRequestTest(ITestOutputHelper output)
         {
@@ -51,10 +156,10 @@ namespace System.Net.Tests
             Assert.Equal(0, request.Headers.Count);
             Assert.Equal(HttpVersion.Version11, request.ProtocolVersion);
             Assert.Equal("GET", request.Method);
-            Assert.Equal(HttpWebRequest.DefaultMaximumResponseHeadersLength, 64);
+            Assert.Equal(64, HttpWebRequest.DefaultMaximumResponseHeadersLength);
             Assert.NotNull(HttpWebRequest.DefaultCachePolicy);
-            Assert.Equal(HttpWebRequest.DefaultCachePolicy.Level, RequestCacheLevel.BypassCache);
-            Assert.Equal(PlatformDetection.IsFullFramework ? 64 : 0, HttpWebRequest.DefaultMaximumErrorResponseLength);
+            Assert.Equal(RequestCacheLevel.BypassCache, HttpWebRequest.DefaultCachePolicy.Level);
+            Assert.Equal(0, HttpWebRequest.DefaultMaximumErrorResponseLength);
             Assert.NotNull(request.Proxy);
             Assert.Equal(remoteServer, request.RequestUri);
             Assert.True(request.SupportsCookieContainer);
@@ -110,7 +215,6 @@ namespace System.Net.Tests
             Assert.False(request.AllowReadStreamBuffering);
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "not supported on .NET Framework")]
         [Theory, MemberData(nameof(EchoServers))]
         public void AllowReadStreamBuffering_SetTrueThenGet_ExpectTrue(Uri remoteServer)
         {
@@ -119,18 +223,27 @@ namespace System.Net.Tests
             Assert.True(request.AllowReadStreamBuffering);
         }
 
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task ContentLength_Get_ExpectSameAsGetResponseStream(Uri remoteServer)
+        [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Loopback server with TLS has problems on UWP")]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task ContentLength_Get_ExpectSameAsGetResponseStream(bool useSsl)
         {
-            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            using (WebResponse response = await request.GetResponseAsync())
-            using (Stream myStream = response.GetResponseStream())
-            using (StreamReader sr = new StreamReader(myStream))
+            var options = new LoopbackServer.Options { UseSsl = useSsl };
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
-                string strContent = sr.ReadToEnd();
-                long length = response.ContentLength;
-                Assert.Equal(strContent.Length, length);
-            }
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+                request.ServerCertificateValidationCallback = delegate { return true; };
+                using (WebResponse response = await request.GetResponseAsync())
+                using (Stream myStream = response.GetResponseStream())
+                using (var sr = new StreamReader(myStream))
+                {
+                    string strContent = sr.ReadToEnd();
+                    long length = response.ContentLength;
+                    Assert.Equal(strContent.Length, length);
+                }
+            }, server => server.HandleRequestAsync(), options);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -204,7 +317,7 @@ namespace System.Net.Tests
                     Assert.Contains($"Host: {host}", headers);
                 });
 
-                using (var response = (HttpWebResponse) await getResponse)
+                using (var response = (HttpWebResponse)await getResponse)
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 }
@@ -318,8 +431,8 @@ namespace System.Net.Tests
 
                 Assert.InRange(sw.ElapsedMilliseconds, 1, 15 * 1000);
                 Assert.Equal(WebExceptionStatus.Timeout, exception.Status);
-                Assert.Equal(null, exception.InnerException);
-                Assert.Equal(null, exception.Response);
+                Assert.Null(exception.InnerException);
+                Assert.Null(exception.Response);
 
                 return Task.FromResult<object>(null);
             });
@@ -424,7 +537,7 @@ namespace System.Net.Tests
             request.TransferEncoding = TransferEncoding;
             Assert.Equal(TransferEncoding, request.TransferEncoding);
             request.TransferEncoding = null;
-            Assert.Equal(null, request.TransferEncoding);
+            Assert.Null(request.TransferEncoding);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -455,32 +568,35 @@ namespace System.Net.Tests
         [InlineData(null)]
         [InlineData(false)]
         [InlineData(true)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19225")]
-        public void KeepAlive_CorrectConnectionHeaderSent(bool? keepAlive)
+        public async Task KeepAlive_CorrectConnectionHeaderSent(bool? keepAlive)
         {
-            HttpWebRequest request = WebRequest.CreateHttp(Test.Common.Configuration.Http.RemoteEchoServer);
-
-            if (keepAlive.HasValue)
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
-                request.KeepAlive = keepAlive.Value;
-            }
+                HttpWebRequest request = WebRequest.CreateHttp(url);
+                request.Proxy = null; // Don't use a proxy since it might interfere with the Connection: headers.
+                if (keepAlive.HasValue)
+                {
+                    request.KeepAlive = keepAlive.Value;
+                }
 
-            using (var response = (HttpWebResponse)request.GetResponse())
-            using (var body = new StreamReader(response.GetResponseStream()))
-            {
-                string content = body.ReadToEnd();
+                Task<WebResponse> getResponseTask = request.GetResponseAsync();
+                Task<List<string>> serverTask = server.AcceptConnectionSendResponseAndCloseAsync();
+
+                await TaskTimeoutExtensions.WhenAllOrAnyFailed(new Task[] { getResponseTask, serverTask });
+
+                List<string> requestLines = await serverTask;
                 if (!keepAlive.HasValue || keepAlive.Value)
                 {
-                    // Validate that the request doesn't contain Connection: "close", but we can't validate
-                    // that it does contain Connection: "keep-alive", as that's optional as of HTTP 1.1.
-                    Assert.DoesNotContain("\"Connection\": \"close\"", content, StringComparison.OrdinalIgnoreCase);
+                    // Validate that the request doesn't contain "Connection: close", but we can't validate
+                    // that it does contain "Connection: Keep-Alive", as that's optional as of HTTP 1.1.
+                    Assert.DoesNotContain("Connection: close", requestLines, StringComparer.OrdinalIgnoreCase);
                 }
                 else
                 {
-                    Assert.Contains("\"Connection\": \"close\"", content, StringComparison.OrdinalIgnoreCase);
-                    Assert.DoesNotContain("\"Keep-Alive\"", content, StringComparison.OrdinalIgnoreCase);
+                    Assert.Contains("Connection: close", requestLines, StringComparer.OrdinalIgnoreCase);
+                    Assert.DoesNotContain("Keep-Alive", requestLines, StringComparer.OrdinalIgnoreCase);
                 }
-            }
+            });
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -532,7 +648,6 @@ namespace System.Net.Tests
             Assert.False(request.PreAuthenticate);
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19225")]
         [Theory, MemberData(nameof(EchoServers))]
         public void PreAuthenticate_SetAndGetBooleanResponse_ValuesMatch(Uri remoteServer)
         {
@@ -552,7 +667,7 @@ namespace System.Net.Tests
             request.Connection = Connection;
             Assert.Equal(Connection, request.Connection);
             request.Connection = null;
-            Assert.Equal(null, request.Connection);
+            Assert.Null(request.Connection);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -571,7 +686,7 @@ namespace System.Net.Tests
             request.Expect = Expect;
             Assert.Equal(Expect, request.Expect);
             request.Expect = null;
-            Assert.Equal(null, request.Expect);
+            Assert.Null(request.Expect);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -584,7 +699,7 @@ namespace System.Net.Tests
         [Fact]
         public void DefaultMaximumResponseHeadersLength_SetAndGetLength_ValuesMatch()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 int defaultMaximumResponseHeadersLength = HttpWebRequest.DefaultMaximumResponseHeadersLength;
                 const int NewDefaultMaximumResponseHeadersLength = 255;
@@ -599,14 +714,14 @@ namespace System.Net.Tests
                     HttpWebRequest.DefaultMaximumResponseHeadersLength = defaultMaximumResponseHeadersLength;
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
         public void DefaultMaximumErrorResponseLength_SetAndGetLength_ValuesMatch()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 int defaultMaximumErrorsResponseLength = HttpWebRequest.DefaultMaximumErrorResponseLength;
                 const int NewDefaultMaximumErrorsResponseLength = 255;
@@ -621,14 +736,14 @@ namespace System.Net.Tests
                     HttpWebRequest.DefaultMaximumErrorResponseLength = defaultMaximumErrorsResponseLength;
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
         public void DefaultCachePolicy_SetAndGetPolicyReload_ValuesMatch()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 RequestCachePolicy requestCachePolicy = HttpWebRequest.DefaultCachePolicy;
 
@@ -643,7 +758,7 @@ namespace System.Net.Tests
                     HttpWebRequest.DefaultCachePolicy = requestCachePolicy;
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -661,6 +776,34 @@ namespace System.Net.Tests
             Assert.Equal(ifModifiedSince, request.IfModifiedSince);
         }
 
+        [Theory]
+        [MemberData(nameof(Dates_ReadValue_Data))]
+        public void IfModifiedSince_ReadValue(string raw, DateTime expected)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp("http://localhost");
+            request.Headers.Set(HttpRequestHeader.IfModifiedSince, raw);
+
+            Assert.Equal(expected, request.IfModifiedSince);
+        }
+
+        [Theory]
+        [MemberData(nameof(Dates_Invalid_Data))]
+        public void IfModifiedSince_InvalidValue(string invalid)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp("http://localhost");
+            request.Headers.Set(HttpRequestHeader.IfModifiedSince, invalid);
+
+            Assert.Throws<ProtocolViolationException>(() => request.IfModifiedSince);
+        }
+
+        [Fact]
+        public void IfModifiedSince_NotPresent()
+        {
+            HttpWebRequest request = WebRequest.CreateHttp("http://localhost");
+
+            Assert.Equal(DateTime.MinValue, request.IfModifiedSince);
+        }
+
         [Theory, MemberData(nameof(EchoServers))]
         public void Date_SetMinDateAfterValidDate_ValuesMatch(Uri remoteServer)
         {
@@ -673,6 +816,34 @@ namespace System.Net.Tests
             DateTime date = DateTime.MinValue;
             request.Date = date;
             Assert.Equal(date, request.Date);
+        }
+
+        [Theory]
+        [MemberData(nameof(Dates_ReadValue_Data))]
+        public void Date_ReadValue(string raw, DateTime expected)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp("http://localhost");
+            request.Headers.Set(HttpRequestHeader.Date, raw);
+
+            Assert.Equal(expected, request.Date);
+        }
+
+        [Theory]
+        [MemberData(nameof(Dates_Invalid_Data))]
+        public void Date_InvalidValue(string invalid)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp("http://localhost");
+            request.Headers.Set(HttpRequestHeader.Date, invalid);
+
+            Assert.Throws<ProtocolViolationException>(() => request.Date);
+        }
+
+        [Fact]
+        public void Date_NotPresent()
+        {
+            HttpWebRequest request = WebRequest.CreateHttp("http://localhost");
+
+            Assert.Equal(DateTime.MinValue, request.Date);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -770,7 +941,7 @@ namespace System.Net.Tests
                 Task<WebResponse> getResponse = request.GetResponseAsync();
                 Task<List<string>> serverTask = server.AcceptConnectionSendResponseAndCloseAsync();
 
-                using (HttpWebResponse response = (HttpWebResponse) await getResponse)
+                using (HttpWebResponse response = (HttpWebResponse)await getResponse)
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 }
@@ -856,7 +1027,7 @@ namespace System.Net.Tests
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
             request.Credentials = _explicitCredential;
             request.UseDefaultCredentials = false;
-            Assert.Equal(null, request.Credentials);
+            Assert.Null(request.Credentials);
         }
 
         [OuterLoop]
@@ -914,7 +1085,6 @@ namespace System.Net.Tests
 
         [Theory, MemberData(nameof(EchoServers))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "no exception thrown on mono")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "no exception thrown on netfx")]
         public void BeginGetRequestStream_CreatePostRequestThenCallTwice_ThrowsInvalidOperationException(Uri remoteServer)
         {
             HttpWebRequest request = HttpWebRequest.CreateHttp(remoteServer);
@@ -927,18 +1097,24 @@ namespace System.Net.Tests
             });
         }
 
-        [Theory, MemberData(nameof(EchoServers))]
-        public void BeginGetRequestStream_CreateRequestThenBeginGetResponsePrior_ThrowsProtocolViolationException(Uri remoteServer)
+        [Fact]
+        public async Task BeginGetRequestStream_CreateRequestThenBeginGetResponsePrior_ThrowsProtocolViolationException()
         {
-            HttpWebRequest request = HttpWebRequest.CreateHttp(remoteServer);
-
-            IAsyncResult asyncResult = request.BeginGetResponse(null, null);
-            Assert.Throws<ProtocolViolationException>(() =>
+            await LoopbackServer.CreateServerAsync((server, url) =>
             {
-                request.BeginGetRequestStream(null, null);
+                HttpWebRequest request = HttpWebRequest.CreateHttp(url);
+
+                IAsyncResult asyncResult = request.BeginGetResponse(null, null);
+                Assert.Throws<ProtocolViolationException>(() =>
+                {
+                    request.BeginGetRequestStream(null, null);
+                });
+
+                return Task.CompletedTask;
             });
         }
 
+        [Fact]
         public async Task BeginGetResponse_CreateRequestThenCallTwice_ThrowsInvalidOperationException()
         {
             await LoopbackServer.CreateServerAsync((server, url) =>
@@ -960,6 +1136,7 @@ namespace System.Net.Tests
             Assert.Equal(WebExceptionStatus.RequestCanceled, ex.Status);
         }
 
+        [Fact]
         public async Task GetRequestStreamAsync_WriteAndDisposeRequestStreamThenOpenRequestStream_ThrowsArgumentException()
         {
             await LoopbackServer.CreateServerAsync(async (server, url) =>
@@ -974,6 +1151,7 @@ namespace System.Net.Tests
             });
         }
 
+        [Fact]
         public async Task GetRequestStreamAsync_SetPOSTThenGet_ExpectNotNull()
         {
             await LoopbackServer.CreateServerAsync(async (server, url) =>
@@ -987,34 +1165,45 @@ namespace System.Net.Tests
             });
         }
 
+        [Fact]
         public async Task GetResponseAsync_GetResponseStream_ExpectNotNull()
         {
-            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
-                HttpWebRequest request = WebRequest.CreateHttp(url);
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
                 using (WebResponse response = await request.GetResponseAsync())
+                using (Stream myStream = response.GetResponseStream())
                 {
-                    Assert.NotNull(response.GetResponseStream());
+                    Assert.NotNull(myStream);
                 }
-            });
+            }, server => server.HandleRequestAsync());
         }
 
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task GetResponseAsync_GetResponseStream_ContainsHost(Uri remoteServer)
+        [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Loopback server with TLS has problems on UWP")]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task GetResponseAsync_GetResponseStream_ContainsHost(bool useSsl)
         {
-            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            request.Method = HttpMethod.Get.Method;
+            var options = new LoopbackServer.Options { UseSsl = useSsl };
 
-            using (WebResponse response = await request.GetResponseAsync())
-            using (Stream myStream = response.GetResponseStream())
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
-                Assert.NotNull(myStream);
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+                request.ServerCertificateValidationCallback = delegate { return true; };
+                using (WebResponse response = await request.GetResponseAsync())
+                using (Stream myStream = response.GetResponseStream())
                 using (var sr = new StreamReader(myStream))
                 {
-                    string strContent = sr.ReadToEnd();
-                    Assert.True(strContent.Contains("\"Host\": \"" + System.Net.Test.Common.Configuration.Http.Host + "\""));
+                    Assert.Equal(uri.Host + ":" + uri.Port, response.Headers["Host"]);
                 }
-            }
+            }, async server =>
+            {
+                string host = server.Uri.Host + ":" + server.Uri.Port;
+                HttpRequestData requestData = await server.HandleRequestAsync(headers: new HttpHeaderData[] { new HttpHeaderData("Host", host) });
+                string serverReceivedHost = requestData.GetSingleHeaderValue("Host");
+                Assert.Equal(host, serverReceivedHost);
+            }, options);
         }
 
         [OuterLoop]
@@ -1027,7 +1216,7 @@ namespace System.Net.Tests
             request.CookieContainer.Add(remoteServer, new Cookie("1", "cookie1"));
             request.CookieContainer.Add(remoteServer, new Cookie("2", "cookie2"));
             Assert.True(request.SupportsCookieContainer);
-            Assert.Equal(request.CookieContainer.GetCookies(remoteServer).Count, 2);
+            Assert.Equal(2, request.CookieContainer.GetCookies(remoteServer).Count);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -1035,37 +1224,71 @@ namespace System.Net.Tests
         {
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
             request.AddRange(1, 5);
-            Assert.Equal(request.Headers["Range"], "bytes=1-5");
+            Assert.Equal("bytes=1-5", request.Headers["Range"]);
         }
 
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task GetResponseAsync_PostRequestStream_ContainsData(Uri remoteServer)
+        [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Loopback server with TLS has problems on UWP")]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task GetResponseAsync_PostRequestStream_ContainsData(bool useSsl)
         {
-            HttpWebRequest request = HttpWebRequest.CreateHttp(remoteServer);
-            request.Method = HttpMethod.Post.Method;
+            var options = new LoopbackServer.Options { UseSsl = useSsl };
 
-            using (Stream requestStream = await request.GetRequestStreamAsync())
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
-                requestStream.Write(_requestBodyBytes, 0, _requestBodyBytes.Length);
-            }
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+                request.ServerCertificateValidationCallback = delegate { return true; };
+                request.Method = HttpMethod.Post.Method;
+                using (Stream requestStream = await request.GetRequestStreamAsync())
+                {
+                    requestStream.Write(_requestBodyBytes, 0, _requestBodyBytes.Length);
+                }
 
-            using (WebResponse response = await request.GetResponseAsync())
-            using (Stream myStream = response.GetResponseStream())
-            using (var sr = new StreamReader(myStream))
+                using (WebResponse response = await request.GetResponseAsync())
+                using (Stream myStream = response.GetResponseStream())
+                using (var sr = new StreamReader(myStream))
+                {
+                    string strContent = sr.ReadToEnd();
+                    //Assert.Equal(RequestBody, strContent);
+                }
+            }, server => server.AcceptConnectionAsync(async (con) =>
             {
-                string strContent = sr.ReadToEnd();
-                Assert.True(strContent.Contains(RequestBody));
-            }
+                await con.SendResponseAsync(content: RequestBody);
+
+                StringBuilder sb = new StringBuilder();
+                byte[] buf = new byte[1024];
+                int count = 0;
+
+                do
+                {
+                    count = con.Stream.Read(buf, 0, buf.Length);
+                    if (count != 0)
+                    {
+                        sb.Append(Encoding.UTF8.GetString(buf, 0, count));
+                    }
+                } while (count > 0);
+
+                Assert.Contains(RequestBody, sb.ToString());
+            }), options);
         }
-        
-        [Theory] 
-        [MemberData(nameof(EchoServers))]
-        public async Task GetResponseAsync_UseDefaultCredentials_ExpectSuccess(Uri remoteServer)
+
+        [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Loopback server with TLS has problems on UWP")]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task GetResponseAsync_UseDefaultCredentials_ExpectSuccess(bool useSsl)
         {
-            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            request.UseDefaultCredentials = true;
-            var response = await request.GetResponseAsync();
-            response.Dispose();
+            var options = new LoopbackServer.Options { UseSsl = useSsl };
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+                request.ServerCertificateValidationCallback = delegate { return true; };
+                request.UseDefaultCredentials = true;
+
+                (await request.GetResponseAsync()).Dispose();
+            }, server => server.HandleRequestAsync(), options);
         }
 
         [OuterLoop] // fails on networks with DNS servers that provide a dummy page for invalid addresses
@@ -1078,40 +1301,61 @@ namespace System.Net.Tests
             Assert.Equal(WebExceptionStatus.NameResolutionFailure, ex.Status);
         }
 
-        public static object[][] StatusCodeServers = {
-            new object[] { System.Net.Test.Common.Configuration.Http.StatusCodeUri(false, 404) },
-            new object[] { System.Net.Test.Common.Configuration.Http.StatusCodeUri(true, 404) },
-        };
-
-        [Theory, MemberData(nameof(StatusCodeServers))]
-        public async Task GetResponseAsync_ResourceNotFound_ThrowsWebException(Uri remoteServer)
+        [Fact]
+        public async Task GetResponseAsync_ResourceNotFound_ThrowsWebException()
         {
-            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            WebException ex = await Assert.ThrowsAsync<WebException>(() => request.GetResponseAsync());
-            Assert.Equal(WebExceptionStatus.ProtocolError, ex.Status);
-        }
-
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task HaveResponse_GetResponseAsync_ExpectTrue(Uri remoteServer)
-        {
-            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            using (WebResponse response = await request.GetResponseAsync())
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
-                Assert.True(request.HaveResponse);
-            }
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+                WebException ex = await Assert.ThrowsAsync<WebException>(() => request.GetResponseAsync());
+                Assert.Equal(WebExceptionStatus.ProtocolError, ex.Status);
+            }, server => server.AcceptConnectionSendCustomResponseAndCloseAsync(
+                $"HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n"));
         }
 
         [Theory]
-        [MemberData(nameof(EchoServers))]
-        public async Task Headers_GetResponseHeaders_ContainsExpectedValue(Uri remoteServer)
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Loopback server with TLS has problems on UWP")]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task HaveResponse_GetResponseAsync_ExpectTrue(bool useSsl)
         {
-            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
+            var options = new LoopbackServer.Options { UseSsl = useSsl };
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+                request.ServerCertificateValidationCallback = delegate { return true; };
+                request.UseDefaultCredentials = true;
+
+                using WebResponse response = await request.GetResponseAsync();
+                Assert.True(request.HaveResponse);
+            }, server => server.HandleRequestAsync(), options);
+        }
+
+        [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Loopback server with TLS has problems on UWP")]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task Headers_GetResponseHeaders_ContainsExpectedValue(bool useSsl)
+        {
+            var options = new LoopbackServer.Options { UseSsl = useSsl };
+
+            const string HeadersPartialContent = "application/json";
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+                request.ServerCertificateValidationCallback = delegate { return true; };
+                request.ContentType = HeadersPartialContent;
+
+                using WebResponse response = await request.GetResponseAsync();
                 string headersString = response.Headers.ToString();
-                string headersPartialContent = "Content-Type: application/json";
-                Assert.True(headersString.Contains(headersPartialContent));
-            }
+                Assert.Equal(HeadersPartialContent, response.Headers[HttpResponseHeader.ContentType]);
+            }, async server =>
+            {
+                HttpRequestData requestData = await server.HandleRequestAsync(headers: new[] { new HttpHeaderData("Content-Type", HeadersPartialContent) });
+                string contentType = requestData.GetSingleHeaderValue("Content-Type");
+                Assert.Equal(HeadersPartialContent, contentType);
+            }, options);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -1146,6 +1390,43 @@ namespace System.Net.Tests
             Assert.NotNull(request.Proxy);
         }
 
+        [OuterLoop("Uses external server")]
+        [PlatformSpecific(TestPlatforms.AnyUnix)] // The default proxy is resolved via WinINet on Windows.
+        [Fact]
+        public async Task ProxySetViaEnvironmentVariable_DefaultProxyCredentialsUsed()
+        {
+            var cred = new NetworkCredential(Guid.NewGuid().ToString("N"), Guid.NewGuid().ToString("N"));
+            LoopbackServer.Options options =
+                new LoopbackServer.Options { IsProxy = true, Username = cred.UserName, Password = cred.Password };
+
+            await LoopbackServer.CreateServerAsync(async (proxyServer, proxyUri) =>
+            {
+                // HttpWebRequest/HttpClient will read a default proxy from the http_proxy environment variable. Ensure
+                // that when it does our default proxy credentials are used. To avoid messing up anything else in this
+                // process we run the test in another process.
+                var psi = new ProcessStartInfo();
+                Task<List<string>> proxyTask = null;
+
+                proxyTask = proxyServer.AcceptConnectionPerformAuthenticationAndCloseAsync("Proxy-Authenticate: Basic realm=\"NetCore\"\r\n");
+                psi.Environment.Add("http_proxy", $"http://{proxyUri.Host}:{proxyUri.Port}");
+
+                RemoteExecutor.Invoke(async (user, pw) =>
+                {
+                    WebRequest.DefaultWebProxy.Credentials = new NetworkCredential(user, pw);
+                    HttpWebRequest request = HttpWebRequest.CreateHttp(Configuration.Http.RemoteEchoServer);
+
+                    using (var response = (HttpWebResponse) await request.GetResponseAsync())
+                    {
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    }
+
+                    return RemoteExecutor.SuccessExitCode;
+                }, cred.UserName, cred.Password, new RemoteInvokeOptions { StartInfo = psi }).Dispose();
+
+                await proxyTask;
+            }, options);
+        }
+
         [Theory, MemberData(nameof(EchoServers))]
         public void RequestUri_CreateHttpThenGet_ExpectSameUri(Uri remoteServer)
         {
@@ -1153,14 +1434,21 @@ namespace System.Net.Tests
             Assert.Equal(remoteServer, request.RequestUri);
         }
 
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task ResponseUri_GetResponseAsync_ExpectSameUri(Uri remoteServer)
+        [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Loopback server with TLS has problems on UWP")]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task ResponseUri_GetResponseAsync_ExpectSameUri(bool useSsl)
         {
-            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            using (WebResponse response = await request.GetResponseAsync())
+            var options = new LoopbackServer.Options { UseSsl = useSsl };
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
-                Assert.Equal(remoteServer, response.ResponseUri);
-            }
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+                request.ServerCertificateValidationCallback = delegate { return true; };
+                using WebResponse response = await request.GetResponseAsync();
+                Assert.Equal(uri, response.ResponseUri);
+            }, server => server.HandleRequestAsync(), options);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -1170,56 +1458,68 @@ namespace System.Net.Tests
             Assert.True(request.SupportsCookieContainer);
         }
 
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task SimpleScenario_UseGETVerb_Success(Uri remoteServer)
+        [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Loopback server with TLS has problems on UWP")]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task SimpleScenario_UseGETVerb_Success(bool useSsl)
         {
-            HttpWebRequest request = HttpWebRequest.CreateHttp(remoteServer);
-            using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
-            using (Stream responseStream = response.GetResponseStream())
-            using (var sr = new StreamReader(responseStream))
+            var options = new LoopbackServer.Options { UseSsl = useSsl };
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
-                string responseBody = sr.ReadToEnd();
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+                request.ServerCertificateValidationCallback = delegate { return true; };
+                using HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            }
+            }, server => server.HandleRequestAsync(), options);
         }
 
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task SimpleScenario_UsePOSTVerb_Success(Uri remoteServer)
+        [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Loopback server with TLS has problems on UWP")]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task SimpleScenario_UsePOSTVerb_Success(bool useSsl)
         {
-            HttpWebRequest request = HttpWebRequest.CreateHttp(remoteServer);
-            request.Method = HttpMethod.Post.Method;
+            var options = new LoopbackServer.Options { UseSsl = useSsl };
 
-            using (Stream requestStream = await request.GetRequestStreamAsync())
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
-                requestStream.Write(_requestBodyBytes, 0, _requestBodyBytes.Length);
-            }
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+                request.ServerCertificateValidationCallback = delegate { return true; };
+                request.Method = HttpMethod.Post.Method;
+                using (Stream requestStream = await request.GetRequestStreamAsync())
+                {
+                    requestStream.Write(_requestBodyBytes, 0, _requestBodyBytes.Length);
+                }
 
-            using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
-            using (Stream responseStream = response.GetResponseStream())
-            using (var sr = new StreamReader(responseStream))
-            {
-                string responseBody = sr.ReadToEnd();
+                using HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            }
+            }, server => server.HandleRequestAsync(), options);
         }
 
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task ContentType_AddHeaderWithNoContent_SendRequest_HeaderGetsSent(Uri remoteServer)
+        [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Loopback server with TLS has problems on UWP")]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task ContentType_AddHeaderWithNoContent_SendRequest_HeaderGetsSent(bool useSsl)
         {
             const string ContentType = "text/plain; charset=utf-8";
-            HttpWebRequest request = HttpWebRequest.CreateHttp(remoteServer);
-            request.ContentType = ContentType;
+            var options = new LoopbackServer.Options { UseSsl = useSsl };
 
-            using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
-            using (Stream responseStream = response.GetResponseStream())
-            using (var sr = new StreamReader(responseStream))
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
-                string responseBody = sr.ReadToEnd();
-                _output.WriteLine(responseBody);
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+                request.ServerCertificateValidationCallback = delegate { return true; };
+                request.ContentType = ContentType;
 
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                Assert.True(responseBody.Contains($"\"Content-Type\": \"{ContentType}\""));
-            }
+                using HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
+                Assert.Equal(ContentType, response.Headers[HttpResponseHeader.ContentType]);
+            }, async server =>
+            {
+                HttpRequestData requestData = await server.HandleRequestAsync(headers: new HttpHeaderData[] { new HttpHeaderData("Content-Type", ContentType) });
+                Assert.Equal(ContentType, requestData.GetSingleHeaderValue("Content-Type"));
+            }, options);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -1231,6 +1531,7 @@ namespace System.Net.Tests
             Assert.Equal(MediaType, request.MediaType);
         }
 
+        [Fact]
         public async Task HttpWebRequest_EndGetRequestStreamContext_ExpectedValue()
         {
             await LoopbackServer.CreateServerAsync((server, url) =>
@@ -1241,14 +1542,7 @@ namespace System.Net.Tests
 
                 using (request.EndGetRequestStream(request.BeginGetRequestStream(null, null), out context))
                 {
-                    if (PlatformDetection.IsFullFramework)
-                    {
-                        Assert.NotNull(context);
-                    }
-                    else
-                    {
-                        Assert.Null(context);
-                    }
+                    Assert.Null(context);
                 }
 
                 return Task.FromResult<object>(null);
@@ -1257,7 +1551,6 @@ namespace System.Net.Tests
 
         [ActiveIssue(19083)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "dotnet/corefx #19083")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19083")]
         [Fact]
         public async Task Abort_BeginGetRequestStreamThenAbort_EndGetRequestStreamThrowsWebException()
         {
@@ -1280,7 +1573,6 @@ namespace System.Net.Tests
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "ResponseCallback not called after Abort on mono")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "ResponseCallback not called after Abort on netfx")]
         [Fact]
         public async Task Abort_BeginGetResponseThenAbort_ResponseCallbackCalledBeforeAbortReturns()
         {
@@ -1386,11 +1678,11 @@ namespace System.Net.Tests
                 BinaryFormatter formatter = new BinaryFormatter();
                 var hwr = HttpWebRequest.CreateHttp("http://localhost");
 
-                // .NET Framework throws 
+                // .NET Framework throws
                 // System.Runtime.Serialization.SerializationException:
                 //  Type 'System.Net.WebRequest+WebProxyWrapper' in Assembly 'System, Version=4.0.0.
                 //        0, Culture=neutral, PublicKeyToken=b77a5c561934e089' is not marked as serializable.
-                // While .NET Core throws 
+                // While .NET Core throws
                 // System.Runtime.Serialization.SerializationException:
                 //  Type 'System.Net.HttpWebRequest' in Assembly 'System.Net.Requests, Version=4.0.0.
                 //        0, Culture=neutral, PublicKeyToken=b77a5c561934e089' is not marked as serializable.

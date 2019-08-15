@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -9,9 +10,9 @@ using System.Runtime.InteropServices;
 
 namespace System.Text
 {
-    internal ref struct ValueStringBuilder
+    internal ref partial struct ValueStringBuilder
     {
-        private char[] _arrayToReturnToPool;
+        private char[]? _arrayToReturnToPool;
         private Span<char> _chars;
         private int _pos;
 
@@ -19,6 +20,13 @@ namespace System.Text
         {
             _arrayToReturnToPool = null;
             _chars = initialBuffer;
+            _pos = 0;
+        }
+
+        public ValueStringBuilder(int initialCapacity)
+        {
+            _arrayToReturnToPool = ArrayPool<char>.Shared.Rent(initialCapacity);
+            _chars = _arrayToReturnToPool;
             _pos = 0;
         }
 
@@ -38,14 +46,25 @@ namespace System.Text
         public void EnsureCapacity(int capacity)
         {
             if (capacity > _chars.Length)
-                Grow(capacity - _chars.Length);
+                Grow(capacity - _pos);
+        }
+
+        /// <summary>
+        /// Get a pinnable reference to the builder.
+        /// Does not ensure there is a null char after <see cref="Length"/>
+        /// This overload is pattern matched in the C# 7.3+ compiler so you can omit
+        /// the explicit method call, and write eg "fixed (char* c = builder)"
+        /// </summary>
+        public ref char GetPinnableReference()
+        {
+            return ref MemoryMarshal.GetReference(_chars);
         }
 
         /// <summary>
         /// Get a pinnable reference to the builder.
         /// </summary>
         /// <param name="terminate">Ensures that the builder has a null char after <see cref="Length"/></param>
-        public ref char GetPinnableReference(bool terminate = false)
+        public ref char GetPinnableReference(bool terminate)
         {
             if (terminate)
             {
@@ -66,7 +85,7 @@ namespace System.Text
 
         public override string ToString()
         {
-            var s = new string(_chars.Slice(0, _pos));
+            var s = _chars.Slice(0, _pos).ToString();
             Dispose();
             return s;
         }
@@ -121,11 +140,26 @@ namespace System.Text
             _pos += count;
         }
 
+        public void Insert(int index, string s)
+        {
+            int count = s.Length;
+
+            if (_pos > (_chars.Length - count))
+            {
+                Grow(count);
+            }
+
+            int remaining = _pos - index;
+            _chars.Slice(index, remaining).CopyTo(_chars.Slice(index + count));
+            s.AsSpan().CopyTo(_chars.Slice(index));
+            _pos += count;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Append(char c)
         {
             int pos = _pos;
-            if (pos < _chars.Length)
+            if ((uint)pos < (uint)_chars.Length)
             {
                 _chars[pos] = c;
                 _pos = pos + 1;
@@ -140,7 +174,7 @@ namespace System.Text
         public void Append(string s)
         {
             int pos = _pos;
-            if (s.Length == 1 && pos < _chars.Length) // very common case, e.g. appending strings from NumberFormatInfo like separators, percent symbols, etc.
+            if (s.Length == 1 && (uint)pos < (uint)_chars.Length) // very common case, e.g. appending strings from NumberFormatInfo like separators, percent symbols, etc.
             {
                 _chars[pos] = s[0];
                 _pos = pos + 1;
@@ -194,7 +228,7 @@ namespace System.Text
             _pos += length;
         }
 
-        public unsafe void Append(ReadOnlySpan<char> value)
+        public void Append(ReadOnlySpan<char> value)
         {
             int pos = _pos;
             if (pos > _chars.Length - value.Length)
@@ -226,16 +260,25 @@ namespace System.Text
             Append(c);
         }
 
+        /// <summary>
+        /// Resize the internal buffer either by doubling current buffer size or
+        /// by adding <paramref name="additionalCapacityBeyondPos"/> to
+        /// <see cref="_pos"/> whichever is greater.
+        /// </summary>
+        /// <param name="additionalCapacityBeyondPos">
+        /// Number of chars requested beyond current position.
+        /// </param>
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private void Grow(int requiredAdditionalCapacity)
+        private void Grow(int additionalCapacityBeyondPos)
         {
-            Debug.Assert(requiredAdditionalCapacity > 0);
+            Debug.Assert(additionalCapacityBeyondPos > 0);
+            Debug.Assert(_pos > _chars.Length - additionalCapacityBeyondPos, "Grow called incorrectly, no resize is needed.");
 
-            char[] poolArray = ArrayPool<char>.Shared.Rent(Math.Max(_pos + requiredAdditionalCapacity, _chars.Length * 2));
+            char[] poolArray = ArrayPool<char>.Shared.Rent(Math.Max(_pos + additionalCapacityBeyondPos, _chars.Length * 2));
 
             _chars.CopyTo(poolArray);
 
-            char[] toReturn = _arrayToReturnToPool;
+            char[]? toReturn = _arrayToReturnToPool;
             _chars = _arrayToReturnToPool = poolArray;
             if (toReturn != null)
             {
@@ -246,7 +289,7 @@ namespace System.Text
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Dispose()
         {
-            char[] toReturn = _arrayToReturnToPool;
+            char[]? toReturn = _arrayToReturnToPool;
             this = default; // for safety, to avoid using pooled array if this instance is erroneously appended to again
             if (toReturn != null)
             {

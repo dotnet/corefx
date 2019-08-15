@@ -38,7 +38,7 @@ namespace System.Xml
 
         private bool _returnOriginalStringValues;
 
-        private CachingEventHandler _cacheHandler;
+        private readonly CachingEventHandler _cacheHandler;
 
         //current state
         private int _currentAttrIndex;
@@ -46,7 +46,7 @@ namespace System.Xml
         private bool _readAhead;
 
         //Lineinfo
-        private IXmlLineInfo _lineInfo;
+        private readonly IXmlLineInfo _lineInfo;
 
         //ReadAttributeValue TextNode
         private ValidatingReaderNodeData _textNode;
@@ -245,7 +245,7 @@ namespace System.Xml
         public override string GetAttribute(string name)
         {
             int i;
-            if (name.IndexOf(':') == -1)
+            if (!name.Contains(':'))
             {
                 i = GetAttributeIndexWithoutPrefix(name);
             }
@@ -305,7 +305,7 @@ namespace System.Xml
         public override bool MoveToAttribute(string name)
         {
             int i;
-            if (name.IndexOf(':') == -1)
+            if (!name.Contains(':'))
             {
                 i = GetAttributeIndexWithoutPrefix(name);
             }

@@ -19,24 +19,24 @@ namespace System.Globalization.Tests
 
         [Theory]
         [MemberData(nameof(ReadOnly_TestData))]
-        public void ReadOnly(DateTimeFormatInfo format, bool originalFormatIsReadOnly)
+        public void ReadOnly_Invoke_ReturnsExpected(DateTimeFormatInfo format, bool originalFormatIsReadOnly)
         {
             Assert.Equal(originalFormatIsReadOnly, format.IsReadOnly);
 
             DateTimeFormatInfo readOnlyFormat = DateTimeFormatInfo.ReadOnly(format);
-            if (originalFormatIsReadOnly) 
+            if (originalFormatIsReadOnly)
             {
-            	Assert.Same(format, readOnlyFormat);
+                Assert.Same(format, readOnlyFormat);
             }
-            else 
+            else
             {
-            	Assert.NotSame(format, readOnlyFormat);
+                Assert.NotSame(format, readOnlyFormat);
             }
             Assert.True(readOnlyFormat.IsReadOnly);
         }
 
         [Fact]
-        public void ReadOnly_Null_ThrowsArgumentNullException()
+        public void ReadOnly_NullDtfi_ThrowsArgumentNullException()
         {
             AssertExtensions.Throws<ArgumentNullException>("dtfi", () => DateTimeFormatInfo.ReadOnly(null)); // Dtfi is null
         }

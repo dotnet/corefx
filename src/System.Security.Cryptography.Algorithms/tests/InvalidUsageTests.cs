@@ -19,12 +19,11 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
                 AssertExtensions.Throws<ArgumentOutOfRangeException, ArgumentException>("count", null, () => hmac.ExposedHashCore(new byte[1], 0, -1));
                 AssertExtensions.Throws<ArgumentException>(null, () => hmac.ExposedHashCore(new byte[1], 0, 2));
                 AssertExtensions.Throws<ArgumentException>(null, () => hmac.ExposedHashCore(new byte[2], 1, 2));
-                AssertExtensions.Throws<ArgumentException>(null, () => hmac.ExposedHashCore(new byte[1], Int32.MaxValue, Int32.MaxValue));
+                AssertExtensions.Throws<ArgumentException>(null, () => hmac.ExposedHashCore(new byte[1], int.MaxValue, int.MaxValue));
             }
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NetFX throws a CryptoException because it lacks boundary checking in the Stream overload. See #19092.")]
         public void InvalidHashCoreArgumentsFromStream()
         {
             using (SHA1 sha1 = SHA1.Create())

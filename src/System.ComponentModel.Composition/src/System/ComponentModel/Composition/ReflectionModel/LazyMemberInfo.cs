@@ -18,16 +18,19 @@ namespace System.ComponentModel.Composition.ReflectionModel
         public LazyMemberInfo(MemberInfo member)
         {
             Requires.NotNull(member, nameof(member));
-            EnsureSupportedMemberType(member.MemberType, "member");
+            EnsureSupportedMemberType(member.MemberType, nameof(member));
 
             _accessorsCreator = null;
             _memberType = member.MemberType;
-            
-            switch(_memberType)
+
+            switch (_memberType)
             {
                 case MemberTypes.Property:
                     PropertyInfo property = (PropertyInfo)member;
-                    Assumes.NotNull(property);
+                    if (property == null)
+                    {
+                        throw new Exception(SR.Diagnostic_InternalExceptionMessage);
+                    }
                     _accessors = new MemberInfo[] { property.GetGetMethod(true), property.GetSetMethod(true) };
                     break;
                 case MemberTypes.Event:
@@ -42,13 +45,13 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public LazyMemberInfo(MemberTypes memberType, params MemberInfo[] accessors)
         {
-            EnsureSupportedMemberType(memberType, "memberType");
+            EnsureSupportedMemberType(memberType, nameof(memberType));
             Requires.NotNull(accessors, nameof(accessors));
-            
+
             string errorMessage;
             if (!LazyMemberInfo.AreAccessorsValid(memberType, accessors, out errorMessage))
             {
-                throw new ArgumentException(errorMessage, "accessors");
+                throw new ArgumentException(errorMessage, nameof(accessors));
             }
 
             _memberType = memberType;
@@ -58,7 +61,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public LazyMemberInfo(MemberTypes memberType, Func<MemberInfo[]> accessorsCreator)
         {
-            EnsureSupportedMemberType(memberType, "memberType");
+            EnsureSupportedMemberType(memberType, nameof(memberType));
             Requires.NotNull(accessorsCreator, nameof(accessorsCreator));
 
             _memberType = memberType;
@@ -97,8 +100,10 @@ namespace System.ComponentModel.Composition.ReflectionModel
             }
             else
             {
-                Assumes.NotNull(_accessors);
-                Assumes.NotNull(_accessors[0]);
+                if (_accessors == null || _accessors[0] == null)
+                {
+                    throw new Exception(SR.Diagnostic_InternalExceptionMessage);
+                }
                 return MemberType.GetHashCode() ^ _accessors[0].GetHashCode();
             }
         }
@@ -120,8 +125,10 @@ namespace System.ComponentModel.Composition.ReflectionModel
             }
 
             // we are dealing with explicitly passed accessors in both cases
-            Assumes.NotNull(_accessors);
-            Assumes.NotNull(that._accessors);
+            if (_accessors == null || that._accessors == null)
+            {
+                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
+            }
             return _accessors.SequenceEqual(that._accessors);
         }
 
@@ -192,10 +199,10 @@ namespace System.ComponentModel.Composition.ReflectionModel
                         (accessors.Length != 1) ||
                         ((accessors.Length == 1) && (accessors[0].MemberType != memberType)))
                     {
-                        errorMessage = string.Format(CultureInfo.CurrentCulture, SR.LazyMemberInfo_InvalidAccessorOnSimpleMember, memberType);
+                        errorMessage = SR.Format(SR.LazyMemberInfo_InvalidAccessorOnSimpleMember, memberType);
                         return false;
                     }
-                   
+
                     break;
             }
             return true;

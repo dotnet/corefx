@@ -2,15 +2,26 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO.Enumeration;
 using System.Linq;
 
+#if MS_IO_REDIST
+using Microsoft.IO.Enumeration;
+
+namespace Microsoft.IO
+#else
+using System.IO.Enumeration;
+
 namespace System.IO
+#endif
 {
     public sealed partial class DirectoryInfo : FileSystemInfo
     {
+        private bool _isNormalized;
+
         public DirectoryInfo(string path)
         {
             Init(originalPath: path,
@@ -31,22 +42,24 @@ namespace System.IO
             fullPath = fullPath ?? originalPath;
             fullPath = isNormalized ? fullPath : Path.GetFullPath(fullPath);
 
-            _name = fileName ?? (PathInternal.IsRoot(fullPath) ?
-                    fullPath :
-                    Path.GetFileName(PathInternal.TrimEndingDirectorySeparator(fullPath.AsSpan()))).ToString();
+            _name = fileName ?? (PathInternal.IsRoot(fullPath.AsSpan()) ?
+                    fullPath.AsSpan() :
+                    Path.GetFileName(Path.TrimEndingDirectorySeparator(fullPath.AsSpan()))).ToString();
 
             FullPath = fullPath;
+
+            _isNormalized = isNormalized;
         }
 
         public DirectoryInfo Parent
         {
             get
             {
-                // FullPath might end in either "parent\child" or "parent\child\", and in either case we want 
+                // FullPath might end in either "parent\child" or "parent\child\", and in either case we want
                 // the parent of child, not the child. Trim off an ending directory separator if there is one,
                 // but don't mangle the root.
-                string parentName = Path.GetDirectoryName(PathInternal.IsRoot(FullPath) ? FullPath : PathInternal.TrimEndingDirectorySeparator(FullPath));
-                return parentName != null ? 
+                string parentName = Path.GetDirectoryName(PathInternal.IsRoot(FullPath.AsSpan()) ? FullPath : Path.TrimEndingDirectorySeparator(FullPath));
+                return parentName != null ?
                     new DirectoryInfo(parentName, isNormalized: true) :
                     null;
             }
@@ -56,22 +69,27 @@ namespace System.IO
         {
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
-            if (PathInternal.IsEffectivelyEmpty(path))
+            if (PathInternal.IsEffectivelyEmpty(path.AsSpan()))
                 throw new ArgumentException(SR.Argument_PathEmpty, nameof(path));
             if (Path.IsPathRooted(path))
                 throw new ArgumentException(SR.Arg_Path2IsRooted, nameof(path));
 
-            string fullPath = Path.GetFullPath(Path.Combine(FullPath, path));
+            string newPath = Path.GetFullPath(Path.Combine(FullPath, path));
 
-            if (fullPath.Length < FullPath.Length 
-                || (fullPath.Length > FullPath.Length && !PathInternal.IsDirectorySeparator(fullPath[FullPath.Length]))
-                || string.Compare(FullPath, 0, fullPath, 0, FullPath.Length, PathInternal.StringComparison) != 0)
+            ReadOnlySpan<char> trimmedNewPath = Path.TrimEndingDirectorySeparator(newPath.AsSpan());
+            ReadOnlySpan<char> trimmedCurrentPath = Path.TrimEndingDirectorySeparator(FullPath.AsSpan());
+
+            // We want to make sure the requested directory is actually under the subdirectory.
+            if (trimmedNewPath.StartsWith(trimmedCurrentPath, PathInternal.StringComparison)
+                // Allow the exact same path, but prevent allowing "..\FooBar" through when the directory is "Foo"
+                && ((trimmedNewPath.Length == trimmedCurrentPath.Length) || PathInternal.IsDirectorySeparator(newPath[trimmedCurrentPath.Length])))
             {
-                throw new ArgumentException(SR.Format(SR.Argument_InvalidSubPath, path, FullPath), nameof(path));
+                FileSystem.CreateDirectory(newPath);
+                return new DirectoryInfo(newPath);
             }
 
-            FileSystem.CreateDirectory(fullPath);
-            return new DirectoryInfo(fullPath);
+            // We weren't nested
+            throw new ArgumentException(SR.Format(SR.Argument_InvalidSubPath, path, FullPath), nameof(path));
         }
 
         public void Create() => FileSystem.CreateDirectory(FullPath);
@@ -79,7 +97,7 @@ namespace System.IO
         // Returns an array of Files in the DirectoryInfo specified by path
         public FileInfo[] GetFiles() => GetFiles("*", enumerationOptions: EnumerationOptions.Compatible);
 
-        // Returns an array of Files in the current DirectoryInfo matching the 
+        // Returns an array of Files in the current DirectoryInfo matching the
         // given search criteria (i.e. "*.txt").
         public FileInfo[] GetFiles(string searchPattern) => GetFiles(searchPattern, enumerationOptions: EnumerationOptions.Compatible);
 
@@ -107,7 +125,7 @@ namespace System.IO
         // Returns an array of Directories in the current directory.
         public DirectoryInfo[] GetDirectories() => GetDirectories("*", enumerationOptions: EnumerationOptions.Compatible);
 
-        // Returns an array of Directories in the current DirectoryInfo matching the 
+        // Returns an array of Directories in the current DirectoryInfo matching the
         // given search criteria (i.e. "System*" could match the System & System32 directories).
         public DirectoryInfo[] GetDirectories(string searchPattern) => GetDirectories(searchPattern, enumerationOptions: EnumerationOptions.Compatible);
 
@@ -151,7 +169,7 @@ namespace System.IO
         public IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(string searchPattern, EnumerationOptions enumerationOptions)
             => InternalEnumerateInfos(FullPath, searchPattern, SearchTarget.Both, enumerationOptions);
 
-        internal static IEnumerable<FileSystemInfo> InternalEnumerateInfos(
+        private IEnumerable<FileSystemInfo> InternalEnumerateInfos(
             string path,
             string searchPattern,
             SearchTarget searchTarget,
@@ -161,16 +179,16 @@ namespace System.IO
             if (searchPattern == null)
                 throw new ArgumentNullException(nameof(searchPattern));
 
-            FileSystemEnumerableFactory.NormalizeInputs(ref path, ref searchPattern, options);
+            _isNormalized &= FileSystemEnumerableFactory.NormalizeInputs(ref path, ref searchPattern, options.MatchType);
 
             switch (searchTarget)
             {
                 case SearchTarget.Directories:
-                    return FileSystemEnumerableFactory.DirectoryInfos(path, searchPattern, options);
+                    return FileSystemEnumerableFactory.DirectoryInfos(path, searchPattern, options, _isNormalized);
                 case SearchTarget.Files:
-                    return FileSystemEnumerableFactory.FileInfos(path, searchPattern, options);
+                    return FileSystemEnumerableFactory.FileInfos(path, searchPattern, options, _isNormalized);
                 case SearchTarget.Both:
-                    return FileSystemEnumerableFactory.FileSystemInfos(path, searchPattern, options);
+                    return FileSystemEnumerableFactory.FileSystemInfos(path, searchPattern, options, _isNormalized);
                 default:
                     throw new ArgumentException(SR.ArgumentOutOfRange_Enum, nameof(searchTarget));
             }
@@ -211,7 +229,7 @@ namespace System.IO
 
             Init(originalPath: destDirName,
                  fullPath: destinationWithSeparator,
-                 fileName: _name,
+                 fileName: null,
                  isNormalized: true);
 
             // Flush any cached information about the directory.

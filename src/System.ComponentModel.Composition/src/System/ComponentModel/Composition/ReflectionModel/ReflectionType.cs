@@ -3,17 +3,19 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Reflection;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.ReflectionModel
 {
     internal class ReflectionType : ReflectionMember
     {
-        private Type _type;
+        private readonly Type _type;
 
         public ReflectionType(Type type)
         {
-            Assumes.NotNull(type);
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
 
             _type = type;
         }

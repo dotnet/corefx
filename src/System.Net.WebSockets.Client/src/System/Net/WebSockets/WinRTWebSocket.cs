@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -30,7 +30,6 @@ namespace System.Net.WebSockets
     {
         #region Constants
         private const string HeaderNameCookie = "Cookie";
-        private const string ClientAuthenticationOID = "1.3.6.1.5.5.7.3.2";
         #endregion
 
         private static readonly Lazy<bool> s_MessageWebSocketClientCertificateSupported =
@@ -124,7 +123,7 @@ namespace System.Net.WebSockets
             {
                 if (!MessageWebSocketClientCertificateSupported)
                 {
-                    throw new PlatformNotSupportedException(string.Format(CultureInfo.InvariantCulture,
+                    throw new PlatformNotSupportedException(SR.Format(CultureInfo.InvariantCulture,
                         SR.net_WebSockets_UWPClientCertSupportRequiresWindows10GreaterThan1703));
                 }
 
@@ -134,7 +133,7 @@ namespace System.Net.WebSockets
                     RTCertificate winRtClientCert = await CertificateHelper.ConvertDotNetClientCertToWinRtClientCertAsync(dotNetClientCert).ConfigureAwait(false);
                     if (winRtClientCert == null)
                     {
-                        throw new PlatformNotSupportedException(string.Format(
+                        throw new PlatformNotSupportedException(SR.Format(
                                     CultureInfo.InvariantCulture,
                                     SR.net_WebSockets_UWPClientCertSupportRequiresCertInPersonalCertificateStore));
                     }
@@ -262,7 +261,7 @@ namespace System.Net.WebSockets
             {
                 if (callClose)
                 {
-                    _messageWebSocket.Close((ushort) closeStatus, statusDescription ?? String.Empty);
+                    _messageWebSocket.Close((ushort) closeStatus, statusDescription ?? string.Empty);
                 }
 
                 var result = await _closeWebSocketReceiveResultTcs.Task.ConfigureAwait(false);
@@ -277,7 +276,7 @@ namespace System.Net.WebSockets
             CancellationToken cancellationToken)
         {
             CheckValidState(s_validCloseOutputStates);
-            _messageWebSocket.Close((ushort)closeStatus, statusDescription ?? String.Empty);
+            _messageWebSocket.Close((ushort)closeStatus, statusDescription ?? string.Empty);
             InterlockedCheckAndUpdateCloseState(WebSocketState.CloseSent, s_validCloseOutputStates);
             return Task.CompletedTask;
         }
@@ -382,9 +381,15 @@ namespace System.Net.WebSockets
 
                         bool endOfMessage = false;
                         uint readCount = Math.Min(dataAvailable, (uint) buffer.Count);
-                        var dataBuffer = reader.ReadBuffer(readCount);
-                        // Safe to cast readCount to int as the maximum value that readCount can be is buffer.Count.
-                        dataBuffer.CopyTo(0, buffer.Array, buffer.Offset, (int) readCount);
+
+                        if (readCount > 0)
+                        {
+                            IBuffer dataBuffer = reader.ReadBuffer(readCount);
+
+                            // Safe to cast readCount to int as the maximum value that readCount can be is buffer.Count.
+                            dataBuffer.CopyTo(0, buffer.Array, buffer.Offset, (int) readCount);
+                        }
+
                         if (dataAvailable == readCount)
                         {
                             endOfMessage = !IsPartialMessageEvent(args);
@@ -530,7 +535,7 @@ namespace System.Net.WebSockets
                 {
                     if (_state == currentState)
                     {
-                        // Ordering is important to maintain .Net 4.5 WebSocket implementation exception behavior.
+                        // Ordering is important to maintain .NET Framework 4.5 WebSocket implementation exception behavior.
                         if (_disposed)
                         {
                             throw new ObjectDisposedException(GetType().FullName);

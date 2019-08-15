@@ -12,7 +12,7 @@ namespace System.Xml.Linq
         private XContainer _parent;
         private XName _attrName;
         private string _attrValue;
-        private XContainer _root;
+        private readonly XContainer _root;
 
         public XNodeBuilder(XContainer container)
         {
@@ -68,7 +68,7 @@ namespace System.Xml.Linq
 
         public override void WriteCharEntity(char ch)
         {
-            AddString(new string(ch, 1));
+            AddString(char.ToString(ch));
         }
 
         public override void WriteChars(char[] buffer, int index, int count)
@@ -190,12 +190,13 @@ namespace System.Xml.Linq
 
         public override void WriteSurrogateCharEntity(char lowCh, char highCh)
         {
-            AddString(new string(new char[] { highCh, lowCh }));
+            ReadOnlySpan<char> entity = stackalloc char[] { highCh, lowCh };
+            AddString(new string(entity));
         }
 
         public override void WriteValue(DateTimeOffset value)
         {
-            // For compatibility with custom writers, XmlWriter writes DateTimeOffset as DateTime. 
+            // For compatibility with custom writers, XmlWriter writes DateTimeOffset as DateTime.
             // Our internal writers should use the DateTimeOffset-String conversion from XmlConvert.
             WriteString(XmlConvert.ToString(value));
         }

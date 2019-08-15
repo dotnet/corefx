@@ -31,7 +31,7 @@ namespace System.Configuration
             return configRecord;
         }
 
-        // Create the factory that will evaluate configuration 
+        // Create the factory that will evaluate configuration
         protected override object CreateSectionFactory(FactoryRecord factoryRecord)
         {
             return new RuntimeConfigurationFactory(this, factoryRecord);
@@ -72,7 +72,7 @@ namespace System.Configuration
                 catch (Exception e)
                 {
                     throw new ConfigurationErrorsException(
-                        string.Format(SR.Config_exception_in_config_section_handler,
+                        SR.Format(SR.Config_exception_in_config_section_handler,
                             section.SectionInformation.SectionName), e);
                 }
             }
@@ -128,7 +128,7 @@ namespace System.Configuration
                         if (ConfigurationElement.IsLockAttributeName(attribute.Name))
                         {
                             throw new ConfigurationErrorsException(
-                                string.Format(SR.Config_element_locking_not_supported, sectionName), attribute);
+                                SR.Format(SR.Config_element_locking_not_supported, sectionName), attribute);
                         }
                 }
 

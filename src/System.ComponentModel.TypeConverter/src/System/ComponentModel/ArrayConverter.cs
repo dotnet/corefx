@@ -7,21 +7,16 @@ using System.Globalization;
 namespace System.ComponentModel
 {
     /// <summary>
-    /// <para>Provides a type converter to convert <see cref='System.Array'/>
-    /// objects to and from various other representations.</para>
+    /// Provides a type converter to convert <see cref='System.Array'/>
+    /// objects to and from various other representations.
     /// </summary>
     public class ArrayConverter : CollectionConverter
     {
         /// <summary>
-        ///    <para>Converts the given value object to the specified destination type.</para>
+        /// Converts the given value object to the specified destination type.
         /// </summary>
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
-            if (destinationType == null)
-            {
-                throw new ArgumentNullException(nameof(destinationType));
-            }
-
             if (destinationType == typeof(string) && value is Array)
             {
                 return SR.Format(SR.Array, value.GetType().Name);
@@ -31,7 +26,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///    <para>Gets a collection of properties for the type of array specified by the value parameter.</para>
+        /// Gets a collection of properties for the type of array specified by the value parameter.
         /// </summary>
         public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes)
         {
@@ -39,34 +34,29 @@ namespace System.ComponentModel
             {
                 return null;
             }
-
-            PropertyDescriptor[] props = null;
-
-            if (value.GetType().IsArray)
+            if (!(value is Array valueArray))
             {
-                Array valueArray = (Array)value;
-                int length = valueArray.GetLength(0);
-                props = new PropertyDescriptor[length];
+                return new PropertyDescriptorCollection(null);
+            }
 
-                Type arrayType = value.GetType();
-                Type elementType = arrayType.GetElementType();
+            int length = valueArray.GetLength(0);
+            PropertyDescriptor[] props = new PropertyDescriptor[length];
 
-                for (int i = 0; i < length; i++)
-                {
-                    props[i] = new ArrayPropertyDescriptor(arrayType, elementType, i);
-                }
+            Type arrayType = value.GetType();
+            Type elementType = arrayType.GetElementType();
+
+            for (int i = 0; i < length; i++)
+            {
+                props[i] = new ArrayPropertyDescriptor(arrayType, elementType, i);
             }
 
             return new PropertyDescriptorCollection(props);
         }
 
         /// <summary>
-        ///    <para>Gets a value indicating whether this object supports properties.</para>
+        /// Gets a value indicating whether this object supports properties.
         /// </summary>
-        public override bool GetPropertiesSupported(ITypeDescriptorContext context)
-        {
-            return true;
-        }
+        public override bool GetPropertiesSupported(ITypeDescriptorContext context) => true;
 
         private class ArrayPropertyDescriptor : SimplePropertyDescriptor
         {
@@ -80,8 +70,7 @@ namespace System.ComponentModel
 
             public override object GetValue(object instance)
             {
-                var array = instance as Array;
-                if (array != null && array.GetLength(0) > _index)
+                if (instance is Array array && array.GetLength(0) > _index)
                 {
                     return array.GetValue(_index);
                 }
@@ -91,9 +80,8 @@ namespace System.ComponentModel
 
             public override void SetValue(object instance, object value)
             {
-                if (instance is Array)
+                if (instance is Array array)
                 {
-                    Array array = (Array)instance;
                     if (array.GetLength(0) > _index)
                     {
                         array.SetValue(value, _index);

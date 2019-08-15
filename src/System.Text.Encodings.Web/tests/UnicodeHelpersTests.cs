@@ -2,29 +2,30 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using Xunit;
 
-namespace Microsoft.Framework.WebEncoders
+namespace System.Text.Encodings.Web.Tests
 {
     public unsafe class UnicodeHelpersTests
     {
+        // If updating the version of UnicodeData.txt, update the below string with the new file name.
+        private const string UnicodeDataFileName = "UnicodeData.12.1.txt";
+
         private const int UnicodeReplacementChar = '\uFFFD';
 
         private static readonly UTF8Encoding _utf8EncodingThrowOnInvalidBytes = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
         // To future refactorers:
-        // The following GetScalarValueFromUtf16_* tests must not be done as a [Theory].  If done via [InlineData], the invalid 
-        // code points will get sanitized with replacement characters before they even reach the test, as the strings are parsed 
-        // from the attributes in reflection.  And if done via [MemberData], the XmlWriter used by xunit will throw exceptions 
+        // The following GetScalarValueFromUtf16_* tests must not be done as a [Theory].  If done via [InlineData], the invalid
+        // code points will get sanitized with replacement characters before they even reach the test, as the strings are parsed
+        // from the attributes in reflection.  And if done via [MemberData], the XmlWriter used by xunit will throw exceptions
         // when it attempts to write out the test arguments, due to the invalid text.
 
         [Fact]
@@ -88,13 +89,13 @@ namespace Microsoft.Framework.WebEncoders
         {
             for (int i = 0; i <= 0x10FFFF; i++)
             {
-                if (i <= 0xFFFF && Char.IsSurrogate((char)i))
+                if (i <= 0xFFFF && char.IsSurrogate((char)i))
                 {
                     continue; // no surrogates
                 }
 
                 // Arrange
-                byte[] expectedUtf8Bytes = _utf8EncodingThrowOnInvalidBytes.GetBytes(Char.ConvertFromUtf32(i));
+                byte[] expectedUtf8Bytes = _utf8EncodingThrowOnInvalidBytes.GetBytes(char.ConvertFromUtf32(i));
 
                 // Act
                 List<byte> actualUtf8Bytes = new List<byte>(4);
@@ -161,13 +162,13 @@ namespace Microsoft.Framework.WebEncoders
             HashSet<string> seenCategories = new HashSet<string>();
 
             bool[] retVal = new bool[0x10000];
-            string[] allLines = new StreamReader(typeof(UnicodeHelpersTests).GetTypeInfo().Assembly.GetManifestResourceStream("UnicodeData.8.0.txt")).ReadAllLines();
+            string[] allLines = new StreamReader(typeof(UnicodeHelpersTests).GetTypeInfo().Assembly.GetManifestResourceStream(UnicodeDataFileName)).ReadAllLines();
 
             uint startSpanCodepoint = 0;
             foreach (string line in allLines)
             {
                 string[] splitLine = line.Split(';');
-                uint codePoint = UInt32.Parse(splitLine[0], NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture);
+                uint codePoint = uint.Parse(splitLine[0], NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture);
                 if (codePoint >= retVal.Length)
                 {
                     continue; // don't care about supplementary chars
@@ -177,6 +178,10 @@ namespace Microsoft.Framework.WebEncoders
                 {
                     retVal[codePoint] = true; // we allow U+0020 SPACE as our only valid Zs (whitespace) char
                 }
+                else if (codePoint == 0xFEFF)
+                {
+                    retVal[codePoint] = false; // we explicitly forbid U+FEFF ZERO WIDTH NO-BREAK SPACE because it's also the byte order mark (BOM)
+                }
                 else
                 {
                     string category = splitLine[2];
@@ -185,11 +190,11 @@ namespace Microsoft.Framework.WebEncoders
                     {
                         retVal[codePoint] = true; // chars in this category are allowable
                         seenCategories.Add(category);
-                        
+
                         if (splitLine[1].EndsWith("First>"))
                         {
                             startSpanCodepoint = codePoint;
-                        } 
+                        }
                         else if (splitLine[1].EndsWith("Last>"))
                         {
                             for (uint spanCounter = startSpanCodepoint; spanCounter < codePoint; spanCounter++)
@@ -197,7 +202,7 @@ namespace Microsoft.Framework.WebEncoders
                                 retVal[spanCounter] = true; // chars in this category are allowable
                             }
                         }
-                        
+
                     }
                 }
             }

@@ -38,7 +38,7 @@ namespace System.Net.Http.Headers
             set { SetOrRemoveParsedValue(KnownHeaders.ContentDisposition.Descriptor, value); }
         }
 
-        // Must be a collection (and not provide properties like "GZip", "Deflate", etc.) since the 
+        // Must be a collection (and not provide properties like "GZip", "Deflate", etc.) since the
         // order matters!
         public ICollection<string> ContentEncoding
         {
@@ -133,7 +133,7 @@ namespace System.Net.Http.Headers
 
         public DateTimeOffset? Expires
         {
-            get { return HeaderUtilities.GetDateTimeOffsetValue(KnownHeaders.Expires.Descriptor, this); }
+            get { return HeaderUtilities.GetDateTimeOffsetValue(KnownHeaders.Expires.Descriptor, this, DateTimeOffset.MinValue); }
             set { SetOrRemoveParsedValue(KnownHeaders.Expires.Descriptor, value); }
         }
 

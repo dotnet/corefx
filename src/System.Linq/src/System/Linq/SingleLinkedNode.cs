@@ -65,15 +65,6 @@ namespace System.Linq
         }
 
         /// <summary>
-        /// Gets an <see cref="IEnumerator{TSource}"/> that enumerates the items of this node's singly-linked list in reverse.
-        /// </summary>
-        /// <param name="count">The number of items in this node.</param>
-        public IEnumerator<TSource> GetEnumerator(int count)
-        {
-            return ((IEnumerable<TSource>)ToArray(count)).GetEnumerator();
-        }
-
-        /// <summary>
         /// Gets the node at a logical index by walking the linked list.
         /// </summary>
         /// <param name="index">The logical index.</param>
@@ -95,10 +86,10 @@ namespace System.Linq
         }
 
         /// <summary>
-        /// Returns an <see cref="T:TSource[]"/> that contains the items of this node's singly-linked list in reverse.
+        /// Returns an array that contains the items of this node's singly-linked list in reverse.
         /// </summary>
         /// <param name="count">The number of items in this node.</param>
-        private TSource[] ToArray(int count)
+        public TSource[] ToArray(int count)
         {
             Debug.Assert(count == GetCount());
 

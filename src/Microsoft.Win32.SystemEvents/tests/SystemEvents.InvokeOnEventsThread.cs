@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -14,12 +14,13 @@ namespace Microsoft.Win32.SystemEventsTests
 {
     public class InvokeOnEventsThreadTests : SystemEventsTest
     {
+        [ActiveIssue(38661, TargetFrameworkMonikers.NetFramework)]
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void InvokeOnEventsThreadRunsAsynchronously()
         {
             var invoked = new AutoResetEvent(false);
             SystemEvents.InvokeOnEventsThread(new Action(() => invoked.Set()));
-            Assert.True(invoked.WaitOne(PostMessageWait * SystemEventsTest.ExpectedEventMultiplier));
+            Assert.True(invoked.WaitOne(PostMessageWait));
         }
 
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -33,7 +34,7 @@ namespace Microsoft.Win32.SystemEventsTests
             };
 
             try
-            {   
+            {
                 // force a TimeChanged event to get the event thread ID
                 SystemEvents.TimeChanged += handler;
                 SendMessage(User32.WM_REFLECT + User32.WM_TIMECHANGE, IntPtr.Zero, IntPtr.Zero);
@@ -44,7 +45,7 @@ namespace Microsoft.Win32.SystemEventsTests
                     actualThreadId = Thread.CurrentThread.ManagedThreadId;
                     invoked.Set();
                 }));
-                Assert.True(invoked.WaitOne(PostMessageWait * SystemEventsTest.ExpectedEventMultiplier));
+                Assert.True(invoked.WaitOne(PostMessageWait));
                 Assert.Equal(expectedThreadId, actualThreadId);
             }
             finally

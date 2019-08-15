@@ -119,7 +119,7 @@ namespace System.Linq.Tests
         public void SameResultsRepeatCallsIntQuery()
         {
             var q = GuaranteeNotIList(from x in new[] { 9999, 0, 888, -1, 66, -777, 1, 2, -12345 }
-                    where x > Int32.MinValue
+                    where x > int.MinValue
                     select x);
 
             Assert.Equal(q.Skip(0), q.Skip(0));
@@ -138,8 +138,8 @@ namespace System.Linq.Tests
         [Fact]
         public void SameResultsRepeatCallsStringQuery()
         {
-            var q = GuaranteeNotIList(from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", String.Empty }
-                    where !String.IsNullOrEmpty(x)
+            var q = GuaranteeNotIList(from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", string.Empty }
+                    where !string.IsNullOrEmpty(x)
                     select x);
 
             Assert.Equal(q.Skip(0), q.Skip(0));
@@ -160,7 +160,7 @@ namespace System.Linq.Tests
         {
             int?[] source = { 3, 100, 4, null, 10 };
             int?[] expected = { 100, 4, null, 10 };
-            
+
             Assert.Equal(expected, source.Skip(1));
         }
 
@@ -178,7 +178,7 @@ namespace System.Linq.Tests
         {
             int?[] source = { 3, 100, null, 4, 10 };
             int?[] expected = { 10 };
-            
+
             Assert.Equal(expected, source.Skip(source.Length - 1));
         }
 
@@ -485,11 +485,11 @@ namespace System.Linq.Tests
             // _state, is incremented to keep track of this and to stop enumerating once
             // we pass that limit. However, for Skip, there is no such limit and the
             // iterator can contain an unlimited number of items (including past int.MaxValue).
-            
+
             // This test makes sure that, in Skip, _state is not incorrectly incremented,
             // so that it does not overflow to a negative number and enumeration does not
             // stop prematurely.
-            
+
             var iterator = new FastInfiniteEnumerator<int>().Skip(1).GetEnumerator();
             iterator.MoveNext(); // Make sure the underlying enumerator has been initialized.
 

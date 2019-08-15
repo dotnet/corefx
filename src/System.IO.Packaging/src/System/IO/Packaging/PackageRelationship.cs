@@ -11,10 +11,10 @@ using System.Diagnostics;
 namespace System.IO.Packaging
 {
     /// <summary>
-    /// This class is used to express a relationship between a source and a target part. 
+    /// This class is used to express a relationship between a source and a target part.
     /// The only way to create a PackageRelationship, is to call the PackagePart.CreateRelationship()
-    /// or Package.CreateRelationship(). A relationship is owned by a part or by the package itself. 
-    /// If the source part is deleted all the relationships it owns are also deleted. 
+    /// or Package.CreateRelationship(). A relationship is owned by a part or by the package itself.
+    /// If the source part is deleted all the relationships it owns are also deleted.
     /// A target of the relationship need not be present.
     /// This class is part of the MMCF Packaging layer.
     /// </summary>
@@ -77,7 +77,7 @@ namespace System.IO.Packaging
         /// PackageRelationship's identifier. Unique across relationships for the given source.
         /// </summary>
         /// <value>String</value>
-        public String Id
+        public string Id
         {
             get
             {
@@ -149,7 +149,7 @@ namespace System.IO.Packaging
                 "TargetMode enum value is out of Range");
 
             // Look for empty string or string with just spaces
-            Debug.Assert(relationshipType.Trim() != String.Empty,
+            Debug.Assert(relationshipType.Trim() != string.Empty,
                 "RelationshipType cannot be empty string or a string with just spaces");
 
             _package = package;
@@ -161,7 +161,7 @@ namespace System.IO.Packaging
         }
 
         #endregion Internal Constructor
-        
+
         #region Internal Properties
 
         internal static Uri ContainerRelationshipPartName
@@ -173,15 +173,15 @@ namespace System.IO.Packaging
         }
 
         #endregion Internal Properties
-        
+
         #region Private Members
 
-        private Package _package;
-        private PackagePart _source;
-        private Uri _targetUri;
-        private string _relationshipType;
-        private TargetMode _targetMode;
-        private String _id;
+        private readonly Package _package;
+        private readonly PackagePart _source;
+        private readonly Uri _targetUri;
+        private readonly string _relationshipType;
+        private readonly TargetMode _targetMode;
+        private readonly string _id;
 
         private static readonly Uri s_containerRelationshipPartName = PackUriHelper.CreatePartUri(new Uri("/_rels/.rels", UriKind.Relative));
 

@@ -19,7 +19,7 @@ namespace System.Xml.Schema
 
         private ListType _type = ListType.Any;
         private Hashtable _set = null;
-        private string _targetNamespace;
+        private readonly string _targetNamespace;
 
         public NamespaceList()
         {
@@ -110,7 +110,7 @@ namespace System.Xml.Schema
                 case ListType.Set:
                     return _set[ns] != null;
             }
-            Debug.Assert(false);
+            Debug.Fail($"Unexpected type {_type}");
             return false;
         }
 
@@ -155,7 +155,7 @@ namespace System.Xml.Schema
                     }
                     return sb.ToString();
             }
-            Debug.Assert(false);
+            Debug.Fail($"Unexpected type {_type}");
             return string.Empty;
         }
 
@@ -243,7 +243,7 @@ namespace System.Xml.Schema
                         nslist = o1.CompareSetToOther(o2);
                     }
                     else if (o1._set.Contains(string.Empty))
-                    { //clause 6.1 - set S includes absent, o2 is not(absent) 
+                    { //clause 6.1 - set S includes absent, o2 is not(absent)
                         nslist = new NamespaceList();
                     }
                     else
@@ -272,7 +272,7 @@ namespace System.Xml.Schema
                         nslist = o2.CompareSetToOther(o1);
                     }
                     else if (o2._set.Contains(string.Empty))
-                    { //clause 6.1 - set S includes absent, o2 is not(absent) 
+                    { //clause 6.1 - set S includes absent, o2 is not(absent)
                         nslist = new NamespaceList();
                     }
                     else
@@ -304,7 +304,7 @@ namespace System.Xml.Schema
                 nslist = null;
             }
             else
-            { //clause 5.4 - Set S does not contain negated ns or absent 
+            { //clause 5.4 - Set S does not contain negated ns or absent
                 nslist = other.Clone();
             }
             return nslist;

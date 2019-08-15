@@ -36,7 +36,7 @@ namespace System.ComponentModel.Composition
 
     public class TypeCatalogTests
     {
-        public static void Constructor_NullReflectionContextArgument_ShouldThrowArgumentNull(Func<ReflectionContext, TypeCatalog> catalogCreator)
+        private static void Constructor_NullReflectionContextArgument_ShouldThrowArgumentNull(Func<ReflectionContext, TypeCatalog> catalogCreator)
         {
             Assert.Throws<ArgumentNullException>("reflectionContext", () =>
             {
@@ -44,7 +44,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        public static void Constructor_NullDefinitionOriginArgument_ShouldThrowArgumentNull(Func<ICompositionElement, TypeCatalog> catalogCreator)
+        private static void Constructor_NullDefinitionOriginArgument_ShouldThrowArgumentNull(Func<ICompositionElement, TypeCatalog> catalogCreator)
         {
             Assert.Throws<ArgumentNullException>("definitionOrigin", () =>
             {
@@ -508,7 +508,7 @@ namespace System.ComponentModel.Composition
 
         private string GetDisplayName(bool useEllipses, Type catalogType, params Type[] types)
         {
-            return String.Format(CultureInfo.CurrentCulture,
+            return string.Format(CultureInfo.CurrentCulture,
                     SR.TypeCatalog_DisplayNameFormat,
                     catalogType.Name,
                     this.GetTypesDisplay(useEllipses, types));
@@ -535,7 +535,7 @@ namespace System.ComponentModel.Composition
             }
 
             if (useEllipses)
-            {   // Add an elipse to indicate that there 
+            {   // Add an elipse to indicate that there
                 // are more types than actually listed
                 builder.Append(CultureInfo.CurrentCulture.TextInfo.ListSeparator);
                 builder.Append(" ...");

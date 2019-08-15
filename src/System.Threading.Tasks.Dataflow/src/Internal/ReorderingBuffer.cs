@@ -8,7 +8,7 @@
 //
 //
 // An intermediate buffer that ensures messages are output in the right order.
-// Used by blocks (e.g. TransformBlock, TransformManyBlock) when operating in 
+// Used by blocks (e.g. TransformBlock, TransformManyBlock) when operating in
 // parallel modes that could result in messages being processed out of order.
 //
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -176,7 +176,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
             }
 
             /// <summary>Gets a dictionary of buffered items and their reordering IDs.</summary>
-            public Dictionary<long, KeyValuePair<Boolean, TOutput>> ItemsBuffered { get { return _buffer._reorderingBuffer; } }
+            public Dictionary<long, KeyValuePair<bool, TOutput>> ItemsBuffered { get { return _buffer._reorderingBuffer; } }
             /// <summary>Gets the next ID required for outputting.</summary>
             public long NextIdRequired { get { return _buffer._nextReorderedIdToOutput; } }
         }

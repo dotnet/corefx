@@ -21,7 +21,7 @@ namespace System.Reflection.Internal
                 }
                 catch (IOException)
                 {
-                    // Should be catch(FileLoadException), but it's not available in our current 
+                    // Should be catch (FileLoadException), but it's not available in our current
                     // profile. It can still be thrown even when throwOnError is false.
                 }
 
@@ -48,7 +48,7 @@ namespace System.Reflection.Internal
                 // don't expect to hit this as the parameter types we pass are
                 // specified to match known definitions precisely.
 
-                Debug.Assert(false, "Current platform has ambiguous match for: " + type.FullName + "." + name);
+                Debug.Assert(false, $"Current platform has ambiguous match for: {type.FullName}.{name}");
                 return null;
             }
         }

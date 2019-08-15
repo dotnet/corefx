@@ -2,13 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
+    [ConditionalClass(typeof(ParallelQueryCombinationTests), nameof(RunSlowTests))]
     public static partial class ParallelQueryCombinationTests
     {
+        // on ARM platforms many available cores makes this unbearably slow: #36494
+        public static bool RunSlowTests => PlatformDetection.IsNotArmNorArm64Process || Environment.ProcessorCount <= 8;
+
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
@@ -137,7 +142,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void Concat(Labeled<Operation> source, Labeled<Operation> operation)
         {
-            Action<Operation, Operation> concat = (left, right) =>
+            void Concat(Operation left, Operation right)
             {
                 int seen = DefaultStart;
                 foreach (int i in left(DefaultStart, DefaultSize / 2, source.Item)
@@ -146,9 +151,9 @@ namespace System.Linq.Parallel.Tests
                     Assert.Equal(seen++, i);
                 }
                 Assert.Equal(DefaultStart + DefaultSize, seen);
-            };
-            concat(operation.Item, LabeledDefaultSource.AsOrdered().Item);
-            concat(LabeledDefaultSource.AsOrdered().Item, operation.Item);
+            }
+            Concat(operation.Item, LabeledDefaultSource.AsOrdered().Item);
+            Concat(LabeledDefaultSource.AsOrdered().Item, operation.Item);
         }
 
         [Theory]
@@ -156,7 +161,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void Concat_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
-            Action<Operation, Operation> concat = (left, right) =>
+            void Concat(Operation left, Operation right)
             {
                 int seen = DefaultStart;
                 Assert.All(
@@ -165,9 +170,9 @@ namespace System.Linq.Parallel.Tests
                     x => Assert.Equal(seen++, x)
                     );
                 Assert.Equal(DefaultStart + DefaultSize, seen);
-            };
-            concat(operation.Item, LabeledDefaultSource.AsOrdered().Item);
-            concat(LabeledDefaultSource.AsOrdered().Item, operation.Item);
+            }
+            Concat(operation.Item, LabeledDefaultSource.AsOrdered().Item);
+            Concat(LabeledDefaultSource.AsOrdered().Item, operation.Item);
         }
 
         [Theory]
@@ -294,7 +299,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void Except(Labeled<Operation> source, Labeled<Operation> operation)
         {
-            Action<Operation, Operation> except = (left, right) =>
+            void Except(Operation left, Operation right)
             {
                 int seen = DefaultStart;
                 ParallelQuery<int> query = left(DefaultStart, DefaultSize + DefaultSize / 2, source.Item)
@@ -304,9 +309,9 @@ namespace System.Linq.Parallel.Tests
                     Assert.Equal(seen++, i);
                 }
                 Assert.Equal(DefaultStart + DefaultSize, seen);
-            };
-            except(operation.Item, DefaultSource);
-            except(LabeledDefaultSource.AsOrdered().Item, operation.Item);
+            }
+            Except(operation.Item, DefaultSource);
+            Except(LabeledDefaultSource.AsOrdered().Item, operation.Item);
         }
 
         [Theory]
@@ -314,16 +319,16 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void Except_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
-            Action<Operation, Operation> except = (left, right) =>
+            void Except(Operation left, Operation right)
             {
                 int seen = DefaultStart;
                 ParallelQuery<int> query = left(DefaultStart, DefaultSize + DefaultSize / 2, source.Item)
                     .Except(right(DefaultStart + DefaultSize, DefaultSize, source.Item));
                 Assert.All(query.ToList(), x => Assert.Equal(seen++, x));
                 Assert.Equal(DefaultStart + DefaultSize, seen);
-            };
-            except(operation.Item, DefaultSource);
-            except(LabeledDefaultSource.AsOrdered().Item, operation.Item);
+            }
+            Except(operation.Item, DefaultSource);
+            Except(LabeledDefaultSource.AsOrdered().Item, operation.Item);
         }
 
         [Theory]
@@ -460,12 +465,11 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [ActiveIssue(1155)]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
         public static void GroupJoin(Labeled<Operation> source, Labeled<Operation> operation)
         {
-            Action<Operation, Operation> groupJoin = (left, right) =>
+            void GroupJoin(Operation left, Operation right)
             {
                 int seenKey = DefaultStart / GroupFactor;
                 foreach (KeyValuePair<int, IEnumerable<int>> group in left(DefaultStart / GroupFactor, DefaultSize / GroupFactor, source.Item)
@@ -477,18 +481,17 @@ namespace System.Linq.Parallel.Tests
                     Assert.Equal((group.Key + 1) * GroupFactor, seenElement);
                 }
                 Assert.Equal((DefaultStart + DefaultSize) / GroupFactor, seenKey);
-            };
-            groupJoin(operation.Item, LabeledDefaultSource.AsOrdered().Item);
-            groupJoin(LabeledDefaultSource.AsOrdered().Item, operation.Item);
+            }
+            GroupJoin(operation.Item, LabeledDefaultSource.AsOrdered().Item);
+            GroupJoin(LabeledDefaultSource.AsOrdered().Item, operation.Item);
         }
 
         [Theory]
-        [ActiveIssue(1155)]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
         public static void GroupJoin_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
-            Action<Operation, Operation> groupJoin = (left, right) =>
+            void GroupJoin(Operation left, Operation right)
             {
                 int seenKey = DefaultStart / GroupFactor;
                 foreach (KeyValuePair<int, IEnumerable<int>> group in left(DefaultStart / GroupFactor, DefaultSize / GroupFactor, source.Item)
@@ -500,9 +503,9 @@ namespace System.Linq.Parallel.Tests
                     Assert.Equal((group.Key + 1) * GroupFactor, seenElement);
                 }
                 Assert.Equal((DefaultStart + DefaultSize) / GroupFactor, seenKey);
-            };
-            groupJoin(operation.Item, LabeledDefaultSource.AsOrdered().Item);
-            groupJoin(LabeledDefaultSource.AsOrdered().Item, operation.Item);
+            }
+            GroupJoin(operation.Item, LabeledDefaultSource.AsOrdered().Item);
+            GroupJoin(LabeledDefaultSource.AsOrdered().Item, operation.Item);
         }
 
         [Theory]
@@ -510,7 +513,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void Intersect(Labeled<Operation> source, Labeled<Operation> operation)
         {
-            Action<Operation, Operation> intersect = (left, right) =>
+            void Intersect(Operation left, Operation right)
             {
                 int seen = DefaultStart;
                 ParallelQuery<int> query = left(DefaultStart - DefaultSize / 2, DefaultSize + DefaultSize / 2, source.Item)
@@ -520,9 +523,9 @@ namespace System.Linq.Parallel.Tests
                     Assert.Equal(seen++, i);
                 }
                 Assert.Equal(DefaultStart + DefaultSize, seen);
-            };
-            intersect(operation.Item, DefaultSource);
-            intersect(LabeledDefaultSource.AsOrdered().Item, operation.Item);
+            }
+            Intersect(operation.Item, DefaultSource);
+            Intersect(LabeledDefaultSource.AsOrdered().Item, operation.Item);
         }
 
         [Theory]
@@ -530,25 +533,24 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void Intersect_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
-            Action<Operation, Operation> intersect = (left, right) =>
+            void Intersect(Operation left, Operation right)
             {
                 int seen = DefaultStart;
                 ParallelQuery<int> query = left(DefaultStart - DefaultSize / 2, DefaultSize + DefaultSize / 2, source.Item)
                     .Intersect(right(DefaultStart, DefaultSize + DefaultSize / 2, source.Item));
                 Assert.All(query.ToList(), x => Assert.Equal(seen++, x));
                 Assert.Equal(DefaultStart + DefaultSize, seen);
-            };
-            intersect(operation.Item, DefaultSource);
-            intersect(LabeledDefaultSource.AsOrdered().Item, operation.Item);
+            }
+            Intersect(operation.Item, DefaultSource);
+            Intersect(LabeledDefaultSource.AsOrdered().Item, operation.Item);
         }
 
         [Theory]
-        [ActiveIssue(1155)]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
         public static void Join(Labeled<Operation> source, Labeled<Operation> operation)
         {
-            Action<Operation, Operation> join = (left, right) =>
+            void Join(Operation left, Operation right)
             {
                 int seen = DefaultStart;
                 ParallelQuery<KeyValuePair<int, int>> query = left(DefaultStart / GroupFactor, DefaultSize / GroupFactor, source.Item)
@@ -559,18 +561,17 @@ namespace System.Linq.Parallel.Tests
                     Assert.Equal(p.Key, p.Value / GroupFactor);
                 }
                 Assert.Equal(DefaultStart + DefaultSize, seen);
-            };
-            join(operation.Item, LabeledDefaultSource.AsOrdered().Item);
-            join(LabeledDefaultSource.AsOrdered().Item, operation.Item);
+            }
+            Join(operation.Item, LabeledDefaultSource.AsOrdered().Item);
+            Join(LabeledDefaultSource.AsOrdered().Item, operation.Item);
         }
 
         [Theory]
-        [ActiveIssue(1155)]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
         public static void Join_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
-            Action<Operation, Operation> join = (left, right) =>
+            void Join(Operation left, Operation right)
             {
                 int seen = DefaultStart;
                 ParallelQuery<KeyValuePair<int, int>> query = left(DefaultStart / GroupFactor, DefaultSize / GroupFactor, source.Item)
@@ -581,9 +582,9 @@ namespace System.Linq.Parallel.Tests
                     Assert.Equal(p.Key, p.Value / GroupFactor);
                 }
                 Assert.Equal(DefaultStart + DefaultSize, seen);
-            };
-            join(operation.Item, LabeledDefaultSource.AsOrdered().Item);
-            join(LabeledDefaultSource.AsOrdered().Item, operation.Item);
+            }
+            Join(operation.Item, LabeledDefaultSource.AsOrdered().Item);
+            Join(LabeledDefaultSource.AsOrdered().Item, operation.Item);
         }
 
         [Theory]
@@ -1385,7 +1386,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void Union(Labeled<Operation> source, Labeled<Operation> operation)
         {
-            Action<Operation, Operation> union = (left, right) =>
+            void Union(Operation left, Operation right)
             {
                 int seen = DefaultStart;
                 ParallelQuery<int> query = left(DefaultStart, DefaultSize * 3 / 4, source.Item)
@@ -1395,9 +1396,9 @@ namespace System.Linq.Parallel.Tests
                     Assert.Equal(seen++, i);
                 }
                 Assert.Equal(DefaultStart + DefaultSize, seen);
-            };
-            union(operation.Item, LabeledDefaultSource.AsOrdered().Item);
-            union(LabeledDefaultSource.AsOrdered().Item, operation.Item);
+            }
+            Union(operation.Item, LabeledDefaultSource.AsOrdered().Item);
+            Union(LabeledDefaultSource.AsOrdered().Item, operation.Item);
         }
 
         [Theory]
@@ -1405,16 +1406,16 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void Union_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
-            Action<Operation, Operation> union = (left, right) =>
+            void Union(Operation left, Operation right)
             {
                 int seen = DefaultStart;
                 ParallelQuery<int> query = left(DefaultStart, DefaultSize * 3 / 4, source.Item)
                     .Union(right(DefaultStart + DefaultSize / 2, DefaultSize / 2, source.Item));
                 Assert.All(query.ToList(), x => Assert.Equal(seen++, x));
                 Assert.Equal(DefaultStart + DefaultSize, seen);
-            };
-            union(operation.Item, LabeledDefaultSource.AsOrdered().Item);
-            union(LabeledDefaultSource.AsOrdered().Item, operation.Item);
+            }
+            Union(operation.Item, LabeledDefaultSource.AsOrdered().Item);
+            Union(LabeledDefaultSource.AsOrdered().Item, operation.Item);
         }
 
         [Theory]
@@ -1468,7 +1469,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void Zip(Labeled<Operation> source, Labeled<Operation> operation)
         {
-            Action<Operation, Operation> zip = (left, right) =>
+            void Zip(Operation left, Operation right)
             {
                 int seen = DefaultStart;
                 ParallelQuery<int> query = left(DefaultStart * 2, DefaultSize, source.Item)
@@ -1478,9 +1479,9 @@ namespace System.Linq.Parallel.Tests
                     Assert.Equal(seen++, i);
                 }
                 Assert.Equal(DefaultStart + DefaultSize, seen);
-            };
-            zip(operation.Item, LabeledDefaultSource.AsOrdered().Item);
-            zip(LabeledDefaultSource.AsOrdered().Item, operation.Item);
+            }
+            Zip(operation.Item, LabeledDefaultSource.AsOrdered().Item);
+            Zip(LabeledDefaultSource.AsOrdered().Item, operation.Item);
         }
 
         [Theory]
@@ -1488,16 +1489,16 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void Zip_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
-            Action<Operation, Operation> zip = (left, right) =>
+            void Zip(Operation left, Operation right)
             {
                 int seen = DefaultStart;
                 ParallelQuery<int> query = left(DefaultStart * 2, DefaultSize, source.Item)
                     .Zip(right(0, DefaultSize, source.Item), (x, y) => (x + y) / 2);
                 Assert.All(query.ToList(), x => Assert.Equal(seen++, x));
                 Assert.Equal(DefaultStart + DefaultSize, seen);
-            };
-            zip(operation.Item, LabeledDefaultSource.AsOrdered().Item);
-            zip(LabeledDefaultSource.AsOrdered().Item, operation.Item);
+            }
+            Zip(operation.Item, LabeledDefaultSource.AsOrdered().Item);
+            Zip(LabeledDefaultSource.AsOrdered().Item, operation.Item);
         }
     }
 }

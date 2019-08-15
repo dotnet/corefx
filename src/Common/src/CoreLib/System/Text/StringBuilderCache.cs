@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 namespace System.Text
 {
     /// <summary>Provide a cached reusable instance of stringbuilder per thread.</summary>
@@ -14,11 +15,11 @@ namespace System.Text
         private const int DefaultCapacity = 16; // == StringBuilder.DefaultCapacity
 
         // WARNING: We allow diagnostic tools to directly inspect this member (t_cachedInstance).
-        // See https://github.com/dotnet/corert/blob/master/Documentation/design-docs/diagnostics/diagnostics-tools-contract.md for more details. 
-        // Please do not change the type, the name, or the semantic usage of this member without understanding the implication for tools. 
+        // See https://github.com/dotnet/corert/blob/master/Documentation/design-docs/diagnostics/diagnostics-tools-contract.md for more details.
+        // Please do not change the type, the name, or the semantic usage of this member without understanding the implication for tools.
         // Get in touch with the diagnostics team if you have questions.
         [ThreadStatic]
-        private static StringBuilder t_cachedInstance;
+        private static StringBuilder? t_cachedInstance;
 
         /// <summary>Get a StringBuilder for the specified capacity.</summary>
         /// <remarks>If a StringBuilder of an appropriate size is cached, it will be returned and the cache emptied.</remarks>
@@ -26,7 +27,7 @@ namespace System.Text
         {
             if (capacity <= MaxBuilderSize)
             {
-                StringBuilder sb = t_cachedInstance;
+                StringBuilder? sb = t_cachedInstance;
                 if (sb != null)
                 {
                     // Avoid stringbuilder block fragmentation by getting a new StringBuilder
@@ -39,6 +40,7 @@ namespace System.Text
                     }
                 }
             }
+
             return new StringBuilder(capacity);
         }
 

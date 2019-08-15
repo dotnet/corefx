@@ -6,16 +6,14 @@ using System.ComponentModel;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
-using System.Linq;
 using Xunit;
-using Xunit.Sdk;
 
 namespace System.Drawing.Tests
 {
     public class GraphicsTests
     {
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void GetHdc_FromHdc_Roundtrips()
         {
             using (var bitmap = new Bitmap(10, 10))
@@ -39,7 +37,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void GetHdc_SameImage_ReturnsSame()
         {
             using (var bitmap = new Bitmap(10, 10))
@@ -59,7 +57,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void GetHdc_NotReleased_ThrowsInvalidOperationException()
         {
             using (var bitmap = new Bitmap(10, 10))
@@ -78,7 +76,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void GetHdc_Disposed_ThrowsObjectDisposedException()
         {
             using (var bitmap = new Bitmap(10, 10))
@@ -100,7 +98,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(FromHdc_TestData))]
         public void FromHdc_ValidHdc_ReturnsExpected(IntPtr hdc)
         {
@@ -112,7 +110,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(FromHdc_TestData))]
         public void FromHdc_ValidHdcWithContext_ReturnsExpected(IntPtr hdc)
         {
@@ -124,7 +122,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(FromHdc_TestData))]
         public void FromHdcInternal_GetDC_ReturnsExpected(IntPtr hdc)
         {
@@ -136,28 +134,28 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void FromHdc_ZeroHdc_ThrowsArgumentNullException()
         {
             AssertExtensions.Throws<ArgumentNullException>("hdc", () => Graphics.FromHdc(IntPtr.Zero));
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void FromHdcInternal_ZeroHdc_ThrowsOutOfMemoryException()
         {
             Assert.Throws<OutOfMemoryException>(() => Graphics.FromHdcInternal(IntPtr.Zero));
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void FromHdc_ZeroHdc_ThrowsOutOfMemoryException()
         {
             Assert.Throws<OutOfMemoryException>(() => Graphics.FromHdc(IntPtr.Zero, (IntPtr)10));
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void FromHdc_InvalidHdc_ThrowsOutOfMemoryException()
         {
             Assert.Throws<OutOfMemoryException>(() => Graphics.FromHwnd((IntPtr)10));
@@ -165,7 +163,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void ReleaseHdc_ValidHdc_ResetsHdc()
         {
             using (var bitmap = new Bitmap(10, 10))
@@ -189,7 +187,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void ReleaseHdc_NoSuchHdc_ResetsHdc()
         {
             using (var bitmap = new Bitmap(10, 10))
@@ -206,7 +204,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void ReleaseHdc_OtherGraphicsHdc_Success()
         {
             using (var bitmap1 = new Bitmap(10, 10))
@@ -226,7 +224,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void ReleaseHdc_NoHdc_ThrowsArgumentException()
         {
             using (var bitmap = new Bitmap(10, 10))
@@ -239,7 +237,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void ReleaseHdc_Disposed_ThrowsObjectDisposedException()
         {
             using (var bitmap = new Bitmap(10, 10))
@@ -260,7 +258,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Hwnd_TestData))]
         public void FromHwnd_ValidHwnd_ReturnsExpected(IntPtr hWnd)
         {
@@ -272,7 +270,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Hwnd_TestData))]
         public void FromHwndInternal_ValidHwnd_ReturnsExpected(IntPtr hWnd)
         {
@@ -284,7 +282,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void FromHwnd_InvalidHwnd_ThrowsOutOfMemoryException()
         {
             Assert.Throws<OutOfMemoryException>(() => Graphics.FromHdc((IntPtr)10));
@@ -292,7 +290,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(PixelFormat.Format16bppRgb555)]
         [InlineData(PixelFormat.Format16bppRgb565)]
         [InlineData(PixelFormat.Format24bppRgb)]
@@ -312,13 +310,13 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void FromImage_NullImage_ThrowsArgumentNullException()
         {
             AssertExtensions.Throws<ArgumentNullException>("image", () => Graphics.FromImage(null));
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(PixelFormat.Format1bppIndexed)]
         [InlineData(PixelFormat.Format4bppIndexed)]
         [InlineData(PixelFormat.Format8bppIndexed)]
@@ -332,7 +330,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void FromImage_DisposedImage_ThrowsArgumentException()
         {
             var image = new Bitmap(10, 10);
@@ -341,7 +339,7 @@ namespace System.Drawing.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => Graphics.FromImage(image));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void FromImage_Metafile_ThrowsOutOfMemoryException()
         {
             using (var image = new Metafile(Helpers.GetTestBitmapPath("telescope_01.wmf")))
@@ -351,7 +349,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(PixelFormat.Format16bppArgb1555)]
         [InlineData(PixelFormat.Format16bppGrayScale)]
         public void FromImage_Invalid16BitFormat_ThrowsOutOfMemoryException(PixelFormat format)
@@ -369,7 +367,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(CompositingMode_TestData))]
         public void CompositingMode_Set_GetReturnsExpected(CompositingMode mode, Color expectedOverlap)
         {
@@ -399,8 +397,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(CompositingMode.SourceOver - 1)]
         [InlineData(CompositingMode.SourceCopy + 1)]
         public void CompositingMode_SetInvalid_ThrowsInvalidEnumArgumentException(CompositingMode compositingMode)
@@ -408,12 +405,12 @@ namespace System.Drawing.Tests
             using (var image = new Bitmap(10, 10))
             using (Graphics graphics = Graphics.FromImage(image))
             {
-                Assert.ThrowsAny<ArgumentException>(() => graphics.CompositingMode = compositingMode);
+                AssertExtensions.Throws<InvalidEnumArgumentException>("value", () => graphics.CompositingMode = compositingMode);
             }
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void CompositingMode_GetSetWhenBusy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -432,7 +429,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void CompositingMode_GetSetWhenDisposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -472,7 +469,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(CompositingQuality_TestData))]
         public void CompositingQuality_Set_GetReturnsExpected(CompositingQuality quality, Color[][] expectedIntersectionColor)
         {
@@ -494,8 +491,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(CompositingQuality.Invalid - 1)]
         [InlineData(CompositingQuality.AssumeLinear + 1)]
         public void CompositingQuality_SetInvalid_ThrowsInvalidEnumArgumentException(CompositingQuality compositingQuality)
@@ -503,12 +499,12 @@ namespace System.Drawing.Tests
             using (var image = new Bitmap(10, 10))
             using (Graphics graphics = Graphics.FromImage(image))
             {
-                Assert.ThrowsAny<ArgumentException>(() => graphics.CompositingQuality = compositingQuality);
+                AssertExtensions.Throws<InvalidEnumArgumentException>("value", () => graphics.CompositingQuality = compositingQuality);
             }
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void CompositingQuality_GetSetWhenBusy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -527,7 +523,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void CompositingQuality_GetSetWhenDisposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -540,7 +536,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Dispose_MultipleTimesWithoutHdc_Success()
         {
             using (var bitmap = new Bitmap(10, 10))
@@ -554,7 +550,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Dispose_MultipleTimesWithHdc_Success()
         {
             using (var bitmap = new Bitmap(10, 10))
@@ -571,7 +567,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DpiX_GetWhenBusy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -589,7 +585,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DpiX_GetWhenDisposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -602,7 +598,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DpiY_GetWhenBusy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -620,7 +616,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DpiY_GetWhenDisposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -632,11 +628,11 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(FlushIntention.Flush)]
         [InlineData(FlushIntention.Sync)]
         [InlineData(FlushIntention.Flush - 1)] // Not in the range of valid values of FlushIntention.
-        [InlineData(FlushIntention.Sync - 1)] // Not in the range of valid values of FlushIntention.
+        [InlineData(FlushIntention.Sync + 1)] // Not in the range of valid values of FlushIntention.
         public void Flush_MultipleTimes_Success(FlushIntention intention)
         {
             using (var image = new Bitmap(10, 10))
@@ -654,7 +650,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Flush_Busy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -673,7 +669,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Flush_Disposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -686,8 +682,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(InterpolationMode.Bicubic, InterpolationMode.Bicubic)]
         [InlineData(InterpolationMode.Bilinear, InterpolationMode.Bilinear)]
         [InlineData(InterpolationMode.Default, InterpolationMode.Bilinear)]
@@ -706,8 +701,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(InterpolationMode.Invalid - 1)]
         [InlineData(InterpolationMode.HighQualityBicubic + 1)]
         public void InterpolationMode_SetInvalid_ThrowsInvalidEnumArgumentException(InterpolationMode interpolationMode)
@@ -715,12 +709,11 @@ namespace System.Drawing.Tests
             using (var image = new Bitmap(10, 10))
             using (Graphics graphics = Graphics.FromImage(image))
             {
-                Assert.ThrowsAny<ArgumentException>(() => graphics.InterpolationMode = interpolationMode);
+                AssertExtensions.Throws<InvalidEnumArgumentException>("value", () => graphics.InterpolationMode = interpolationMode);
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void InterpolationMode_SetToInvalid_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -731,7 +724,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void InterpolationMode_GetSetWhenBusy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -750,7 +743,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void InterpolationMode_GetSetWhenDisposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -763,7 +756,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(1)]
         [InlineData(1000000032)]
         [InlineData(float.NaN)]
@@ -777,8 +770,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(-1)]
         [InlineData(0)]
         [InlineData(1000000033)]
@@ -794,7 +786,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void PageScale_GetSetWhenBusy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -813,7 +805,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void PageScale_GetSetWhenDisposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -826,7 +818,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(GraphicsUnit.Display)]
         [InlineData(GraphicsUnit.Document)]
         [InlineData(GraphicsUnit.Inch)]
@@ -843,8 +835,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(GraphicsUnit.World - 1)]
         [InlineData(GraphicsUnit.Millimeter + 1)]
         public void PageUnit_SetInvalid_ThrowsInvalidEnumArgumentException(GraphicsUnit pageUnit)
@@ -852,12 +843,11 @@ namespace System.Drawing.Tests
             using (var image = new Bitmap(10, 10))
             using (Graphics graphics = Graphics.FromImage(image))
             {
-                Assert.ThrowsAny<ArgumentException>(() => graphics.PageUnit = pageUnit);
+                AssertExtensions.Throws<InvalidEnumArgumentException>("value", () => graphics.PageUnit = pageUnit);
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void PageUnit_SetWorld_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -868,7 +858,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void PageUnit_GetSetWhenBusy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -887,7 +877,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void PageUnit_GetSetWhenDisposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -900,7 +890,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(PixelOffsetMode.Default)]
         [InlineData(PixelOffsetMode.Half)]
         [InlineData(PixelOffsetMode.HighQuality)]
@@ -916,8 +906,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(PixelOffsetMode.Invalid - 1)]
         [InlineData(PixelOffsetMode.Half + 1)]
         public void PixelOffsetMode_SetInvalid_ThrowsInvalidEnumArgumentException(PixelOffsetMode pixelOffsetMode)
@@ -925,11 +914,11 @@ namespace System.Drawing.Tests
             using (var image = new Bitmap(10, 10))
             using (Graphics graphics = Graphics.FromImage(image))
             {
-                Assert.ThrowsAny<ArgumentException>(() => graphics.PixelOffsetMode = pixelOffsetMode);
+                AssertExtensions.Throws<InvalidEnumArgumentException>("value", () => graphics.PixelOffsetMode = pixelOffsetMode);
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void PixelOffsetMode_SetToInvalid_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -940,7 +929,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void PixelOffsetMode_GetSetWhenBusy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -959,7 +948,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void PixelOffsetMode_GetSetWhenDisposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1011,7 +1000,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(RenderingOrigin_TestData))]
         public void RenderingOrigin_SetToCustom_RendersExpected(Point renderingOrigin, Color[][] expectedRendering)
         {
@@ -1031,7 +1020,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void RenderingOrigin_GetSetWhenBusy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1050,7 +1039,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void RenderingOrigin_GetSetWhenDisposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1063,8 +1052,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(SmoothingMode.AntiAlias, SmoothingMode.AntiAlias)]
         [InlineData(SmoothingMode.Default, SmoothingMode.None)]
         [InlineData(SmoothingMode.HighQuality, SmoothingMode.AntiAlias)]
@@ -1080,8 +1068,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(SmoothingMode.Invalid - 1)]
         [InlineData(SmoothingMode.AntiAlias + 1)]
         public void SmoothingMode_SetInvalid_ThrowsInvalidEnumArgumentException(SmoothingMode smoothingMode)
@@ -1089,12 +1076,11 @@ namespace System.Drawing.Tests
             using (var image = new Bitmap(10, 10))
             using (Graphics graphics = Graphics.FromImage(image))
             {
-                Assert.ThrowsAny<ArgumentException>(() => graphics.SmoothingMode = smoothingMode);
+                AssertExtensions.Throws<InvalidEnumArgumentException>("value", () => graphics.SmoothingMode = smoothingMode);
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void SmoothingMode_SetToInvalid_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1105,7 +1091,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void SmoothingMode_GetSetWhenBusy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1124,7 +1110,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void SmoothingMode_GetSetWhenDisposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1137,7 +1123,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(0)]
         [InlineData(1)]
         [InlineData(12)]
@@ -1151,7 +1137,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(-1)]
         [InlineData(13)]
         public void TextContrast_SetInvalid_ThrowsArgumentException(int textContrast)
@@ -1164,7 +1150,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TextContrast_GetSetWhenBusy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1183,7 +1169,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TextContrast_GetSetWhenDisposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1196,7 +1182,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(TextRenderingHint.AntiAlias)]
         [InlineData(TextRenderingHint.AntiAliasGridFit)]
         [InlineData(TextRenderingHint.ClearTypeGridFit)]
@@ -1213,8 +1199,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(TextRenderingHint.SystemDefault - 1)]
         [InlineData(TextRenderingHint.ClearTypeGridFit + 1)]
         public void TextRenderingHint_SetInvalid_ThrowsInvalidEnumArgumentException(TextRenderingHint textRenderingHint)
@@ -1222,12 +1207,12 @@ namespace System.Drawing.Tests
             using (var image = new Bitmap(10, 10))
             using (Graphics graphics = Graphics.FromImage(image))
             {
-                Assert.ThrowsAny<ArgumentException>(() => graphics.TextRenderingHint = textRenderingHint);
+                AssertExtensions.Throws<InvalidEnumArgumentException>("value", () => graphics.TextRenderingHint = textRenderingHint);
             }
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TextRenderingHint_GetSetWhenBusy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1246,7 +1231,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TextRenderingHint_GetSetWhenDisposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1260,7 +1245,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Transform_SetValid_GetReturnsExpected()
         {
             Color empty = Helpers.EmptyColor;
@@ -1288,8 +1273,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Transform_SetNull_ThrowsNullReferenceException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1299,7 +1283,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Transform_SetDisposedMatrix_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1312,7 +1296,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Transform_SetNonInvertibleMatrix_ThrowsArgumentException()
         {
             using (var image = new Bitmap(5, 5))
@@ -1324,7 +1308,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Transform_GetSetWhenBusy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1344,7 +1328,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Transform_GetSetWhenDisposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1358,7 +1342,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void ResetTransform_Invoke_SetsTransformToIdentity()
         {
             using (var image = new Bitmap(10, 10))
@@ -1374,7 +1358,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void ResetTransform_Busy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1392,7 +1376,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void ResetTransform_Disposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1404,7 +1388,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void MultiplyTransform_NoOrder_Success()
         {
             using (var image = new Bitmap(10, 10))
@@ -1421,7 +1405,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(MatrixOrder.Prepend)]
         [InlineData(MatrixOrder.Append)]
         public void MultiplyTransform_Order_Success(MatrixOrder order)
@@ -1440,7 +1424,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void MultiplyTransform_NullMatrix_ThrowsArgumentNullException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1451,8 +1435,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void MultiplyTransform_DisposedMatrix_Nop()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -1467,7 +1450,7 @@ namespace System.Drawing.Tests
             Assert.Equal(transform, brush.Transform);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void MultiplyTransform_NonInvertibleMatrix_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1479,7 +1462,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(MatrixOrder.Prepend - 1)]
         [InlineData(MatrixOrder.Append + 1)]
         public void MultiplyTransform_InvalidOrder_ThrowsArgumentException(MatrixOrder order)
@@ -1493,7 +1476,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void MultiplyTransform_Busy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1513,7 +1496,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void MultiplyTransform_Disposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1527,7 +1510,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(-1, -2)]
         [InlineData(0, 0)]
         [InlineData(1, 2)]
@@ -1546,7 +1529,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(1, 1, MatrixOrder.Prepend)]
         [InlineData(1, 1, MatrixOrder.Append)]
         [InlineData(0, 0, MatrixOrder.Prepend)]
@@ -1568,7 +1551,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(MatrixOrder.Prepend - 1)]
         [InlineData(MatrixOrder.Append + 1)]
         public void TranslateTransform_InvalidOrder_ThrowsArgumentException(MatrixOrder order)
@@ -1581,7 +1564,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TranslateTransform_Busy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1600,7 +1583,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TranslateTransform_Disposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1613,7 +1596,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(-1, -2)]
         [InlineData(1, 2)]
         public void ScaleTransform_NoOrder_Success(float sx, float sy)
@@ -1631,7 +1614,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(1, 1, MatrixOrder.Prepend)]
         [InlineData(1, 1, MatrixOrder.Append)]
         [InlineData(-1, -1, MatrixOrder.Prepend)]
@@ -1651,7 +1634,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void ScaleTransform_ZeroZero_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1662,7 +1645,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(MatrixOrder.Prepend - 1)]
         [InlineData(MatrixOrder.Append + 1)]
         public void ScaleTransform_InvalidOrder_ThrowsArgumentException(MatrixOrder order)
@@ -1675,7 +1658,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void ScaleTransform_Busy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1694,7 +1677,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void ScaleTransform_Disposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1707,7 +1690,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(-1)]
         [InlineData(0)]
         [InlineData(1)]
@@ -1727,7 +1710,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(1, MatrixOrder.Prepend)]
         [InlineData(1, MatrixOrder.Append)]
         [InlineData(0, MatrixOrder.Prepend)]
@@ -1749,7 +1732,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(MatrixOrder.Prepend - 1)]
         [InlineData(MatrixOrder.Append + 1)]
         public void RotateTransform_InvalidOrder_ThrowsArgumentException(MatrixOrder order)
@@ -1762,7 +1745,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void RotateTransform_Busy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1781,7 +1764,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void RotateTransform_Disposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1807,7 +1790,7 @@ namespace System.Drawing.Tests
 
         [ActiveIssue(23650)]
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(CopyFromScreen_TestData))]
         public void CopyFromScreen_OutOfRange_DoesNotAffectGraphics(int sourceX, int sourceY, int destinationX, int destinationY, Size size)
         {
@@ -1825,7 +1808,7 @@ namespace System.Drawing.Tests
 
         [ActiveIssue(23650)]
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(0, 0, 0, 0, 10, 10)]
         [InlineData(0, 0, 0, 0, int.MaxValue, int.MaxValue)]
         [InlineData(1, 1, 2, 2, 3, 3)]
@@ -1885,7 +1868,7 @@ namespace System.Drawing.Tests
 
         [ActiveIssue(23650)]
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(CopyPixelOperation_TestData))]
         public void CopyFromScreen_IntsAndValidCopyPixelOperation_Success(CopyPixelOperation copyPixelOperation)
         {
@@ -1900,7 +1883,7 @@ namespace System.Drawing.Tests
 
         [ActiveIssue(23650)]
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(CopyPixelOperation_TestData))]
         public void CopyFromScreen_PointsAndValidCopyPixelOperation_Success(CopyPixelOperation copyPixelOperation)
         {
@@ -1915,7 +1898,7 @@ namespace System.Drawing.Tests
 
         [ActiveIssue(23650)]
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(CopyPixelOperation.NoMirrorBitmap + 1)]
         [InlineData(CopyPixelOperation.Blackness - 1)]
         [InlineData(CopyPixelOperation.NotSourceErase - 1)]
@@ -1945,7 +1928,7 @@ namespace System.Drawing.Tests
 
         [ActiveIssue(23650)]
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void CopyFromScreen_Busy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -1968,7 +1951,7 @@ namespace System.Drawing.Tests
 
         [ActiveIssue(23650)]
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void CopyFromScreen_Disposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2035,7 +2018,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(TransformPoints_TestData))]
         public void TransformPoints_Points_Success(CoordinateSpace destSpace, CoordinateSpace srcSpace, Point[] points, Point[] expected)
         {
@@ -2103,7 +2086,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(TransformPointFs_TestData))]
         public void TransformPoints_PointFs_Success(CoordinateSpace destSpace, CoordinateSpace srcSpace, PointF[] points, PointF[] expected)
         {
@@ -2119,7 +2102,8 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(CoordinateSpace.Device)]
         [InlineData(CoordinateSpace.World)]
         [InlineData(CoordinateSpace.Page)]
@@ -2137,7 +2121,8 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(CoordinateSpace.Device)]
         [InlineData(CoordinateSpace.World)]
         [InlineData(CoordinateSpace.Page)]
@@ -2156,7 +2141,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(CoordinateSpace.World - 1)]
         [InlineData(CoordinateSpace.Device + 1)]
         public void TransformPoints_InvalidDestSpace_ThrowsArgumentException(CoordinateSpace destSpace)
@@ -2170,7 +2155,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(CoordinateSpace.World - 1)]
         [InlineData(CoordinateSpace.Device + 1)]
         public void TransformPoints_InvalidSourceSpace_ThrowsArgumentException(CoordinateSpace srcSpace)
@@ -2183,7 +2168,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TransformPoints_NullPoints_ThrowsArgumentNullException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2195,7 +2180,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TransformPoints_EmptyPoints_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2207,7 +2192,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TransformPoints_Busy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2227,7 +2212,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TransformPoints_Disposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2247,7 +2232,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(GetNearestColor_TestData))]
         public void GetNearestColor_Color_ReturnsExpected(PixelFormat pixelFormat, Color color, Color expected)
         {
@@ -2259,7 +2244,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void GetNearestColor_Busy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2278,7 +2263,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void GetNearestColor_Disposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2290,162 +2275,8 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void DrawLine_NullPen_ThrowsArgumentNullException()
-        {
-            using (var image = new Bitmap(10, 10))
-            using (Graphics graphics = Graphics.FromImage(image))
-            {
-                AssertExtensions.Throws<ArgumentNullException>("pen", () => graphics.DrawLine(null, Point.Empty, Point.Empty));
-                AssertExtensions.Throws<ArgumentNullException>("pen", () => graphics.DrawLine(null, 0, 0, 0, 0));
-                AssertExtensions.Throws<ArgumentNullException>("pen", () => graphics.DrawLine(null, PointF.Empty, PointF.Empty));
-                AssertExtensions.Throws<ArgumentNullException>("pen", () => graphics.DrawLine(null, 0f, 0f, 0f, 0f));
-            }
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void DrawLine_DisposedPen_ThrowsArgumentException()
-        {
-            using (var image = new Bitmap(10, 10))
-            using (Graphics graphics = Graphics.FromImage(image))
-            {
-                var pen = new Pen(Color.Red);
-                pen.Dispose();
-
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawLine(pen, Point.Empty, Point.Empty));
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawLine(pen, 0, 0, 0, 0));
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawLine(pen, PointF.Empty, PointF.Empty));
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawLine(pen, 0f, 0f, 0f, 0f));
-            }
-        }
-
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void DrawLine_Busy_ThrowsInvalidOperationException()
-        {
-            using (var image = new Bitmap(10, 10))
-            using (Graphics graphics = Graphics.FromImage(image))
-            using (var pen = new Pen(Color.Red))
-            {
-                IntPtr hdc = graphics.GetHdc();
-                try
-                {
-                    Assert.Throws<InvalidOperationException>(() => graphics.DrawLine(pen, Point.Empty, Point.Empty));
-                    Assert.Throws<InvalidOperationException>(() => graphics.DrawLine(pen, 0, 0, 0, 0));
-                    Assert.Throws<InvalidOperationException>(() => graphics.DrawLine(pen, PointF.Empty, PointF.Empty));
-                    Assert.Throws<InvalidOperationException>(() => graphics.DrawLine(pen, 0f, 0f, 0f, 0f));
-                }
-                finally
-                {
-                    graphics.ReleaseHdc();
-                }
-            }
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void DrawLine_Disposed_ThrowsArgumentException()
-        {
-            using (var image = new Bitmap(10, 10))
-            using (var pen = new Pen(Color.Red))
-            {
-                Graphics graphics = Graphics.FromImage(image);
-                graphics.Dispose();
-
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawLine(pen, Point.Empty, Point.Empty));
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawLine(pen, 0, 0, 0, 0));
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawLine(pen, PointF.Empty, PointF.Empty));
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawLine(pen, 0f, 0f, 0f, 0f));
-            }
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void DrawLines_NullPen_ThrowsArgumentNullException()
-        {
-            using (var image = new Bitmap(10, 10))
-            using (Graphics graphics = Graphics.FromImage(image))
-            {
-                AssertExtensions.Throws<ArgumentNullException>("pen", () => graphics.DrawLines(null, new Point[2]));
-                AssertExtensions.Throws<ArgumentNullException>("pen", () => graphics.DrawLines(null, new PointF[2]));
-            }
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void DrawLines_DisposedPen_ThrowsArgumentException()
-        {
-            using (var image = new Bitmap(10, 10))
-            using (Graphics graphics = Graphics.FromImage(image))
-            {
-                var pen = new Pen(Color.Red);
-                pen.Dispose();
-
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawLines(pen, new Point[2]));
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawLines(pen, new PointF[2]));
-            }
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void DrawLines_NullPoints_ThrowsArgumentNullException()
-        {
-            using (var image = new Bitmap(10, 10))
-            using (Graphics graphics = Graphics.FromImage(image))
-            using (var pen = new Pen(Color.Red))
-            {
-                AssertExtensions.Throws<ArgumentNullException>("points", () => graphics.DrawLines(pen, (Point[])null));
-                AssertExtensions.Throws<ArgumentNullException>("points", () => graphics.DrawLines(pen, (PointF[])null));
-            }
-        }
-
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
-        [InlineData(0)]
-        [InlineData(1)]
-        public void DrawLines_InvalidPointsLength_ThrowsArgumentException(int length)
-        {
-            using (var image = new Bitmap(10, 10))
-            using (Graphics graphics = Graphics.FromImage(image))
-            using (var pen = new Pen(Color.Red))
-            {
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawLines(pen, new Point[length]));
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawLines(pen, new PointF[length]));
-            }
-        }
-
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void DrawLines_Busy_ThrowsInvalidOperationException()
-        {
-            using (var image = new Bitmap(10, 10))
-            using (Graphics graphics = Graphics.FromImage(image))
-            using (var pen = new Pen(Color.Red))
-            {
-                IntPtr hdc = graphics.GetHdc();
-                try
-                {
-                    Assert.Throws<InvalidOperationException>(() => graphics.DrawLines(pen, new Point[2]));
-                    Assert.Throws<InvalidOperationException>(() => graphics.DrawLines(pen, new PointF[2]));
-                }
-                finally
-                {
-                    graphics.ReleaseHdc();
-                }
-            }
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void DrawLines_Disposed_ThrowsArgumentException()
-        {
-            using (var image = new Bitmap(10, 10))
-            using (var pen = new Pen(Color.Red))
-            {
-                Graphics graphics = Graphics.FromImage(image);
-                graphics.Dispose();
-
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawLines(pen, new Point[2]));
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawLines(pen, new PointF[2]));
-            }
-        }
-
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawArc_NullPen_ThrowsArgumentNullException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2459,7 +2290,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawArc_DisposedPen_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2476,7 +2307,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawArc_ZeroWidth_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2491,7 +2322,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawArc_ZeroHeight_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2506,7 +2337,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawArc_Busy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2529,7 +2360,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawArc_Disposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2545,160 +2376,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void DrawBezier_NullPen_ThrowsArgumentNullException()
-        {
-            using (var image = new Bitmap(10, 10))
-            using (Graphics graphics = Graphics.FromImage(image))
-            {
-                AssertExtensions.Throws<ArgumentNullException>("pen", () => graphics.DrawBezier(null, 1, 2, 3, 4, 5, 6, 7, 8));
-                AssertExtensions.Throws<ArgumentNullException>("pen", () => graphics.DrawBezier(null, Point.Empty, Point.Empty, Point.Empty, Point.Empty));
-                AssertExtensions.Throws<ArgumentNullException>("pen", () => graphics.DrawBezier(null, PointF.Empty, PointF.Empty, PointF.Empty, PointF.Empty));
-            }
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void DrawBezier_DisposedPen_ThrowsArgumentException()
-        {
-            using (var image = new Bitmap(10, 10))
-            using (Graphics graphics = Graphics.FromImage(image))
-            {
-                var pen = new Pen(Color.Red);
-                pen.Dispose();
-
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawBezier(pen, 1, 2, 3, 4, 5, 6, 7, 8));
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawBezier(pen, Point.Empty, Point.Empty, Point.Empty, Point.Empty));
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawBezier(pen, PointF.Empty, PointF.Empty, PointF.Empty, PointF.Empty));
-            }
-        }
-
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void DrawBezier_Busy_ThrowsInvalidOperationException()
-        {
-            using (var image = new Bitmap(10, 10))
-            using (Graphics graphics = Graphics.FromImage(image))
-            using (var pen = new Pen(Color.Red))
-            {
-                IntPtr hdc = graphics.GetHdc();
-                try
-                {
-                    Assert.Throws<InvalidOperationException>(() => graphics.DrawBezier(pen, 1, 2, 3, 4, 5, 6, 7, 8));
-                    Assert.Throws<InvalidOperationException>(() => graphics.DrawBezier(pen, Point.Empty, Point.Empty, Point.Empty, Point.Empty));
-                    Assert.Throws<InvalidOperationException>(() => graphics.DrawBezier(pen, PointF.Empty, PointF.Empty, PointF.Empty, PointF.Empty));
-                }
-                finally
-                {
-                    graphics.ReleaseHdc();
-                }
-            }
-        }
-
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void DrawBezier_Disposed_ThrowsArgumentException()
-        {
-            using (var image = new Bitmap(10, 10))
-            using (var pen = new Pen(Color.Red))
-            {
-                Graphics graphics = Graphics.FromImage(image);
-                graphics.Dispose();
-
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawArc(pen, new Rectangle(0, 0, 1, 1), 0, 90));
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawArc(pen, 0, 0, 1, 1, 0, 90));
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawArc(pen, new RectangleF(0, 0, 1, 1), 0, 90));
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawArc(pen, 0f, 0f, 1f, 1f, 0, 90));
-            }
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void DrawBeziers_NullPen_ThrowsArgumentNullException()
-        {
-            using (var image = new Bitmap(10, 10))
-            using (Graphics graphics = Graphics.FromImage(image))
-            {
-                AssertExtensions.Throws<ArgumentNullException>("pen", () => graphics.DrawBeziers(null, new Point[2]));
-                AssertExtensions.Throws<ArgumentNullException>("pen", () => graphics.DrawBeziers(null, new PointF[2]));
-            }
-        }
-
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void DrawBeziers_DisposedPen_ThrowsArgumentException()
-        {
-            using (var image = new Bitmap(10, 10))
-            using (Graphics graphics = Graphics.FromImage(image))
-            {
-                var pen = new Pen(Color.Red);
-                pen.Dispose();
-
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawBeziers(pen, new Point[2]));
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawBeziers(pen, new PointF[2]));
-            }
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void DrawBeziers_NullPoints_ThrowsArgumentNullException()
-        {
-            using (var image = new Bitmap(10, 10))
-            using (Graphics graphics = Graphics.FromImage(image))
-            using (var pen = new Pen(Color.Red))
-            {
-                AssertExtensions.Throws<ArgumentNullException>("points", () => graphics.DrawBeziers(pen, (Point[])null));
-                AssertExtensions.Throws<ArgumentNullException>("points", () => graphics.DrawBeziers(pen, (PointF[])null));
-            }
-        }
-
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void DrawBeziers_EmptyPoints_ThrowsArgumentException()
-        {
-            using (var image = new Bitmap(10, 10))
-            using (Graphics graphics = Graphics.FromImage(image))
-            using (var pen = new Pen(Color.Red))
-            {
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawBeziers(pen, new Point[0]));
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawBeziers(pen, new PointF[0]));
-            }
-        }
-
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void DrawBeziers_Busy_ThrowsInvalidOperationException()
-        {
-            using (var image = new Bitmap(10, 10))
-            using (Graphics graphics = Graphics.FromImage(image))
-            using (var pen = new Pen(Color.Red))
-            {
-                IntPtr hdc = graphics.GetHdc();
-                try
-                {
-                    Assert.Throws<InvalidOperationException>(() => graphics.DrawBeziers(pen, new Point[2]));
-                    Assert.Throws<InvalidOperationException>(() => graphics.DrawBeziers(pen, new PointF[2]));
-                }
-                finally
-                {
-                    graphics.ReleaseHdc();
-                }
-            }
-        }
-
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void DrawBeziers_Disposed_ThrowsArgumentException()
-        {
-            using (var image = new Bitmap(10, 10))
-            using (var pen = new Pen(Color.Red))
-            {
-                Graphics graphics = Graphics.FromImage(image);
-                graphics.Dispose();
-
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawBeziers(pen, new Point[2]));
-                AssertExtensions.Throws<ArgumentException>(null, () => graphics.DrawBeziers(pen, new PointF[2]));
-            }
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawRectangle_NullPen_ThrowsArgumentNullException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2710,7 +2388,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawRectangle_DisposedPen_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2727,7 +2405,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawRectangle_Busy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2748,7 +2426,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawRectangle_Disposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2763,8 +2441,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawRectangles_NullPen_ThrowsArgumentNullException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2775,7 +2452,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawRectangles_DisposedPen_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2789,7 +2466,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawRectangles_NullRectangles_ThrowsArgumentNullException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2801,7 +2478,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawRectangles_EmptyRectangles_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2814,7 +2491,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawRectangles_Busy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2834,7 +2511,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawRectangles_Disposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2848,7 +2525,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawEllipse_NullPen_ThrowsArgumentNullException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2861,7 +2538,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawEllipse_DisposedPen_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2879,7 +2556,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawEllipse_Busy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2901,7 +2578,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawEllipse_Disposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2917,7 +2594,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawPie_NullPen_ThrowsArgumentNullException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2930,7 +2607,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawPie_DisposedPen_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2947,7 +2624,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawPie_ZeroWidth_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2962,7 +2639,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawPie_ZeroHeight_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2977,7 +2654,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawPie_Busy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2999,7 +2676,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawPie_Disposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -3015,7 +2692,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawPolygon_NullPen_ThrowsArgumentNullException()
         {
             using (var image = new Bitmap(10, 10))
@@ -3026,7 +2703,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawPolygon_DisposedPen_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -3040,7 +2717,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawPolygon_NullPoints_ThrowsArgumentNullException()
         {
             using (var image = new Bitmap(10, 10))
@@ -3052,7 +2729,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(0)]
         [InlineData(1)]
         public void DrawPolygon_InvalidPointsLength_ThrowsArgumentException(int length)
@@ -3067,7 +2744,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawPolygon_Busy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -3087,7 +2764,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawPolygon_Disposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -3101,7 +2778,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawPath_NullPen_ThrowsArgumentNullException()
         {
             using (var image = new Bitmap(10, 10))
@@ -3112,7 +2789,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawPath_DisposedPen_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -3126,7 +2803,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawPath_NullPath_ThrowsArgumentNullException()
         {
             using (var image = new Bitmap(10, 10))
@@ -3137,7 +2814,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawPath_DisposedPath_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -3152,7 +2829,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawPath_Busy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -3172,7 +2849,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawPath_Disposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -3186,7 +2863,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawCurve_NullPen_ThrowsArgumentNullException()
         {
             using (var image = new Bitmap(10, 10))
@@ -3202,7 +2879,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawCurve_DisposedPen_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -3221,7 +2898,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawCurve_NullPoints_ThrowsArgumentNullException()
         {
             using (var image = new Bitmap(10, 10))
@@ -3238,7 +2915,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(0)]
         [InlineData(1)]
         public void DrawCurve_InvalidPointsLength_ThrowsArgumentException(int length)
@@ -3258,7 +2935,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(4, -1, 4)]
         [InlineData(4, 0, -1)]
         [InlineData(4, 4, 0)]
@@ -3277,7 +2954,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawCurve_Busy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -3302,7 +2979,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawCurve_Disposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -3321,7 +2998,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawClosedCurve_NullPen_ThrowsArgumentNullException()
         {
             using (var image = new Bitmap(10, 10))
@@ -3334,7 +3011,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawClosedCurve_DisposedPen_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -3350,7 +3027,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawClosedCurve_NullPoints_ThrowsArgumentNullException()
         {
             using (var image = new Bitmap(10, 10))
@@ -3364,7 +3041,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(0)]
         [InlineData(1)]
         [InlineData(2)]
@@ -3382,7 +3059,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawClosedCurve_Busy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -3404,7 +3081,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawClosedCurve_Disposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -3420,7 +3097,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Clear_Color_Success()
         {
             Color color = Color.FromArgb(Color.Plum.ToArgb());
@@ -3441,7 +3118,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Clear_Busy_ThrowsInvalidOperationException()
         {
             using (var image = new Bitmap(10, 10))
@@ -3460,7 +3137,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Clear_Disposed_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -3474,7 +3151,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawString_DefaultFont_Succeeds()
         {
             using (var image = new Bitmap(50, 50))
@@ -3486,7 +3163,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawString_CompositingModeSourceCopy_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))

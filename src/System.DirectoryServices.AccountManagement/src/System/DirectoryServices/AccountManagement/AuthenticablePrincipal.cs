@@ -6,7 +6,6 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Permissions;
 
 namespace System.DirectoryServices.AccountManagement
 {
@@ -57,7 +56,7 @@ namespace System.DirectoryServices.AccountManagement
 
                 // We don't want to let them set a null value.
                 if (!value.HasValue)
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
 
                 HandleSet<bool>(ref _enabled, value.Value, ref _enabledChanged,
                                   PropertyNames.AuthenticablePrincipalEnabled);
@@ -248,7 +247,7 @@ namespace System.DirectoryServices.AccountManagement
 
         // Certificates property
         private X509Certificate2Collection _certificates = new X509Certificate2Collection();
-        private List<string> _certificateOriginalThumbprints = new List<string>();
+        private readonly List<string> _certificateOriginalThumbprints = new List<string>();
         private LoadState _X509Certificate2CollectionLoaded = LoadState.NotSet;
 
         public X509Certificate2Collection Certificates
@@ -326,7 +325,7 @@ namespace System.DirectoryServices.AccountManagement
         //
         // Private implementation
         //
-        internal protected AuthenticablePrincipal(PrincipalContext context)
+        protected internal AuthenticablePrincipal(PrincipalContext context)
         {
             if (context == null)
                 throw new ArgumentException(SR.NullArguments);
@@ -336,7 +335,7 @@ namespace System.DirectoryServices.AccountManagement
             this.rosf = new AdvancedFilters(this);
         }
 
-        internal protected AuthenticablePrincipal(PrincipalContext context, string samAccountName, string password, bool enabled) : this(context)
+        protected internal AuthenticablePrincipal(PrincipalContext context, string samAccountName, string password, bool enabled) : this(context)
         {
             if (samAccountName != null)
             {
@@ -351,7 +350,7 @@ namespace System.DirectoryServices.AccountManagement
             this.Enabled = enabled;
         }
 
-        static internal AuthenticablePrincipal MakeAuthenticablePrincipal(PrincipalContext ctx)
+        internal static AuthenticablePrincipal MakeAuthenticablePrincipal(PrincipalContext ctx)
         {
             AuthenticablePrincipal ap = new AuthenticablePrincipal(ctx);
             ap.unpersisted = false;
@@ -366,10 +365,10 @@ namespace System.DirectoryServices.AccountManagement
                 throw new ArgumentException(SR.AuthenticablePrincipalMustBeSubtypeOfAuthPrinc);
 
             if (context == null)
-                throw new ArgumentNullException("context");
+                throw new ArgumentNullException(nameof(context));
 
             if (subtype == null)
-                throw new ArgumentNullException("subtype");
+                throw new ArgumentNullException(nameof(subtype));
         }
 
         //
@@ -505,7 +504,7 @@ namespace System.DirectoryServices.AccountManagement
                     {
                         if (_passwordInfo == null)
                         {
-                            // Should never happen, since GetChangeStatusForProperty returned false                
+                            // Should never happen, since GetChangeStatusForProperty returned false
                             Debug.Fail("AuthenticablePrincipal.GetValueForProperty(PwdInfo): shouldn't be here");
                             throw new InvalidOperationException();
                         }
@@ -611,7 +610,7 @@ namespace System.DirectoryServices.AccountManagement
                 string thumbprint = certificate.Thumbprint;
 
                 // If we found a cert whose thumbprint wasn't in the thumbprints list,
-                // it was inserted --> collection has changed                
+                // it was inserted --> collection has changed
                 if (!remainingOriginalThumbprints.Contains(thumbprint))
                 {
                     GlobalDebug.WriteLineIf(GlobalDebug.Info, "AuthenticablePrincipal", "RefreshOriginalThumbprintList: found inserted cert");

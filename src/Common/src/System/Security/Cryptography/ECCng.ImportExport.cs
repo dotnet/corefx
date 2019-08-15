@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -46,8 +46,8 @@ namespace System.Security.Cryptography
                 {
                     // Build the header
                     BCRYPT_ECCKEY_BLOB* pBcryptBlob = (BCRYPT_ECCKEY_BLOB*)pBlob;
-                    pBcryptBlob->Magic = ecdh ? 
-                        EcdhCurveNameToMagicNumber(parameters.Curve.Oid.FriendlyName, includePrivateParameters) : 
+                    pBcryptBlob->Magic = ecdh ?
+                        EcdhCurveNameToMagicNumber(parameters.Curve.Oid.FriendlyName, includePrivateParameters) :
                         EcdsaCurveNameToMagicNumber(parameters.Curve.Oid.FriendlyName, includePrivateParameters);
                     pBcryptBlob->cbKey = parameters.Q.X.Length;
 
@@ -383,7 +383,7 @@ namespace System.Security.Cryptography
 
         /// <summary>
         /// Map a curve name to magic number. Maps the names of the curves that worked pre-Win10
-        /// to the pre-Win10 magic numbers to support import on pre-Win10 environments 
+        /// to the pre-Win10 magic numbers to support import on pre-Win10 environments
         /// that don't have the named curve functionality.
         /// </summary>
         private static KeyBlobMagicNumber EcdsaCurveNameToMagicNumber(string name, bool includePrivateParameters)
@@ -415,7 +415,7 @@ namespace System.Security.Cryptography
 
         /// <summary>
         /// Map a curve name to magic number. Maps the names of the curves that worked pre-Win10
-        /// to the pre-Win10 magic numbers to support import on pre-Win10 environments 
+        /// to the pre-Win10 magic numbers to support import on pre-Win10 environments
         /// that don't have the named curve functionality.
         /// </summary>
         private static KeyBlobMagicNumber EcdhCurveNameToMagicNumber(string name, bool includePrivateParameters)
@@ -470,7 +470,11 @@ namespace System.Security.Cryptography
             return curveType;
         }
 
-        internal static SafeNCryptKeyHandle ImportKeyBlob(string blobType, byte[] keyBlob, string curveName, SafeNCryptProviderHandle provider)
+        internal static SafeNCryptKeyHandle ImportKeyBlob(
+            string blobType,
+            ReadOnlySpan<byte> keyBlob,
+            string curveName,
+            SafeNCryptProviderHandle provider)
         {
             ErrorCode errorCode;
             SafeNCryptKeyHandle keyHandle;
@@ -496,7 +500,15 @@ namespace System.Security.Cryptography
                     desc.ulVersion = Interop.BCrypt.BCRYPTBUFFER_VERSION;
                     Marshal.StructureToPtr(desc, descPtr, false);
 
-                    errorCode = Interop.NCrypt.NCryptImportKey(provider, IntPtr.Zero, blobType, descPtr, out keyHandle, keyBlob, keyBlob.Length, 0);
+                    errorCode = Interop.NCrypt.NCryptImportKey(
+                        provider,
+                        IntPtr.Zero,
+                        blobType,
+                        descPtr,
+                        out keyHandle,
+                        ref MemoryMarshal.GetReference(keyBlob),
+                        keyBlob.Length,
+                        0);
                 }
                 finally
                 {
@@ -510,7 +522,7 @@ namespace System.Security.Cryptography
                 Exception e = errorCode.ToCryptographicException();
                 if (errorCode == ErrorCode.NTE_INVALID_PARAMETER)
                 {
-                    throw new PlatformNotSupportedException(string.Format(SR.Cryptography_CurveNotSupported, curveName), e);
+                    throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_CurveNotSupported, curveName), e);
                 }
                 throw e;
             }
@@ -553,14 +565,17 @@ namespace System.Security.Cryptography
             {
                 case "nistP256":
                 case "ECDH_P256":
+                case "ECDSA_P256":
                     return AlgorithmName.ECDHP256;
 
                 case "nistP384":
                 case "ECDH_P384":
+                case "ECDSA_P384":
                     return AlgorithmName.ECDHP384;
 
                 case "nistP521":
                 case "ECDH_P521":
+                case "ECDSA_P521":
                     return AlgorithmName.ECDHP521;
             }
 

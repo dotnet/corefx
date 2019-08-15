@@ -32,7 +32,7 @@ namespace System.Runtime.CompilerServices.Tests
             Assert.NotEqual(i123.GetHashCode(), h4);
 
             int h5 = RuntimeHelpers.GetHashCode(null);
-            Assert.Equal(h5, 0);
+            Assert.Equal(0, h5);
         }
 
         public struct TestStruct
@@ -97,7 +97,7 @@ namespace System.Runtime.CompilerServices.Tests
         {
             RuntimeTypeHandle t = typeof(HasCctor).TypeHandle;
             RuntimeHelpers.RunClassConstructor(t);
-            Assert.Equal(HasCctorReceiver.S, "Hello");
+            Assert.Equal("Hello", HasCctorReceiver.S);
             return;
         }
 
@@ -115,7 +115,6 @@ namespace System.Runtime.CompilerServices.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void PrepareMethod()
         {
             foreach (MethodInfo m in typeof(RuntimeHelpersTests).GetMethods())
@@ -135,7 +134,7 @@ namespace System.Runtime.CompilerServices.Tests
             //
 
             // Generic definition with instantiation is valid
-            RuntimeHelpers.PrepareMethod(typeof(List<>).GetMethod("Add").MethodHandle, 
+            RuntimeHelpers.PrepareMethod(typeof(List<>).GetMethod("Add").MethodHandle,
                 new RuntimeTypeHandle[] { typeof(TestStruct).TypeHandle });
 
             // Instantiated method without instantiation is valid

@@ -19,8 +19,6 @@ namespace System.Collections.Specialized
         private int version; // Do not rename (binary serialization)
         private int count; // Do not rename (binary serialization)
         private readonly IComparer comparer; // Do not rename (binary serialization)
-        [NonSerialized]
-        private Object _syncRoot;
 
         public ListDictionary()
         {
@@ -146,17 +144,7 @@ namespace System.Collections.Specialized
             }
         }
 
-        public object SyncRoot
-        {
-            get
-            {
-                if (_syncRoot == null)
-                {
-                    System.Threading.Interlocked.CompareExchange(ref _syncRoot, new Object(), null);
-                }
-                return _syncRoot;
-            }
-        }
+        public object SyncRoot => this;
 
         public ICollection Values
         {
@@ -285,9 +273,9 @@ namespace System.Collections.Specialized
 
         private class NodeEnumerator : IDictionaryEnumerator
         {
-            private ListDictionary _list;
+            private readonly ListDictionary _list;
             private DictionaryNode _current;
-            private int _version;
+            private readonly int _version;
             private bool _start;
 
 
@@ -371,11 +359,11 @@ namespace System.Collections.Specialized
                 _current = null;
             }
         }
-        
+
         private class NodeKeyValueCollection : ICollection
         {
-            private ListDictionary _list;
-            private bool _isKeys;
+            private readonly ListDictionary _list;
+            private readonly bool _isKeys;
 
             public NodeKeyValueCollection(ListDictionary list, bool isKeys)
             {
@@ -434,10 +422,10 @@ namespace System.Collections.Specialized
 
             private class NodeKeyValueEnumerator : IEnumerator
             {
-                private ListDictionary _list;
+                private readonly ListDictionary _list;
                 private DictionaryNode _current;
-                private int _version;
-                private bool _isKeys;
+                private readonly int _version;
+                private readonly bool _isKeys;
                 private bool _start;
 
                 public NodeKeyValueEnumerator(ListDictionary list, bool isKeys)

@@ -10,7 +10,7 @@ namespace System.Xml
 {
     internal partial class ReadContentAsBinaryHelper
     {
-        // Internal methods 
+        // Internal methods
 
         internal async Task<int> ReadContentAsBase64Async(byte[] buffer, int index, int count)
         {
@@ -55,7 +55,7 @@ namespace System.Xml
                 case State.InReadElementContent:
                     throw new InvalidOperationException(SR.Xml_MixingBinaryContentMethods);
                 default:
-                    Debug.Assert(false);
+                    Debug.Fail($"Unexpected state {_state}");
                     return 0;
             }
 
@@ -111,7 +111,7 @@ namespace System.Xml
                 case State.InReadElementContent:
                     throw new InvalidOperationException(SR.Xml_MixingBinaryContentMethods);
                 default:
-                    Debug.Assert(false);
+                    Debug.Fail($"Unexpected state {_state}");
                     return 0;
             }
 
@@ -167,7 +167,7 @@ namespace System.Xml
                     }
                     break;
                 default:
-                    Debug.Assert(false);
+                    Debug.Fail($"Unexpected state {_state}");
                     return 0;
             }
 
@@ -223,7 +223,7 @@ namespace System.Xml
                     }
                     break;
                 default:
-                    Debug.Assert(false);
+                    Debug.Fail($"Unexpected state {_state}");
                     return 0;
             }
 

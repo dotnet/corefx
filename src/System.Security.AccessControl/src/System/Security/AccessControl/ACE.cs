@@ -139,7 +139,7 @@ nameof(binaryForm),
                 // Indicates a bug in the implementation, not in user's code.
                 //
 
-                Debug.Assert(false, "Length > ushort.MaxValue");
+                Debug.Fail("Length > ushort.MaxValue");
                 // Replacing SystemException with InvalidOperationException. It's not a perfect fit,
                 // but it's the best exception type available to indicate a failure because
                 // of a bug in the ACE itself.
@@ -850,13 +850,13 @@ nameof(type),
                 {
                     throw new ArgumentOutOfRangeException(
 nameof(opaque),
-                        string.Format(CultureInfo.CurrentCulture, SR.ArgumentOutOfRange_ArrayLength, 0, MaxOpaqueLength));
+                        SR.Format(SR.ArgumentOutOfRange_ArrayLength, 0, MaxOpaqueLength));
                 }
                 else if (opaque.Length % 4 != 0)
                 {
                     throw new ArgumentOutOfRangeException(
 nameof(opaque),
-                        string.Format(CultureInfo.CurrentCulture, SR.ArgumentOutOfRange_ArrayLengthMultiple, 4));
+                        SR.Format(SR.ArgumentOutOfRange_ArrayLengthMultiple, 4));
                 }
             }
 
@@ -885,7 +885,7 @@ nameof(opaque),
             {
                 if (OpaqueLength > MaxOpaqueLength)
                 {
-                    Debug.Assert(false, "OpaqueLength somehow managed to exceed MaxOpaqueLength");
+                    Debug.Fail("OpaqueLength somehow managed to exceed MaxOpaqueLength");
                     // Replacing SystemException with InvalidOperationException. It's not a perfect fit,
                     // but it's the best exception type available to indicate a failure because
                     // of a bug in the ACE itself.
@@ -1202,7 +1202,7 @@ nameof(opaque),
                     // Indicates a bug in the implementation, not in user's code
                     //
 
-                    Debug.Assert(false, "Invalid ACE type");
+                    Debug.Fail("Invalid ACE type");
                     // Replacing SystemException with InvalidOperationException. It's not a perfect fit,
                     // but it's the best exception type available to indicate a failure because
                     // of a bug in the ACE itself.
@@ -1303,13 +1303,13 @@ nameof(opaque),
                 {
                     throw new ArgumentOutOfRangeException(
 nameof(opaque),
-                        string.Format(CultureInfo.CurrentCulture, SR.ArgumentOutOfRange_ArrayLength, 0, MaxOpaqueLengthInternal));
+                        SR.Format(SR.ArgumentOutOfRange_ArrayLength, 0, MaxOpaqueLengthInternal));
                 }
                 else if (opaque.Length % 4 != 0)
                 {
                     throw new ArgumentOutOfRangeException(
 nameof(opaque),
-                        string.Format(CultureInfo.CurrentCulture, SR.ArgumentOutOfRange_ArrayLengthMultiple, 4));
+                        SR.Format(SR.ArgumentOutOfRange_ArrayLengthMultiple, 4));
                 }
             }
 
@@ -1353,21 +1353,21 @@ nameof(opaque),
     //     ULONG SidStart;
     //     // Opaque resouce manager specific data
     // } ACCESS_ALLOWED_CALLBACK_ACE, *PACCESS_ALLOWED_CALLBACK_ACE;
-    // 
+    //
     // typedef struct _ACCESS_DENIED_CALLBACK_ACE {
     //     ACE_HEADER Header;
     //     ACCESS_MASK Mask;
     //     ULONG SidStart;
     //     // Opaque resouce manager specific data
     // } ACCESS_DENIED_CALLBACK_ACE, *PACCESS_DENIED_CALLBACK_ACE;
-    // 
+    //
     // typedef struct _SYSTEM_AUDIT_CALLBACK_ACE {
     //     ACE_HEADER Header;
     //     ACCESS_MASK Mask;
     //     ULONG SidStart;
     //     // Opaque resouce manager specific data
     // } SYSTEM_AUDIT_CALLBACK_ACE, *PSYSTEM_AUDIT_CALLBACK_ACE;
-    // 
+    //
     // typedef struct _SYSTEM_ALARM_CALLBACK_ACE {
     //     ACE_HEADER Header;
     //     ACCESS_MASK Mask;
@@ -1646,7 +1646,7 @@ nameof(qualifier),
             {
                 if (OpaqueLength > MaxOpaqueLengthInternal)
                 {
-                    Debug.Assert(false, "OpaqueLength somehow managed to exceed MaxOpaqueLength");
+                    Debug.Fail("OpaqueLength somehow managed to exceed MaxOpaqueLength");
                     // Replacing SystemException with InvalidOperationException. It's not a perfect fit,
                     // but it's the best exception type available to indicate a failure because
                     // of a bug in the ACE itself.
@@ -1778,18 +1778,18 @@ nameof(qualifier),
 
         #region Private Methods
 
-        //  
+        //
         // The following access mask bits in object aces may refer to an objectType that
         // identifies the property set, property, extended right, or type of child object to which the ACE applies
         //
-        //    ADS_RIGHT_DS_CREATE_CHILD = 0x1, 
-        //    ADS_RIGHT_DS_DELETE_CHILD = 0x2, 
+        //    ADS_RIGHT_DS_CREATE_CHILD = 0x1,
+        //    ADS_RIGHT_DS_DELETE_CHILD = 0x2,
         //    ADS_RIGHT_DS_SELF = 0x8,
-        //    ADS_RIGHT_DS_READ_PROP = 0x10, 
-        //    ADS_RIGHT_DS_WRITE_PROP = 0x20, 
+        //    ADS_RIGHT_DS_READ_PROP = 0x10,
+        //    ADS_RIGHT_DS_WRITE_PROP = 0x20,
         //    ADS_RIGHT_DS_CONTROL_ACCESS = 0x100
         //
-        internal static readonly int AccessMaskWithObjectType = 0x1 | 0x2 | 0x8 | 0x10 | 0x20 | 0x100;
+        internal const int AccessMaskWithObjectType = 0x1 | 0x2 | 0x8 | 0x10 | 0x20 | 0x100;
 
         private static AceType TypeFromQualifier(bool isCallback, AceQualifier qualifier)
         {
@@ -2212,7 +2212,7 @@ nameof(qualifier),
             {
                 if (OpaqueLength > MaxOpaqueLengthInternal)
                 {
-                    Debug.Assert(false, "OpaqueLength somehow managed to exceed MaxOpaqueLength");
+                    Debug.Fail("OpaqueLength somehow managed to exceed MaxOpaqueLength");
                     // Replacing SystemException with InvalidOperationException. It's not a perfect fit,
                     // but it's the best exception type available to indicate a failure because
                     // of a bug in the ACE itself.

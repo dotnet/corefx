@@ -13,7 +13,7 @@ namespace System.Linq.Tests
         public void SameResultsRepeatCallsIntQuery()
         {
             var q = from x in new[] { 9999, 0, 888, -1, 66, -777, 1, 2, -12345 }
-                    where x > Int32.MinValue
+                    where x > int.MinValue
                     select x;
 
             Assert.Equal(q.Max(), q.Max());
@@ -22,13 +22,13 @@ namespace System.Linq.Tests
         [Fact]
         public void SameResultsRepeatCallsStringQuery()
         {
-            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", String.Empty }
-                    where !String.IsNullOrEmpty(x)
+            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", string.Empty }
+                    where !string.IsNullOrEmpty(x)
                     select x;
 
             Assert.Equal(q.Max(), q.Max());
         }
-        
+
         [Fact]
         public void Max_Int_NullSource_ThrowsArgumentNullException()
         {
@@ -379,7 +379,7 @@ namespace System.Linq.Tests
             yield return new object[] { new float?[] { null, null, null, float.NaN }, float.NaN };
             yield return new object[] { new float?[] { null, float.NaN, null }, float.NaN };
         }
-        
+
         [Theory]
         [MemberData(nameof(Max_NullableFloat_TestData))]
         public void Max_NullableFloat(IEnumerable<float?> source, float? expected)
@@ -505,7 +505,7 @@ namespace System.Linq.Tests
             Assert.Throws<InvalidOperationException>(() => Enumerable.Empty<DateTime>().Max());
             Assert.Throws<InvalidOperationException>(() => Enumerable.Empty<DateTime>().Max(i => i));
         }
-        
+
         public static IEnumerable<object[]> Max_String_TestData()
         {
             yield return new object[] { Enumerable.Range(1, 10).Select(i => i.ToString()).ToArray(), "9" };
@@ -676,7 +676,7 @@ namespace System.Linq.Tests
             };
             Assert.Equal(long.MaxValue, source.Max(e => e.num));
         }
-        
+
         [Fact]
         public void Max_NullableFloat_NullSelector_ThrowsArgumentNullException()
         {
@@ -695,7 +695,7 @@ namespace System.Linq.Tests
             };
             Assert.Equal(100.45f, source.Max(e => e.num));
         }
-        
+
         [Fact]
         public void Max_NullableDouble_NullSelector_ThrowsArgumentNullException()
         {

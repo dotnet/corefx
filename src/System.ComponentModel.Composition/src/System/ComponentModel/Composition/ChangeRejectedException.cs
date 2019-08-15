@@ -50,14 +50,14 @@ namespace System.ComponentModel.Composition
         ///     Gets a message that describes the exception.
         /// </summary>
         /// <value>
-        ///     A <see cref="String"/> containing a message that describes the 
+        ///     A <see cref="string"/> containing a message that describes the
         ///     <see cref="ChangeRejectedException"/>.
         /// </value>
         public override string Message
         {
             get
             {
-                return string.Format(CultureInfo.CurrentCulture, 
+                return SR.Format(
                     SR.CompositionException_ChangesRejected,
                     base.Message);
             }

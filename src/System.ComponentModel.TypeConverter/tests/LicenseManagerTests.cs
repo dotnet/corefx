@@ -1,13 +1,13 @@
 // Licensed to the .NET Foundation under one or more agreements.
-// See the LICENSE file in the project root for more information. 
+// See the LICENSE file in the project root for more information.
 
 //
 // System.ComponentModel.LicenseManagerTests test cases
 //
 // Authors:
-//	Ivan Hamilton (ivan@chimerical.com.au)
-//	Gonzalo Paniagua Javier (gonzalo@ximian.com)
-//	Martin Willemoes Hansen (mwh@sysrq.dk)
+//  Ivan Hamilton (ivan@chimerical.com.au)
+//  Gonzalo Paniagua Javier (gonzalo@ximian.com)
+//  Martin Willemoes Hansen (mwh@sysrq.dk)
 //
 // (c) 2002 Ximian, Inc. (http://www.ximian.com)
 // (c) 2003 Martin Willemoes Hansen
@@ -60,20 +60,14 @@ namespace System.ComponentModel.Tests
             {
             }
 
-            public override string LicenseKey
-            {
-                get { return "YourLicenseKey"; }
-            }
+            public override string LicenseKey => "YourLicenseKey";
         }
 
         public TestLicenseProvider() : base()
         {
         }
 
-        public override License GetLicense(LicenseContext context,
-            Type type,
-            object instance,
-            bool allowExceptions)
+        public override License GetLicense(LicenseContext context, Type type, object instance, bool allowExceptions)
         {
             if (type.Name.Equals("RuntimeLicensedObject"))
             {
@@ -147,7 +141,7 @@ namespace System.ComponentModel.Tests
                 exceptionThrown = true;
             }
             //Check the exception was thrown
-            Assert.Equal(true, exceptionThrown);
+            Assert.True(exceptionThrown);
             //Check the context didn't change
             Assert.Equal(oldcontext, LicenseManager.CurrentContext);
             //Unlock it
@@ -173,18 +167,18 @@ namespace System.ComponentModel.Tests
                 Assert.Equal(typeof(ArgumentException), e.GetType());
                 exceptionThrown = true;
             }
-            Assert.Equal(true, exceptionThrown);
+            Assert.True(exceptionThrown);
             //Unlock it
             LicenseManager.UnlockContext(lockObject);
 
             //** bool IsValid(Type);
-            Assert.Equal(true, LicenseManager.IsLicensed(typeof(UnlicensedObject)));
-            Assert.Equal(true, LicenseManager.IsLicensed(typeof(LicensedObject)));
-            Assert.Equal(false, LicenseManager.IsLicensed(typeof(InvalidLicensedObject)));
+            Assert.True(LicenseManager.IsLicensed(typeof(UnlicensedObject)));
+            Assert.True(LicenseManager.IsLicensed(typeof(LicensedObject)));
+            Assert.False(LicenseManager.IsLicensed(typeof(InvalidLicensedObject)));
 
-            Assert.Equal(true, LicenseManager.IsValid(typeof(UnlicensedObject)));
-            Assert.Equal(true, LicenseManager.IsValid(typeof(LicensedObject)));
-            Assert.Equal(false, LicenseManager.IsValid(typeof(InvalidLicensedObject)));
+            Assert.True(LicenseManager.IsValid(typeof(UnlicensedObject)));
+            Assert.True(LicenseManager.IsValid(typeof(LicensedObject)));
+            Assert.False(LicenseManager.IsValid(typeof(InvalidLicensedObject)));
 
             UnlicensedObject unlicensedObject = new UnlicensedObject();
             LicensedObject licensedObject = new LicensedObject();
@@ -192,16 +186,16 @@ namespace System.ComponentModel.Tests
 
             //** bool IsValid(Type, object, License);
             License license = null;
-            Assert.Equal(true, LicenseManager.IsValid(unlicensedObject.GetType(), unlicensedObject, out license));
-            Assert.Equal(null, license);
+            Assert.True(LicenseManager.IsValid(unlicensedObject.GetType(), unlicensedObject, out license));
+            Assert.Null(license);
 
             license = null;
-            Assert.Equal(true, LicenseManager.IsValid(licensedObject.GetType(), licensedObject, out license));
+            Assert.True(LicenseManager.IsValid(licensedObject.GetType(), licensedObject, out license));
             Assert.Equal("TestLicense", license.GetType().Name);
 
             license = null;
-            Assert.Equal(false, LicenseManager.IsValid(invalidLicensedObject.GetType(), invalidLicensedObject, out license));
-            Assert.Equal(null, license);
+            Assert.False(LicenseManager.IsValid(invalidLicensedObject.GetType(), invalidLicensedObject, out license));
+            Assert.Null(license);
 
             //** void Validate(Type);
             //Shouldn't throw exception
@@ -220,12 +214,12 @@ namespace System.ComponentModel.Tests
                 exceptionThrown = true;
             }
             //Check the exception was thrown
-            Assert.Equal(true, exceptionThrown);
+            Assert.True(exceptionThrown);
 
             //** License Validate(Type, object);
             //Shouldn't throw exception, returns null license
             license = LicenseManager.Validate(typeof(UnlicensedObject), unlicensedObject);
-            Assert.Equal(null, license);
+            Assert.Null(license);
 
             //Shouldn't throw exception, returns TestLicense license
             license = LicenseManager.Validate(typeof(LicensedObject), licensedObject);
@@ -244,8 +238,8 @@ namespace System.ComponentModel.Tests
                 exceptionThrown = true;
             }
             //Check the exception was thrown
-            Assert.Equal(true, exceptionThrown);
-            Assert.Equal(null, license);
+            Assert.True(exceptionThrown);
+            Assert.Null(license);
 
 
             //** object CreateWithContext (Type, LicenseContext);
@@ -271,8 +265,8 @@ namespace System.ComponentModel.Tests
                 exceptionThrown = true;
             }
             //Check the exception was thrown
-            Assert.Equal(true, exceptionThrown);
-            //Test we can create DesignTime with A new DesignTimeContext 
+            Assert.True(exceptionThrown);
+            //Test we can create DesignTime with A new DesignTimeContext
             cwc = null;
             cwc = LicenseManager.CreateWithContext(typeof(DesigntimeLicensedObject),
                 new DesigntimeLicenseContext());

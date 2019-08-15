@@ -65,31 +65,32 @@ namespace System.Net
         internal const string SpecialAttributeLiteral = "$";
 
         internal static readonly char[] PortSplitDelimiters = new char[] { ' ', ',', '\"' };
-        internal static readonly char[] Reserved2Name = new char[] { ' ', '\t', '\r', '\n', '=', ';', ',' };
+        // Space (' ') should be reserved as well per RFCs, but major web browsers support it and some web sites use it - so we support it too
+        internal static readonly char[] Reserved2Name = new char[] { '\t', '\r', '\n', '=', ';', ',' };
         internal static readonly char[] Reserved2Value = new char[] { ';', ',' };
 
         // fields
 
-        string m_comment = string.Empty;
-        Uri m_commentUri = null;
-        CookieVariant m_cookieVariant = CookieVariant.Plain;
-        bool m_discard = false;
-        string m_domain = string.Empty;
-        bool m_domain_implicit = true;
-        DateTime m_expires = DateTime.MinValue;
-        string m_name = string.Empty;
-        string m_path = string.Empty;
-        bool m_path_implicit = true;
-        string m_port = string.Empty;
-        bool m_port_implicit = true;
-        int[] m_port_list = null;
-        bool m_secure = false;
-        bool m_httpOnly = false;
-        DateTime m_timeStamp = DateTime.Now;
-        string m_value = string.Empty;
-        int m_version = 0;
+        private string m_comment = string.Empty;
+        private Uri m_commentUri = null;
+        private CookieVariant m_cookieVariant = CookieVariant.Plain;
+        private bool m_discard = false;
+        private string m_domain = string.Empty;
+        private bool m_domain_implicit = true;
+        private DateTime m_expires = DateTime.MinValue;
+        private string m_name = string.Empty;
+        private string m_path = string.Empty;
+        private bool m_path_implicit = true;
+        private string m_port = string.Empty;
+        private bool m_port_implicit = true;
+        private int[] m_port_list = null;
+        private bool m_secure = false;
+        private bool m_httpOnly = false;
+        private DateTime m_timeStamp = DateTime.Now;
+        private string m_value = string.Empty;
+        private int m_version = 0;
 
-        string m_domainKey = string.Empty;
+        private string m_domainKey = string.Empty;
         internal bool IsQuotedVersion = false;
         internal bool IsQuotedDomain = false;
 
@@ -215,7 +216,7 @@ namespace System.Net
             }
             set
             {
-                m_domain = (value == null ? String.Empty : value);
+                m_domain = (value == null ? string.Empty : value);
                 m_domain_implicit = false;
                 m_domainKey = string.Empty; //this will get it value when adding into the Container.
             }
@@ -277,7 +278,7 @@ namespace System.Net
             }
             set
             {
-                if (String.IsNullOrEmpty(value) || !InternalSetName(value))
+                if (string.IsNullOrEmpty(value) || !InternalSetName(value))
                 {
                     throw new CookieException(SR.Format(SR.net_cookie_attribute, "Name", value == null ? "<null>" : value));
                 }
@@ -286,7 +287,7 @@ namespace System.Net
 
         internal bool InternalSetName(string value)
         {
-            if (String.IsNullOrEmpty(value) || value[0] == '$' || value.IndexOfAny(Reserved2Name) != -1)
+            if (string.IsNullOrEmpty(value) || value[0] == '$' || value.IndexOfAny(Reserved2Name) != -1 ||  value[0] == ' ' || value[value.Length - 1] == ' ')
             {
                 m_name = string.Empty;
                 return false;
@@ -306,7 +307,7 @@ namespace System.Net
             }
             set
             {
-                m_path = (value == null ? String.Empty : value);
+                m_path = (value == null ? string.Empty : value);
                 m_path_implicit = false;
             }
         }
@@ -348,8 +349,8 @@ namespace System.Net
             clonedCookie.Secure = m_secure;
 
             //
-            // The variant is set when we set properties like port/version. So, 
-            // we should copy over the variant from the original cookie after 
+            // The variant is set when we set properties like port/version. So,
+            // we should copy over the variant from the original cookie after
             // we set all other properties
             clonedCookie.m_cookieVariant = m_cookieVariant;
 
@@ -399,7 +400,7 @@ namespace System.Net
             }
 
             //Check the name
-            if (m_name == null || m_name.Length == 0 || m_name[0] == '$' || m_name.IndexOfAny(Reserved2Name) != -1)
+            if (string.IsNullOrEmpty(m_name) || m_name[0] == '$' || m_name.IndexOfAny(Reserved2Name) != -1 ||  m_name[0] == ' ' || m_name[m_name.Length - 1] == ' ')
             {
                 if (isThrow)
                 {
@@ -484,7 +485,7 @@ namespace System.Net
                     int host_dot = host.IndexOf('.');
 
                     // First quick check is for pushing a cookie into the local domain
-                    if (isLocalDomain && (string.Compare(localDomain, domain, StringComparison.OrdinalIgnoreCase) == 0))
+                    if (isLocalDomain && string.Equals(localDomain, domain, StringComparison.OrdinalIgnoreCase))
                     {
                         valid = true;
                     }
@@ -532,7 +533,7 @@ namespace System.Net
                 {
                     // for implicitly set domain AND at the set_default==false time
                     // we simply got to match uri.Host against m_domain
-                    if (string.Compare(host, m_domain, StringComparison.OrdinalIgnoreCase) != 0)
+                    if (!string.Equals(host, m_domain, StringComparison.OrdinalIgnoreCase))
                     {
                         valid = false;
                     }
@@ -668,7 +669,7 @@ namespace System.Net
                         // Skip spaces
                         if (ports[i] != string.Empty)
                         {
-                            if (!Int32.TryParse(ports[i], out port))
+                            if (!int.TryParse(ports[i], out port))
                                 throw new CookieException(SR.Format(SR.net_cookie_attribute, PortAttributeName, value));
                             // valid values for port 0 - 0xFFFF
                             if ((port < 0) || (port > 0xFFFF))
@@ -731,7 +732,7 @@ namespace System.Net
             }
             set
             {
-                m_value = (value == null ? String.Empty : value);
+                m_value = (value == null ? string.Empty : value);
             }
         }
 
@@ -763,7 +764,6 @@ namespace System.Net
         }
 
 
-        //public Version Version {
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>
@@ -802,10 +802,10 @@ namespace System.Net
 
             Cookie other = (Cookie)comparand;
 
-            return (string.Compare(Name, other.Name, StringComparison.OrdinalIgnoreCase) == 0)
-                    && (string.Compare(Value, other.Value, StringComparison.Ordinal) == 0)
-                    && (string.Compare(Path, other.Path, StringComparison.Ordinal) == 0)
-                    && (string.Compare(Domain, other.Domain, StringComparison.OrdinalIgnoreCase) == 0)
+            return (string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase))
+                    && (string.Equals(Value, other.Value, StringComparison.Ordinal))
+                    && (string.Equals(Path, other.Path, StringComparison.Ordinal))
+                    && (string.Equals(Domain, other.Domain, StringComparison.OrdinalIgnoreCase))
                     && (Version == other.Version)
                     ;
         }
@@ -955,7 +955,7 @@ namespace System.Net
         {
 #if !uap
             if (NetEventSource.IsEnabled)
-                NetEventSource.Info(this, 
+                NetEventSource.Info(this,
                               "Cookie: " + ToString() + "->\n"
                             + "\tComment    = " + Comment + "\n"
                             + "\tCommentUri = " + CommentUri + "\n"
@@ -1018,18 +1018,18 @@ namespace System.Net
     {
         // fields
 
-        bool m_eofCookie;
-        int m_index;
-        int m_length;
-        string m_name;
-        bool m_quoted;
-        int m_start;
-        CookieToken m_token;
-        int m_tokenLength;
-        string m_tokenStream;
-        string m_value;
-        int m_cookieStartIndex;
-        int m_cookieLength;
+        private bool m_eofCookie;
+        private int m_index;
+        private int m_length;
+        private string m_name;
+        private bool m_quoted;
+        private int m_start;
+        private CookieToken m_token;
+        private int m_tokenLength;
+        private string m_tokenStream;
+        private string m_value;
+        private int m_cookieStartIndex;
+        private int m_cookieLength;
 
         // constructors
 
@@ -1116,7 +1116,7 @@ namespace System.Net
         //
         //  Gets the full string of the cookie
         //
-        
+
         internal string GetCookieString()
         {
             return m_tokenStream.Substring(m_cookieStartIndex, m_cookieLength).Trim();
@@ -1200,7 +1200,7 @@ namespace System.Net
         {
             m_tokenLength = 0;
             m_start = m_index;
-            while ((m_index < m_length) && Char.IsWhiteSpace(m_tokenStream[m_index]))
+            while ((m_index < m_length) && char.IsWhiteSpace(m_tokenStream[m_index]))
             {
                 ++m_index;
                 ++m_start;
@@ -1273,7 +1273,7 @@ namespace System.Net
                     }
                     ++m_index;
                 }
-                
+
                 if (Eof)
                 {
                     m_cookieLength = m_index - m_cookieStartIndex;
@@ -1436,8 +1436,8 @@ namespace System.Net
 
         private struct RecognizedAttribute
         {
-            string m_name;
-            CookieToken m_token;
+            private string m_name;
+            private CookieToken m_token;
 
             internal RecognizedAttribute(string name, CookieToken token)
             {
@@ -1455,7 +1455,7 @@ namespace System.Net
 
             internal bool IsEqualTo(string value)
             {
-                return string.Compare(m_name, value, StringComparison.OrdinalIgnoreCase) == 0;
+                return string.Equals(m_name, value, StringComparison.OrdinalIgnoreCase);
             }
         }
 
@@ -1463,7 +1463,7 @@ namespace System.Net
         // recognized attributes in order of expected commonality
         //
 
-        static RecognizedAttribute[] RecognizedAttributes = {
+        private static RecognizedAttribute[] RecognizedAttributes = {
             new RecognizedAttribute(Cookie.PathAttributeName, CookieToken.Path),
             new RecognizedAttribute(Cookie.MaxAgeAttributeName, CookieToken.MaxAge),
             new RecognizedAttribute(Cookie.ExpiresAttributeName, CookieToken.Expires),
@@ -1477,7 +1477,7 @@ namespace System.Net
             new RecognizedAttribute(Cookie.HttpOnlyAttributeName, CookieToken.HttpOnly),
         };
 
-        static RecognizedAttribute[] RecognizedServerAttributes = {
+        private static RecognizedAttribute[] RecognizedServerAttributes = {
             new RecognizedAttribute('$' + Cookie.PathAttributeName, CookieToken.Path),
             new RecognizedAttribute('$' + Cookie.VersionAttributeName, CookieToken.Version),
             new RecognizedAttribute('$' + Cookie.DomainAttributeName, CookieToken.Domain),
@@ -1521,8 +1521,8 @@ namespace System.Net
     {
         // fields
 
-        CookieTokenizer m_tokenizer;
-        Cookie m_savedCookie;
+        private CookieTokenizer m_tokenizer;
+        private Cookie m_savedCookie;
 
         // constructors
 

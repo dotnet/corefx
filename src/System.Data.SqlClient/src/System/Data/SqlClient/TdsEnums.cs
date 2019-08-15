@@ -131,7 +131,7 @@ namespace System.Data.SqlClient
         public const byte SQLDEBUG_CMD = 0x60;
         public const byte SQLLOGINACK = 0xad;
         public const byte SQLFEATUREEXTACK = 0xae;    // TDS 7.4 - feature ack
-        public const byte SQLSESSIONSTATE = 0xe4;    // TDS 7.4 - connection resiliency session state  
+        public const byte SQLSESSIONSTATE = 0xe4;    // TDS 7.4 - connection resiliency session state
         public const byte SQLENVCHANGE = 0xe3;    // Environment change notification
         public const byte SQLSECLEVEL = 0xed;    // Security level token ???
         public const byte SQLROWCRC = 0x39;    // ROWCRC datastream???
@@ -201,16 +201,34 @@ namespace System.Data.SqlClient
         // Feature Extension
         public const byte FEATUREEXT_TERMINATOR = 0xFF;
         public const byte FEATUREEXT_SRECOVERY = 0x01;
+        public const byte FEATUREEXT_FEDAUTH = 0x02;
         public const byte FEATUREEXT_GLOBALTRANSACTIONS = 0x05;
+        public const byte FEATUREEXT_UTF8SUPPORT = 0x0A;
 
         [Flags]
         public enum FeatureExtension : uint
         {
             None = 0,
             SessionRecovery = 1,
-            GlobalTransactions = 8,
+            FedAuth = 2,
+            GlobalTransactions = 16,
+            UTF8Support = 512,
         }
 
+        public const uint UTF8_IN_TDSCOLLATION = 0x4000000;
+
+        public const byte FEDAUTHLIB_LIVEID = 0X00;
+        public const byte FEDAUTHLIB_SECURITYTOKEN = 0x01;
+        public const byte FEDAUTHLIB_ADAL = 0x02;
+        public const byte FEDAUTHLIB_RESERVED = 0X7F;
+
+        public enum FedAuthLibrary : byte
+        {
+            LiveId = FEDAUTHLIB_LIVEID,
+            SecurityToken = FEDAUTHLIB_SECURITYTOKEN,
+            ADAL = FEDAUTHLIB_ADAL, // For later support
+            Default = FEDAUTHLIB_RESERVED
+        }
 
         //    Loginrec defines
         public const byte MAX_LOG_NAME = 30;              // TDS 4.2 login rec max name length
@@ -220,7 +238,7 @@ namespace System.Data.SqlClient
         public const byte MAX_NIC_SIZE = 6;               // The size of a MAC or client address
         public const byte SQLVARIANT_SIZE = 2;               // size of the fixed portion of a sql variant (type, cbPropBytes)
         public const byte VERSION_SIZE = 4;               // size of the tds version (4 unsigned bytes)
-        public const int CLIENT_PROG_VER = 0x06000000;      // Client interface version       
+        public const int CLIENT_PROG_VER = 0x06000000;      // Client interface version
         public const int YUKON_LOG_REC_FIXED_LEN = 0x5e;
         // misc
         public const int TEXT_TIME_STAMP_LEN = 8;
@@ -523,7 +541,7 @@ namespace System.Data.SqlClient
         public const short SNI_WSAECONNRESET = 10054;    // An existing connection was forcibly closed by the remote host.
 
         // SNI internal errors (shouldn't overlap with Win32 / socket errors)
-        public const uint SNI_QUEUE_FULL = 1048576;		 // Packet queue is full
+        public const uint SNI_QUEUE_FULL = 1048576;         // Packet queue is full
 
         // SNI flags
         public const uint SNI_SSL_VALIDATE_CERTIFICATE = 1;   // This enables validation of server certificate
@@ -927,5 +945,29 @@ namespace System.Data.SqlClient
         Snix_Close,
         Snix_SendRows,
     }
-}
 
+    internal enum ParsingErrorState
+    {
+        Undefined = 0,
+        FedAuthInfoLengthTooShortForCountOfInfoIds = 1,
+        FedAuthInfoLengthTooShortForData = 2,
+        FedAuthInfoFailedToReadCountOfInfoIds = 3,
+        FedAuthInfoFailedToReadTokenStream = 4,
+        FedAuthInfoInvalidOffset = 5,
+        FedAuthInfoFailedToReadData = 6,
+        FedAuthInfoDataNotUnicode = 7,
+        FedAuthInfoDoesNotContainStsurlAndSpn = 8,
+        FedAuthInfoNotReceived = 9,
+        FedAuthNotAcknowledged = 10,
+        FedAuthFeatureAckContainsExtraData = 11,
+        FedAuthFeatureAckUnknownLibraryType = 12,
+        UnrequestedFeatureAckReceived = 13,
+        UnknownFeatureAck = 14,
+        InvalidTdsTokenReceived = 15,
+        SessionStateLengthTooShort = 16,
+        SessionStateInvalidStatus = 17,
+        CorruptedTdsStream = 18,
+        ProcessSniPacketFailed = 19,
+        FedAuthRequiredPreLoginResponseInvalidValue = 20,
+    }
+}

@@ -17,16 +17,16 @@ namespace System.ComponentModel.Composition.Hosting
         private List<ComposablePart> _parts = new List<ComposablePart>();
         private volatile bool _isDisposed = false;
         private volatile bool _isRunning = false;
-        private CompositionLock _lock = null;
+        private readonly CompositionLock _lock = null;
         private ExportProvider _sourceProvider;
         private ImportEngine _importEngine;
         private volatile bool _currentlyComposing;
-        private CompositionOptions _compositionOptions;
+        private readonly CompositionOptions _compositionOptions;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ComposablePartExportProvider"/> class.
         /// </summary>
-        public ComposablePartExportProvider() : 
+        public ComposablePartExportProvider() :
             this(false)
         {
         }
@@ -40,7 +40,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             if (compositionOptions > (CompositionOptions.DisableSilentRejection | CompositionOptions.IsThreadSafe | CompositionOptions.ExportCompositionService))
             {
-                throw new ArgumentOutOfRangeException("compositionOptions");
+                throw new ArgumentOutOfRangeException(nameof(compositionOptions));
             }
 
             _compositionOptions = compositionOptions;
@@ -104,8 +104,8 @@ namespace System.ComponentModel.Composition.Hosting
         ///     exports.
         /// </summary>
         /// <value>
-        ///     The <see cref="ExportProvider"/> which provides the 
-        ///     <see cref="ComposablePartExportProvider"/> access to <see cref="Export"/> objects. 
+        ///     The <see cref="ExportProvider"/> which provides the
+        ///     <see cref="ComposablePartExportProvider"/> access to <see cref="Export"/> objects.
         ///     The default is <see langword="null"/>.
         /// </value>
         /// <exception cref="ArgumentNullException">
@@ -116,14 +116,14 @@ namespace System.ComponentModel.Composition.Hosting
         ///     <para>
         ///         -or-
         ///     </para>
-        ///     The methods on the <see cref="ComposablePartExportProvider"/> 
+        ///     The methods on the <see cref="ComposablePartExportProvider"/>
         ///     have already been accessed.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///     The <see cref="ComposablePartExportProvider"/> has been disposed of.
         /// </exception>
         /// <remarks>
-        ///     This property must be set before accessing any methods on the 
+        ///     This property must be set before accessing any methods on the
         ///     <see cref="ComposablePartExportProvider"/>.
         /// </remarks>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "EnsureCanSet ensures that the property is set only once, Dispose is not required")]
@@ -154,7 +154,10 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 if (_importEngine == null)
                 {
-                    Assumes.NotNull(_sourceProvider);
+                    if (_sourceProvider == null)
+                    {
+                        throw new Exception(SR.Diagnostic_InternalExceptionMessage);
+                    }
                     ImportEngine importEngine = new ImportEngine(_sourceProvider, _compositionOptions);
                     using (_lock.LockStateForWrite())
                     {
@@ -189,7 +192,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// empty <see cref="IEnumerable{T}"/>.
         /// </result>
         /// <remarks>
-        /// 	<note type="inheritinfo">
+        /// <note type="inheritinfo">
         /// The implementers should not treat the cardinality-related mismatches as errors, and are not
         /// expected to throw exceptions in those cases.
         /// For instance, if the import requests exactly one export and the provider has no matching exports or more than one,
@@ -228,7 +231,7 @@ namespace System.ComponentModel.Composition.Hosting
                 }
             }
             return exports;
-        }    
+        }
 
         public void Compose(CompositionBatch batch)
         {
@@ -316,7 +319,10 @@ namespace System.ComponentModel.Composition.Hosting
 
         private List<ComposablePart> GetUpdatedPartsList(ref CompositionBatch batch)
         {
-            Assumes.NotNull(batch);
+            if (batch == null)
+            {
+                throw new ArgumentNullException(nameof(batch));
+            }
 
             // Copy the current list of parts - we are about to modify it
             // This is an OK thing to do as this is the only method that can modify the List AND Compose can
@@ -347,7 +353,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
 
             // Clone the batch, so that the external changes wouldn't happen half-way thorugh compose
-            // NOTE : this does not guarantee the atomicity of cloning, which is not the goal anyway, 
+            // NOTE : this does not guarantee the atomicity of cloning, which is not the goal anyway,
             // rather the fact that all subsequent calls will deal with an unchanging batch
             batch = new CompositionBatch(batch.PartsToAdd, partsToRemove);
 
@@ -356,7 +362,10 @@ namespace System.ComponentModel.Composition.Hosting
 
         private void Recompose(CompositionBatch batch, AtomicComposition atomicComposition)
         {
-            Assumes.NotNull(batch);
+            if (batch == null)
+            {
+                throw new ArgumentNullException(nameof(batch));
+            }
 
             // Unregister any removed component parts
             foreach (ComposablePart part in batch.PartsToRemove)
@@ -369,11 +378,11 @@ namespace System.ComponentModel.Composition.Hosting
             // the event
             IEnumerable<ExportDefinition> addedExports = batch.PartsToAdd.Count != 0 ?
                 batch.PartsToAdd.SelectMany(part => part.ExportDefinitions).ToArray() :
-                new ExportDefinition[0];
+                Array.Empty<ExportDefinition>();
 
             IEnumerable<ExportDefinition> removedExports = batch.PartsToRemove.Count != 0 ?
                 batch.PartsToRemove.SelectMany(part => part.ExportDefinitions).ToArray() :
-                new ExportDefinition[0];
+                Array.Empty<ExportDefinition>();
 
             OnExportsChanging(
                 new ExportsChangeEventArgs(addedExports, removedExports, atomicComposition));
@@ -409,7 +418,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             if (_sourceProvider == null)
             {
-                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, SR.ObjectMustBeInitialized, "SourceProvider")); // NOLOC
+                throw new InvalidOperationException(SR.Format(SR.ObjectMustBeInitialized, "SourceProvider")); // NOLOC
             }
         }
 
@@ -435,7 +444,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             if ((_isRunning) || (currentValue != null))
             {
-                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, SR.ObjectAlreadyInitialized));
+                throw new InvalidOperationException(SR.ObjectAlreadyInitialized);
             }
         }
     }

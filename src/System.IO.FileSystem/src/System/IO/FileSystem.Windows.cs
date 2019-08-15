@@ -3,11 +3,18 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.IO;
 using System.Text;
 
+#if MS_IO_REDIST
+namespace Microsoft.IO
+#else
 namespace System.IO
+#endif
 {
     internal static partial class FileSystem
     {
@@ -75,10 +82,10 @@ namespace System.IO
             int length = fullPath.Length;
 
             // We need to trim the trailing slash or the code will try to create 2 directories of the same name.
-            if (length >= 2 && PathInternal.EndsInDirectorySeparator(fullPath))
+            if (length >= 2 && Path.EndsInDirectorySeparator(fullPath.AsSpan()))
                 length--;
 
-            int lengthRoot = PathInternal.GetRootLength(fullPath);
+            int lengthRoot = PathInternal.GetRootLength(fullPath.AsSpan());
 
             if (length > lengthRoot)
             {
@@ -119,9 +126,9 @@ namespace System.IO
                 {
                     int currentError = Marshal.GetLastWin32Error();
                     // While we tried to avoid creating directories that don't
-                    // exist above, there are at least two cases that will 
+                    // exist above, there are at least two cases that will
                     // cause us to see ERROR_ALREADY_EXISTS here.  FileExists
-                    // can fail because we didn't have permission to the 
+                    // can fail because we didn't have permission to the
                     // directory.  Secondly, another thread or process could
                     // create the directory between the time we check and the
                     // time we try using the directory.  Thirdly, it could
@@ -150,7 +157,7 @@ namespace System.IO
                 return;
             }
 
-            // Only throw an exception if creating the exact directory we 
+            // Only throw an exception if creating the exact directory we
             // wanted failed to work correctly.
             if (!r && (firstError != 0))
                 throw Win32Marshal.GetExceptionForWin32Error(firstError, errorString);
@@ -193,19 +200,43 @@ namespace System.IO
             int errorCode = Interop.Errors.ERROR_SUCCESS;
 
             // Neither GetFileAttributes or FindFirstFile like trailing separators
-            path = PathInternal.TrimEndingDirectorySeparator(path);
+            path = Path.TrimEndingDirectorySeparator(path);
 
             using (DisableMediaInsertionPrompt.Create())
             {
                 if (!Interop.Kernel32.GetFileAttributesEx(path, Interop.Kernel32.GET_FILEEX_INFO_LEVELS.GetFileExInfoStandard, ref data))
                 {
                     errorCode = Marshal.GetLastWin32Error();
-                    if (errorCode == Interop.Errors.ERROR_ACCESS_DENIED)
+                    if (errorCode != Interop.Errors.ERROR_FILE_NOT_FOUND
+                        && errorCode != Interop.Errors.ERROR_PATH_NOT_FOUND
+                        && errorCode != Interop.Errors.ERROR_NOT_READY
+                        && errorCode != Interop.Errors.ERROR_INVALID_NAME
+                        && errorCode != Interop.Errors.ERROR_BAD_PATHNAME
+                        && errorCode != Interop.Errors.ERROR_BAD_NETPATH
+                        && errorCode != Interop.Errors.ERROR_BAD_NET_NAME
+                        && errorCode != Interop.Errors.ERROR_INVALID_PARAMETER
+                        && errorCode != Interop.Errors.ERROR_NETWORK_UNREACHABLE
+                        && errorCode != Interop.Errors.ERROR_NETWORK_ACCESS_DENIED
+                        && errorCode != Interop.Errors.ERROR_INVALID_HANDLE         // eg from \\.\CON
+                        && errorCode != Interop.Errors.ERROR_FILENAME_EXCED_RANGE   // Path is too long
+                        )
                     {
+                        // Assert so we can track down other cases (if any) to add to our test suite
+                        Debug.Assert(errorCode == Interop.Errors.ERROR_ACCESS_DENIED || errorCode == Interop.Errors.ERROR_SHARING_VIOLATION,
+                            $"Unexpected error code getting attributes {errorCode} from path {path}");
+
                         // Files that are marked for deletion will not let you GetFileAttributes,
                         // ERROR_ACCESS_DENIED is given back without filling out the data struct.
                         // FindFirstFile, however, will. Historically we always gave back attributes
                         // for marked-for-deletion files.
+                        //
+                        // Another case where enumeration works is with special system files such as
+                        // pagefile.sys that give back ERROR_SHARING_VIOLATION on GetAttributes.
+                        //
+                        // Ideally we'd only try again for known cases due to the potential performance
+                        // hit. The last attempt to do so baked for nearly a year before we found the
+                        // pagefile.sys case. As such we're probably stuck filtering out specific
+                        // cases that we know we don't want to retry on.
 
                         var findData = new Interop.Kernel32.WIN32_FIND_DATA();
                         using (SafeFindHandle handle = Interop.Kernel32.FindFirstFile(path, ref findData))
@@ -298,7 +329,7 @@ namespace System.IO
 
         public static void MoveDirectory(string sourceFullPath, string destFullPath)
         {
-            if (!Interop.Kernel32.MoveFile(sourceFullPath, destFullPath))
+            if (!Interop.Kernel32.MoveFile(sourceFullPath, destFullPath, overwrite: false))
             {
                 int errorCode = Marshal.GetLastWin32Error();
 
@@ -313,9 +344,9 @@ namespace System.IO
             }
         }
 
-        public static void MoveFile(string sourceFullPath, string destFullPath)
+        public static void MoveFile(string sourceFullPath, string destFullPath, bool overwrite)
         {
-            if (!Interop.Kernel32.MoveFile(sourceFullPath, destFullPath))
+            if (!Interop.Kernel32.MoveFile(sourceFullPath, destFullPath, overwrite))
             {
                 throw Win32Marshal.GetExceptionForLastWin32Error();
             }
@@ -323,7 +354,7 @@ namespace System.IO
 
         private static SafeFileHandle OpenHandle(string fullPath, bool asDirectory)
         {
-            string root = fullPath.Substring(0, PathInternal.GetRootLength(fullPath));
+            string root = fullPath.Substring(0, PathInternal.GetRootLength(fullPath.AsSpan()));
             if (root == fullPath && root[1] == Path.VolumeSeparatorChar)
             {
                 // intentionally not fullpath, most upstack public APIs expose this as path.
@@ -378,7 +409,7 @@ namespace System.IO
 
         private static void GetFindData(string fullPath, ref Interop.Kernel32.WIN32_FIND_DATA findData)
         {
-            using (SafeFindHandle handle = Interop.Kernel32.FindFirstFile(PathInternal.TrimEndingDirectorySeparator(fullPath), ref findData))
+            using (SafeFindHandle handle = Interop.Kernel32.FindFirstFile(Path.TrimEndingDirectorySeparator(fullPath), ref findData))
             {
                 if (handle.IsInvalid)
                 {
@@ -397,7 +428,7 @@ namespace System.IO
             // Reparse points can be used for other types of files, notably OneDrive placeholder files. We
             // should treat reparse points that are not name surrogates as any other directory, e.g. recurse
             // into them. Surrogates should just be detached.
-            // 
+            //
             // See
             // https://github.com/dotnet/corefx/issues/24250
             // https://msdn.microsoft.com/en-us/library/windows/desktop/aa365511.aspx
@@ -470,7 +501,7 @@ namespace System.IO
                                 if (!Interop.Kernel32.DeleteVolumeMountPoint(mountPoint) && exception == null)
                                 {
                                     errorCode = Marshal.GetLastWin32Error();
-                                    if (errorCode != Interop.Errors.ERROR_SUCCESS && 
+                                    if (errorCode != Interop.Errors.ERROR_SUCCESS &&
                                         errorCode != Interop.Errors.ERROR_PATH_NOT_FOUND)
                                     {
                                         exception = Win32Marshal.GetExceptionForWin32Error(errorCode, fileName);

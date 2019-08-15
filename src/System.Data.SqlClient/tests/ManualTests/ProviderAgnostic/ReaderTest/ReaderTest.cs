@@ -5,13 +5,14 @@
 using System.Data.Common;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Data.SqlClient.ManualTesting.Tests
 {
     public static class ReaderTest
     {
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void TestMain()
         {
             string connectionString = DataTestUtility.TcpConnStr;
@@ -265,6 +266,40 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     }
                 }
             }
+        }
+
+        [ConditionalFact(typeof(DataTestUtility), nameof(DataTestUtility.AreConnStringsSetup))]
+        public static async Task TestConcurrentLoadSync()
+        {
+            ConcurrentLoadContext context = new ConcurrentLoadContext(
+                providerFactory: SqlClientFactory.Instance,
+                connectionString: DataTestUtility.TcpConnStr,
+                mode: ConcurrentLoadContext.Mode.Sync,
+                warmupSeconds: 1,
+                executionSeconds: 60,
+                threadCount: Environment.ProcessorCount * 4
+            );
+            var (transactionPerSecond, average, stdDeviation) = await context.Run();
+            Assert.InRange(transactionPerSecond, 1, int.MaxValue);
+            Assert.True(average > 0);
+            Assert.True(stdDeviation != 0);
+        }
+
+        [ConditionalFact(typeof(DataTestUtility), nameof(DataTestUtility.AreConnStringsSetup))]
+        public static async Task TestConcurrentLoadAsync()
+        {
+            ConcurrentLoadContext context = new ConcurrentLoadContext(
+                providerFactory: SqlClientFactory.Instance,
+                connectionString: DataTestUtility.TcpConnStr,
+                mode: ConcurrentLoadContext.Mode.Async,
+                warmupSeconds: 1,
+                executionSeconds: 60,
+                threadCount: Environment.ProcessorCount * 4
+            );
+            var (transactionPerSecond, average, stdDeviation) = await context.Run();
+            Assert.InRange(transactionPerSecond, 1, int.MaxValue);
+            Assert.True(average > 0);
+            Assert.True(stdDeviation != 0);
         }
     }
 }

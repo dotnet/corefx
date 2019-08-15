@@ -19,32 +19,32 @@ namespace System.IO.Pipes
         // Use the maximum number of server instances that the system resources allow
         public const int MaxAllowedServerInstances = -1;
 
-        public NamedPipeServerStream(String pipeName)
+        public NamedPipeServerStream(string pipeName)
             : this(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.None, 0, 0, HandleInheritability.None)
         {
         }
 
-        public NamedPipeServerStream(String pipeName, PipeDirection direction)
+        public NamedPipeServerStream(string pipeName, PipeDirection direction)
             : this(pipeName, direction, 1, PipeTransmissionMode.Byte, PipeOptions.None, 0, 0, HandleInheritability.None)
         {
         }
 
-        public NamedPipeServerStream(String pipeName, PipeDirection direction, int maxNumberOfServerInstances)
+        public NamedPipeServerStream(string pipeName, PipeDirection direction, int maxNumberOfServerInstances)
             : this(pipeName, direction, maxNumberOfServerInstances, PipeTransmissionMode.Byte, PipeOptions.None, 0, 0, HandleInheritability.None)
         {
         }
 
-        public NamedPipeServerStream(String pipeName, PipeDirection direction, int maxNumberOfServerInstances, PipeTransmissionMode transmissionMode)
+        public NamedPipeServerStream(string pipeName, PipeDirection direction, int maxNumberOfServerInstances, PipeTransmissionMode transmissionMode)
             : this(pipeName, direction, maxNumberOfServerInstances, transmissionMode, PipeOptions.None, 0, 0, HandleInheritability.None)
         {
         }
 
-        public NamedPipeServerStream(String pipeName, PipeDirection direction, int maxNumberOfServerInstances, PipeTransmissionMode transmissionMode, PipeOptions options)
+        public NamedPipeServerStream(string pipeName, PipeDirection direction, int maxNumberOfServerInstances, PipeTransmissionMode transmissionMode, PipeOptions options)
             : this(pipeName, direction, maxNumberOfServerInstances, transmissionMode, options, 0, 0, HandleInheritability.None)
         {
         }
 
-        public NamedPipeServerStream(String pipeName, PipeDirection direction, int maxNumberOfServerInstances, PipeTransmissionMode transmissionMode, PipeOptions options, int inBufferSize, int outBufferSize)
+        public NamedPipeServerStream(string pipeName, PipeDirection direction, int maxNumberOfServerInstances, PipeTransmissionMode transmissionMode, PipeOptions options, int inBufferSize, int outBufferSize)
             : this(pipeName, direction, maxNumberOfServerInstances, transmissionMode, options, inBufferSize, outBufferSize, HandleInheritability.None)
         {
         }
@@ -53,18 +53,18 @@ namespace System.IO.Pipes
         /// Full named pipe server constructor
         /// </summary>
         /// <param name="pipeName">Pipe name</param>
-        /// <param name="direction">Pipe direction: In, Out or InOut (duplex). 
+        /// <param name="direction">Pipe direction: In, Out or InOut (duplex).
         /// Win32 note: this gets OR'd into dwOpenMode to CreateNamedPipe
         /// </param>
-        /// <param name="maxNumberOfServerInstances">Maximum number of server instances. Specify a fixed value between 
-        /// 1 and 254 (Windows)/greater than 1 (Unix), or use NamedPipeServerStream.MaxAllowedServerInstances to use the 
+        /// <param name="maxNumberOfServerInstances">Maximum number of server instances. Specify a fixed value between
+        /// 1 and 254 (Windows)/greater than 1 (Unix), or use NamedPipeServerStream.MaxAllowedServerInstances to use the
         /// maximum amount allowed by system resources.</param>
         /// <param name="transmissionMode">Byte mode or message mode.
         /// Win32 note: this gets used for dwPipeMode. CreateNamedPipe allows you to specify PIPE_TYPE_BYTE/MESSAGE
         /// and PIPE_READMODE_BYTE/MESSAGE independently, but this sets type and readmode to match.
         /// </param>
         /// <param name="options">PipeOption enum: None, Asynchronous, or Write-through
-        /// Win32 note: this gets passed in with dwOpenMode to CreateNamedPipe. Asynchronous corresponds to 
+        /// Win32 note: this gets passed in with dwOpenMode to CreateNamedPipe. Asynchronous corresponds to
         /// FILE_FLAG_OVERLAPPED option. PipeOptions enum doesn't expose FIRST_PIPE_INSTANCE option because
         /// this sets that automatically based on the number of instances specified.
         /// </param>
@@ -72,11 +72,8 @@ namespace System.IO.Pipes
         /// Note: this size is always advisory; OS uses a suggestion.
         /// </param>
         /// <param name="outBufferSize">Outgoing buffer size, 0 or higher (see above)</param>
-        /// <param name="pipeSecurity">PipeSecurity, or null for default security descriptor</param>
         /// <param name="inheritability">Whether handle is inheritable</param>
-        /// <param name="additionalAccessRights">Combination (logical OR) of PipeAccessRights.TakeOwnership, 
-        /// PipeAccessRights.AccessSystemSecurity, and PipeAccessRights.ChangePermissions</param>
-        private NamedPipeServerStream(String pipeName, PipeDirection direction, int maxNumberOfServerInstances,
+        private NamedPipeServerStream(string pipeName, PipeDirection direction, int maxNumberOfServerInstances,
                 PipeTransmissionMode transmissionMode, PipeOptions options, int inBufferSize, int outBufferSize,
                 HandleInheritability inheritability)
             : base(direction, transmissionMode, outBufferSize)
@@ -204,7 +201,7 @@ namespace System.IO.Pipes
         }
     }
 
-    // Users will use this delegate to specify a method to call while impersonating the client 
+    // Users will use this delegate to specify a method to call while impersonating the client
     // (see NamedPipeServerStream.RunAsClient).
     public delegate void PipeStreamImpersonationWorker();
 }

@@ -18,7 +18,7 @@ namespace System.Collections.Concurrent.Tests
 {
     public abstract class ProducerConsumerCollectionTests : IEnumerable_Generic_Tests<int>
     {
-        protected override IEnumerable<ModifyEnumerable> ModifyEnumerables => new List<ModifyEnumerable>();
+        protected override IEnumerable<ModifyEnumerable> GetModifyEnumerables(ModifyOperation operations) => new List<ModifyEnumerable>();
         protected override int CreateT(int seed) => new Random(seed).Next();
         protected override EnumerableOrder Order => EnumerableOrder.Unspecified;
         protected override IEnumerable<int> GenericIEnumerableFactory(int count) => CreateProducerConsumerCollection(count);
@@ -957,7 +957,6 @@ namespace System.Collections.Concurrent.Tests
         [Theory]
         [InlineData(0)]
         [InlineData(10)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttributes_Success(int count)
         {
             IProducerConsumerCollection<int> c = CreateProducerConsumerCollection(count);
@@ -969,7 +968,6 @@ namespace System.Collections.Concurrent.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerTypeProxy_Ctor_NullArgument_Throws()
         {
             IProducerConsumerCollection<int> c = CreateProducerConsumerCollection();

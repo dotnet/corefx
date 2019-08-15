@@ -4,7 +4,7 @@
 
 namespace System.Security
 {
-    // SecuritySafeCriticalAttribute: 
+    // SecuritySafeCriticalAttribute:
     // Indicates that the code may contain violations to the security critical rules (e.g. transitions from
     //      critical to non-public transparent, transparent to non-public critical, etc.), has been audited for
     //      security concerns and is considered security clean. Also indicates that the code is considered SecurityCritical.

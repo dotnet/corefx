@@ -9,7 +9,6 @@
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 using System.Diagnostics;
-using Internal.Runtime.Augments;
 
 namespace System.Threading
 {
@@ -26,10 +25,10 @@ namespace System.Threading
     //     }
     //
     // Internally it just maintains a counter that is used to decide when to yield, etc.
-    // 
+    //
     // A common usage is to spin before blocking. In those cases, the NextSpinWillYield
     // property allows a user to decide to fall back to waiting once it returns true:
-    // 
+    //
     //     void f() {
     //         SpinWait wait = new SpinWait();
     //         while (!p) {
@@ -80,7 +79,7 @@ namespace System.Threading
         /// <remarks>
         /// These numbers were arrived at by experimenting with different numbers in various cases that currently use it. It's
         /// only a suggested value and typically works well when the proper wait is something like an event.
-        /// 
+        ///
         /// Spinning less can lead to early waiting and more context switching, spinning more can decrease latency but may use
         /// up some CPU time unnecessarily. Depends on the situation too, for instance SemaphoreSlim uses more iterations
         /// because the waiting there is currently a lot more expensive (involves more spinning, taking a lock, etc.). It also
@@ -88,13 +87,12 @@ namespace System.Threading
         /// for here.
         /// </remarks>
         internal static readonly int SpinCountforSpinBeforeWait = PlatformHelper.IsSingleProcessor ? 1 : 35;
-        internal const int Sleep1ThresholdForSpinBeforeWait = 40; // should be greater than SpinCountforSpinBeforeWait
 
         // The number of times we've spun already.
         private int _count;
 
         /// <summary>
-        /// Gets the number of times <see cref="SpinOnce"/> has been called on this instance.
+        /// Gets the number of times <see cref="SpinOnce()"/> has been called on this instance.
         /// </summary>
         public int Count
         {
@@ -107,14 +105,14 @@ namespace System.Threading
         }
 
         /// <summary>
-        /// Gets whether the next call to <see cref="SpinOnce"/> will yield the processor, triggering a
+        /// Gets whether the next call to <see cref="SpinOnce()"/> will yield the processor, triggering a
         /// forced context switch.
         /// </summary>
-        /// <value>Whether the next call to <see cref="SpinOnce"/> will yield the processor, triggering a
+        /// <value>Whether the next call to <see cref="SpinOnce()"/> will yield the processor, triggering a
         /// forced context switch.</value>
         /// <remarks>
-        /// On a single-CPU machine, <see cref="SpinOnce"/> always yields the processor. On machines with
-        /// multiple CPUs, <see cref="SpinOnce"/> may yield after an unspecified number of calls.
+        /// On a single-CPU machine, <see cref="SpinOnce()"/> always yields the processor. On machines with
+        /// multiple CPUs, <see cref="SpinOnce()"/> may yield after an unspecified number of calls.
         /// </remarks>
         public bool NextSpinWillYield => _count >= YieldThreshold || PlatformHelper.IsSingleProcessor;
 
@@ -123,16 +121,46 @@ namespace System.Threading
         /// </summary>
         /// <remarks>
         /// This is typically called in a loop, and may change in behavior based on the number of times a
-        /// <see cref="SpinOnce"/> has been called thus far on this instance.
+        /// <see cref="SpinOnce()"/> has been called thus far on this instance.
         /// </remarks>
         public void SpinOnce()
         {
-            SpinOnce(DefaultSleep1Threshold);
+            SpinOnceCore(DefaultSleep1Threshold);
         }
 
-        internal void SpinOnce(int sleep1Threshold)
+        /// <summary>
+        /// Performs a single spin.
+        /// </summary>
+        /// <param name="sleep1Threshold">
+        /// A minimum spin count after which <code>Thread.Sleep(1)</code> may be used. A value of <code>-1</code> may be used to
+        /// disable the use of <code>Thread.Sleep(1)</code>.
+        /// </param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="sleep1Threshold"/> is less than <code>-1</code>.
+        /// </exception>
+        /// <remarks>
+        /// This is typically called in a loop, and may change in behavior based on the number of times a
+        /// <see cref="SpinOnce()"/> has been called thus far on this instance.
+        /// </remarks>
+        public void SpinOnce(int sleep1Threshold)
         {
-            Debug.Assert(sleep1Threshold >= YieldThreshold || PlatformHelper.IsSingleProcessor); // so that NextSpinWillYield behaves as requested
+            if (sleep1Threshold < -1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(sleep1Threshold), sleep1Threshold, SR.ArgumentOutOfRange_NeedNonNegOrNegative1);
+            }
+
+            if (sleep1Threshold >= 0 && sleep1Threshold < YieldThreshold)
+            {
+                sleep1Threshold = YieldThreshold;
+            }
+
+            SpinOnceCore(sleep1Threshold);
+        }
+
+        private void SpinOnceCore(int sleep1Threshold)
+        {
+            Debug.Assert(sleep1Threshold >= -1);
+            Debug.Assert(sleep1Threshold < 0 || sleep1Threshold >= YieldThreshold);
 
             // (_count - YieldThreshold) % 2 == 0: The purpose of this check is to interleave Thread.Yield/Sleep(0) with
             // Thread.SpinWait. Otherwise, the following issues occur:
@@ -145,7 +173,7 @@ namespace System.Threading
             //     contention), they may switch between one another, delaying work that can make progress.
             if ((
                     _count >= YieldThreshold &&
-                    (_count >= sleep1Threshold || (_count - YieldThreshold) % 2 == 0)
+                    ((_count >= sleep1Threshold && sleep1Threshold >= 0) || (_count - YieldThreshold) % 2 == 0)
                 ) ||
                 PlatformHelper.IsSingleProcessor)
             {
@@ -164,20 +192,20 @@ namespace System.Threading
                 // configured to use the (default) coarse-grained system timer.
                 //
 
-                if (_count >= sleep1Threshold)
+                if (_count >= sleep1Threshold && sleep1Threshold >= 0)
                 {
-                    RuntimeThread.Sleep(1);
+                    Thread.Sleep(1);
                 }
                 else
                 {
                     int yieldsSoFar = _count >= YieldThreshold ? (_count - YieldThreshold) / 2 : _count;
                     if ((yieldsSoFar % Sleep0EveryHowManyYields) == (Sleep0EveryHowManyYields - 1))
                     {
-                        RuntimeThread.Sleep(0);
+                        Thread.Sleep(0);
                     }
                     else
                     {
-                        RuntimeThread.Yield();
+                        Thread.Yield();
                     }
                 }
             }
@@ -195,19 +223,19 @@ namespace System.Threading
                 // since we expect most callers will eventually block anyway.
                 //
                 // Also, cap the maximum spin count to a value such that many thousands of CPU cycles would not be wasted doing
-                // the equivalent of YieldProcessor(), as that that point SwitchToThread/Sleep(0) are more likely to be able to
+                // the equivalent of YieldProcessor(), as at that point SwitchToThread/Sleep(0) are more likely to be able to
                 // allow other useful work to run. Long YieldProcessor() loops can help to reduce contention, but Sleep(1) is
                 // usually better for that.
                 //
-                // RuntimeThread.OptimalMaxSpinWaitsPerSpinIteration:
+                // Thread.OptimalMaxSpinWaitsPerSpinIteration:
                 //   - See Thread::InitializeYieldProcessorNormalized(), which describes and calculates this value.
                 //
-                int n = RuntimeThread.OptimalMaxSpinWaitsPerSpinIteration;
+                int n = Thread.OptimalMaxSpinWaitsPerSpinIteration;
                 if (_count <= 30 && (1 << _count) < n)
                 {
                     n = 1 << _count;
                 }
-                RuntimeThread.SpinWait(n);
+                Thread.SpinWait(n);
             }
 
             // Finally, increment our spin counter.
@@ -218,8 +246,8 @@ namespace System.Threading
         /// Resets the spin counter.
         /// </summary>
         /// <remarks>
-        /// This makes <see cref="SpinOnce"/> and <see cref="NextSpinWillYield"/> behave as though no calls
-        /// to <see cref="SpinOnce"/> had been issued on this instance. If a <see cref="SpinWait"/> instance
+        /// This makes <see cref="SpinOnce()"/> and <see cref="NextSpinWillYield"/> behave as though no calls
+        /// to <see cref="SpinOnce()"/> had been issued on this instance. If a <see cref="SpinWait"/> instance
         /// is reused many times, it may be useful to reset it to avoid yielding too soon.
         /// </remarks>
         public void Reset()
@@ -249,13 +277,13 @@ namespace System.Threading
         /// </summary>
         /// <param name="condition">A delegate to be executed over and over until it returns true.</param>
         /// <param name="timeout">
-        /// A <see cref="TimeSpan"/> that represents the number of milliseconds to wait, 
+        /// A <see cref="TimeSpan"/> that represents the number of milliseconds to wait,
         /// or a TimeSpan that represents -1 milliseconds to wait indefinitely.</param>
         /// <returns>True if the condition is satisfied within the timeout; otherwise, false</returns>
         /// <exception cref="ArgumentNullException">The <paramref name="condition"/> argument is null.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="timeout"/> is a negative number
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="timeout"/> is a negative number
         /// other than -1 milliseconds, which represents an infinite time-out -or- timeout is greater than
-        /// <see cref="System.Int32.MaxValue"/>.</exception>
+        /// <see cref="int.MaxValue"/>.</exception>
         public static bool SpinUntil(Func<bool> condition, TimeSpan timeout)
         {
             // Validate the timeout
@@ -278,7 +306,7 @@ namespace System.Threading
         /// cref="System.Threading.Timeout.Infinite"/> (-1) to wait indefinitely.</param>
         /// <returns>True if the condition is satisfied within the timeout; otherwise, false</returns>
         /// <exception cref="ArgumentNullException">The <paramref name="condition"/> argument is null.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is a
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is a
         /// negative number other than -1, which represents an infinite time-out.</exception>
         public static bool SpinUntil(Func<bool> condition, int millisecondsTimeout)
         {

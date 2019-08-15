@@ -27,16 +27,16 @@ namespace System.Xml.Tests
 
         public string testData = null;
 
-        public void Initialize()
+        private void Initialize()
         {
             this.testData = Path.Combine(TestData._Root, "EnableUpaCheck");
             bWarningCallback = bErrorCallback = false;
             errorCount = 0;
-            errorLineNumbers = new Int32[10];
+            errorLineNumbers = new int[10];
         }
 
         //Hook up validaton callback
-        public void ValidationCallback(object sender, ValidationEventArgs args)
+        private void ValidationCallback(object sender, ValidationEventArgs args)
         {
             if (args.Severity == XmlSeverityType.Error)
             {

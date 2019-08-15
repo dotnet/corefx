@@ -12,16 +12,15 @@ namespace System.Diagnostics
     // Overview
     // --------
     // We have a few constraints we're working under here:
-    // - waitpid is used on Unix to get the exit status (including exit code) of a child process, but the first call
-    //   to it after the child has completed will reap the child removing the chance of subsequent calls getting status.
+    // - waitid is used on Unix to get the exit status (including exit code) of a child process, but once a child
+    //   process is reaped, it is no longer possible to get the status.
     // - The Process design allows for multiple independent Process objects to be handed out, and each of those
     //   objects may be used concurrently with each other, even if they refer to the same underlying process.
     //   Same with ProcessWaitHandle objects.  This is based on the Windows design where anyone with a handle to the
     //   process can retrieve completion information about that process.
-    // - There is no good Unix equivalent to a process handle nor to being able to asynchronously be notified
-    //   of a process' exit (without more intrusive mechanisms like ptrace), which means such support
-    //   needs to be layered on top of waitpid.
-    // 
+    // - There is no good Unix equivalent to asynchronously be notified of a non-child process' exit, which means such
+    //   support needs to be layered on top of kill.
+    //
     // As a result, we have the following scheme:
     // - We maintain a static/shared table that maps process ID to ProcessWaitState objects.
     //   Access to this table requires taking a global lock, so we try to minimize the number of
@@ -37,17 +36,10 @@ namespace System.Diagnostics
     //   the wait state object uses its own lock to protect the per-process state.  This includes
     //   caching exit / exit code / exit time information so that a Process object for a process that's already
     //   had waitpid called for it can get at its exit information.
-    //
-    // A negative ramification of this is that if a process exits, but there are outstanding wait handles 
-    // handed out (and rooted, so they can't be GC'd), and then a new process is created and the pid is recycled, 
-    // new calls to get that process's wait state will get the old process's wait state.  However, pid recycling
-    // will be a more general issue, since pids are the only identifier we have to a process, so if a Process
-    // object is created for a particular pid, then that process goes away and a new one comes in with the same pid,
-    // our Process object will silently switch to referring to the new pid.  Unix systems typically have a simple
-    // policy for pid recycling, which is that they start at a low value, increment up to a system maximum (e.g.
-    // 32768), and then wrap around and start reusing value that aren't currently in use.  On Linux, 
-    // proc/sys/kernel/pid_max defines the max pid value.  Given the conditions that would be required for this
-    // to happen, it's possible but unlikely.
+    // - When we detect a recycled pid, we remove that ProcessWaitState from the table and replace it with a new one
+    //   that represents the new process. For child processes we know a pid is recycled when we see the pid of a new
+    //   child is already in the table. For non-child processes, we assume that a pid may be recycled as soon as
+    //   we've observed it has exited.
 
     /// <summary>Exit information and waiting capabilities for a process.</summary>
     internal sealed class ProcessWaitState : IDisposable
@@ -63,14 +55,14 @@ namespace System.Diagnostics
         {
             internal ProcessWaitState _state;
 
-            internal Holder(int processId, bool isNewChild = false)
+            internal Holder(int processId, bool isNewChild = false, bool usesTerminal = false)
             {
-                _state = ProcessWaitState.AddRef(processId, isNewChild);
+                _state = ProcessWaitState.AddRef(processId, isNewChild, usesTerminal);
             }
 
             ~Holder()
             {
-                // Don't try to Dispose resources (like ManualResetEvents) if 
+                // Don't try to Dispose resources (like ManualResetEvents) if
                 // the process is shutting down.
                 if (_state != null && !Environment.HasShutdownStarted)
                 {
@@ -107,7 +99,7 @@ namespace System.Diagnostics
         /// </summary>
         /// <param name="processId">The process ID for which we need wait state.</param>
         /// <returns>The wait state object.</returns>
-        internal static ProcessWaitState AddRef(int processId, bool isNewChild)
+        internal static ProcessWaitState AddRef(int processId, bool isNewChild, bool usesTerminal)
         {
             lock (s_childProcessWaitStates)
             {
@@ -117,7 +109,7 @@ namespace System.Diagnostics
                     // When the PID is recycled for a new child, we remove the old child.
                     s_childProcessWaitStates.Remove(processId);
 
-                    pws = new ProcessWaitState(processId, isChild: true);
+                    pws = new ProcessWaitState(processId, isChild: true, usesTerminal);
                     s_childProcessWaitStates.Add(processId, pws);
                     pws._outstandingRefCount++; // For Holder
                     pws._outstandingRefCount++; // Decremented in CheckChildren
@@ -126,12 +118,32 @@ namespace System.Diagnostics
                 {
                     lock (s_processWaitStates)
                     {
+                        DateTime exitTime = default;
                         // We are referencing an existing process.
                         // This may be a child process, so we check s_childProcessWaitStates too.
-                        if (!s_childProcessWaitStates.TryGetValue(processId, out pws) &&
-                            !s_processWaitStates.TryGetValue(processId, out pws))
+                        if (s_childProcessWaitStates.TryGetValue(processId, out pws))
                         {
-                            pws = new ProcessWaitState(processId, isChild: false);
+                            // child process
+                        }
+                        else if (s_processWaitStates.TryGetValue(processId, out pws))
+                        {
+                            // This is best effort for dealing with recycled pids for non-child processes.
+                            // As long as we haven't observed process exit, it's safe to share the ProcessWaitState.
+                            // Once we've observed the exit, we'll create a new ProcessWaitState just in case
+                            // this may be a recycled pid.
+                            // If it wasn't, that ProcessWaitState will observe too that the process has exited.
+                            // We pass the ExitTime so it can be the same, but we'll clear it when we see there
+                            // is a live process with that pid.
+                            if (pws.GetExited(out _, refresh: false))
+                            {
+                                s_processWaitStates.Remove(processId);
+                                exitTime = pws.ExitTime;
+                                pws = null;
+                            }
+                        }
+                        if (pws == null)
+                        {
+                            pws = new ProcessWaitState(processId, isChild: false, usesTerminal: false, exitTime);
                             s_processWaitStates.Add(processId, pws);
                         }
                         pws._outstandingRefCount++;
@@ -184,6 +196,8 @@ namespace System.Diagnostics
         private readonly int _processId;
         /// <summary>Associated process is a child process.</summary>
         private readonly bool _isChild;
+        /// <summary>Associated process is a child that can use the terminal.</summary>
+        private readonly bool _usesTerminal;
 
         /// <summary>If a wait operation is in progress, the Task that represents it; otherwise, null.</summary>
         private Task _waitInProgress;
@@ -204,11 +218,13 @@ namespace System.Diagnostics
 
         /// <summary>Initialize the wait state object.</summary>
         /// <param name="processId">The associated process' ID.</param>
-        private ProcessWaitState(int processId, bool isChild)
+        private ProcessWaitState(int processId, bool isChild, bool usesTerminal, DateTime exitTime = default)
         {
             Debug.Assert(processId >= 0);
             _processId = processId;
             _isChild = isChild;
+            _usesTerminal = usesTerminal;
+            _exitTime = exitTime;
         }
 
         /// <summary>Releases managed resources used by the ProcessWaitState.</summary>
@@ -232,7 +248,10 @@ namespace System.Diagnostics
             Debug.Assert(Monitor.IsEntered(_gate));
 
             _exited = true;
-            _exitTime = DateTime.Now;
+            if (_exitTime == default)
+            {
+                _exitTime = DateTime.Now;
+            }
             _exitedEvent?.Set();
         }
 
@@ -285,11 +304,11 @@ namespace System.Diagnostics
             get
             {
                 int? ignored;
-                return GetExited(out ignored);
+                return GetExited(out ignored, refresh: true);
             }
         }
 
-        internal bool GetExited(out int? exitCode)
+        internal bool GetExited(out int? exitCode, bool refresh)
         {
             lock (_gate)
             {
@@ -308,9 +327,12 @@ namespace System.Diagnostics
                     return false;
                 }
 
-                // We don't know if we've exited, but no one else is currently
-                // checking, so check.
-                CheckForNonChildExit();
+                if (refresh)
+                {
+                    // We don't know if we've exited, but no one else is currently
+                    // checking, so check.
+                    CheckForNonChildExit();
+                }
 
                 // We now have an up-to-date snapshot for whether we've exited,
                 // and if we have, what the exit code is (if we were able to find out).
@@ -324,6 +346,7 @@ namespace System.Diagnostics
             Debug.Assert(Monitor.IsEntered(_gate));
             if (!_isChild)
             {
+                bool exited;
                 // We won't be able to get an exit code, but we'll at least be able to determine if the process is
                 // still running.
                 int killResult = Interop.Sys.Kill(_processId, Interop.Sys.Signals.None); // None means don't send a signal
@@ -332,7 +355,7 @@ namespace System.Diagnostics
                     // Process is still running.  This could also be a defunct process that has completed
                     // its work but still has an entry in the processes table due to its parent not yet
                     // having waited on it to clean it up.
-                    return;
+                    exited = false;
                 }
                 else // error from kill
                 {
@@ -340,18 +363,27 @@ namespace System.Diagnostics
                     if (errno == Interop.Error.ESRCH)
                     {
                         // Couldn't find the process; assume it's exited
-                        SetExited();
-                        return;
+                        exited = true;
                     }
                     else if (errno == Interop.Error.EPERM)
                     {
                         // Don't have permissions to the process; assume it's alive
-                        return;
+                        exited = false;
                     }
-                    else Debug.Fail("Unexpected errno value from kill");
+                    else
+                    {
+                        Debug.Fail("Unexpected errno value from kill");
+                        exited = true;
+                    }
                 }
-
-                SetExited();
+                if (exited)
+                {
+                    SetExited();
+                }
+                else
+                {
+                    _exitTime = default;
+                }
             }
         }
 
@@ -499,7 +531,7 @@ namespace System.Diagnostics
                         // Wait
                         try
                         {
-                            await Task.Delay(pollingIntervalMs, cancellationToken); // no need for ConfigureAwait(false) as we're in a Task.Run
+                            await Task.Delay(pollingIntervalMs, cancellationToken).ConfigureAwait(false);
                             pollingIntervalMs = Math.Min(pollingIntervalMs * 2, MaxPollingIntervalMs);
                         }
                         catch (OperationCanceledException) { }
@@ -533,7 +565,14 @@ namespace System.Diagnostics
                 {
                     _exitCode = exitCode;
 
+                    if (_usesTerminal)
+                    {
+                        // Update terminal settings before calling SetExited.
+                        Process.ConfigureTerminalForChildProcesses(-1);
+                    }
+
                     SetExited();
+
                     return true;
                 }
                 else if (waitResult == 0)
@@ -596,7 +635,7 @@ namespace System.Diagnostics
 
                 if (checkAll)
                 {
-                    // We track things to unref so we don't invalidate our iterator by changing s_childProcessWaitStates. 
+                    // We track things to unref so we don't invalidate our iterator by changing s_childProcessWaitStates.
                     ProcessWaitState firstToRemove = null;
                     List<ProcessWaitState> additionalToRemove = null;
                     foreach (KeyValuePair<int, ProcessWaitState> kv in s_childProcessWaitStates)

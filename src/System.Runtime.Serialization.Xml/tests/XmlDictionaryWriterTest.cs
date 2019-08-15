@@ -37,11 +37,32 @@ public static class XmlDictionaryWriterTest
             actual = sr.ReadToEnd();
         }
 
-        Assert.StrictEqual(expect, actual);
+        Assert.Equal(expect, actual);
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Async APIs are available on NetCore only")]
+    public static void XmlBaseWriter_WriteBinHex()
+    {
+        var str = "The quick brown fox jumps over the lazy dog.";
+        var bytes = Encoding.Unicode.GetBytes(str);
+        string expect = @"<data>540068006500200071007500690063006B002000620072006F0077006E00200066006F00780020006A0075006D007000730020006F00760065007200200074006800650020006C0061007A007900200064006F0067002E00</data>";
+        string actual;
+        using (var ms = new MemoryStream())
+        {
+            var writer = XmlDictionaryWriter.CreateTextWriter(ms);
+            writer.WriteStartElement("data");
+            writer.WriteBinHex(bytes, 0, bytes.Length);
+            writer.WriteEndElement();
+            writer.Flush();
+            ms.Position = 0;
+            var sr = new StreamReader(ms);
+            actual = sr.ReadToEnd();
+        }
+
+        Assert.Equal(expect, actual);
+    }
+
+    [Fact]
     public static void XmlBaseWriter_FlushAsync()
     {
         string actual = null;
@@ -50,7 +71,7 @@ public static class XmlDictionaryWriterTest
         string expect = GetExpectString(bytes, byteSize);
         string lastCompletedOperation = null;
         try
-        {            
+        {
             using (var ms = new AsyncMemoryStream())
             {
                 var writer = XmlDictionaryWriter.CreateTextWriter(ms);
@@ -80,7 +101,7 @@ public static class XmlDictionaryWriterTest
                 actual = sr.ReadToEnd();
             }
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             var sb = new StringBuilder();
             sb.AppendLine($"An error occurred: {e.Message}");
@@ -90,12 +111,11 @@ public static class XmlDictionaryWriterTest
             Assert.True(false, sb.ToString());
         }
 
-        Assert.StrictEqual(expect, actual);
+        Assert.Equal(expect, actual);
 
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Async APIs are available on NetCore only")]
     public static void XmlBaseWriter_WriteStartEndElementAsync()
     {
         string actual;
@@ -119,11 +139,10 @@ public static class XmlDictionaryWriterTest
             actual = sr.ReadToEnd();
         }
 
-        Assert.StrictEqual(expect, actual);
+        Assert.Equal(expect, actual);
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Async APIs are available on NetCore only")]
     public static void XmlBaseWriter_CheckAsync_ThrowInvalidOperationException()
     {
         int byteSize = 1024;
@@ -164,12 +183,11 @@ public static class XmlDictionaryWriterTest
             writer.WriteEndElement();
             writer.WriteEndDocument();
             writer.Flush();
-            ms.Position = 0;            
+            ms.Position = 0;
         }
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "is implemented on full framework")]
     public static void CreateMtomReaderWriter_Throw_PNSE()
     {
         using (var stream = new MemoryStream())
@@ -292,7 +310,6 @@ public static class XmlDictionaryWriterTest
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "is implemented on full framework")]
     public static void FragmentTest()
     {
         string rwTypeStr = "Text";
@@ -432,7 +449,7 @@ public static class XmlDictionaryWriterTest
         writer.WriteStartElement("Fragment" + nestedLevelsLeft);
         for (int i = 0; i < 5; i++)
         {
-            writer.WriteStartElement(String.Format("Element{0}_{1}", nestedLevelsLeft, i));
+            writer.WriteStartElement(string.Format("Element{0}_{1}", nestedLevelsLeft, i));
             writer.WriteAttributeString("attr1", "value1");
             writer.WriteAttributeString("attr2", "value2");
         }

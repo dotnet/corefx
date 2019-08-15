@@ -9,6 +9,6 @@ internal partial class Interop
     internal partial class Kernel32
     {
         [DllImport(Libraries.Kernel32, EntryPoint = "SetEnvironmentVariableW", SetLastError = true, CharSet = CharSet.Unicode, BestFitMapping = false)]
-        internal static extern bool SetEnvironmentVariable(string lpName, string lpValue);
+        internal static extern bool SetEnvironmentVariable(string lpName, string? lpValue);
     }
 }

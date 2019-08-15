@@ -43,11 +43,11 @@ namespace System.Xml
             if (buffer == null)
                 throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull(nameof(buffer));
             if (offset < 0)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(offset), SR.Format(SR.ValueMustBeNonNegative)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(offset), SR.ValueMustBeNonNegative));
             if (offset > buffer.Length)
                 throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(offset), SR.Format(SR.OffsetExceedsBufferSize, buffer.Length)));
             if (count < 0)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(count), SR.Format(SR.ValueMustBeNonNegative)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(count), SR.ValueMustBeNonNegative));
             if (count > buffer.Length - offset)
                 throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(count), SR.Format(SR.SizeExceedsRemainingBufferSpace, buffer.Length - offset)));
             MoveToInitial(quotas, session, null);
@@ -885,9 +885,9 @@ namespace System.Xml
                 int actual = Math.Max(maxLength - maxTextNodeLength, 0);
                 int offset = BufferReader.ReadBytes(actual);
 
-                // We need to make sure we don't split a utf8  character, so scan backwards for a 
-                // character boundary.  We'll actually always push off at least one character since 
-                // although we find the character boundary, we don't bother to figure out if we have 
+                // We need to make sure we don't split a utf8  character, so scan backwards for a
+                // character boundary.  We'll actually always push off at least one character since
+                // although we find the character boundary, we don't bother to figure out if we have
                 // all the bytes that comprise the character.
                 int i;
                 for (i = offset + actual - 1; i >= offset; i--)
@@ -1158,13 +1158,13 @@ namespace System.Xml
                     type = typeof(bool);
                     break;
                 case XmlBinaryNodeType.Int16TextWithEndElement:
-                    type = typeof(Int16);
+                    type = typeof(short);
                     break;
                 case XmlBinaryNodeType.Int32TextWithEndElement:
-                    type = typeof(Int32);
+                    type = typeof(int);
                     break;
                 case XmlBinaryNodeType.Int64TextWithEndElement:
-                    type = typeof(Int64);
+                    type = typeof(long);
                     break;
                 case XmlBinaryNodeType.FloatTextWithEndElement:
                     type = typeof(float);
@@ -1219,11 +1219,11 @@ namespace System.Xml
             if (array == null)
                 throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException(nameof(array)));
             if (offset < 0)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(offset), SR.Format(SR.ValueMustBeNonNegative)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(offset), SR.ValueMustBeNonNegative));
             if (offset > array.Length)
                 throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(offset), SR.Format(SR.OffsetExceedsBufferSize, array.Length)));
             if (count < 0)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(count), SR.Format(SR.ValueMustBeNonNegative)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(count), SR.ValueMustBeNonNegative));
             if (count > array.Length - offset)
                 throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(count), SR.Format(SR.SizeExceedsRemainingBufferSpace, array.Length - offset)));
         }
@@ -1254,11 +1254,11 @@ namespace System.Xml
             return base.ReadArray(localName, namespaceUri, array, offset, count);
         }
 
-        private unsafe int ReadArray(Int16[] array, int offset, int count)
+        private unsafe int ReadArray(short[] array, int offset, int count)
         {
             CheckArray(array, offset, count);
             int actual = Math.Min(count, _arrayCount);
-            fixed (Int16* items = &array[offset])
+            fixed (short* items = &array[offset])
             {
                 BufferReader.UnsafeReadArray((byte*)items, (byte*)&items[actual]);
             }
@@ -1266,25 +1266,25 @@ namespace System.Xml
             return actual;
         }
 
-        public override int ReadArray(string localName, string namespaceUri, Int16[] array, int offset, int count)
+        public override int ReadArray(string localName, string namespaceUri, short[] array, int offset, int count)
         {
             if (IsStartArray(localName, namespaceUri, XmlBinaryNodeType.Int16TextWithEndElement) && BitConverter.IsLittleEndian)
                 return ReadArray(array, offset, count);
             return base.ReadArray(localName, namespaceUri, array, offset, count);
         }
 
-        public override int ReadArray(XmlDictionaryString localName, XmlDictionaryString namespaceUri, Int16[] array, int offset, int count)
+        public override int ReadArray(XmlDictionaryString localName, XmlDictionaryString namespaceUri, short[] array, int offset, int count)
         {
             if (IsStartArray(localName, namespaceUri, XmlBinaryNodeType.Int16TextWithEndElement) && BitConverter.IsLittleEndian)
                 return ReadArray(array, offset, count);
             return base.ReadArray(localName, namespaceUri, array, offset, count);
         }
 
-        private unsafe int ReadArray(Int32[] array, int offset, int count)
+        private unsafe int ReadArray(int[] array, int offset, int count)
         {
             CheckArray(array, offset, count);
             int actual = Math.Min(count, _arrayCount);
-            fixed (Int32* items = &array[offset])
+            fixed (int* items = &array[offset])
             {
                 BufferReader.UnsafeReadArray((byte*)items, (byte*)&items[actual]);
             }
@@ -1292,25 +1292,25 @@ namespace System.Xml
             return actual;
         }
 
-        public override int ReadArray(string localName, string namespaceUri, Int32[] array, int offset, int count)
+        public override int ReadArray(string localName, string namespaceUri, int[] array, int offset, int count)
         {
             if (IsStartArray(localName, namespaceUri, XmlBinaryNodeType.Int32TextWithEndElement) && BitConverter.IsLittleEndian)
                 return ReadArray(array, offset, count);
             return base.ReadArray(localName, namespaceUri, array, offset, count);
         }
 
-        public override int ReadArray(XmlDictionaryString localName, XmlDictionaryString namespaceUri, Int32[] array, int offset, int count)
+        public override int ReadArray(XmlDictionaryString localName, XmlDictionaryString namespaceUri, int[] array, int offset, int count)
         {
             if (IsStartArray(localName, namespaceUri, XmlBinaryNodeType.Int32TextWithEndElement) && BitConverter.IsLittleEndian)
                 return ReadArray(array, offset, count);
             return base.ReadArray(localName, namespaceUri, array, offset, count);
         }
 
-        private unsafe int ReadArray(Int64[] array, int offset, int count)
+        private unsafe int ReadArray(long[] array, int offset, int count)
         {
             CheckArray(array, offset, count);
             int actual = Math.Min(count, _arrayCount);
-            fixed (Int64* items = &array[offset])
+            fixed (long* items = &array[offset])
             {
                 BufferReader.UnsafeReadArray((byte*)items, (byte*)&items[actual]);
             }
@@ -1318,14 +1318,14 @@ namespace System.Xml
             return actual;
         }
 
-        public override int ReadArray(string localName, string namespaceUri, Int64[] array, int offset, int count)
+        public override int ReadArray(string localName, string namespaceUri, long[] array, int offset, int count)
         {
             if (IsStartArray(localName, namespaceUri, XmlBinaryNodeType.Int64TextWithEndElement) && BitConverter.IsLittleEndian)
                 return ReadArray(array, offset, count);
             return base.ReadArray(localName, namespaceUri, array, offset, count);
         }
 
-        public override int ReadArray(XmlDictionaryString localName, XmlDictionaryString namespaceUri, Int64[] array, int offset, int count)
+        public override int ReadArray(XmlDictionaryString localName, XmlDictionaryString namespaceUri, long[] array, int offset, int count)
         {
             if (IsStartArray(localName, namespaceUri, XmlBinaryNodeType.Int64TextWithEndElement) && BitConverter.IsLittleEndian)
                 return ReadArray(array, offset, count);

@@ -1,12 +1,17 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Text.RegularExpressions.Tests
 {
-    public class RegexCacheTests : RemoteExecutorTestBase
+    public class RegexCacheTests
     {
         [Theory]
         [InlineData(0)]
@@ -33,24 +38,22 @@ namespace System.Text.RegularExpressions.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "reflection blocked")]
         public void Ctor_Cache_Second_drops_first()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 Regex.CacheSize = 1;
                 Assert.True(Regex.IsMatch("1", "1"));
                 Assert.True(Regex.IsMatch("2", "2")); // previous removed from cache
                 Assert.True(GetCachedItemsNum() == 1);
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "reflection blocked")]
         public void Ctor_Cache_Shrink_cache()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 Regex.CacheSize = 2;
                 Assert.True(Regex.IsMatch("1", "1"));
@@ -60,54 +63,51 @@ namespace System.Text.RegularExpressions.Tests
                 Assert.True(GetCachedItemsNum() == 1);
                 Regex.CacheSize = 0; // clear
                 Assert.True(GetCachedItemsNum() == 0);
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "reflection blocked")]
         public void Ctor_Cache_Promote_entries()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 Regex.CacheSize = 3;
                 Assert.True(Regex.IsMatch("1", "1"));
-                Assert.True(Regex.IsMatch("2", "2")); 
+                Assert.True(Regex.IsMatch("2", "2"));
                 Assert.True(Regex.IsMatch("3", "3"));
                 Assert.True(GetCachedItemsNum() == 3);
                 Assert.True(Regex.IsMatch("1", "1")); // should be put first
                 Assert.True(GetCachedItemsNum() == 3);
                 Regex.CacheSize = 1;  // only 1 stays
                 Assert.True(GetCachedItemsNum() == 1);
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "reflection blocked")]
         public void Ctor_Cache_Uses_culture_and_options()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 Regex.CacheSize = 0;
                 Regex.CacheSize = 3;
                 Assert.True(Regex.IsMatch("1", "1", RegexOptions.IgnoreCase));
                 Assert.True(Regex.IsMatch("1", "1", RegexOptions.Multiline));
                 Assert.True(GetCachedItemsNum() == 2);
-                CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-DE");
+                // Force to set a different culture than the current culture!
+                CultureInfo.CurrentCulture = CultureInfo.CurrentCulture.Equals(CultureInfo.GetCultureInfo("de-DE")) ? CultureInfo.InvariantCulture : CultureInfo.GetCultureInfo("de-DE");
                 Assert.True(Regex.IsMatch("1", "1", RegexOptions.Multiline));
                 Assert.True(GetCachedItemsNum() == 3);
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.UapAot, 
-            "different cache structure, reflection blocked")]
         public void Ctor_Cache_Uses_dictionary_linked_list_switch_does_not_throw()
         {
             // assume the limit is less than the cache size so we cross it two times:
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 int original = Regex.CacheSize;
                 Regex.CacheSize = 0;
@@ -135,23 +135,12 @@ namespace System.Text.RegularExpressions.Tests
                         Assert.True(GetCachedItemsNum() == Regex.CacheSize);
                     }
                 }
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         private int GetCachedItemsNum()
         {
-            // On .NET Framework we have a different cache structure.
-            if (PlatformDetection.IsFullFramework)
-            {
-                object linkedList = typeof(Regex)
-                    .GetField("livecode", BindingFlags.NonPublic | BindingFlags.Static)
-                    .GetValue(null);
-                return (int)linkedList.GetType()
-                    .GetProperty("Count", BindingFlags.Public | BindingFlags.Instance)
-                    .GetValue(linkedList);
-            }
-
             return (int)typeof(Regex)
                 .GetField("s_cacheCount", BindingFlags.NonPublic | BindingFlags.Static)
                 .GetValue(null);

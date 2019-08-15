@@ -27,8 +27,8 @@ namespace System.Net.Security
     */
     public partial class NegotiateStream : AuthenticatedStream
     {
-        private NegoState _negoState;
-        private string _package;
+        private readonly NegoState _negoState;
+        private readonly string _package;
         private IIdentity _remoteIdentity;
 
         public NegotiateStream(Stream innerStream) : this(innerStream, false)
@@ -41,7 +41,7 @@ namespace System.Net.Security
             using (DebugThreadTracking.SetThreadKind(ThreadKinds.User))
             {
 #endif
-                _negoState = new NegoState(innerStream, leaveInnerStreamOpen);
+                _negoState = new NegoState(innerStream);
                 _package = NegoState.DefaultPackage;
                 InitializeStreamPart();
 #if DEBUG
@@ -222,7 +222,7 @@ namespace System.Net.Security
         {
             AuthenticateAsClient(credential, null, targetName, requiredProtectionLevel, allowedImpersonationLevel);
         }
-        
+
         public virtual void AuthenticateAsClient(
             NetworkCredential credential, ChannelBinding binding, string targetName, ProtectionLevel requiredProtectionLevel, TokenImpersonationLevel allowedImpersonationLevel)
         {
@@ -525,6 +525,18 @@ namespace System.Net.Security
 #if DEBUG
             }
 #endif
+        }
+
+        public override async ValueTask DisposeAsync()
+        {
+            try
+            {
+                _negoState.Close();
+            }
+            finally
+            {
+                await base.DisposeAsync().ConfigureAwait(false);
+            }
         }
 
         public override int Read(byte[] buffer, int offset, int count)

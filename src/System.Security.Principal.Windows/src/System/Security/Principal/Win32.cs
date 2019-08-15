@@ -40,33 +40,26 @@ namespace System.Security.Principal
             string systemName,
             PolicyRights rights)
         {
-            uint ReturnCode;
-            SafeLsaPolicyHandle Result;
-            Interop.LSA_OBJECT_ATTRIBUTES Loa;
+            SafeLsaPolicyHandle policyHandle;
 
-            Loa.Length = Marshal.SizeOf<Interop.LSA_OBJECT_ATTRIBUTES>();
-            Loa.RootDirectory = IntPtr.Zero;
-            Loa.ObjectName = IntPtr.Zero;
-            Loa.Attributes = 0;
-            Loa.SecurityDescriptor = IntPtr.Zero;
-            Loa.SecurityQualityOfService = IntPtr.Zero;
-
-            if (0 == (ReturnCode = Interop.Advapi32.LsaOpenPolicy(systemName, ref Loa, (int)rights, out Result)))
+            var attributes = new Interop.OBJECT_ATTRIBUTES();
+            uint error = Interop.Advapi32.LsaOpenPolicy(systemName, ref attributes, (int)rights, out policyHandle);
+            if (error == 0)
             {
-                return Result;
+                return policyHandle;
             }
-            else if (ReturnCode == Interop.StatusOptions.STATUS_ACCESS_DENIED)
+            else if (error == Interop.StatusOptions.STATUS_ACCESS_DENIED)
             {
                 throw new UnauthorizedAccessException();
             }
-            else if (ReturnCode == Interop.StatusOptions.STATUS_INSUFFICIENT_RESOURCES ||
-                      ReturnCode == Interop.StatusOptions.STATUS_NO_MEMORY)
+            else if (error == Interop.StatusOptions.STATUS_INSUFFICIENT_RESOURCES ||
+                      error == Interop.StatusOptions.STATUS_NO_MEMORY)
             {
                 throw new OutOfMemoryException();
             }
             else
             {
-                uint win32ErrorCode = Interop.Advapi32.LsaNtStatusToWinError(ReturnCode);
+                uint win32ErrorCode = Interop.Advapi32.LsaNtStatusToWinError(error);
 
                 throw new Win32Exception(unchecked((int)win32ErrorCode));
             }
@@ -206,10 +199,10 @@ namespace System.Security.Principal
             {
                 bool result;
 
-                byte[] BinaryForm1 = new Byte[sid1.BinaryLength];
+                byte[] BinaryForm1 = new byte[sid1.BinaryLength];
                 sid1.GetBinaryForm(BinaryForm1, 0);
 
-                byte[] BinaryForm2 = new Byte[sid2.BinaryLength];
+                byte[] BinaryForm2 = new byte[sid2.BinaryLength];
                 sid2.GetBinaryForm(BinaryForm2, 0);
 
                 return (Interop.Advapi32.IsEqualDomainSid(BinaryForm1, BinaryForm2, out result) == FALSE ? false : result);
@@ -271,7 +264,7 @@ namespace System.Security.Principal
             // not having to P/Invoke twice (once to get the buffer, once to get the data)
             //
 
-            byte[] BinaryForm = new Byte[sid.BinaryLength];
+            byte[] BinaryForm = new byte[sid.BinaryLength];
             sid.GetBinaryForm(BinaryForm, 0);
             uint sidLength = (uint)SecurityIdentifier.MaxBinaryLength;
             byte[] resultSidBinary = new byte[sidLength];

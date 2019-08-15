@@ -9,8 +9,8 @@ namespace System.Security.Cryptography
 {
     public sealed partial class ECDsaCng : ECDsa
     {
-        private CngAlgorithmCore _core;
-        private CngAlgorithm _hashAlgorithm;
+        private CngAlgorithmCore _core = new CngAlgorithmCore(nameof(ECDsaCng));
+        private CngAlgorithm _hashAlgorithm = CngAlgorithm.Sha256;
 
         /// <summary>
         ///     Hash algorithm to use when generating a signature over arbitrary data
@@ -30,8 +30,8 @@ namespace System.Security.Cryptography
         /// <summary>
         ///     Creates a new ECDsaCng object that will use the specified key. The key's
         ///     <see cref="CngKey.AlgorithmGroup" /> must be ECDsa. This constructor
-        ///     creates a copy of the key. Hence, the caller can safely dispose of the 
-        ///     passed in key and continue using the ECDsaCng object. 
+        ///     creates a copy of the key. Hence, the caller can safely dispose of the
+        ///     passed in key and continue using the ECDsaCng object.
         /// </summary>
         /// <param name="key">Key to use for ECDsa operations</param>
         /// <exception cref="ArgumentException">if <paramref name="key" /> is not an ECDsa key</exception>
@@ -52,6 +52,11 @@ namespace System.Security.Cryptography
             _core.Dispose();
         }
 
+        private void ThrowIfDisposed()
+        {
+            _core.ThrowIfDisposed();
+        }
+
         private void DisposeKey()
         {
             _core.DisposeKey();
@@ -67,9 +72,9 @@ namespace System.Security.Cryptography
             return algorithmGroup == CngAlgorithmGroup.ECDsa || algorithmGroup == CngAlgorithmGroup.ECDiffieHellman;
         }
 
-        internal string GetCurveName()
+        internal string GetCurveName(out string oidValue)
         {
-            return Key.GetCurveName();
+            return Key.GetCurveName(out oidValue);
         }
 
         private void ImportFullKeyBlob(byte[] ecfullKeyBlob, bool includePrivateParameters)
@@ -90,6 +95,37 @@ namespace System.Security.Cryptography
         private byte[] ExportFullKeyBlob(bool includePrivateParameters)
         {
             return ECCng.ExportFullKeyBlob(Key, includePrivateParameters);
+        }
+
+        private void AcceptImport(CngPkcs8.Pkcs8Response response)
+        {
+            Key = response.Key;
+        }
+
+        public override bool TryExportPkcs8PrivateKey(Span<byte> destination, out int bytesWritten)
+        {
+            return Key.TryExportKeyBlob(
+                Interop.NCrypt.NCRYPT_PKCS8_PRIVATE_KEY_BLOB,
+                destination,
+                out bytesWritten);
+        }
+
+        private byte[] ExportEncryptedPkcs8(ReadOnlySpan<char> pkcs8Password, int kdfCount)
+        {
+            return Key.ExportPkcs8KeyBlob(pkcs8Password, kdfCount);
+        }
+
+        private bool TryExportEncryptedPkcs8(
+            ReadOnlySpan<char> pkcs8Password,
+            int kdfCount,
+            Span<byte> destination,
+            out int bytesWritten)
+        {
+            return Key.TryExportPkcs8KeyBlob(
+                pkcs8Password,
+                kdfCount,
+                destination,
+                out bytesWritten);
         }
 
         public void FromXmlString(string xml, ECKeyXmlFormat format)

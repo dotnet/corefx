@@ -20,7 +20,7 @@ namespace System.Text.Tests
                 yield return new object[] { "a" + c + "b", 2, 1 };
                 yield return new object[] { "a" + c + "b", 0, 3 };
             }
-            
+
             // Empty string
             yield return new object[] { string.Empty, 0, 0 };
             yield return new object[] { "abc", 3, 0 };
@@ -84,7 +84,7 @@ namespace System.Text.Tests
             Encode(source, index, count, GetBytes(source, index, count), valid: false);
         }
 
-        public void Encode(string source, int index, int count, byte[] expected, bool valid)
+        private static void Encode(string source, int index, int count, byte[] expected, bool valid)
         {
             EncodingHelpers.Encode(Encoding.GetEncoding("latin1"), source, index, count, expected);
 

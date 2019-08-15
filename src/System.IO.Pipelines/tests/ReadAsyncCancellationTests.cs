@@ -136,7 +136,7 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void FlushAsyncCancellationDeadlock()
+        public void ReadAsyncCancellationDeadlock()
         {
             var cts = new CancellationTokenSource();
             var cts2 = new CancellationTokenSource();
@@ -145,7 +145,7 @@ namespace System.IO.Pipelines.Tests
             ValueTaskAwaiter<ReadResult> awaiter = Pipe.Reader.ReadAsync(cts.Token).GetAwaiter();
             awaiter.OnCompleted(
                 () => {
-                    // We are on cancellation thread and need to wait untill another ReadAsync call
+                    // We are on cancellation thread and need to wait until another ReadAsync call
                     // takes pipe state lock
                     e.Wait();
                     // Make sure we had enough time to reach _cancellationTokenRegistration.Dispose
@@ -154,7 +154,7 @@ namespace System.IO.Pipelines.Tests
                     Pipe.Reader.ReadAsync();
                 });
 
-            // Start a thread that would run cancellation calbacks
+            // Start a thread that would run cancellation callbacks
             Task cancellationTask = Task.Run(() => cts.Cancel());
             // Start a thread that would call ReadAsync with different token
             // and block on _cancellationTokenRegistration.Dispose
@@ -164,8 +164,8 @@ namespace System.IO.Pipelines.Tests
                     Pipe.Reader.ReadAsync(cts2.Token);
                 });
 
-            bool completed = Task.WhenAll(cancellationTask, blockingTask).Wait(TimeSpan.FromSeconds(10));
-            Assert.True(completed);
+            bool completed = Task.WhenAll(cancellationTask, blockingTask).Wait(TimeSpan.FromSeconds(30));
+            Assert.True(completed, $"Read tasks are not completed. CancellationTask: {cancellationTask.Status} BlockingTask: {blockingTask.Status}");
         }
 
         [Fact]
@@ -429,6 +429,53 @@ namespace System.IO.Pipelines.Tests
             buffer.First.Span.CopyTo(array);
             Assert.Equal("Hello World", Encoding.ASCII.GetString(array));
             Pipe.Reader.AdvanceTo(buffer.End, buffer.End);
+        }
+
+        [Fact]
+        public async Task ReadAsyncIsNotCancelledWhenCancellationTokenCancelledBetweenReads()
+        {
+            await Pipe.Writer.WriteAsync(new byte[1]);
+
+            var cts = new CancellationTokenSource();
+
+            ReadResult rr = await Pipe.Reader.ReadAsync(cts.Token);
+            Assert.False(rr.IsCanceled);
+
+            cts.Cancel();
+            Pipe.Reader.AdvanceTo(rr.Buffer.End);
+
+            cts = new CancellationTokenSource();
+            ValueTask<ReadResult> awaiter = Pipe.Reader.ReadAsync(cts.Token);
+            Assert.False(awaiter.IsCompleted);
+        }
+
+        [Fact]
+        public async Task TryReadIsNotCancelledWhenCancellationTokenCancelledBetweenReads()
+        {
+            await Pipe.Writer.WriteAsync(new byte[1]);
+
+            var cts = new CancellationTokenSource();
+            ReadResult result = await Pipe.Reader.ReadAsync(cts.Token);
+            Pipe.Reader.AdvanceTo(result.Buffer.End);
+
+            cts.Cancel();
+
+            Assert.False(Pipe.Reader.TryRead(out result));
+            Assert.False(result.IsCanceled);
+        }
+
+        [Fact]
+        public async Task TryReadWithDataIsNotCancelledWhenCancellationTokenCancelledBetweenReads()
+        {
+            await Pipe.Writer.WriteAsync(new byte[1]);
+
+            var cts = new CancellationTokenSource();
+            ReadResult result = await Pipe.Reader.ReadAsync(cts.Token);
+            Pipe.Reader.AdvanceTo(result.Buffer.End);
+
+            cts.Cancel();
+            await Pipe.Writer.WriteAsync(new byte[1]);
+            Assert.True(Pipe.Reader.TryRead(out result));
         }
     }
 }

@@ -103,7 +103,7 @@ namespace System.Data.ProviderBase
         private readonly DbConnectionFactory _connectionFactory;
         private readonly DbConnectionPoolGroup _connectionPoolGroup;
         private readonly DbConnectionPoolGroupOptions _connectionPoolGroupOptions;
-        private DbConnectionPoolProviderInfo _connectionPoolProviderInfo;
+        private readonly DbConnectionPoolProviderInfo _connectionPoolProviderInfo;
 
         private State _state;
 
@@ -267,7 +267,7 @@ namespace System.Data.ProviderBase
             get { return (null != _identity && DbConnectionPoolIdentity.NoIdentity != _identity); }
         }
 
-        private void CleanupCallback(Object state)
+        private void CleanupCallback(object state)
         {
             // Called when the cleanup-timer ticks over.
 
@@ -500,7 +500,7 @@ namespace System.Data.ProviderBase
                     // be returned to a different customer until the transaction
                     // actually completes, so we send it into Stasis -- the SysTx
                     // transaction object will ensure that it is owned (not lost),
-                    // and it will be certain to put it back into the pool.                    
+                    // and it will be certain to put it back into the pool.
 
                     if (_state == State.ShuttingDown)
                     {
@@ -572,7 +572,7 @@ namespace System.Data.ProviderBase
             obj.Dispose();
         }
 
-        private void ErrorCallback(Object state)
+        private void ErrorCallback(object state)
         {
             _errorOccurred = false;
             _waitHandles.ErrorEvent.Reset();
@@ -673,7 +673,7 @@ namespace System.Data.ProviderBase
                         Interlocked.Exchange(ref _pendingOpensWaiting, 0);
                     }
                 }
-            } while (_pendingOpens.TryPeek(out next));
+            } while (!_pendingOpens.IsEmpty);
         }
 
         internal bool TryGetConnection(DbConnection owningObject, TaskCompletionSource<DbConnectionInternal> retry, DbConnectionOptions userOptions, out DbConnectionInternal connection)
@@ -928,8 +928,8 @@ namespace System.Data.ProviderBase
                 Debug.Assert(obj != null, "null connection is not expected");
             }
 
-            // When another thread is clearing this pool,  
-            // it will remove all connections in this pool which causes the 
+            // When another thread is clearing this pool,
+            // it will remove all connections in this pool which causes the
             // following assert to fire, which really mucks up stress against
             //  checked bits.
 

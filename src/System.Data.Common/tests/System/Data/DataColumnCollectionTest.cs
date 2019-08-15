@@ -14,10 +14,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -240,8 +240,8 @@ namespace System.Data.Tests
             }
             catch (ArgumentException e)
             {
-                //				Assert.Equal (typeof (ArgumentException), e.GetType ());
-                //				Assert.Equal ("Column 'test' already belongs to this or another DataTable.", e.Message);
+                //                Assert.Equal (typeof (ArgumentException), e.GetType ());
+                //                Assert.Equal ("Column 'test' already belongs to this or another DataTable.", e.Message);
             }
 
             try
@@ -251,8 +251,8 @@ namespace System.Data.Tests
             }
             catch (ArgumentException e)
             {
-                //				Assert.Equal (typeof (ArgumentException), e.GetType ());
-                //				Assert.Equal ("Column 'test' already belongs to this or another DataTable.", e.Message);
+                //                Assert.Equal (typeof (ArgumentException), e.GetType ());
+                //                Assert.Equal ("Column 'test' already belongs to this or another DataTable.", e.Message);
             }
 
             DataColumn C2 = new DataColumn("test");
@@ -264,8 +264,8 @@ namespace System.Data.Tests
             }
             catch (DuplicateNameException e)
             {
-                //				Assert.Equal (typeof (DuplicateNameException), e.GetType ());
-                //				Assert.Equal ("A DataColumn named 'test' already belongs to this DataTable.", e.Message);
+                //                Assert.Equal (typeof (DuplicateNameException), e.GetType ());
+                //                Assert.Equal ("A DataColumn named 'test' already belongs to this DataTable.", e.Message);
             }
 
             try
@@ -275,8 +275,8 @@ namespace System.Data.Tests
             }
             catch (InvalidExpressionException e)
             {
-                //				Assert.True (e is InvalidExpressionException);
-                //				Assert.Equal ("Expression 'substring ('fdsafewq', 2)' is invalid.", e.Message);
+                //                Assert.True (e is InvalidExpressionException);
+                //                Assert.Equal ("Expression 'substring ('fdsafewq', 2)' is invalid.", e.Message);
             }
         }
 
@@ -358,7 +358,7 @@ namespace System.Data.Tests
             DataColumn C = new DataColumn("test1");
             Cols.Add();
 
-            // LAMESPEC: MSDN says that if C doesn't belong to Cols
+            // MSDN says that if C doesn't belong to Cols
             // Exception is thrown.
             Assert.False(Cols.CanRemove(C));
 

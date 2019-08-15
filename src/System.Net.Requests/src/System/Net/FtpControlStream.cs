@@ -101,7 +101,7 @@ namespace System.Net
         }
 
         /// <summary>
-        ///    <para>Provides a wrapper for the async accept operations
+        /// Provides a wrapper for the async accept operations.
         /// </summary>
         private static void AcceptCallback(IAsyncResult asyncResult)
         {
@@ -283,7 +283,7 @@ namespace System.Net
             // If we are already logged in and the server returns 530 then
             // the server does not support re-issuing a USER command,
             // tear down the connection and start all over again
-            if (entry.Command.IndexOf("USER") != -1)
+            if (entry.Command.IndexOf("USER", StringComparison.Ordinal) != -1)
             {
                 // The server may not require a password for this user, so bypass the password command
                 if (status == FtpStatusCode.LoggedInProceed)
@@ -306,7 +306,7 @@ namespace System.Net
             }
 
             if (_loginState != FtpLoginState.LoggedIn
-                && entry.Command.IndexOf("PASS") != -1)
+                && entry.Command.IndexOf("PASS", StringComparison.Ordinal) != -1)
             {
                 // Note the fact that we logged in
                 if (status == FtpStatusCode.NeedLoginAccount || status == FtpStatusCode.LoggedInProceed)
@@ -412,11 +412,11 @@ namespace System.Net
             else if (status == FtpStatusCode.FileStatus)
             {
                 FtpWebRequest request = (FtpWebRequest)_request;
-                if (entry.Command.StartsWith("SIZE "))
+                if (entry.Command.StartsWith("SIZE ", StringComparison.Ordinal))
                 {
                     _contentLength = GetContentLengthFrom213Response(response.StatusDescription);
                 }
-                else if (entry.Command.StartsWith("MDTM "))
+                else if (entry.Command.StartsWith("MDTM ", StringComparison.Ordinal))
                 {
                     _lastModified = GetLastModifiedFrom213Response(response.StatusDescription);
                 }
@@ -433,7 +433,7 @@ namespace System.Net
             else
             {
                 // We only use CWD to reset ourselves back to the login directory.
-                if (entry.Command.IndexOf("CWD") != -1)
+                if (entry.Command.IndexOf("CWD", StringComparison.Ordinal) != -1)
                 {
                     _establishedServerDirectory = _requestedServerDirectory;
                 }
@@ -570,12 +570,12 @@ namespace System.Net
 
                 if (request.UsePassive)
                 {
-                    string passiveCommand = (ServerAddress.AddressFamily == AddressFamily.InterNetwork) ? "PASV" : "EPSV";
+                    string passiveCommand = (ServerAddress.AddressFamily == AddressFamily.InterNetwork || ServerAddress.IsIPv4MappedToIPv6) ? "PASV" : "EPSV";
                     commandList.Add(new PipelineEntry(FormatFtpCommand(passiveCommand, null), PipelineEntryFlags.CreateDataConnection));
                 }
                 else
                 {
-                    string portCommand = (ServerAddress.AddressFamily == AddressFamily.InterNetwork) ? "PORT" : "EPRT";
+                    string portCommand = (ServerAddress.AddressFamily == AddressFamily.InterNetwork || ServerAddress.IsIPv4MappedToIPv6) ? "PORT" : "EPRT";
                     CreateFtpListenerSocket(request);
                     commandList.Add(new PipelineEntry(FormatFtpCommand(portCommand, GetPortCommandLine(request))));
                 }
@@ -645,6 +645,7 @@ namespace System.Net
             // Handle passive responses by parsing the port and later doing a Connect(...)
             bool isPassive = false;
             int port = -1;
+
             if (entry.Command == "PASV\r\n" || entry.Command == "EPSV\r\n")
             {
                 if (!response.PositiveCompletion)
@@ -784,16 +785,16 @@ namespace System.Net
         /// <summary>
         ///    <para>Formats an IP address (contained in a UInt32) to a FTP style command string</para>
         /// </summary>
-        private String FormatAddress(IPAddress address, int Port)
+        private string FormatAddress(IPAddress address, int Port)
         {
             byte[] localAddressInBytes = address.GetAddressBytes();
 
             // produces a string in FTP IPAddress/Port encoding (a1, a2, a3, a4, p1, p2), for sending as a parameter
             // to the port command.
             StringBuilder sb = new StringBuilder(32);
-            foreach (byte element in localAddressInBytes)
+            for (int i = address.IsIPv4MappedToIPv6 ? 12 : 0; i < localAddressInBytes.Length; i++)
             {
-                sb.Append(element);
+                sb.Append(localAddressInBytes[i]);
                 sb.Append(',');
             }
             sb.Append(Port / 256);
@@ -804,13 +805,13 @@ namespace System.Net
 
         /// <summary>
         ///    <para>Formats an IP address (v6) to a FTP style command string
-        ///    Looks something in this form: |2|1080::8:800:200C:417A|5282| <para>
+        ///    Looks something in this form: |2|1080::8:800:200C:417A|5282| </para>
         ///    |2|4567::0123:5678:0123:5678|0123|
         /// </summary>
         private string FormatAddressV6(IPAddress address, int port)
         {
             StringBuilder sb = new StringBuilder(43); // based on max size of IPv6 address + port + seperators
-            String addressString = address.ToString();
+            string addressString = address.ToString();
             sb.Append("|2|");
             sb.Append(addressString);
             sb.Append('|');
@@ -939,7 +940,7 @@ namespace System.Net
             //
             // Not sure what we are doing here but I guess the logic is IIS centric
             //
-            int start = str.IndexOf("for ");
+            int start = str.IndexOf("for ", StringComparison.Ordinal);
             if (start == -1)
                 return;
             start += 4;
@@ -990,15 +991,15 @@ namespace System.Net
         /// </summary>
         private void TryUpdateContentLength(string str)
         {
-            int pos1 = str.LastIndexOf("(");
+            int pos1 = str.LastIndexOf('(');
             if (pos1 != -1)
             {
-                int pos2 = str.IndexOf(" bytes).");
+                int pos2 = str.IndexOf(" bytes).", StringComparison.Ordinal);
                 if (pos2 != -1 && pos2 > pos1)
                 {
                     pos1++;
                     long result;
-                    if (Int64.TryParse(str.Substring(pos1, pos2 - pos1),
+                    if (long.TryParse(str.Substring(pos1, pos2 - pos1),
                                         NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite,
                                         NumberFormatInfo.InvariantInfo, out result))
                     {
@@ -1021,7 +1022,7 @@ namespace System.Net
             }
             else
             {
-                return String.Empty;
+                return string.Empty;
             }
         }
 
@@ -1040,7 +1041,7 @@ namespace System.Net
 
             int index = parsedList.Length - 1;
             // skip the last non-number token (e.g. terminating '.')
-            if (!Char.IsNumber(parsedList[index], 0))
+            if (!char.IsNumber(parsedList[index], 0))
                 index--;
 
             int port = Convert.ToByte(parsedList[index--], NumberFormatInfo.InvariantInfo);
@@ -1055,8 +1056,8 @@ namespace System.Net
         /// </summary>
         private int GetPortV6(string responseString)
         {
-            int pos1 = responseString.LastIndexOf("(");
-            int pos2 = responseString.LastIndexOf(")");
+            int pos1 = responseString.LastIndexOf('(');
+            int pos2 = responseString.LastIndexOf(')');
             if (pos1 == -1 || pos2 <= pos1)
                 throw new FormatException(SR.Format(SR.net_ftp_response_invalid_format, responseString));
 
@@ -1100,7 +1101,7 @@ namespace System.Net
             {
                 // retrieves the IP address of the local endpoint
                 IPEndPoint localEP = (IPEndPoint)_dataSocket.LocalEndPoint;
-                if (ServerAddress.AddressFamily == AddressFamily.InterNetwork)
+                if (ServerAddress.AddressFamily == AddressFamily.InterNetwork || ServerAddress.IsIPv4MappedToIPv6)
                 {
                     return FormatAddress(localEP.Address, localEP.Port);
                 }
@@ -1144,6 +1145,11 @@ namespace System.Net
         {
             // Safe to be called under an Assert.
             Socket socket = new Socket(templateSocket.AddressFamily, templateSocket.SocketType, templateSocket.ProtocolType);
+            if (templateSocket.AddressFamily == AddressFamily.InterNetworkV6 && templateSocket.DualMode)
+            {
+                socket.DualMode = true;
+            }
+
             return socket;
         }
 
@@ -1162,7 +1168,7 @@ namespace System.Net
             if (response.Status == ResponseDescription.NoStatus)
             {
                 // If the response does not start with three digits, then it is not a valid response from an FTP server.
-                if (!(Char.IsDigit(responseString[0]) && Char.IsDigit(responseString[1]) && Char.IsDigit(responseString[2]) && (responseString[3] == ' ' || responseString[3] == '-')))
+                if (!(char.IsDigit(responseString[0]) && char.IsDigit(responseString[1]) && char.IsDigit(responseString[2]) && (responseString[3] == ' ' || responseString[3] == '-')))
                 {
                     return false;
                 }
@@ -1190,7 +1196,7 @@ namespace System.Net
             // FTP protocol for multiline responses.
             // All other cases indicate that the response is not yet complete.
             int index = 0;
-            while ((index = responseString.IndexOf("\r\n", validThrough)) != -1)  // gets the end line.
+            while ((index = responseString.IndexOf("\r\n", validThrough, StringComparison.Ordinal)) != -1)  // gets the end line.
             {
                 int lineStart = validThrough;
                 validThrough = index + 2;  // validThrough now marks the end of the line being examined.
@@ -1239,4 +1245,3 @@ namespace System.Net
         }
     } // class FtpControlStream
 } // namespace System.Net
-

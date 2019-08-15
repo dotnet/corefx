@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -13,10 +13,9 @@ namespace System.Configuration
     /// </summary>
     public class AppSettingsReader
     {
-        private NameValueCollection _map;
-        private static Type s_stringType = typeof(string);
-        private static Type[] _paramsArray = new Type[] { s_stringType };
-        private static string NullString = "None";
+        private readonly NameValueCollection _map;
+        private static readonly Type s_stringType = typeof(string);
+        private const string NullString = "None";
 
         public AppSettingsReader()
         {
@@ -26,7 +25,7 @@ namespace System.Configuration
         /// <summary>
         /// Gets the value for specified key from ConfigurationManager.AppSettings, and returns
         /// an object of the specified type containing the value from the config file.  If the key
-        /// isn't in the config file, or if it is not a valid value for the given type, it will 
+        /// isn't in the config file, or if it is not a valid value for the given type, it will
         /// throw an exception with a descriptive message so the user can make the appropriate
         /// change
         /// </summary>
@@ -37,7 +36,7 @@ namespace System.Configuration
 
             string val = _map[key];
 
-            if (val == null) throw new InvalidOperationException(string.Format(SR.AppSettingsReaderNoKey, key));
+            if (val == null) throw new InvalidOperationException(SR.Format(SR.AppSettingsReaderNoKey, key));
 
             if (type == s_stringType)
             {
@@ -71,7 +70,7 @@ namespace System.Configuration
                 catch (Exception)
                 {
                     string displayString = (val.Length == 0) ? SR.AppSettingsReaderEmptyString : val;
-                    throw new InvalidOperationException(string.Format(SR.AppSettingsReaderCantParse, displayString, key, type.ToString()));
+                    throw new InvalidOperationException(SR.Format(SR.AppSettingsReaderCantParse, displayString, key, type));
                 }
             }
         }

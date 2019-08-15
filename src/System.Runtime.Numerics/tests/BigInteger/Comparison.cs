@@ -17,7 +17,7 @@ namespace System.Numerics.Tests
             RunTests(seed);
         }
 
-        public static void RunTests(int seed)
+        private static void RunTests(int seed)
         {
             Random random = new Random(seed);
 
@@ -43,16 +43,16 @@ namespace System.Numerics.Tests
             VerifyComparison(BigInteger.MinusOne, BigInteger.One, -1);
 
             // BigInteger.MinusOne, Large Negative
-            VerifyComparison(BigInteger.MinusOne, -1L * ((BigInteger)Int64.MaxValue), 1);
+            VerifyComparison(BigInteger.MinusOne, -1L * ((BigInteger)long.MaxValue), 1);
 
             // BigInteger.MinusOne, Small Negative
-            VerifyComparison(BigInteger.MinusOne, -1L * ((BigInteger)Int16.MaxValue), 1);
+            VerifyComparison(BigInteger.MinusOne, -1L * ((BigInteger)short.MaxValue), 1);
 
             // BigInteger.MinusOne, Large Number
-            VerifyComparison(BigInteger.MinusOne, (BigInteger)Int32.MaxValue + 1, -1);
+            VerifyComparison(BigInteger.MinusOne, (BigInteger)int.MaxValue + 1, -1);
 
             // BigInteger.MinusOne, Small Number
-            VerifyComparison(BigInteger.MinusOne, (BigInteger)Int32.MaxValue - 1, -1);
+            VerifyComparison(BigInteger.MinusOne, (BigInteger)int.MaxValue - 1, -1);
 
             // BigInteger.MinusOne, One Less
             VerifyComparison(BigInteger.MinusOne, BigInteger.MinusOne - 1, 1);
@@ -62,16 +62,16 @@ namespace System.Numerics.Tests
             VerifyComparison(BigInteger.Zero, BigInteger.Zero, 0);
 
             // BigInteger.Zero, Large Negative
-            VerifyComparison(BigInteger.Zero, -1L * ((BigInteger)Int32.MaxValue + 1), 1);
+            VerifyComparison(BigInteger.Zero, -1L * ((BigInteger)int.MaxValue + 1), 1);
 
             // BigInteger.Zero, Small Negative
-            VerifyComparison(BigInteger.Zero, -1L * ((BigInteger)Int32.MaxValue - 1), 1);
+            VerifyComparison(BigInteger.Zero, -1L * ((BigInteger)int.MaxValue - 1), 1);
 
             // BigInteger.Zero, Large Number
-            VerifyComparison(BigInteger.Zero, (BigInteger)Int32.MaxValue + 1, -1);
+            VerifyComparison(BigInteger.Zero, (BigInteger)int.MaxValue + 1, -1);
 
             // BigInteger.Zero, Small Number
-            VerifyComparison(BigInteger.Zero, (BigInteger)Int32.MaxValue - 1, -1);
+            VerifyComparison(BigInteger.Zero, (BigInteger)int.MaxValue - 1, -1);
 
 
             // BigInteger.One, BigInteger.One
@@ -84,142 +84,142 @@ namespace System.Numerics.Tests
             VerifyComparison(BigInteger.One, BigInteger.Zero, 1);
 
             // BigInteger.One, Large Negative
-            VerifyComparison(BigInteger.One, -1 * ((BigInteger)Int32.MaxValue + 1), 1);
+            VerifyComparison(BigInteger.One, -1 * ((BigInteger)int.MaxValue + 1), 1);
 
             // BigInteger.One, Small Negative
-            VerifyComparison(BigInteger.One, -1 * ((BigInteger)Int32.MaxValue - 1), 1);
+            VerifyComparison(BigInteger.One, -1 * ((BigInteger)int.MaxValue - 1), 1);
 
             // BigInteger.One, Large Number
-            VerifyComparison(BigInteger.One, (BigInteger)Int32.MaxValue + 1, -1);
+            VerifyComparison(BigInteger.One, (BigInteger)int.MaxValue + 1, -1);
 
             // BigInteger.One, Small Number
-            VerifyComparison(BigInteger.One, (BigInteger)Int32.MaxValue - 1, -1);
+            VerifyComparison(BigInteger.One, (BigInteger)int.MaxValue - 1, -1);
 
             //Basic Checks
             // BigInteger.MinusOne, (Int32) -1
-            VerifyComparison(BigInteger.MinusOne, (Int32)(-1), 0);
+            VerifyComparison(BigInteger.MinusOne, (int)(-1), 0);
 
             // BigInteger.Zero, (Int32) 0
-            VerifyComparison(BigInteger.Zero, (Int32)(0), 0);
+            VerifyComparison(BigInteger.Zero, (int)(0), 0);
 
             // BigInteger.One, 1
-            VerifyComparison(BigInteger.One, (Int32)(1), 0);
+            VerifyComparison(BigInteger.One, (int)(1), 0);
 
 
             //1 Inputs Around the boundary of UInt32
             // -1 * UInt32.MaxValue, -1 * UInt32.MaxValue
-            VerifyComparison(-1L * (BigInteger)UInt32.MaxValue - 1, -1L * (BigInteger)UInt32.MaxValue - 1, 0);
+            VerifyComparison(-1L * (BigInteger)uint.MaxValue - 1, -1L * (BigInteger)uint.MaxValue - 1, 0);
 
             // -1 * UInt32.MaxValue, -1 * UInt32.MaxValue -1
-            VerifyComparison(-1L * (BigInteger)UInt32.MaxValue, (-1L * (BigInteger)UInt32.MaxValue) - 1L, 1);
+            VerifyComparison(-1L * (BigInteger)uint.MaxValue, (-1L * (BigInteger)uint.MaxValue) - 1L, 1);
 
             // UInt32.MaxValue, -1 * UInt32.MaxValue
-            VerifyComparison((BigInteger)UInt32.MaxValue, -1L * (BigInteger)UInt32.MaxValue, 1);
+            VerifyComparison((BigInteger)uint.MaxValue, -1L * (BigInteger)uint.MaxValue, 1);
 
             // UInt32.MaxValue, UInt32.MaxValue
-            VerifyComparison((BigInteger)UInt32.MaxValue, (BigInteger)UInt32.MaxValue, 0);
+            VerifyComparison((BigInteger)uint.MaxValue, (BigInteger)uint.MaxValue, 0);
 
             // UInt32.MaxValue, UInt32.MaxValue + 1
-            VerifyComparison((BigInteger)UInt32.MaxValue, (BigInteger)UInt32.MaxValue + 1, -1);
+            VerifyComparison((BigInteger)uint.MaxValue, (BigInteger)uint.MaxValue + 1, -1);
 
             // UInt64.MaxValue, UInt64.MaxValue
-            VerifyComparison((BigInteger)UInt64.MaxValue, (BigInteger)UInt64.MaxValue, 0);
+            VerifyComparison((BigInteger)ulong.MaxValue, (BigInteger)ulong.MaxValue, 0);
 
             // UInt64.MaxValue + 1, UInt64.MaxValue
-            VerifyComparison((BigInteger)UInt64.MaxValue + 1, UInt64.MaxValue, 1);
+            VerifyComparison((BigInteger)ulong.MaxValue + 1, ulong.MaxValue, 1);
 
             //Other cases
             // -1 * Large Bigint, -1 * Large BigInt
-            VerifyComparison(-1L * ((BigInteger)Int32.MaxValue + 1), -1L * ((BigInteger)Int32.MaxValue + 1), 0);
+            VerifyComparison(-1L * ((BigInteger)int.MaxValue + 1), -1L * ((BigInteger)int.MaxValue + 1), 0);
 
             // Large Bigint, Large Negative BigInt
-            VerifyComparison((BigInteger)Int32.MaxValue + 1, -1L * ((BigInteger)Int32.MaxValue + 1), 1);
+            VerifyComparison((BigInteger)int.MaxValue + 1, -1L * ((BigInteger)int.MaxValue + 1), 1);
 
             // Large Bigint, UInt32.MaxValue
-            VerifyComparison((BigInteger)Int64.MaxValue + 1, (BigInteger)UInt32.MaxValue, 1);
+            VerifyComparison((BigInteger)long.MaxValue + 1, (BigInteger)uint.MaxValue, 1);
 
             // Large Bigint, One More
-            VerifyComparison((BigInteger)Int32.MaxValue + 1, ((BigInteger)Int32.MaxValue) + 2, -1);
+            VerifyComparison((BigInteger)int.MaxValue + 1, ((BigInteger)int.MaxValue) + 2, -1);
 
             // -1 * Small Bigint, -1 * Small BigInt
-            VerifyComparison(-1L * ((BigInteger)Int32.MaxValue - 1), -1L * ((BigInteger)Int32.MaxValue - 1), 0);
+            VerifyComparison(-1L * ((BigInteger)int.MaxValue - 1), -1L * ((BigInteger)int.MaxValue - 1), 0);
 
             // Small Bigint, Small Negative BigInt
-            VerifyComparison((BigInteger)Int32.MaxValue - 1, -1L * ((BigInteger)Int32.MaxValue - 1), 1);
+            VerifyComparison((BigInteger)int.MaxValue - 1, -1L * ((BigInteger)int.MaxValue - 1), 1);
 
             // Small Bigint, UInt32.MaxValue
-            VerifyComparison((BigInteger)Int32.MaxValue - 1, (BigInteger)UInt32.MaxValue - 1, -1);
+            VerifyComparison((BigInteger)int.MaxValue - 1, (BigInteger)uint.MaxValue - 1, -1);
 
             // Small Bigint, One More
-            VerifyComparison((BigInteger)Int32.MaxValue - 2, ((BigInteger)Int32.MaxValue) - 1, -1);
+            VerifyComparison((BigInteger)int.MaxValue - 2, ((BigInteger)int.MaxValue) - 1, -1);
 
             //BigInteger vs. Int32
 
             // One Larger (BigInteger), Int32.MaxValue
-            VerifyComparison((BigInteger)Int32.MaxValue + 1, Int32.MaxValue, 1);
+            VerifyComparison((BigInteger)int.MaxValue + 1, int.MaxValue, 1);
 
             // Larger BigInteger, Int32.MaxValue
-            VerifyComparison((BigInteger)UInt64.MaxValue + 1, Int32.MaxValue, 1);
+            VerifyComparison((BigInteger)ulong.MaxValue + 1, int.MaxValue, 1);
 
             // Smaller BigInteger, Int32.MaxValue
-            VerifyComparison((BigInteger)Int16.MinValue - 1, Int32.MaxValue, -1);
+            VerifyComparison((BigInteger)short.MinValue - 1, int.MaxValue, -1);
 
             // One Smaller (BigInteger), Int32.MaxValue
-            VerifyComparison((BigInteger)Int32.MaxValue - 1, Int32.MaxValue, -1);
+            VerifyComparison((BigInteger)int.MaxValue - 1, int.MaxValue, -1);
 
             // (BigInteger) Int32.MaxValue, Int32.MaxValue
-            VerifyComparison((BigInteger)Int32.MaxValue, Int32.MaxValue, 0);
+            VerifyComparison((BigInteger)int.MaxValue, int.MaxValue, 0);
 
             //BigInteger vs. UInt32
             // One Larger (BigInteger), UInt32.MaxValue
-            VerifyComparison((BigInteger)UInt32.MaxValue + 1, UInt32.MaxValue, 1);
+            VerifyComparison((BigInteger)uint.MaxValue + 1, uint.MaxValue, 1);
 
             // Larger BigInteger, UInt32.MaxValue
-            VerifyComparison((BigInteger)Int64.MaxValue + 1, UInt32.MaxValue, 1);
+            VerifyComparison((BigInteger)long.MaxValue + 1, uint.MaxValue, 1);
 
             // Smaller BigInteger, UInt32.MaxValue
-            VerifyComparison((BigInteger)Int16.MinValue - 1, UInt32.MaxValue, -1);
+            VerifyComparison((BigInteger)short.MinValue - 1, uint.MaxValue, -1);
 
             // One Smaller (BigInteger), UInt32.MaxValue
-            VerifyComparison((BigInteger)UInt32.MaxValue - 1, UInt32.MaxValue, -1);
+            VerifyComparison((BigInteger)uint.MaxValue - 1, uint.MaxValue, -1);
 
             // (BigInteger UInt32.MaxValue, UInt32.MaxValue
-            VerifyComparison((BigInteger)UInt32.MaxValue, UInt32.MaxValue, 0);
+            VerifyComparison((BigInteger)uint.MaxValue, uint.MaxValue, 0);
 
             //BigInteger vs. UInt64
             // One Larger (BigInteger), UInt64.MaxValue
-            VerifyComparison((BigInteger)UInt64.MaxValue + 1, UInt64.MaxValue, 1);
+            VerifyComparison((BigInteger)ulong.MaxValue + 1, ulong.MaxValue, 1);
 
             // Larger BigInteger, UInt64.MaxValue
-            VerifyComparison((BigInteger)UInt64.MaxValue + 100, UInt64.MaxValue, 1);
+            VerifyComparison((BigInteger)ulong.MaxValue + 100, ulong.MaxValue, 1);
 
             // Smaller BigInteger, UInt64.MaxValue
-            VerifyComparison((BigInteger)Int16.MinValue - 1, UInt64.MaxValue, -1);
-            VerifyComparison((BigInteger)Int16.MaxValue - 1, UInt64.MaxValue, -1);
-            VerifyComparison((BigInteger)Int32.MaxValue + 1, UInt64.MaxValue, -1);
+            VerifyComparison((BigInteger)short.MinValue - 1, ulong.MaxValue, -1);
+            VerifyComparison((BigInteger)short.MaxValue - 1, ulong.MaxValue, -1);
+            VerifyComparison((BigInteger)int.MaxValue + 1, ulong.MaxValue, -1);
 
             // One Smaller (BigInteger), UInt64.MaxValue
-            VerifyComparison((BigInteger)UInt64.MaxValue - 1, UInt64.MaxValue, -1);
+            VerifyComparison((BigInteger)ulong.MaxValue - 1, ulong.MaxValue, -1);
 
             // (BigInteger UInt64.MaxValue, UInt64.MaxValue
-            VerifyComparison((BigInteger)UInt64.MaxValue, UInt64.MaxValue, 0);
+            VerifyComparison((BigInteger)ulong.MaxValue, ulong.MaxValue, 0);
 
             //BigInteger vs. Int64
             // One Smaller (BigInteger), Int64.MaxValue
-            VerifyComparison((BigInteger)Int64.MaxValue - 1, Int64.MaxValue, -1);
+            VerifyComparison((BigInteger)long.MaxValue - 1, long.MaxValue, -1);
 
             // Larger BigInteger, Int64.MaxValue
-            VerifyComparison((BigInteger)UInt64.MaxValue + 100, Int64.MaxValue, 1);
+            VerifyComparison((BigInteger)ulong.MaxValue + 100, long.MaxValue, 1);
 
             // Smaller BigInteger, Int32.MaxValue
-            VerifyComparison((BigInteger)Int16.MinValue - 1, Int64.MaxValue, -1);
+            VerifyComparison((BigInteger)short.MinValue - 1, long.MaxValue, -1);
 
             // (BigInteger Int64.MaxValue, Int64.MaxValue
-            VerifyComparison((BigInteger)Int64.MaxValue, Int64.MaxValue, 0);
+            VerifyComparison((BigInteger)long.MaxValue, long.MaxValue, 0);
 
             // One Larger (BigInteger), Int64.MaxValue
-            VerifyComparison((BigInteger)Int64.MaxValue + 1, Int64.MaxValue, 1);
-            
+            VerifyComparison((BigInteger)long.MaxValue + 1, long.MaxValue, 1);
+
 
             //1 Random Inputs
             // Random BigInteger only differs by sign
@@ -229,7 +229,7 @@ namespace System.Numerics.Tests
                 do
                 {
                     byteArray = GetRandomByteArray(random);
-                } 
+                }
                 while (MyBigIntImp.IsZero(byteArray));
 
                 BigInteger b2 = new BigInteger(byteArray);
@@ -293,7 +293,7 @@ namespace System.Numerics.Tests
             do
             {
                 byteArray = GetRandomByteArray(random);
-            } 
+            }
             while (MyBigIntImp.IsZero(byteArray));
 
             isNegative = 0 == random.Next(0, 2);
@@ -340,7 +340,7 @@ namespace System.Numerics.Tests
             do
             {
                 byteArray = GetRandomByteArray(random);
-            } 
+            }
             while (MyBigIntImp.IsZero(byteArray));
 
             BigInteger b1 = new BigInteger(byteArray);
@@ -350,16 +350,16 @@ namespace System.Numerics.Tests
         private static void RunNegativeTests(Random random)
         {
             // BigInteger.Zero, 0
-            Assert.Equal(false, BigInteger.Zero.Equals((Object)0));
+            Assert.False(BigInteger.Zero.Equals((object)0));
 
             // BigInteger.Zero, null
-            Assert.Equal(false, BigInteger.Zero.Equals((Object)null));
+            Assert.False(BigInteger.Zero.Equals((object)null));
 
             // BigInteger.Zero, string
-            Assert.Equal(false, BigInteger.Zero.Equals((Object)"0"));
+            Assert.False(BigInteger.Zero.Equals((object)"0"));
         }
 
-        public static void IComparable_Invalid(string paramName)
+        private static void IComparable_Invalid(string paramName)
         {
             IComparable comparable = new BigInteger();
             Assert.Equal(1, comparable.CompareTo(null));
@@ -367,14 +367,6 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)] // Desktop misses Exception.ParamName fixed in .NETCore
-        public static void IComparable_Invalid_net46()
-        {
-            IComparable_Invalid(null);
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void IComparable_Invalid_netcore()
         {
             IComparable_Invalid("obj");
@@ -395,19 +387,19 @@ namespace System.Numerics.Tests
             Assert.Equal(expectedEquals, x.Equals(y));
             Assert.Equal(expectedEquals, y.Equals(x));
 
-            Assert.Equal(expectedEquals, x.Equals((Object)y));
-            Assert.Equal(expectedEquals, y.Equals((Object)x));
+            Assert.Equal(expectedEquals, x.Equals((object)y));
+            Assert.Equal(expectedEquals, y.Equals((object)x));
 
-            VerifyCompareResult(expectedResult, x.CompareTo(y), "x.CompareTo(y)");
-            VerifyCompareResult(-expectedResult, y.CompareTo(x), "y.CompareTo(x)");
+            VerifyCompareResult(expectedResult, x.CompareTo(y));
+            VerifyCompareResult(-expectedResult, y.CompareTo(x));
 
             IComparable comparableX = x;
             IComparable comparableY = y;
-            VerifyCompareResult(expectedResult, comparableX.CompareTo(y), "comparableX.CompareTo(y)");
-            VerifyCompareResult(-expectedResult, comparableY.CompareTo(x), "comparableY.CompareTo(x)");
+            VerifyCompareResult(expectedResult, comparableX.CompareTo(y));
+            VerifyCompareResult(-expectedResult, comparableY.CompareTo(x));
 
-            VerifyCompareResult(expectedResult, BigInteger.Compare(x, y), "Compare(x,y)");
-            VerifyCompareResult(-expectedResult, BigInteger.Compare(y, x), "Compare(y,x)");
+            VerifyCompareResult(expectedResult, BigInteger.Compare(x, y));
+            VerifyCompareResult(-expectedResult, BigInteger.Compare(y, x));
 
             if (expectedEquals)
             {
@@ -431,7 +423,7 @@ namespace System.Numerics.Tests
             Assert.Equal(expectedLessThan || expectedEquals, y >= x);
         }
 
-        private static void VerifyComparison(BigInteger x, Int32 y, int expectedResult)
+        private static void VerifyComparison(BigInteger x, int y, int expectedResult)
         {
             bool expectedEquals = 0 == expectedResult;
             bool expectedLessThan = expectedResult < 0;
@@ -445,84 +437,7 @@ namespace System.Numerics.Tests
 
             Assert.Equal(expectedEquals, x.Equals(y));
 
-            VerifyCompareResult(expectedResult, x.CompareTo(y), "x.CompareTo(y)");
-
-            if (expectedEquals)
-            {
-                Assert.Equal(x.GetHashCode(), ((BigInteger)y).GetHashCode());
-                Assert.Equal(x.ToString(), ((BigInteger)y).ToString());
-            }
-            
-            Assert.Equal(x.GetHashCode(), x.GetHashCode());
-            Assert.Equal(((BigInteger)y).GetHashCode(), ((BigInteger)y).GetHashCode());
-
-            Assert.Equal(expectedLessThan, x < y);
-            Assert.Equal(expectedGreaterThan, y < x);
-
-            Assert.Equal(expectedGreaterThan, x > y);
-            Assert.Equal(expectedLessThan, y > x);
-
-            Assert.Equal(expectedLessThan || expectedEquals, x <= y);
-            Assert.Equal(expectedGreaterThan || expectedEquals, y <= x);
-
-            Assert.Equal(expectedGreaterThan || expectedEquals, x >= y);
-            Assert.Equal(expectedLessThan || expectedEquals, y >= x);
-        }
-
-        private static void VerifyComparison(BigInteger x, UInt32 y, int expectedResult)
-        {
-            bool expectedEquals = 0 == expectedResult;
-            bool expectedLessThan = expectedResult < 0;
-            bool expectedGreaterThan = expectedResult > 0;
-
-            Assert.Equal(expectedEquals, x == y);
-            Assert.Equal(expectedEquals, y == x);
-
-            Assert.Equal(!expectedEquals, x != y);
-            Assert.Equal(!expectedEquals, y != x);
-
-            Assert.Equal(expectedEquals, x.Equals(y));
-
-            VerifyCompareResult(expectedResult, x.CompareTo(y), "x.CompareTo(y)");
-
-            if (expectedEquals)
-            {
-                Assert.Equal(x.GetHashCode(), ((BigInteger)y).GetHashCode());
-                Assert.Equal(x.ToString(), ((BigInteger)y).ToString());
-            }
-
-
-            Assert.Equal(x.GetHashCode(), x.GetHashCode());
-            Assert.Equal(((BigInteger)y).GetHashCode(), ((BigInteger)y).GetHashCode());
-
-            Assert.Equal(expectedLessThan, x < y);
-            Assert.Equal(expectedGreaterThan, y < x);
-
-            Assert.Equal(expectedGreaterThan, x > y);
-            Assert.Equal(expectedLessThan, y > x);
-
-            Assert.Equal(expectedLessThan || expectedEquals, x <= y);
-            Assert.Equal(expectedGreaterThan || expectedEquals, y <= x);
-
-            Assert.Equal(expectedGreaterThan || expectedEquals, x >= y);
-            Assert.Equal(expectedLessThan || expectedEquals, y >= x);
-        }
-
-        private static void VerifyComparison(BigInteger x, Int64 y, int expectedResult)
-        {
-            bool expectedEquals = 0 == expectedResult;
-            bool expectedLessThan = expectedResult < 0;
-            bool expectedGreaterThan = expectedResult > 0;
-
-            Assert.Equal(expectedEquals, x == y);
-            Assert.Equal(expectedEquals, y == x);
-
-            Assert.Equal(!expectedEquals, x != y);
-            Assert.Equal(!expectedEquals, y != x);
-
-            Assert.Equal(expectedEquals, x.Equals(y));
-
-            VerifyCompareResult(expectedResult, x.CompareTo(y), "x.CompareTo(y)");
+            VerifyCompareResult(expectedResult, x.CompareTo(y));
 
             if (expectedEquals)
             {
@@ -546,7 +461,7 @@ namespace System.Numerics.Tests
             Assert.Equal(expectedLessThan || expectedEquals, y >= x);
         }
 
-        private static void VerifyComparison(BigInteger x, UInt64 y, int expectedResult)
+        private static void VerifyComparison(BigInteger x, uint y, int expectedResult)
         {
             bool expectedEquals = 0 == expectedResult;
             bool expectedLessThan = expectedResult < 0;
@@ -560,7 +475,84 @@ namespace System.Numerics.Tests
 
             Assert.Equal(expectedEquals, x.Equals(y));
 
-            VerifyCompareResult(expectedResult, x.CompareTo(y), "x.CompareTo(y)");
+            VerifyCompareResult(expectedResult, x.CompareTo(y));
+
+            if (expectedEquals)
+            {
+                Assert.Equal(x.GetHashCode(), ((BigInteger)y).GetHashCode());
+                Assert.Equal(x.ToString(), ((BigInteger)y).ToString());
+            }
+
+
+            Assert.Equal(x.GetHashCode(), x.GetHashCode());
+            Assert.Equal(((BigInteger)y).GetHashCode(), ((BigInteger)y).GetHashCode());
+
+            Assert.Equal(expectedLessThan, x < y);
+            Assert.Equal(expectedGreaterThan, y < x);
+
+            Assert.Equal(expectedGreaterThan, x > y);
+            Assert.Equal(expectedLessThan, y > x);
+
+            Assert.Equal(expectedLessThan || expectedEquals, x <= y);
+            Assert.Equal(expectedGreaterThan || expectedEquals, y <= x);
+
+            Assert.Equal(expectedGreaterThan || expectedEquals, x >= y);
+            Assert.Equal(expectedLessThan || expectedEquals, y >= x);
+        }
+
+        private static void VerifyComparison(BigInteger x, long y, int expectedResult)
+        {
+            bool expectedEquals = 0 == expectedResult;
+            bool expectedLessThan = expectedResult < 0;
+            bool expectedGreaterThan = expectedResult > 0;
+
+            Assert.Equal(expectedEquals, x == y);
+            Assert.Equal(expectedEquals, y == x);
+
+            Assert.Equal(!expectedEquals, x != y);
+            Assert.Equal(!expectedEquals, y != x);
+
+            Assert.Equal(expectedEquals, x.Equals(y));
+
+            VerifyCompareResult(expectedResult, x.CompareTo(y));
+
+            if (expectedEquals)
+            {
+                Assert.Equal(x.GetHashCode(), ((BigInteger)y).GetHashCode());
+                Assert.Equal(x.ToString(), ((BigInteger)y).ToString());
+            }
+
+            Assert.Equal(x.GetHashCode(), x.GetHashCode());
+            Assert.Equal(((BigInteger)y).GetHashCode(), ((BigInteger)y).GetHashCode());
+
+            Assert.Equal(expectedLessThan, x < y);
+            Assert.Equal(expectedGreaterThan, y < x);
+
+            Assert.Equal(expectedGreaterThan, x > y);
+            Assert.Equal(expectedLessThan, y > x);
+
+            Assert.Equal(expectedLessThan || expectedEquals, x <= y);
+            Assert.Equal(expectedGreaterThan || expectedEquals, y <= x);
+
+            Assert.Equal(expectedGreaterThan || expectedEquals, x >= y);
+            Assert.Equal(expectedLessThan || expectedEquals, y >= x);
+        }
+
+        private static void VerifyComparison(BigInteger x, ulong y, int expectedResult)
+        {
+            bool expectedEquals = 0 == expectedResult;
+            bool expectedLessThan = expectedResult < 0;
+            bool expectedGreaterThan = expectedResult > 0;
+
+            Assert.Equal(expectedEquals, x == y);
+            Assert.Equal(expectedEquals, y == x);
+
+            Assert.Equal(!expectedEquals, x != y);
+            Assert.Equal(!expectedEquals, y != x);
+
+            Assert.Equal(expectedEquals, x.Equals(y));
+
+            VerifyCompareResult(expectedResult, x.CompareTo(y));
 
             if (expectedEquals)
             {
@@ -613,11 +605,11 @@ namespace System.Numerics.Tests
             Assert.Equal(expectedEquals, x.Equals(y));
             Assert.Equal(expectedEquals, y.Equals(x));
 
-            Assert.Equal(expectedEquals, x.Equals((Object)y));
-            Assert.Equal(expectedEquals, y.Equals((Object)x));
+            Assert.Equal(expectedEquals, x.Equals((object)y));
+            Assert.Equal(expectedEquals, y.Equals((object)x));
 
-            VerifyCompareResult(expectedResult, x.CompareTo(y), "x.CompareTo(y)");
-            VerifyCompareResult(-expectedResult, y.CompareTo(x), "y.CompareTo(x)");
+            VerifyCompareResult(expectedResult, x.CompareTo(y));
+            VerifyCompareResult(-expectedResult, y.CompareTo(x));
 
             if (expectedEquals)
             {
@@ -646,7 +638,7 @@ namespace System.Numerics.Tests
             Assert.Equal(expectedLessThan || expectedEquals, y >= x);
         }
         
-        private static void VerifyCompareResult(int expected, int actual, string message)
+        private static void VerifyCompareResult(int expected, int actual)
         {
             if (0 == expected)
             {

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -51,7 +51,7 @@ namespace System.Security.Cryptography.Tests.Asn1
                 // then one inverted exclamation (2 bytes UTF-8)
                 new string('\uFE60', 2000 / 3) + '\u00A1',
                 2000,
-            }, 
+            },
         };
 
         public static IEnumerable<object[]> InvalidInputs => Array.Empty<object[]>();
@@ -274,14 +274,18 @@ namespace System.Security.Cryptography.Tests.Asn1
         public new void VerifyWrite_CERSegmented_Span_CustomPrimitiveTag(string input, int contentByteCount) =>
             base.VerifyWrite_CERSegmented_Span_CustomPrimitiveTag(input, contentByteCount);
 
-        [Theory]
-        [MemberData(nameof(InvalidInputs))]
-        public new void VerifyWrite_String_NonEncodable(string input) =>
-            base.VerifyWrite_String_NonEncodable(input);
+        // UTF8 has no non-encodable values.
 
         [Theory]
-        [MemberData(nameof(InvalidInputs))]
-        public new void VerifyWrite_Span_NonEncodable(string input) =>
-            base.VerifyWrite_Span_NonEncodable(input);
+        [InlineData(false)]
+        [InlineData(true)]
+        public new void WriteAfterDispose_Span(bool empty) =>
+            base.WriteAfterDispose_Span(empty);
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public new void WriteAfterDispose_String(bool empty) =>
+            base.WriteAfterDispose_String(empty);
     }
 }

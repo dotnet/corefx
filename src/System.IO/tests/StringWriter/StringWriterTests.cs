@@ -2,17 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Xunit;
 using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
+using Xunit;
 
 namespace System.IO.Tests
 {
-    public partial class StringWriterTests : RemoteExecutorTestBase
+    public partial class StringWriterTests
     {
         static int[] iArrInvalidValues = new int[] { -1, -2, -100, -1000, -10000, -100000, -1000000, -10000000, -100000000, -1000000000, int.MinValue, short.MinValue };
         static int[] iArrLargeValues = new int[] { int.MaxValue, int.MaxValue - 1, int.MaxValue / 2, int.MaxValue / 10, int.MaxValue / 100 };
@@ -278,7 +279,7 @@ namespace System.IO.Tests
             await sw.WriteLineAsync("World!");
 
             Assert.Equal(
-                string.Format("H{0}ello{0}World!{0}", Environment.NewLine), 
+                string.Format("H{0}ello{0}World!{0}", Environment.NewLine),
                 sw.ToString());
         }
 
@@ -286,13 +287,14 @@ namespace System.IO.Tests
         public static void GetEncoding()
         {
             var sw = new StringWriter();
+            Assert.Equal(new UnicodeEncoding(false, false), sw.Encoding);
             Assert.Equal(Encoding.Unicode.WebName, sw.Encoding.WebName);
         }
 
         [Fact]
         public static void TestWriteMisc()
         {
-            RemoteInvoke(() => 
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentCulture = new CultureInfo("en-US"); // floating-point formatting comparison depends on culture
                 var sw = new StringWriter();
@@ -315,14 +317,14 @@ namespace System.IO.Tests
         public static void TestWriteObject()
         {
             var sw = new StringWriter();
-            sw.Write(new Object());
+            sw.Write(new object());
             Assert.Equal("System.Object", sw.ToString());
         }
 
         [Fact]
         public static void TestWriteLineMisc()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentCulture = new CultureInfo("en-US"); // floating-point formatting comparison depends on culture
                 var sw = new StringWriter();
@@ -344,10 +346,10 @@ namespace System.IO.Tests
         public static void TestWriteLineObject()
         {
             var sw = new StringWriter();
-            sw.WriteLine(new Object());
+            sw.WriteLine(new object());
             Assert.Equal("System.Object" + Environment.NewLine, sw.ToString());
         }
-    
+
         [Fact]
         public static void TestWriteLineAsyncCharArray()
         {
@@ -358,7 +360,6 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework throws NullReferenceException")]
         public async Task NullNewLineAsync()
         {
             using (MemoryStream ms = new MemoryStream())

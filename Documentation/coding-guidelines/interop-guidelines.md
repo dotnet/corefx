@@ -134,7 +134,7 @@ TargetsUnix is true for both OSX and Linux builds and can be used to include cod
 You should not test the value of the OSGroup property directly, instead use one of the values above.
 
 #### Project Files
-Whenever possible, a single .csproj should be used per assembly, spanning all target platforms, e.g. System.Console.csproj includes conditional entries for when targeting Windows vs when targeting Linux. A property can be passed to msbuild to control which flavor is built, e.g. msbuild /p:OSGroup=OSX System.Console.csproj.
+Whenever possible, a single .csproj should be used per assembly, spanning all target platforms, e.g. System.Console.csproj includes conditional entries for when targeting Windows vs when targeting Linux. A property can be passed to dotnet msbuild to control which flavor is built, e.g. `dotnet msbuild /p:OSGroup=OSX System.Console.csproj`.
 
 ### Constants
 - Wherever possible, constants should be defined as "const". Only if the data type doesn't support this (e.g. IntPtr) should they instead be static readonly fields.
@@ -174,7 +174,7 @@ Using enums instead of partial, static classes can lead to needing lots of casts
 
 ### Definition
 
-When defining the P/Invoke signatures and structs, the following guidelines should be followed. More details on P/Invoke behavior and these guidelines can be found here: [P/Invokes](interop-pinvokes)
+When defining the P/Invoke signatures and structs, the following guidelines should be followed. More details on P/Invoke behavior and these guidelines can be found here: [P/Invokes](interop-pinvokes.md)
 
 - Interop signatures / structs / constants should be defined using the same name / capitalization / etc. that's used in the corresponding native code.
 - Avoid using `StringBuilder`, particularly as an output buffer to avoid over allocating.

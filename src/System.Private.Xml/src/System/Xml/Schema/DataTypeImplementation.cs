@@ -16,21 +16,17 @@ namespace System.Xml.Schema
     using System.Xml.Serialization;
     using System.Reflection;
 
-    /// <include file='doc\DatatypeImplementation.uex' path='docs/doc[@for="XmlSchemaDatatypeVariety"]/*' />
     public enum XmlSchemaDatatypeVariety
     {
-        /// <include file='doc\DatatypeImplementation.uex' path='docs/doc[@for="XmlSchemaDatatypeVariety.Atomic"]/*' />
         Atomic,
-        /// <include file='doc\DatatypeImplementation.uex' path='docs/doc[@for="XmlSchemaDatatypeVariety.List"]/*' />
         List,
-        /// <include file='doc\DatatypeImplementation.uex' path='docs/doc[@for="XmlSchemaDatatypeVariety.Union"]/*' />
         Union
     }
 
     internal class XsdSimpleValue
     { //Wrapper to store XmlType and TypedValue together
-        private XmlSchemaSimpleType _xmlType;
-        private object _typedValue;
+        private readonly XmlSchemaSimpleType _xmlType;
+        private readonly object _typedValue;
 
         public XsdSimpleValue(XmlSchemaSimpleType st, object value)
         {
@@ -106,8 +102,8 @@ namespace System.Xml.Schema
         private XmlValueConverter _valueConverter;
         private XmlSchemaType _parentSchemaType;
 
-        private static Hashtable s_builtinTypes = new Hashtable();
-        private static XmlSchemaSimpleType[] s_enumToTypeCode = new XmlSchemaSimpleType[(int)XmlTypeCode.DayTimeDuration + 1];
+        private static readonly Hashtable s_builtinTypes = new Hashtable();
+        private static readonly XmlSchemaSimpleType[] s_enumToTypeCode = new XmlSchemaSimpleType[(int)XmlTypeCode.DayTimeDuration + 1];
         private static XmlSchemaSimpleType s__anySimpleType;
         private static XmlSchemaSimpleType s__anyAtomicType;
         private static XmlSchemaSimpleType s__untypedAtomicType;
@@ -143,17 +139,17 @@ namespace System.Xml.Schema
         internal static XmlSchemaSimpleType AnyAtomicType { get { return s__anyAtomicType; } }
         internal static XmlSchemaSimpleType UntypedAtomicType { get { return s__untypedAtomicType; } }
 
-        internal new static DatatypeImplementation FromXmlTokenizedType(XmlTokenizedType token)
+        internal static new DatatypeImplementation FromXmlTokenizedType(XmlTokenizedType token)
         {
             return s_tokenizedTypes[(int)token];
         }
 
-        internal new static DatatypeImplementation FromXmlTokenizedTypeXsd(XmlTokenizedType token)
+        internal static new DatatypeImplementation FromXmlTokenizedTypeXsd(XmlTokenizedType token)
         {
             return s_tokenizedTypesXsd[(int)token];
         }
 
-        internal new static DatatypeImplementation FromXdrName(string name)
+        internal static new DatatypeImplementation FromXdrName(string name)
         {
             int i = Array.BinarySearch(s_xdrTypes, name, null);
             return i < 0 ? null : (DatatypeImplementation)s_xdrTypes[i];
@@ -400,7 +396,7 @@ namespace System.Xml.Schema
             return dt;
         }
 
-        internal new static DatatypeImplementation DeriveByUnion(XmlSchemaSimpleType[] types, XmlSchemaType schemaType)
+        internal static new DatatypeImplementation DeriveByUnion(XmlSchemaSimpleType[] types, XmlSchemaType schemaType)
         {
             DatatypeImplementation dt = new Datatype_union(types);
             dt._baseType = s_anySimpleType; //Base type of a union is anySimpleType
@@ -445,7 +441,6 @@ namespace System.Xml.Schema
 
         internal override bool IsEqual(object o1, object o2)
         {
-            //Debug.WriteLineIf(DiagnosticsSwitches.XmlSchema.TraceVerbose, string.Format("\t\tSchemaDatatype.IsEqual({0}, {1})", o1, o2));
             return Compare(o1, o2) == 0;
         }
 
@@ -593,7 +588,7 @@ namespace System.Xml.Schema
                 }
                 if (this.HasLexicalFacets)
                 {
-                    string s1 = (string)this.ValueConverter.ChangeType(value, typeof(System.String), namespaceResolver); //Using value here to avoid info loss
+                    string s1 = (string)this.ValueConverter.ChangeType(value, typeof(string), namespaceResolver); //Using value here to avoid info loss
                     exception = this.FacetsChecker.CheckLexicalFacets(ref s1, this);
                     if (exception != null) goto Error;
                 }
@@ -712,9 +707,9 @@ namespace System.Xml.Schema
 
         private class SchemaDatatypeMap : IComparable
         {
-            private string _name;
-            private DatatypeImplementation _type;
-            private int _parentIndex;
+            private readonly string _name;
+            private readonly DatatypeImplementation _type;
+            private readonly int _parentIndex;
 
             internal SchemaDatatypeMap(string name, DatatypeImplementation type)
             {
@@ -915,8 +910,8 @@ namespace System.Xml.Schema
     //List type
     internal class Datatype_List : Datatype_anySimpleType
     {
-        private DatatypeImplementation _itemType;
-        private int _minListSize;
+        private readonly DatatypeImplementation _itemType;
+        private readonly int _minListSize;
 
         internal override XmlValueConverter CreateValueConverter(XmlSchemaType schemaType)
         {
@@ -1064,7 +1059,7 @@ namespace System.Xml.Schema
                     item = valuesToCheck.GetValue(i);
                     if (checkItemLexical)
                     {
-                        string s1 = (string)itemValueConverter.ChangeType(item, typeof(System.String), namespaceResolver);
+                        string s1 = (string)itemValueConverter.ChangeType(item, typeof(string), namespaceResolver);
                         exception = itemFacetsChecker.CheckLexicalFacets(ref s1, _itemType);
                         if (exception != null) goto Error;
                     }
@@ -1078,7 +1073,7 @@ namespace System.Xml.Schema
                 //Check facets on the list itself
                 if (this.HasLexicalFacets)
                 {
-                    string s1 = (string)this.ValueConverter.ChangeType(valueToCheck, typeof(System.String), namespaceResolver);
+                    string s1 = (string)this.ValueConverter.ChangeType(valueToCheck, typeof(string), namespaceResolver);
                     exception = listFacetsChecker.CheckLexicalFacets(ref s1, this);
                     if (exception != null) goto Error;
                 }
@@ -1172,7 +1167,7 @@ namespace System.Xml.Schema
     {
         private static readonly Type s_atomicValueType = typeof(object);
         private static readonly Type s_listValueType = typeof(object[]);
-        private XmlSchemaSimpleType[] _types;
+        private readonly XmlSchemaSimpleType[] _types;
 
         internal override XmlValueConverter CreateValueConverter(XmlSchemaType schemaType)
         {
@@ -1322,7 +1317,7 @@ namespace System.Xml.Schema
             {
                 if (this.HasLexicalFacets)
                 {
-                    string s1 = (string)this.ValueConverter.ChangeType(valueToCheck, typeof(System.String), nsmgr); //Using value here to avoid info loss
+                    string s1 = (string)this.ValueConverter.ChangeType(valueToCheck, typeof(string), nsmgr); //Using value here to avoid info loss
                     exception = unionFacetsChecker.CheckLexicalFacets(ref s1, this);
                     if (exception != null) goto Error;
                 }
@@ -1385,7 +1380,7 @@ namespace System.Xml.Schema
         internal override int Compare(object value1, object value2)
         {
             //Changed StringComparison.CurrentCulture to StringComparison.Ordinal to handle zero-weight code points like the cyrillic E
-            return String.Compare(value1.ToString(), value2.ToString(), StringComparison.Ordinal);
+            return string.Compare(value1.ToString(), value2.ToString(), StringComparison.Ordinal);
         }
 
         internal override Exception TryParseValue(string s, XmlNameTable nameTable, IXmlNamespaceResolver nsmgr, out object typedValue)
@@ -2011,7 +2006,7 @@ namespace System.Xml.Schema
     {
         private static readonly Type s_atomicValueType = typeof(DateTime);
         private static readonly Type s_listValueType = typeof(DateTime[]);
-        private XsdDateTimeFlags _dateTimeFlags;
+        private readonly XsdDateTimeFlags _dateTimeFlags;
 
         internal override XmlValueConverter CreateValueConverter(XmlSchemaType schemaType)
         {

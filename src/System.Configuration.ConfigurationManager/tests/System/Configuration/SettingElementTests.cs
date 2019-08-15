@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -42,9 +42,9 @@ namespace System.Configuration.Tests
         public void DefaultValueIsNull()
         {
             var Element = new SettingElement();
-            Assert.Equal(null, Element.Value.CurrentConfiguration);
+            Assert.Null(Element.Value.CurrentConfiguration);
         }
-    
+
         [Fact]
         public void DefaultConstructorEquality()
         {
@@ -74,7 +74,6 @@ namespace System.Configuration.Tests
                     }
                 }
             };
-            Assert.NotNull(Element.GetHashCode());
         }
     }
 }

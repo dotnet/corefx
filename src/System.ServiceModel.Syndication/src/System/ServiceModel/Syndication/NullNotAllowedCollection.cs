@@ -6,11 +6,9 @@ using System.Collections.ObjectModel;
 
 namespace System.ServiceModel.Syndication
 {
-    internal class NullNotAllowedCollection<TCollectionItem> : Collection<TCollectionItem>
-        where TCollectionItem : class
+    internal class NullNotAllowedCollection<TCollectionItem> : Collection<TCollectionItem> where TCollectionItem : class
     {
-        public NullNotAllowedCollection()
-            : base()
+        public NullNotAllowedCollection() : base()
         {
         }
 
@@ -18,8 +16,9 @@ namespace System.ServiceModel.Syndication
         {
             if (item == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("item");
+                throw new ArgumentNullException(nameof(item));
             }
+
             base.InsertItem(index, item);
         }
 
@@ -27,8 +26,9 @@ namespace System.ServiceModel.Syndication
         {
             if (item == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("item");
+                throw new ArgumentNullException(nameof(item));
             }
+
             base.SetItem(index, item);
         }
     }

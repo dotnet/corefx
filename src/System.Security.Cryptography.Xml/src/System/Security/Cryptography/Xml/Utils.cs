@@ -11,7 +11,6 @@ using System.IO;
 using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Permissions;
 using System.Text;
 using System.Threading;
 using System.Xml;
@@ -162,11 +161,11 @@ namespace System.Security.Cryptography.Xml
         {
             int i, iCount = 0;
             for (i = 0; i < inputCount; i++)
-                if (Char.IsWhiteSpace(inputBuffer[inputOffset + i])) iCount++;
+                if (char.IsWhiteSpace(inputBuffer[inputOffset + i])) iCount++;
             char[] rgbOut = new char[inputCount - iCount];
             iCount = 0;
             for (i = 0; i < inputCount; i++)
-                if (!Char.IsWhiteSpace(inputBuffer[inputOffset + i]))
+                if (!char.IsWhiteSpace(inputBuffer[inputOffset + i]))
                 {
                     rgbOut[iCount++] = inputBuffer[inputOffset + i];
                 }
@@ -513,9 +512,6 @@ namespace System.Security.Cryptography.Xml
 
             CanonicalXmlNodeList namespaces = new CanonicalXmlNodeList();
             XmlNode ancestorNode = elem;
-
-            if (ancestorNode == null) return null;
-
             bool bDefNamespaceToAdd = true;
 
             while (ancestorNode != null)
@@ -751,7 +747,7 @@ namespace System.Security.Cryptography.Xml
                     digit = (uint)(sArray[i] & 0x0f);
                     hexOrder[j++] = s_hexValues[digit];
                 }
-                result = new String(hexOrder);
+                result = new string(hexOrder);
             }
             return result;
         }
@@ -788,7 +784,7 @@ namespace System.Security.Cryptography.Xml
             if (elements.Count != 1)
                 return false;
             X509Certificate2 certificate = elements[0].Certificate;
-            if (String.Compare(certificate.SubjectName.Name, certificate.IssuerName.Name, StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Equals(certificate.SubjectName.Name, certificate.IssuerName.Name, StringComparison.OrdinalIgnoreCase))
                 return true;
             return false;
         }

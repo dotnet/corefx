@@ -32,7 +32,7 @@ namespace System.Collections.Immutable
             /// </summary>
             /// <param name="root">The root.</param>
             /// <param name="comparers">The comparers.</param>
-            /// 
+            ///
             internal MutationInput(
                 SortedInt32KeyNode<HashBucket> root,
                 Comparers comparers)
@@ -57,6 +57,14 @@ namespace System.Collections.Immutable
             internal SortedInt32KeyNode<HashBucket> Root
             {
                 get { return _root; }
+            }
+
+            /// <summary>
+            /// Gets the set of comparers.
+            /// </summary>
+            internal Comparers Comparers
+            {
+                get { return _comparers; }
             }
 
             /// <summary>

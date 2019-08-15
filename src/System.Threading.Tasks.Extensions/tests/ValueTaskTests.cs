@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks.Sources;
+using System.Threading.Tasks.Sources.Tests;
 using Xunit;
 
 namespace System.Threading.Tasks.Tests
@@ -41,7 +42,7 @@ namespace System.Threading.Tasks.Tests
             Assert.True(default(ValueTask<string>).IsCompletedSuccessfully);
             Assert.False(default(ValueTask<string>).IsFaulted);
             Assert.False(default(ValueTask<string>).IsCanceled);
-            Assert.Equal(null, default(ValueTask<string>).Result);
+            Assert.Null(default(ValueTask<string>).Result);
         }
 
         [Theory]

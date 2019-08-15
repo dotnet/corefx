@@ -5,13 +5,15 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Tests;
 using Xunit;
 
 namespace System.Text.Tests
 {
     public partial class EncodingTest : IClassFixture<CultureSetup>
     {
+        private const string AsciiPrintable = " 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        private static readonly char[] s_asciiPrintableCharArr = AsciiPrintable.ToCharArray();
+
         public EncodingTest(CultureSetup setup)
         {
             // Setting up the culture happens externally, and only once, which is what we want.
@@ -448,7 +450,7 @@ namespace System.Text.Tests
             yield return Map(65000, "utf-7");
             yield return Map(65001, "utf-8");
         }
- 
+
         private static KeyValuePair<int, string> Map(int codePage, string webName)
         {
             return new KeyValuePair<int, string>(codePage, webName);
@@ -467,7 +469,7 @@ namespace System.Text.Tests
             if (defaultEncoding.CodePage == Encoding.UTF8.CodePage)
             {
                 // if the default encoding is not UTF8 that means either we are running on the full framework
-                // or the encoding provider is registered throw the call Encoding.RegisterProvider. 
+                // or the encoding provider is registered throw the call Encoding.RegisterProvider.
                 // at that time we shouldn't expect exceptions when creating the following encodings.
                 foreach (object[] mapping in CodePageInfo())
                 {
@@ -563,9 +565,43 @@ namespace System.Text.Tests
 
             // Small round-trip for ASCII alphanumeric range (some code pages use different punctuation!)
             // Start with space.
-            string asciiPrintable = " 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-            char[] traveled = encoding.GetChars(encoding.GetBytes(asciiPrintable));
-            Assert.Equal(asciiPrintable.ToCharArray(), traveled);
+            char[] traveled = encoding.GetChars(encoding.GetBytes(AsciiPrintable));
+            Assert.Equal(s_asciiPrintableCharArr, traveled);
+        }
+
+        [Theory]
+        [MemberData(nameof(CodePageInfo))]
+        public static void TestEncoderNLSAndDecoderNLSValidateDataRoundTrips(int codePage, string webName, string queryString)
+        {
+            _ = webName;
+            Encoding encoding;
+
+            if (codePage != 20932 && codePage != 50222)
+            {
+                encoding = CodePagesEncodingProvider.Instance.GetEncoding(queryString);
+            }
+            else
+            {
+                encoding = CodePagesEncodingProvider.Instance.GetEncoding(codePage);
+            }
+
+            Encoder encoder = encoding.GetEncoder();
+            Decoder decoder = encoding.GetDecoder();
+
+            // Small round-trip for ASCII alphanumeric range (some code pages use different punctuation!)
+            // Start with space.
+            int asciiPrintableLength = s_asciiPrintableCharArr.Length;
+            int encodedByteCount = encoding.GetByteCount(s_asciiPrintableCharArr);
+            byte[] encodedBytes = new byte[encodedByteCount];
+            char[] decodedChars = new char[asciiPrintableLength];
+
+            int encodedLength = encoder.GetBytes(s_asciiPrintableCharArr, 0, asciiPrintableLength, encodedBytes, 0, false);
+            Assert.Equal(encodedByteCount, encodedLength);
+
+            int decodedLength = decoder.GetChars(encodedBytes, 0, encodedByteCount, decodedChars, 0);
+            Assert.Equal(asciiPrintableLength, decodedLength);
+
+            Assert.Equal(s_asciiPrintableCharArr, decodedChars);
         }
 
         [Theory]
@@ -587,6 +623,8 @@ namespace System.Text.Tests
         [MemberData(nameof(CodePageInfo))]
         public static void TestEncodingDisplayNames(int codePage, string webName, string queryString)
         {
+            _ = webName;
+            _ = queryString;
             var encoding = CodePagesEncodingProvider.Instance.GetEncoding(codePage);
 
             string name = encoding.EncodingName;
@@ -598,10 +636,10 @@ namespace System.Text.Tests
 
         // This test is run as part of the default mappings test, since it modifies global state which that test
         // depends on.
-        public static void TestRegister1252()
+        private static void TestRegister1252()
         {
             // This test case ensure we can map all 1252 codepage codepoints without any exception.
-            string s1252Result = 
+            string s1252Result =
             "\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\u0008\u0009\u000a\u000b\u000c\u000d\u000e\u000f" +
             "\u0010\u0011\u0012\u0013\u0014\u0015\u0016\u0017\u0018\u0019\u001a\u001b\u001c\u001d\u001e\u001f" +
             "\u0020\u0021\u0022\u0023\u0024\u0025\u0026\u0027\u0028\u0029\u002a\u002b\u002c\u002d\u002e\u002f" +
@@ -629,7 +667,6 @@ namespace System.Text.Tests
 
             Assert.Equal(s1252Result, win1252.GetString(enc));
         }
-
     }
 
     public class CultureSetup : IDisposable

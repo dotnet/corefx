@@ -33,8 +33,13 @@ namespace System.Net.Sockets
                 IntPtr remoteAddr;
 
                 // set the socket context
+                bool refAdded = false;
+                SafeHandle safeHandle = _listenSocket.SafeHandle;
                 try
                 {
+                    safeHandle.DangerousAddRef(ref refAdded);
+                    IntPtr handle = safeHandle.DangerousGetHandle();
+
                     _listenSocket.GetAcceptExSockaddrs(
                         Marshal.UnsafeAddrOfPinnedArrayElement(_buffer, 0),
                         _buffer.Length - (_addressBufferLength * 2),
@@ -46,8 +51,6 @@ namespace System.Net.Sockets
                         out remoteSocketAddress.InternalSize);
 
                     Marshal.Copy(remoteAddr, remoteSocketAddress.Buffer, 0, remoteSocketAddress.Size);
-
-                    IntPtr handle = _listenSocket.SafeHandle.DangerousGetHandle();
 
                     errorCode = Interop.Winsock.setsockopt(
                         _acceptSocket.SafeHandle,
@@ -67,6 +70,13 @@ namespace System.Net.Sockets
                 {
                     errorCode = SocketError.OperationAborted;
                 }
+                finally
+                {
+                    if (refAdded)
+                    {
+                        safeHandle.DangerousRelease();
+                    }
+                }
 
                 ErrorCode = (int)errorCode;
             }
@@ -81,7 +91,7 @@ namespace System.Net.Sockets
 
         // SetUnmanagedStructures
         //
-        // This method fills in overlapped structures used in an asynchronous 
+        // This method fills in overlapped structures used in an asynchronous
         // overlapped Winsock call. These calls are outside the runtime and are
         // unmanaged code, so we need to prepare specific structures and ints that
         // lie in unmanaged memory since the overlapped calls may complete asynchronously.

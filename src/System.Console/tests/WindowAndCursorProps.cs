@@ -6,52 +6,67 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.RemoteExecutor;
+using Microsoft.DotNet.XUnitExtensions;
 using Xunit;
-using Xunit.NetCore.Extensions;
 
-public class WindowAndCursorProps : RemoteExecutorTestBase
+public class WindowAndCursorProps
 {
     [Fact]
     [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
-    public static void BufferSize_SettingNotSupported()
+    public static void BufferWidth_GetUnix_ReturnsWindowWidth()
     {
-        Assert.Throws<PlatformNotSupportedException>(() => Console.BufferWidth = 1);
-        Assert.Throws<PlatformNotSupportedException>(() => Console.BufferHeight = 1);
+        Assert.Equal(Console.WindowWidth, Console.BufferWidth);
     }
 
     [Fact]
     [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
-    public static void BufferSize_GettingSameAsWindowSize()
+    public static void BufferWidth_SetUnix_ThrowsPlatformNotSupportedException()
     {
         Assert.Throws<PlatformNotSupportedException>(() => Console.BufferWidth = 1);
-        Assert.Throws<PlatformNotSupportedException>(() => Console.BufferHeight = 1);
+    }
 
-        Assert.Equal(Console.WindowWidth, Console.BufferWidth);
+    [Fact]
+    [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
+    public static void BufferHeight_GetUnix_ReturnsWindowHeight()
+    {
         Assert.Equal(Console.WindowHeight, Console.BufferHeight);
     }
 
     [Fact]
-    [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior specific to Windows
-    public static void WindowWidth_WindowHeight_InvalidSize()
+    [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
+    public static void BufferHeight_SetUnix_ThrowsPlatformNotSupportedException()
+    {
+        Assert.Throws<PlatformNotSupportedException>(() => Console.BufferHeight = 1);
+    }
+
+    [Fact]
+    [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
+    public static void SetBufferSize_Unix_ThrowsPlatformNotSupportedException()
+    {
+        Assert.Throws<PlatformNotSupportedException>(() => Console.SetBufferSize(0, 0));
+    }
+
+    [Theory]
+    [PlatformSpecific(TestPlatforms.Windows)]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public static void WindowWidth_SetInvalid_ThrowsArgumentOutOfRangeException(int value)
     {
         if (Console.IsOutputRedirected)
         {
-            Assert.Throws<IOException>(() => Console.WindowWidth = 0);
-            Assert.Throws<IOException>(() => Console.WindowHeight = 0);
+            Assert.Throws<IOException>(() => Console.WindowWidth = value);
         }
         else
         {
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("width", () => Console.WindowWidth = 0);
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("height", () => Console.WindowHeight = 0);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("width", () => Console.WindowWidth = value);
         }
     }
 
     [Fact]
     [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
-    public static void WindowWidth()
+    public static void WindowWidth_GetUnix_Success()
     {
-        Assert.Throws<PlatformNotSupportedException>(() => Console.WindowWidth = 100);
-
         // Validate that Console.WindowWidth returns some value in a non-redirected o/p.
         Helpers.RunInNonRedirectedOutput((data) => Console.WriteLine(Console.WindowWidth));
         Helpers.RunInRedirectedOutput((data) => Console.WriteLine(Console.WindowWidth));
@@ -59,10 +74,31 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
 
     [Fact]
     [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
-    public static void WindowHeight()
+    public static void WindowWidth_SetUnix_ThrowsPlatformNotSupportedException()
     {
-        Assert.Throws<PlatformNotSupportedException>(() => Console.WindowHeight = 100);
+        Assert.Throws<PlatformNotSupportedException>(() => Console.WindowWidth = 100);
+    }
 
+    [Theory]
+    [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior specific to Windows
+    [InlineData(0)]
+    [InlineData(-1)]
+    public static void WindowHeight_SetInvalid_ThrowsArgumentOutOfRangeException(int value)
+    {
+        if (Console.IsOutputRedirected)
+        {
+            Assert.Throws<IOException>(() => Console.WindowHeight = value);
+        }
+        else
+        {
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("height", () => Console.WindowHeight = value);
+        }
+    }
+
+    [Fact]
+    [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
+    public static void WindowHeight_GetUnix_Success()
+    {
         // Validate that Console.WindowHeight returns some value in a non-redirected o/p.
         Helpers.RunInNonRedirectedOutput((data) => Console.WriteLine(Console.WindowHeight));
         Helpers.RunInRedirectedOutput((data) => Console.WriteLine(Console.WindowHeight));
@@ -70,11 +106,52 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
 
     [Fact]
     [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
-    public static void WindowLeftTop_AnyUnix()
+    public static void WindowHeight_SetUnix_ThrowsPlatformNotSupportedException()
+    {
+        Assert.Throws<PlatformNotSupportedException>(() => Console.WindowHeight = 100);
+    }
+
+    [Fact]
+    [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
+    public static void LargestWindowWidth_UnixGet_ReturnsExpected()
+    {
+        Helpers.RunInNonRedirectedOutput((data) => Assert.Equal(Console.WindowWidth, Console.LargestWindowWidth));
+        Helpers.RunInRedirectedOutput((data) => Assert.Equal(Console.WindowWidth, Console.LargestWindowWidth));
+    }
+
+    [Fact]
+    [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
+    public static void LargestWindowHeight_UnixGet_ReturnsExpected()
+    {
+        Helpers.RunInNonRedirectedOutput((data) => Assert.Equal(Console.WindowHeight, Console.LargestWindowHeight));
+        Helpers.RunInRedirectedOutput((data) => Assert.Equal(Console.WindowHeight, Console.LargestWindowHeight));
+    }
+
+    [Fact]
+    [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
+    public static void WindowLeft_GetUnix_ReturnsZero()
     {
         Assert.Equal(0, Console.WindowLeft);
-        Assert.Equal(0, Console.WindowTop);
+    }
+
+    [Fact]
+    [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
+    public static void WindowLeft_SetUnix_ThrowsPlatformNotSupportedException()
+    {
         Assert.Throws<PlatformNotSupportedException>(() => Console.WindowLeft = 0);
+    }
+
+    [Fact]
+    [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
+    public static void WindowTop_GetUnix_ReturnsZero()
+    {
+        Assert.Equal(0, Console.WindowTop);
+    }
+
+    [Fact]
+    [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
+    public static void WindowTop_SetUnix_ThrowsPlatformNotSupportedException()
+    {
         Assert.Throws<PlatformNotSupportedException>(() => Console.WindowTop = 0);
     }
 
@@ -94,7 +171,7 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
         }
     }
 
-    [Fact] 
+    [Fact]
     [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
     [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] //CI system makes it difficult to run things in a non-redirected environments.
     public static void NonRedirectedCursorVisible()
@@ -109,54 +186,55 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
 
     [Fact]
     [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
-    public static void CursorVisible()
+    public static void CursorVisible_GetUnix_ThrowsPlatformNotSupportedException()
     {
-        Assert.Throws<PlatformNotSupportedException>(() => { bool unused = Console.CursorVisible; });
+        Assert.Throws<PlatformNotSupportedException>(() => Console.CursorVisible);
+    }
 
-        // Validate that the Console.CursorVisible does nothing in a redirected stream.
-        Helpers.RunInRedirectedOutput((data) => { Console.CursorVisible = false; Assert.Equal(0, data.ToArray().Length); });
-        Helpers.RunInRedirectedOutput((data) => { Console.CursorVisible = true; Assert.Equal(0, data.ToArray().Length); });
+    [Theory]
+    [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
+    [InlineData(true)]
+    [InlineData(false)]
+    public static void CursorVisible_SetUnixRedirected_Nop(bool value)
+    {
+        Helpers.RunInRedirectedOutput((data) => {
+            Console.CursorVisible = value;
+            Assert.Equal(0, data.ToArray().Length);
+        });
     }
 
     [Fact]
     [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
-    public static void Title_GetSet_Unix()
+    public static void Title_GetUnix_ThrowPlatformNotSupportedException()
     {
         Assert.Throws<PlatformNotSupportedException>(() => Console.Title);
-        RemoteInvoke(() =>
+    }
+
+    [Fact]
+    [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
+    public static void Title_SetUnix_Success()
+    {
+        RemoteExecutor.Invoke(() =>
         {
             Console.Title = "Title set by unit test";
-            return SuccessExitCode;
+            return RemoteExecutor.SuccessExitCode;
         }).Dispose();
     }
 
     [Fact]
     [PlatformSpecific(TestPlatforms.Windows)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "In appcontainer, the stream cannot be opened: there is no Console")]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "// NETFX does not have the fix https://github.com/dotnet/corefx/pull/28905")]
-    public static void Title_Get_Windows()
+    public static void Title_GetWindows_ReturnsNonNull()
     {
         Assert.NotNull(Console.Title);
     }
 
-    [Fact]
+    [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
     [PlatformSpecific(TestPlatforms.Windows)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "In appcontainer, the stream cannot be opened: there is no Console")]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "// NETFX does not have the fix https://github.com/dotnet/corefx/pull/28905")]
     public static void Title_Get_Windows_NoNulls()
     {
         string title = Console.Title;
         string trimmedTitle = title.TrimEnd('\0');
-
-        if (PlatformDetection.IsWindowsNanoServer)
-        {
-            // Nano server titles are currently broken
-            Assert.NotEqual(trimmedTitle, title);
-        }
-        else
-        {
-            Assert.Equal(trimmedTitle, title);
-        }
+        Assert.Equal(trimmedTitle, title);
     }
 
     [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // Nano currently ignores set title
@@ -171,11 +249,10 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     [InlineData(513)]
     [InlineData(1024)]
     [PlatformSpecific(TestPlatforms.Windows)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // In appcontainer, the stream cannot be opened: there is no Console
     public static void Title_Set_Windows(int lengthOfTitle)
     {
         // Try to set the title to some other value.
-        RemoteInvoke(lengthOfTitleString =>
+        RemoteExecutor.Invoke(lengthOfTitleString =>
         {
             string newTitle = new string('a', int.Parse(lengthOfTitleString));
             Console.Title = newTitle;
@@ -189,40 +266,19 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
             {
                 Assert.Equal(newTitle, Console.Title);
             }
-            return SuccessExitCode;
+            return RemoteExecutor.SuccessExitCode;
         }, lengthOfTitle.ToString()).Dispose();
     }
 
-    [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)] // In appcontainer, the stream cannot be opened: there is no Console
-    public static void Title_Get_Windows_Uap()
-    {
-        Assert.Throws<IOException>(() => Console.Title);
-    }
-
-    [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)] // In appcontainer, the stream cannot be opened: there is no Console
-    public static void Title_Set_Windows_Uap(int lengthOfTitle)
-    {
-        Assert.Throws<IOException>(() => Console.Title = "x");
-    }
-
     [Fact]
-    public static void Title_Set_Windows_Null_ThrowsArgumentNullException()
+    public static void Title_SetNull_ThrowsArgumentNullException()
     {
         AssertExtensions.Throws<ArgumentNullException>("value", () => Console.Title = null);
     }
 
     [Fact]
-    [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-    public static void Title_Set_Windows_GreaterThan24500Chars_ThrowsArgumentOutOfRangeException()
-    {
-        // We don't explicitly throw on Core as this isn't technically correct
-        string newTitle = new string('a', 24501);
-        AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => Console.Title = newTitle);
-    }
-
-    [Fact]
     [OuterLoop] // makes noise, not very inner-loop friendly
-    public static void Beep()
+    public static void Beep_Invoke_Success()
     {
         // Nothing to verify; just run the code.
         Console.Beep();
@@ -231,7 +287,7 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     [Fact]
     [OuterLoop] // makes noise, not very inner-loop friendly
     [PlatformSpecific(TestPlatforms.Windows)]
-    public static void BeepWithFrequency()
+    public static void BeepWithFrequency_Invoke_Success()
     {
         // Nothing to verify; just run the code.
         Console.Beep(800, 200);
@@ -264,7 +320,7 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
 
     [Fact]
     [OuterLoop] // clears the screen, not very inner-loop friendly
-    public static void Clear()
+    public static void Clear_Invoke_Success()
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || (!Console.IsInputRedirected && !Console.IsOutputRedirected))
         {
@@ -274,7 +330,7 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     }
 
     [Fact]
-    public static void SetCursorPosition()
+    public static void SetCursorPosition_Invoke_Success()
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || (!Console.IsInputRedirected && !Console.IsOutputRedirected))
         {
@@ -300,7 +356,7 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     }
 
     [Fact]
-    public static void GetCursorPosition()
+    public static void GetCursorPosition_Invoke_ReturnsExpected()
     {
         if (!Console.IsInputRedirected && !Console.IsOutputRedirected)
         {
@@ -322,8 +378,76 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     }
 
     [Fact]
+    public void CursorLeft_Set_GetReturnsExpected()
+    {
+        if (!Console.IsInputRedirected && !Console.IsOutputRedirected)
+        {
+            int origLeft = Console.CursorLeft;
+
+            Console.CursorLeft = 10;
+            Assert.Equal(10, Console.CursorLeft);
+
+            Console.CursorLeft = origLeft;
+            Assert.Equal(origLeft, Console.CursorLeft);
+        }
+        else if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            Assert.Equal(0, Console.CursorLeft);
+        }
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(short.MaxValue + 1)]
+    public void CursorLeft_SetInvalid_ThrowsArgumentOutOfRangeException(int value)
+    {
+        if (PlatformDetection.IsWindows && Console.IsOutputRedirected)
+        {
+            Assert.Throws<IOException>(() => Console.CursorLeft = value);
+        }
+        else
+        {
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("left", () => Console.CursorLeft = value);
+        }
+    }
+
+    [Fact]
+    public void CursorTop_Set_GetReturnsExpected()
+    {
+        if (!Console.IsInputRedirected && !Console.IsOutputRedirected)
+        {
+            int origTop = Console.CursorTop;
+
+            Console.CursorTop = 10;
+            Assert.Equal(10, Console.CursorTop);
+
+            Console.CursorTop = origTop;
+            Assert.Equal(origTop, Console.CursorTop);
+        }
+        else if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            Assert.Equal(0, Console.CursorTop);
+        }
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(short.MaxValue + 1)]
+    public void CursorTop_SetInvalid_ThrowsArgumentOutOfRangeException(int value)
+    {
+        if (PlatformDetection.IsWindows & Console.IsOutputRedirected)
+        {
+            Assert.Throws<IOException>(() => Console.CursorTop = value);
+        }
+        else
+        {
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("top", () => Console.CursorTop = value);
+        }
+    }
+
+    [Fact]
     [PlatformSpecific(TestPlatforms.Windows)]
-    public void CursorSize_SetGet_ReturnsExpected()
+    public void CursorSize_Set_GetReturnsExpected()
     {
         if (!Console.IsInputRedirected && !Console.IsOutputRedirected)
         {
@@ -351,9 +475,15 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
 
     [Fact]
     [PlatformSpecific(TestPlatforms.AnyUnix)]
-    public void CursorSize_SetUnix_ThrowsPlatformNotSupportedException()
+    public void CursorSize_GetUnix_ReturnsExpected()
     {
         Assert.Equal(100, Console.CursorSize);
+    }
+
+    [Fact]
+    [PlatformSpecific(TestPlatforms.AnyUnix)]
+    public void CursorSize_SetUnix_ThrowsPlatformNotSupportedException()
+    {
         Assert.Throws<PlatformNotSupportedException>(() => Console.CursorSize = 1);
     }
 

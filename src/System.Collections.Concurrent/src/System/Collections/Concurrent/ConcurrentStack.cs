@@ -12,6 +12,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace System.Collections.Concurrent
@@ -21,7 +22,7 @@ namespace System.Collections.Concurrent
     // although some optimistic concurrency and retry is used, possibly leading to lack of
     // fairness and/or livelock. The stack uses spinning and backoff to add some randomization,
     // in hopes of statistically decreasing the possibility of livelock.
-    // 
+    //
     // Note that we currently allocate a new node on every push. This avoids having to worry
     // about potential ABA issues, since the CLR GC ensures that a memory address cannot be
     // reused before all references to it have died.
@@ -44,7 +45,7 @@ namespace System.Collections.Concurrent
         private class Node
         {
             internal readonly T _value; // Value of the node.
-            internal Node _next; // Next pointer.
+            internal Node? _next; // Next pointer.
 
             /// <summary>
             /// Constructs a new node with the specified value and no next node.
@@ -57,7 +58,7 @@ namespace System.Collections.Concurrent
             }
         }
 
-        private volatile Node _head; // The stack is a singly linked list, and only remembers the head.
+        private volatile Node? _head; // The stack is a singly linked list, and only remembers the head.
         private const int BACKOFF_MAX_YIELDS = 8; // Arbitrary number to cap backoff.
 
         /// <summary>
@@ -74,7 +75,7 @@ namespace System.Collections.Concurrent
         /// </summary>
         /// <param name="collection">The collection whose elements are copied to the new <see
         /// cref="ConcurrentStack{T}"/>.</param>
-        /// <exception cref="T:System.ArgumentNullException">The <paramref name="collection"/> argument is
+        /// <exception cref="System.ArgumentNullException">The <paramref name="collection"/> argument is
         /// null.</exception>
         public ConcurrentStack(IEnumerable<T> collection)
         {
@@ -92,7 +93,7 @@ namespace System.Collections.Concurrent
         private void InitializeFromCollection(IEnumerable<T> collection)
         {
             // We just copy the contents of the collection to our stack.
-            Node lastNode = null;
+            Node? lastNode = null;
             foreach (T element in collection)
             {
                 Node newNode = new Node(element);
@@ -148,7 +149,7 @@ namespace System.Collections.Concurrent
                 // they are being dequeued. If we ever changed this (e.g. to pool nodes somehow),
                 // we'd need to revisit this implementation.
 
-                for (Node curr = _head; curr != null; curr = curr._next)
+                for (Node? curr = _head; curr != null; curr = curr._next)
                 {
                     count++; //we don't handle overflow, to be consistent with existing generic collection types in CLR
                 }
@@ -159,10 +160,10 @@ namespace System.Collections.Concurrent
 
 
         /// <summary>
-        /// Gets a value indicating whether access to the <see cref="T:System.Collections.ICollection"/> is
+        /// Gets a value indicating whether access to the <see cref="System.Collections.ICollection"/> is
         /// synchronized with the SyncRoot.
         /// </summary>
-        /// <value>true if access to the <see cref="T:System.Collections.ICollection"/> is synchronized
+        /// <value>true if access to the <see cref="System.Collections.ICollection"/> is synchronized
         /// with the SyncRoot; otherwise, false. For <see cref="ConcurrentStack{T}"/>, this property always
         /// returns false.</value>
         bool ICollection.IsSynchronized
@@ -176,9 +177,9 @@ namespace System.Collections.Concurrent
 
         /// <summary>
         /// Gets an object that can be used to synchronize access to the <see
-        /// cref="T:System.Collections.ICollection"/>. This property is not supported.
+        /// cref="System.Collections.ICollection"/>. This property is not supported.
         /// </summary>
-        /// <exception cref="T:System.NotSupportedException">The SyncRoot property is not supported</exception>
+        /// <exception cref="System.NotSupportedException">The SyncRoot property is not supported</exception>
         object ICollection.SyncRoot
         {
             get
@@ -200,13 +201,13 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
-        /// Copies the elements of the <see cref="T:System.Collections.ICollection"/> to an <see
-        /// cref="T:System.Array"/>, starting at a particular
-        /// <see cref="T:System.Array"/> index.
+        /// Copies the elements of the <see cref="System.Collections.ICollection"/> to an <see
+        /// cref="System.Array"/>, starting at a particular
+        /// <see cref="System.Array"/> index.
         /// </summary>
-        /// <param name="array">The one-dimensional <see cref="T:System.Array"/> that is the destination of
+        /// <param name="array">The one-dimensional <see cref="System.Array"/> that is the destination of
         /// the elements copied from the
-        /// <see cref="ConcurrentStack{T}"/>. The <see cref="T:System.Array"/> must
+        /// <see cref="ConcurrentStack{T}"/>. The <see cref="System.Array"/> must
         /// have zero-based indexing.</param>
         /// <param name="index">The zero-based index in <paramref name="array"/> at which copying
         /// begins.</param>
@@ -218,10 +219,10 @@ namespace System.Collections.Concurrent
         /// <paramref name="array"/> is multidimensional. -or-
         /// <paramref name="array"/> does not have zero-based indexing. -or-
         /// <paramref name="index"/> is equal to or greater than the length of the <paramref name="array"/>
-        /// -or- The number of elements in the source <see cref="T:System.Collections.ICollection"/> is
+        /// -or- The number of elements in the source <see cref="System.Collections.ICollection"/> is
         /// greater than the available space from <paramref name="index"/> to the end of the destination
         /// <paramref name="array"/>. -or- The type of the source <see
-        /// cref="T:System.Collections.ICollection"/> cannot be cast automatically to the type of the
+        /// cref="System.Collections.ICollection"/> cannot be cast automatically to the type of the
         /// destination <paramref name="array"/>.
         /// </exception>
         void ICollection.CopyTo(Array array, int index)
@@ -241,11 +242,11 @@ namespace System.Collections.Concurrent
 
         /// <summary>
         /// Copies the <see cref="ConcurrentStack{T}"/> elements to an existing one-dimensional <see
-        /// cref="T:System.Array"/>, starting at the specified array index.
+        /// cref="System.Array"/>, starting at the specified array index.
         /// </summary>
-        /// <param name="array">The one-dimensional <see cref="T:System.Array"/> that is the destination of
+        /// <param name="array">The one-dimensional <see cref="System.Array"/> that is the destination of
         /// the elements copied from the
-        /// <see cref="ConcurrentStack{T}"/>. The <see cref="T:System.Array"/> must have zero-based
+        /// <see cref="ConcurrentStack{T}"/>. The <see cref="System.Array"/> must have zero-based
         /// indexing.</param>
         /// <param name="index">The zero-based index in <paramref name="array"/> at which copying
         /// begins.</param>
@@ -273,7 +274,6 @@ namespace System.Collections.Concurrent
             ToList().CopyTo(array, index);
         }
 
-#pragma warning disable 0420 // No warning for Interlocked.xxx if compiled with new managed compiler (Roslyn)
         /// <summary>
         /// Inserts an object at the top of the <see cref="ConcurrentStack{T}"/>.
         /// </summary>
@@ -331,7 +331,7 @@ namespace System.Collections.Concurrent
         /// <exception cref="ArgumentNullException"><paramref name="items"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="startIndex"/> or <paramref
-        /// name="count"/> is negative. Or <paramref name="startIndex"/> is greater than or equal to the length 
+        /// name="count"/> is negative. Or <paramref name="startIndex"/> is greater than or equal to the length
         /// of <paramref name="items"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="startIndex"/> + <paramref name="count"/> is
         /// greater than the length of <paramref name="items"/>.</exception>
@@ -384,7 +384,7 @@ namespace System.Collections.Concurrent
             // Keep trying to CAS the existing head with the new node until we succeed.
             do
             {
-                spin.SpinOnce();
+                spin.SpinOnce(sleep1Threshold: -1);
                 // Reread the head and link our new node.
                 tail._next = _head;
             }
@@ -423,10 +423,10 @@ namespace System.Collections.Concurrent
 
         /// <summary>
         /// Attempts to add an object to the <see
-        /// cref="T:System.Collections.Concurrent.IProducerConsumerCollection{T}"/>.
+        /// cref="System.Collections.Concurrent.IProducerConsumerCollection{T}"/>.
         /// </summary>
         /// <param name="item">The object to add to the <see
-        /// cref="T:System.Collections.Concurrent.IProducerConsumerCollection{T}"/>. The value can be a null
+        /// cref="System.Collections.Concurrent.IProducerConsumerCollection{T}"/>. The value can be a null
         /// reference (Nothing in Visual Basic) for reference types.
         /// </param>
         /// <returns>true if the object was added successfully; otherwise, false.</returns>
@@ -444,17 +444,17 @@ namespace System.Collections.Concurrent
         /// without removing it.
         /// </summary>
         /// <param name="result">When this method returns, <paramref name="result"/> contains an object from
-        /// the top of the <see cref="T:System.Collections.Concurrent.ConcurrentStack{T}"/> or an
+        /// the top of the <see cref="System.Collections.Concurrent.ConcurrentStack{T}"/> or an
         /// unspecified value if the operation failed.</param>
         /// <returns>true if and object was returned successfully; otherwise, false.</returns>
-        public bool TryPeek(out T result)
+        public bool TryPeek([MaybeNullWhen(false)] out T result)
         {
-            Node head = _head;
+            Node? head = _head;
 
             // If the stack is empty, return false; else return the element and true.
             if (head == null)
             {
-                result = default(T);
+                result = default(T)!;
                 return false;
             }
             else
@@ -474,13 +474,13 @@ namespace System.Collections.Concurrent
         /// <returns>true if an element was removed and returned from the top of the <see
         /// cref="ConcurrentStack{T}"/>
         /// successfully; otherwise, false.</returns>
-        public bool TryPop(out T result)
+        public bool TryPop([MaybeNullWhen(false)] out T result)
         {
-            Node head = _head;
+            Node? head = _head;
             //stack is empty
             if (head == null)
             {
-                result = default(T);
+                result = default(T)!;
                 return false;
             }
             if (Interlocked.CompareExchange(ref _head, head._next, head) == head)
@@ -498,7 +498,7 @@ namespace System.Collections.Concurrent
         /// atomically.
         /// </summary>
         /// <param name="items">
-        /// The <see cref="T:System.Array"/> to which objects popped from the top of the <see
+        /// The <see cref="System.Array"/> to which objects popped from the top of the <see
         /// cref="ConcurrentStack{T}"/> will be added.
         /// </param>
         /// <returns>The number of objects successfully popped from the top of the <see
@@ -528,19 +528,19 @@ namespace System.Collections.Concurrent
         /// atomically.
         /// </summary>
         /// <param name="items">
-        /// The <see cref="T:System.Array"/> to which objects popped from the top of the <see
+        /// The <see cref="System.Array"/> to which objects popped from the top of the <see
         /// cref="ConcurrentStack{T}"/> will be added.
         /// </param>
         /// <param name="startIndex">The zero-based offset in <paramref name="items"/> at which to begin
         /// inserting elements from the top of the <see cref="ConcurrentStack{T}"/>.</param>
         /// <param name="count">The number of elements to be popped from top of the <see
         /// cref="ConcurrentStack{T}"/> and inserted into <paramref name="items"/>.</param>
-        /// <returns>The number of objects successfully popped from the top of 
-        /// the <see cref="ConcurrentStack{T}"/> and inserted in <paramref name="items"/>.</returns>        
+        /// <returns>The number of objects successfully popped from the top of
+        /// the <see cref="ConcurrentStack{T}"/> and inserted in <paramref name="items"/>.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="items"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="startIndex"/> or <paramref
-        /// name="count"/> is negative. Or <paramref name="startIndex"/> is greater than or equal to the length 
+        /// name="count"/> is negative. Or <paramref name="startIndex"/> is greater than or equal to the length
         /// of <paramref name="items"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="startIndex"/> + <paramref name="count"/> is
         /// greater than the length of <paramref name="items"/>.</exception>
@@ -559,11 +559,11 @@ namespace System.Collections.Concurrent
             if (count == 0)
                 return 0;
 
-            Node poppedHead;
+            Node? poppedHead;
             int nodesCount = TryPopCore(count, out poppedHead);
             if (nodesCount > 0)
             {
-                CopyRemovedItems(poppedHead, items, startIndex, nodesCount);
+                CopyRemovedItems(poppedHead!, items, startIndex, nodesCount);
             }
             return nodesCount;
         }
@@ -573,17 +573,17 @@ namespace System.Collections.Concurrent
         /// </summary>
         /// <param name="result">The popped item</param>
         /// <returns>True if succeeded, false otherwise</returns>
-        private bool TryPopCore(out T result)
+        private bool TryPopCore([MaybeNullWhen(false)] out T result)
         {
-            Node poppedNode;
+            Node? poppedNode;
 
             if (TryPopCore(1, out poppedNode) == 1)
             {
-                result = poppedNode._value;
+                result = poppedNode!._value;
                 return true;
             }
 
-            result = default(T);
+            result = default(T)!;
             return false;
         }
 
@@ -598,16 +598,16 @@ namespace System.Collections.Concurrent
         /// </param>
         /// <returns>The number of objects successfully popped from the top of
         /// the <see cref="ConcurrentStack{T}"/>.</returns>
-        private int TryPopCore(int count, out Node poppedHead)
+        private int TryPopCore(int count, out Node? poppedHead)
         {
             SpinWait spin = new SpinWait();
 
             // Try to CAS the head with its current next.  We stop when we succeed or
             // when we notice that the stack is empty, whichever comes first.
-            Node head;
+            Node? head;
             Node next;
             int backoff = 1;
-            Random r = null;
+            Random? r = null;
             while (true)
             {
                 head = _head;
@@ -645,7 +645,7 @@ namespace System.Collections.Concurrent
                 // We failed to CAS the new head.  Spin briefly and retry.
                 for (int i = 0; i < backoff; i++)
                 {
-                    spin.SpinOnce();
+                    spin.SpinOnce(sleep1Threshold: -1);
                 }
 
                 if (spin.NextSpinWillYield)
@@ -662,7 +662,6 @@ namespace System.Collections.Concurrent
                 }
             }
         }
-#pragma warning restore 0420
 
         /// <summary>
         /// Local helper function to copy the popped elements into a given collection
@@ -673,17 +672,17 @@ namespace System.Collections.Concurrent
         /// <param name="nodesCount">The number of nodes.</param>
         private static void CopyRemovedItems(Node head, T[] collection, int startIndex, int nodesCount)
         {
-            Node current = head;
+            Node? current = head;
             for (int i = startIndex; i < startIndex + nodesCount; i++)
             {
-                collection[i] = current._value;
+                collection[i] = current!._value;
                 current = current._next;
             }
         }
 
         /// <summary>
         /// Attempts to remove and return an object from the <see
-        /// cref="T:System.Collections.Concurrent.IProducerConsumerCollection{T}"/>.
+        /// cref="System.Collections.Concurrent.IProducerConsumerCollection{T}"/>.
         /// </summary>
         /// <param name="item">
         /// When this method returns, if the operation was successful, <paramref name="item"/> contains the
@@ -705,7 +704,7 @@ namespace System.Collections.Concurrent
         /// cref="ConcurrentStack{T}"/>.</returns>
         public T[] ToArray()
         {
-            Node curr = _head;
+            Node? curr = _head;
             return curr == null ?
                 Array.Empty<T>() :
                 ToList(curr).ToArray();
@@ -725,7 +724,7 @@ namespace System.Collections.Concurrent
         /// Returns an array containing a snapshot of the list's contents starting at the specified node.
         /// </summary>
         /// <returns>A list of the stack's contents starting at the specified node.</returns>
-        private List<T> ToList(Node curr)
+        private List<T> ToList(Node? curr)
         {
             List<T> list = new List<T>();
 
@@ -744,8 +743,8 @@ namespace System.Collections.Concurrent
         /// <returns>An enumerator for the <see cref="ConcurrentStack{T}"/>.</returns>
         /// <remarks>
         /// The enumeration represents a moment-in-time snapshot of the contents
-        /// of the stack.  It does not reflect any updates to the collection after 
-        /// <see cref="GetEnumerator"/> was called.  The enumerator is safe to use
+        /// of the stack.  It does not reflect any updates to the collection after
+        /// <see cref="GetEnumerator()"/> was called.  The enumerator is safe to use
         /// concurrently with reads from and writes to the stack.
         /// </remarks>
         public IEnumerator<T> GetEnumerator()
@@ -756,14 +755,14 @@ namespace System.Collections.Concurrent
 
             //If we put yield-return here, the iterator will be lazily evaluated. As a result a snapshot of
             //the stack is not taken when GetEnumerator is initialized but when MoveNext() is first called.
-            //This is inconsistent with existing generic collections. In order to prevent it, we capture the 
+            //This is inconsistent with existing generic collections. In order to prevent it, we capture the
             //value of _head in a buffer and call out to a helper method
             return GetEnumerator(_head);
         }
 
-        private IEnumerator<T> GetEnumerator(Node head)
+        private IEnumerator<T> GetEnumerator(Node? head)
         {
-            Node current = head;
+            Node? current = head;
             while (current != null)
             {
                 yield return current._value;
@@ -774,12 +773,12 @@ namespace System.Collections.Concurrent
         /// <summary>
         /// Returns an enumerator that iterates through a collection.
         /// </summary>
-        /// <returns>An <see cref="T:System.Collections.IEnumerator"/> that can be used to iterate through
+        /// <returns>An <see cref="System.Collections.IEnumerator"/> that can be used to iterate through
         /// the collection.</returns>
         /// <remarks>
         /// The enumeration represents a moment-in-time snapshot of the contents of the stack. It does not
         /// reflect any updates to the collection after
-        /// <see cref="GetEnumerator"/> was called. The enumerator is safe to use concurrently with reads
+        /// <see cref="GetEnumerator()"/> was called. The enumerator is safe to use concurrently with reads
         /// from and writes to the stack.
         /// </remarks>
         IEnumerator IEnumerable.GetEnumerator()

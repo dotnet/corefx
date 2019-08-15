@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net.Http.Headers;
 using System.Net.Security;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
@@ -53,10 +54,13 @@ namespace System.Net.Http
         internal static readonly Version HttpVersionUnknown = new Version(0, 0);
         private static readonly TimeSpan s_maxTimeout = TimeSpan.FromMilliseconds(int.MaxValue);
 
+        private static readonly StringWithQualityHeaderValue s_gzipHeaderValue = new StringWithQualityHeaderValue("gzip");
+        private static readonly StringWithQualityHeaderValue s_deflateHeaderValue = new StringWithQualityHeaderValue("deflate");
+
         [ThreadStatic]
         private static StringBuilder t_requestHeadersBuilder;
 
-        private object _lockObject = new object();
+        private readonly object _lockObject = new object();
         private bool _doManualDecompressionCheck = false;
         private WinInetProxyHelper _proxyHelper = null;
         private bool _automaticRedirection = HttpHandlerDefaults.DefaultAutomaticRedirection;
@@ -86,11 +90,11 @@ namespace System.Net.Http
         private TimeSpan _receiveDataTimeout = TimeSpan.FromSeconds(30);
         private int _maxResponseHeadersLength = HttpHandlerDefaults.DefaultMaxResponseHeadersLength;
         private int _maxResponseDrainSize = 64 * 1024;
-        private IDictionary<String, Object> _properties; // Only create dictionary when required.
+        private IDictionary<string, object> _properties; // Only create dictionary when required.
         private volatile bool _operationStarted;
         private volatile bool _disposed;
         private SafeWinHttpHandle _sessionHandle;
-        private WinHttpAuthHelper _authHelper = new WinHttpAuthHelper();
+        private readonly WinHttpAuthHelper _authHelper = new WinHttpAuthHelper();
 
         public WinHttpHandler()
         {
@@ -475,7 +479,7 @@ namespace System.Net.Http
             {
                 if (_properties == null)
                 {
-                    _properties = new Dictionary<String, object>();
+                    _properties = new Dictionary<string, object>();
                 }
 
                 return _properties;
@@ -553,7 +557,7 @@ namespace System.Net.Http
             Task.Factory.StartNew(
                 s => {
                     var whrs = (WinHttpRequestState)s;
-                    whrs.Handler.StartRequest(whrs);
+                    _ = whrs.Handler.StartRequestAsync(whrs);
                 },
                 state,
                 CancellationToken.None,
@@ -607,7 +611,8 @@ namespace System.Net.Http
         private static void AddRequestHeaders(
             SafeWinHttpHandle requestHandle,
             HttpRequestMessage requestMessage,
-            CookieContainer cookies)
+            CookieContainer cookies,
+            DecompressionMethods manuallyProcessedDecompressionMethods)
         {
             // Get a StringBuilder to use for creating the request headers.
             // We cache one in TLS to avoid creating a new one for each request.
@@ -619,6 +624,26 @@ namespace System.Net.Http
             else
             {
                 t_requestHeadersBuilder = requestHeadersBuffer = new StringBuilder();
+            }
+
+            // Normally WinHttpHandler will let native WinHTTP add 'Accept-Encoding' request headers
+            // for gzip and/or default as needed based on whether the handler should do automatic
+            // decompression of response content. But on Windows 7, WinHTTP doesn't support this feature.
+            // So, we need to manually add these headers since WinHttpHandler still supports automatic
+            // decompression (by doing it within the handler).
+            if (manuallyProcessedDecompressionMethods != DecompressionMethods.None)
+            {
+                if ((manuallyProcessedDecompressionMethods & DecompressionMethods.GZip) == DecompressionMethods.GZip &&
+                    !requestMessage.Headers.AcceptEncoding.Contains(s_gzipHeaderValue))
+                {
+                    requestMessage.Headers.AcceptEncoding.Add(s_gzipHeaderValue);
+                }
+
+                if ((manuallyProcessedDecompressionMethods & DecompressionMethods.Deflate) == DecompressionMethods.Deflate &&
+                    !requestMessage.Headers.AcceptEncoding.Contains(s_deflateHeaderValue))
+                {
+                    requestMessage.Headers.AcceptEncoding.Add(s_deflateHeaderValue);
+                }
             }
 
             // Manually add cookies.
@@ -764,7 +789,7 @@ namespace System.Net.Http
             }
         }
 
-        private async void StartRequest(WinHttpRequestState state)
+        private async Task StartRequestAsync(WinHttpRequestState state)
         {
             if (state.CancellationToken.IsCancellationRequested)
             {
@@ -831,7 +856,8 @@ namespace System.Net.Http
                 AddRequestHeaders(
                     state.RequestHandle,
                     state.RequestMessage,
-                    _cookieUsePolicy == CookieUsePolicy.UseSpecifiedCookieContainer ? _cookieContainer : null);
+                    _cookieUsePolicy == CookieUsePolicy.UseSpecifiedCookieContainer ? _cookieContainer : null,
+                    _doManualDecompressionCheck ? _automaticDecompression : DecompressionMethods.None);
 
                 uint proxyAuthScheme = 0;
                 uint serverAuthScheme = 0;
@@ -882,7 +908,8 @@ namespace System.Net.Http
                 uint optionData = unchecked((uint)_receiveDataTimeout.TotalMilliseconds);
                 SetWinHttpOption(state.RequestHandle, Interop.WinHttp.WINHTTP_OPTION_RECEIVE_TIMEOUT, ref optionData);
 
-                HttpResponseMessage responseMessage = WinHttpResponseParser.CreateResponseMessage(state, _doManualDecompressionCheck);
+                HttpResponseMessage responseMessage =
+                    WinHttpResponseParser.CreateResponseMessage(state, _doManualDecompressionCheck ? _automaticDecompression : DecompressionMethods.None);
                 state.Tcs.TrySetResult(responseMessage);
 
                 // HttpStatusCode cast is needed for 308 Moved Permenantly, which we support but is not included in NetStandard status codes.
@@ -924,7 +951,7 @@ namespace System.Net.Http
             uint optionData = 0;
             SslProtocols sslProtocols =
                 (_sslProtocols == SslProtocols.None) ? SecurityProtocol.DefaultSecurityProtocols : _sslProtocols;
-            
+
 #pragma warning disable 0618 // SSL2/SSL3 are deprecated
             if ((sslProtocols & SslProtocols.Ssl2) != 0)
             {
@@ -950,6 +977,17 @@ namespace System.Net.Http
             if ((sslProtocols & SslProtocols.Tls12) != 0)
             {
                 optionData |= Interop.WinHttp.WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
+            }
+
+            // As of Win10RS5 there's no public constant for WinHTTP + TLS 1.3
+            // This library builds against netstandard, which doesn't define the Tls13 enum field.
+
+            // If only unknown values (e.g. TLS 1.3) were asked for, report ERROR_INVALID_PARAMETER.
+            if (optionData == 0)
+            {
+                throw WinHttpException.CreateExceptionUsingError(
+                    unchecked((int)Interop.WinHttp.ERROR_INVALID_PARAMETER),
+                    nameof(SetSessionHandleTlsOptions));
             }
 
             SetWinHttpOption(sessionHandle, Interop.WinHttp.WINHTTP_OPTION_SECURE_PROTOCOLS, ref optionData);
@@ -1355,8 +1393,12 @@ namespace System.Net.Http
             using (var requestStream = new WinHttpRequestStream(state, chunkedModeForSend))
             {
                 await state.RequestMessage.Content.CopyToAsync(
-                    requestStream,
-                    state.TransportContext).ConfigureAwait(false);
+#if HTTP_DLL
+                    requestStream, state.TransportContext, state.CancellationToken
+#else
+                    requestStream, state.TransportContext
+#endif
+                    ).ConfigureAwait(false);
                 await requestStream.EndUploadAsync(state.CancellationToken).ConfigureAwait(false);
             }
         }

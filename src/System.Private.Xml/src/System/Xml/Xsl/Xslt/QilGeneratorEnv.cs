@@ -4,8 +4,8 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Xml.XPath;
 using System.Xml.Schema;
+using System.Xml.XPath;
 using System.Xml.Xsl.Qil;
 using System.Xml.Xsl.Runtime;
 using System.Xml.Xsl.XPath;
@@ -167,7 +167,6 @@ namespace System.Xml.Xsl.Xslt
                     else if (name == "format-date" || name == "format-time")
                     {
                         FunctionInfo.CheckArity(/*minArg:*/1, /*maxArg:*/3, name, args.Count);
-                        bool fwdCompat = (_xslVersion == XslVersion.ForwardsCompatible);
                         return _f.InvokeMsFormatDateTime(
                             /*datetime:*/_f.ConvertToString(args[0]),
                             /*format:  */1 < args.Count ? _f.ConvertToString(args[1]) : _f.String(string.Empty),
@@ -410,11 +409,10 @@ namespace System.Xml.Xsl.Xslt
 
             if (name.NodeType == QilNodeType.LiteralString)
             {
-                string keyName = (string)(QilLiteral)name;
-                string prefix, local, nsUri;
+                string keyName = (QilLiteral)name;
 
-                _compiler.ParseQName(keyName, out prefix, out local, new ThrowErrorHelper());
-                nsUri = ResolvePrefixThrow(/*ignoreDefaultNs:*/true, prefix);
+                _compiler.ParseQName(keyName, out string prefix, out string local, new ThrowErrorHelper());
+                string nsUri = ResolvePrefixThrow(/*ignoreDefaultNs:*/true, prefix);
                 QilName qname = _f.QName(local, nsUri, prefix);
 
                 if (!_compiler.Keys.Contains(qname))
@@ -644,11 +642,9 @@ namespace System.Xml.Xsl.Xslt
 
         private XmlQualifiedName ResolveQNameThrow(bool ignoreDefaultNs, QilNode qilName)
         {
-            string name = (string)(QilLiteral)qilName;
-            string prefix, local, nsUri;
-
-            _compiler.ParseQName(name, out prefix, out local, new ThrowErrorHelper());
-            nsUri = ResolvePrefixThrow(/*ignoreDefaultNs:*/ignoreDefaultNs, prefix);
+            string name = (QilLiteral)qilName;
+            _compiler.ParseQName(name, out string prefix, out string local, new ThrowErrorHelper());
+            string nsUri = ResolvePrefixThrow(/*ignoreDefaultNs:*/ignoreDefaultNs, prefix);
 
             return new XmlQualifiedName(local, nsUri);
         }

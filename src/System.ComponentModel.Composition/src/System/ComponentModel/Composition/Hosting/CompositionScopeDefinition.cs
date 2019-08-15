@@ -32,7 +32,7 @@ namespace System.ComponentModel.Composition.Hosting
         public CompositionScopeDefinition(ComposablePartCatalog catalog, IEnumerable<CompositionScopeDefinition> children)
         {
             Requires.NotNull(catalog, nameof(catalog));
-            Requires.NullOrNotNullElements(children, "children");
+            Requires.NullOrNotNullElements(children, nameof(children));
 
             InitializeCompositionScopeDefinition(catalog, children, null);
         }
@@ -46,8 +46,8 @@ namespace System.ComponentModel.Composition.Hosting
         public CompositionScopeDefinition(ComposablePartCatalog catalog, IEnumerable<CompositionScopeDefinition> children, IEnumerable<ExportDefinition> publicSurface)
         {
             Requires.NotNull(catalog, nameof(catalog));
-            Requires.NullOrNotNullElements(children, "children");
-            Requires.NullOrNotNullElements(publicSurface, "publicSurface");
+            Requires.NullOrNotNullElements(children, nameof(children));
+            Requires.NullOrNotNullElements(publicSurface, nameof(publicSurface));
 
             InitializeCompositionScopeDefinition(catalog, children, publicSurface);
         }
@@ -64,7 +64,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 _children = children.ToArray();
             }
-            if(publicSurface != null)
+            if (publicSurface != null)
             {
                 _publicSurface = publicSurface;
             }
@@ -87,10 +87,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 if (disposing)
                 {
-                    // NOTE : According to http://msdn.microsoft.com/en-us/library/4bw5ewxy.aspx, the warning is bogus when used with Interlocked API.
-#pragma warning disable 420
                     if (Interlocked.CompareExchange(ref _isDisposed, 1, 0) == 0)
-#pragma warning restore 420
                     {
                         INotifyComposablePartCatalogChanged notifyCatalog = _catalog as INotifyComposablePartCatalogChanged;
                         if (notifyCatalog != null)
@@ -138,14 +135,14 @@ namespace System.ComponentModel.Composition.Hosting
             get
             {
                 ThrowIfDisposed();
-                if(_publicSurface == null)
+                if (_publicSurface == null)
                 {
                     return this.SelectMany( (p) => p.ExportDefinitions );
                 }
 
                 return _publicSurface;
             }
-        } 
+        }
 
         /// <summary>
         /// Gets an Enumerator for the ComposablePartDefinitions
@@ -168,13 +165,13 @@ namespace System.ComponentModel.Composition.Hosting
         /// by <paramref name="definition"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// 	<paramref name="definition"/> is <see langword="null"/>.
+        /// <paramref name="definition"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         /// The <see cref="ComposablePartCatalog"/> has been disposed of.
         /// </exception>
         /// <remarks>
-        /// 	<note type="inheritinfo">
+        /// <note type="inheritinfo">
         /// Overriders of this property should never return <see langword="null"/>, if no
         /// <see cref="ExportDefinition"/> match the conditions defined by
         /// <paramref name="definition"/>, return an empty <see cref="IEnumerable{T}"/>.
@@ -189,17 +186,20 @@ namespace System.ComponentModel.Composition.Hosting
 
         internal IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> GetExportsFromPublicSurface(ImportDefinition definition)
         {
-            Assumes.NotNull(definition, "definition");
+            if (definition == null)
+            {
+                throw new ArgumentNullException(nameof(definition));
+            }
 
             var exports = new List<Tuple<ComposablePartDefinition, ExportDefinition>>();
 
-            foreach(var exportDefinition in PublicSurface)
+            foreach (var exportDefinition in PublicSurface)
             {
                 if (definition.IsConstraintSatisfiedBy(exportDefinition))
                 {
                     foreach (var export in GetExports(definition))
                     {
-                        if(export.Item2 == exportDefinition)
+                        if (export.Item2 == exportDefinition)
                         {
                             exports.Add(export);
                             break;
@@ -221,7 +221,7 @@ namespace System.ComponentModel.Composition.Hosting
         public event EventHandler<ComposablePartCatalogChangeEventArgs> Changing;
 
         /// <summary>
-        /// Raises the <see cref="E:Changed"/> event.
+        /// Raises the <see cref="Changed"/> event.
         /// </summary>
         /// <param name="e">The <see cref="System.ComponentModel.Composition.Hosting.ComposablePartCatalogChangeEventArgs"/> instance containing the event data.</param>
         protected virtual void OnChanged(ComposablePartCatalogChangeEventArgs e)
@@ -234,7 +234,7 @@ namespace System.ComponentModel.Composition.Hosting
         }
 
         /// <summary>
-        /// Raises the <see cref="E:Changing"/> event.
+        /// Raises the <see cref="Changing"/> event.
         /// </summary>
         /// <param name="e">The <see cref="System.ComponentModel.Composition.Hosting.ComposablePartCatalogChangeEventArgs"/> instance containing the event data.</param>
         protected virtual void OnChanging(ComposablePartCatalogChangeEventArgs e)

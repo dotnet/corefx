@@ -4,27 +4,24 @@
 
 /*============================================================
 **
-** 
-** 
+**
+**
 **
 ** Purpose: Create a Memorystream over an UnmanagedMemoryStream
 **
 ===========================================================*/
 
-using System;
-using System.Runtime.InteropServices;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.IO
 {
     // Needed for backwards compatibility with V1.x usages of the
-    // ResourceManager, where a MemoryStream is now returned as an 
+    // ResourceManager, where a MemoryStream is now returned as an
     // UnmanagedMemoryStream from ResourceReader.
     internal sealed class UnmanagedMemoryStreamWrapper : MemoryStream
     {
-        private UnmanagedMemoryStream _unmanagedStream;
+        private readonly UnmanagedMemoryStream _unmanagedStream;
 
         internal UnmanagedMemoryStreamWrapper(UnmanagedMemoryStream stream)
         {
@@ -71,7 +68,7 @@ namespace System.IO
 
         public override bool TryGetBuffer(out ArraySegment<byte> buffer)
         {
-            buffer = default(ArraySegment<byte>);
+            buffer = default;
             return false;
         }
 
@@ -127,7 +124,7 @@ namespace System.IO
             return _unmanagedStream.Seek(offset, loc);
         }
 
-        public unsafe override byte[] ToArray()
+        public override unsafe byte[] ToArray()
         {
             byte[] buffer = new byte[_unmanagedStream.Length];
             _unmanagedStream.Read(buffer, 0, (int)_unmanagedStream.Length);
@@ -150,7 +147,7 @@ namespace System.IO
         }
 
         // Writes this MemoryStream to another stream.
-        public unsafe override void WriteTo(Stream stream)
+        public override unsafe void WriteTo(Stream stream)
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream), SR.ArgumentNull_Stream);
@@ -160,7 +157,7 @@ namespace System.IO
             stream.Write(buffer, 0, buffer.Length);
         }
 
-        public override void SetLength(Int64 value)
+        public override void SetLength(long value)
         {
             // This was probably meant to call _unmanagedStream.SetLength(value), but it was forgotten in V.4.0.
             // Now this results in a call to the base which touches the underlying array which is never actually used.
@@ -169,7 +166,7 @@ namespace System.IO
         }
 
 
-        public override Task CopyToAsync(Stream destination, Int32 bufferSize, CancellationToken cancellationToken)
+        public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
         {
             // The parameter checks must be in sync with the base version:
             if (destination == null)
@@ -201,26 +198,25 @@ namespace System.IO
         }
 
 
-        public override Task<Int32> ReadAsync(Byte[] buffer, Int32 offset, Int32 count, CancellationToken cancellationToken)
+        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             return _unmanagedStream.ReadAsync(buffer, offset, count, cancellationToken);
         }
 
-        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default(CancellationToken))
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
         {
             return _unmanagedStream.ReadAsync(buffer, cancellationToken);
         }
 
 
-        public override Task WriteAsync(Byte[] buffer, Int32 offset, Int32 count, CancellationToken cancellationToken)
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             return _unmanagedStream.WriteAsync(buffer, offset, count, cancellationToken);
         }
 
-        public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default(CancellationToken))
+        public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
         {
             return _unmanagedStream.WriteAsync(buffer, cancellationToken);
         }
     }  // class UnmanagedMemoryStreamWrapper
 }  // namespace
-

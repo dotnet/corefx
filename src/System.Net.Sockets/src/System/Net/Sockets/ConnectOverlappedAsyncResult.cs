@@ -7,9 +7,9 @@ namespace System.Net.Sockets
     // ConnectOverlappedAsyncResult - used to take care of storage for async Socket BeginConnect call.
     internal sealed partial class ConnectOverlappedAsyncResult : BaseOverlappedAsyncResult
     {
-        private EndPoint _endPoint;
+        private readonly EndPoint _endPoint;
 
-        internal ConnectOverlappedAsyncResult(Socket socket, EndPoint endPoint, Object asyncState, AsyncCallback asyncCallback) :
+        internal ConnectOverlappedAsyncResult(Socket socket, EndPoint endPoint, object asyncState, AsyncCallback asyncCallback) :
             base(socket, asyncState, asyncCallback)
         {
             _endPoint = endPoint;

@@ -4,7 +4,6 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
-using Microsoft.Internal;
 using Microsoft.Internal.Collections;
 
 namespace System.ComponentModel.Composition.ReflectionModel
@@ -15,13 +14,12 @@ namespace System.ComponentModel.Composition.ReflectionModel
         private static readonly Type LazyOfTType = typeof(Lazy<>);
         private static readonly Type LazyOfTMType = typeof(Lazy<,>);
         private static readonly Type ExportFactoryOfTType = typeof(ExportFactory<>);
-        private static readonly Type ExportFactoryOfTMType = typeof(ExportFactory<,>);
 
         private readonly Type _type;
         private readonly bool _isAssignableCollectionType;
         private Type _contractType;
         private Func<Export, object> _castSingleValue;
-        private bool _isOpenGeneric = false;
+        private readonly bool _isOpenGeneric = false;
 
         [ThreadStatic]
         internal static Dictionary<Type, Func<Export, object>> _castSingleValueCache;
@@ -36,7 +34,10 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public ImportType(Type type, ImportCardinality cardinality)
         {
-            Assumes.NotNull(type);
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
 
             _type = type;
             Type contractType = type;
@@ -72,7 +73,10 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             get
             {
-                Assumes.IsTrue(!_isOpenGeneric);
+                if (_isOpenGeneric)
+                {
+                    throw new Exception(SR.Diagnostic_InternalExceptionMessage);
+                }
                 return _castSingleValue;
             }
         }
@@ -106,8 +110,15 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public static bool IsDescendentOf(Type type, Type baseType)
         {
-            Assumes.NotNull(type);
-            Assumes.NotNull(baseType);
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
+            if (baseType == null)
+            {
+                throw new ArgumentNullException(nameof(baseType));
+            }
 
             if (!baseType.IsGenericTypeDefinition)
             {

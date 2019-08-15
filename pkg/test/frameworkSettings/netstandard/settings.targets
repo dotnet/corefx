@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project>
   <Import Project="$(ToolsDir)netfxreference.props" />
 
   <PropertyGroup>
@@ -11,5 +10,8 @@
     <!-- intentionally dangling refs in shims -->
     <ExcludeFromClosure Include="@(NetFxReference)" />
     <IgnoredReference Include="@(NetFxReference)" />
+
+    <!-- windows.winmd is not part of the framework -->
+    <IgnoredReference Include="Windows" />
   </ItemGroup>
 </Project>

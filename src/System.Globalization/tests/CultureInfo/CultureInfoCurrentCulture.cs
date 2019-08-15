@@ -2,22 +2,21 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Globalization.Tests
 {
-    public class CurrentCultureTests : RemoteExecutorTestBase
+    public class CurrentCultureTests
     {
         [Fact]
         public void CurrentCulture()
         {
-            if (PlatformDetection.IsNetNative && !PlatformDetection.IsInAppContainer) // Tide us over until .Net Native ILC tests run are run inside an appcontainer.
-                return;
-
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo newCulture = new CultureInfo(CultureInfo.CurrentCulture.Name.Equals("ja-JP", StringComparison.OrdinalIgnoreCase) ? "ar-SA" : "ja-JP");
                 CultureInfo.CurrentCulture = newCulture;
@@ -30,7 +29,7 @@ namespace System.Globalization.Tests
                 Assert.Equal(CultureInfo.CurrentCulture, newCulture);
                 Assert.Equal("de-DE_phoneb", newCulture.CompareInfo.Name);
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -43,10 +42,7 @@ namespace System.Globalization.Tests
         [Fact]
         public void CurrentUICulture()
         {
-            if (PlatformDetection.IsNetNative && !PlatformDetection.IsInAppContainer) // Tide us over until .Net Native ILC tests run are run inside an appcontainer.
-                return;
-
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo newUICulture = new CultureInfo(CultureInfo.CurrentUICulture.Name.Equals("ja-JP", StringComparison.OrdinalIgnoreCase) ? "ar-SA" : "ja-JP");
                 CultureInfo.CurrentUICulture = newUICulture;
@@ -58,7 +54,7 @@ namespace System.Globalization.Tests
 
                 Assert.Equal(CultureInfo.CurrentUICulture, newUICulture);
                 Assert.Equal("de-DE_phoneb", newUICulture.CompareInfo.Name);
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -66,7 +62,7 @@ namespace System.Globalization.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Thread cultures is not honored in UWP.")]
         public void DefaultThreadCurrentCulture()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo newCulture = new CultureInfo(CultureInfo.DefaultThreadCurrentCulture == null || CultureInfo.DefaultThreadCurrentCulture.Name.Equals("ja-JP", StringComparison.OrdinalIgnoreCase) ? "ar-SA" : "ja-JP");
                 CultureInfo.DefaultThreadCurrentCulture = newCulture;
@@ -78,7 +74,7 @@ namespace System.Globalization.Tests
                 ((IAsyncResult)task).AsyncWaitHandle.WaitOne();
                 task.Wait();
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -86,7 +82,7 @@ namespace System.Globalization.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Thread cultures is not honored in UWP.")]
         public void DefaultThreadCurrentUICulture()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo newUICulture = new CultureInfo(CultureInfo.DefaultThreadCurrentUICulture == null || CultureInfo.DefaultThreadCurrentUICulture.Name.Equals("ja-JP", StringComparison.OrdinalIgnoreCase) ? "ar-SA" : "ja-JP");
                 CultureInfo.DefaultThreadCurrentUICulture = newUICulture;
@@ -98,7 +94,7 @@ namespace System.Globalization.Tests
                 ((IAsyncResult)task).AsyncWaitHandle.WaitOne();
                 task.Wait();
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -124,7 +120,7 @@ namespace System.Globalization.Tests
 
             psi.Environment["LANG"] = langEnvVar;
 
-            RemoteInvoke(expected =>
+            RemoteExecutor.Invoke(expected =>
             {
                 Assert.NotNull(CultureInfo.CurrentCulture);
                 Assert.NotNull(CultureInfo.CurrentUICulture);
@@ -132,7 +128,7 @@ namespace System.Globalization.Tests
                 Assert.Equal(expected, CultureInfo.CurrentCulture.Name);
                 Assert.Equal(expected, CultureInfo.CurrentUICulture.Name);
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, expectedCultureName, new RemoteInvokeOptions { StartInfo = psi }).Dispose();
         }
 
@@ -152,7 +148,7 @@ namespace System.Globalization.Tests
                psi.Environment["LANG"] = langEnvVar;
             }
 
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 Assert.NotNull(CultureInfo.CurrentCulture);
                 Assert.NotNull(CultureInfo.CurrentUICulture);
@@ -160,20 +156,21 @@ namespace System.Globalization.Tests
                 Assert.Equal("", CultureInfo.CurrentCulture.Name);
                 Assert.Equal("", CultureInfo.CurrentUICulture.Name);
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, new RemoteInvokeOptions { StartInfo = psi }).Dispose();
         }
 
         private static void CopyEssentialTestEnvironment(IDictionary<string, string> environment)
         {
             string[] essentialVariables = { "HOME", "LD_LIBRARY_PATH" };
-            foreach(string essentialVariable in essentialVariables)
-            {
-                string varValue = Environment.GetEnvironmentVariable(essentialVariable);
+            string[] prefixedVariables = { "DOTNET_", "COMPlus_" };
 
-                if (varValue != null)
+            foreach (DictionaryEntry de in Environment.GetEnvironmentVariables())
+            {
+                if (Array.FindIndex(essentialVariables, x => x.Equals(de.Key)) >= 0 ||
+                    Array.FindIndex(prefixedVariables, x => ((string)de.Key).StartsWith(x, StringComparison.OrdinalIgnoreCase)) >= 0)
                 {
-                    environment[essentialVariable] = varValue;
+                    environment[(string)de.Key] = (string)de.Value;
                 }
             }
         }

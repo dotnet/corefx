@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -19,8 +19,6 @@ namespace System.Security.Cryptography.Xml.Tests
 <example>
 <test>some text node</test>
 </example>";
-        
-        private static bool SupportsNewRsaTypes => !PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx462OrNewer;
 
         private static void SignXml(XmlDocument doc, AsymmetricAlgorithm key)
         {
@@ -61,8 +59,7 @@ namespace System.Security.Cryptography.Xml.Tests
             return signedXml.CheckSignature(certificate, verifySignatureOnly: true);
         }
 
-        // https://github.com/dotnet/corefx/issues/19270
-        [ConditionalFact(nameof(SupportsNewRsaTypes))]
+        [Fact]
         public void SignedXmlHasCertificateVerifiableSignature()
         {
             using (X509Certificate2 x509cert = TestHelpers.GetSampleX509Certificate())

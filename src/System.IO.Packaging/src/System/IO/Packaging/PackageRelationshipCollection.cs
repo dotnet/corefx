@@ -12,7 +12,7 @@ namespace System.IO.Packaging
     /// <summary>
     /// Collection of all the relationships corresponding to a given source PackagePart.
     /// This class is part of the MMCF Packaging Layer. It handles serialization to/from
-    /// relationship parts, creation of those parts and offers methods to create, delete 
+    /// relationship parts, creation of those parts and offers methods to create, delete
     /// and enumerate relationships.
     /// </summary>
     public class PackageRelationshipCollection : IEnumerable<PackageRelationship>
@@ -43,7 +43,7 @@ namespace System.IO.Packaging
                 return new FilteredEnumerator(relationshipsEnumerator, _filter);
         }
         #endregion
-        
+
         #region Internal Members
         /// <summary>
         /// Constructor
@@ -58,11 +58,11 @@ namespace System.IO.Packaging
         }
 
         #endregion
-        
+
         #region Private Members
 
-        private InternalRelationshipCollection _relationships;
-        private string _filter;
+        private readonly InternalRelationshipCollection _relationships;
+        private readonly string _filter;
 
         #endregion
 
@@ -71,7 +71,7 @@ namespace System.IO.Packaging
         #region FilteredEnumerator Class
 
         /// <summary>
-        /// Internal class for the FilteredEnumerator        
+        /// Internal class for the FilteredEnumerator
         /// </summary>
         private sealed class FilteredEnumerator : IEnumerator<PackageRelationship>
         {
@@ -88,7 +88,7 @@ namespace System.IO.Packaging
                 Debug.Assert(filter != null, "PackageRelationship filter string cannot be null");
 
                 // Look for empty string or string with just spaces
-                Debug.Assert(filter.Trim() != String.Empty,
+                Debug.Assert(filter.Trim() != string.Empty,
                     "RelationshipType filter cannot be empty string or a string with just spaces");
 
                 _enumerator = enumerator;
@@ -119,7 +119,7 @@ namespace System.IO.Packaging
             /// Gets the current object in the enumerator
             /// </summary>
             /// <value></value>
-            Object IEnumerator.Current
+            object IEnumerator.Current
             {
                 get
                 {
@@ -158,7 +158,7 @@ namespace System.IO.Packaging
 
             public void Dispose()
             {
-                //Most enumerators have dispose as a no-op, we follow the same pattern. 
+                //Most enumerators have dispose as a no-op, we follow the same pattern.
                 _enumerator.Dispose();
             }
 
@@ -171,7 +171,7 @@ namespace System.IO.Packaging
                 PackageRelationship r = _enumerator.Current;
 
                 //Case-sensitive comparison
-                if (String.CompareOrdinal(r.RelationshipType, _filter) == 0)
+                if (string.CompareOrdinal(r.RelationshipType, _filter) == 0)
                     return true;
                 else
                     return false;
@@ -181,8 +181,8 @@ namespace System.IO.Packaging
 
             #region Private Members
 
-            private IEnumerator<PackageRelationship> _enumerator;
-            private string _filter;
+            private readonly IEnumerator<PackageRelationship> _enumerator;
+            private readonly string _filter;
 
             #endregion Private Members
         }

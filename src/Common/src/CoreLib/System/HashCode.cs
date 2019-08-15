@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -9,20 +9,20 @@ https://raw.githubusercontent.com/Cyan4973/xxHash/5c174cfa4e45a42f94082dc0d4539b
 
   xxHash - Fast Hash algorithm
   Copyright (C) 2012-2016, Yann Collet
-  
+
   BSD 2-Clause License (http://www.opensource.org/licenses/bsd-license.php)
-  
+
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are
   met:
-  
+
   * Redistributions of source code must retain the above copyright
   notice, this list of conditions and the following disclaimer.
   * Redistributions in binary form must reproduce the above
   copyright notice, this list of conditions and the following disclaimer
   in the documentation and/or other materials provided with the
   distribution.
-  
+
   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -34,7 +34,7 @@ https://raw.githubusercontent.com/Cyan4973/xxHash/5c174cfa4e45a42f94082dc0d4539b
   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  
+
   You can contact the author at :
   - xxHash homepage: http://www.xxhash.com
   - xxHash source repository : https://github.com/Cyan4973/xxHash
@@ -43,6 +43,7 @@ https://raw.githubusercontent.com/Cyan4973/xxHash/5c174cfa4e45a42f94082dc0d4539b
 
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace System
@@ -253,10 +254,6 @@ namespace System
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static uint Rol(uint value, int count)
-            => (value << count) | (value >> (32 - count));
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void Initialize(out uint v1, out uint v2, out uint v3, out uint v4)
         {
             v1 = s_seed + Prime1 + Prime2;
@@ -268,23 +265,19 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static uint Round(uint hash, uint input)
         {
-            hash += input * Prime2;
-            hash = Rol(hash, 13);
-            hash *= Prime1;
-            return hash;
+            return BitOperations.RotateLeft(hash + input * Prime2, 13) * Prime1;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static uint QueueRound(uint hash, uint queuedValue)
         {
-            hash += queuedValue * Prime3;
-            return Rol(hash, 17) * Prime4;
+            return BitOperations.RotateLeft(hash + queuedValue * Prime3, 17) * Prime4;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static uint MixState(uint v1, uint v2, uint v3, uint v4)
         {
-            return Rol(v1, 1) + Rol(v2, 7) + Rol(v3, 12) + Rol(v4, 18);
+            return BitOperations.RotateLeft(v1, 1) + BitOperations.RotateLeft(v2, 7) + BitOperations.RotateLeft(v3, 12) + BitOperations.RotateLeft(v4, 18);
         }
 
         private static uint MixEmptyState()
@@ -308,7 +301,7 @@ namespace System
             Add(value?.GetHashCode() ?? 0);
         }
 
-        public void Add<T>(T value, IEqualityComparer<T> comparer)
+        public void Add<T>(T value, IEqualityComparer<T>? comparer)
         {
             Add(comparer != null ? comparer.GetHashCode(value) : (value?.GetHashCode() ?? 0));
         }
@@ -335,9 +328,9 @@ namespace System
 
             // To see what's really going on here, have a look at the Combine
             // methods.
-            
+
             var val = (uint)value;
-            
+
             // Storing the value of _length locally shaves of quite a few bytes
             // in the resulting machine code.
             uint previousLength = _length++;
@@ -368,7 +361,7 @@ namespace System
             // Storing the value of _length locally shaves of quite a few bytes
             // in the resulting machine code.
             uint length = _length;
-            
+
             // position refers to the *next* queue position in this method, so
             // position == 1 means that _queue1 is populated; _queue2 would have
             // been populated on the next call to Add.
@@ -405,10 +398,10 @@ namespace System
         }
 
 #pragma warning disable 0809
-        // Obsolete member 'memberA' overrides non-obsolete member 'memberB'. 
+        // Obsolete member 'memberA' overrides non-obsolete member 'memberB'.
         // Disallowing GetHashCode and Equals is by design
 
-        // * We decided to not override GetHashCode() to produce the hash code 
+        // * We decided to not override GetHashCode() to produce the hash code
         //   as this would be weird, both naming-wise as well as from a
         //   behavioral standpoint (GetHashCode() should return the object's
         //   hash code, not the one being computed).
@@ -424,7 +417,7 @@ namespace System
 
         [Obsolete("HashCode is a mutable struct and should not be compared with other HashCodes.", error: true)]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public override bool Equals(object obj) => throw new NotSupportedException(SR.HashCode_EqualityNotSupported);
+        public override bool Equals(object? obj) => throw new NotSupportedException(SR.HashCode_EqualityNotSupported);
 #pragma warning restore 0809
     }
 }

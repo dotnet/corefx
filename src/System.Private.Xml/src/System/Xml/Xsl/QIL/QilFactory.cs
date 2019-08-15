@@ -10,11 +10,11 @@ namespace System.Xml.Xsl.Qil
     /// Factory methods for constructing QilExpression nodes.
     /// </summary>
     /// <remarks>
-    /// See <see cref="http://dynamo/qil/qil.xml">the QIL functional specification</see> for documentation.
+    /// See <see href="http://dynamo/qil/qil.xml">the QIL functional specification</see> for documentation.
     /// </remarks>
     internal sealed class QilFactory
     {
-        private QilTypeChecker _typeCheck;
+        private readonly QilTypeChecker _typeCheck;
 
         public QilFactory()
         {

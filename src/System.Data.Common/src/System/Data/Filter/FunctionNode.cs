@@ -43,7 +43,7 @@ namespace System.Data
             _name = name;
             for (int i = 0; i < s_funcs.Length; i++)
             {
-                if (string.Compare(s_funcs[i]._name, name, StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Equals(s_funcs[i]._name, name, StringComparison.OrdinalIgnoreCase))
                 {
                     // we found the reserved word..
                     _info = i;
@@ -573,7 +573,6 @@ namespace System.Data
 
         internal void Check()
         {
-            Function f = s_funcs[_info];
             if (_info < 0)
                 throw ExprException.UndefinedFunction(_name);
 

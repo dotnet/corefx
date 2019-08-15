@@ -13,8 +13,18 @@ namespace System.Data.SqlClient.ManualTesting.Tests
     {
         private const string COL_PROGRAM_NAME = "ProgramName";
         private const string COL_HOSTNAME = "HostName";
+        private static readonly string s_databaseName = "d_" + Guid.NewGuid().ToString().Replace('-', '_');
+        private static readonly string s_tableName = "Person";
+        private static readonly string s_connectionString = DataTestUtility.TcpConnStr;
+        private static readonly string s_dbConnectionString = new SqlConnectionStringBuilder(s_connectionString) { InitialCatalog = s_databaseName }.ConnectionString;
+        private static readonly string s_createDatabaseCmd = $"CREATE DATABASE {s_databaseName}";
+        private static readonly string s_createTableCmd = $"CREATE TABLE {s_tableName} (NAME NVARCHAR(40), AGE INT)";
+        private static readonly string s_alterDatabaseSingleCmd = $"ALTER DATABASE {s_databaseName} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;";
+        private static readonly string s_alterDatabaseMultiCmd = $"ALTER DATABASE {s_databaseName} SET MULTI_USER WITH ROLLBACK IMMEDIATE;";
+        private static readonly string s_selectTableCmd = $"SELECT COUNT(*) FROM {s_tableName}";
+        private static readonly string s_dropDatabaseCmd = $"DROP DATABASE {s_databaseName}";
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void EnvironmentHostNameTest()
         {
             SqlConnectionStringBuilder builder = (new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr) { Pooling = true });
@@ -31,7 +41,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                         {
                             int programNameOrdinal = reader.GetOrdinal(COL_PROGRAM_NAME);
                             string programName = reader.GetString(programNameOrdinal);
-                            
+
                             if (programName != null && programName.Trim().Equals(builder.ApplicationName))
                             {
                                 // Get the hostname
@@ -49,7 +59,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             Assert.True(false, "No non-empty hostname found for the application");
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void ConnectionTimeoutTestWithThread()
         {
             const int timeoutSec = 5;
@@ -83,6 +93,30 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             Assert.True(timeElapsed < threshold);
         }
 
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
+        public static void ProcessIdTest()
+        {
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr);
+            string sqlProviderName = builder.ApplicationName;
+            string sqlProviderProcessID = System.Diagnostics.Process.GetCurrentProcess().Id.ToString();
+
+            using (SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString))
+            {
+                sqlConnection.Open();
+                string strCommand = $"SELECT PROGRAM_NAME,HOSTPROCESS FROM SYS.SYSPROCESSES WHERE PROGRAM_NAME LIKE ('%{sqlProviderName}%')";
+                using (SqlCommand command = new SqlCommand(strCommand, sqlConnection))
+                {
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            Assert.Equal(sqlProviderName,reader.GetString(0).Trim());
+                            Assert.Equal(sqlProviderProcessID, reader.GetString(1).Trim());
+                        }
+                    }
+                }
+            }
+        }
         public class ConnectionWorker
         {
             private static List<ConnectionWorker> workerList = new List<ConnectionWorker>();
@@ -143,6 +177,36 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 _timeElapsed = totalTime / Convert.ToDouble(_numOfTry);
 
                 _doneEvent.Set();
+            }
+        }
+
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
+        public static void ConnectionKilledTest()
+        {
+            try
+            {
+                // Setup Database and Table.
+                DataTestUtility.RunNonQuery(s_connectionString, s_createDatabaseCmd);
+                DataTestUtility.RunNonQuery(s_dbConnectionString, s_createTableCmd);
+
+                // Kill all the connections and set Database to SINGLE_USER Mode.
+                DataTestUtility.RunNonQuery(s_connectionString, s_alterDatabaseSingleCmd);
+                // Set Database back to MULTI_USER Mode
+                DataTestUtility.RunNonQuery(s_connectionString, s_alterDatabaseMultiCmd);
+
+                // Execute SELECT statement.
+                DataTestUtility.RunNonQuery(s_dbConnectionString, s_selectTableCmd);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                Assert.Null(ex);
+            }
+            finally
+            {
+                // Kill all the connections, set Database to SINGLE_USER Mode and drop Database
+                DataTestUtility.RunNonQuery(s_connectionString, s_alterDatabaseSingleCmd);
+                DataTestUtility.RunNonQuery(s_connectionString, s_dropDatabaseCmd);
             }
         }
     }

@@ -8,14 +8,18 @@ using System.Net.Test.Common;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    public abstract class HttpClientHandler_DefaultProxyCredentials_Test : HttpClientTestBase
+    public abstract class HttpClientHandler_DefaultProxyCredentials_Test : HttpClientHandlerTestBase
     {
+        public HttpClientHandler_DefaultProxyCredentials_Test(ITestOutputHelper output) : base(output) { }
+
         [Fact]
         public void Default_Get_Null()
         {
@@ -43,8 +47,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(23702, TargetFrameworkMonikers.NetFramework)]
-        [ActiveIssue(20010, TargetFrameworkMonikers.Uap)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't support .Proxy property")]
         [Fact]
         public async Task ProxyExplicitlyProvided_DefaultCredentials_Ignored()
         {
@@ -55,13 +58,13 @@ namespace System.Net.Http.Functional.Tests
             await LoopbackServer.CreateClientAndServerAsync(async proxyUrl =>
             {
                 using (HttpClientHandler handler = CreateHttpClientHandler())
-                using (var client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     handler.Proxy = new UseSpecifiedUriWebProxy(proxyUrl, explicitProxyCreds);
                     handler.DefaultProxyCredentials = defaultSystemProxyCreds;
                     using (HttpResponseMessage response = await client.GetAsync("http://notatrealserver.com/")) // URL does not matter
                     {
-                        Assert.Equal(response.StatusCode, HttpStatusCode.OK);
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                     }
                 }
             }, async server =>
@@ -77,7 +80,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [PlatformSpecific(TestPlatforms.AnyUnix)] // The default proxy is resolved via WinINet on Windows.
         [Theory]
         [InlineData(false)]
@@ -102,10 +105,10 @@ namespace System.Net.Http.Functional.Tests
                     psi.Environment.Add("http_proxy", $"http://{proxyUri.Host}:{proxyUri.Port}");
                 }
 
-                RemoteInvoke(async (useProxyString, useSocketsHttpHandlerString) =>
+                RemoteExecutor.Invoke(async (useProxyString, useSocketsHttpHandlerString, useHttp2String) =>
                 {
-                    using (HttpClientHandler handler = CreateHttpClientHandler(useSocketsHttpHandlerString))
-                    using (var client = new HttpClient(handler))
+                    using (HttpClientHandler handler = CreateHttpClientHandler(useSocketsHttpHandlerString, useHttp2String))
+                    using (HttpClient client = CreateHttpClient(handler, useHttp2String))
                     {
                         var creds = new NetworkCredential(ExpectedUsername, ExpectedPassword);
                         handler.DefaultProxyCredentials = creds;
@@ -113,10 +116,10 @@ namespace System.Net.Http.Functional.Tests
 
                         HttpResponseMessage response = await client.GetAsync(Configuration.Http.RemoteEchoServer);
                         // Correctness of user and password is done in server part.
-                        Assert.True(response.StatusCode ==  HttpStatusCode.OK);
+                        Assert.True(response.StatusCode == HttpStatusCode.OK);
                     }
-                    return SuccessExitCode;
-                }, useProxy.ToString(), UseSocketsHttpHandler.ToString(), new RemoteInvokeOptions { StartInfo = psi }).Dispose();
+                    return RemoteExecutor.SuccessExitCode;
+                }, useProxy.ToString(), UseSocketsHttpHandler.ToString(), UseHttp2.ToString(), new RemoteInvokeOptions { StartInfo = psi }).Dispose();
                 if (useProxy)
                 {
                     await proxyTask;
@@ -127,19 +130,19 @@ namespace System.Net.Http.Functional.Tests
         // The purpose of this test is mainly to validate the .NET Framework OOB System.Net.Http implementation
         // since it has an underlying dependency to WebRequest. While .NET Core implementations of System.Net.Http
         // are not using any WebRequest code, the test is still useful to validate correctness.
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public async Task ProxyNotExplicitlyProvided_DefaultCredentialsSet_DefaultWebProxySetToNull_Success()
         {
             WebRequest.DefaultWebProxy = null;
 
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 handler.DefaultProxyCredentials = new NetworkCredential("UsernameNotUsed", "PasswordNotUsed");
                 HttpResponseMessage response = await client.GetAsync(Configuration.Http.RemoteEchoServer);
 
-                Assert.Equal(response.StatusCode, HttpStatusCode.OK);
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             }
         }
     }

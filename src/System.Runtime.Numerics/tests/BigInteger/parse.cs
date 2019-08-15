@@ -3,16 +3,18 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Numerics.Tests
 {
     public partial class parseTest
     {
-        private readonly static int s_samples = 10;
-        private readonly static Random s_random = new Random(100);
+        private static readonly int s_samples = 10;
+        private static readonly Random s_random = new Random(100);
 
         // Invariant culture is commonly used for (de-)serialization and similar to en-US
         // Ukrainian (Ukraine) added to catch regressions (issue #1642)
@@ -34,13 +36,11 @@ namespace System.Numerics.Tests
         [OuterLoop]
         public static void RunParseToStringTests(CultureInfo culture)
         {
-            CultureInfo originalCulture = Thread.CurrentThread.CurrentCulture;
-
-            try
+            RemoteExecutor.Invoke((cultureName) =>
             {
                 byte[] tempByteArray1 = new byte[0];
 
-                Thread.CurrentThread.CurrentCulture = culture;
+                Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo(cultureName);
 
                 //default style
                 VerifyDefaultParse(s_random);
@@ -77,16 +77,13 @@ namespace System.Numerics.Tests
                 {
                     BigInteger junk;
                     BigInteger.TryParse("1", invalid, null, out junk);
-                    Assert.Equal(junk.ToString("d"), "1");
+                    Assert.Equal("1", junk.ToString("d"));
                 });
 
                 //FormatProvider tests
                 RunFormatProviderParseStrings();
-            }
-            finally
-            {
-                Thread.CurrentThread.CurrentCulture = originalCulture;
-            }
+
+            }, culture.ToString()).Dispose();
         }
 
         private static void RunFormatProviderParseStrings()
@@ -111,11 +108,11 @@ namespace System.Numerics.Tests
             VerifyFormatParse("123&4567^ <", NumberStyles.Any, nfi, new BigInteger(-1234567));
         }
 
-        public static void VerifyDefaultParse(Random random)
+        private static void VerifyDefaultParse(Random random)
         {
             // BasicTests
             VerifyFailParseToString(null, typeof(ArgumentNullException));
-            VerifyFailParseToString(String.Empty, typeof(FormatException));
+            VerifyFailParseToString(string.Empty, typeof(FormatException));
             VerifyParseToString("0");
             VerifyParseToString("000");
             VerifyParseToString("1");
@@ -232,10 +229,10 @@ namespace System.Numerics.Tests
             }
         }
 
-        public static void VerifyNumberStyles(NumberStyles ns, Random random)
+        private static void VerifyNumberStyles(NumberStyles ns, Random random)
         {
             VerifyParseToString(null, ns, false, null);
-            VerifyParseToString(String.Empty, ns, false);
+            VerifyParseToString(string.Empty, ns, false);
             VerifyParseToString("0", ns, true);
             VerifyParseToString("000", ns, true);
             VerifyParseToString("1", ns, true);
@@ -333,7 +330,7 @@ namespace System.Numerics.Tests
             {
                 string digits = GetDigitSequence(1, 100, random);
                 string exp = GetDigitSequence(1, 3, random);
-                int expValue = Int32.Parse(exp);
+                int expValue = int.Parse(exp);
                 string zeros = new string('0', expValue);
                 //Positive Exponents
                 VerifyParseToString(digits + "e" + CultureInfo.CurrentCulture.NumberFormat.PositiveSign + exp, ns, ((ns & NumberStyles.AllowExponent) != 0), digits + zeros);
@@ -346,9 +343,9 @@ namespace System.Numerics.Tests
                         valid = false;
                     }
                 }
-                if (digits.Length - Int32.Parse(exp) > 0)
+                if (digits.Length - int.Parse(exp) > 0)
                 {
-                    VerifyParseToString(digits + "e" + CultureInfo.CurrentCulture.NumberFormat.NegativeSign + exp, ns, valid, digits.Substring(0, digits.Length - Int32.Parse(exp)));
+                    VerifyParseToString(digits + "e" + CultureInfo.CurrentCulture.NumberFormat.NegativeSign + exp, ns, valid, digits.Substring(0, digits.Length - int.Parse(exp)));
                 }
                 else
                 {
@@ -387,7 +384,7 @@ namespace System.Numerics.Tests
         private static void VerifyFailParseToString(string num1, Type expectedExceptionType)
         {
             BigInteger test;
-            Assert.False(BigInteger.TryParse(num1, out test), String.Format("Expected TryParse to fail on {0}", num1));
+            Assert.False(BigInteger.TryParse(num1, out test), string.Format("Expected TryParse to fail on {0}", num1));
             if (num1 == null)
             {
                 Assert.Throws<ArgumentNullException>(() => { BigInteger.Parse(num1).ToString("d"); });
@@ -425,7 +422,7 @@ namespace System.Numerics.Tests
                 {
                     Assert.Throws<FormatException>(() => { BigInteger.Parse(num1, ns); });
                 }
-                Assert.False(BigInteger.TryParse(num1, ns, null, out test), String.Format("Expected TryParse to fail on {0}", num1));
+                Assert.False(BigInteger.TryParse(num1, ns, null, out test), string.Format("Expected TryParse to fail on {0}", num1));
             }
 
             if (num1 != null)
@@ -449,7 +446,7 @@ namespace System.Numerics.Tests
             else
             {
                 Assert.Throws<FormatException>(() => { BigInteger.Parse(num1, nfi); });
-                Assert.False(BigInteger.TryParse(num1, NumberStyles.Any, nfi, out test), String.Format("Expected TryParse to fail on {0}", num1));
+                Assert.False(BigInteger.TryParse(num1, NumberStyles.Any, nfi, out test), string.Format("Expected TryParse to fail on {0}", num1));
             }
 
             if (num1 != null)
@@ -472,8 +469,8 @@ namespace System.Numerics.Tests
             }
             else
             {
-                Assert.Throws<FormatException>(() => { BigInteger.Parse(num1, ns, nfi); });                
-                Assert.False(BigInteger.TryParse(num1, ns, nfi, out test), String.Format("Expected TryParse to fail on {0}", num1));
+                Assert.Throws<FormatException>(() => { BigInteger.Parse(num1, ns, nfi); });
+                Assert.False(BigInteger.TryParse(num1, ns, nfi, out test), string.Format("Expected TryParse to fail on {0}", num1));
             }
 
             if (num1 != null)
@@ -482,10 +479,10 @@ namespace System.Numerics.Tests
             }
         }
 
-        private static String GetDigitSequence(int min, int max, Random random)
+        private static string GetDigitSequence(int min, int max, Random random)
         {
-            String result = String.Empty;
-            String[] digits = new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+            string result = string.Empty;
+            string[] digits = new string[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
             int size = random.Next(min, max);
 
             for (int i = 0; i < size; i++)
@@ -503,10 +500,10 @@ namespace System.Numerics.Tests
             return result;
         }
 
-        private static String GetHexDigitSequence(int min, int max, Random random)
+        private static string GetHexDigitSequence(int min, int max, Random random)
         {
-            String result = String.Empty;
-            String[] digits = new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f" };
+            string result = string.Empty;
+            string[] digits = new string[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f" };
             int size = random.Next(min, max);
             bool hasHexCharacter = false;
 
@@ -526,13 +523,13 @@ namespace System.Numerics.Tests
             return result;
         }
 
-        private static String GetRandomInvalidChar(Random random)
+        private static string GetRandomInvalidChar(Random random)
         {
-            Char[] digits = new Char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C', 'D', 'E', 'F' };
-            Char result = '5';
+            char[] digits = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C', 'D', 'E', 'F' };
+            char result = '5';
             while (result == '5')
             {
-                result = unchecked((Char)random.Next());
+                result = unchecked((char)random.Next());
                 for (int i = 0; i < digits.Length; i++)
                 {
                     if (result == (char)digits[i])
@@ -548,23 +545,23 @@ namespace System.Numerics.Tests
                 }
             }
 
-            String res = new String(result, 1);
+            string res = new string(result, 1);
             return res;
         }
 
-        private static String Fix(String input)
+        private static string Fix(string input)
         {
             return Fix(input, false);
         }
 
-        private static String Fix(String input, bool isHex)
+        private static string Fix(string input, bool isHex)
         {
             return Fix(input, isHex, true);
         }
 
-        private static String Fix(String input, bool isHex, bool failureNotExpected)
+        private static string Fix(string input, bool isHex, bool failureNotExpected)
         {
-            String output = input;
+            string output = input;
 
             if (failureNotExpected)
             {
@@ -576,7 +573,7 @@ namespace System.Numerics.Tests
                 {
                     output = output.Substring(1);
                 }
-                List<Char> out2 = new List<Char>();
+                List<char> out2 = new List<char>();
                 for (int i = 0; i < output.Length; i++)
                 {
                     if ((output[i] >= '0') & (output[i] <= '9'))
@@ -584,25 +581,25 @@ namespace System.Numerics.Tests
                         out2.Add(output[i]);
                     }
                 }
-                output = new String(out2.ToArray());
+                output = new string(out2.ToArray());
             }
 
             return output;
         }
 
-        private static String ConvertHexToDecimal(string input)
+        private static string ConvertHexToDecimal(string input)
         {
             char[] inArr = input.ToCharArray();
             bool isNeg = false;
 
             if (inArr.Length > 0)
             {
-                if (Int32.Parse("0" + inArr[0], NumberStyles.AllowHexSpecifier) > 7)
+                if (int.Parse("0" + inArr[0], NumberStyles.AllowHexSpecifier) > 7)
                 {
                     isNeg = true;
                     for (int i = 0; i < inArr.Length; i++)
                     {
-                        int digit = Int32.Parse("0" + inArr[i], NumberStyles.AllowHexSpecifier);
+                        int digit = int.Parse("0" + inArr[i], NumberStyles.AllowHexSpecifier);
                         digit = 15 - digit;
                         inArr[i] = digit.ToString("x")[0];
                     }
@@ -615,7 +612,7 @@ namespace System.Numerics.Tests
             {
                 try
                 {
-                    BigInteger x2 = (Int32.Parse(new string(new char[] { inArr[i] }), NumberStyles.AllowHexSpecifier) * baseNum);
+                    BigInteger x2 = (int.Parse(new string(new char[] { inArr[i] }), NumberStyles.AllowHexSpecifier) * baseNum);
                     x = x + x2;
                 }
                 catch (FormatException)
@@ -644,7 +641,7 @@ namespace System.Numerics.Tests
                 number.Reverse();
             }
 
-            String y2 = new String(number.ToArray());
+            string y2 = new string(number.ToArray());
             if (isNeg)
             {
                 y2 = CultureInfo.CurrentCulture.NumberFormat.NegativeSign.ToCharArray() + y2;
@@ -652,12 +649,12 @@ namespace System.Numerics.Tests
             return y2;
         }
 
-        private static String GenerateGroups(int[] sizes, string seperator, Random random)
+        private static string GenerateGroups(int[] sizes, string seperator, Random random)
         {
             List<int> total_sizes = new List<int>();
             int total;
             int num_digits = random.Next(10, 100);
-            string digits = String.Empty;
+            string digits = string.Empty;
 
             total = 0;
             total_sizes.Add(0);
@@ -766,7 +763,7 @@ namespace System.Numerics.Tests
             return (ns & NumberStyles.AllowTrailingWhite) != 0;
         }
 
-        public static void Eval(BigInteger x, String expected)
+        private static void Eval(BigInteger x, string expected)
         {
             bool IsPos = (x >= 0);
             if (!IsPos)
@@ -776,7 +773,7 @@ namespace System.Numerics.Tests
 
             if (x == 0)
             {
-                Assert.Equal(expected, "0");
+                Assert.Equal("0", expected);
             }
             else
             {
@@ -787,7 +784,7 @@ namespace System.Numerics.Tests
                     x = x / 10;
                 }
                 number.Reverse();
-                String actual = new String(number.ToArray());
+                string actual = new string(number.ToArray());
 
                 Assert.Equal(expected, actual);
             }

@@ -75,7 +75,7 @@ namespace System.Collections.Tests
             for (int i = 0; i < collBase.Count; i++)
             {
                 Foo value = CreateValue(i);
-                Assert.Equal(value, collBase[i]);               
+                Assert.Equal(value, collBase[i]);
             }
         }
 
@@ -299,8 +299,8 @@ namespace System.Collections.Tests
             // SyncRoot should be the reference to the underlying collection, not to MyCollection
             var collBase = new MyCollection();
             object syncRoot = collBase.SyncRoot;
-            Assert.NotEqual(syncRoot, collBase);
-            Assert.Equal(collBase.SyncRoot, collBase.SyncRoot);
+            Assert.NotNull(syncRoot);
+            Assert.Same(collBase.SyncRoot, collBase.SyncRoot);
         }
 
         [Fact]
@@ -821,7 +821,7 @@ namespace System.Collections.Tests
                 IntValue = intValue;
                 StringValue = stringValue;
             }
-            
+
             public int IntValue { get; set; }
             public string StringValue { get; set; }
 

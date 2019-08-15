@@ -22,16 +22,16 @@ namespace System.Diagnostics.Tracing
 #endif
 {
     [StructLayout(LayoutKind.Explicit, Size = 16)]
-#if !CORECLR && !ES_BUILD_PN    
+#if ES_BUILD_STANDALONE
     [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
-#endif // !CORECLR && !ES_BUILD_PN
+#endif
 
     /*
-     EventDescriptor was public in the separate System.Diagnostics.Tracing assembly(pre NS2.0), 
+     EventDescriptor was public in the separate System.Diagnostics.Tracing assembly(pre NS2.0),
      now the move to CoreLib marked them as private.
-     While they are technically private (it's a contract used between the library and the ILC toolchain), 
+     While they are technically private (it's a contract used between the library and the ILC toolchain),
      we need them to be rooted and exported from shared library for the system to work.
-     For now I'm simply marking them as public again.A cleaner solution might be to use.rd.xml to 
+     For now I'm simply marking them as public again.A cleaner solution might be to use.rd.xml to
      root them and modify shared library definition to force export them.
      */
 #if ES_BUILD_PN
@@ -41,23 +41,23 @@ namespace System.Diagnostics.Tracing
 #endif
     struct EventDescriptor
     {
-        # region private
+        #region private
         [FieldOffset(0)]
-        private int m_traceloggingId;
+        private readonly int m_traceloggingId;
         [FieldOffset(0)]
-        private ushort m_id;
+        private readonly ushort m_id;
         [FieldOffset(2)]
-        private byte m_version;
+        private readonly byte m_version;
         [FieldOffset(3)]
-        private byte m_channel;
+        private readonly byte m_channel;
         [FieldOffset(4)]
-        private byte m_level;
+        private readonly byte m_level;
         [FieldOffset(5)]
-        private byte m_opcode;
+        private readonly byte m_opcode;
         [FieldOffset(6)]
-        private ushort m_task;
+        private readonly ushort m_task;
         [FieldOffset(8)]
-        private long m_keywords;
+        private readonly long m_keywords;
         #endregion
 
         public EventDescriptor(
@@ -176,7 +176,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (!(obj is EventDescriptor))
                 return false;

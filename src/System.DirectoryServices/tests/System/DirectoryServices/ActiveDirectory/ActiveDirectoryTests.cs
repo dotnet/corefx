@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -30,7 +30,7 @@ namespace System.DirectoryServices.Tests
 
                 using (DirectoryEntry de = schema.GetDirectoryEntry())
                 {
-                    Assert.True("CN=Schema".Equals(de.Name, StringComparison.OrdinalIgnoreCase));
+                    Assert.Equal("CN=Schema", de.Name, StringComparer.OrdinalIgnoreCase);
                 }
             }
         }
@@ -63,7 +63,7 @@ namespace System.DirectoryServices.Tests
 
                 using (DirectoryEntry de = orgClass.GetDirectoryEntry())
                 {
-                    Assert.True("CN=Organization".Equals(de.Name, StringComparison.OrdinalIgnoreCase));
+                    Assert.Equal("CN=Organization", de.Name, StringComparer.OrdinalIgnoreCase);
                 }
             }
         }
@@ -86,7 +86,7 @@ namespace System.DirectoryServices.Tests
 
                 using (DirectoryEntry de = adsp.GetDirectoryEntry())
                 {
-                    Assert.True("CN=Object-Class".Equals(de.Name, StringComparison.OrdinalIgnoreCase));
+                    Assert.Equal("CN=Object-Class", de.Name, StringComparer.OrdinalIgnoreCase);
                 }
 
                 Assert.Equal(ActiveDirectorySyntax.Oid, adsp.Syntax);
@@ -123,7 +123,7 @@ namespace System.DirectoryServices.Tests
                 {
                     // we expect to get top only entries
                     string s  = (string) child.Properties["objectClass"][0];
-                    Assert.True(s.Equals("top", StringComparison.OrdinalIgnoreCase));
+                    Assert.Equal("top", s, StringComparer.OrdinalIgnoreCase);
                     newTopClassCount += 1;
                 }
 
@@ -222,7 +222,7 @@ namespace System.DirectoryServices.Tests
                 using (ActiveDirectorySchema schema = forest.Schema)
                 using (ActiveDirectorySchemaClass  adsc = schema.FindClass("top"))
                 {
-                    Assert.True("top".Equals(adsc.CommonName, StringComparison.OrdinalIgnoreCase));
+                    Assert.Equal("top", adsc.CommonName, StringComparer.OrdinalIgnoreCase);
                 }
             }
         }
@@ -410,7 +410,7 @@ namespace System.DirectoryServices.Tests
         private static DirectoryContext ActiveDirectoryContext => new DirectoryContext(
                                             DirectoryContextType.DirectoryServer,
                                             LdapConfiguration.Configuration.ServerName +
-                                            (String.IsNullOrEmpty(LdapConfiguration.Configuration.Port) ? "" : ":" + LdapConfiguration.Configuration.Port),
+                                            (string.IsNullOrEmpty(LdapConfiguration.Configuration.Port) ? "" : ":" + LdapConfiguration.Configuration.Port),
                                             LdapConfiguration.Configuration.UserName,
                                             LdapConfiguration.Configuration.Password);
 

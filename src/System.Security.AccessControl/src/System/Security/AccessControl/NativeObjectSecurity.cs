@@ -26,8 +26,8 @@ namespace System.Security.AccessControl
         #region Private Members
 
         private readonly ResourceType _resourceType;
-        private ExceptionFromErrorCode _exceptionFromErrorCode = null;
-        private object _exceptionContext = null;
+        private readonly ExceptionFromErrorCode _exceptionFromErrorCode = null;
+        private readonly object _exceptionContext = null;
         private readonly uint ProtectedDiscretionaryAcl = 0x80000000;
         private readonly uint ProtectedSystemAcl = 0x40000000;
         private readonly uint UnprotectedDiscretionaryAcl = 0x20000000;
@@ -157,7 +157,7 @@ nameof(name));
                     }
                     else
                     {
-                        Debug.Assert(false, string.Format(CultureInfo.InvariantCulture, "Win32GetSecurityInfo() failed with unexpected error code {0}", error));
+                        Debug.Fail($"Win32GetSecurityInfo() failed with unexpected error code {error}");
                         exception = new InvalidOperationException(SR.Format(SR.AccessControl_UnexpectedError, error));
                     }
                 }
@@ -299,7 +299,7 @@ nameof(name));
                         }
                         else
                         {
-                            Debug.Assert(false, string.Format(CultureInfo.InvariantCulture, "Unexpected error code {0}", error));
+                            Debug.Fail($"Unexpected error code {error}");
                             exception = new InvalidOperationException(SR.Format(SR.AccessControl_UnexpectedError, error));
                         }
                     }

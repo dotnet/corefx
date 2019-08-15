@@ -15,7 +15,7 @@ namespace System.ComponentModel.Tests
         public void Ctor_Default()
         {
             var resourceManager = new ComponentResourceManager();
-            Assert.Null(resourceManager.BaseName);
+            Assert.Empty(resourceManager.BaseName);
             Assert.False(resourceManager.IgnoreCase);
             Assert.NotNull(resourceManager.ResourceSetType);
         }
@@ -46,13 +46,10 @@ namespace System.ComponentModel.Tests
             Assert.Null(value.GetOnlyProperty);
             Assert.Null(value.GetPrivateProperty());
 
-            if (!PlatformDetection.IsFullFramework) // https://github.com/dotnet/corefx/issues/22444 needs to be ported to netfx
-            {
-                resourceManager.ApplyResources(value, "Default");
-                Assert.Equal("DefaultGetSetProperty", value.GetSetProperty);
-                Assert.Null(value.GetOnlyProperty);
-                Assert.Null(value.GetPrivateProperty());
-            }
+            resourceManager.ApplyResources(value, "Default");
+            Assert.Equal("DefaultGetSetProperty", value.GetSetProperty);
+            Assert.Null(value.GetOnlyProperty);
+            Assert.Null(value.GetPrivateProperty());
         }
 
         private class TestValue
@@ -96,19 +93,14 @@ namespace System.ComponentModel.Tests
             {
                 IgnoreCase = true
             };
-            
-            resourceManager.ApplyResources(value, "Object");
 
+            resourceManager.ApplyResources(value, "Object");
             Assert.Null(value.GetSetProperty);
             Assert.Equal("ObjectGetSetProperty", value.getsetproperty);
 
-            if (!PlatformDetection.IsFullFramework) // https://github.com/dotnet/corefx/issues/22444 needs to be ported to netfx
-            {
-                resourceManager.ApplyResources(value, "Default");
-
-                Assert.Null(value.GetSetProperty);
-                Assert.Equal("DefaultGetSetProperty", value.getsetproperty);
-            }
+            resourceManager.ApplyResources(value, "Default");
+            Assert.Null(value.GetSetProperty);
+            Assert.Equal("DefaultGetSetProperty", value.getsetproperty);
         }
 
         public class MulticaseBaseClass
@@ -135,11 +127,8 @@ namespace System.ComponentModel.Tests
             resourceManager.ApplyResources(value, "Object");
             Assert.Equal("ObjectGetSetProperty", value.GetSetProperty);
 
-            if (!PlatformDetection.IsFullFramework) // https://github.com/dotnet/corefx/issues/22444 needs to be ported to netfx
-            {
-                resourceManager.ApplyResources(value, "Default");
-                Assert.Equal("DefaultGetSetProperty", value.GetSetProperty);
-            }
+            resourceManager.ApplyResources(value, "Default");
+            Assert.Equal("DefaultGetSetProperty", value.GetSetProperty);
         }
 
         [Fact]
@@ -154,15 +143,11 @@ namespace System.ComponentModel.Tests
             resourceManager.ApplyResources(value, "Object");
             Assert.Equal("ObjectGetSetProperty", value.GetSetProperty);
 
-            if (!PlatformDetection.IsFullFramework) // https://github.com/dotnet/corefx/issues/22444 needs to be ported to netfx
-            {
-                resourceManager.ApplyResources(value, "Default");
-                Assert.Equal("DefaultGetSetProperty", value.GetSetProperty);
-            }
+            resourceManager.ApplyResources(value, "Default");
+            Assert.Equal("DefaultGetSetProperty", value.GetSetProperty);
         }
 
         [Fact]
-        [ActiveIssue(22145, TargetFrameworkMonikers.NetFramework)]
         public void ApplyResources_IComponentWithDesignModeSite_Success()
         {
             var resourceManager = new ComponentResourceManager(typeof(global::Resources.TestResx))
@@ -174,11 +159,8 @@ namespace System.ComponentModel.Tests
             resourceManager.ApplyResources(value, "Object");
             Assert.Equal("ObjectGetSetProperty", value.GetSetProperty);
 
-            if (!PlatformDetection.IsFullFramework) // https://github.com/dotnet/corefx/issues/22444 needs to be ported to netfx
-            {
-                resourceManager.ApplyResources(value, "Default");
-                Assert.Equal("DefaultGetSetProperty", value.GetSetProperty);
-            }
+            resourceManager.ApplyResources(value, "Default");
+            Assert.Equal("DefaultGetSetProperty", value.GetSetProperty);
         }
 
         private class TestSite : ISite

@@ -17,6 +17,7 @@ namespace System.Xml.Linq
     /// An XML attribute is a name/value pair associated with an XML element.
     /// </remarks>
     [SuppressMessage("Microsoft.Naming", "CA1711:IdentifiersShouldNotHaveIncorrectSuffix", Justification = "Reviewed.")]
+    [System.ComponentModel.TypeDescriptionProvider("MS.Internal.Xml.Linq.ComponentModel.XTypeDescriptionProvider`1[[System.Xml.Linq.XAttribute, System.Xml.Linq, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]],System.ComponentModel.TypeConverter")]
     public class XAttribute : XObject
     {
         /// <summary>
@@ -676,7 +677,7 @@ namespace System.Xml.Linq
             {
                 if (value.Length == 0)
                 {
-                    // The empty namespace name can only be declared by 
+                    // The empty namespace name can only be declared by
                     // the default namespace declaration
                     throw new ArgumentException(SR.Format(SR.Argument_NamespaceDeclarationPrefixed, name.LocalName));
                 }
@@ -697,13 +698,13 @@ namespace System.Xml.Linq
                     string localName = name.LocalName;
                     if (localName == "xml")
                     {
-                        // No other namespace name can be declared by the 'xml' 
-                        // prefix namespace declaration. 
+                        // No other namespace name can be declared by the 'xml'
+                        // prefix namespace declaration.
                         throw new ArgumentException(SR.Argument_NamespaceDeclarationXml);
                     }
                     else if (localName == "xmlns")
                     {
-                        // The 'xmlns' prefix must not be declared. 
+                        // The 'xmlns' prefix must not be declared.
                         throw new ArgumentException(SR.Argument_NamespaceDeclarationXmlns);
                     }
                 }

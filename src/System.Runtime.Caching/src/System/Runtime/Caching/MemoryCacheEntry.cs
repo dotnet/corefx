@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
@@ -13,8 +14,8 @@ namespace System.Runtime.Caching
 {
     internal class MemoryCacheEntry : MemoryCacheKey
     {
-        private Object _value;
-        private DateTime _utcCreated;
+        private readonly object _value;
+        private readonly DateTime _utcCreated;
         private int _state;
         // expiration
         private DateTime _utcAbsExp;
@@ -22,11 +23,11 @@ namespace System.Runtime.Caching
         private ExpiresEntryRef _expiresEntryRef;
         private byte _expiresBucket; // index of the expiration list (bucket)
         // usage
-        private byte _usageBucket;  // index of the usage list (== priority-1)
+        private readonly byte _usageBucket;  // index of the usage list (== priority-1)
         private UsageEntryRef _usageEntryRef;   // ref into the usage list
         private DateTime _utcLastUpdateUsage;   // time we last updated usage
 
-        private CacheEntryRemovedCallback _callback;
+        private readonly CacheEntryRemovedCallback _callback;
         private SeldomUsedFields _fields; // optimization to reduce workingset when the entry hasn't any dependencies
 
         private class SeldomUsedFields
@@ -37,7 +38,7 @@ namespace System.Runtime.Caching
             internal Tuple<MemoryCacheStore, MemoryCacheEntry> _updateSentinel; // the MemoryCacheEntry (and its associated store) of the OnUpdateSentinel for this entry, if there is one
         }
 
-        internal Object Value
+        internal object Value
         {
             get { return _value; }
         }
@@ -104,8 +105,8 @@ namespace System.Runtime.Caching
             set { _utcLastUpdateUsage = value; }
         }
 
-        internal MemoryCacheEntry(String key,
-                                  Object value,
+        internal MemoryCacheEntry(string key,
+                                  object value,
                                   DateTimeOffset absExp,
                                   TimeSpan slidingExp,
                                   CacheItemPriority priority,
@@ -115,7 +116,7 @@ namespace System.Runtime.Caching
         {
             if (value == null)
             {
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
             _utcCreated = DateTime.UtcNow;
             _value = value;
@@ -190,7 +191,7 @@ namespace System.Runtime.Caching
             }
             catch
             {
-                // 
+                //
             }
         }
 
@@ -234,7 +235,7 @@ namespace System.Runtime.Caching
             return !_usageEntryRef.IsInvalid;
         }
 
-        private void OnDependencyChanged(Object state)
+        private void OnDependencyChanged(object state)
         {
             if (State == EntryState.AddedToCache)
             {
@@ -258,7 +259,7 @@ namespace System.Runtime.Caching
                     // set to null so RemoveDependent does not attempt to access it, since we're not
                     // using a copy of the KeyCollection.
                     _fields._dependents = null;
-                    Dbg.Assert(_fields._dependents == null, "_fields._dependents == null");
+                    Debug.Assert(_fields._dependents == null, "_fields._dependents == null");
                 }
             }
             if (deps != null)

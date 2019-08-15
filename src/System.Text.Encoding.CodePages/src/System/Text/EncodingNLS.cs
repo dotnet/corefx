@@ -41,9 +41,9 @@ namespace System.Text
 
         // Returns the number of bytes required to encode a range of characters in
         // a character array.
-        // 
+        //
         // All of our public Encodings that don't use EncodingNLS must have this (including EncodingNLS)
-        // So if you fix this, fix the others. 
+        // So if you fix this, fix the others.
         // parent method is safe
         public override unsafe int GetByteCount(char[] chars, int index, int count)
         {
@@ -67,9 +67,9 @@ namespace System.Text
         }
 
         // All of our public Encodings that don't use EncodingNLS must have this (including EncodingNLS)
-        // So if you fix this, fix the others. 
+        // So if you fix this, fix the others.
         // parent method is safe
-        public override unsafe int GetByteCount(String s)
+        public override unsafe int GetByteCount(string s)
         {
             // Validate input
             if (s == null)
@@ -98,7 +98,7 @@ namespace System.Text
         // All of our public Encodings that don't use EncodingNLS must have this (including EncodingNLS)
         // So if you fix this, fix the others.
 
-        public override unsafe int GetBytes(String s, int charIndex, int charCount,
+        public override unsafe int GetBytes(string s, int charIndex, int charCount,
                                               byte[] bytes, int byteIndex)
         {
             if (s == null || bytes == null)
@@ -133,9 +133,9 @@ namespace System.Text
         // Alternatively, the GetMaxByteCount method can be used to
         // determine the maximum number of bytes that will be produced for a given
         // number of characters, regardless of the actual character values.
-        // 
+        //
         // All of our public Encodings that don't use EncodingNLS must have this (including EncodingNLS)
-        // So if you fix this, fix the others.  
+        // So if you fix this, fix the others.
         // parent method is safe
         public override unsafe int GetBytes(char[] chars, int charIndex, int charCount,
                                                byte[] bytes, int byteIndex)
@@ -172,7 +172,7 @@ namespace System.Text
         }
 
         // All of our public Encodings that don't use EncodingNLS must have this (including EncodingNLS)
-        // So if you fix this, fix the others. 
+        // So if you fix this, fix the others.
         public override unsafe int GetBytes(char* chars, int charCount, byte* bytes, int byteCount)
         {
             // Validate Parameters
@@ -187,9 +187,9 @@ namespace System.Text
 
         // Returns the number of characters produced by decoding a range of bytes
         // in a byte array.
-        // 
+        //
         // All of our public Encodings that don't use EncodingNLS must have this (including EncodingNLS)
-        // So if you fix this, fix the others.  
+        // So if you fix this, fix the others.
         // parent method is safe
         public override unsafe int GetCharCount(byte[] bytes, int index, int count)
         {
@@ -213,7 +213,7 @@ namespace System.Text
         }
 
         // All of our public Encodings that don't use EncodingNLS must have this (including EncodingNLS)
-        // So if you fix this, fix the others.  
+        // So if you fix this, fix the others.
         public override unsafe int GetCharCount(byte* bytes, int count)
         {
             // Validate Parameters
@@ -227,7 +227,7 @@ namespace System.Text
         }
 
         // All of our public Encodings that don't use EncodingNLS must have this (including EncodingNLS)
-        // So if you fix this, fix the others.  
+        // So if you fix this, fix the others.
         // parent method is safe
         public override unsafe int GetChars(byte[] bytes, int byteIndex, int byteCount,
                                               char[] chars, int charIndex)
@@ -264,7 +264,7 @@ namespace System.Text
         }
 
         // All of our public Encodings that don't use EncodingNLS must have this (including EncodingNLS)
-        // So if you fix this, fix the others.  
+        // So if you fix this, fix the others.
         public unsafe override int GetChars(byte* bytes, int byteCount, char* chars, int charCount)
         {
             // Validate Parameters
@@ -279,11 +279,11 @@ namespace System.Text
 
         // Returns a string containing the decoded representation of a range of
         // bytes in a byte array.
-        // 
+        //
         // All of our public Encodings that don't use EncodingNLS must have this (including EncodingNLS)
         // So if you fix this, fix the others.
         // parent method is safe
-        public override unsafe String GetString(byte[] bytes, int index, int count)
+        public override unsafe string GetString(byte[] bytes, int index, int count)
         {
             // Validate Parameters
             if (bytes == null)
@@ -296,7 +296,7 @@ namespace System.Text
                 throw new ArgumentOutOfRangeException(nameof(bytes), SR.ArgumentOutOfRange_IndexCountBuffer);
 
             // Avoid problems with empty input buffer
-            if (bytes.Length == 0) return String.Empty;
+            if (bytes.Length == 0) return string.Empty;
 
             fixed (byte* pBytes = &bytes[0])
                 return GetString(pBytes + index, count);
@@ -357,7 +357,7 @@ namespace System.Text
             throw new ArgumentException(SR.Format(SR.Argument_EncodingConversionOverflowChars, EncodingName, DecoderFallback.GetType()), "chars");
         }
 
-        public override String EncodingName
+        public override string EncodingName
         {
             get
             {
@@ -539,7 +539,7 @@ namespace System.Text
         }
 
         // Returns the IANA preferred name for this encoding
-        public override String WebName
+        public override string WebName
         {
             get
             {

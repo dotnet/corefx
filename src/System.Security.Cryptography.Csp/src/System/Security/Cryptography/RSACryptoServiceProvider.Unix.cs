@@ -151,6 +151,22 @@ namespace System.Security.Cryptography
             _publicOnly = (parameters.P == null || parameters.P.Length == 0);
         }
 
+        public override void ImportEncryptedPkcs8PrivateKey(
+            ReadOnlySpan<byte> passwordBytes,
+            ReadOnlySpan<byte> source,
+            out int bytesRead)
+        {
+            _impl.ImportEncryptedPkcs8PrivateKey(passwordBytes, source, out bytesRead);
+        }
+
+        public override void ImportEncryptedPkcs8PrivateKey(
+            ReadOnlySpan<char> password,
+            ReadOnlySpan<byte> source,
+            out int bytesRead)
+        {
+            _impl.ImportEncryptedPkcs8PrivateKey(password, source, out bytesRead);
+        }
+
         public override string KeyExchangeAlgorithm => _impl.KeyExchangeAlgorithm;
 
         public override int KeySize
@@ -159,8 +175,9 @@ namespace System.Security.Cryptography
             set { _impl.KeySize = value; }
         }
 
-        public override KeySizes[] LegalKeySizes => 
-            _impl.LegalKeySizes; // Csp Windows and RSAOpenSsl are the same (384, 16384, 8)
+        // RSAOpenSsl is (512, 16384, 8), RSASecurityTransforms is (1024, 16384, 8)
+        // Either way the minimum is lifted off of CAPI's 384, due to platform constraints.
+        public override KeySizes[] LegalKeySizes => _impl.LegalKeySizes;
 
         // PersistKeyInCsp has no effect in Unix
         public bool PersistKeyInCsp { get; set; }
@@ -195,7 +212,7 @@ namespace System.Security.Cryptography
 
         public override byte[] SignHash(byte[] hash, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding) =>
             padding == null ? throw new ArgumentNullException(nameof(padding)) :
-            padding != RSASignaturePadding.Pkcs1 ? throw PaddingModeNotSupported() : 
+            padding != RSASignaturePadding.Pkcs1 ? throw PaddingModeNotSupported() :
             _impl.SignHash(hash, hashAlgorithm, padding);
 
         public override bool TrySignHash(ReadOnlySpan<byte> hash, Span<byte> destination, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding, out int bytesWritten) =>

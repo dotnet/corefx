@@ -5,7 +5,7 @@
 using System.ComponentModel;
 using System.Net.Test.Common;
 using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates; 
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 using Xunit;
@@ -28,7 +28,7 @@ namespace System.Net.Security.Tests
             using (X509Certificate2 certificate = Configuration.Certificates.GetServerCertificate())
             {
                 // Using the same certificate for server and client auth.
-                X509Certificate2Collection clientCertificateCollection = 
+                X509Certificate2Collection clientCertificateCollection =
                     new X509Certificate2Collection(certificate);
 
                 var tasks = new Task[2];
@@ -39,7 +39,7 @@ namespace System.Net.Security.Tests
                                             clientCertificateCollection, false);
 
 
-                await Task.WhenAll(tasks).TimeoutAfter(15 * 1000);
+                await Task.WhenAll(tasks).TimeoutAfter(TestConfiguration.PassingTestTimeoutMilliseconds);
 
                 if (!PlatformDetection.IsWindows7 ||
                     Capability.IsTrustedRootCertificateInstalled())

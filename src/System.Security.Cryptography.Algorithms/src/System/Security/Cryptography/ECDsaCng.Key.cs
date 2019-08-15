@@ -11,10 +11,10 @@ namespace System.Security.Cryptography
     {
         public sealed partial class ECDsaCng : ECDsa
         {
-            private readonly ECCngKey _key = new ECCngKey(AlgorithmName.ECDsa);
+            private readonly ECCngKey _key = new ECCngKey(AlgorithmName.ECDsa, nameof(ECDsa));
 
-            private string GetCurveName() => _key.GetCurveName(KeySize);
-            
+            private string GetCurveName(out string oidValue) => _key.GetCurveName(KeySize, out oidValue);
+
             public override void GenerateKey(ECCurve curve)
             {
                 _key.GenerateKey(curve);

@@ -8,6 +8,7 @@
 <#@ import namespace="System.Diagnostics" #>
 <#@ include file="GenerationConfig.ttinclude" #><# GenerateCopyrightHeader(); #>
 
+#nullable enable
 using System.Runtime.InteropServices;
 
 namespace System.Numerics
@@ -34,7 +35,7 @@ namespace System.Numerics
         {
 #>
         [FieldOffset(<#=Marshal.SizeOf(type) * g#>)]
-        internal <#=type.Name#> <#= type.Name.ToLowerInvariant() + "_" + g #>;
+        internal <#= typeAliases[type] #> <#= type.Name.ToLowerInvariant() + "_" + g #>;
 <#
         }
 #>

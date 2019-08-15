@@ -25,7 +25,6 @@ namespace System.Net.Sockets.Tests
         [InlineData(AddressFamily.DataLink)]
         [InlineData(AddressFamily.NetBios)]
         [InlineData(AddressFamily.Unix)]
-        [InlineData(AddressFamily.Unknown)]
         public void Ctor_InvalidFamily_Throws(AddressFamily family)
         {
             AssertExtensions.Throws<ArgumentException>("family", () => new TcpClient(family));
@@ -234,7 +233,6 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Bug in Connected that dereferences null Client socket")]
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void ConnectedAvailable_NullClient()
@@ -248,7 +246,6 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Bug in ExclusiveAddressUse that dereferences null Client socket")]
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void ExclusiveAddressUse_NullClient()
@@ -261,7 +258,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // [ActiveIssue(11057)]
         public void Roundtrip_ExclusiveAddressUse_GetEqualsSet_True()
         {
             using (TcpClient client = new TcpClient())
@@ -271,7 +268,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // [ActiveIssue(11057)]
         public void Roundtrip_ExclusiveAddressUse_GetEqualsSet_False()
         {
             using (TcpClient client = new TcpClient())
@@ -311,6 +308,21 @@ namespace System.Net.Sockets.Tests
                 Assert.True(client.NoDelay);
                 client.NoDelay = false;
                 Assert.False(client.NoDelay);
+            }
+        }
+
+        [Theory]
+        [InlineData(AddressFamily.InterNetwork)]
+        [InlineData(AddressFamily.InterNetworkV6)]
+        public void Ttl_Set_GetEqualsSet(AddressFamily af)
+        {
+            using (TcpClient client = new TcpClient(af))
+            {
+                short newTtl = client.Client.Ttl;
+                // Change default ttl.
+                newTtl += (short)((newTtl < 255) ? 1 : -1);
+                client.Client.Ttl = newTtl;
+                Assert.Equal(newTtl, client.Client.Ttl);
             }
         }
 
@@ -392,7 +404,6 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Bug in TcpClient.Dispose/EndConnect: the former nulls out Client, which the latter tries to use")]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(false)]
@@ -427,6 +438,33 @@ namespace System.Net.Sockets.Tests
                 sw.Stop();
 
                 Assert.Null(client.Client); // should be nulled out after Dispose
+            }
+        }
+
+        [Fact]
+        public void Connect_Dual_Success()
+        {
+            if (!Socket.OSSupportsIPv6)
+            {
+                return;
+            }
+
+            using (var server = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp))
+            {
+                // Set up a server socket to which to connect
+                server.Bind(new IPEndPoint(IPAddress.IPv6Loopback, 0));
+                server.Listen(1);
+                var endpoint = (IPEndPoint)server.LocalEndPoint;
+
+                using (TcpClient client = new TcpClient())
+                {
+                    // Some platforms may not support IPv6 dual mode and they should fall-back to IPv4
+                    // without throwing exception. However in such case attempt to connect to IPv6 would still fail.
+                    if (client.Client.AddressFamily == AddressFamily.InterNetworkV6 && client.Client.DualMode)
+                    {
+                        client.Connect(endpoint);
+                    }
+                }
             }
         }
 

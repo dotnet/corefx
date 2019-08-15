@@ -59,7 +59,7 @@ namespace System.Xml.Tests
         [Theory]
         [InlineData("single")]
         [InlineData("multiple")]
-        public void SanityTestForSimpleType_MultipleCallInOneContext(String param)
+        public void SanityTestForSimpleType_MultipleCallInOneContext(string param)
         {
             XmlSchemaValidator val = CreateValidator(XSDFILE_VALIDATE_TEXT);
             CValidationEventHolder holder = new CValidationEventHolder();
@@ -84,8 +84,8 @@ namespace System.Xml.Tests
             val.EndValidation();
 
             Assert.True(!holder.IsCalledA);
-            Assert.Equal(info.Validity, XmlSchemaValidity.Valid);
-            Assert.Equal(info.ContentType, XmlSchemaContentType.TextOnly);
+            Assert.Equal(XmlSchemaValidity.Valid, info.Validity);
+            Assert.Equal(XmlSchemaContentType.TextOnly, info.ContentType);
 
             return;
         }
@@ -115,8 +115,8 @@ namespace System.Xml.Tests
             val.EndValidation();
 
             Assert.True(!holder.IsCalledA);
-            Assert.Equal(info.Validity, XmlSchemaValidity.Valid);
-            Assert.Equal(info.ContentType, XmlSchemaContentType.Mixed);
+            Assert.Equal(XmlSchemaValidity.Valid, info.Validity);
+            Assert.Equal(XmlSchemaContentType.Mixed, info.ContentType);
 
             return;
         }
@@ -243,8 +243,8 @@ namespace System.Xml.Tests
             val.EndValidation();
 
             Assert.True(!holder.IsCalledA);
-            Assert.Equal(info.Validity, XmlSchemaValidity.Valid);
-            Assert.Equal(info.ContentType, XmlSchemaContentType.ElementOnly);
+            Assert.Equal(XmlSchemaValidity.Valid, info.Validity);
+            Assert.Equal(XmlSchemaContentType.ElementOnly, info.ContentType);
 
             return;
         }
@@ -340,14 +340,14 @@ namespace System.Xml.Tests
                 val.ValidateEndOfAttributes(null);
                 val.ValidateEndElement(info);
 
-                Assert.Equal(info.Validity, XmlSchemaValidity.Valid);
-                Assert.Equal(info.ContentType, XmlSchemaContentType.TextOnly);
+                Assert.Equal(XmlSchemaValidity.Valid, info.Validity);
+                Assert.Equal(XmlSchemaContentType.TextOnly, info.ContentType);
             }
 
             val.ValidateEndElement(info);
 
-            Assert.Equal(info.Validity, XmlSchemaValidity.Valid);
-            Assert.Equal(info.ContentType, XmlSchemaContentType.ElementOnly);
+            Assert.Equal(XmlSchemaValidity.Valid, info.Validity);
+            Assert.Equal(XmlSchemaContentType.ElementOnly, info.ContentType);
 
             val.EndValidation();
 
@@ -373,8 +373,8 @@ namespace System.Xml.Tests
 
             val.ValidateEndElement(info);
 
-            Assert.Equal(info.Validity, XmlSchemaValidity.Valid);
-            Assert.Equal(info.ContentType, XmlSchemaContentType.ElementOnly);
+            Assert.Equal(XmlSchemaValidity.Valid, info.Validity);
+            Assert.Equal(XmlSchemaContentType.ElementOnly, info.ContentType);
 
             val.EndValidation();
 
@@ -404,8 +404,8 @@ namespace System.Xml.Tests
             val.ValidateEndElement(info);
 
             Assert.True(holder.IsCalledA);
-            Assert.Equal(holder.lastSeverity, XmlSeverityType.Error);
-            Assert.Equal(info.Validity, XmlSchemaValidity.Invalid);
+            Assert.Equal(XmlSeverityType.Error, holder.lastSeverity);
+            Assert.Equal(XmlSchemaValidity.Invalid, info.Validity);
 
             return;
         }
@@ -422,8 +422,8 @@ namespace System.Xml.Tests
             val.ValidateEndElement(info);
             val.EndValidation();
 
-            Assert.Equal(info.Validity, XmlSchemaValidity.Valid);
-            Assert.Equal(info.ContentType, XmlSchemaContentType.TextOnly);
+            Assert.Equal(XmlSchemaValidity.Valid, info.Validity);
+            Assert.Equal(XmlSchemaContentType.TextOnly, info.ContentType);
 
             return;
         }
@@ -503,11 +503,11 @@ namespace System.Xml.Tests
             val.ValidateEndElement(info, "123");
             val.EndValidation();
 
-            Assert.Equal(info.Validity, XmlSchemaValidity.Valid);
-            Assert.Equal(info.ContentType, XmlSchemaContentType.TextOnly);
-            Assert.Equal(info.IsDefault, false);
-            Assert.Equal(info.IsNil, false);
-            Assert.Equal(info.SchemaType.TypeCode, XmlTypeCode.Int);
+            Assert.Equal(XmlSchemaValidity.Valid, info.Validity);
+            Assert.Equal(XmlSchemaContentType.TextOnly, info.ContentType);
+            Assert.False(info.IsDefault);
+            Assert.False(info.IsNil);
+            Assert.Equal(XmlTypeCode.Int, info.SchemaType.TypeCode);
 
             return;
         }
@@ -525,8 +525,8 @@ namespace System.Xml.Tests
 
             val.ValidateEndElement(info);
 
-            Assert.Equal(info.Validity, XmlSchemaValidity.Valid);
-            Assert.Equal(info.ContentType, XmlSchemaContentType.Empty);
+            Assert.Equal(XmlSchemaValidity.Valid, info.Validity);
+            Assert.Equal(XmlSchemaContentType.Empty, info.ContentType);
 
             val.EndValidation();
 
@@ -538,7 +538,7 @@ namespace System.Xml.Tests
         [InlineData("duplicate")]
         [InlineData("missing")]
         [InlineData("ignore")]
-        public void TestForIdentityConstraints_Valid_InvalidDuplicateKey_InvalidKeyRefMissing_InvalidIdentitiConstraintIsSet(String constrType)
+        public void TestForIdentityConstraints_Valid_InvalidDuplicateKey_InvalidKeyRefMissing_InvalidIdentitiConstraintIsSet(string constrType)
         {
             XmlSchemaValidator val;
             XmlSchemaInfo info = new XmlSchemaInfo();
@@ -674,7 +674,7 @@ namespace System.Xml.Tests
         [Theory]
         [InlineData("first")]
         [InlineData("second")] //(BUG #307549)
-        public void TestXmlSchemaInfoValuesAfterUnionValidation_Without_With_ValidationEndElementOverload(String overload)
+        public void TestXmlSchemaInfoValuesAfterUnionValidation_Without_With_ValidationEndElementOverload(string overload)
         {
             XmlSchemaValidator val = CreateValidator(XSDFILE_VALIDATE_END_ELEMENT);
             XmlSchemaInfo info = new XmlSchemaInfo();
@@ -692,7 +692,7 @@ namespace System.Xml.Tests
             else
                 val.ValidateEndElement(info, "false");
 
-            Assert.Equal(info.MemberType.TypeCode, XmlTypeCode.Boolean);
+            Assert.Equal(XmlTypeCode.Boolean, info.MemberType.TypeCode);
 
             return;
         }
@@ -761,7 +761,7 @@ namespace System.Xml.Tests
         [Theory]
         [InlineData("valid")]
         [InlineData("invalid")]
-        public void SkipAfterValidating_ValidContent_IncompleteContent(String validity)
+        public void SkipAfterValidating_ValidContent_IncompleteContent(string validity)
         {
             XmlSchemaValidator val = CreateValidator(XSDFILE_VALIDATE_END_ELEMENT);
             XmlSchemaInfo info = new XmlSchemaInfo();
@@ -785,7 +785,7 @@ namespace System.Xml.Tests
             val.SkipToEndElement(info);
             val.EndValidation();
 
-            Assert.Equal(info.Validity, XmlSchemaValidity.NotKnown);
+            Assert.Equal(XmlSchemaValidity.NotKnown, info.Validity);
 
             return;
         }
@@ -803,7 +803,7 @@ namespace System.Xml.Tests
             val.ValidateText(StringGetter("foo"));
             val.SkipToEndElement(info);
 
-            Assert.Equal(info.Validity, XmlSchemaValidity.NotKnown);
+            Assert.Equal(XmlSchemaValidity.NotKnown, info.Validity);
 
             return;
         }
@@ -820,7 +820,7 @@ namespace System.Xml.Tests
             val.ValidateAttribute("attr1", "", StringGetter("foo"), info);
             val.SkipToEndElement(info);
 
-            Assert.Equal(info.Validity, XmlSchemaValidity.NotKnown);
+            Assert.Equal(XmlSchemaValidity.NotKnown, info.Validity);
 
             return;
         }

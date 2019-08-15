@@ -13,9 +13,7 @@ namespace System.Collections.ObjectModel
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class Collection<T> : IList<T>, IList, IReadOnlyList<T>
     {
-        private IList<T> items; // Do not rename (binary serialization)
-        [NonSerialized]
-        private Object _syncRoot;
+        private readonly IList<T> items; // Do not rename (binary serialization)
 
         public Collection()
         {
@@ -51,7 +49,7 @@ namespace System.Collections.ObjectModel
                     ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
                 }
 
-                if (index < 0 || index >= items.Count)
+                if ((uint)index >= (uint)items.Count)
                 {
                     ThrowHelper.ThrowArgumentOutOfRange_IndexException();
                 }
@@ -108,9 +106,9 @@ namespace System.Collections.ObjectModel
                 ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
             }
 
-            if (index < 0 || index > items.Count)
+            if ((uint)index > (uint)items.Count)
             {
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index, ExceptionResource.ArgumentOutOfRange_ListInsert);
+                ThrowHelper.ThrowArgumentOutOfRange_IndexException();
             }
 
             InsertItem(index, item);
@@ -136,7 +134,7 @@ namespace System.Collections.ObjectModel
                 ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
             }
 
-            if (index < 0 || index >= items.Count)
+            if ((uint)index >= (uint)items.Count)
             {
                 ThrowHelper.ThrowArgumentOutOfRange_IndexException();
             }
@@ -186,19 +184,7 @@ namespace System.Collections.ObjectModel
         {
             get
             {
-                if (_syncRoot == null)
-                {
-                    ICollection c = items as ICollection;
-                    if (c != null)
-                    {
-                        _syncRoot = c.SyncRoot;
-                    }
-                    else
-                    {
-                        System.Threading.Interlocked.CompareExchange<Object>(ref _syncRoot, new Object(), null);
-                    }
-                }
-                return _syncRoot;
+                return (items is ICollection coll) ? coll.SyncRoot : this;
             }
         }
 
@@ -229,8 +215,7 @@ namespace System.Collections.ObjectModel
                 ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
             }
 
-            T[] tArray = array as T[];
-            if (tArray != null)
+            if (array is T[] tArray)
             {
                 items.CopyTo(tArray, index);
             }
@@ -242,7 +227,7 @@ namespace System.Collections.ObjectModel
                 // For example, if the element type of the Array is derived from T,
                 // we can't figure out if we can successfully copy the element beforehand.
                 //
-                Type targetType = array.GetType().GetElementType();
+                Type targetType = array.GetType().GetElementType()!;
                 Type sourceType = typeof(T);
                 if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType)))
                 {
@@ -250,10 +235,10 @@ namespace System.Collections.ObjectModel
                 }
 
                 //
-                // We can't cast array of value type to object[], so we don't support 
+                // We can't cast array of value type to object[], so we don't support
                 // widening of primitive types here.
                 //
-                object[] objects = array as object[];
+                object?[]? objects = array as object[];
                 if (objects == null)
                 {
                     ThrowHelper.ThrowArgumentException_Argument_InvalidArrayType();
@@ -274,21 +259,25 @@ namespace System.Collections.ObjectModel
             }
         }
 
-        object IList.this[int index]
+        object? IList.this[int index]
         {
             get { return items[index]; }
             set
             {
                 ThrowHelper.IfNullAndNullsAreIllegalThenThrow<T>(value, ExceptionArgument.value);
 
+                T item = default(T)!;
+
                 try
                 {
-                    this[index] = (T)value;
+                    item = (T)value!;
                 }
                 catch (InvalidCastException)
                 {
                     ThrowHelper.ThrowWrongValueTypeArgumentException(value, typeof(T));
                 }
+
+                this[index] = item;
             }
         }
 
@@ -305,11 +294,10 @@ namespace System.Collections.ObjectModel
             get
             {
                 // There is no IList<T>.IsFixedSize, so we must assume that only
-                // readonly collections are fixed size, if our internal item 
+                // readonly collections are fixed size, if our internal item
                 // collection does not implement IList.  Note that Array implements
                 // IList, and therefore T[] and U[] will be fixed-size.
-                IList list = items as IList;
-                if (list != null)
+                if (items is IList list)
                 {
                     return list.IsFixedSize;
                 }
@@ -317,7 +305,7 @@ namespace System.Collections.ObjectModel
             }
         }
 
-        int IList.Add(object value)
+        int IList.Add(object? value)
         {
             if (items.IsReadOnly)
             {
@@ -325,37 +313,41 @@ namespace System.Collections.ObjectModel
             }
             ThrowHelper.IfNullAndNullsAreIllegalThenThrow<T>(value, ExceptionArgument.value);
 
+            T item = default(T)!;
+
             try
             {
-                Add((T)value);
+                item = (T)value!;
             }
             catch (InvalidCastException)
             {
                 ThrowHelper.ThrowWrongValueTypeArgumentException(value, typeof(T));
             }
+
+            Add(item);
 
             return this.Count - 1;
         }
 
-        bool IList.Contains(object value)
+        bool IList.Contains(object? value)
         {
             if (IsCompatibleObject(value))
             {
-                return Contains((T)value);
+                return Contains((T)value!);
             }
             return false;
         }
 
-        int IList.IndexOf(object value)
+        int IList.IndexOf(object? value)
         {
             if (IsCompatibleObject(value))
             {
-                return IndexOf((T)value);
+                return IndexOf((T)value!);
             }
             return -1;
         }
 
-        void IList.Insert(int index, object value)
+        void IList.Insert(int index, object? value)
         {
             if (items.IsReadOnly)
             {
@@ -363,17 +355,21 @@ namespace System.Collections.ObjectModel
             }
             ThrowHelper.IfNullAndNullsAreIllegalThenThrow<T>(value, ExceptionArgument.value);
 
+            T item = default(T)!;
+
             try
             {
-                Insert(index, (T)value);
+                item = (T)value!;
             }
             catch (InvalidCastException)
             {
                 ThrowHelper.ThrowWrongValueTypeArgumentException(value, typeof(T));
             }
+
+            Insert(index, item);
         }
 
-        void IList.Remove(object value)
+        void IList.Remove(object? value)
         {
             if (items.IsReadOnly)
             {
@@ -382,15 +378,15 @@ namespace System.Collections.ObjectModel
 
             if (IsCompatibleObject(value))
             {
-                Remove((T)value);
+                Remove((T)value!);
             }
         }
 
-        private static bool IsCompatibleObject(object value)
+        private static bool IsCompatibleObject(object? value)
         {
             // Non-null values are fine.  Only accept nulls if T is a class or Nullable<U>.
-            // Note that default(T) is not equal to null for value types except when T is Nullable<U>. 
-            return ((value is T) || (value == null && default(T) == null));
+            // Note that default(T) is not equal to null for value types except when T is Nullable<U>.
+            return ((value is T) || (value == null && default(T)! == null));
         }
     }
 }

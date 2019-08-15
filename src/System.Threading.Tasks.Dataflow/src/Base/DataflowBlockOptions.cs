@@ -21,7 +21,7 @@ namespace System.Threading.Tasks.Dataflow
     /// Provides options used to configure the processing performed by dataflow blocks.
     /// </summary>
     /// <remarks>
-    /// <see cref="DataflowBlockOptions"/> is mutable and can be configured through its properties.  
+    /// <see cref="DataflowBlockOptions"/> is mutable and can be configured through its properties.
     /// When specific configuration options are not set, the following defaults are used:
     /// <list type="table">
     ///     <listheader>
@@ -61,19 +61,19 @@ namespace System.Threading.Tasks.Dataflow
     public class DataflowBlockOptions
     {
         /// <summary>
-        /// A constant used to specify an unlimited quantity for <see cref="DataflowBlockOptions"/> members 
+        /// A constant used to specify an unlimited quantity for <see cref="DataflowBlockOptions"/> members
         /// that provide an upper bound. This field is constant.
         /// </summary>
-        public const Int32 Unbounded = -1;
+        public const int Unbounded = -1;
 
         /// <summary>The scheduler to use for scheduling tasks to process messages.</summary>
         private TaskScheduler _taskScheduler = TaskScheduler.Default;
         /// <summary>The cancellation token to monitor for cancellation requests.</summary>
         private CancellationToken _cancellationToken = CancellationToken.None;
         /// <summary>The maximum number of messages that may be processed per task.</summary>
-        private Int32 _maxMessagesPerTask = Unbounded;
+        private int _maxMessagesPerTask = Unbounded;
         /// <summary>The maximum number of messages that may be buffered by the block.</summary>
-        private Int32 _boundedCapacity = Unbounded;
+        private int _boundedCapacity = Unbounded;
         /// <summary>The name format to use for creating a name for a block.</summary>
         private string _nameFormat = "{0} Id={1}"; // see NameFormat property for a description of format items
         /// <summary>Whether to force ordered processing of messages.</summary>
@@ -129,7 +129,7 @@ namespace System.Threading.Tasks.Dataflow
         }
 
         /// <summary>Gets or sets the maximum number of messages that may be processed per task.</summary>
-        public Int32 MaxMessagesPerTask
+        public int MaxMessagesPerTask
         {
             get { return _maxMessagesPerTask; }
             set
@@ -143,13 +143,13 @@ namespace System.Threading.Tasks.Dataflow
         /// <summary>Gets a MaxMessagesPerTask value that may be used for comparison purposes.</summary>
         /// <returns>The maximum value, usable for comparison purposes.</returns>
         /// <remarks>Unlike MaxMessagesPerTask, this property will always return a positive value.</remarks>
-        internal Int32 ActualMaxMessagesPerTask
+        internal int ActualMaxMessagesPerTask
         {
-            get { return (_maxMessagesPerTask == Unbounded) ? Int32.MaxValue : _maxMessagesPerTask; }
+            get { return (_maxMessagesPerTask == Unbounded) ? int.MaxValue : _maxMessagesPerTask; }
         }
 
         /// <summary>Gets or sets the maximum number of messages that may be buffered by the block.</summary>
-        public Int32 BoundedCapacity
+        public int BoundedCapacity
         {
             get { return _boundedCapacity; }
             set
@@ -164,8 +164,8 @@ namespace System.Threading.Tasks.Dataflow
         /// Gets or sets the format string to use when a block is queried for its name.
         /// </summary>
         /// <remarks>
-        /// The name format may contain up to two format items. {0} will be substituted 
-        /// with the block's name. {1} will be substituted with the block's Id, as is 
+        /// The name format may contain up to two format items. {0} will be substituted
+        /// with the block's name. {1} will be substituted with the block's Id, as is
         /// returned from the block's Completion.Id property.
         /// </remarks>
         public string NameFormat
@@ -183,7 +183,7 @@ namespace System.Threading.Tasks.Dataflow
         /// <remarks>
         /// By default, dataflow blocks enforce ordering on the processing of messages. This means that a
         /// block like <see cref="TransformBlock{TInput, TOutput}"/> will ensure that messages are output in the same
-        /// order they were input, even if parallelism is employed by the block and the processing of a message N finishes 
+        /// order they were input, even if parallelism is employed by the block and the processing of a message N finishes
         /// after the processing of a subsequent message N+1 (the block will reorder the results to maintain the input
         /// ordering prior to making those results available to a consumer).  Some blocks may allow this to be relaxed,
         /// however.  Setting <see cref="EnsureOrdered"/> to false tells a block that it may relax this ordering if
@@ -203,7 +203,7 @@ namespace System.Threading.Tasks.Dataflow
     /// as <see cref="ActionBlock{T}"/> and <see cref="TransformBlock{TInput,TOutput}"/>.
     /// </summary>
     /// <remarks>
-    /// <see cref="ExecutionDataflowBlockOptions"/> is mutable and can be configured through its properties.  
+    /// <see cref="ExecutionDataflowBlockOptions"/> is mutable and can be configured through its properties.
     /// When specific configuration options are not set, the following defaults are used:
     /// <list type="table">
     ///     <listheader>
@@ -254,7 +254,7 @@ namespace System.Threading.Tasks.Dataflow
         /// <remarks>
         /// Do not change the values of this instance.  It is shared by all of our blocks when no options are provided by the user.
         /// </remarks>
-        internal new static readonly ExecutionDataflowBlockOptions Default = new ExecutionDataflowBlockOptions();
+        internal static new readonly ExecutionDataflowBlockOptions Default = new ExecutionDataflowBlockOptions();
 
         /// <summary>Returns this <see cref="ExecutionDataflowBlockOptions"/> instance if it's the default instance or else a cloned instance.</summary>
         /// <returns>An instance of the options that may be cached by the block.</returns>
@@ -276,15 +276,15 @@ namespace System.Threading.Tasks.Dataflow
         }
 
         /// <summary>The maximum number of tasks that may be used concurrently to process messages.</summary>
-        private Int32 _maxDegreeOfParallelism = 1;
+        private int _maxDegreeOfParallelism = 1;
         /// <summary>Whether the code using this block will only ever have a single producer accessing the block at any given time.</summary>
-        private Boolean _singleProducerConstrained = false;
+        private bool _singleProducerConstrained = false;
 
         /// <summary>Initializes the <see cref="ExecutionDataflowBlockOptions"/>.</summary>
         public ExecutionDataflowBlockOptions() { }
 
         /// <summary>Gets the maximum number of messages that may be processed by the block concurrently.</summary>
-        public Int32 MaxDegreeOfParallelism
+        public int MaxDegreeOfParallelism
         {
             get { return _maxDegreeOfParallelism; }
             set
@@ -302,12 +302,12 @@ namespace System.Threading.Tasks.Dataflow
         /// This property defaults to false, such that the block may be used by multiple
         /// producers concurrently.  This property should only be set to true if the code
         /// using the block can guarantee that it will only ever be used by one producer
-        /// (e.g. a source linked to the block) at a time, meaning that methods like Post, 
-        /// Complete, Fault, and OfferMessage will never be called concurrently.  Some blocks 
+        /// (e.g. a source linked to the block) at a time, meaning that methods like Post,
+        /// Complete, Fault, and OfferMessage will never be called concurrently.  Some blocks
         /// may choose to capitalize on the knowledge that there will only be one producer at a time
         /// in order to provide better performance.
         /// </remarks>
-        public Boolean SingleProducerConstrained
+        public bool SingleProducerConstrained
         {
             get { return _singleProducerConstrained; }
             set
@@ -320,22 +320,22 @@ namespace System.Threading.Tasks.Dataflow
         /// <summary>Gets a MaxDegreeOfParallelism value that may be used for comparison purposes.</summary>
         /// <returns>The maximum value, usable for comparison purposes.</returns>
         /// <remarks>Unlike MaxDegreeOfParallelism, this property will always return a positive value.</remarks>
-        internal Int32 ActualMaxDegreeOfParallelism
+        internal int ActualMaxDegreeOfParallelism
         {
-            get { return (_maxDegreeOfParallelism == Unbounded) ? Int32.MaxValue : _maxDegreeOfParallelism; }
+            get { return (_maxDegreeOfParallelism == Unbounded) ? int.MaxValue : _maxDegreeOfParallelism; }
         }
 
         /// <summary>Gets whether these dataflow block options allow for parallel execution.</summary>
-        internal Boolean SupportsParallelExecution { get { return _maxDegreeOfParallelism == Unbounded || _maxDegreeOfParallelism > 1; } }
+        internal bool SupportsParallelExecution { get { return _maxDegreeOfParallelism == Unbounded || _maxDegreeOfParallelism > 1; } }
     }
 
     /// <summary>
     /// Provides options used to configure the processing performed by dataflow blocks that
-    /// group together multiple messages, blocks such as <see cref="JoinBlock{T1,T2}"/> and 
+    /// group together multiple messages, blocks such as <see cref="JoinBlock{T1,T2}"/> and
     /// <see cref="BatchBlock{T}"/>.
     /// </summary>
     /// <remarks>
-    /// <see cref="GroupingDataflowBlockOptions"/> is mutable and can be configured through its properties.  
+    /// <see cref="GroupingDataflowBlockOptions"/> is mutable and can be configured through its properties.
     /// When specific configuration options are not set, the following defaults are used:
     /// <list type="table">
     ///     <listheader>
@@ -386,7 +386,7 @@ namespace System.Threading.Tasks.Dataflow
         /// <remarks>
         /// Do not change the values of this instance.  It is shared by all of our blocks when no options are provided by the user.
         /// </remarks>
-        internal new static readonly GroupingDataflowBlockOptions Default = new GroupingDataflowBlockOptions();
+        internal static new readonly GroupingDataflowBlockOptions Default = new GroupingDataflowBlockOptions();
 
         /// <summary>Returns this <see cref="GroupingDataflowBlockOptions"/> instance if it's the default instance or else a cloned instance.</summary>
         /// <returns>An instance of the options that may be cached by the block.</returns>
@@ -408,15 +408,15 @@ namespace System.Threading.Tasks.Dataflow
         }
 
         /// <summary>Whether the block should greedily consume offered messages.</summary>
-        private Boolean _greedy = true;
+        private bool _greedy = true;
         /// <summary>The maximum number of groups that should be generated by the block.</summary>
-        private Int64 _maxNumberOfGroups = Unbounded;
+        private long _maxNumberOfGroups = Unbounded;
 
         /// <summary>Initializes the <see cref="GroupingDataflowBlockOptions"/>.</summary>
         public GroupingDataflowBlockOptions() { }
 
         /// <summary>Gets or sets the Boolean value to use to determine whether to greedily consume offered messages.</summary>
-        public Boolean Greedy
+        public bool Greedy
         {
             get { return _greedy; }
             set
@@ -427,7 +427,7 @@ namespace System.Threading.Tasks.Dataflow
         }
 
         /// <summary>Gets or sets the maximum number of groups that should be generated by the block.</summary>
-        public Int64 MaxNumberOfGroups
+        public long MaxNumberOfGroups
         {
             get { return _maxNumberOfGroups; }
             set
@@ -441,9 +441,9 @@ namespace System.Threading.Tasks.Dataflow
         /// <summary>Gets a MaxNumberOfGroups value that may be used for comparison purposes.</summary>
         /// <returns>The maximum value, usable for comparison purposes.</returns>
         /// <remarks>Unlike MaxNumberOfGroups, this property will always return a positive value.</remarks>
-        internal Int64 ActualMaxNumberOfGroups
+        internal long ActualMaxNumberOfGroups
         {
-            get { return (_maxNumberOfGroups == Unbounded) ? Int64.MaxValue : _maxNumberOfGroups; }
+            get { return (_maxNumberOfGroups == Unbounded) ? long.MaxValue : _maxNumberOfGroups; }
         }
     }
 }

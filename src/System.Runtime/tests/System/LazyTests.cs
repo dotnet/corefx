@@ -126,7 +126,7 @@ namespace System.Tests
             // When used with LazyThreadSafetyMode.PublicationOnly this causes a stack overflow
             // Value_Invalid_Impl(ref x, new Lazy<int>(f, LazyThreadSafetyMode.PublicationOnly));
         }
-        
+
         public class InitiallyExceptionThrowingCtor
         {
             public static int counter = 0;
@@ -261,7 +261,7 @@ namespace System.Tests
         }
 
         public static IEnumerable<object[]> Value_FuncCtor_Exception_MemberData()
-        { 
+        {
             yield return new object[] { new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99)) };
             yield return new object[] { new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), true) };
             yield return new object[] { new Lazy<ExceptionInCtor>(() => new ExceptionInCtor(99), false) };
@@ -387,7 +387,7 @@ namespace System.Tests
         }
 
         [Fact]
-        public static void EnsureInitalized_SimpleRefTypes()
+        public static void EnsureInitialized_SimpleRefTypes()
         {
             var hdcTemplate = new HasDefaultCtor();
             string strTemplate = "foo";
@@ -418,7 +418,7 @@ namespace System.Tests
         }
 
         [Fact]
-        public static void EnsureInitalized_SimpleRefTypes_Invalid()
+        public static void EnsureInitialized_SimpleRefTypes_Invalid()
         {
             // Func based initialization (nulls not permitted).
             string e = null;
@@ -486,7 +486,7 @@ namespace System.Tests
         }
 
         [Fact]
-        public static void EnsureInitalized_ComplexRefTypes_Invalid()
+        public static void EnsureInitialized_ComplexRefTypes_Invalid()
         {
             // Activator.CreateInstance (for a type without a default ctor).
             NoDefaultCtor ndc = null;

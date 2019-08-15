@@ -155,7 +155,7 @@ namespace System.Threading.Tasks.Tests.Status
                     {
                         _mre.Wait();
                         //
-                        // Current Task status is WaitingForChildrenToComplete if Task didn't Cancel/Faulted and Child was created 
+                        // Current Task status is WaitingForChildrenToComplete if Task didn't Cancel/Faulted and Child was created
                         // without Detached options and current status of the child isn't RanToCompletion or Faulted yet
                         //
 
@@ -211,7 +211,7 @@ namespace System.Threading.Tasks.Tests.Status
                 try
                 {
                     //
-                    // Need to wait for Children task if it was created with Default option (Detached by default), 
+                    // Need to wait for Children task if it was created with Default option (Detached by default),
                     // or current task was either canceled or failed
                     //
                     if (_createChildTask &&
@@ -300,6 +300,8 @@ namespace System.Threading.Tasks.Tests.Status
         {
             try
             {
+                ManualResetEventSlim childMre = new ManualResetEventSlim(initialState: false);
+
                 if (_createChildTask)
                 {
                     TaskCreationOptions childTCO = (TaskCreationOptions)(int)_childCreationOptions;
@@ -313,18 +315,21 @@ namespace System.Threading.Tasks.Tests.Status
                         childTCO = TaskCreationOptions.AttachedToParent;
                     }
 
-                    _childTask = new Task(ChildTaskRun, null, _childTaskToken, childTCO);
+                    _childTask = new Task(ChildTaskRun, childMre, _childTaskToken, childTCO);
 
                     if (_childTask.Status != TaskStatus.Created)
                     {
                         Assert.True(false, string.Format("Expecting Child Task status to be Created while getting {0}", _childTask.Status.ToString()));
                     }
+
+                    _childTask.Start();
+
                     if (_testAction != TestAction.CancelTask && _testAction != TestAction.CancelTaskAndAcknowledge)
                     {
                         //
-                        // if cancel action, start the child task after calling Cancel()
+                        // if cancel action, release the child task after calling Cancel()
                         //
-                        _childTask.Start();
+                        childMre.Set();
                     }
                 }
 
@@ -336,19 +341,14 @@ namespace System.Threading.Tasks.Tests.Status
                 switch (_testAction)
                 {
                     case TestAction.CancelTask:
-                        if (_createChildTask)
-                        {
-                            _childTask.Start();
-                        }
                         _taskCts.Cancel();
+                        childMre.Set();
 
                         break;
                     case TestAction.CancelTaskAndAcknowledge:
-                        if (_createChildTask)
-                        {
-                            _childTask.Start();
-                        }
                         _taskCts.Cancel();
+                        childMre.Set();
+
                         if (_taskCts.Token.IsCancellationRequested)
                         {
                             throw new OperationCanceledException(_taskCts.Token);
@@ -367,6 +367,8 @@ namespace System.Threading.Tasks.Tests.Status
 
         private void ChildTaskRun(object o)
         {
+            (o as ManualResetEventSlim)?.Wait();
+
             if (_childTask.Status != TaskStatus.Running)
             {
                 Assert.True(false, string.Format("Expecting Child Task status to be Running while getting {0}", _childTask.Status.ToString()));

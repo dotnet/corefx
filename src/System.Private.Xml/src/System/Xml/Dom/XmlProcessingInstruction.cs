@@ -11,7 +11,7 @@ namespace System.Xml
     // processor-specific information in the text of the document.
     public class XmlProcessingInstruction : XmlLinkedNode
     {
-        private string _target;
+        private readonly string _target;
         private string _data;
 
         protected internal XmlProcessingInstruction(string target, string data, XmlDocument doc) : base(doc)
@@ -21,13 +21,13 @@ namespace System.Xml
         }
 
         // Gets the name of the node.
-        public override String Name
+        public override string Name
         {
             get
             {
                 if (_target != null)
                     return _target;
-                return String.Empty;
+                return string.Empty;
             }
         }
 
@@ -38,21 +38,21 @@ namespace System.Xml
         }
 
         // Gets or sets the value of the node.
-        public override String Value
+        public override string Value
         {
             get { return _data; }
             set { Data = value; } //use Data instead of data so that event will be fired
         }
 
         // Gets the target of the processing instruction.
-        public String Target
+        public string Target
         {
             get { return _target; }
         }
 
         // Gets or sets the content of processing instruction,
         // excluding the target.
-        public String Data
+        public string Data
         {
             get { return _data; }
             set

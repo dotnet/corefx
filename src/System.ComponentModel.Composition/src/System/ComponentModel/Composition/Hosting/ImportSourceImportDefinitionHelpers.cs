@@ -4,7 +4,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 using System.Linq.Expressions;
 using Microsoft.Internal;
 
@@ -16,7 +16,7 @@ namespace System.ComponentModel.Composition.Hosting
         public static ImportDefinition RemoveImportSource(this ImportDefinition definition)
         {
             var contractBasedDefinition = definition as ContractBasedImportDefinition;
-            if(contractBasedDefinition == null)
+            if (contractBasedDefinition == null)
             {
                 return definition;
             }
@@ -28,12 +28,15 @@ namespace System.ComponentModel.Composition.Hosting
 
         internal class NonImportSourceImportDefinition : ContractBasedImportDefinition
         {
-            private ContractBasedImportDefinition _sourceDefinition;
+            private readonly ContractBasedImportDefinition _sourceDefinition;
             private IDictionary<string, object> _metadata;
 
             public NonImportSourceImportDefinition(ContractBasedImportDefinition sourceDefinition)
             {
-                Assumes.NotNull(sourceDefinition);
+                if (sourceDefinition == null)
+                {
+                    throw new ArgumentNullException(nameof(sourceDefinition));
+                }
                 _sourceDefinition = sourceDefinition;
                 _metadata = null;
             }
@@ -47,16 +50,15 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 get
                 {
-                    Contract.Ensures(Contract.Result<IDictionary<string, object>>() != null);
-
                     var reply = _metadata;
-                    if(reply == null)
+                    if (reply == null)
                     {
                         reply = new Dictionary<string, object> (_sourceDefinition.Metadata);
                         reply.Remove(CompositionConstants.ImportSourceMetadataName);
                         _metadata = reply;
                     }
 
+                    Debug.Assert(reply != null);
                     return reply;
                 }
             }

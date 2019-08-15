@@ -3,12 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Diagnostics;
 
-namespace Test
+namespace System.Threading.Tasks.Tests
 {
     public class TaskContinueWith_ContFuncAndActionWithArgsTests
     {
@@ -273,8 +270,8 @@ namespace Test
 
             string stateParam = "test"; //used as a state parameter for the continuation if the useStateParam is true
             Task t1 = new Task(delegate { x = 1; });
-            Task t2 = t1.ContinueWith(delegate (Task t, Object obj) { y = 1; }, stateParam);
-            Task<int> t3 = t2.ContinueWith(delegate (Task t, Object obj) { return 5; }, stateParam);
+            Task t2 = t1.ContinueWith(delegate (Task t, object obj) { y = 1; }, stateParam);
+            Task<int> t3 = t2.ContinueWith(delegate (Task t, object obj) { return 5; }, stateParam);
             Task<int> t4 = t3.ContinueWith(delegate (Task<int> t, Object obj) { return Task<int>.Factory.StartNew(delegate { return 10; }); }, stateParam).Unwrap();
             Task<string> t5 = t4.ContinueWith(delegate (Task<int> t, Object obj) { return Task<string>.Factory.StartNew(delegate { for (int i = 0; i < 400; i++) ; return "worked"; }); }, stateParam).Unwrap();
 
@@ -417,7 +414,7 @@ namespace Test
         #region Helper Methods
 
         // Chains a Task continuation to a Task.
-        public static void RunContinueWithTaskTask_State(TaskContinuationOptions options, bool runNegativeCases = false)
+        private static void RunContinueWithTaskTask_State(TaskContinuationOptions options, bool runNegativeCases = false)
         {
             bool ran = false;
 
@@ -450,7 +447,7 @@ namespace Test
         }
 
         // Chains a Task<T> continuation to a Task, with a Func<Task, T>.
-        public static void RunContinueWithTaskFuture_State(TaskContinuationOptions options, bool runNegativeCases = false)
+        private static void RunContinueWithTaskFuture_State(TaskContinuationOptions options, bool runNegativeCases = false)
         {
             bool ran = false;
 
@@ -484,7 +481,7 @@ namespace Test
         }
 
         // Chains a Task continuation to a Task<T>.
-        public static void RunContinueWithFutureTask_State(TaskContinuationOptions options, bool runNegativeCases = false)
+        private static void RunContinueWithFutureTask_State(TaskContinuationOptions options, bool runNegativeCases = false)
         {
             bool ran = false;
 
@@ -518,7 +515,7 @@ namespace Test
         }
 
         // Chains a Task<U> continuation to a Task<T>, with a Func<Task<T>, U>.
-        public static void RunContinueWithFutureFuture_State(TaskContinuationOptions options, bool runNegativeCases = false)
+        private static void RunContinueWithFutureFuture_State(TaskContinuationOptions options, bool runNegativeCases = false)
         {
             bool ran = false;
 
@@ -530,7 +527,7 @@ namespace Test
                     delegate { ran = false; },
                     delegate (Task t)
                     {
-                        return t.ContinueWith<int>(delegate (Task f, Object obj) { ran = true; return 5; }, stateParam, options);
+                        return t.ContinueWith<int>(delegate (Task f, object obj) { ran = true; return 5; }, stateParam, options);
                     },
                     delegate { return ran; },
                     true
@@ -542,7 +539,7 @@ namespace Test
                     delegate { ran = false; },
                     delegate (Task t)
                     {
-                        return t.ContinueWith<int>(delegate (Task f, Object obj) { ran = true; return 5; }, stateParam, options);
+                        return t.ContinueWith<int>(delegate (Task f, object obj) { ran = true; return 5; }, stateParam, options);
                     },
                     delegate { return ran; },
                     true
@@ -551,7 +548,7 @@ namespace Test
         }
 
         // Base logic for RunContinueWithXXXYYY() methods
-        public static void RunContinueWithBase(
+        private static void RunContinueWithBase(
             TaskContinuationOptions options,
             Action initRan,
             Func<Task, Task> continuationMaker,
@@ -604,7 +601,7 @@ namespace Test
         }
 
         // Base logic for RunContinueWithXXXYYY() methods
-        public static void RunContinueWithBase_ExceptionCases(
+        private static void RunContinueWithBase_ExceptionCases(
             TaskContinuationOptions options,
             Action initRan,
             Func<Task, Task> continuationMaker,
@@ -711,7 +708,7 @@ namespace Test
         }
 
         // Ensures that the specified exception is an AggregateException wrapping a TaskCanceledException
-        public static void EnsureExceptionIsAEofTCE(Exception exception, string message)
+        private static void EnsureExceptionIsAEofTCE(Exception exception, string message)
         {
             if (exception == null)
             {

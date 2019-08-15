@@ -12,7 +12,7 @@ internal partial class Interop
         // https://msdn.microsoft.com/en-us/library/bb432380.aspx
         // https://msdn.microsoft.com/en-us/library/windows/hardware/ff566424.aspx
         [DllImport(Libraries.NtDll, CharSet = CharSet.Unicode, ExactSpelling = true)]
-        private unsafe static extern int NtCreateFile(
+        private static extern unsafe int NtCreateFile(
             out IntPtr FileHandle,
             DesiredAccess DesiredAccess,
             ref OBJECT_ATTRIBUTES ObjectAttributes,
@@ -25,7 +25,7 @@ internal partial class Interop
             void* EaBuffer,
             uint EaLength);
 
-        internal unsafe static (int status, IntPtr handle) CreateFile(
+        internal static unsafe (int status, IntPtr handle) CreateFile(
             ReadOnlySpan<char> path,
             IntPtr rootDirectory,
             CreateDisposition createDisposition,
@@ -33,7 +33,9 @@ internal partial class Interop
             System.IO.FileShare shareAccess = System.IO.FileShare.ReadWrite | System.IO.FileShare.Delete,
             System.IO.FileAttributes fileAttributes = 0,
             CreateOptions createOptions = CreateOptions.FILE_SYNCHRONOUS_IO_NONALERT,
-            ObjectAttributes objectAttributes = ObjectAttributes.OBJ_CASE_INSENSITIVE)
+            ObjectAttributes objectAttributes = ObjectAttributes.OBJ_CASE_INSENSITIVE,
+            void* eaBuffer = null,
+            uint eaLength = 0)
         {
             fixed (char* c = &MemoryMarshal.GetReference(path))
             {
@@ -55,109 +57,19 @@ internal partial class Interop
                     ref attributes,
                     out IO_STATUS_BLOCK statusBlock,
                     AllocationSize: null,
-                    FileAttributes: fileAttributes,
-                    ShareAccess: shareAccess,
-                    CreateDisposition: createDisposition,
-                    CreateOptions: createOptions,
-                    EaBuffer: null,
-                    EaLength: 0);
+                    fileAttributes,
+                    shareAccess,
+                    createDisposition,
+                    createOptions,
+                    eaBuffer,
+                    eaLength);
 
                 return (status, handle);
             }
         }
 
-        // https://msdn.microsoft.com/en-us/library/windows/hardware/ff557749.aspx
-        public unsafe struct OBJECT_ATTRIBUTES
-        {
-            public uint Length;
-
-            /// <summary>
-            /// Optional handle to root object directory for the given ObjectName.
-            /// Can be a file system directory or object manager directory.
-            /// </summary>
-            public IntPtr RootDirectory;
-
-            /// <summary>
-            /// Name of the object. Must be fully qualified if RootDirectory isn't set.
-            /// Otherwise is relative to RootDirectory.
-            /// </summary>
-            public UNICODE_STRING* ObjectName;
-
-            public ObjectAttributes Attributes;
-
-            /// <summary>
-            /// If null, object will receive default security settings.
-            /// </summary>
-            public void* SecurityDescriptor;
-
-            /// <summary>
-            /// Optional quality of service to be applied to the object. Used to indicate
-            /// security impersonation level and context tracking mode (dynamic or static).
-            /// </summary>
-            public void* SecurityQualityOfService;
-
-            /// <summary>
-            /// Equivalent of InitializeObjectAttributes macro with the exception that you can directly set SQOS.
-            /// </summary>
-            public unsafe OBJECT_ATTRIBUTES(UNICODE_STRING* objectName, ObjectAttributes attributes, IntPtr rootDirectory)
-            {
-                Length = (uint)sizeof(OBJECT_ATTRIBUTES);
-                RootDirectory = rootDirectory;
-                ObjectName = objectName;
-                Attributes = attributes;
-                SecurityDescriptor = null;
-                SecurityQualityOfService = null;
-            }
-        }
-
-        [Flags]
-        public enum ObjectAttributes : uint
-        {
-            // https://msdn.microsoft.com/en-us/library/windows/hardware/ff564586.aspx
-            // https://msdn.microsoft.com/en-us/library/windows/hardware/ff547804.aspx
-
-            /// <summary>
-            /// This handle can be inherited by child processes of the current process.
-            /// </summary>
-            OBJ_INHERIT = 0x00000002,
-
-            /// <summary>
-            /// This flag only applies to objects that are named within the object manager.
-            /// By default, such objects are deleted when all open handles to them are closed.
-            /// If this flag is specified, the object is not deleted when all open handles are closed.
-            /// </summary>
-            OBJ_PERMANENT = 0x00000010,
-
-            /// <summary>
-            /// Only a single handle can be open for this object.
-            /// </summary>
-            OBJ_EXCLUSIVE = 0x00000020,
-
-            /// <summary>
-            /// Lookups for this object should be case insensitive.
-            /// </summary>
-            OBJ_CASE_INSENSITIVE = 0x00000040,
-
-            /// <summary>
-            /// Create on existing object should open, not fail with STATUS_OBJECT_NAME_COLLISION.
-            /// </summary>
-            OBJ_OPENIF = 0x00000080,
-
-            /// <summary>
-            /// Open the symbolic link, not its target.
-            /// </summary>
-            OBJ_OPENLINK = 0x00000100,
-
-            // Only accessible from kernel mode
-            // OBJ_KERNEL_HANDLE
-
-            // Access checks enforced, even in kernel mode
-            // OBJ_FORCE_ACCESS_CHECK
-            // OBJ_VALID_ATTRIBUTES = 0x000001F2
-        }
-
         /// <summary>
-        /// File creation disposition when calling directly to NT apis.
+        /// File creation disposition when calling directly to NT APIs.
         /// </summary>
         public enum CreateDisposition : uint
         {
@@ -351,7 +263,7 @@ internal partial class Interop
             FILE_OPEN_REQUIRING_OPLOCK = 0x00010000,
 
             /// <summary>
-            /// CreateFile2 uses this flag to prevent opening a file that you don't have access to without specifying 
+            /// CreateFile2 uses this flag to prevent opening a file that you don't have access to without specifying
             /// FILE_SHARE_READ. (Preventing users that can only read a file from denying access to other readers.)
             /// </summary>
             /// <remarks>

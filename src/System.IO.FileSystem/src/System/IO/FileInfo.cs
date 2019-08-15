@@ -2,10 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 
+#if MS_IO_REDIST
+namespace Microsoft.IO
+#else
 namespace System.IO
+#endif
 {
     // Class for creating FileStream objects, and some basic file management
     // routines such as Delete, etc.
@@ -21,10 +27,10 @@ namespace System.IO
         internal FileInfo(string originalPath, string fullPath = null, string fileName = null, bool isNormalized = false)
         {
             // Want to throw the original argument name
-            OriginalPath = originalPath ?? throw new ArgumentNullException("fileName");
+            OriginalPath = originalPath ?? throw new ArgumentNullException(nameof(fileName));
 
             fullPath = fullPath ?? originalPath;
-            Debug.Assert(!isNormalized || !PathInternal.IsPartiallyQualified(fullPath), "should be fully qualified if normalized");
+            Debug.Assert(!isNormalized || !PathInternal.IsPartiallyQualified(fullPath.AsSpan()), "should be fully qualified if normalized");
 
             FullPath = isNormalized ? fullPath ?? originalPath : Path.GetFullPath(fullPath);
             _name = fileName ?? Path.GetFileName(originalPath);
@@ -116,6 +122,14 @@ namespace System.IO
         // This method does work across volumes.
         public void MoveTo(string destFileName)
         {
+            MoveTo(destFileName, false);
+        }
+
+        // Moves a given file to a new location and potentially a new file name.
+        // Optionally overwrites existing file.
+        // This method does work across volumes.
+        public void MoveTo(string destFileName, bool overwrite)
+        {
             if (destFileName == null)
                 throw new ArgumentNullException(nameof(destFileName));
             if (destFileName.Length == 0)
@@ -132,7 +146,7 @@ namespace System.IO
             if (!Exists)
                 throw new FileNotFoundException(SR.Format(SR.IO_FileNotFound_FileName, FullName), FullName);
 
-            FileSystem.MoveFile(FullPath, fullDestFileName);
+            FileSystem.MoveFile(FullPath, fullDestFileName, overwrite);
 
             FullPath = fullDestFileName;
             OriginalPath = destFileName;

@@ -4,7 +4,6 @@
 
 using System.Collections.Generic;
 using System.IO;
-using Test.Cryptography;
 using Xunit;
 
 namespace System.Security.Cryptography.Encoding.Tests
@@ -39,8 +38,19 @@ namespace System.Security.Cryptography.Encoding.Tests
 
         public static IEnumerable<object[]> TestData_Ascii_Whitespace()
         {
+            yield return new object[] { "fo", "\tZ\tm8=\r" };
             yield return new object[] { "fo", "\tZ\tm8=\n" };
+            yield return new object[] { "fo", "\tZ\tm8=\r\n" };
             yield return new object[] { "foo", " Z m 9 v" };
+        }
+
+        public static IEnumerable<object[]> TestData_Oversize()
+        {
+            // test data with extra chunks of data outside the selected range
+            yield return new object[] { "Zm9v////", 0, 4, "foo" };
+            yield return new object[] { "////Zm9v", 4, 4, "foo" };
+            yield return new object[] { "////Zm9v////", 4, 4, "foo" };
+            yield return new object[] { "Zm9vYmFyYm", 0, 10, "foobar" };
         }
 
         [Fact]
@@ -53,7 +63,7 @@ namespace System.Security.Cryptography.Encoding.Tests
                 InvalidInput_Base64Transform(transform);
 
                 // These exceptions only thrown in ToBase
-                AssertExtensions.Throws<ArgumentOutOfRangeException>("offsetOut", () => transform.TransformFinalBlock(data_5bytes, 0, 5));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("inputCount", () => transform.TransformFinalBlock(data_5bytes, 0, 5));
             }
         }
 
@@ -77,8 +87,8 @@ namespace System.Security.Cryptography.Encoding.Tests
 
             AssertExtensions.Throws<ArgumentNullException>("inputBuffer", () => transform.TransformBlock(null, 0, 0, null, 0));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("inputOffset", () => transform.TransformBlock(Array.Empty<byte>(), -1, 0, null, 0));
-            AssertExtensions.Throws<ArgumentNullException>("dst", () => transform.TransformBlock(data_4bytes, 0, 4, null, 0));
-            AssertExtensions.Throws<ArgumentException>(null, () => transform.TransformBlock(Array.Empty<byte>(), 0, 1, null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("outputBuffer", () => transform.TransformBlock(data_4bytes, 0, 4, null, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("inputCount", () => transform.TransformBlock(Array.Empty<byte>(), 0, 1, null, 0));
             AssertExtensions.Throws<ArgumentException>(null, () => transform.TransformBlock(Array.Empty<byte>(), 1, 0, null, 0));
 
             AssertExtensions.Throws<ArgumentNullException>("inputBuffer", () => transform.TransformFinalBlock(null, 0, 0));
@@ -110,11 +120,22 @@ namespace System.Security.Cryptography.Encoding.Tests
             byte[] inputBytes = Text.Encoding.ASCII.GetBytes(data);
             byte[] outputBytes = new byte[100];
 
+            // Verify read mode
             using (var ms = new MemoryStream(inputBytes))
             using (var cs = new CryptoStream(ms, transform, CryptoStreamMode.Read))
             {
                 int bytesRead = cs.Read(outputBytes, 0, outputBytes.Length);
                 string outputString = Text.Encoding.ASCII.GetString(outputBytes, 0, bytesRead);
+                Assert.Equal(expected, outputString);
+            }
+
+            // Verify write mode
+            using (var ms = new MemoryStream(outputBytes))
+            using (var cs = new CryptoStream(ms, transform, CryptoStreamMode.Write))
+            {
+                cs.Write(inputBytes, 0, inputBytes.Length);
+                cs.FlushFinalBlock();
+                string outputString = Text.Encoding.ASCII.GetString(outputBytes, 0, (int)ms.Position);
                 Assert.Equal(expected, outputString);
             }
         }
@@ -128,22 +149,39 @@ namespace System.Security.Cryptography.Encoding.Tests
                 Assert.True(inputBytes.Length > 4);
 
                 // Test passing blocks > 4 characters to TransformFinalBlock (not supported)
-                AssertExtensions.Throws<ArgumentOutOfRangeException>("offsetOut", () => transform.TransformFinalBlock(inputBytes, 0, inputBytes.Length));
+                _ = expected;
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("inputCount", () => transform.TransformFinalBlock(inputBytes, 0, inputBytes.Length));
             }
         }
 
         [Theory, MemberData(nameof(TestData_LongBlock_Ascii))]
-        public static void ValidateFromBase64TransformFinalBlock(string expected, string encoding)
+        public static void ValidateFromBase64TransformFinalBlock(string expected, string encoded)
         {
             using (var transform = new FromBase64Transform())
             {
-                byte[] inputBytes = Text.Encoding.ASCII.GetBytes(encoding);
+                byte[] inputBytes = Text.Encoding.ASCII.GetBytes(encoded);
                 Assert.True(inputBytes.Length > 4);
 
                 // Test passing blocks > 4 characters to TransformFinalBlock (supported)
                 byte[] outputBytes = transform.TransformFinalBlock(inputBytes, 0, inputBytes.Length);
                 string outputString = Text.Encoding.ASCII.GetString(outputBytes, 0, outputBytes.Length);
                 Assert.Equal(expected, outputString);
+            }
+        }
+
+        [Theory, MemberData(nameof(TestData_LongBlock_Ascii))]
+        public static void ValidateFromBase64TransformBlock(string expected, string encoded)
+        {
+            using (var transform = new FromBase64Transform())
+            {
+                byte[] inputBytes = Text.Encoding.ASCII.GetBytes(encoded);
+                Assert.True(inputBytes.Length > 4);
+
+                byte[] outputBytes = new byte[100];
+                int bytesWritten = transform.TransformBlock(inputBytes, 0, inputBytes.Length, outputBytes, 0);
+                string outputText = Text.Encoding.ASCII.GetString(outputBytes, 0, bytesWritten);
+
+                Assert.Equal(expected, outputText);
             }
         }
 
@@ -166,6 +204,22 @@ namespace System.Security.Cryptography.Encoding.Tests
             }
         }
 
+        [Theory, MemberData(nameof(TestData_Oversize))]
+        public static void ValidateFromBase64_OversizeBuffer(string input, int offset, int count, string expected)
+        {
+            using (var transform = new FromBase64Transform())
+            {
+                byte[] inputBytes = Text.Encoding.ASCII.GetBytes(input);
+                byte[] outputBytes = new byte[100];
+
+                int bytesWritten = transform.TransformBlock(inputBytes, offset, count, outputBytes, 0);
+
+                string outputText = Text.Encoding.ASCII.GetString(outputBytes, 0, bytesWritten);
+
+                Assert.Equal(expected, outputText);
+            }
+        }
+
         [Theory, MemberData(nameof(TestData_Ascii_Whitespace))]
         public static void ValidateWhitespace(string expected, string data)
         {
@@ -173,7 +227,7 @@ namespace System.Security.Cryptography.Encoding.Tests
             byte[] outputBytes = new byte[100];
 
             // Verify default of FromBase64TransformMode.IgnoreWhiteSpaces
-            using (var base64Transform = new FromBase64Transform()) 
+            using (var base64Transform = new FromBase64Transform())
             using (var ms = new MemoryStream(inputBytes))
             using (var cs = new CryptoStream(ms, base64Transform, CryptoStreamMode.Read))
             {

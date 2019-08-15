@@ -27,8 +27,8 @@ namespace System.SpanTests
                 int result = firstSpan.SequenceCompareTo(secondSpan);
                 Assert.Equal(0, result);
 
-                // Make sure each element of the array was compared once. (Strictly speaking, it would not be illegal for 
-                // SequenceCompareTo to compare an element more than once but that would be a non-optimal implementation and 
+                // Make sure each element of the array was compared once. (Strictly speaking, it would not be illegal for
+                // SequenceCompareTo to compare an element more than once but that would be a non-optimal implementation and
                 // a red flag. So we'll stick with the stricter test.)
                 Assert.Equal(first.Length, log.Count);
                 foreach (TInt elem in first)
@@ -79,7 +79,7 @@ namespace System.SpanTests
 
                 var first = new TInt[length];
                 var second = new TInt[length];
-                
+
                 for (int i = 0; i < length; i++)
                 {
                     first[i] = new TInt(i + 1, log);

@@ -416,7 +416,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             Assert.ThrowsAny<ArgumentException>(() => binder.Bind(args, parameters, target));
         }
 
-        public static void DoStuff<T>(IEnumerable<T> x)
+        private static void DoStuff<T>(IEnumerable<T> x)
         {
             // Don't actually do stuff!
         }
@@ -439,6 +439,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
         }
 
         [Fact]
+        [ActiveIssue(31032, TargetFrameworkMonikers.NetFramework)]
         public void TryInvokeOrAccessNestedClassAsMember()
         {
             dynamic dFirst = new Outer.Inner();
@@ -455,6 +456,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
         }
 
         [Fact]
+        [ActiveIssue(31032, TargetFrameworkMonikers.NetFramework)]
         public void TryInvokeTypeParameterAsMember()
         {
             dynamic d = new List<int>();
@@ -483,6 +485,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
         }
 
         [Fact]
+        [ActiveIssue(31032, TargetFrameworkMonikers.NetFramework)]
         public void AccessMethodHiddenByNested()
         {
             dynamic dFirst = new DerivedOuterHidingMethod.Inner();
@@ -513,7 +516,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             dFirst.DoNothing();
             dynamic d = new DerivedOuterHidingNested();
             Assert.Equal(42, d.Inner());
-		}
+        }
 
         [Fact]
         public void CannotCallOperatorDirectly()

@@ -9,7 +9,7 @@ using Xunit;
 namespace System.Collections.ObjectModel.Tests
 {
     /// <summary>
-    /// Tests that the INotifyCollectionChanged and IPropertyChanged events are fired 
+    /// Tests that the INotifyCollectionChanged and IPropertyChanged events are fired
     /// when an item is changed in the underlying ObservableCollection<T>.
     /// </summary>
     public class ReadOnlyObservableCollection_EventsTests
@@ -116,23 +116,23 @@ namespace System.Collections.ObjectModel.Tests
             ReadOnlyObservableCollection<Guid> readonlyCol = new ReadOnlyObservableCollection<Guid>(collection);
             ((INotifyCollectionChanged)readonlyCol).CollectionChanged += (o, e) => { throw new ShouldNotBeInvokedException(); };
 
-            int[] iArrInvalidValues = new Int32[] { -1, -2, -100, -1000, -10000, -100000, -1000000, -10000000, -100000000, -1000000000, Int32.MinValue };
+            int[] iArrInvalidValues = new int[] { -1, -2, -100, -1000, -10000, -100000, -1000000, -10000000, -100000000, -1000000000, int.MinValue };
             foreach (var index in iArrInvalidValues)
             {
-                Assert.Throws<ArgumentOutOfRangeException>(() => collection.RemoveAt(index));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => collection.RemoveAt(index));
                 Assert.Equal(anArray.Length, readonlyCol.Count);
             }
 
-            int[] iArrLargeValues = new Int32[] { collection.Count, Int32.MaxValue, Int32.MaxValue / 2, Int32.MaxValue / 10 };
+            int[] iArrLargeValues = new int[] { collection.Count, int.MaxValue, int.MaxValue / 2, int.MaxValue / 10 };
             foreach (var index in iArrLargeValues)
             {
-                Assert.Throws<ArgumentOutOfRangeException>(() => collection.RemoveAt(index));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => collection.RemoveAt(index));
                 Assert.Equal(anArray.Length, readonlyCol.Count);
             }
         }
 
         /// <summary>
-        /// Tests that items can be moved throughout a collection whether from 
+        /// Tests that items can be moved throughout a collection whether from
         /// beginning to end, etc. And the events are forwarded.
         /// </summary>
         [Fact]
@@ -149,7 +149,7 @@ namespace System.Collections.ObjectModel.Tests
 
         /// <summary>
         /// Tests that:
-        /// ArgumentOutOfRangeException is thrown when the source or destination 
+        /// ArgumentOutOfRangeException is thrown when the source or destination
         /// Index is >= collection.Count or Index < 0.
         /// And the events are not forwarded.
         /// </summary>
@@ -165,20 +165,20 @@ namespace System.Collections.ObjectModel.Tests
             ((INotifyCollectionChanged)readonlyCol).CollectionChanged += (o, e) => { throw new ShouldNotBeInvokedException(); };
 
             int validIndex = 2;
-            int[] iArrInvalidValues = new Int32[] { -1, -2, -100, -1000, -10000, -100000, -1000000, -10000000, -100000000, -1000000000, Int32.MinValue };
-            int[] iArrLargeValues = new Int32[] { anArray.Length, Int32.MaxValue, Int32.MaxValue / 2, Int32.MaxValue / 10 };
+            int[] iArrInvalidValues = new int[] { -1, -2, -100, -1000, -10000, -100000, -1000000, -10000000, -100000000, -1000000000, int.MinValue };
+            int[] iArrLargeValues = new int[] { anArray.Length, int.MaxValue, int.MaxValue / 2, int.MaxValue / 10 };
 
             foreach (var index in iArrInvalidValues)
             {
                 // invalid startIndex, valid destination index.
-                Assert.Throws<ArgumentOutOfRangeException>(() => collection.Move(index, validIndex));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => collection.Move(index, validIndex));
                 Assert.Equal(anArray.Length, collection.Count);
             }
 
             foreach (var index in iArrLargeValues)
             {
                 // invalid startIndex, valid destination index.
-                Assert.Throws<ArgumentOutOfRangeException>(() => collection.Move(index, validIndex));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => collection.Move(index, validIndex));
                 Assert.Equal(anArray.Length, collection.Count);
             }
         }
@@ -214,23 +214,23 @@ namespace System.Collections.ObjectModel.Tests
             ((INotifyCollectionChanged)readonlyCol).CollectionChanged += (o, e) => { throw new ShouldNotBeInvokedException(); };
 
             Guid itemToInsert = Guid.NewGuid();
-            int[] iArrInvalidValues = new Int32[] { -1, -2, -100, -1000, -10000, -100000, -1000000, -10000000, -100000000, -1000000000, Int32.MinValue };
+            int[] iArrInvalidValues = new int[] { -1, -2, -100, -1000, -10000, -100000, -1000000, -10000000, -100000000, -1000000000, int.MinValue };
             foreach (var index in iArrInvalidValues)
             {
-                Assert.Throws<ArgumentOutOfRangeException>(() => collection.Insert(index, itemToInsert));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => collection.Insert(index, itemToInsert));
                 Assert.Equal(anArray.Length, collection.Count);
             }
 
-            int[] iArrLargeValues = new Int32[] { collection.Count + 1, Int32.MaxValue, Int32.MaxValue / 2, Int32.MaxValue / 10 };
+            int[] iArrLargeValues = new int[] { collection.Count + 1, int.MaxValue, int.MaxValue / 2, int.MaxValue / 10 };
             foreach (var index in iArrLargeValues)
             {
-                Assert.Throws<ArgumentOutOfRangeException>(() => collection.Insert(index, itemToInsert));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => collection.Insert(index, itemToInsert));
                 Assert.Equal(anArray.Length, collection.Count);
             }
         }
 
         /// <summary>
-        /// Tests that the appropriate collectionchanged and propertychanged events are 
+        /// Tests that the appropriate collectionchanged and propertychanged events are
         /// fired when an item is replaced in the collection.
         /// </summary>
         [Fact]
@@ -271,7 +271,7 @@ namespace System.Collections.ObjectModel.Tests
         #endregion
 
         /// <summary>
-        /// Will perform an Add or Insert on the given Collection depending on whether the 
+        /// Will perform an Add or Insert on the given Collection depending on whether the
         /// insertIndex is null or not. If it is null, will Add, otherwise, will Insert.
         /// </summary>
         public void AddOrInsertItemTest(ReadOnlyObservableCollection<string> readOnlyCol, ObservableCollection<string> collection,

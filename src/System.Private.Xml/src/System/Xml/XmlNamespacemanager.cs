@@ -34,7 +34,7 @@ namespace System.Xml
         private int _lastDecl = 0;
 
         // name table
-        private XmlNameTable _nameTable;
+        private readonly XmlNameTable _nameTable;
 
         // ID (depth) of the current scope
         private int _scopeId;
@@ -44,8 +44,8 @@ namespace System.Xml
         private bool _useHashtable;
 
         // atomized prefixes for "xml" and "xmlns"
-        private string _xml;
-        private string _xmlNs;
+        private readonly string _xml;
+        private readonly string _xmlNs;
 
         // Constants
         private const int MinDeclsCountForHashtable = 16;
@@ -192,7 +192,7 @@ namespace System.Xml
             int declIndex = LookupNamespaceDecl(prefix);
             while (declIndex != -1)
             {
-                if (String.Equals(_nsdecls[declIndex].uri, uri) && _nsdecls[declIndex].scopeId == _scopeId)
+                if (string.Equals(_nsdecls[declIndex].uri, uri) && _nsdecls[declIndex].scopeId == _scopeId)
                 {
                     _nsdecls[declIndex].uri = null;
                 }
@@ -213,7 +213,7 @@ namespace System.Xml
             return prefixes.Keys.GetEnumerator();
         }
 
-        // This pragma disables a warning that the return type is not CLS-compliant, but generics are part of CLS in Whidbey. 
+        // This pragma disables a warning that the return type is not CLS-compliant, but generics are part of CLS in Whidbey.
 #pragma warning disable 3002
         public virtual IDictionary<string, string> GetNamespacesInScope(XmlNamespaceScope scope)
         {
@@ -296,7 +296,7 @@ namespace System.Xml
                 // Non-atomized lookup
                 for (int thisDecl = _lastDecl; thisDecl >= 0; thisDecl--)
                 {
-                    if (String.Equals(_nsdecls[thisDecl].prefix, prefix) && _nsdecls[thisDecl].uri != null)
+                    if (string.Equals(_nsdecls[thisDecl].prefix, prefix) && _nsdecls[thisDecl].uri != null)
                     {
                         return thisDecl;
                     }
@@ -310,10 +310,10 @@ namespace System.Xml
             // Don't assume that prefix is atomized
             for (int thisDecl = _lastDecl; thisDecl >= 0; thisDecl--)
             {
-                if (String.Equals(_nsdecls[thisDecl].uri, uri))
+                if (string.Equals(_nsdecls[thisDecl].uri, uri))
                 {
                     string prefix = _nsdecls[thisDecl].prefix;
-                    if (String.Equals(LookupNamespace(prefix), uri))
+                    if (string.Equals(LookupNamespace(prefix), uri))
                     {
                         return prefix;
                     }
@@ -327,7 +327,7 @@ namespace System.Xml
             // Don't assume that prefix is atomized
             for (int thisDecl = _lastDecl; _nsdecls[thisDecl].scopeId == _scopeId; thisDecl--)
             {
-                if (String.Equals(_nsdecls[thisDecl].prefix, prefix) && _nsdecls[thisDecl].uri != null)
+                if (string.Equals(_nsdecls[thisDecl].prefix, prefix) && _nsdecls[thisDecl].uri != null)
                 {
                     if (prefix.Length > 0 || _nsdecls[thisDecl].uri.Length > 0)
                     {

@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public static partial class DateTimeTests
+    public partial class DateTimeTests
     {
         [Theory]
         [MemberData(nameof(StandardFormatSpecifiers))]
@@ -37,20 +37,20 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(ToString_MatchesExpected_MemberData))]
-        public static void TryFormat_MatchesExpected(DateTime dateTime, string format, string expected)
+        public static void TryFormat_MatchesExpected(DateTime dateTime, string format, IFormatProvider provider, string expected)
         {
             var destination = new char[expected.Length];
 
-            Assert.False(dateTime.TryFormat(destination.AsSpan(0, destination.Length - 1), out _, format));
+            Assert.False(dateTime.TryFormat(destination.AsSpan(0, destination.Length - 1), out _, format, provider));
 
-            Assert.True(dateTime.TryFormat(destination, out int charsWritten, format));
+            Assert.True(dateTime.TryFormat(destination, out int charsWritten, format, provider));
             Assert.Equal(destination.Length, charsWritten);
             Assert.Equal(expected, new string(destination));
         }
 
         [Theory]
-        [MemberData(nameof(Parse_ValidInput_Suceeds_MemberData))]
-        public static void Parse_Span_ValidInput_Suceeds(string input, CultureInfo culture, DateTime? expected)
+        [MemberData(nameof(Parse_ValidInput_Succeeds_MemberData))]
+        public static void Parse_Span_ValidInput_Succeeds(string input, CultureInfo culture, DateTime? expected)
         {
             Assert.Equal(expected, DateTime.Parse(input.AsSpan(), culture));
         }

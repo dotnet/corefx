@@ -30,11 +30,11 @@ namespace System.Security.Cryptography.Rsa.Tests
             }
         }
 
+        public bool SupportsLargeExponent => true;
+
         public bool SupportsSha2Oaep => true;
 
         public bool SupportsPss => true;
-
-        public bool SupportsDecryptingIntoExactSpaceRequired => true;
     }
 
     public partial class RSAFactory

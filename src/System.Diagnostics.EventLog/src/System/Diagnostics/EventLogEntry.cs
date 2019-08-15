@@ -19,7 +19,7 @@ namespace System.Diagnostics
     {
         internal byte[] dataBuf;
         internal int bufOffset;
-        private EventLogInternal owner;
+        private readonly EventLogInternal owner;
         private string category;
         private string message;
 
@@ -30,11 +30,6 @@ namespace System.Diagnostics
             this.owner = log;
 
             GC.SuppressFinalize(this);
-        }
-
-        private EventLogEntry(SerializationInfo info, StreamingContext context)
-        {
-            throw new PlatformNotSupportedException();
         }
 
         /// <summary>
@@ -123,7 +118,7 @@ namespace System.Diagnostics
         /// <summary>
         /// The number identifying the message for this source.
         /// </summary>
-        [Obsolete("This property has been deprecated.  Please use System.Diagnostics.EventLogEntry.InstanceId instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("This property has been deprecated.  Please use System.Diagnostics.EventLogEntry.InstanceId instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public int EventID
         {
             get
@@ -235,11 +230,11 @@ namespace System.Diagnostics
         /// <summary>
         /// The full number identifying the message in the event message dll.
         /// </summary>
-        public Int64 InstanceId
+        public long InstanceId
         {
             get
             {
-                return (UInt32)IntFrom(dataBuf, bufOffset + FieldOffsets.EVENTID);
+                return (uint)IntFrom(dataBuf, bufOffset + FieldOffsets.EVENTID);
             }
         }
 
@@ -281,19 +276,19 @@ namespace System.Diagnostics
 
                 int userNameLen = 256;
                 int domainNameLen = 256;
-                int sidNameUse = 0;
-                StringBuilder bufUserName = new StringBuilder(userNameLen);
-                StringBuilder bufDomainName = new StringBuilder(domainNameLen);
-                StringBuilder retUserName = new StringBuilder();
-
-                if (Interop.Kernel32.LookupAccountSid(MachineName, sid, bufUserName, ref userNameLen, bufDomainName, ref domainNameLen, ref sidNameUse) != 0)
+                unsafe
                 {
-                    retUserName.Append(bufDomainName.ToString());
-                    retUserName.Append("\\");
-                    retUserName.Append(bufUserName.ToString());
+                    fixed (char* bufUserName = new char[userNameLen])
+                    fixed (char* bufDomainName = new char[domainNameLen])
+                    {
+                        if (Interop.Advapi32.LookupAccountSid(MachineName, sid, bufUserName, ref userNameLen, bufDomainName, ref domainNameLen, out int sidNameUse) != 0)
+                        {
+                            return new string(bufDomainName) + "\\" + new string(bufUserName);
+                        }
+                    }
                 }
 
-                return retUserName.ToString();
+                return string.Empty;
             }
         }
 
@@ -331,7 +326,7 @@ namespace System.Diagnostics
             (0xFF00 & (buf[offset + 1] << 8)) | (0xFF & (buf[offset]));
         }
 
-        internal string ReplaceMessageParameters(String msg, string[] insertionStrings)
+        internal string ReplaceMessageParameters(string msg, string[] insertionStrings)
         {
             int percentIdx = msg.IndexOf('%');
             if (percentIdx < 0)
@@ -346,13 +341,13 @@ namespace System.Diagnostics
             {
                 string param = null;
                 int lasNumIdx = percentIdx + 1;
-                while (lasNumIdx < msgLength && Char.IsDigit(msg, lasNumIdx))
+                while (lasNumIdx < msgLength && char.IsDigit(msg, lasNumIdx))
                     lasNumIdx++;
 
                 uint paramMsgID = 0;
 
                 if (lasNumIdx != percentIdx + 1)
-                    UInt32.TryParse(msg.Substring(percentIdx + 1, lasNumIdx - percentIdx - 1), out paramMsgID);
+                    uint.TryParse(msg.Substring(percentIdx + 1, lasNumIdx - percentIdx - 1), out paramMsgID);
 
                 if (paramMsgID != 0)
                     param = owner.FormatMessageWrapper(paramDLLNames, paramMsgID, insertionStrings);
@@ -479,6 +474,5 @@ namespace System.Diagnostics
         }
 
         private static readonly DateTime beginningOfTime = new DateTime(1970, 1, 1, 0, 0, 0);
-        private const int OFFSETFIXUP = 4 + 4 + 4 + 4 + 4 + 4 + 2 + 2 + 2 + 2 + 4 + 4 + 4 + 4 + 4 + 4;
     }
 }

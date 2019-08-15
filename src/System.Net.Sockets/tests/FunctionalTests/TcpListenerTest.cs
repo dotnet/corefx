@@ -23,7 +23,7 @@ namespace System.Net.Sockets.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("port", () => TcpListener.Create(66000));
         }
 
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // [ActiveIssue(11057)]
         [InlineData(0)]
         [InlineData(1)]
         [InlineData(2)]
@@ -131,7 +131,7 @@ namespace System.Net.Sockets.Tests
             if (Socket.OSSupportsIPv6 || !Socket.OSSupportsIPv4)
             {
                 // TBD we should figure out better way how to execute this in IPv4 only environment.
-                return; 
+                return;
             }
 
             // This should not throw e.g. default to IPv6.

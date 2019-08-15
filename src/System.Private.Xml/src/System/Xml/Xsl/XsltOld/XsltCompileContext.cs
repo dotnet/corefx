@@ -21,8 +21,8 @@ namespace System.Xml.Xsl.XsltOld
         private Processor _processor;
 
         // storage for the functions
-        private static Hashtable s_FunctionTable = CreateFunctionTable();
-        private static IXsltContextFunction s_FuncNodeSet = new FuncNodeSet();
+        private static readonly Hashtable s_FunctionTable = CreateFunctionTable();
+        private static readonly IXsltContextFunction s_FuncNodeSet = new FuncNodeSet();
         private const string f_NodeSet = "node-set";
 
         internal XsltCompileContext(InputScopeManager manager, Processor processor) : base(/*dummy*/false)
@@ -47,7 +47,7 @@ namespace System.Xml.Xsl.XsltOld
 
         public override int CompareDocument(string baseUri, string nextbaseUri)
         {
-            return String.Compare(baseUri, nextbaseUri, StringComparison.Ordinal);
+            return string.Compare(baseUri, nextbaseUri, StringComparison.Ordinal);
         }
 
         // Namespace support
@@ -78,7 +78,7 @@ namespace System.Xml.Xsl.XsltOld
 
         internal object EvaluateVariable(VariableAction variable)
         {
-            Object result = _processor.GetVariableValue(variable);
+            object result = _processor.GetVariableValue(variable);
             if (result == null && !variable.IsGlobal)
             {
                 // This was uninitialized local variable. May be we have sutable global var too?
@@ -115,7 +115,7 @@ namespace System.Xml.Xsl.XsltOld
             // restrict search to methods with the same name and requiested protection attribute
             for (int i = 0; i < length; i++)
             {
-                if (string.Compare(name, methods[i].Name, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal) == 0)
+                if (string.Equals(name, methods[i].Name, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
                 {
                     if (!publicOnly || methods[i].GetBaseDefinition().IsPublic)
                     {
@@ -315,7 +315,7 @@ namespace System.Xml.Xsl.XsltOld
             return keyTable;
         }
 
-        private static void AddKeyValue(Hashtable keyTable, String key, XPathNavigator value, bool checkDuplicates)
+        private static void AddKeyValue(Hashtable keyTable, string key, XPathNavigator value, bool checkDuplicates)
         {
             ArrayList list = (ArrayList)keyTable[key];
             if (list == null)
@@ -375,7 +375,7 @@ namespace System.Xml.Xsl.XsltOld
             }
             else
             {
-                String key = XmlConvert.ToXPathString(result);
+                string key = XmlConvert.ToXPathString(result);
                 AddKeyValue(keyTable, key, /*value:*/node, /*checkDuplicates:*/ false);
             }
         }
@@ -498,9 +498,9 @@ namespace System.Xml.Xsl.XsltOld
             return XPathEmptyIterator.Instance;
         }
 
-        private String SystemProperty(string qname)
+        private string SystemProperty(string qname)
         {
-            String result = string.Empty;
+            string result = string.Empty;
 
             string prefix;
             string local;
@@ -710,7 +710,7 @@ namespace System.Xml.Xsl.XsltOld
                     case XPathResultType.String:
                         // Unfortunetely XPathResultType.String == XPathResultType.Navigator (This is wrong but cant be changed in Everett)
                         // Fortunetely we have typeCode hare so let's discriminate by typeCode
-                        if (type == typeof(String))
+                        if (type == typeof(string))
                         {
                             return ToString(val);
                         }
@@ -726,7 +726,7 @@ namespace System.Xml.Xsl.XsltOld
                     case XPathResultType.Error:
                         return val;
                     default:
-                        Debug.Assert(false, "unexpected XPath type");
+                        Debug.Fail("unexpected XPath type");
                         return val;
                 }
             }
@@ -734,7 +734,7 @@ namespace System.Xml.Xsl.XsltOld
 
         private class FuncCurrent : XsltFunctionImpl
         {
-            public FuncCurrent() : base(0, 0, XPathResultType.NodeSet, new XPathResultType[] { }) { }
+            public FuncCurrent() : base(0, 0, XPathResultType.NodeSet, Array.Empty<XPathResultType>()) { }
             public override object Invoke(XsltContext xsltContext, object[] args, XPathNavigator docContext)
             {
                 return ((XsltCompileContext)xsltContext).Current();
@@ -946,9 +946,9 @@ namespace System.Xml.Xsl.XsltOld
 
         private class FuncExtension : XsltFunctionImpl
         {
-            private object _extension;
-            private MethodInfo _method;
-            private Type[] _types;
+            private readonly object _extension;
+            private readonly MethodInfo _method;
+            private readonly Type[] _types;
 
             public FuncExtension(object extension, MethodInfo method)
             {

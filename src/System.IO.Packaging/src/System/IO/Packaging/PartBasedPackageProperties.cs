@@ -143,7 +143,7 @@ namespace System.IO.Packaging
         /// The type of content represented, generally defined by a specific
         /// use and intended audience. Example values include "Whitepaper",
         /// "Security Bulletin", and "Exam". (This property is distinct from
-        /// MIME content types as defined in RFC 2616.) 
+        /// MIME content types as defined in RFC 2616.)
         /// </value>
         public override string ContentType
         {
@@ -301,7 +301,7 @@ namespace System.IO.Packaging
         }
 
         #endregion Public Properties
-        
+
         #region Internal Methods
 
         // Invoked from Package.Flush.
@@ -332,7 +332,7 @@ namespace System.IO.Packaging
         }
 
         #endregion Internal Methods
-        
+
         #region Private Methods
 
         // The property store is implemented as a hash table of objects.
@@ -535,7 +535,7 @@ namespace System.IO.Packaging
                     // Property elements can occur in any order (xsd:all).
                     object localName = reader.LocalName;
                     PackageXmlEnum xmlStringIndex = PackageXmlStringTable.GetEnumOf(localName);
-                    String valueType = PackageXmlStringTable.GetValueType(xmlStringIndex);
+                    string valueType = PackageXmlStringTable.GetValueType(xmlStringIndex);
 
                     if (Array.IndexOf(s_validProperties, xmlStringIndex) == -1)  // An unexpected element is an error.
                     {
@@ -552,7 +552,7 @@ namespace System.IO.Packaging
                             null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
                     }
 
-                    if (String.CompareOrdinal(valueType, "String") == 0)
+                    if (string.CompareOrdinal(valueType, "String") == 0)
                     {
                         // The schema is closed and defines no attributes on this type of element.
                         if (attributesCount != 0)
@@ -563,7 +563,7 @@ namespace System.IO.Packaging
 
                         RecordNewBinding(xmlStringIndex, GetStringData(reader), true /*initializing*/, reader);
                     }
-                    else if (String.CompareOrdinal(valueType, "DateTime") == 0)
+                    else if (string.CompareOrdinal(valueType, "DateTime") == 0)
                     {
                         int allowedAttributeCount = (object)reader.NamespaceURI ==
                                                             PackageXmlStringTable.GetXmlStringAsObject(PackageXmlEnum.DublinCoreTermsNamespace)
@@ -587,7 +587,7 @@ namespace System.IO.Packaging
                     }
                     else  // An unexpected element is an error.
                     {
-                        Debug.Assert(false, "Unknown value type for properties");
+                        Debug.Fail("Unknown value type for properties");
                     }
                 }
             }
@@ -597,10 +597,10 @@ namespace System.IO.Packaging
         // The value of xsi:type is a qualified name. It should have a prefix that matches
         //  the xml namespace (ns) within the scope and the name that matches name
         // The comparisons should be case-sensitive comparisons
-        internal static void ValidateXsiType(XmlReader reader, Object ns, string name)
+        internal static void ValidateXsiType(XmlReader reader, object ns, string name)
         {
             // Get the value of xsi;type
-            String typeValue = reader.GetAttribute(PackageXmlStringTable.GetXmlString(PackageXmlEnum.Type),
+            string typeValue = reader.GetAttribute(PackageXmlStringTable.GetXmlString(PackageXmlEnum.Type),
                                 PackageXmlStringTable.GetXmlString(PackageXmlEnum.XmlSchemaInstanceNamespace));
 
             // Missing xsi:type
@@ -622,8 +622,8 @@ namespace System.IO.Packaging
             // Check the following conditions
             //  The namespace of the prefix (string before ":") matches "ns"
             //  The name (string after ":") matches "name"
-            if (!Object.ReferenceEquals(ns, reader.LookupNamespace(typeValue.Substring(0, index)))
-                    || String.CompareOrdinal(name, typeValue.Substring(index + 1, typeValue.Length - index - 1)) != 0)
+            if (!object.ReferenceEquals(ns, reader.LookupNamespace(typeValue.Substring(0, index)))
+                    || string.CompareOrdinal(name, typeValue.Substring(index + 1, typeValue.Length - index - 1)) != 0)
             {
                 throw new XmlException(SR.Format(SR.UnknownDCDateTimeXsiType, reader.Name),
                     null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
@@ -760,7 +760,7 @@ namespace System.IO.Packaging
         private void SerializeDirtyProperties()
         {
             // Create a property element for each non-null entry.
-            foreach (KeyValuePair<PackageXmlEnum, Object> entry in _propertyDictionary)
+            foreach (KeyValuePair<PackageXmlEnum, object> entry in _propertyDictionary)
             {
                 Debug.Assert(entry.Value != null);
 
@@ -815,23 +815,23 @@ namespace System.IO.Packaging
         }
 
         #endregion Private Methods
-        
+
         #region Private Fields
 
-        private Package _package;
+        private readonly Package _package;
         private PackagePart _propertyPart;
         private XmlWriter _xmlWriter;
 
         // Table of objects from the closed set of literals defined below.
         // (Uses object comparison rather than string comparison.)
         private const int NumCoreProperties = 16;
-        private Dictionary<PackageXmlEnum, Object> _propertyDictionary = new Dictionary<PackageXmlEnum, Object>(NumCoreProperties);
+        private readonly Dictionary<PackageXmlEnum, object> _propertyDictionary = new Dictionary<PackageXmlEnum, object>(NumCoreProperties);
         private bool _dirty = false;
 
         // This System.Xml.NameTable makes sure that we use the same references to strings
         // throughout (including when parsing Xml) and so can perform reference comparisons
         // rather than value comparisons.
-        private NameTable _nameTable;
+        private readonly NameTable _nameTable;
 
         // Literals.
         private static readonly ContentType s_coreDocumentPropertiesContentType
@@ -845,7 +845,7 @@ namespace System.IO.Packaging
         private const string DefaultPropertyPartNameExtension = ".psmdcp";
         private const string GuidStorageFormatString = @"N";     // N - simple format without adornments
 
-        private static PackageXmlEnum[] s_validProperties = new PackageXmlEnum[] {
+        private static readonly PackageXmlEnum[] s_validProperties = new PackageXmlEnum[] {
                                                                                 PackageXmlEnum.Creator,
                                                                                 PackageXmlEnum.Identifier,
                                                                                 PackageXmlEnum.Title,
@@ -867,7 +867,7 @@ namespace System.IO.Packaging
         // Array of formats to supply to XmlConvert.ToDateTime or DateTime.ParseExact.
         // xsd:DateTime requires full date time in sortable (ISO 8601) format.
         // It can be expressed in local time, universal time (Z), or relative to universal time (zzz).
-        // Negative years are accepted. 
+        // Negative years are accepted.
         // IMPORTANT: Second fractions are recognized only down to 1 tenth of a microsecond because this is the resolution
         // of the DateTime type. The Xml standard, however, allows any number of decimals; but XmlConvert only offers
         // this very awkward API with an explicit pattern enumeration.

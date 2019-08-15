@@ -16,7 +16,7 @@ namespace System.Security.Cryptography.Xml
         private string _canonicalizationMethod;
         private string _signatureMethod;
         private string _signatureLength;
-        private ArrayList _references;
+        private readonly ArrayList _references;
         private XmlElement _cachedXml = null;
         private SignedXml _signedXml = null;
         private Transform _canonicalizationMethodTransform = null;
@@ -100,7 +100,7 @@ namespace System.Security.Cryptography.Xml
                 {
                     _canonicalizationMethodTransform = CryptoHelpers.CreateFromName<Transform>(CanonicalizationMethod);
                     if (_canonicalizationMethodTransform == null)
-                        throw new CryptographicException(string.Format(CultureInfo.CurrentCulture, SR.Cryptography_Xml_CreateTransformFailed, CanonicalizationMethod));
+                        throw new CryptographicException(SR.Format(SR.Cryptography_Xml_CreateTransformFailed, CanonicalizationMethod));
                     _canonicalizationMethodTransform.SignedXml = SignedXml;
                     _canonicalizationMethodTransform.Reference = null;
                 }

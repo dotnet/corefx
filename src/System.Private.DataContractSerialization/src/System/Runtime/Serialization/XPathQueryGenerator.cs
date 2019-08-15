@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -11,12 +11,12 @@ using System.Xml;
 
 namespace System.Runtime.Serialization
 {
-    
+
 
     public static class XPathQueryGenerator
     {
-        const string XPathSeparator = "/";
-        const string NsSeparator = ":";
+        private const string XPathSeparator = "/";
+        private const string NsSeparator = ":";
 
         public static string CreateFromDataContractSerializer(Type type, MemberInfo[] pathToMember, out XmlNamespaceManager namespaces)
         {
@@ -57,16 +57,16 @@ namespace System.Runtime.Serialization
             return context.XPath;
         }
 
-        static DataContract ProcessDataContract(DataContract contract, ExportContext context, MemberInfo memberNode)
+        private static DataContract ProcessDataContract(DataContract contract, ExportContext context, MemberInfo memberNode)
         {
             if (contract is ClassDataContract)
             {
                 return ProcessClassDataContract((ClassDataContract)contract, context, memberNode);
             }
-            throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlObjectSerializer.CreateSerializationException(SR.Format(SR.QueryGeneratorPathToMemberNotFound)));
+            throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlObjectSerializer.CreateSerializationException(SR.QueryGeneratorPathToMemberNotFound));
         }
 
-        static DataContract ProcessClassDataContract(ClassDataContract contract, ExportContext context, MemberInfo memberNode)
+        private static DataContract ProcessClassDataContract(ClassDataContract contract, ExportContext context, MemberInfo memberNode)
         {
             string prefix = context.SetNamespace(contract.Namespace.Value);
             foreach (DataMember member in GetDataMembers(contract))
@@ -77,10 +77,10 @@ namespace System.Runtime.Serialization
                     return member.MemberTypeContract;
                 }
             }
-            throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlObjectSerializer.CreateSerializationException(SR.Format(SR.QueryGeneratorPathToMemberNotFound)));
+            throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlObjectSerializer.CreateSerializationException(SR.QueryGeneratorPathToMemberNotFound));
         }
 
-        static IEnumerable<DataMember> GetDataMembers(ClassDataContract contract)
+        private static IEnumerable<DataMember> GetDataMembers(ClassDataContract contract)
         {
             if (contract.BaseContract != null)
             {
@@ -98,11 +98,11 @@ namespace System.Runtime.Serialization
             }
         }
 
-        class ExportContext
+        private class ExportContext
         {
-            private XmlNamespaceManager _namespaces;
+            private readonly XmlNamespaceManager _namespaces;
             private int _nextPrefix;
-            private StringBuilder _xPathBuilder;
+            private readonly StringBuilder _xPathBuilder;
 
             public ExportContext(DataContract rootContract)
             {

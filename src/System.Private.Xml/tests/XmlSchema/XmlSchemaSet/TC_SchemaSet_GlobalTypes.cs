@@ -22,8 +22,8 @@ namespace System.Xml.Tests
 
         public XmlSchema GetSchema(string ns, string type1, string type2)
         {
-            string xsd = String.Empty;
-            if (ns.Equals(String.Empty))
+            string xsd = string.Empty;
+            if (ns.Equals(string.Empty))
                 xsd = "<schema xmlns='http://www.w3.org/2001/XMLSchema'><complexType name='" + type1 + "'><sequence><element name='local'/></sequence></complexType><simpleType name='" + type2 + "'><restriction base='int'/></simpleType></schema>";
             else
                 xsd = "<schema xmlns='http://www.w3.org/2001/XMLSchema' targetNamespace='" + ns + "'><complexType name='" + type1 + "'><sequence><element name='local'/></sequence></complexType><simpleType name='" + type2 + "'><restriction base='int'/></simpleType></schema>";
@@ -34,8 +34,7 @@ namespace System.Xml.Tests
 
         //-----------------------------------------------------------------------------------
         //[Variation(Desc = "v1 - GlobalTypes on empty collection")]
-        [InlineData()]
-        [Theory]
+        [Fact]
         public void v1()
         {
             XmlSchemaSet sc = new XmlSchemaSet();
@@ -237,8 +236,7 @@ namespace System.Xml.Tests
         //-----------------------------------------------------------------------------------
         //REGRESSIONS
         //[Variation(Desc = "v100 - XmlSchemaSet: Components are not added to the global tabels if it is already compiled", Priority = 1)]
-        [InlineData()]
-        [Theory]
+        [Fact]
         public void v100()
         {
             try

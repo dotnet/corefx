@@ -10,6 +10,7 @@ using System.Diagnostics.Tracing;
 using System.Diagnostics;
 using Xunit;
 using System;
+using System.Collections.Generic;
 
 namespace BasicEventSourceTests
 {
@@ -20,7 +21,7 @@ namespace BasicEventSourceTests
         internal static bool IsProcessElevated => s_isElevated.Value;
 
         /// <summary>
-        /// Confirms that there are no EventSources running.  
+        /// Confirms that there are no EventSources running.
         /// </summary>
         /// <param name="message">Will be printed as part of the Assert</param>
         public static void CheckNoEventSourcesRunning(string message = "")
@@ -36,7 +37,9 @@ namespace BasicEventSourceTests
                     eventSource.Name != "System.Buffers.ArrayPoolEventSource" &&
                     eventSource.Name != "System.Threading.SynchronizationEventSource" &&
                     eventSource.Name != "System.Runtime.InteropServices.InteropEventProvider" &&
-                    eventSource.Name != "System.Reflection.Runtime.Tracing"
+                    eventSource.Name != "System.Reflection.Runtime.Tracing" &&
+                    eventSource.Name != "Microsoft-Windows-DotNETRuntime" &&
+                    eventSource.Name != "System.Runtime"
                     )
                 {
                     eventSourceNames += eventSource.Name + " ";
@@ -45,6 +48,36 @@ namespace BasicEventSourceTests
 
             Debug.WriteLine(message);
             Assert.Equal("", eventSourceNames);
+        }
+
+        /// <summary>
+        /// Unwraps a nullable returned from either ETW or EventListener
+        /// </summary>
+        /// <typeparam name="T">The type to unwrap</typeparam>
+        /// <param name="wrappedValue">Value returned from event payload</param>
+        /// <returns></returns>
+        public static T? UnwrapNullable<T>(object wrappedValue) where T : struct
+        {
+            // ETW will return a collection of key/value pairs
+            if (wrappedValue is IDictionary<string, object> dict)
+            {
+                Assert.True(dict.ContainsKey("HasValue"));
+                Assert.True(dict.ContainsKey("Value"));
+
+                if ((bool)dict["HasValue"])
+                {
+                    return (T)dict["Value"];
+                }
+            }
+            // EventListener will return the boxed value of the nullable, which will either be a value or null object reference
+            else if (wrappedValue != null)
+            {
+                Assert.IsType<T>(wrappedValue);
+                return (T?)wrappedValue;
+            }
+
+            // wrappedValue is null or wrappedValue is IDictionary, but HasValue is false
+            return null;
         }
     }
 }

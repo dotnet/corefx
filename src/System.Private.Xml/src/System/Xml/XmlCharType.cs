@@ -2,22 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-//#define XMLCHARTYPE_GEN_RESOURCE    // generate the character properties into XmlCharType.bin
-
-using System.IO;
-using System.Reflection;
-using System.Threading;
 using System.Diagnostics;
+using System.IO;
+using System.Threading;
 
 namespace System.Xml
 {
-    /// <include file='doc\XmlCharType.uex' path='docs/doc[@for="XmlCharType"]/*' />
-    /// <internalonly/>
-    /// <devdoc>
+    /// <summary>
     ///  The XmlCharType class is used for quick character type recognition
     ///  which is optimized for the first 127 ascii characters.
-    /// </devdoc>
-    unsafe internal struct XmlCharType
+    /// </summary>
+    internal unsafe struct XmlCharType
     {
         // Surrogate constants
         internal const int SurHighStart = 0xd800;    // 1101 10xx
@@ -108,11 +103,6 @@ namespace System.Xml
             return (charProperties[ch] & fWhitespace) != 0;
         }
 
-        public bool IsExtender(char ch)
-        {
-            return (ch == 0xb7);
-        }
-
         // NOTE: This method will not be inlined (because it uses byte* charProperties)
         public bool IsNCNameSingleChar(char ch)
         {
@@ -128,11 +118,6 @@ namespace System.Xml
         public bool IsNameSingleChar(char ch)
         {
             return IsNCNameSingleChar(ch) || ch == ':';
-        }
-
-        public bool IsStartNameSingleChar(char ch)
-        {
-            return IsStartNCNameSingleChar(ch) || ch == ':';
         }
 
         // NOTE: This method will not be inlined (because it uses byte* charProperties)
@@ -192,21 +177,10 @@ namespace System.Xml
             return IsNCNameCharXml4e(ch) || ch == ':';
         }
 
-        // This method uses the XML 4th edition name character ranges
-        public bool IsStartNameCharXml4e(char ch)
-        {
-            return IsStartNCNameCharXml4e(ch) || ch == ':';
-        }
-
         // Digit methods
         public static bool IsDigit(char ch)
         {
             return InRange(ch, 0x30, 0x39);
-        }
-
-        public static bool IsHexDigit(char ch)
-        {
-            return InRange(ch, 0x30, 0x39) || InRange(ch, 'a', 'f') || InRange(ch, 'A', 'F');
         }
 
         // Surrogate methods
@@ -280,7 +254,7 @@ namespace System.Xml
             return -1;
         }
 
-        static internal bool IsOnlyDigits(string str, int startPos, int len)
+        internal static bool IsOnlyDigits(string str, int startPos, int len)
         {
             Debug.Assert(str != null);
             Debug.Assert(startPos + len <= str.Length);
@@ -289,22 +263,6 @@ namespace System.Xml
             for (int i = startPos; i < startPos + len; i++)
             {
                 if (!IsDigit(str[i]))
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        static internal bool IsOnlyDigits(char[] chars, int startPos, int len)
-        {
-            Debug.Assert(chars != null);
-            Debug.Assert(startPos + len <= chars.Length);
-            Debug.Assert(startPos <= chars.Length);
-
-            for (int i = startPos; i < startPos + len; i++)
-            {
-                if (!IsDigit(chars[i]))
                 {
                     return false;
                 }

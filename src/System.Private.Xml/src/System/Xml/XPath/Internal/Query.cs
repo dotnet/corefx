@@ -102,7 +102,7 @@ namespace MS.Internal.Xml.XPath
             int l = 0;
             int r = buffer.Count;
 
-            // In most cases nodes are already sorted. 
+            // In most cases nodes are already sorted.
             // This means that nav often will be equal or after then last item in the buffer
             // So let's check this first.
             if (r != 0)
@@ -187,12 +187,6 @@ namespace MS.Internal.Xml.XPath
             if (value is bool) return XPathResultType.Boolean;
             Debug.Assert(value is XPathNavigator, "Unknown value type");
             return XPathResultType_Navigator;
-        }
-
-        // =================== Serialization ======================
-        public virtual void PrintQuery(XmlWriter w)
-        {
-            w.WriteElementString(this.GetType().Name, string.Empty);
         }
     }
 }

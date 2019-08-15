@@ -179,7 +179,7 @@ namespace System.Data
             HResult = HResults.DataMissingPrimaryKey;
         }
     }
-    
+
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class NoNullAllowedException : DataException
@@ -203,7 +203,7 @@ namespace System.Data
             HResult = HResults.DataNoNullAllowed;
         }
     }
-    
+
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class ReadOnlyException : DataException
@@ -227,7 +227,7 @@ namespace System.Data
             HResult = HResults.DataReadOnly;
         }
     }
-    
+
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class RowNotInTableException : DataException
@@ -251,7 +251,7 @@ namespace System.Data
             HResult = HResults.DataRowNotInTable;
         }
     }
-    
+
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class VersionNotFoundException : DataException
@@ -643,7 +643,7 @@ namespace System.Data
         //
         // Storage
         //
-        public static Exception AggregateException(AggregateType aggregateType, Type type) => _Data(SR.Format(SR.DataStorage_AggregateException, aggregateType.ToString(), type.Name));
+        public static Exception AggregateException(AggregateType aggregateType, Type type) => _Data(SR.Format(SR.DataStorage_AggregateException, aggregateType, type.Name));
         public static Exception InvalidStorageType(TypeCode typecode) => _Data(SR.Format(SR.DataStorage_InvalidStorageType, typecode.ToString()));
         public static Exception RangeArgument(int min, int max) => _Argument(SR.Format(SR.Range_Argument, (min).ToString(CultureInfo.InvariantCulture), (max).ToString(CultureInfo.InvariantCulture)));
         public static Exception NullRange() => _Data(SR.Range_NullRange);
@@ -673,7 +673,6 @@ namespace System.Data
         public static Exception CircularComplexType(string name) => _Data(SR.Format(SR.Xml_CircularComplexType, name));
         public static Exception CannotInstantiateAbstract(string name) => _Data(SR.Format(SR.Xml_CannotInstantiateAbstract, name));
         public static Exception InvalidKey(string name) => _Data(SR.Format(SR.Xml_InvalidKey, name));
-        public static Exception DiffgramMissingTable(string name) => _Data(SR.Format(SR.Xml_MissingTable, name));
         public static Exception DiffgramMissingSQL() => _Data(SR.Xml_MissingSQL);
         public static Exception DuplicateConstraintRead(string str) => _Data(SR.Format(SR.Xml_DuplicateConstraint, str));
         public static Exception ColumnTypeConflict(string name) => _Data(SR.Format(SR.Xml_ColumnConflict, name));
@@ -682,7 +681,7 @@ namespace System.Data
         public static Exception InvalidPrefix(string name) => _Data(SR.Format(SR.Xml_InvalidPrefix_SpecialCharacters, name));
         public static Exception CanNotDeserializeObjectType() => _InvalidOperation(SR.Xml_CanNotDeserializeObjectType);
         public static Exception IsDataSetAttributeMissingInSchema() => _Data(SR.Xml_IsDataSetAttributeMissingInSchema);
-        public static Exception TooManyIsDataSetAtributeInSchema() => _Data(SR.Xml_TooManyIsDataSetAtributeInSchema);
+        public static Exception TooManyIsDataSetAttributesInSchema() => _Data(SR.Xml_TooManyIsDataSetAttributesInSchema);
 
         // XML save
         public static Exception NestedCircular(string name) => _Data(SR.Format(SR.Xml_NestedCircular, name));

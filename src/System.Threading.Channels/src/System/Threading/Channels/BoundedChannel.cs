@@ -20,11 +20,11 @@ namespace System.Threading.Channels
         /// <summary>The maximum capacity of the channel.</summary>
         private readonly int _bufferedCapacity;
         /// <summary>Items currently stored in the channel waiting to be read.</summary>
-        private readonly Dequeue<T> _items = new Dequeue<T>();
+        private readonly Deque<T> _items = new Deque<T>();
         /// <summary>Readers waiting to read from the channel.</summary>
-        private readonly Dequeue<AsyncOperation<T>> _blockedReaders = new Dequeue<AsyncOperation<T>>();
+        private readonly Deque<AsyncOperation<T>> _blockedReaders = new Deque<AsyncOperation<T>>();
         /// <summary>Writers waiting to write to the channel.</summary>
-        private readonly Dequeue<VoidAsyncOperationWithData<T>> _blockedWriters = new Dequeue<VoidAsyncOperationWithData<T>>();
+        private readonly Deque<VoidAsyncOperationWithData<T>> _blockedWriters = new Deque<VoidAsyncOperationWithData<T>>();
         /// <summary>Linked list of WaitToReadAsync waiters.</summary>
         private AsyncOperation<bool> _waitingReadersTail;
         /// <summary>Linked list of WaitToWriteAsync waiters.</summary>
@@ -367,9 +367,14 @@ namespace System.Threading.Channels
                     {
                         // The channel is full, and we're in a dropping mode.
                         // Drop either the oldest or the newest and write the new item.
-                        T droppedItem = parent._mode == BoundedChannelFullMode.DropNewest ?
-                            parent._items.DequeueTail() :
+                        if (parent._mode == BoundedChannelFullMode.DropNewest)
+                        {
+                            parent._items.DequeueTail();
+                        }
+                        else
+                        {
                             parent._items.DequeueHead();
+                        }
                         parent._items.EnqueueTail(item);
                         return true;
                     }
@@ -539,9 +544,14 @@ namespace System.Threading.Channels
                     {
                         // The channel is full, and we're in a dropping mode.
                         // Drop either the oldest or the newest and write the new item.
-                        T droppedItem = parent._mode == BoundedChannelFullMode.DropNewest ?
-                            parent._items.DequeueTail() :
+                        if (parent._mode == BoundedChannelFullMode.DropNewest)
+                        {
+                            parent._items.DequeueTail();
+                        }
+                        else
+                        {
                             parent._items.DequeueHead();
+                        }
                         parent._items.EnqueueTail(item);
                         return default;
                     }

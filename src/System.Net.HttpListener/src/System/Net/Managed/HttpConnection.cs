@@ -4,7 +4,7 @@
 // System.Net.HttpConnection
 //
 // Author:
-//	Gonzalo Paniagua Javier (gonzalo.mono@gmail.com)
+//  Gonzalo Paniagua Javier (gonzalo.mono@gmail.com)
 //
 // Copyright (c) 2005-2009 Novell, Inc. (http://www.novell.com)
 // Copyright (c) 2012 Xamarin, Inc. (http://xamarin.com)
@@ -16,10 +16,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -81,6 +81,7 @@ namespace System.Net
             }
             else
             {
+#pragma warning disable CA5359
                 _sslStream = epl.Listener.CreateSslStream(new NetworkStream(sock, false), false, (t, c, ch, e) =>
                 {
                     if (c == null)
@@ -98,6 +99,7 @@ namespace System.Net
                     _clientCertErrors = new int[] { (int)e };
                     return true;
                 });
+#pragma warning restore CA5359
 
                 _stream = _sslStream;
             }

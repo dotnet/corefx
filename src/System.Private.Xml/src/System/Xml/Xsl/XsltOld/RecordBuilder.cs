@@ -2,36 +2,34 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+using System.Text;
+using System.Xml.XPath;
+using System.Collections;
+
 namespace System.Xml.Xsl.XsltOld
 {
-    using System;
-    using System.Diagnostics;
-    using System.Text;
-    using System.Xml;
-    using System.Xml.XPath;
-    using System.Collections;
-
     internal sealed class RecordBuilder
     {
         private int _outputState;
         private RecordBuilder _next;
 
-        private RecordOutput _output;
+        private readonly IRecordOutput _output;
 
         // Atomization:
-        private XmlNameTable _nameTable;
-        private OutKeywords _atoms;
+        private readonly XmlNameTable _nameTable;
+        private readonly OutKeywords _atoms;
 
         // Namespace manager for output
-        private OutputScopeManager _scopeManager;
+        private readonly OutputScopeManager _scopeManager;
 
         // Main node + Fields Collection
-        private BuilderInfo _mainNode = new BuilderInfo();
-        private ArrayList _attributeList = new ArrayList();
+        private readonly BuilderInfo _mainNode = new BuilderInfo();
+        private readonly ArrayList _attributeList = new ArrayList();
         private int _attributeCount;
-        private ArrayList _namespaceList = new ArrayList();
+        private readonly ArrayList _namespaceList = new ArrayList();
         private int _namespaceCount;
-        private BuilderInfo _dummy = new BuilderInfo();
+        private readonly BuilderInfo _dummy = new BuilderInfo();
 
         // Current position in the list
         private BuilderInfo _currentInfo;
@@ -53,7 +51,7 @@ namespace System.Xml.Xsl.XsltOld
 
         private const string PrefixFormat = "xp_{0}";
 
-        internal RecordBuilder(RecordOutput output, XmlNameTable nameTable)
+        internal RecordBuilder(IRecordOutput output, XmlNameTable nameTable)
         {
             Debug.Assert(output != null);
             _output = output;
@@ -78,7 +76,7 @@ namespace System.Xml.Xsl.XsltOld
             set { _next = value; }
         }
 
-        internal RecordOutput Output
+        internal IRecordOutput Output
         {
             get { return _output; }
         }
@@ -127,7 +125,7 @@ namespace System.Xml.Xsl.XsltOld
             }
         }
 
-        internal Processor.OutputResult BeginEvent(int state, XPathNodeType nodeType, string prefix, string name, string nspace, bool empty, Object htmlProps, bool search)
+        internal Processor.OutputResult BeginEvent(int state, XPathNodeType nodeType, string prefix, string name, string nspace, bool empty, object htmlProps, bool search)
         {
             if (!CanOutput(state))
             {
@@ -318,7 +316,7 @@ namespace System.Xml.Xsl.XsltOld
             return _attributeCount++;
         }
 
-        private void BeginAttribute(string prefix, string name, string nspace, Object htmlAttrProps, bool search)
+        private void BeginAttribute(string prefix, string name, string nspace, object htmlAttrProps, bool search)
         {
             int attrib = FindAttribute(name, nspace, ref prefix);
 
@@ -349,8 +347,8 @@ namespace System.Xml.Xsl.XsltOld
                 }
                 else if (Ref.Equal(_mainNode.NamespaceURI, _atoms.Empty))
                 {
-                    // http://www.w3.org/1999/11/REC-xslt-19991116-errata/ E25 
-                    // Should throw an error but ingnoring it in Everett. 
+                    // http://www.w3.org/1999/11/REC-xslt-19991116-errata/ E25
+                    // Should throw an error but ingnoring it in Everett.
                     // Would be a breaking change
                 }
                 else

@@ -5,7 +5,6 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-
 namespace System.Net.Http
 {
     public enum CookieUsePolicy
@@ -17,9 +16,9 @@ namespace System.Net.Http
     public enum WindowsProxyUsePolicy
     {
         DoNotUseProxy = 0,
-        UseCustomProxy = 3,
         UseWinHttpProxy = 1,
         UseWinInetProxy = 2,
+        UseCustomProxy = 3,
     }
     public partial class WinHttpHandler : System.Net.Http.HttpMessageHandler
     {

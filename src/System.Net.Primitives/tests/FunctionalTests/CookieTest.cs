@@ -116,7 +116,7 @@ namespace System.Net.Primitives.Functional.Tests
         {
             Cookie c = new Cookie();
             Assert.False(c.Expired);
-            
+
             c.Expires = DateTime.Now.AddDays(-1);
             Assert.True(c.Expired);
 
@@ -144,11 +144,18 @@ namespace System.Net.Primitives.Functional.Tests
         [Fact]
         public static void Name_GetSet_Success()
         {
-            Cookie c = new Cookie();
-            Assert.Equal(string.Empty, c.Name);
+            Cookie c1 = new Cookie();
+            Assert.Equal(string.Empty, c1.Name);
 
-            c.Name = "hello";
-            Assert.Equal("hello", c.Name);
+            c1.Name = "hello";
+            Assert.Equal("hello", c1.Name);
+
+            if (!PlatformDetection.IsFullFramework)
+            {
+                Cookie c2 = new Cookie();
+                c2.Name = "hello world";
+                Assert.Equal("hello world", c2.Name);
+            }
         }
 
         [Theory]
@@ -156,6 +163,7 @@ namespace System.Net.Primitives.Functional.Tests
         [InlineData("")]
         [InlineData("$hello")]
         [InlineData("hello ")]
+        [InlineData(" hello")]
         [InlineData("hello\t")]
         [InlineData("hello\r")]
         [InlineData("hello\n")]
@@ -180,7 +188,7 @@ namespace System.Net.Primitives.Functional.Tests
             c.Path = null;
             Assert.Equal(string.Empty, c.Path);
         }
-        
+
         [Fact]
         public static void Port_GetSet_Success()
         {
@@ -239,18 +247,8 @@ namespace System.Net.Primitives.Functional.Tests
             c.Value = null;
             Assert.Equal(string.Empty, c.Value);
         }
-        
-        [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)] // Cookie.Value returns null on full framework, empty string on .NETCore
-        public static void Value_PassNullToCtor_GetReturnsEmptyString_net46()
-        {
-            var cookie = new Cookie("SomeName", null);
-            // Cookie.Value returns null on full framework.
-            Assert.Null(cookie.Value);
-        }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // Cookie.Value returns null on full framework, empty string on .NETCore
         public static void Value_PassNullToCtor_GetReturnsEmptyString()
         {
             var cookie = new Cookie("SomeName", null);
@@ -309,7 +307,7 @@ namespace System.Net.Primitives.Functional.Tests
             Assert.NotEqual(c2, c5);
             Assert.NotEqual(c2, c6);
             Assert.NotEqual(c2, c9);
-            
+
             Assert.NotEqual(c2.GetHashCode(), c4.GetHashCode());
             Assert.NotEqual(c2.GetHashCode(), c5.GetHashCode());
             Assert.NotEqual(c2.GetHashCode(), c6.GetHashCode());
@@ -318,7 +316,7 @@ namespace System.Net.Primitives.Functional.Tests
             Assert.Equal(c6, c7);
             Assert.NotEqual(c6, c8);
             Assert.NotEqual(c6, c9);
-            
+
             Assert.NotEqual(c6.GetHashCode(), c8.GetHashCode());
             Assert.NotEqual(c6.GetHashCode(), c9.GetHashCode());
 

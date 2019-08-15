@@ -13,7 +13,7 @@ namespace System.Runtime.Serialization
     {
         private IList<ExtensionDataMember> _members;
 
-#if USE_REFEMIT || uapaot
+#if USE_REFEMIT
         public ExtensionDataObject()
 #else
         internal ExtensionDataObject()
@@ -21,7 +21,7 @@ namespace System.Runtime.Serialization
         {
         }
 
-#if USE_REFEMIT || uapaot
+#if USE_REFEMIT
         public IList<ExtensionDataMember> Members
 #else
         internal IList<ExtensionDataMember> Members
@@ -32,7 +32,7 @@ namespace System.Runtime.Serialization
         }
     }
 
-#if USE_REFEMIT || uapaot
+#if USE_REFEMIT
     public class ExtensionDataMember
 #else
     internal class ExtensionDataMember
@@ -67,7 +67,7 @@ namespace System.Runtime.Serialization
         }
     }
 
-#if USE_REFEMIT || uapaot
+#if USE_REFEMIT
     public interface IDataNode
 #else
     internal interface IDataNode
@@ -198,7 +198,7 @@ namespace System.Runtime.Serialization
         internal void AddQualifiedNameAttribute(ElementData element, string elementPrefix, string elementName, string elementNs, string valueName, string valueNs)
         {
             string prefix = ExtensionDataReader.GetPrefix(valueNs);
-            element.AddAttribute(elementPrefix, elementNs, elementName, String.Format(CultureInfo.InvariantCulture, "{0}:{1}", prefix, valueName));
+            element.AddAttribute(elementPrefix, elementNs, elementName, prefix + ":" + valueName);
 
             bool prefixDeclaredOnElement = false;
             if (element.attributes != null)

@@ -12,20 +12,23 @@ namespace System.ComponentModel.Composition.ReflectionModel
 {
     internal class ReflectionParameterImportDefinition : ReflectionImportDefinition
     {
-        private Lazy<ParameterInfo> _importingLazyParameter;
+        private readonly Lazy<ParameterInfo> _importingLazyParameter;
 
         public ReflectionParameterImportDefinition(
             Lazy<ParameterInfo> importingLazyParameter,
-            string contractName, 
+            string contractName,
             string requiredTypeIdentity,
             IEnumerable<KeyValuePair<string,Type>> requiredMetadata,
-            ImportCardinality cardinality, 
+            ImportCardinality cardinality,
             CreationPolicy requiredCreationPolicy,
             IDictionary<string, object> metadata,
             ICompositionElement origin)
             : base(contractName, requiredTypeIdentity, requiredMetadata, cardinality, false, true, requiredCreationPolicy, metadata, origin)
         {
-            Assumes.NotNull(importingLazyParameter);
+            if (importingLazyParameter == null)
+            {
+                throw new ArgumentNullException(nameof(importingLazyParameter));
+            }
 
             _importingLazyParameter = importingLazyParameter;
         }
@@ -47,7 +50,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 CultureInfo.CurrentCulture,
                 "{0} (Parameter=\"{1}\", ContractName=\"{2}\")",  // NOLOC
                 parameter.Member.GetDisplayName(),
-                parameter.Name,                
+                parameter.Name,
                 ContractName);
         }
     }

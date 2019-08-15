@@ -1,38 +1,57 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ProjectGuid>{15DB0DCC-68B4-4CFB-8BD2-F26BCCAF5A3F}</ProjectGuid>
-    <IncludePartialFacadeTests Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'uap'">true</IncludePartialFacadeTests>
+    <IncludePartialFacadeTests>true</IncludePartialFacadeTests>
+    <TestRuntime>true</TestRuntime>
+    <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
   <ItemGroup Condition="'$(IncludePartialFacadeTests)' == 'true'">
-    <!-- Tests specific to the fast span -->
+    <!-- Tests specific to netcoreapp and uap -->
+    <Compile Include="ArrayBufferWriter\ArrayBufferWriterTests.Byte.cs" />
+    <Compile Include="ArrayBufferWriter\ArrayBufferWriterTests.Char.cs" />
+    <Compile Include="ArrayBufferWriter\ArrayBufferWriterTests.String.cs" />
+    <Compile Include="ArrayBufferWriter\ArrayBufferWriterTests.T.cs" />
+    <Compile Include="MemoryMarshal\AsRef.cs" />
+    <Compile Include="MemoryMarshal\AsReadOnlyRef.cs" />
     <Compile Include="MemoryMarshal\CreateSpan.cs" />
     <Compile Include="MemoryMarshal\CreateReadOnlySpan.cs" />
+    <Compile Include="$(CommonPath)\..\tests\System\RealFormatterTestsBase.netcoreapp.cs" Link="ParsersAndFormatters\Formatter\RealFormatterTestsBase.netcoreapp.cs" />
+    <Compile Include="ParsersAndFormatters\Formatter\RealFormatterTests.netcoreapp.cs" />
+    <Compile Include="$(CommonPath)\..\tests\System\RealParserTestsBase.netcoreapp.cs" Link="ParsersAndFormatters\Parser\RealParserTestsBase.netcoreapp.cs" />
+    <Compile Include="ParsersAndFormatters\Parser\RealParserTests.netcoreapp.cs" />
+    <Compile Include="ReadOnlySpan\Contains.byte.cs" />
+    <Compile Include="ReadOnlySpan\Contains.T.cs" />
     <Compile Include="Span\Reflection.cs" />
+    <Compile Include="SequenceReader\Advance.cs" />
+    <Compile Include="SequenceReader\BasicTests.cs" />
+    <Compile Include="SequenceReader\BinaryExtensions.cs" />
+    <Compile Include="SequenceReader\CopyTo.cs" />
+    <Compile Include="SequenceReader\IsNext.cs" />
+    <Compile Include="SequenceReader\OwnedArray.cs" />
+    <Compile Include="SequenceReader\ReadTo.cs" />
+    <Compile Include="SequenceReader\Rewind.cs" />
+    <Compile Include="SequenceReader\SequenceSegment.cs" />
+    <Compile Include="SequenceReader\SequenceFactory.cs" />
+    <Compile Include="SequenceReader\SkipDelimiter.cs" />
+    <Compile Include="SequenceReader\SpanLiteralExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AllocationHelper.cs" />
-    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Common.char.cs" />
-    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Common.byte.cs" />
-    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Default.cs" />
-    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Empty.cs" />
     <Compile Include="TInt.cs" />
     <Compile Include="TestException.cs" />
     <Compile Include="TestHelpers.cs" />
     <Compile Include="TestMemory.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BuffersExtensions\BuffersExtensionsTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Span\AsSpan.cs" />
     <Compile Include="Span\Fill.cs" />
     <Compile Include="Span\Clear.cs" />
+    <Compile Include="Span\Contains.T.cs" />
     <Compile Include="Span\CopyTo.cs" />
     <Compile Include="Span\CtorArray.cs" />
     <Compile Include="Span\CtorArrayIntInt.cs" />
@@ -52,6 +71,7 @@
     <Compile Include="Span\IndexOf.char.cs" />
     <Compile Include="Span\IndexOf.T.cs" />
     <Compile Include="Span\IndexOfAny.byte.cs" />
+    <Compile Include="Span\IndexOfAny.char.cs" />
     <Compile Include="Span\IndexOfAny.T.cs" />
     <Compile Include="Span\IndexOfSequence.byte.cs" />
     <Compile Include="Span\IndexOfSequence.char.cs" />
@@ -86,6 +106,10 @@
     <Compile Include="Span\ToString.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Common.char.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Common.byte.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Default.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Empty.cs" />
     <Compile Include="ReadOnlyBuffer\BufferSegment.cs" />
     <Compile Include="ReadOnlyBuffer\ReadOnlySequenceFactory.byte.cs" />
     <Compile Include="ReadOnlyBuffer\ReadOnlySequenceFactory.char.cs" />
@@ -98,17 +122,13 @@
   <ItemGroup>
     <Compile Include="ReadOnlySpan\AsSpan.cs" />
     <Compile Include="ReadOnlySpan\BinarySearch.cs" />
-    <Compile Include="ReadOnlySpan\CompareTo.cs" />
-    <Compile Include="ReadOnlySpan\Contains.cs" />
     <Compile Include="ReadOnlySpan\CopyTo.cs" />
     <Compile Include="ReadOnlySpan\CtorArray.cs" />
     <Compile Include="ReadOnlySpan\CtorArrayIntInt.cs" />
     <Compile Include="ReadOnlySpan\CtorPointerInt.cs" />
     <Compile Include="ReadOnlySpan\Empty.cs" />
     <Compile Include="ReadOnlySpan\EndsWith.byte.cs" />
-    <Compile Include="ReadOnlySpan\EndsWith.char.cs" />
     <Compile Include="ReadOnlySpan\EndsWith.long.cs" />
-    <Compile Include="ReadOnlySpan\EndsWith.StringComparison.cs" />
     <Compile Include="ReadOnlySpan\EndsWith.T.cs" />
     <Compile Include="ReadOnlySpan\Equality.cs" />
     <Compile Include="ReadOnlySpan\Equals.cs" />
@@ -117,47 +137,35 @@
     <Compile Include="ReadOnlySpan\GetPinnableReference.cs" />
     <Compile Include="ReadOnlySpan\ImplicitConversion.cs" />
     <Compile Include="ReadOnlySpan\IndexOf.byte.cs" />
-    <Compile Include="ReadOnlySpan\IndexOf.char.cs" />
     <Compile Include="ReadOnlySpan\IndexOf.T.cs" />
     <Compile Include="ReadOnlySpan\IndexOfAny.byte.cs" />
+    <Compile Include="ReadOnlySpan\IndexOfAny.char.cs" />
     <Compile Include="ReadOnlySpan\IndexOfAny.T.cs" />
     <Compile Include="ReadOnlySpan\IndexOfSequence.byte.cs" />
-    <Compile Include="ReadOnlySpan\IndexOfSequence.char.cs" />
     <Compile Include="ReadOnlySpan\IndexOfSequence.T.cs" />
-    <Compile Include="ReadOnlySpan\IsWhiteSpace.cs" />
     <Compile Include="ReadOnlySpan\LastIndexOfAny.byte.cs" />
     <Compile Include="ReadOnlySpan\LastIndexOfAny.T.cs" />
     <Compile Include="ReadOnlySpan\LastIndexOf.byte.cs" />
-    <Compile Include="ReadOnlySpan\LastIndexOf.char.cs" />
     <Compile Include="ReadOnlySpan\LastIndexOf.T.cs" />
     <Compile Include="ReadOnlySpan\LastIndexOfSequence.byte.cs" />
-    <Compile Include="ReadOnlySpan\LastIndexOfSequence.char.cs" />
     <Compile Include="ReadOnlySpan\LastIndexOfSequence.T.cs" />
     <Compile Include="ReadOnlySpan\Overflow.cs" />
     <Compile Include="ReadOnlySpan\Overlaps.cs" />
     <Compile Include="ReadOnlySpan\SequenceCompareTo.bool.cs" />
     <Compile Include="ReadOnlySpan\SequenceCompareTo.byte.cs" />
-    <Compile Include="ReadOnlySpan\SequenceCompareTo.char.cs" />
     <Compile Include="ReadOnlySpan\SequenceCompareTo.int.cs" />
     <Compile Include="ReadOnlySpan\SequenceCompareTo.long.cs" />
     <Compile Include="ReadOnlySpan\SequenceCompareTo.T.cs" />
     <Compile Include="ReadOnlySpan\SequenceEqual.byte.cs" />
-    <Compile Include="ReadOnlySpan\SequenceEqual.char.cs" />
     <Compile Include="ReadOnlySpan\SequenceEqual.long.cs" />
     <Compile Include="ReadOnlySpan\SequenceEqual.T.cs" />
     <Compile Include="ReadOnlySpan\Slice.cs" />
     <Compile Include="ReadOnlySpan\StartsWith.byte.cs" />
-    <Compile Include="ReadOnlySpan\StartsWith.char.cs" />
     <Compile Include="ReadOnlySpan\StartsWith.long.cs" />
-    <Compile Include="ReadOnlySpan\StartsWith.StringComparison.cs" />
     <Compile Include="ReadOnlySpan\StartsWith.T.cs" />
     <Compile Include="ReadOnlySpan\ToArray.cs" />
-    <Compile Include="ReadOnlySpan\ToLower.cs" />
     <Compile Include="ReadOnlySpan\ToString.cs" />
-    <Compile Include="ReadOnlySpan\ToUpper.cs" />
-    <Compile Include="ReadOnlySpan\TrimAnyCharacter.cs" />
-    <Compile Include="ReadOnlySpan\TrimManyCharacters.cs" />
-    <Compile Include="ReadOnlySpan\TrimWhiteSpace.cs" />
+    <Compile Include="ReadOnlySpan\ToUpperLower.cs" />
     <Compile Include="$(CommonTestPath)\Tests\System\StringTests.cs">
       <Link>ReadOnlySpan\StringTests.cs</Link>
     </Compile>
@@ -172,6 +180,7 @@
     <Compile Include="Memory\Equality.cs" />
     <Compile Include="Memory\GetHashCode.cs" />
     <Compile Include="Memory\ImplicitConversion.cs" />
+    <Compile Include="Memory\IndexAndRange.cs" />
     <Compile Include="Memory\MemoryManager.cs" />
     <Compile Include="Memory\Pin.cs" />
     <Compile Include="Memory\Slice.cs" />
@@ -179,6 +188,7 @@
     <Compile Include="Memory\Strings.cs" />
     <Compile Include="Memory\ToArray.cs" />
     <Compile Include="Memory\ToString.cs" />
+    <Compile Include="Memory\Trim.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MemoryMarshal\AsBytesReadOnlySpan.cs" />
@@ -214,6 +224,7 @@
   <ItemGroup>
     <Compile Include="Binary\BinaryReaderUnitTests.cs" />
     <Compile Include="Binary\BinaryWriterUnitTests.cs" />
+    <Compile Include="Binary\ReverseEndiannessUnitTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ParsersAndFormatters\Formatter\FormatterTestData.cs" />
@@ -239,6 +250,9 @@
     <Compile Include="ParsersAndFormatters\TestData.cs" />
     <Compile Include="ParsersAndFormatters\TestUtils.cs" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
+    <Compile Include="Span\Indexer.cs" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="Base64\Base64DecoderUnitTests.cs" />
     <Compile Include="Base64\Base64EncoderUnitTests.cs" />
@@ -252,17 +266,4 @@
       <Link>Common\System\MutableDecimal.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
-      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
-      <Name>RemoteExecutorConsoleApp</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

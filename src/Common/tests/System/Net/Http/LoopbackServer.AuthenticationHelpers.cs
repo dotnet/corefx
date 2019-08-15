@@ -25,13 +25,13 @@ namespace System.Net.Test.Common
             await AcceptConnectionAsync(async connection =>
             {
                 string headerName = _options.IsProxy ? "Proxy-Authorization" : "Authorization";
-                lines = await connection.ReadRequestHeaderAsync();
+                lines = await connection.ReadRequestHeaderAsync().ConfigureAwait(false);
                 if (GetRequestHeaderValue(lines, headerName) == null)
                 {
                     await connection.SendResponseAsync( _options.IsProxy ?
-                                    HttpStatusCode.ProxyAuthenticationRequired : HttpStatusCode.Unauthorized, authenticateHeaders);
+                                    HttpStatusCode.ProxyAuthenticationRequired : HttpStatusCode.Unauthorized, authenticateHeaders).ConfigureAwait(false);
 
-                    lines = await connection.ReadRequestHeaderAsync();
+                    lines = await connection.ReadRequestHeaderAsync().ConfigureAwait(false);
                 }
                 Debug.Assert(lines.Count > 0);
 
@@ -78,13 +78,13 @@ namespace System.Net.Test.Common
 
                 if (success)
                 {
-                    await connection.SendResponseAsync(additionalHeaders: "Connection: close\r\n");
+                    await connection.SendResponseAsync(additionalHeaders: "Connection: close\r\n").ConfigureAwait(false);
                 }
                 else
                 {
-                    await connection.SendResponseAsync(HttpStatusCode.Unauthorized, "Connection: close\r\n" + authenticateHeaders);
+                    await connection.SendResponseAsync(HttpStatusCode.Unauthorized, "Connection: close\r\n" + authenticateHeaders).ConfigureAwait(false);
                 }
-            });
+            }).ConfigureAwait(false);
 
             return lines;
         }
@@ -108,7 +108,7 @@ namespace System.Net.Test.Common
             for (int i = 0; i < values.Length; i++)
             {
                 string trimmedValue = values[i].Trim();
-                if (trimmedValue.Contains(nameof(username)))
+                if (trimmedValue.StartsWith(nameof(username)))
                 {
                     // Username is a quoted string.
                     int startIndex = trimmedValue.IndexOf('"');
@@ -123,11 +123,11 @@ namespace System.Net.Test.Common
                     if (string.IsNullOrEmpty(username))
                         return false;
                 }
-                else if (trimmedValue.Contains(nameof(userhash)) && trimmedValue.Contains("true"))
+                else if (trimmedValue.StartsWith(nameof(userhash)) && trimmedValue.Contains("true"))
                 {
                     userhash = true;
                 }
-                else if (trimmedValue.Contains(nameof(uri)))
+                else if (trimmedValue.StartsWith(nameof(uri)))
                 {
                     int startIndex = trimmedValue.IndexOf('"');
                     if (startIndex != -1)
@@ -140,7 +140,7 @@ namespace System.Net.Test.Common
                     if (string.IsNullOrEmpty(uri))
                         return false;
                 }
-                else if (trimmedValue.Contains(nameof(realm)))
+                else if (trimmedValue.StartsWith(nameof(realm)))
                 {
                     // Realm is a quoted string.
                     int startIndex = trimmedValue.IndexOf('"');
@@ -154,7 +154,7 @@ namespace System.Net.Test.Common
                     if (string.IsNullOrEmpty(realm))
                         return false;
                 }
-                else if (trimmedValue.Contains(nameof(cnonce)))
+                else if (trimmedValue.StartsWith(nameof(cnonce)))
                 {
                     // CNonce is a quoted string.
                     int startIndex = trimmedValue.IndexOf('"');
@@ -164,7 +164,7 @@ namespace System.Net.Test.Common
                         cnonce = trimmedValue.Substring(startIndex, trimmedValue.Length - startIndex - 1);
                     }
                 }
-                else if (trimmedValue.Contains(nameof(nonce)))
+                else if (trimmedValue.StartsWith(nameof(nonce)))
                 {
                     // Nonce is a quoted string.
                     int startIndex = trimmedValue.IndexOf('"');
@@ -178,7 +178,7 @@ namespace System.Net.Test.Common
                     if (string.IsNullOrEmpty(nonce))
                         return false;
                 }
-                else if (trimmedValue.Contains(nameof(response)))
+                else if (trimmedValue.StartsWith(nameof(response)))
                 {
                     // response is a quoted string.
                     int startIndex = trimmedValue.IndexOf('"');
@@ -192,7 +192,7 @@ namespace System.Net.Test.Common
                     if (string.IsNullOrEmpty(response))
                         return false;
                 }
-                else if (trimmedValue.Contains(nameof(algorithm)))
+                else if (trimmedValue.StartsWith(nameof(algorithm)))
                 {
                     int startIndex = trimmedValue.IndexOf('=');
                     if (startIndex != -1)
@@ -201,7 +201,7 @@ namespace System.Net.Test.Common
                         algorithm = trimmedValue.Substring(startIndex, trimmedValue.Length - startIndex).Trim();
                     }
                 }
-                else if (trimmedValue.Contains(nameof(opaque)))
+                else if (trimmedValue.StartsWith(nameof(opaque)))
                 {
                     // Opaque is a quoted string.
                     int startIndex = trimmedValue.IndexOf('"');
@@ -211,7 +211,7 @@ namespace System.Net.Test.Common
                         opaque = trimmedValue.Substring(startIndex, trimmedValue.Length - startIndex - 1);
                     }
                 }
-                else if (trimmedValue.Contains(nameof(qop)))
+                else if (trimmedValue.StartsWith(nameof(qop)))
                 {
                     int startIndex = trimmedValue.IndexOf('"');
                     if (startIndex != -1)
@@ -225,7 +225,7 @@ namespace System.Net.Test.Common
                         qop = trimmedValue.Substring(startIndex, trimmedValue.Length - startIndex).Trim();
                     }
                 }
-                else if (trimmedValue.Contains(nameof(nc)))
+                else if (trimmedValue.StartsWith(nameof(nc)))
                 {
                     int startIndex = trimmedValue.IndexOf('=');
                     if (startIndex != -1)
@@ -248,11 +248,11 @@ namespace System.Net.Test.Common
             }
 
             if (string.IsNullOrEmpty(algorithm))
-                algorithm = "sha-256";
+                algorithm = "MD5";
 
             // Calculate response and compare with the client response hash.
             string a1 = options.Username + ":" + realm + ":" + options.Password;
-            if (algorithm.Contains("sess"))
+            if (algorithm.EndsWith("sess", StringComparison.OrdinalIgnoreCase))
             {
                 a1 = ComputeHash(a1, algorithm) + ":" + nonce;
 
@@ -288,7 +288,7 @@ namespace System.Net.Test.Common
         {
             // Disable MD5 insecure warning.
 #pragma warning disable CA5351
-            using (HashAlgorithm hash = algorithm.Contains("SHA-256") ? SHA256.Create() : (HashAlgorithm)MD5.Create())
+            using (HashAlgorithm hash = algorithm.StartsWith("SHA-256", StringComparison.OrdinalIgnoreCase) ? SHA256.Create() : (HashAlgorithm)MD5.Create())
 #pragma warning restore CA5351
             {
                 Encoding enc = Encoding.UTF8;

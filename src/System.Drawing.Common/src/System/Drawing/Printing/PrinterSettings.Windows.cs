@@ -39,7 +39,7 @@ namespace System.Drawing.Printing
         private short _copies = -1;
         private Duplex _duplex = System.Drawing.Printing.Duplex.Default;
         private TriState _collate = TriState.Default;
-        private PageSettings _defaultPageSettings;
+        private readonly PageSettings _defaultPageSettings;
         private int _fromPage;
         private int _toPage;
         private int _maxPage = 9999;
@@ -81,13 +81,13 @@ namespace System.Drawing.Printing
             {
                 if (value < 0)
                     throw new ArgumentException(SR.Format(SR.InvalidLowBoundArgumentEx,
-                                                             "value", value.ToString(CultureInfo.CurrentCulture),
+                                                             nameof(value), value.ToString(CultureInfo.CurrentCulture),
                                                              (0).ToString(CultureInfo.CurrentCulture)));
                 /*
-                    We shouldnt allow copies to be set since the copies can be a large number 
+                    We shouldnt allow copies to be set since the copies can be a large number
                     and can be reflected in PrintDialog. So for the Copies property,
-                    we prefer that for SafePrinting, copied cannot be set programmatically 
-                    but through the print dialog. 
+                    we prefer that for SafePrinting, copied cannot be set programmatically
+                    but through the print dialog.
                     Any lower security could set copies to anything.
                 */
                 _copies = value;
@@ -159,7 +159,7 @@ namespace System.Drawing.Printing
             {
                 if (value < 0)
                     throw new ArgumentException(SR.Format(SR.InvalidLowBoundArgumentEx,
-                                                             "value", value.ToString(CultureInfo.CurrentCulture),
+                                                             nameof(value), value.ToString(CultureInfo.CurrentCulture),
                                                              (0).ToString(CultureInfo.CurrentCulture)));
                 _fromPage = value;
             }
@@ -276,7 +276,7 @@ namespace System.Drawing.Printing
             {
                 if (value < 0)
                     throw new ArgumentException(SR.Format(SR.InvalidLowBoundArgumentEx,
-                                                             "value", value.ToString(CultureInfo.CurrentCulture),
+                                                             nameof(value), value.ToString(CultureInfo.CurrentCulture),
                                                              (0).ToString(CultureInfo.CurrentCulture)));
                 _maxPage = value;
             }
@@ -292,7 +292,7 @@ namespace System.Drawing.Printing
             {
                 if (value < 0)
                     throw new ArgumentException(SR.Format(SR.InvalidLowBoundArgumentEx,
-                                                             "value", value.ToString(CultureInfo.CurrentCulture),
+                                                             nameof(value), value.ToString(CultureInfo.CurrentCulture),
                                                              (0).ToString(CultureInfo.CurrentCulture)));
                 _minPage = value;
             }
@@ -373,7 +373,7 @@ namespace System.Drawing.Printing
             set
             {
                 if (!Enum.IsDefined(typeof(PrintRange), value))
-                    throw new InvalidEnumArgumentException("value", unchecked((int)value), typeof(PrintRange));
+                    throw new InvalidEnumArgumentException(nameof(value), unchecked((int)value), typeof(PrintRange));
 
                 _printRange = value;
             }
@@ -425,7 +425,7 @@ namespace System.Drawing.Printing
                 _cachedDevmode = null;
                 _extrainfo = null;
                 _printerName = value;
-                // PrinterName can be set through a fulltrusted assembly without using  the PrintDialog. 
+                // PrinterName can be set through a fulltrusted assembly without using  the PrintDialog.
                 // So dont set this variable here.
                 //PrintDialogDisplayed = true;
             }
@@ -537,7 +537,7 @@ namespace System.Drawing.Printing
             {
                 if (value < 0)
                     throw new ArgumentException(SR.Format(SR.InvalidLowBoundArgumentEx,
-                                                             "value", value.ToString(CultureInfo.CurrentCulture),
+                                                             nameof(value), value.ToString(CultureInfo.CurrentCulture),
                                                              (0).ToString(CultureInfo.CurrentCulture)));
                 _toPage = value;
             }
@@ -732,7 +732,7 @@ namespace System.Drawing.Printing
                 bool status = SafeNativeMethods.PrintDlg(data);
 
                 if (!status)
-                    return SR.Format(SR.NoDefaultPrinter);
+                    return SR.NoDefaultPrinter;
 
                 IntPtr handle = data.hDevNames;
                 IntPtr names = SafeNativeMethods.GlobalLock(new HandleRef(data, handle));
@@ -756,7 +756,7 @@ namespace System.Drawing.Printing
                 bool status = SafeNativeMethods.PrintDlg(data);
 
                 if (!status)
-                    return SR.Format(SR.NoDefaultPrinter);
+                    return SR.NoDefaultPrinter;
 
                 IntPtr handle = data.hDevNames;
                 IntPtr names = SafeNativeMethods.GlobalLock(new HandleRef(data, handle));
@@ -785,7 +785,7 @@ namespace System.Drawing.Printing
                 data.Flags = SafeNativeMethods.PD_RETURNDEFAULT;
                 bool status = SafeNativeMethods.PrintDlg(data);
                 if (!status)
-                    return SR.Format(SR.NoDefaultPrinter);
+                    return SR.NoDefaultPrinter;
 
                 IntPtr handle = data.hDevNames;
                 IntPtr names = SafeNativeMethods.GlobalLock(new HandleRef(data, handle));
@@ -810,7 +810,7 @@ namespace System.Drawing.Printing
                 bool status = SafeNativeMethods.PrintDlg(data);
 
                 if (!status)
-                    return SR.Format(SR.NoDefaultPrinter);
+                    return SR.NoDefaultPrinter;
 
                 IntPtr handle = data.hDevNames;
                 IntPtr names = SafeNativeMethods.GlobalLock(new HandleRef(data, handle));
@@ -1194,7 +1194,7 @@ namespace System.Drawing.Printing
         }
 
         // names is pointer to DEVNAMES
-        private static String ReadOneDEVNAME(IntPtr pDevnames, int slot)
+        private static string ReadOneDEVNAME(IntPtr pDevnames, int slot)
         {
             int offset = checked(Marshal.SystemDefaultCharSize * Marshal.ReadInt16((IntPtr)(checked((long)pDevnames + slot * 2))));
             string result = Marshal.PtrToStringAuto((IntPtr)(checked((long)pDevnames + offset)));
@@ -1383,7 +1383,7 @@ namespace System.Drawing.Printing
             [
                 EditorBrowsable(EditorBrowsableState.Never)
             ]
-            public Int32 Add(PaperSize paperSize)
+            public int Add(PaperSize paperSize)
             {
                 PaperSize[] newArray = new PaperSize[Count + 1];
                 ((ICollection)this).CopyTo(newArray, 0);
@@ -1473,7 +1473,7 @@ namespace System.Drawing.Printing
             }
 
             [EditorBrowsable(EditorBrowsableState.Never)]
-            public Int32 Add(PaperSource paperSource)
+            public int Add(PaperSource paperSource)
             {
                 PaperSource[] newArray = new PaperSource[Count + 1];
                 ((ICollection)this).CopyTo(newArray, 0);
@@ -1562,7 +1562,7 @@ namespace System.Drawing.Printing
             }
 
             [EditorBrowsable(EditorBrowsableState.Never)]
-            public Int32 Add(PrinterResolution printerResolution)
+            public int Add(PrinterResolution printerResolution)
             {
                 PrinterResolution[] newArray = new PrinterResolution[Count + 1];
                 ((ICollection)this).CopyTo(newArray, 0);
@@ -1574,12 +1574,12 @@ namespace System.Drawing.Printing
 
         public class StringCollection : ICollection
         {
-            private String[] _array;
+            private string[] _array;
 
             /// <summary>
             /// Initializes a new instance of the <see cref='StringCollection'/> class.
             /// </summary>
-            public StringCollection(String[] array)
+            public StringCollection(string[] array)
             {
                 _array = array;
             }
@@ -1598,7 +1598,7 @@ namespace System.Drawing.Printing
             /// <summary>
             /// Gets the string with the specified index.
             /// </summary>
-            public virtual String this[int index]
+            public virtual string this[int index]
             {
                 get
                 {
@@ -1654,9 +1654,9 @@ namespace System.Drawing.Printing
             [
                 EditorBrowsable(EditorBrowsableState.Never)
             ]
-            public Int32 Add(String value)
+            public int Add(string value)
             {
-                String[] newArray = new String[Count + 1];
+                string[] newArray = new string[Count + 1];
                 ((ICollection)this).CopyTo(newArray, 0);
                 newArray[Count] = value;
                 _array = newArray;
@@ -1666,11 +1666,11 @@ namespace System.Drawing.Printing
 
         private class ArrayEnumerator : IEnumerator
         {
-            private object[] _array;
+            private readonly object[] _array;
             private object _item;
             private int _index;
-            private int _startIndex;
-            private int _endIndex;
+            private readonly int _startIndex;
+            private readonly int _endIndex;
 
             public ArrayEnumerator(object[] array, int startIndex, int count)
             {
@@ -1700,7 +1700,7 @@ namespace System.Drawing.Printing
 
             public void Reset()
             {
-                // Position enumerator before first item 
+                // Position enumerator before first item
 
                 _index = _startIndex;
                 _item = null;

@@ -4,21 +4,15 @@
 
 using System.Buffers;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace System.IO.Pipelines
 {
     internal sealed class BufferSegment : ReadOnlySequenceSegment<byte>
     {
-        private IMemoryOwner<byte> _memoryOwner;
+        private object _memoryOwner;
         private BufferSegment _next;
         private int _end;
-
-        /// <summary>
-        /// The Start represents the offset into AvailableMemory where the range of "active" bytes begins. At the point when the block is leased
-        /// the Start is guaranteed to be equal to 0. The value of Start may be assigned anywhere between 0 and
-        /// AvailableMemory.Length, and must be equal to or less than End.
-        /// </summary>
-        public int Start { get; private set; }
 
         /// <summary>
         /// The End represents the offset into AvailableMemory where the range of "active" bytes ends. At the point when the block is leased
@@ -30,10 +24,10 @@ namespace System.IO.Pipelines
             get => _end;
             set
             {
-                Debug.Assert(value - Start <= AvailableMemory.Length);
+                Debug.Assert(value <= AvailableMemory.Length);
 
                 _end = value;
-                Memory = AvailableMemory.Slice(Start, _end - Start);
+                Memory = AvailableMemory.Slice(0, value);
             }
         }
 
@@ -48,52 +42,58 @@ namespace System.IO.Pipelines
             get => _next;
             set
             {
-                _next = value;
                 Next = value;
+                _next = value;
             }
         }
 
-        public void SetMemory(IMemoryOwner<byte> memoryOwner)
-        {
-            SetMemory(memoryOwner, 0, 0);
-        }
-
-        public void SetMemory(IMemoryOwner<byte> memoryOwner, int start, int end, bool readOnly = false)
+        public void SetOwnedMemory(IMemoryOwner<byte> memoryOwner)
         {
             _memoryOwner = memoryOwner;
+            AvailableMemory = memoryOwner.Memory;
+        }
 
-            AvailableMemory = _memoryOwner.Memory;
-
-            ReadOnly = readOnly;
-            RunningIndex = 0;
-            Start = start;
-            End = end;
-            NextSegment = null;
+        public void SetOwnedMemory(byte[] arrayPoolBuffer)
+        {
+            _memoryOwner = arrayPoolBuffer;
+            AvailableMemory = arrayPoolBuffer;
         }
 
         public void ResetMemory()
         {
-            _memoryOwner.Dispose();
+            if (_memoryOwner is IMemoryOwner<byte> owner)
+            {
+                owner.Dispose();
+            }
+            else
+            {
+                byte[] poolArray = (byte[])_memoryOwner;
+                ArrayPool<byte>.Shared.Return(poolArray);
+            }
+
+            // Order of below field clears is significant as it clears in a sequential order
+            // https://github.com/dotnet/corefx/pull/35256#issuecomment-462800477
+            Next = null;
+            RunningIndex = 0;
+            Memory = default;
             _memoryOwner = null;
+            _next = null;
+            _end = 0;
             AvailableMemory = default;
         }
 
-        internal IMemoryOwner<byte> MemoryOwner => _memoryOwner;
+        // Exposed for testing
+        internal object MemoryOwner => _memoryOwner;
 
         public Memory<byte> AvailableMemory { get; private set; }
 
-        public int Length => End - Start;
+        public int Length => End;
 
-        /// <summary>
-        /// If true, data should not be written into the backing block after the End offset. Data between start and end should never be modified
-        /// since this would break cloning.
-        /// </summary>
-        public bool ReadOnly { get; private set; }
-
-        /// <summary>
-        /// The amount of writable bytes in this segment. It is the amount of bytes between Length and End
-        /// </summary>
-        public int WritableBytes => AvailableMemory.Length - End;
+        public int WritableBytes
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => AvailableMemory.Length - End;
+        }
 
         public void SetNext(BufferSegment segment)
         {
@@ -110,5 +110,18 @@ namespace System.IO.Pipelines
                 segment = segment.NextSegment;
             }
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static long GetLength(BufferSegment startSegment, int startIndex, BufferSegment endSegment, int endIndex)
+        {
+            return (endSegment.RunningIndex + (uint)endIndex) - (startSegment.RunningIndex + (uint)startIndex);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static long GetLength(long startPosition, BufferSegment endSegment, int endIndex)
+        {
+            return (endSegment.RunningIndex + (uint)endIndex) - startPosition;
+        }
+
     }
 }

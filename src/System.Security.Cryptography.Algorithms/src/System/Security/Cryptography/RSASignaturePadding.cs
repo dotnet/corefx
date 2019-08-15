@@ -4,7 +4,7 @@
 
 namespace System.Security.Cryptography
 {
-    // NOTE: This is *currently* 1:1 with the enum, but it exists to reserve room for more options 
+    // NOTE: This is *currently* 1:1 with the enum, but it exists to reserve room for more options
     //       such as custom # of PSS salt bytes without having to modify other parts of the API
     //       surface.
 
@@ -64,9 +64,9 @@ namespace System.Security.Cryptography
 
         public static bool operator ==(RSASignaturePadding left, RSASignaturePadding right)
         {
-            if (Object.ReferenceEquals(left, null))
+            if (object.ReferenceEquals(left, null))
             {
-                return Object.ReferenceEquals(right, null);
+                return object.ReferenceEquals(right, null);
             }
 
             return left.Equals(right);

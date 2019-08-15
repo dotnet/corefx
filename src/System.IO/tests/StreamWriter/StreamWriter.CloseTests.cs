@@ -41,7 +41,10 @@ namespace System.IO.Tests
 
         private void ValidateDisposedExceptions(StreamWriter sw)
         {
-            Assert.Null(sw.BaseStream);
+            if (PlatformDetection.IsNetCore)
+            {
+                Assert.NotNull(sw.BaseStream);
+            }
             Assert.Throws<ObjectDisposedException>(() => sw.Write('A'));
             Assert.Throws<ObjectDisposedException>(() => sw.Write("hello"));
             Assert.Throws<ObjectDisposedException>(() => sw.Flush());
@@ -73,7 +76,7 @@ namespace System.IO.Tests
 
             Stream memstr2 = CreateStream();
             StreamWriter sw2 = new StreamWriter(memstr2);
-            
+
             sw2.Dispose();
             Assert.Throws<ObjectDisposedException>(() => sw2.Flush());
         }

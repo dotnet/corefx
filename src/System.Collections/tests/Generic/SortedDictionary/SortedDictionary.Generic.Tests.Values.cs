@@ -10,10 +10,11 @@ namespace System.Collections.Tests
 {
     public class SortedDictionary_Generic_Tests_Values : ICollection_Generic_Tests<string>
     {
-        protected override bool DefaultValueAllowed { get { return true; } }
-        protected override bool DuplicateValuesAllowed { get { return true; } }
-        protected override bool IsReadOnly { get { return true; } }
-        protected override IEnumerable<ModifyEnumerable> ModifyEnumerables { get { return new List<ModifyEnumerable>(); } }
+        protected override bool DefaultValueAllowed => true;
+        protected override bool DuplicateValuesAllowed => true;
+        protected override bool IsReadOnly => true;
+
+        protected override IEnumerable<ModifyEnumerable> GetModifyEnumerables(ModifyOperation operations) => new List<ModifyEnumerable>();
 
         protected override ICollection<string> GenericICollectionFactory()
         {
@@ -38,9 +39,8 @@ namespace System.Collections.Tests
             return Convert.ToBase64String(bytes);
         }
 
-        [Theory]
-        [MemberData(nameof(ValidCollectionSizes))]
-        public void SortedDictionary_Generic_ValueCollection_Constructor_NullDictionary(int count)
+        [Fact]
+        public void SortedDictionary_Generic_ValueCollection_Constructor_NullDictionary()
         {
             Assert.Throws<ArgumentNullException>(() => new SortedDictionary<string, string>.ValueCollection(null));
         }
@@ -59,12 +59,12 @@ namespace System.Collections.Tests
 
     public class SortedDictionary_Generic_Tests_Values_AsICollection : ICollection_NonGeneric_Tests
     {
-        protected override bool NullAllowed { get { return true; } }
-        protected override bool DuplicateValuesAllowed { get { return true; } }
-        protected override bool IsReadOnly { get { return true; } }
-        protected override bool Enumerator_Current_UndefinedOperation_Throws { get { return true; } }
-        protected override IEnumerable<ModifyEnumerable> ModifyEnumerables { get { return new List<ModifyEnumerable>(); } }
-        protected override bool SupportsSerialization { get { return false; } }
+        protected override bool NullAllowed => true;
+        protected override bool DuplicateValuesAllowed => true;
+        protected override bool IsReadOnly => true;
+        protected override bool Enumerator_Current_UndefinedOperation_Throws => true;
+        protected override IEnumerable<ModifyEnumerable> GetModifyEnumerables(ModifyOperation operations) => new List<ModifyEnumerable>();
+        protected override bool SupportsSerialization => false;
 
         protected override ICollection NonGenericICollectionFactory()
         {

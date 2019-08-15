@@ -211,7 +211,7 @@ namespace System.Globalization
                         case CorrectionAlgorithm.Year1620to1699: return EphemerisCorrection1620to1699(year);
                     }
 
-                    break; // break the loop and assert eventually 
+                    break; // break the loop and assert eventually
                 }
             }
 
@@ -393,7 +393,7 @@ namespace System.Globalization
 
             double approx = EstimatePrior(LongitudeSpring, MiddayAtPersianObservationSite(date));
             long lowerBoundNewYearDay = (long)Math.Floor(approx) - 1;
-            long upperBoundNewYearDay = lowerBoundNewYearDay + 3; // estimate is generally within a day of the actual occurrance (at the limits, the error expands, since the calculations rely on the mean tropical year which changes...)
+            long upperBoundNewYearDay = lowerBoundNewYearDay + 3; // estimate is generally within a day of the actual occurrence (at the limits, the error expands, since the calculations rely on the mean tropical year which changes...)
             long day = lowerBoundNewYearDay;
             for (; day != upperBoundNewYearDay; ++day)
             {

@@ -17,7 +17,7 @@ namespace System.Collections.Specialized.Tests
             StringDictionary stringDictionary2 = Helpers.CreateStringDictionary(count);
 
             Assert.Same(stringDictionary1.SyncRoot, stringDictionary1.SyncRoot);
-            Assert.IsType<object>(stringDictionary1.SyncRoot);
+            Assert.IsType<Hashtable>(stringDictionary1.SyncRoot);
 
             Assert.NotSame(stringDictionary1.SyncRoot, stringDictionary2.SyncRoot);
         }

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using System.Threading;
 
 namespace System.Net.Security
@@ -14,7 +13,7 @@ namespace System.Net.Security
     internal static class SSPIHandleCache
     {
         private const int c_MaxCacheSize = 0x1F;  // must a (power of 2) - 1
-        private static SafeCredentialReference[] s_cacheSlots = new SafeCredentialReference[c_MaxCacheSize + 1];
+        private static readonly SafeCredentialReference[] s_cacheSlots = new SafeCredentialReference[c_MaxCacheSize + 1];
         private static int s_current = -1;
 
         internal static void CacheCredential(SafeFreeCredentials newHandle)
@@ -34,16 +33,13 @@ namespace System.Net.Security
                     newRef = Interlocked.Exchange<SafeCredentialReference>(ref s_cacheSlots[index], newRef);
                 }
 
-                if (newRef != null)
-                {
-                    newRef.Dispose();
-                }
+                newRef?.Dispose();
             }
             catch (Exception e)
             {
                 if (!ExceptionCheck.IsFatal(e))
                 {
-                    NetEventSource.Fail(null, "Attempted to throw: {e}");
+                    if (NetEventSource.IsEnabled) NetEventSource.Fail(null, $"Attempted to throw: {e}");
                 }
             }
         }

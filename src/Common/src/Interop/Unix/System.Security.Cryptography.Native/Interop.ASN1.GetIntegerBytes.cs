@@ -2,11 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Text;
+using System.Security.Cryptography.Asn1;
 
 using Microsoft.Win32.SafeHandles;
 
@@ -38,8 +35,8 @@ internal static partial class Interop
                 (handle, buf) => EncodeAsn1Integer(handle, buf),
                 asn1Integer);
 
-            DerSequenceReader reader = DerSequenceReader.CreateForPayload(derEncoded);
-            return reader.ReadIntegerBytes();
+            AsnReader reader = new AsnReader(derEncoded, AsnEncodingRules.DER);
+            return reader.ReadIntegerBytes().ToArray();
         }
     }
 }

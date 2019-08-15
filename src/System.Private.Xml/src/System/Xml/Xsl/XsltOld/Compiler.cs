@@ -30,7 +30,7 @@ namespace System.Xml.Xsl.XsltOld
         internal XmlSortOrder order;
         internal XmlCaseOrder caseOrder;
 
-        public Sort(int sortkey, String xmllang, XmlDataType datatype, XmlSortOrder xmlorder, XmlCaseOrder xmlcaseorder)
+        public Sort(int sortkey, string xmllang, XmlDataType datatype, XmlSortOrder xmlorder, XmlCaseOrder xmlcaseorder)
         {
             select = sortkey;
             lang = xmllang;
@@ -75,7 +75,7 @@ namespace System.Xml.Xsl.XsltOld
         // Current import stack
         private Stack _stylesheets;
 
-        private HybridDictionary _documentURIs = new HybridDictionary();
+        private readonly HybridDictionary _documentURIs = new HybridDictionary();
 
         // import/include documents, who is here has its URI in this.documentURIs
         private NavigatorInput _input;
@@ -90,7 +90,7 @@ namespace System.Xml.Xsl.XsltOld
         internal Stylesheet rootStylesheet;
         private RootAction _rootAction;
         private List<TheQuery> _queryStore;
-        private QueryBuilder _queryBuilder = new QueryBuilder();
+        private readonly QueryBuilder _queryBuilder = new QueryBuilder();
         private int _rtfCount = 0;
 
         // Used to load Built In templates
@@ -269,12 +269,12 @@ namespace System.Xml.Xsl.XsltOld
             InsertExcludedNamespace(Input.Navigator.GetAttribute(Input.Atoms.ExcludeResultPrefixes, Input.Atoms.UriXsl));
         }
 
-        internal bool IsExtensionNamespace(String nspace)
+        internal bool IsExtensionNamespace(string nspace)
         {
             return _scopeManager.IsExtensionNamespace(nspace);
         }
 
-        internal bool IsExcludedNamespace(String nspace)
+        internal bool IsExcludedNamespace(string nspace)
         {
             return _scopeManager.IsExcludedNamespace(nspace);
         }
@@ -382,7 +382,7 @@ namespace System.Xml.Xsl.XsltOld
             return _currentTemplate.AllocateVariableSlot();
         }
 
-        internal void AddNamespaceAlias(String StylesheetURI, NamespaceInfo AliasInfo)
+        internal void AddNamespaceAlias(string StylesheetURI, NamespaceInfo AliasInfo)
         {
             if (_globalNamespaceAliasTable == null)
             {
@@ -395,7 +395,7 @@ namespace System.Xml.Xsl.XsltOld
             }
         }
 
-        internal bool IsNamespaceAlias(String StylesheetURI)
+        internal bool IsNamespaceAlias(string StylesheetURI)
         {
             if (_globalNamespaceAliasTable == null)
             {
@@ -404,7 +404,7 @@ namespace System.Xml.Xsl.XsltOld
             return _globalNamespaceAliasTable.Contains(StylesheetURI);
         }
 
-        internal NamespaceInfo FindNamespaceAlias(String StylesheetURI)
+        internal NamespaceInfo FindNamespaceAlias(string StylesheetURI)
         {
             if (_globalNamespaceAliasTable != null)
             {
@@ -413,17 +413,17 @@ namespace System.Xml.Xsl.XsltOld
             return null;
         }
 
-        internal String ResolveXmlNamespace(String prefix)
+        internal string ResolveXmlNamespace(string prefix)
         {
             return _scopeManager.ResolveXmlNamespace(prefix);
         }
 
-        internal String ResolveXPathNamespace(String prefix)
+        internal string ResolveXPathNamespace(string prefix)
         {
             return _scopeManager.ResolveXPathNamespace(prefix);
         }
 
-        internal String DefaultNamespace
+        internal string DefaultNamespace
         {
             get { return _scopeManager.DefaultNamespace; }
         }
@@ -767,18 +767,7 @@ namespace System.Xml.Xsl.XsltOld
         //
         // Script support
         //
-        private Hashtable[] _typeDeclsByLang = new Hashtable[] { new Hashtable(), new Hashtable(), new Hashtable() };
-        private ArrayList _scriptFiles = new ArrayList();
-        // Namespaces we always import when compiling
-        private static string[] s_defaultNamespaces = new string[] {
-            "System",
-            "System.Collections",
-            "System.Text",
-            "System.Text.RegularExpressions",
-            "System.Xml",
-            "System.Xml.Xsl",
-            "System.Xml.XPath",
-        };
+        private readonly Hashtable[] _typeDeclsByLang = new Hashtable[] { new Hashtable(), new Hashtable(), new Hashtable() };
 
         internal void AddScript(string source, ScriptingLanguage lang, string ns, string fileName, int lineNumber)
         {
@@ -1190,8 +1179,8 @@ namespace System.Xml.Xsl.XsltOld
 
         internal class ErrorXPathExpression : CompiledXpathExpr
         {
-            private string _baseUri;
-            private int _lineNumber, _linePosition;
+            private readonly string _baseUri;
+            private readonly int _lineNumber, _linePosition;
             public ErrorXPathExpression(string expression, string baseUri, int lineNumber, int linePosition)
                 : base(null, expression, false)
             {

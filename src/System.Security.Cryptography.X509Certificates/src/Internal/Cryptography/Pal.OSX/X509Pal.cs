@@ -3,8 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Diagnostics;
+using System.Numerics;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Apple;
+using System.Security.Cryptography.Asn1;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Internal.Cryptography.Pal
@@ -22,6 +25,8 @@ namespace Internal.Cryptography.Pal
             public AsymmetricAlgorithm DecodePublicKey(Oid oid, byte[] encodedKeyValue, byte[] encodedParameters,
                 ICertificatePal certificatePal)
             {
+                const int errSecInvalidKeyRef = -67712;
+                const int errSecUnsupportedKeySize = -67735;
                 AppleCertificatePal applePal = certificatePal as AppleCertificatePal;
 
                 if (applePal != null)
@@ -30,11 +35,34 @@ namespace Internal.Cryptography.Pal
 
                     switch (oid.Value)
                     {
-                        case Oids.RsaRsa:
+                        case Oids.Rsa:
+                            Debug.Assert(!key.IsInvalid);
                             return new RSAImplementation.RSASecurityTransforms(key);
-                        case Oids.DsaDsa:
+                        case Oids.Dsa:
+                            if (key.IsInvalid)
+                            {
+                                // SecCertificateCopyKey returns null for DSA, so fall back to manually building it.
+                                return DecodeDsaPublicKey(encodedKeyValue, encodedParameters);
+                            }
                             return new DSAImplementation.DSASecurityTransforms(key);
-                        case Oids.Ecc:
+                        case Oids.EcPublicKey:
+                            // If X509GetPublicKey uses the new SecCertificateCopyKey API it can return an invalid
+                            // key reference for unsupported algorithms. This currently happens for the BrainpoolP160r1
+                            // algorithm in the test suite (as of macOS Mojave Developer Preview 4).
+                            if (key.IsInvalid)
+                            {
+                                throw Interop.AppleCrypto.CreateExceptionForOSStatus(errSecInvalidKeyRef);
+                            }
+                            // EccGetKeySizeInBits can fail for two reasons. First, the Apple implementation has changed
+                            // and we receive values from API that were not previously handled. In that case the CoreFX
+                            // implementation will need to be adjusted to handle these values. Second, we deliberately
+                            // return 0 from the native code to prevent hitting buggy API implementations in Apple code
+                            // later.
+                            if (Interop.AppleCrypto.EccGetKeySizeInBits(key) == 0)
+                            {
+                                key.Dispose();
+                                throw Interop.AppleCrypto.CreateExceptionForOSStatus(errSecUnsupportedKeySize);
+                            }
                             return new ECDsaImplementation.ECDsaSecurityTransforms(key);
                     }
 
@@ -44,9 +72,9 @@ namespace Internal.Cryptography.Pal
                 {
                     switch (oid.Value)
                     {
-                        case Oids.RsaRsa:
+                        case Oids.Rsa:
                             return DecodeRsaPublicKey(encodedKeyValue);
-                        case Oids.DsaDsa:
+                        case Oids.Dsa:
                             return DecodeDsaPublicKey(encodedKeyValue, encodedParameters);
                     }
                 }
@@ -56,14 +84,10 @@ namespace Internal.Cryptography.Pal
 
             private static AsymmetricAlgorithm DecodeRsaPublicKey(byte[] encodedKeyValue)
             {
-                DerSequenceReader reader = new DerSequenceReader(encodedKeyValue);
-                RSAParameters rsaParameters = new RSAParameters();
-                reader.ReadPkcs1PublicBlob(ref rsaParameters);
-
                 RSA rsa = RSA.Create();
                 try
                 {
-                    rsa.ImportParameters(rsaParameters);
+                    rsa.ImportRSAPublicKey(new ReadOnlySpan<byte>(encodedKeyValue), out _);
                     return rsa;
                 }
                 catch (Exception)
@@ -75,21 +99,26 @@ namespace Internal.Cryptography.Pal
 
             private static AsymmetricAlgorithm DecodeDsaPublicKey(byte[] encodedKeyValue, byte[] encodedParameters)
             {
-                DSAParameters dsaParameters = new DSAParameters();
-                DerSequenceReader parameterReader = new DerSequenceReader(encodedParameters);
-
-                parameterReader.ReadSubjectPublicKeyInfo(encodedKeyValue, ref dsaParameters);
-
-                DSA dsa = DSA.Create();
-                try
+                SubjectPublicKeyInfoAsn spki = new SubjectPublicKeyInfoAsn
                 {
-                    dsa.ImportParameters(dsaParameters);
-                    return dsa;
-                }
-                catch (Exception)
+                    Algorithm = new AlgorithmIdentifierAsn { Algorithm = new Oid(Oids.Dsa, null), Parameters = encodedParameters },
+                    SubjectPublicKey = encodedKeyValue,
+                };
+
+                using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
                 {
-                    dsa.Dispose();
-                    throw;
+                    spki.Encode(writer);
+                    DSA dsa = DSA.Create();
+                    try
+                    {
+                        dsa.ImportSubjectPublicKeyInfo(writer.EncodeAsSpan(), out _);
+                        return dsa;
+                    }
+                    catch (Exception)
+                    {
+                        dsa.Dispose();
+                        throw;
+                    }
                 }
             }
 
@@ -114,12 +143,22 @@ namespace Internal.Cryptography.Pal
 
             public X509ContentType GetCertContentType(byte[] rawData)
             {
+                const int errSecUnknownFormat = -25257;
                 if (rawData == null || rawData.Length == 0)
                 {
-                    return X509ContentType.Unknown;
+                    // Throw to match Windows and Unix behavior.
+                    throw Interop.AppleCrypto.CreateExceptionForOSStatus(errSecUnknownFormat);
                 }
-                
-                return Interop.AppleCrypto.X509GetContentType(rawData, rawData.Length);
+
+                X509ContentType contentType = Interop.AppleCrypto.X509GetContentType(rawData, rawData.Length);
+
+                if (contentType == X509ContentType.Unknown)
+                {
+                    // Throw to match Windows and Unix behavior.
+                    throw Interop.AppleCrypto.CreateExceptionForOSStatus(errSecUnknownFormat);
+                }
+
+                return contentType;
             }
 
             public X509ContentType GetCertContentType(string fileName)

@@ -23,7 +23,7 @@ namespace System.IO
 
         private static string NormalizeDriveName(string driveName)
         {
-            if (driveName.Contains("\0"))
+            if (driveName.Contains("\0")) // string.Contains(char) is .NetCore2.1+ specific
             {
                 throw new ArgumentException(SR.Format(SR.Arg_InvalidDriveChars, driveName), nameof(driveName));
             }
@@ -91,7 +91,7 @@ namespace System.IO
                 Interop.Sys.MountPointInformation mpi = default(Interop.Sys.MountPointInformation);
                 CheckStatfsResultAndThrowIfNecessary(Interop.Sys.GetSpaceInfoForMountPoint(Name, out mpi));
                 return checked((long)mpi.TotalFreeSpace);
-            } 
+            }
         }
 
         public long TotalSize

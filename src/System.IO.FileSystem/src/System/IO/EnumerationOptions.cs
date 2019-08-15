@@ -1,8 +1,15 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.IO;
+
+#if MS_IO_REDIST
+namespace Microsoft.IO
+#else
 namespace System.IO
+#endif
 {
     public class EnumerationOptions
     {
@@ -62,7 +69,7 @@ namespace System.IO
         /// useful is with remote share enumeration on Windows. Having a large buffer may result in
         /// better performance as more results can be batched over the wire (e.g. over a network
         /// share). A "large" buffer, for example, would be 16K. Typical is 4K.
-        /// 
+        ///
         /// We will not use the suggested buffer size if it has no meaning for the native APIs on the
         /// current platform or if it would be too small for getting at least a single result.
         /// </remarks>
@@ -81,7 +88,6 @@ namespace System.IO
         /// The default is simple matching where '*' is always 0 or more characters and '?' is a single character.
         /// </remarks>
         public MatchType MatchType { get; set; }
-
 
         /// <summary>
         /// For APIs that allow specifying a match expression this will allow you to specify case matching behavior.

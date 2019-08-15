@@ -12,4 +12,3 @@ namespace System.Security
         public UnverifiableCodeAttribute() { }
     }
 }
-

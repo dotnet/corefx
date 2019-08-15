@@ -187,6 +187,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
                     }
 
                     RunChain(chain, leafCert, true, "Chain verification");
+                    DisposeChainCerts(chain);
                 }
             }
             finally
@@ -398,12 +399,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
                 intermed2Serial[1] = 2;
                 leafSerial[1] = 1;
 
-                using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
-                {
-                    rng.GetBytes(intermed1Serial, 2, intermed1Serial.Length - 2);
-                    rng.GetBytes(intermed2Serial, 2, intermed2Serial.Length - 2);
-                    rng.GetBytes(leafSerial, 2, leafSerial.Length - 2);
-                }
+                RandomNumberGenerator.Fill(intermed1Serial.AsSpan(2));
+                RandomNumberGenerator.Fill(intermed2Serial.AsSpan(2));
+                RandomNumberGenerator.Fill(leafSerial.AsSpan(2));
 
                 X509Certificate2 intermed1Tmp =
                     intermed1Request.Create(rootCertWithKey.SubjectName, rootGenerator, now, intermedEnd, intermed1Serial);
@@ -516,6 +514,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
                         chain.ChainPolicy.VerificationTime = notBefore.ToLocalTime().DateTime;
 
                         RunChain(chain, leafCert, true, "Chain build");
+                        DisposeChainCerts(chain);
                     }
                 }
                 finally

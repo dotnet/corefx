@@ -22,8 +22,8 @@ namespace System.Net.Http.Functional.Tests
                 Assert.Equal(HttpStatusCode.OK, rm.StatusCode);
                 Assert.Equal("OK", rm.ReasonPhrase);
                 Assert.Equal(new Version(1, 1), rm.Version);
-                Assert.Equal(null, rm.Content);
-                Assert.Equal(null, rm.RequestMessage);
+                Assert.Null(rm.Content);
+                Assert.Null(rm.RequestMessage);
             }
         }
 
@@ -35,8 +35,8 @@ namespace System.Net.Http.Functional.Tests
                 Assert.Equal(HttpStatusCode.Accepted, rm.StatusCode);
                 Assert.Equal("Accepted", rm.ReasonPhrase);
                 Assert.Equal(new Version(1, 1), rm.Version);
-                Assert.Equal(null, rm.Content);
-                Assert.Equal(null, rm.RequestMessage);
+                Assert.Null(rm.Content);
+                Assert.Null(rm.RequestMessage);
             }
         }
 
@@ -120,20 +120,24 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
-        public void EnsureSuccessStatusCode_AddContentToMessage_ContentIsDisposed()
+        public void EnsureSuccessStatusCode_SuccessStatusCode_ContentIsNotDisposed()
         {
-            using (var response404 = new HttpResponseMessage(HttpStatusCode.NotFound))
-            {
-                response404.Content = new MockContent();
-                Assert.Throws<HttpRequestException>(() => response404.EnsureSuccessStatusCode());
-                Assert.True((response404.Content as MockContent).IsDisposed);
-            }
-
             using (var response200 = new HttpResponseMessage(HttpStatusCode.OK))
             {
                 response200.Content = new MockContent();
                 response200.EnsureSuccessStatusCode(); // No exception.
                 Assert.False((response200.Content as MockContent).IsDisposed);
+            }
+        }
+
+        [Fact]
+        public void EnsureSuccessStatusCode_NonSuccessStatusCode_ContentIsNotDisposed()
+        {
+            using (var response404 = new HttpResponseMessage(HttpStatusCode.NotFound))
+            {
+                response404.Content = new MockContent();
+                Assert.Throws<HttpRequestException>(() => response404.EnsureSuccessStatusCode());
+                Assert.False((response404.Content as MockContent).IsDisposed);
             }
         }
 
@@ -216,8 +220,8 @@ namespace System.Net.Http.Functional.Tests
         {
             using (var rm = new HttpResponseMessage())
             {
-                rm.ReasonPhrase = String.Empty;
-                Assert.Equal(String.Empty, rm.ReasonPhrase);
+                rm.ReasonPhrase = string.Empty;
+                Assert.Equal(string.Empty, rm.ReasonPhrase);
             }
         }
 
@@ -277,6 +281,21 @@ namespace System.Net.Http.Functional.Tests
                     "  Content-Type: text/plain; charset=utf-8\r\n" +
                     "  Custom-Content-Header: value2\r\n" +
                     "}", rm.ToString());
+
+                rm.TrailingHeaders.Add("Custom-Trailing-Header", "value3");
+
+                Assert.Equal(
+                    "StatusCode: 400, ReasonPhrase: 'Bad Request', Version: 1.0, Content: " + typeof(StringContent).ToString() + ", Headers:\r\n" +
+                    "{\r\n" +
+                    "  Accept-Ranges: bytes\r\n" +
+                    "  Accept-Ranges: pages\r\n" +
+                    "  Custom-Response-Header: value1\r\n" +
+                    "  Content-Type: text/plain; charset=utf-8\r\n" +
+                    "  Custom-Content-Header: value2\r\n" +
+                    "}, Trailing Headers:\r\n" +
+                    "{\r\n" +
+                    "  Custom-Trailing-Header: value3\r\n" +
+                    "}", rm.ToString());
             }
         }
 
@@ -303,6 +322,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        #endregion   
+        #endregion
     }
 }

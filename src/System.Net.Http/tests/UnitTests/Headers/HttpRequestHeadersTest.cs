@@ -612,6 +612,17 @@ namespace System.Net.Http.Tests
         }
 
         [Fact]
+        public void UserAgent_TryGetValuesAndGetValues_Malformed()
+        {
+            string malformedUserAgent = "Mozilla/4.0 (compatible (compatible; MSIE 8.0; Windows NT 6.1; Trident/7.0)";
+            headers.TryAddWithoutValidation("User-Agent", malformedUserAgent);
+            Assert.True(headers.TryGetValues("User-Agent", out IEnumerable<string> ua));
+            Assert.Equal(1, ua.Count());
+            Assert.Equal(malformedUserAgent, ua.First());
+            Assert.Equal(malformedUserAgent, headers.GetValues("User-Agent").First());
+        }
+
+        [Fact]
         public void UserAgent_UseAddMethodWithInvalidValue_InvalidValueRecognized()
         {
             headers.TryAddWithoutValidation("User-Agent", "custom\u4F1A");
@@ -1117,7 +1128,7 @@ namespace System.Net.Http.Tests
             // Connection collection has 2 values plus 'chunked'
             Assert.Equal(3, headers.TransferEncoding.Count);
             Assert.Equal(3, headers.GetValues("Transfer-Encoding").Count());
-            Assert.Equal(true, headers.TransferEncodingChunked);
+            Assert.True(headers.TransferEncodingChunked);
             Assert.Equal(new TransferCodingHeaderValue("custom1"), headers.TransferEncoding.ElementAt(0));
             Assert.Equal(new TransferCodingHeaderValue("custom2"), headers.TransferEncoding.ElementAt(1));
 

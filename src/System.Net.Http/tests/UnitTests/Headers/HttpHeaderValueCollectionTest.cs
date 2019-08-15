@@ -23,7 +23,7 @@ namespace System.Net.Http.Tests
         private static readonly Uri invalidValue = new Uri("http://invalid/");
         private static readonly TransferCodingHeaderValue specialChunked = new TransferCodingHeaderValue("chunked");
 
-        // Note that this type just forwards calls to HttpHeaders. So this test method focuses on making sure 
+        // Note that this type just forwards calls to HttpHeaders. So this test method focuses on making sure
         // the correct calls to HttpHeaders are made. This test suite will not test HttpHeaders functionality.
 
         [Fact]
@@ -103,7 +103,7 @@ namespace System.Net.Http.Tests
             HttpRequestHeaders headers = new HttpRequestHeaders();
             Assert.Null(headers.TransferEncodingChunked);
             Assert.Equal(0, headers.TransferEncoding.Count);
-            Assert.Equal(String.Empty, headers.TransferEncoding.ToString());
+            Assert.Equal(string.Empty, headers.TransferEncoding.ToString());
 
             headers.TransferEncoding.Add(specialChunked);
 
@@ -153,7 +153,7 @@ namespace System.Net.Http.Tests
             collection.ParseAdd(null);
             Assert.False(collection.IsSpecialValueSet);
             Assert.Equal(0, collection.Count);
-            Assert.Equal(String.Empty, collection.ToString());
+            Assert.Equal(string.Empty, collection.ToString());
         }
 
         [Fact]
@@ -188,7 +188,7 @@ namespace System.Net.Http.Tests
         {
             HttpResponseHeaders headers = new HttpResponseHeaders();
             string input = "Basic, D\rigest qop=\"auth\",algorithm=MD5-sess";
-            
+
             Assert.Throws<FormatException>(() => { headers.WwwAuthenticate.ParseAdd(input); });
         }
 
@@ -201,7 +201,7 @@ namespace System.Net.Http.Tests
 
             Assert.False(headers.WwwAuthenticate.IsSpecialValueSet);
             Assert.Equal(0, headers.WwwAuthenticate.Count);
-            Assert.Equal(String.Empty, headers.WwwAuthenticate.ToString());
+            Assert.Equal(string.Empty, headers.WwwAuthenticate.ToString());
         }
 
         [Fact]
@@ -356,7 +356,7 @@ namespace System.Net.Http.Tests
             collection.Add(new Uri("http://www.example.org/2/"));
 
             Uri[] array = new Uri[2];
-            
+
             // startIndex + Count = 1 + 2 > array.Length
             AssertExtensions.Throws<ArgumentException>("destinationArray", "", () => { collection.CopyTo(array, 1); });
         }

@@ -21,7 +21,7 @@ namespace System.Linq.Parallel
     ///     Note that normally double.NaN &lt; anything is false, as is anything &lt; NaN.  This would
     ///     lead to some strangeness in Min and Max, e.g. Min({ NaN, 5.0 } == NaN, yet
     ///     Min({ 5.0, NaN }) == 5.0!  We impose a total ordering so that NaN is smaller than
-    ///     everything, including -infinity, which is consistent with Comparer_T. 
+    ///     everything, including -infinity, which is consistent with Comparer_T.
     /// </summary>
     internal sealed class DoubleMinMaxAggregationOperator : InlinedAggregationOperator<double, double, double>
     {
@@ -47,7 +47,7 @@ namespace System.Linq.Parallel
 
         protected override double InternalAggregate(ref Exception singularExceptionToThrow)
         {
-            // Because the final reduction is typically much cheaper than the intermediate 
+            // Because the final reduction is typically much cheaper than the intermediate
             // reductions over the individual partitions, and because each parallel partition
             // will do a lot of work to produce a single output element, we prefer to turn off
             // pipelining, and process the final reductions serially.
@@ -108,8 +108,8 @@ namespace System.Linq.Parallel
 
         private class DoubleMinMaxAggregationOperatorEnumerator<TKey> : InlinedAggregationOperatorEnumerator<double>
         {
-            private QueryOperatorEnumerator<double, TKey> _source; // The source data.
-            private int _sign; // The sign for comparisons (-1 means min, 1 means max).
+            private readonly QueryOperatorEnumerator<double, TKey> _source; // The source data.
+            private readonly int _sign; // The sign for comparisons (-1 means min, 1 means max).
 
             //---------------------------------------------------------------------------------------
             // Instantiates a new aggregation operator.

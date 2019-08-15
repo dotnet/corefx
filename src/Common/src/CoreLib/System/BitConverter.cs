@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -11,7 +10,7 @@ using Internal.Runtime.CompilerServices;
 namespace System
 {
     // The BitConverter class contains methods for
-    // converting an array of bytes to one of the base data 
+    // converting an array of bytes to one of the base data
     // types, as well as for converting a base data type to an
     // array of bytes.
     public static class BitConverter
@@ -20,8 +19,10 @@ namespace System
         // The value is set to true if the architecture is
         // little endian; false if it is big endian.
 #if BIGENDIAN
+        [Intrinsic]
         public static readonly bool IsLittleEndian /* = false */;
 #else
+        [Intrinsic]
         public static readonly bool IsLittleEndian = true;
 #endif
 
@@ -80,7 +81,7 @@ namespace System
             return true;
         }
 
-        // Converts an int into an array of bytes with length 
+        // Converts an int into an array of bytes with length
         // four.
         public static byte[] GetBytes(int value)
         {
@@ -99,7 +100,7 @@ namespace System
             return true;
         }
 
-        // Converts a long into an array of bytes with length 
+        // Converts a long into an array of bytes with length
         // eight.
         public static byte[] GetBytes(long value)
         {
@@ -181,7 +182,7 @@ namespace System
             return true;
         }
 
-        // Converts a float into an array of bytes with length 
+        // Converts a float into an array of bytes with length
         // four.
         public static byte[] GetBytes(float value)
         {
@@ -200,7 +201,7 @@ namespace System
             return true;
         }
 
-        // Converts a double into an array of bytes with length 
+        // Converts a double into an array of bytes with length
         // eight.
         public static byte[] GetBytes(double value)
         {
@@ -219,7 +220,7 @@ namespace System
             return true;
         }
 
-        // Converts an array of bytes into a char.  
+        // Converts an array of bytes into a char.
         public static char ToChar(byte[] value, int startIndex) => unchecked((char)ToInt16(value, startIndex));
 
         // Converts a Span into a char
@@ -230,7 +231,7 @@ namespace System
             return Unsafe.ReadUnaligned<char>(ref MemoryMarshal.GetReference(value));
         }
 
-        // Converts an array of bytes into a short.  
+        // Converts an array of bytes into a short.
         public static short ToInt16(byte[] value, int startIndex)
         {
             if (value == null)
@@ -251,7 +252,7 @@ namespace System
             return Unsafe.ReadUnaligned<short>(ref MemoryMarshal.GetReference(value));
         }
 
-        // Converts an array of bytes into an int.  
+        // Converts an array of bytes into an int.
         public static int ToInt32(byte[] value, int startIndex)
         {
             if (value == null)
@@ -272,7 +273,7 @@ namespace System
             return Unsafe.ReadUnaligned<int>(ref MemoryMarshal.GetReference(value));
         }
 
-        // Converts an array of bytes into a long.  
+        // Converts an array of bytes into a long.
         public static long ToInt64(byte[] value, int startIndex)
         {
             if (value == null)
@@ -294,7 +295,7 @@ namespace System
         }
 
         // Converts an array of bytes into an ushort.
-        // 
+        //
         [CLSCompliant(false)]
         public static ushort ToUInt16(byte[] value, int startIndex) => unchecked((ushort)ToInt16(value, startIndex));
 
@@ -308,7 +309,7 @@ namespace System
         }
 
         // Converts an array of bytes into an uint.
-        // 
+        //
         [CLSCompliant(false)]
         public static uint ToUInt32(byte[] value, int startIndex) => unchecked((uint)ToInt32(value, startIndex));
 
@@ -322,7 +323,7 @@ namespace System
         }
 
         // Converts an array of bytes into an unsigned long.
-        // 
+        //
         [CLSCompliant(false)]
         public static ulong ToUInt64(byte[] value, int startIndex) => unchecked((ulong)ToInt64(value, startIndex));
 
@@ -335,7 +336,7 @@ namespace System
             return Unsafe.ReadUnaligned<ulong>(ref MemoryMarshal.GetReference(value));
         }
 
-        // Converts an array of bytes into a float.  
+        // Converts an array of bytes into a float.
         public static float ToSingle(byte[] value, int startIndex) => Int32BitsToSingle(ToInt32(value, startIndex));
 
         // Converts a Span into a float
@@ -346,7 +347,7 @@ namespace System
             return Unsafe.ReadUnaligned<float>(ref MemoryMarshal.GetReference(value));
         }
 
-        // Converts an array of bytes into a double.  
+        // Converts an array of bytes into a double.
         public static double ToDouble(byte[] value, int startIndex) => Int64BitsToDouble(ToInt64(value, startIndex));
 
         // Converts a Span into a double
@@ -357,7 +358,7 @@ namespace System
             return Unsafe.ReadUnaligned<double>(ref MemoryMarshal.GetReference(value));
         }
 
-        // Converts an array of bytes into a String.  
+        // Converts an array of bytes into a String.
         public static string ToString(byte[] value, int startIndex, int length)
         {
             if (value == null)
@@ -376,7 +377,7 @@ namespace System
 
             if (length > (int.MaxValue / 3))
             {
-                // (Int32.MaxValue / 3) == 715,827,882 Bytes == 699 MB
+                // (int.MaxValue / 3) == 715,827,882 Bytes == 699 MB
                 throw new ArgumentOutOfRangeException(nameof(length), SR.Format(SR.ArgumentOutOfRange_LengthTooLarge, (int.MaxValue / 3)));
             }
 
@@ -403,7 +404,7 @@ namespace System
             });
         }
 
-        // Converts an array of bytes into a String.  
+        // Converts an array of bytes into a String.
         public static string ToString(byte[] value)
         {
             if (value == null)
@@ -411,7 +412,7 @@ namespace System
             return ToString(value, 0, value.Length);
         }
 
-        // Converts an array of bytes into a String.  
+        // Converts an array of bytes into a String.
         public static string ToString(byte[] value, int startIndex)
         {
             if (value == null)
@@ -420,14 +421,14 @@ namespace System
         }
 
         /*==================================ToBoolean===================================
-        **Action:  Convert an array of bytes to a boolean value.  We treat this array 
+        **Action:  Convert an array of bytes to a boolean value.  We treat this array
         **         as if the first 4 bytes were an Int4 an operate on this value.
         **Returns: True if the Int4 value of the first 4 bytes is non-zero.
         **Arguments: value -- The byte array
         **           startIndex -- The position within the array.
         **Exceptions: See ToInt4.
         ==============================================================================*/
-        // Converts an array of bytes into a boolean.  
+        // Converts an array of bytes into a boolean.
         public static bool ToBoolean(byte[] value, int startIndex)
         {
             if (value == null)

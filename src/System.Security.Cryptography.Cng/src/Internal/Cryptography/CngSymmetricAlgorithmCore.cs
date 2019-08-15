@@ -27,7 +27,7 @@ namespace Internal.Cryptography
         }
 
         /// <summary>
-        /// Constructs the core to use a stored CNG key. 
+        /// Constructs the core to use a stored CNG key.
         /// </summary>
         public CngSymmetricAlgorithmCore(ICngSymmetricAlgorithm outer, string keyName, CngProvider provider, CngKeyOpenOptions openOptions)
         {
@@ -198,10 +198,9 @@ namespace Internal.Cryptography
 
         // If using a stored CNG key, these fields provide the CngKey.Open() parameters. If using a plaintext key, _keyName is set to null.
         private string _keyName;
-        private CngProvider _provider;
-        private CngKeyOpenOptions _optionOptions;
+        private readonly CngProvider _provider;
+        private readonly CngKeyOpenOptions _optionOptions;
 
         private const int BitsPerByte = 8;
     }
 }
-

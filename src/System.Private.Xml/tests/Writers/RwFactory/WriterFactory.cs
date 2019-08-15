@@ -272,19 +272,19 @@ namespace System.Xml.Tests
         protected void SetupSettings()
         {
             _settings.ConformanceLevel = (ConformanceLevel)Enum.Parse(typeof(ConformanceLevel), ReadFilterCriteria("ConformanceLevel", true));
-            _settings.CheckCharacters = Boolean.Parse(ReadFilterCriteria("CheckCharacters", true));
+            _settings.CheckCharacters = bool.Parse(ReadFilterCriteria("CheckCharacters", true));
             _settings.CloseOutput = false;
 
-            _settings.Indent = Boolean.Parse(ReadFilterCriteria("Indent", true));
-            _settings.IndentChars = new String(Convert.ToChar(Int32.Parse(ReadFilterCriteria("IndentChars", true))), 1);
-            _settings.NewLineChars = new String(Convert.ToChar(Int32.Parse(ReadFilterCriteria("NewLineChars", true))), 1);
-            _settings.NewLineOnAttributes = Boolean.Parse(ReadFilterCriteria("NewLineOnAttributes", true));
-            if (Boolean.Parse(ReadFilterCriteria("NormalizeNewlines", true)))
+            _settings.Indent = bool.Parse(ReadFilterCriteria("Indent", true));
+            _settings.IndentChars = new string(Convert.ToChar(int.Parse(ReadFilterCriteria("IndentChars", true))), 1);
+            _settings.NewLineChars = new string(Convert.ToChar(int.Parse(ReadFilterCriteria("NewLineChars", true))), 1);
+            _settings.NewLineOnAttributes = bool.Parse(ReadFilterCriteria("NewLineOnAttributes", true));
+            if (bool.Parse(ReadFilterCriteria("NormalizeNewlines", true)))
                 _settings.NewLineHandling = NewLineHandling.Replace;
             else
                 _settings.NewLineHandling = NewLineHandling.None;
 
-            _settings.OmitXmlDeclaration = Boolean.Parse(ReadFilterCriteria("OmitXmlDeclaration", true));
+            _settings.OmitXmlDeclaration = bool.Parse(ReadFilterCriteria("OmitXmlDeclaration", true));
 
             //Reading Writer Type to determine encoding and if the writer type is binary writer.
             string wt = ReadFilterCriteria("WriterType", true);
@@ -315,10 +315,10 @@ namespace System.Xml.Tests
 
 
         /// <summary>
-        /// This function writes the test nodes on the factoryWriter. 
+        /// This function writes the test nodes on the factoryWriter.
         /// This will be called from Test(). If successful it will just return,
         /// else it will throw an appropriate XmlException. This function can use
-        /// the knowledge of the current writertype to write appropriate data if 
+        /// the knowledge of the current writertype to write appropriate data if
         /// really needed.
         /// </summary>
         protected void WriteNodes()

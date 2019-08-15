@@ -4,11 +4,12 @@
 
 using System.Globalization;
 using System.Diagnostics;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Collections.Tests
 {
-    public class CaseInsensitiveComparerTests : RemoteExecutorTestBase
+    public class CaseInsensitiveComparerTests
     {
         [Theory]
         [InlineData("hello", "HELLO", 0)]
@@ -97,7 +98,7 @@ namespace System.Collections.Tests
                 var comparer = new CaseInsensitiveComparer(culture);
 
                 // Turkish has lower-case and upper-case version of the dotted "i", so the upper case of "i" (U+0069) isn't "I" (U+0049)
-                // but rather "İ" (U+0130)
+                // but rather U+0130.
                 if (culture.Name == "tr-TR")
                 {
                     Assert.Equal(1, comparer.Compare("file", "FILE"));
@@ -131,7 +132,7 @@ namespace System.Collections.Tests
         [InlineData("null", "null", 0)]
         public void DefaultInvariant_Compare(object a, object b, int expected)
         {
-            RemoteInvoke((ra, rb, rexpected) =>
+            RemoteExecutor.Invoke((ra, rb, rexpected) =>
             {
                 Func<string, object> convert = (string o) =>
                 {
@@ -174,7 +175,7 @@ namespace System.Collections.Tests
                     CaseInsensitiveComparer defaultInvComparer = CaseInsensitiveComparer.DefaultInvariant;
                     Assert.Equal(rexpected_val, Math.Sign(defaultInvComparer.Compare(ra_val, rb_val)));
                 }
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, a.ToString(), b.ToString(), expected.ToString()).Dispose();
         }
 
@@ -200,7 +201,7 @@ namespace System.Collections.Tests
         public void Default_Compare_TurkishI()
         {
             // Turkish has lower-case and upper-case version of the dotted "i", so the upper case of "i" (U+0069) isn't "I" (U+0049)
-            // but rather "İ" (U+0130)
+            // but rather U+0130.
             CultureInfo culture = CultureInfo.CurrentCulture;
             CaseInsensitiveComparer comparer = CaseInsensitiveComparer.Default;
             if (culture.Name == "tr-TR")

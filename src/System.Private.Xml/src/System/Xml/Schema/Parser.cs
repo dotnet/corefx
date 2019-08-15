@@ -14,9 +14,9 @@ namespace System.Xml.Schema
     internal sealed partial class Parser
     {
         private SchemaType _schemaType;
-        private XmlNameTable _nameTable;
-        private SchemaNames _schemaNames;
-        private ValidationEventHandler _eventHandler;
+        private readonly XmlNameTable _nameTable;
+        private readonly SchemaNames _schemaNames;
+        private readonly ValidationEventHandler _eventHandler;
         private XmlNamespaceManager _namespaceManager;
         private XmlReader _reader;
         private PositionInfo _positionInfo;
@@ -29,7 +29,7 @@ namespace System.Xml.Schema
         private XmlResolver _xmlResolver = null; //to be used only by XDRBuilder
 
         //xs:Annotation perf fix
-        private XmlDocument _dummyDocument;
+        private readonly XmlDocument _dummyDocument;
         private bool _processMarkup;
         private XmlNode _parentNode;
         private XmlNamespaceManager _annotationNSManager;
@@ -138,7 +138,7 @@ namespace System.Xml.Schema
                     return false;
 
                 default:
-                    Debug.Assert(false);
+                    Debug.Fail($"Unexpected root type {rootType}");
                     break;
             }
             return true;
@@ -462,7 +462,7 @@ namespace System.Xml.Schema
                     case XmlNodeType.EndEntity:
                         if (eref.ChildNodes.Count == 0)
                         {
-                            eref.AppendChild(_dummyDocument.CreateTextNode(String.Empty));
+                            eref.AppendChild(_dummyDocument.CreateTextNode(string.Empty));
                         }
                         return eref;
                     case XmlNodeType.EntityReference:

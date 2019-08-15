@@ -26,13 +26,13 @@ namespace XDocumentTests.Streaming
         private Stream _sourceStream = null;
         private Stream _targetStream = null;
 
-        public void GetFreshStream()
+        private void GetFreshStream()
         {
             _sourceStream = new MemoryStream();
             _targetStream = new MemoryStream();
         }
 
-        public void ResetStreamPos()
+        private void ResetStreamPos()
         {
             if (_sourceStream.CanSeek)
             {
@@ -183,7 +183,7 @@ namespace XDocumentTests.Streaming
                 "contacts",
                 new XElement("contact1", "jane"),
                 new XElement("contact2", "john"));
-            List<Object> list = new List<Object>();
+            List<object> list = new List<object>();
             list.Add(contact.Element("contact1"));
             list.Add(contact.Element("contact2"));
             XStreamingElement streamElement = new XStreamingElement("contacts", list);
@@ -528,7 +528,7 @@ namespace XDocumentTests.Streaming
         }
 
         ///<summary>
-        /// This function is used in above variation to make sure that the 
+        /// This function is used in above variation to make sure that the
         /// IEnumerable is indeed walked lazily
         ///</summary>
         public IEnumerable<XElement> GetElements(XElement element)

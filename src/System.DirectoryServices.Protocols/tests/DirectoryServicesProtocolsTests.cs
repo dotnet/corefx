@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -395,7 +395,7 @@ namespace System.DirectoryServicesProtocols.Tests
                         {
                             if (partialResult[i] is SearchResultEntry)
                             {
-                                Assert.True(((SearchResultEntry)partialResult[i]).DistinguishedName.Contains("Group9"));
+                                Assert.Contains("Group9", ((SearchResultEntry)partialResult[i]).DistinguishedName);
                             }
                         }
                     }
@@ -408,7 +408,7 @@ namespace System.DirectoryServicesProtocols.Tests
                     {
                         foreach (SearchResultEntry entry in response.Entries)
                         {
-                            Assert.True(entry.DistinguishedName.Contains("Group9"));
+                            Assert.Contains("Group9", entry.DistinguishedName);
                         }
                     }
                 }
@@ -561,7 +561,7 @@ namespace System.DirectoryServicesProtocols.Tests
 
         private LdapConnection GetConnection()
         {
-            LdapDirectoryIdentifier directoryIdentifier = String.IsNullOrEmpty(LdapConfiguration.Configuration.Port) ?
+            LdapDirectoryIdentifier directoryIdentifier = string.IsNullOrEmpty(LdapConfiguration.Configuration.Port) ?
                                         new LdapDirectoryIdentifier(LdapConfiguration.Configuration.ServerName, true, false) :
                                         new LdapDirectoryIdentifier(LdapConfiguration.Configuration.ServerName,
                                                                     int.Parse(LdapConfiguration.Configuration.Port, NumberStyles.None, CultureInfo.InvariantCulture),

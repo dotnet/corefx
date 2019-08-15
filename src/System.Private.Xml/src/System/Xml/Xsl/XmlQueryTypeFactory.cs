@@ -329,18 +329,19 @@ namespace System.Xml.Xsl
             public static readonly XmlQueryType UntypedAttribute;
             public static readonly XmlQueryType NodeNotRtf;
 
-            private static XmlQueryType[] s_builtInItemTypes;
-            private static XmlQueryType[] s_builtInItemTypesStrict;
-            private static XmlQueryType[] s_specialBuiltInItemTypes;
+            private static readonly XmlQueryType[] s_builtInItemTypes;
+            private static readonly XmlQueryType[] s_builtInItemTypesStrict;
+            private static readonly XmlQueryType[] s_specialBuiltInItemTypes;
 
-            private XmlTypeCode _code;
-            private XmlQualifiedNameTest _nameTest;
-            private XmlSchemaType _schemaType;
-            private bool _isNillable;
-            private XmlNodeKindFlags _nodeKinds;
-            private bool _isStrict;
-            private bool _isNotRtf;
+            private readonly XmlTypeCode _code;
+            private readonly XmlQualifiedNameTest _nameTest;
+            private readonly XmlSchemaType _schemaType;
+            private readonly bool _isNillable;
+            private readonly XmlNodeKindFlags _nodeKinds;
+            private readonly bool _isStrict;
+            private readonly bool _isNotRtf;
 
+#pragma warning disable CA1810 // explicit static cctor
             /// <summary>
             /// Construct arrays of built-in types.
             /// </summary>
@@ -415,6 +416,7 @@ namespace System.Xml.Xsl
 
                 s_specialBuiltInItemTypes = new XmlQueryType[4] { UntypedDocument, UntypedElement, UntypedAttribute, NodeNotRtf };
             }
+#pragma warning restore CA1810
 
             /// <summary>
             /// Create ItemType from XmlTypeCode.
@@ -652,27 +654,6 @@ namespace System.Xml.Xsl
                 get { return this; }
             }
 
-            /// <summary>
-            /// Return the item's converter.
-            /// </summary>
-            public override XmlValueConverter ClrMapping
-            {
-                get
-                {
-                    // Return value converter from XmlSchemaType if type is atomic
-                    if (IsAtomicValue)
-                        return SchemaType.ValueConverter;
-
-                    // Return node converter if item must be a node
-                    if (IsNode)
-                        return XmlNodeConverter.Node;
-
-                    // Otherwise return item converter
-                    return XmlAnyConverter.Item;
-                }
-            }
-
-
             //-----------------------------------------------
             // ListBase implementation
             //-----------------------------------------------
@@ -709,10 +690,10 @@ namespace System.Xml.Xsl
         {
             public static readonly XmlQueryType None = new ChoiceType(new List<XmlQueryType>());
 
-            private XmlTypeCode _code;
-            private XmlSchemaType _schemaType;
-            private XmlNodeKindFlags _nodeKinds;
-            private List<XmlQueryType> _members;
+            private readonly XmlTypeCode _code;
+            private readonly XmlSchemaType _schemaType;
+            private readonly XmlNodeKindFlags _nodeKinds;
+            private readonly List<XmlQueryType> _members;
 
             /// <summary>
             /// Create choice between node kinds.
@@ -940,23 +921,6 @@ namespace System.Xml.Xsl
                 get { return this; }
             }
 
-            /// <summary>
-            /// Always return the item converter.
-            /// </summary>
-            public override XmlValueConverter ClrMapping
-            {
-                get
-                {
-                    if (_code == XmlTypeCode.None || _code == XmlTypeCode.Item)
-                        return XmlAnyConverter.Item;
-
-                    if (IsAtomicValue)
-                        return SchemaType.ValueConverter;
-
-                    return XmlNodeConverter.Node;
-                }
-            }
-
             //-----------------------------------------------
             // ListBase implementation
             //-----------------------------------------------
@@ -987,9 +951,8 @@ namespace System.Xml.Xsl
         {
             public static readonly XmlQueryType Zero = new SequenceType(ChoiceType.None, XmlQueryCardinality.Zero);
 
-            private XmlQueryType _prime;
-            private XmlQueryCardinality _card;
-            private XmlValueConverter _converter;
+            private readonly XmlQueryType _prime;
+            private readonly XmlQueryCardinality _card;
 
             /// <summary>
             /// Create sequence type from prime and cardinality.
@@ -1146,21 +1109,6 @@ namespace System.Xml.Xsl
                 get { return _prime; }
             }
 
-            /// <summary>
-            /// Return the prime's converter wrapped in a list converter.
-            /// </summary>
-            public override XmlValueConverter ClrMapping
-            {
-                get
-                {
-                    if (_converter == null)
-                        _converter = XmlListConverter.Create(_prime.ClrMapping);
-
-                    return _converter;
-                }
-            }
-
-
             //-----------------------------------------------
             // ListBase implementation
             //-----------------------------------------------
@@ -1186,7 +1134,7 @@ namespace System.Xml.Xsl
         /// <summary>
         /// Create a Node XmlQueryType having an XSD content type.
         /// </summary>
-        /// <param name="code">unless kind is Root, Element, or Attribute, "contentType" is ignored</param>
+        /// <param name="kind">unless kind is Root, Element, or Attribute, "contentType" is ignored</param>
         /// <param name="contentType">content type of the node</param>
         /// <returns>the node type</returns>
         public static XmlQueryType Type(XPathNodeType kind, XmlQualifiedNameTest nameTest, XmlSchemaType contentType, bool isNillable)
@@ -1917,7 +1865,7 @@ namespace System.Xml.Xsl
                 return XmlQueryCardinality.ZeroOrMore;
 
             default:
-                Debug.Assert(false);
+                Debug.Fail($"Unexpected type code {typeCode}");
                 return XmlQueryCardinality.None;
             }
         }

@@ -22,16 +22,16 @@ namespace System.Text
     //
     public abstract class Encoder
     {
-        internal EncoderFallback _fallback = null;
+        internal EncoderFallback? _fallback = null;
 
-        internal EncoderFallbackBuffer _fallbackBuffer = null;
+        internal EncoderFallbackBuffer? _fallbackBuffer = null;
 
         protected Encoder()
         {
             // We don't call default reset because default reset probably isn't good if we aren't initialized.
         }
 
-        public EncoderFallback Fallback
+        public EncoderFallback? Fallback
         {
             get
             {
@@ -90,7 +90,7 @@ namespace System.Text
         // We avoid GetMaxByteCount() because a) we can't call the base encoder and b) it might be really big.
         public virtual void Reset()
         {
-            char[] charTemp = { };
+            char[] charTemp = Array.Empty<char>();
             byte[] byteTemp = new byte[GetByteCount(charTemp, 0, 0, true)];
             GetBytes(charTemp, 0, 0, byteTemp, 0, true);
             if (_fallbackBuffer != null)
@@ -343,4 +343,3 @@ namespace System.Text
         }
     }
 }
-

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.ComponentModel.Design.Serialization;
 using System.Globalization;
 using Xunit;
 
@@ -23,15 +24,15 @@ namespace System.ComponentModel.Tests
         [Fact]
         public static void Get_UnderlyingType()
         {
-            Assert.Equal(NullableConverterTests.s_intNullableConverter.UnderlyingType, typeof(int));
-            Assert.Equal(NullableConverterTests.s_myNullableConverter.UnderlyingType, typeof(SomeValueType));
+            Assert.Equal(typeof(int), NullableConverterTests.s_intNullableConverter.UnderlyingType);
+            Assert.Equal(typeof(SomeValueType), NullableConverterTests.s_myNullableConverter.UnderlyingType);
         }
 
         [Fact]
         public static void Get_NullableType()
         {
-            Assert.Equal(NullableConverterTests.s_intNullableConverter.NullableType, typeof(int?));
-            Assert.Equal(NullableConverterTests.s_myNullableConverter.NullableType, typeof(SomeValueType?));
+            Assert.Equal(typeof(int?), NullableConverterTests.s_intNullableConverter.NullableType);
+            Assert.Equal(typeof(SomeValueType?), NullableConverterTests.s_myNullableConverter.NullableType);
         }
 
         [Fact]
@@ -55,10 +56,11 @@ namespace System.ComponentModel.Tests
         [Fact]
         public static void CanConvertTo_WithContext()
         {
-            CanConvertTo_WithContext(new object[2, 2]
+            CanConvertTo_WithContext(new object[3, 2]
                 {
                     { typeof(int), true },
-                    { typeof(string), true }
+                    { typeof(string), true },
+                    { typeof(InstanceDescriptor), true }
                 },
                 NullableConverterTests.s_intNullableConverter);
         }
@@ -86,6 +88,21 @@ namespace System.ComponentModel.Tests
                     { 4, "4", CultureInfo.InvariantCulture }
                 },
                 NullableConverterTests.s_intNullableConverter);
+
+            var actualInstanceDescriptor = (InstanceDescriptor)NullableConverterTests.s_intNullableConverter.ConvertTo(NullableConverterTests.s_nullableThree, typeof(InstanceDescriptor));
+            var expectedMemberInfo = typeof(int?).GetConstructor(new Type[] { typeof(int) });
+            Assert.Equal(expectedMemberInfo, actualInstanceDescriptor.MemberInfo);
+            Assert.Equal(new[] { NullableConverterTests.s_nullableThree }, actualInstanceDescriptor.Arguments);
+            Assert.True(actualInstanceDescriptor.IsComplete);
+            Assert.Equal(NullableConverterTests.s_nullableThree, actualInstanceDescriptor.Invoke());
+
+            var actualUnInitInstanceDescriptor = (InstanceDescriptor)NullableConverterTests.s_intNullableConverter.ConvertTo(NullableConverterTests.s_uninitializedInt, typeof(InstanceDescriptor));
+            Assert.Equal(expectedMemberInfo, actualUnInitInstanceDescriptor.MemberInfo);
+            Assert.Equal(new[] { NullableConverterTests.s_uninitializedInt }, actualUnInitInstanceDescriptor.Arguments);
+            Assert.True(actualUnInitInstanceDescriptor.IsComplete);
+            // This appears to be a bug present in desktop as well
+            // Assert.Equal(NullableConverterTests.s_uninitializedInt, actualUnInitInstanceDescriptor.Invoke());
+            Assert.Equal(0, actualUnInitInstanceDescriptor.Invoke());
 
             SomeValueType v;
             v.a = 10;

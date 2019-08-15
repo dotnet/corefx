@@ -9,7 +9,7 @@ using System.Security.Cryptography;
 namespace Internal.Cryptography
 {
     //
-    // A cross-platform ICryptoTransform implementation for encryption. 
+    // A cross-platform ICryptoTransform implementation for encryption.
     //
     //  - Implements the various padding algorithms (as we support padding algorithms that the underlying native apis don't.)
     //
@@ -18,8 +18,6 @@ namespace Internal.Cryptography
     //
     internal sealed class UniversalCryptoEncryptor : UniversalCryptoTransform
     {
-        private static readonly RandomNumberGenerator s_randomNumberGenerator = RandomNumberGenerator.Create();
-
         public UniversalCryptoEncryptor(PaddingMode paddingMode, BasicSymmetricCipher basicSymmetricCipher)
             : base(paddingMode, basicSymmetricCipher)
         {
@@ -30,11 +28,21 @@ namespace Internal.Cryptography
             return BasicSymmetricCipher.Transform(inputBuffer, inputOffset, inputCount, outputBuffer, outputOffset);
         }
 
-        protected sealed override byte[] UncheckedTransformFinalBlock(byte[] inputBuffer, int inputOffset, int inputCount)
+        protected sealed override unsafe byte[] UncheckedTransformFinalBlock(byte[] inputBuffer, int inputOffset, int inputCount)
         {
             byte[] paddedBlock = PadBlock(inputBuffer, inputOffset, inputCount);
-            byte[] output = BasicSymmetricCipher.TransformFinal(paddedBlock, 0, paddedBlock.Length);
-            return output;
+
+            fixed (byte* paddedBlockPtr = paddedBlock)
+            {
+                byte[] output = BasicSymmetricCipher.TransformFinal(paddedBlock, 0, paddedBlock.Length);
+
+                if (paddedBlock != inputBuffer)
+                {
+                    CryptographicOperations.ZeroMemory(paddedBlock);
+                }
+
+                return output;
+            }
         }
 
         private byte[] PadBlock(byte[] block, int offset, int count)
@@ -70,9 +78,9 @@ namespace Internal.Cryptography
                 // xx rr rr rr rr rr rr 07
                 case PaddingMode.ISO10126:
                     result = new byte[count + padBytes];
-                    
+
                     Buffer.BlockCopy(block, offset, result, 0, count);
-                    s_randomNumberGenerator.GetBytes(result, count + 1, padBytes - 1);
+                    RandomNumberGenerator.Fill(result.AsSpan(count + 1, padBytes - 1));
                     result[result.Length - 1] = (byte)padBytes;
 
                     break;

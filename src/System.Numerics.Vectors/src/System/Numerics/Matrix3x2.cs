@@ -11,6 +11,8 @@ namespace System.Numerics
     /// </summary>
     public struct Matrix3x2 : IEquatable<Matrix3x2>
     {
+        private const float RotationEpsilon = 0.001f * MathF.PI / 180f;     // 0.1% of a degree
+
         #region Public Fields
         /// <summary>
         /// The first element of the first row
@@ -56,7 +58,7 @@ namespace System.Numerics
         /// <summary>
         /// Returns whether the matrix is the identity matrix.
         /// </summary>
-        public bool IsIdentity
+        public readonly bool IsIdentity
         {
             get
             {
@@ -72,7 +74,7 @@ namespace System.Numerics
         /// </summary>
         public Vector2 Translation
         {
-            get
+            readonly get
             {
                 return new Vector2(M31, M32);
             }
@@ -331,27 +333,25 @@ namespace System.Numerics
 
             float c, s;
 
-            const float epsilon = 0.001f * MathF.PI / 180f;     // 0.1% of a degree
-
-            if (radians > -epsilon && radians < epsilon)
+            if (radians > -RotationEpsilon && radians < RotationEpsilon)
             {
                 // Exact case for zero rotation.
                 c = 1;
                 s = 0;
             }
-            else if (radians > MathF.PI / 2 - epsilon && radians < MathF.PI / 2 + epsilon)
+            else if (radians > MathF.PI / 2 - RotationEpsilon && radians < MathF.PI / 2 + RotationEpsilon)
             {
                 // Exact case for 90 degree rotation.
                 c = 0;
                 s = 1;
             }
-            else if (radians < -MathF.PI + epsilon || radians > MathF.PI - epsilon)
+            else if (radians < -MathF.PI + RotationEpsilon || radians > MathF.PI - RotationEpsilon)
             {
                 // Exact case for 180 degree rotation.
                 c = -1;
                 s = 0;
             }
-            else if (radians > -MathF.PI / 2 - epsilon && radians < -MathF.PI / 2 + epsilon)
+            else if (radians > -MathF.PI / 2 - RotationEpsilon && radians < -MathF.PI / 2 + RotationEpsilon)
             {
                 // Exact case for 270 degree rotation.
                 c = 0;
@@ -391,27 +391,25 @@ namespace System.Numerics
 
             float c, s;
 
-            const float epsilon = 0.001f * MathF.PI / 180f;     // 0.1% of a degree
-
-            if (radians > -epsilon && radians < epsilon)
+            if (radians > -RotationEpsilon && radians < RotationEpsilon)
             {
                 // Exact case for zero rotation.
                 c = 1;
                 s = 0;
             }
-            else if (radians > MathF.PI / 2 - epsilon && radians < MathF.PI / 2 + epsilon)
+            else if (radians > MathF.PI / 2 - RotationEpsilon && radians < MathF.PI / 2 + RotationEpsilon)
             {
                 // Exact case for 90 degree rotation.
                 c = 0;
                 s = 1;
             }
-            else if (radians < -MathF.PI + epsilon || radians > MathF.PI - epsilon)
+            else if (radians < -MathF.PI + RotationEpsilon || radians > MathF.PI - RotationEpsilon)
             {
                 // Exact case for 180 degree rotation.
                 c = -1;
                 s = 0;
             }
-            else if (radians > -MathF.PI / 2 - epsilon && radians < -MathF.PI / 2 + epsilon)
+            else if (radians > -MathF.PI / 2 - RotationEpsilon && radians < -MathF.PI / 2 + RotationEpsilon)
             {
                 // Exact case for 270 degree rotation.
                 c = 0;
@@ -441,11 +439,11 @@ namespace System.Numerics
         }
 
         /// <summary>
-        /// Calculates the determinant for this matrix. 
+        /// Calculates the determinant for this matrix.
         /// The determinant is calculated by expanding the matrix with a third column whose values are (0,0,1).
         /// </summary>
         /// <returns>The determinant.</returns>
-        public float GetDeterminant()
+        public readonly float GetDeterminant()
         {
             // There isn't actually any such thing as a determinant for a non-square matrix,
             // but this 3x2 type is really just an optimization of a 3x3 where we happen to
@@ -760,7 +758,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="other">The other matrix to test equality against.</param>
         /// <returns>True if this matrix is equal to other; False otherwise.</returns>
-        public bool Equals(Matrix3x2 other)
+        public readonly bool Equals(Matrix3x2 other)
         {
             return (M11 == other.M11 && M22 == other.M22 && // Check diagonal element first for early out.
                                         M12 == other.M12 &&
@@ -773,7 +771,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="obj">The Object to compare against.</param>
         /// <returns>True if the Object is equal to this matrix; False otherwise.</returns>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             if (obj is Matrix3x2)
             {
@@ -787,20 +785,19 @@ namespace System.Numerics
         /// Returns a String representing this matrix instance.
         /// </summary>
         /// <returns>The string representation.</returns>
-        public override string ToString()
+        public override readonly string ToString()
         {
-            CultureInfo ci = CultureInfo.CurrentCulture;
-            return String.Format(ci, "{{ {{M11:{0} M12:{1}}} {{M21:{2} M22:{3}}} {{M31:{4} M32:{5}}} }}",
-                                 M11.ToString(ci), M12.ToString(ci),
-                                 M21.ToString(ci), M22.ToString(ci),
-                                 M31.ToString(ci), M32.ToString(ci));
+            return string.Format(CultureInfo.CurrentCulture, "{{ {{M11:{0} M12:{1}}} {{M21:{2} M22:{3}}} {{M31:{4} M32:{5}}} }}",
+                                 M11, M12,
+                                 M21, M22,
+                                 M31, M32);
         }
 
         /// <summary>
         /// Returns the hash code for this instance.
         /// </summary>
         /// <returns>The hash code.</returns>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return unchecked(M11.GetHashCode() + M12.GetHashCode() +
                              M21.GetHashCode() + M22.GetHashCode() +

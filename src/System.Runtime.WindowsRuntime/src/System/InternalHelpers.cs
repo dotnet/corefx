@@ -10,7 +10,7 @@ namespace System
     {
         internal static void SetErrorCode(this Exception ex, int code)
         {
-            InteropExtensions.SetExceptionErrorCode(ex, code);
+            ex.HResult = code;
         }
     }
 }

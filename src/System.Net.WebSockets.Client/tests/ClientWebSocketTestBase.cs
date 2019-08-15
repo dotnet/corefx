@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Net.Test.Common;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,6 +20,11 @@ namespace System.Net.WebSockets.Client.Tests
     {
         public static readonly object[][] EchoServers = System.Net.Test.Common.Configuration.WebSockets.EchoServers;
         public static readonly object[][] EchoHeadersServers = System.Net.Test.Common.Configuration.WebSockets.EchoHeadersServers;
+        public static readonly object[][] EchoServersAndBoolean = EchoServers.SelectMany(o => new object[][]
+        {
+            new object[] { o[0], false },
+            new object[] { o[0], true }
+        }).ToArray();
 
         public const int TimeOutMilliseconds = 20000;
         public const int CloseDescriptionMaxLength = 123;
@@ -41,7 +47,7 @@ namespace System.Net.WebSockets.Client.Tests
                     server = new Uri(string.Format("ws://{0}", Guid.NewGuid().ToString()));
                     exceptionMessage = ResourceHelper.GetExceptionMessage("net_webstatus_ConnectFailure");
 
-                    yield return new object[] { server, exceptionMessage };
+                    yield return new object[] { server, exceptionMessage, WebSocketError.Faulted };
                 }
 
                 // Known server but not a real websocket endpoint.
@@ -50,7 +56,7 @@ namespace System.Net.WebSockets.Client.Tests
                     var ub = new UriBuilder("ws", server.Host, server.Port, server.PathAndQuery);
                     exceptionMessage = ResourceHelper.GetExceptionMessage("net_WebSockets_Connect101Expected", (int) HttpStatusCode.OK);
 
-                    yield return new object[] { ub.Uri, exceptionMessage };
+                    yield return new object[] { ub.Uri, exceptionMessage, WebSocketError.NotAWebSocket };
                 }
             }
         }
@@ -76,12 +82,6 @@ namespace System.Net.WebSockets.Client.Tests
                 }
                 catch (WebSocketException exception)
                 {
-                    Assert.Equal(ResourceHelper.GetExceptionMessage(
-                        "net_WebSockets_InvalidState_ClosedOrAborted",
-                        "System.Net.WebSockets.InternalClientWebSocket",
-                        "Aborted"),
-                        exception.Message);
-
                     Assert.Equal(WebSocketError.InvalidState, exception.WebSocketErrorCode);
                     Assert.Equal(WebSocketState.Aborted, cws.State);
                 }

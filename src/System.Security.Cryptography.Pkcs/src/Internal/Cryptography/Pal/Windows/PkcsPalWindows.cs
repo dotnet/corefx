@@ -28,67 +28,6 @@ namespace Internal.Cryptography.Pal.Windows
             return DecryptorPalWindows.Decode(encodedMessage, out version, out contentInfo, out contentEncryptionAlgorithm, out originatorCerts, out unprotectedAttributes);
         }
 
-        public sealed override byte[] EncodeOctetString(byte[] octets)
-        {
-            unsafe
-            {
-                fixed (byte* pOctets = octets)
-                {
-                    DATA_BLOB blob = new DATA_BLOB((IntPtr)pOctets, (uint)(octets.Length));
-                    return Interop.Crypt32.CryptEncodeObjectToByteArray(CryptDecodeObjectStructType.X509_OCTET_STRING, &blob);
-                }
-            }
-        }
-
-        public sealed override byte[] DecodeOctetString(byte[] encodedOctets)
-        {
-            using (SafeHandle sh = Interop.Crypt32.CryptDecodeObjectToMemory(CryptDecodeObjectStructType.X509_OCTET_STRING, encodedOctets))
-            {
-                unsafe
-                {
-                    DATA_BLOB blob = *(DATA_BLOB*)(sh.DangerousGetHandle());
-                    return blob.ToByteArray();
-                }
-            }
-        }
-
-        public sealed override byte[] EncodeUtcTime(DateTime utcTime)
-        {
-            long ft = utcTime.ToFileTimeUtc();
-            unsafe
-            {
-                return Interop.Crypt32.CryptEncodeObjectToByteArray(CryptDecodeObjectStructType.PKCS_UTC_TIME, &ft);
-            }
-        }
-
-        public sealed override DateTime DecodeUtcTime(byte[] encodedUtcTime)
-        {
-            long signingTime = 0;
-            unsafe
-            {
-                fixed (byte* pEncodedUtcTime = encodedUtcTime)
-                {
-                    int cbSize = sizeof(long);
-                    if (!Interop.Crypt32.CryptDecodeObject(CryptDecodeObjectStructType.PKCS_UTC_TIME, (IntPtr)pEncodedUtcTime, encodedUtcTime.Length, &signingTime, ref cbSize))
-                        throw Marshal.GetLastWin32Error().ToCryptographicException();
-                }
-            }
-            return DateTime.FromFileTimeUtc(signingTime);
-        }
-
-        public sealed override string DecodeOid(byte[] encodedOid)
-        {
-            using (SafeHandle sh = Interop.Crypt32.CryptDecodeObjectToMemory(CryptDecodeObjectStructType.X509_OBJECT_IDENTIFIER, encodedOid))
-            {
-                unsafe
-                {
-                    IntPtr pOidValue = *(IntPtr*)(sh.DangerousGetHandle());
-                    string contentType = pOidValue.ToStringAnsi();
-                    return contentType;
-                }
-            }
-        }
-
         public sealed override Oid GetEncodedMessageType(byte[] encodedMessage)
         {
             using (SafeCryptMsgHandle hCryptMsg = Interop.Crypt32.CryptMsgOpenToDecode(MsgEncodingType.All, 0, 0, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero))
@@ -134,8 +73,8 @@ namespace Internal.Cryptography.Pal.Windows
 
         public sealed override void AddCertsFromStoreForDecryption(X509Certificate2Collection certs)
         {
-            certs.AddRange(Helpers.GetStoreCertificates(StoreName.My, StoreLocation.CurrentUser, openExistingOnly: true));
-            certs.AddRange(Helpers.GetStoreCertificates(StoreName.My, StoreLocation.LocalMachine, openExistingOnly: true));
+            certs.AddRange(PkcsHelpers.GetStoreCertificates(StoreName.My, StoreLocation.CurrentUser, openExistingOnly: true));
+            certs.AddRange(PkcsHelpers.GetStoreCertificates(StoreName.My, StoreLocation.LocalMachine, openExistingOnly: true));
         }
 
         public sealed override Exception CreateRecipientsNotFoundException()
@@ -206,17 +145,28 @@ namespace Internal.Cryptography.Pal.Windows
                 if (keySpec == CryptKeySpec.CERT_NCRYPT_KEY_SPEC)
                 {
                     using (SafeNCryptKeyHandle keyHandle = new SafeNCryptKeyHandle(handle.DangerousGetHandle(), handle))
-                    using (CngKey cngKey = CngKey.Open(keyHandle, CngKeyHandleOpenOptions.None))
                     {
-                        if (typeof(T) == typeof(RSA))
-                            return (T)(object)new RSACng(cngKey);
-                        if (typeof(T) == typeof(ECDsa))
-                            return (T)(object)new ECDsaCng(cngKey);
-                        if (typeof(T) == typeof(DSA))
-                            return (T)(object)new DSACng(cngKey);
+                        CngKeyHandleOpenOptions options = CngKeyHandleOpenOptions.None;
+                        byte clrIsEphemeral = 0;
+                        Interop.NCrypt.ErrorCode errorCode = Interop.NCrypt.NCryptGetByteProperty(keyHandle, "CLR IsEphemeral", ref clrIsEphemeral, CngPropertyOptions.CustomProperty);
 
-                        Debug.Fail($"Unknown CNG key type request: {typeof(T).FullName}");
-                        return null;
+                        if (errorCode == Interop.NCrypt.ErrorCode.ERROR_SUCCESS && clrIsEphemeral == 1)
+                        {
+                            options |= CngKeyHandleOpenOptions.EphemeralKey;
+                        }
+
+                        using (CngKey cngKey = CngKey.Open(keyHandle, options))
+                        {
+                            if (typeof(T) == typeof(RSA))
+                                return (T)(object)new RSACng(cngKey);
+                            if (typeof(T) == typeof(ECDsa))
+                                return (T)(object)new ECDsaCng(cngKey);
+                            if (typeof(T) == typeof(DSA))
+                                return (T)(object)new DSACng(cngKey);
+
+                            Debug.Fail($"Unknown CNG key type request: {typeof(T).FullName}");
+                            return null;
+                        }
                     }
                 }
 

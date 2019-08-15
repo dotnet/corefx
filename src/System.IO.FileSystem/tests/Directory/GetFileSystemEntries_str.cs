@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.IO.Tests
@@ -205,33 +205,6 @@ namespace System.IO.Tests
         #region PlatformSpecific
 
         [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public void InvalidPath_Desktop()
-        {
-            foreach (char invalid in Path.GetInvalidFileNameChars())
-            {
-                string badPath = string.Format($"{TestDirectory}{Path.DirectorySeparatorChar}te{invalid}st");
-                switch (invalid)
-                {
-                    case '/':
-                    case '\\':
-                        Assert.Throws<DirectoryNotFoundException>(() => GetEntries(badPath));
-                        break;
-                    case ':':
-                        Assert.Throws<NotSupportedException>(() => GetEntries(badPath));
-                        break;
-                    case '\0':
-                        Assert.Throws<ArgumentException>(() => GetEntries(badPath));
-                        break;
-                    default:
-                        Assert.Throws<ArgumentException>(() => GetEntries(badPath));
-                        break;
-                }
-            }
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void InvalidPath_Core()
         {
             foreach (char invalid in Path.GetInvalidFileNameChars())
@@ -269,19 +242,6 @@ namespace System.IO.Tests
             InlineData("<"),
             InlineData("\t")]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public void WindowsInvalidCharsPath_Desktop(string invalid)
-        {
-            Assert.Throws<ArgumentException>(() => GetEntries(invalid));
-        }
-
-        [Theory,
-            InlineData("\n"),
-            InlineData(">"),
-            InlineData("<"),
-            InlineData("\t")]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void WindowsInvalidCharsPath_Core(string invalid)
         {
             Assert.Throws<IOException>(() => GetEntries(invalid));
@@ -321,11 +281,11 @@ namespace System.IO.Tests
             if (TestDirectories)
             {
                 DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
-                
+
                 testDir.CreateSubdirectory(valid);
 
                 string[] results = GetEntries(testDir.FullName);
-                 
+
                 Assert.Contains(Path.Combine(testDir.FullName, valid), results);
             }
         }
@@ -333,7 +293,7 @@ namespace System.IO.Tests
         #endregion
     }
 
-    public sealed class Directory_GetEntries_CurrentDirectory : RemoteExecutorTestBase
+    public sealed class Directory_GetEntries_CurrentDirectory : FileCleanupTestBase
     {
         [Fact]
         public void CurrentDirectory()
@@ -342,7 +302,7 @@ namespace System.IO.Tests
             Directory.CreateDirectory(testDir);
             File.WriteAllText(Path.Combine(testDir, GetTestFileName()), "cat");
             Directory.CreateDirectory(Path.Combine(testDir, GetTestFileName()));
-            RemoteInvoke((testDirectory) =>
+            RemoteExecutor.Invoke((testDirectory) =>
             {
                 Directory.SetCurrentDirectory(testDirectory);
 
@@ -376,7 +336,7 @@ namespace System.IO.Tests
                 Assert.NotEmpty(Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*", SearchOption.AllDirectories));
                 Assert.NotEmpty(Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*", SearchOption.TopDirectoryOnly));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, testDir).Dispose();
         }
     }

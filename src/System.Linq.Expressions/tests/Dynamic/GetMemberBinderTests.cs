@@ -36,11 +36,11 @@ namespace System.Dynamic.Tests
 
         private static readonly string[] Names =
         {
-            "arg", "ARG", "Arg", "Argument name that isn’t a valid C♯ name 👿🤢",
+            "arg", "ARG", "Arg", "Argument name that isn\u2019t a valid C\u266F name \uD83D\uDC7F\uD83E\uDD22",
             "horrid name with" + (char)0xD800 + "a half surrogate", "new", "break"
         };
 
-        private static IEnumerable<object[]> NamesAndBools() => Names.Select((n, i) => new object[] {n, i % 2 == 0});
+        public static IEnumerable<object[]> NamesAndBools() => Names.Select((n, i) => new object[] {n, i % 2 == 0});
 
         [Fact]
         public void InvokeInstanceProperty()

@@ -15,7 +15,7 @@ namespace System.Reflection.Tests
         {
             AssertExtensions.Throws<ArgumentNullException>("memberInfo", () => new CustomAttributeNamedArgument(null, null));
 
-            MethodInfo m = typeof(CustomAttribute_Named_Typed_ArgumentTests).GetMethod("MyMethod");
+            MethodInfo m = typeof(CustomAttribute_Named_Typed_ArgumentTests).GetMethod("MyMethod", BindingFlags.Static | BindingFlags.NonPublic);
             foreach (CustomAttributeData cad in CustomAttributeData.GetCustomAttributes(m))
             {
                 foreach (CustomAttributeTypedArgument cata in cad.ConstructorArguments)
@@ -27,7 +27,7 @@ namespace System.Reflection.Tests
                 foreach (CustomAttributeNamedArgument cana in cad.NamedArguments)
                 {
                     Assert.Equal("System.String Desc", cana.MemberInfo.ToString());
-                    Assert.True(cana.TypedValue.ArgumentType == typeof(System.String));
+                    Assert.True(cana.TypedValue.ArgumentType == typeof(string));
                     Assert.Equal("This is a description on a method", cana.TypedValue.Value.ToString());
                 }
                 return;
@@ -49,14 +49,14 @@ namespace System.Reflection.Tests
                     return;
                 }
             }
-            
+
             Assert.True(false, "Expected to find MyAttr Attribute");
         }
-        
+
         [MyAttr(MyKinds.First, Desc = "This is a description on a method")]
-        public static void MyMethod() { }
+        private static void MyMethod() { }
     }
-    
+
     internal enum MyKinds {
         First,
         Second

@@ -30,7 +30,7 @@ public class ReadAndWrite
             Console.SetOut(savedStandardOutput);
         }
     }
-    
+
     [Fact]
     public static void WriteToOutputStream_EmptyArray()
     {
@@ -75,7 +75,7 @@ public class ReadAndWrite
 
     private static void WriteCore()
     {
-        // We just want to ensure none of these throw exceptions, we don't actually validate 
+        // We just want to ensure none of these throw exceptions, we don't actually validate
         // what was written.
 
         Console.Write("{0}", 32);
@@ -110,7 +110,7 @@ public class ReadAndWrite
         Assert.Equal("abcd", Console.Out.NewLine);
         Console.Out.NewLine = Environment.NewLine;
 
-        // We just want to ensure none of these throw exceptions, we don't actually validate 
+        // We just want to ensure none of these throw exceptions, we don't actually validate
         // what was written.
 
         Console.WriteLine();
@@ -152,7 +152,7 @@ public class ReadAndWrite
                 Assert.NotNull(writer);
                 Assert.NotEqual(writer, sw); // the writer we provide gets wrapped
 
-                // We just want to ensure none of these throw exceptions, we don't actually validate 
+                // We just want to ensure none of these throw exceptions, we don't actually validate
                 // what was written.
 
                 writer.Write("{0}", 32);
@@ -195,7 +195,7 @@ public class ReadAndWrite
         }
     }
 
-    public static unsafe void ValidateConsoleEncoding(Encoding encoding)
+    private static unsafe void ValidateConsoleEncoding(Encoding encoding)
     {
         Assert.NotNull(encoding);
 
@@ -259,9 +259,6 @@ public class ReadAndWrite
     }
 
     [Fact]
-    // On the full framework it is not guaranteed to eat the preamble bytes
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "https://github.com/dotnet/corefx/issues/21483")]
     public static unsafe void OutputEncodingPreamble()
     {
         Encoding curEncoding = Console.OutputEncoding;
@@ -284,7 +281,6 @@ public class ReadAndWrite
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "https://github.com/dotnet/corefx/issues/21483")]
     public static unsafe void OutputEncoding()
     {
         Encoding curEncoding = Console.OutputEncoding;
@@ -381,7 +377,7 @@ public class ReadAndWrite
         {
             Console.SetOut(savedStandardOutput);
             Console.SetIn(savedStandardInput);
-        }        
+        }
     }
 
     [Fact]

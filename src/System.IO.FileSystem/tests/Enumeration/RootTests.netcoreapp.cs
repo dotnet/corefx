@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -26,7 +26,7 @@ namespace System.IO.Tests.Enumeration
 
             protected override bool ShouldRecurseIntoEntry(ref FileSystemEntry entry)
             {
-                LastDirectory = new string(entry.Directory); 
+                LastDirectory = new string(entry.Directory);
                 return false;
             }
         }
@@ -49,7 +49,7 @@ namespace System.IO.Tests.Enumeration
                     // Should start with the root and shouldn't have a separator after the root
                     Assert.StartsWith(root, recursed.Current);
                     Assert.True(recursed.Current.LastIndexOf(Path.DirectorySeparatorChar) < root.Length,
-                        $"should have no separators pasth the root '{root}' in in '{recursed.Current}'");
+                        $"should have no separators past the root '{root}' in '{recursed.Current}'");
                 }
 
                 Assert.NotNull(recursed.LastDirectory);

@@ -4,9 +4,9 @@
 // Bitmap class testing unit
 //
 // Authors:
-// 	Jordi Mas i Hernàndez (jmas@softcatala.org>
-//	Jonathan Gilbert <logic@deltaq.org>
-//	Sebastien Pouliot  <sebastien@ximian.com>
+//  Jordi Mas i Hernàndez (jmas@softcatala.org>
+//  Jonathan Gilbert <logic@deltaq.org>
+//  Sebastien Pouliot  <sebastien@ximian.com>
 //
 // (C) 2004 Ximian, Inc.  http://www.ximian.com
 // Copyright (C) 2004,2006-2007 Novell, Inc (http://www.novell.com)
@@ -18,10 +18,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -39,7 +39,6 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
-using System.Security.Permissions;
 using System.Text;
 using System.Xml.Serialization;
 using Xunit;
@@ -50,10 +49,10 @@ namespace MonoTests.System.Drawing
     public class TestBitmap
     {
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TestPixels()
         {
-            // Tests GetSetPixel/SetPixel			
+            // Tests GetSetPixel/SetPixel
             Bitmap bmp = new Bitmap(100, 100, PixelFormat.Format32bppRgb);
             bmp.SetPixel(0, 0, Color.FromArgb(255, 128, 128, 128));
             Color color = bmp.GetPixel(0, 0);
@@ -65,6 +64,7 @@ namespace MonoTests.System.Drawing
             Assert.Equal(Color.FromArgb(255, 255, 0, 155), color2);
         }
 
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         [ActiveIssue(20884)]
         public void LockBits_IndexedWrite_NonIndexed()
         {
@@ -75,6 +75,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         [ActiveIssue(20884)]
         public void LockBits_NonIndexedWrite_ToIndexed()
         {
@@ -89,7 +90,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsDrawingSupported), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35744)]
         public void LockBits_ImageLockMode_Invalid()
         {
             using (Bitmap bmp = new Bitmap(10, 10, PixelFormat.Format24bppRgb))
@@ -111,7 +112,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void LockBits_Double()
         {
             using (Bitmap bmp = new Bitmap(10, 10, PixelFormat.Format24bppRgb))
@@ -129,7 +130,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Format1bppIndexed()
         {
             using (Bitmap bmp = new Bitmap(1, 1, PixelFormat.Format1bppIndexed))
@@ -140,7 +141,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Format4bppIndexed()
         {
             using (Bitmap bmp = new Bitmap(1, 1, PixelFormat.Format4bppIndexed))
@@ -151,7 +152,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Format8bppIndexed()
         {
             using (Bitmap bmp = new Bitmap(1, 1, PixelFormat.Format8bppIndexed))
@@ -290,19 +291,20 @@ namespace MonoTests.System.Drawing
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Format32bppArgb()
         {
             FormatTest(PixelFormat.Format32bppArgb);
         }
 
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         [ActiveIssue(20884)]
         public void Format32bppRgb()
         {
             FormatTest(PixelFormat.Format32bppRgb);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Format24bppRgb()
         {
             FormatTest(PixelFormat.Format24bppRgb);
@@ -336,7 +338,7 @@ namespace MonoTests.System.Drawing
             return sRslt;
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Clone()
         {
             string sInFile = Helpers.GetTestBitmapPath("almogaver24bits.bmp");
@@ -354,7 +356,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void CloneImage()
         {
             string sInFile = Helpers.GetTestBitmapPath("almogaver24bits.bmp");
@@ -367,7 +369,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Frames()
         {
             string sInFile = Helpers.GetTestBitmapPath("almogaver24bits.bmp");
@@ -381,7 +383,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void FileDoesNotExists()
         {
             Assert.Throws<ArgumentException>(() => new Bitmap("FileDoesNotExists.jpg"));
@@ -487,7 +489,7 @@ namespace MonoTests.System.Drawing
 
         // Rotate bitmap in diffent ways, and check the result
         // pixels using MD5
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Rotate()
         {
             string sInFile = Helpers.GetTestBitmapPath("almogaver24bits.bmp");
@@ -505,67 +507,32 @@ namespace MonoTests.System.Drawing
 
         // Rotate 1- and 4-bit bitmaps in different ways and check the
         // resulting pixels using MD5
-        [ConditionalFact(Helpers.RecentGdiplusIsAvailable)]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsDrawingSupported), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35744)]
+        [InlineData("1bit.png", RotateFlipType.Rotate180FlipNone, "64AE60858A02228F7B1B18C7812FB6")]
+        [InlineData("1bit.png", RotateFlipType.Rotate180FlipX, "353E937CFF31B1BF6C3DD0A031ACB5")]
+        [InlineData("1bit.png", RotateFlipType.Rotate180FlipXY, "A4DAF507C92BDE10626BC7B34FEFE5")]
+        [InlineData("1bit.png", RotateFlipType.Rotate180FlipY, "23947CE822C1DDE6BEA69C01F8D0D9")]
+        [InlineData("1bit.png", RotateFlipType.Rotate270FlipNone, "E96D3390938350F9DE2608C4364424")]
+        [InlineData("1bit.png", RotateFlipType.Rotate270FlipX, "AEA18A770A845E25B6A8CE28DD6DCB")]
+        [InlineData("1bit.png", RotateFlipType.Rotate270FlipXY, "C0975EAFD2FC1CC9CC7AF20B92FC9F")]
+        [InlineData("1bit.png", RotateFlipType.Rotate270FlipY, "BE45F685BDEBD7079AA1B2CBA46723")]
+        [InlineData("4bit.png", RotateFlipType.Rotate180FlipNone, "27CF5E9CE70BE9EBC47FB996721B95")]
+        [InlineData("4bit.png", RotateFlipType.Rotate180FlipX, "05A77EDDCDF20D5B0AC0169E95D7D7")]
+        [InlineData("4bit.png", RotateFlipType.Rotate180FlipXY, "3CC874B571902366AACED5D619E87D")]
+        [InlineData("4bit.png", RotateFlipType.Rotate180FlipY, "545876C99ACF833E69FBFFBF436034")]
+        [InlineData("4bit.png", RotateFlipType.Rotate270FlipNone, "A919CCB8F97CAD7DC1F01026D11A5D")]
+        [InlineData("4bit.png", RotateFlipType.Rotate270FlipX, "B6B6245796C836923ABAABDF368B29")]
+        [InlineData("4bit.png", RotateFlipType.Rotate270FlipXY, "8DE25C7E1BE4A3B535DB5D83198D83")]
+        [InlineData("4bit.png", RotateFlipType.Rotate270FlipY, "5DB56687757CDEFC52D89C77CA9223")]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void Rotate1bit4bit()
+        public void Rotate1bit4bit(string file, RotateFlipType type, string md5)
         {
-            string[] files = {
-                               Helpers.GetTestBitmapPath ("1bit.png"),
-                               Helpers.GetTestBitmapPath ("4bit.png")
-                             };
-
             StringBuilder md5s = new StringBuilder();
 
-            foreach (string file in files)
+            using (Bitmap bmp = new Bitmap(Helpers.GetTestBitmapPath(file)))
             {
-                using (Bitmap bmp = new Bitmap(file))
-                {
-                    foreach (RotateFlipType type in Enum.GetValues(typeof(RotateFlipType)))
-                    {
-                        md5s.Append(RotateIndexedBmp(bmp, type));
-                    }
-                }
+                Assert.Equal(md5, RotateIndexedBmp(bmp, type));
             }
-
-            using (StreamWriter writer = new StreamWriter("/tmp/md5s.txt"))
-            {
-                writer.WriteLine(md5s);
-            }
-
-            Assert.Equal(
-                "A4DAF507C92BDE10626BC7B34FEFE5" + // 1-bit RotateNoneFlipNone
-                "A4DAF507C92BDE10626BC7B34FEFE5" + // 1-bit Rotate180FlipXY
-                "C0975EAFD2FC1CC9CC7AF20B92FC9F" + // 1-bit Rotate90FlipNone
-                "C0975EAFD2FC1CC9CC7AF20B92FC9F" + // 1-bit Rotate270FlipXY
-                "64AE60858A02228F7B1B18C7812FB6" + // 1-bit Rotate180FlipNone
-                "64AE60858A02228F7B1B18C7812FB6" + // 1-bit RotateNoneFlipXY
-                "E96D3390938350F9DE2608C4364424" + // 1-bit Rotate270FlipNone
-                "E96D3390938350F9DE2608C4364424" + // 1-bit Rotate90FlipXY
-                "23947CE822C1DDE6BEA69C01F8D0D9" + // 1-bit RotateNoneFlipX
-                "23947CE822C1DDE6BEA69C01F8D0D9" + // 1-bit Rotate180FlipY
-                "BE45F685BDEBD7079AA1B2CBA46723" + // 1-bit Rotate90FlipX
-                "BE45F685BDEBD7079AA1B2CBA46723" + // 1-bit Rotate270FlipY
-                "353E937CFF31B1BF6C3DD0A031ACB5" + // 1-bit Rotate180FlipX
-                "353E937CFF31B1BF6C3DD0A031ACB5" + // 1-bit RotateNoneFlipY
-                "AEA18A770A845E25B6A8CE28DD6DCB" + // 1-bit Rotate270FlipX
-                "AEA18A770A845E25B6A8CE28DD6DCB" + // 1-bit Rotate90FlipY
-                "3CC874B571902366AACED5D619E87D" + // 4-bit RotateNoneFlipNone
-                "3CC874B571902366AACED5D619E87D" + // 4-bit Rotate180FlipXY
-                "8DE25C7E1BE4A3B535DB5D83198D83" + // 4-bit Rotate90FlipNone
-                "8DE25C7E1BE4A3B535DB5D83198D83" + // 4-bit Rotate270FlipXY
-                "27CF5E9CE70BE9EBC47FB996721B95" + // 4-bit Rotate180FlipNone
-                "27CF5E9CE70BE9EBC47FB996721B95" + // 4-bit RotateNoneFlipXY
-                "A919CCB8F97CAD7DC1F01026D11A5D" + // 4-bit Rotate270FlipNone
-                "A919CCB8F97CAD7DC1F01026D11A5D" + // 4-bit Rotate90FlipXY
-                "545876C99ACF833E69FBFFBF436034" + // 4-bit RotateNoneFlipX
-                "545876C99ACF833E69FBFFBF436034" + // 4-bit Rotate180FlipY
-                "5DB56687757CDEFC52D89C77CA9223" + // 4-bit Rotate90FlipX
-                "5DB56687757CDEFC52D89C77CA9223" + // 4-bit Rotate270FlipY
-                "05A77EDDCDF20D5B0AC0169E95D7D7" + // 4-bit Rotate180FlipX
-                "05A77EDDCDF20D5B0AC0169E95D7D7" + // 4-bit RotateNoneFlipY
-                "B6B6245796C836923ABAABDF368B29" + // 4-bit Rotate270FlipX
-                "B6B6245796C836923ABAABDF368B29",  // 4-bit Rotate90FlipY
-                md5s.ToString());
         }
 
         private Bitmap CreateBitmap(int width, int height, PixelFormat fmt)
@@ -659,11 +626,11 @@ namespace MonoTests.System.Drawing
 
         //  Tests the LockBitmap functions. Makes a hash of the block of pixels that it returns
         // firsts, changes them, and then using GetPixel does another check of the changes.
-        // The results match the .Net framework
+        // The results match the .NET Framework
         private static byte[] DefaultBitmapHash = new byte[] { 0xD8, 0xD3, 0x68, 0x9C, 0x86, 0x7F, 0xB6, 0xA0, 0x76, 0xD6, 0x00, 0xEF, 0xFF, 0xE5, 0x8E, 0x1B };
         private static byte[] FinalWholeBitmapHash = new byte[] { 0x5F, 0x52, 0x98, 0x37, 0xE3, 0x94, 0xE1, 0xA6, 0x06, 0x6C, 0x5B, 0xF1, 0xA9, 0xC2, 0xA9, 0x43 };
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsDrawingSupported), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35744)]
         public void LockBitmap_Format32bppArgb_Format32bppArgb_ReadWrite_Whole()
         {
             using (Bitmap bmp = CreateBitmap(100, 100, PixelFormat.Format32bppArgb))
@@ -676,7 +643,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsDrawingSupported), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35744)]
         public void LockBitmap_Format32bppArgb_Format32bppPArgb_ReadWrite_Whole()
         {
             using (Bitmap bmp = CreateBitmap(100, 100, PixelFormat.Format32bppArgb))
@@ -689,6 +656,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         [ActiveIssue(20884)]
         public void LockBitmap_Format32bppArgb_Format32bppRgb_ReadWrite_Whole()
         {
@@ -702,7 +670,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsDrawingSupported), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35744)]
         public void LockBitmap_Format32bppArgb_Format24bppRgb_ReadWrite_Whole()
         {
             using (Bitmap bmp = CreateBitmap(100, 100, PixelFormat.Format32bppArgb))
@@ -717,7 +685,7 @@ namespace MonoTests.System.Drawing
 
         private static byte[] FinalPartialBitmapHash = new byte[] { 0xED, 0xD8, 0xDC, 0x9B, 0x44, 0x00, 0x22, 0x9B, 0x07, 0x06, 0x4A, 0x21, 0x70, 0xA7, 0x31, 0x1D };
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsDrawingSupported), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35744)]
         public void LockBitmap_Format32bppArgb_Format32bppArgb_ReadWrite_Partial()
         {
             using (Bitmap bmp = CreateBitmap(100, 100, PixelFormat.Format32bppArgb))
@@ -730,7 +698,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsDrawingSupported), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35744)]
         public void LockBitmap_Format32bppArgb_Format32bppPArgb_ReadWrite_Partial()
         {
             using (Bitmap bmp = CreateBitmap(100, 100, PixelFormat.Format32bppArgb))
@@ -743,6 +711,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         [ActiveIssue(20884)]
         public void LockBitmap_Format32bppArgb_Format32bppRgb_ReadWrite_Partial()
         {
@@ -756,7 +725,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsDrawingSupported), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35744)]
         public void LockBitmap_Format32bppArgb_Format24bppRgb_ReadWrite_Partial()
         {
             using (Bitmap bmp = CreateBitmap(100, 100, PixelFormat.Format32bppArgb))
@@ -771,7 +740,7 @@ namespace MonoTests.System.Drawing
 
         // Tests the LockBitmap and UnlockBitmap functions, specifically the copying
         // of bitmap data in the directions indicated by the ImageLockMode.
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsDrawingSupported), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35744)]
         public void LockUnlockBitmap()
         {
             BitmapData data;
@@ -876,7 +845,7 @@ namespace MonoTests.System.Drawing
                 }
             }
         }
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DefaultFormat1()
         {
             using (Bitmap bmp = new Bitmap(20, 20))
@@ -885,7 +854,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DefaultFormat2()
         {
             string filename = Path.GetTempFileName();
@@ -901,7 +870,7 @@ namespace MonoTests.System.Drawing
             File.Delete(filename);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void BmpDataStride1()
         {
             Bitmap bmp = new Bitmap(184, 184, PixelFormat.Format1bppIndexed);
@@ -931,6 +900,7 @@ namespace MonoTests.System.Drawing
             return new BinaryFormatter().Deserialize(s);
         }
 
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         [ActiveIssue(20844)]
         public void Serialize_Icon()
         {
@@ -957,7 +927,7 @@ namespace MonoTests.System.Drawing
             -1,
         };
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Format1bppIndexed_Palette()
         {
             using (Bitmap bmp = new Bitmap(1, 1, PixelFormat.Format1bppIndexed))
@@ -991,7 +961,7 @@ namespace MonoTests.System.Drawing
             -1,
         };
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Format4bppIndexed_Palette()
         {
             using (Bitmap bmp = new Bitmap(1, 1, PixelFormat.Format4bppIndexed))
@@ -1265,7 +1235,7 @@ namespace MonoTests.System.Drawing
             -1,
         };
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Format8bppIndexed_Palette()
         {
             using (Bitmap bmp = new Bitmap(1, 1, PixelFormat.Format8bppIndexed))
@@ -1280,79 +1250,79 @@ namespace MonoTests.System.Drawing
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void XmlSerialization()
         {
             new XmlSerializer(typeof(Bitmap));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void BitmapImageCtor()
         {
             Assert.Throws<NullReferenceException>(() => new Bitmap((Image)null));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void BitmapImageSizeCtor()
         {
             Assert.Throws<ArgumentException>(() => new Bitmap((Image)null, Size.Empty));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void BitmapImageIntIntCtor()
         {
-            Assert.Throws<ArgumentException>(() => new Bitmap((Image)null, Int32.MinValue, Int32.MaxValue));
+            Assert.Throws<ArgumentException>(() => new Bitmap((Image)null, int.MinValue, int.MaxValue));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void BitmapIntIntCtor()
         {
-            Assert.Throws<ArgumentException>(() => new Bitmap(Int32.MinValue, Int32.MaxValue));
+            Assert.Throws<ArgumentException>(() => new Bitmap(int.MinValue, int.MaxValue));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void BitmapIntIntGraphicCtor()
         {
             Assert.Throws<ArgumentNullException>(() => new Bitmap(1, 1, null));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void BitmapIntIntPixelFormatCtor()
         {
-            Assert.Throws<ArgumentException>(() => new Bitmap(Int32.MinValue, Int32.MaxValue, PixelFormat.Format1bppIndexed));
+            Assert.Throws<ArgumentException>(() => new Bitmap(int.MinValue, int.MaxValue, PixelFormat.Format1bppIndexed));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void BitmapStreamCtor()
         {
             AssertExtensions.Throws<ArgumentNullException, ArgumentException>("stream", null, () => new Bitmap((Stream)null));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void BitmapStreamBoolCtor()
         {
             AssertExtensions.Throws<ArgumentNullException, ArgumentException>("stream", null, () => new Bitmap((Stream)null, true));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void BitmapStringCtor()
         {
             Assert.Throws<ArgumentNullException>(() => new Bitmap((string)null));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void BitmapStringBoolCtor()
         {
             Assert.Throws<ArgumentNullException>(() => new Bitmap((string)null, false));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void BitmapTypeStringCtor1()
         {
             Assert.Throws<NullReferenceException>(() => new Bitmap((Type)null, "mono"));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void BitmapTypeStringCtor2()
         {
             Assert.Throws<ArgumentException>(() => new Bitmap(typeof(Bitmap), null));
@@ -1366,52 +1336,52 @@ namespace MonoTests.System.Drawing
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void SetResolution_Zero()
         {
             Assert.Throws<ArgumentException>(() => SetResolution(0.0f, 0.0f));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void SetResolution_Negative_X()
         {
             Assert.Throws<ArgumentException>(() => SetResolution(-1.0f, 1.0f));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void SetResolution_Negative_Y()
         {
             Assert.Throws<ArgumentException>(() => SetResolution(1.0f, -1.0f));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void SetResolution_MaxValue()
         {
-            SetResolution(Single.MaxValue, Single.MaxValue);
+            SetResolution(float.MaxValue, float.MaxValue);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void SetResolution_PositiveInfinity()
         {
-            SetResolution(Single.PositiveInfinity, Single.PositiveInfinity);
+            SetResolution(float.PositiveInfinity, float.PositiveInfinity);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void SetResolution_NaN()
         {
-            Assert.Throws<ArgumentException>(() => SetResolution(Single.NaN, Single.NaN));
+            Assert.Throws<ArgumentException>(() => SetResolution(float.NaN, float.NaN));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void SetResolution_NegativeInfinity()
         {
-            Assert.Throws<ArgumentException>(() => SetResolution(Single.NegativeInfinity, Single.NegativeInfinity));
+            Assert.Throws<ArgumentException>(() => SetResolution(float.NegativeInfinity, float.NegativeInfinity));
         }
     }
 
     public class BitmapFullTrustTest
     {
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void BitmapIntIntIntPixelFormatIntPtrCtor()
         {
             new Bitmap(1, 1, 1, PixelFormat.Format1bppIndexed, IntPtr.Zero);
@@ -1431,7 +1401,7 @@ namespace MonoTests.System.Drawing
             Assert.Equal(335888, b.Flags);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Hicon16()
         {
             IntPtr hicon;
@@ -1452,7 +1422,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Hicon32()
         {
             IntPtr hicon;
@@ -1473,7 +1443,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Hicon64()
         {
             IntPtr hicon;
@@ -1494,7 +1464,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Hicon96()
         {
             IntPtr hicon;
@@ -1515,7 +1485,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void HBitmap()
         {
             IntPtr hbitmap;
@@ -1543,7 +1513,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void CreateMultipleBitmapFromSameHBITMAP()
         {
             IntPtr hbitmap;
@@ -1580,4 +1550,3 @@ namespace MonoTests.System.Drawing
         }
     }
 }
-

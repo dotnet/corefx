@@ -10,7 +10,6 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Net;
 using System.Security.Principal;
-using System.Security.Permissions;
 using System.Collections.Specialized;
 using System.DirectoryServices;
 using System.Text;
@@ -25,9 +24,9 @@ namespace System.DirectoryServices.AccountManagement
         protected DirectoryEntry ctxBase;
         private const int mappingIndex = 0;
 
-        private object _ctxBaseLock = new object(); // when mutating ctxBase
+        private readonly object _ctxBaseLock = new object(); // when mutating ctxBase
 
-        private bool _ownCtxBase;    // if true, we "own" ctxBase and must Dispose of it when we're done
+        private readonly bool _ownCtxBase;    // if true, we "own" ctxBase and must Dispose of it when we're done
 
         private bool _disposed = false;
 
@@ -187,7 +186,7 @@ namespace System.DirectoryServices.AccountManagement
             s_propertyMappingTableByPropertyFull.Add(mappingIndex, mappingTableByPropertyFull);
 
             // Build a table of Type mapped to a collection of all ldap attributes for that type.
-            // This table will be used to load the objects when searching.             
+            // This table will be used to load the objects when searching.
 
             StringCollection principalPropList = new StringCollection();
             StringCollection authPrincipalPropList = new StringCollection();
@@ -432,7 +431,7 @@ namespace System.DirectoryServices.AccountManagement
                 if (e is System.Runtime.InteropServices.COMException)
                     throw ExceptionHelper.GetExceptionFromCOMException((System.Runtime.InteropServices.COMException)e);
                 else
-                    throw e;
+                    throw;
             }
         }
 
@@ -457,7 +456,7 @@ namespace System.DirectoryServices.AccountManagement
         }
 
         /// <summary>
-        /// If The enabled property was set on the principal then perform actions 
+        /// If The enabled property was set on the principal then perform actions
         /// necessary on the principal to set the enabled status to match
         /// the set value.
         /// </summary>
@@ -507,7 +506,7 @@ namespace System.DirectoryServices.AccountManagement
             bool allowSelfFound;
             bool allowWorldFound;
 
-            // Scan the existing ACL to determine its current state           
+            // Scan the existing ACL to determine its current state
 
             ScanACLForChangePasswordRight(adsSecurity, out denySelfFound, out denyWorldFound, out allowSelfFound, out allowWorldFound);
 
@@ -798,7 +797,7 @@ namespace System.DirectoryServices.AccountManagement
         {
             Debug.Assert(p != null);
             Debug.Assert(p.fakePrincipal == false);
-            Debug.Assert(p.unpersisted == true); // should only ever be called for new principals            
+            Debug.Assert(p.unpersisted == true); // should only ever be called for new principals
 
             // set the userAccountControl bits on the underlying directory entry
             DirectoryEntry de = (DirectoryEntry)p.UnderlyingObject;
@@ -1186,11 +1185,11 @@ namespace System.DirectoryServices.AccountManagement
 
                 if (p.ContextType != ContextType.ApplicationDirectory)
                 {
-                    // A users group membership that applies to a particular domain includes the domain's universal, local and global groups plus the 
+                    // A users group membership that applies to a particular domain includes the domain's universal, local and global groups plus the
                     // universal groups from every other domain in the forest that the user is a member of.  To get this list we must contact both a GlobalCatalog to get the forest
-                    // universal list and a DC in the users domain to get the domain local groups which are not replicated to the GC.  
+                    // universal list and a DC in the users domain to get the domain local groups which are not replicated to the GC.
                     // If we happen to get a GC in the same domain as the user
-                    // then we don't also need a DC because the domain local group memberships will show up as well.  The enumerator code that expands these lists must detect 
+                    // then we don't also need a DC because the domain local group memberships will show up as well.  The enumerator code that expands these lists must detect
                     // duplicates because the list of global groups will show up on both the GC and DC.
                     Debug.Assert(p.ContextType == ContextType.Domain);
 
@@ -1208,7 +1207,7 @@ namespace System.DirectoryServices.AccountManagement
                         var gg = forest.FindAllGlobalCatalogs(dd.SiteName);
                         foreach (GlobalCatalog g in gg)
                         {
-                            if (0 == string.Compare(this.DnsDomainName, g.Domain.Name, StringComparison.OrdinalIgnoreCase))
+                            if (string.Equals(this.DnsDomainName, g.Domain.Name, StringComparison.OrdinalIgnoreCase))
                             {
                                 gc = g;
                                 break;
@@ -1217,12 +1216,12 @@ namespace System.DirectoryServices.AccountManagement
 
                         roots.Add(new DirectoryEntry("GC://" + gc.Name + "/" + p.DistinguishedName, this.credentials != null ? this.credentials.UserName : null, this.credentials != null ? this.credentials.Password : null, this.AuthTypes));
 
-                        if (0 != string.Compare(this.DnsDomainName, gc.Domain.Name, StringComparison.OrdinalIgnoreCase))
+                        if (!string.Equals(this.DnsDomainName, gc.Domain.Name, StringComparison.OrdinalIgnoreCase))
                         {
                             //useASQ = false;
                             roots.Add(principalDE);
 
-                            //Since the GC does not belong to the same domain (as the principal object passed) 
+                            //Since the GC does not belong to the same domain (as the principal object passed)
                             //We should make sure that we ignore domain local groups that we obtained from the cross-domain GC.
                             resultValidator = delegate (dSPropertyCollection resultPropCollection)
                             {
@@ -1236,7 +1235,7 @@ namespace System.DirectoryServices.AccountManagement
                                         return ADUtils.AreSidsInSameDomain(p.Sid, resultSid);
                                     }
                                 }
-                                return true; //Return true for all other case, including the case where we don't have permissions 
+                                return true; //Return true for all other case, including the case where we don't have permissions
                                 //to read groupType/objectSid attribute then we declare the result as a match.
                             };
                         }
@@ -1276,7 +1275,7 @@ namespace System.DirectoryServices.AccountManagement
                         foreach (DirectoryEntry de in roots)
                         {
                             //If, de is not equal to principalDE then it must have been created by this function (above code)
-                            //In that case de is NOT owned by any other modules outside. Hence, configure RangeRetriever to dispose the DirEntry on its dispose. 
+                            //In that case de is NOT owned by any other modules outside. Hence, configure RangeRetriever to dispose the DirEntry on its dispose.
                             enumerators[index] = new RangeRetriever(de, "memberOf", (de != principalDE));
                             index++;
                         }
@@ -1284,8 +1283,8 @@ namespace System.DirectoryServices.AccountManagement
                     else
                     {
                         enumerators = new IEnumerable[1];
-                        //Since principalDE is not owned by us, 
-                        //configuring RangeRetriever _NOT_ to dispose the DirEntry on its dispose. 
+                        //Since principalDE is not owned by us,
+                        //configuring RangeRetriever _NOT_ to dispose the DirEntry on its dispose.
                         enumerators[0] = new RangeRetriever(principalDE, "memberOf", false);
                     }
                 }
@@ -1409,9 +1408,9 @@ namespace System.DirectoryServices.AccountManagement
 
                 // If same forest but different domain then we have a child or alternate tree domain.  We don't have a starting user
                 // object and must do a search on all groups to find membership.
-                if (0 == string.Compare(foreignADStore.DnsForestName, this.DnsForestName, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(foreignADStore.DnsForestName, this.DnsForestName, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (0 == string.Compare(foreignADStore.DnsDomainName, this.DnsDomainName, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(foreignADStore.DnsDomainName, this.DnsDomainName, StringComparison.OrdinalIgnoreCase))
                     {
                         rootPrincipalExists = true;
                     }
@@ -1500,8 +1499,8 @@ namespace System.DirectoryServices.AccountManagement
                     string principalDN = (string)sr.Properties["distinguishedName"][0];
                     GlobalDebug.WriteLineIf(GlobalDebug.Info, "ADStoreCtx", "GetGroupsMemberOf(ctx): match, DN={0}", principalDN);
 
-                    //Here a new DirectoryEntry object is created by sr.GetDirectoryEntry() and passed 
-                    //to RangeRetriever object. Hence, configuring RangeRetriever to dispose the DirEntry on its dispose. 
+                    //Here a new DirectoryEntry object is created by sr.GetDirectoryEntry() and passed
+                    //to RangeRetriever object. Hence, configuring RangeRetriever to dispose the DirEntry on its dispose.
                     IEnumerable memberOf = new RangeRetriever(sr.GetDirectoryEntry(), "memberOf", true);
 
                     string primaryGroupDN = null;
@@ -1639,7 +1638,7 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        // Get members of group g   
+        // Get members of group g
         // Need 2 searchers
         // 1.  Users with this group as their primary group ID
         // 2.  ASQ search against the member attribute on the group object for all contained objects.
@@ -1677,7 +1676,7 @@ namespace System.DirectoryServices.AccountManagement
                 string groupDN = (string)groupDE.Properties["distinguishedName"].Value;
                 BookmarkableResultSet resultSet = null;
 
-                // We must use enumeration to expand groups if their scope is Universal or Local 
+                // We must use enumeration to expand groups if their scope is Universal or Local
                 // or if the domain controller is w2k
                 // or if the context type is ApplicationDirectory (in AD LDS, Global groups can contain members from other partition)
                 // Universal and Local groups can contain members from other domains in the forest.  When this occurs
@@ -1688,8 +1687,8 @@ namespace System.DirectoryServices.AccountManagement
                     g.GroupScope != GroupScope.Global)
                 {
                     //Here the directory entry passed to RangeRetriever constructor belongs to
-                    //the GroupPrincipal object supplied to this function, which is not owned by us. 
-                    //Hence, configuring RangeRetriever _NOT_ to dispose the DirEntry on its dispose. 
+                    //the GroupPrincipal object supplied to this function, which is not owned by us.
+                    //Hence, configuring RangeRetriever _NOT_ to dispose the DirEntry on its dispose.
                     IEnumerable members = new RangeRetriever(groupDE, "member", false);
 
                     GlobalDebug.WriteLineIf(GlobalDebug.Info, "ADStoreCtx", "GetGroupMembership: groupDN={0}", groupDN);
@@ -1781,7 +1780,7 @@ namespace System.DirectoryServices.AccountManagement
                 string principalDN = (string)principalDE.Properties["distinguishedName"].Value;
 
                 // we want to find if a group is "small", meaning that it has less than MaxValRange values (usually 1500)
-                // the property list for the searcher of a group has "member" attribute. if there are more results than MaxValRange, there will also be a "member;range=..." attribute               
+                // the property list for the searcher of a group has "member" attribute. if there are more results than MaxValRange, there will also be a "member;range=..." attribute
                 if (g.IsSmallGroup())
                 {
                     // small groups has special search object that holds the member attribute so we use it for our search (no need to use the DirectoryEntry)
@@ -1827,10 +1826,10 @@ namespace System.DirectoryServices.AccountManagement
 
             try
             {
-                string path = String.Format(
+                string path = string.Format(
                     CultureInfo.InvariantCulture,
                     "LDAP://{0}/{1}",
-                    String.IsNullOrEmpty(this.UserSuppliedServerName) ? this.DnsHostName : this.UserSuppliedServerName,
+                    string.IsNullOrEmpty(this.UserSuppliedServerName) ? this.DnsHostName : this.UserSuppliedServerName,
                     this.ContextBasePartitionDN
                     );
 
@@ -2071,8 +2070,8 @@ namespace System.DirectoryServices.AccountManagement
         // Cross-store support
         //
 
-        // Given a native store object that represents a "foreign" principal (e.g., a FPO object in this store that 
-        // represents a pointer to another store), maps that representation to the other store's StoreCtx and returns 
+        // Given a native store object that represents a "foreign" principal (e.g., a FPO object in this store that
+        // represents a pointer to another store), maps that representation to the other store's StoreCtx and returns
         // a Principal from that other StoreCtx.  The implementation of this method is highly dependent on the
         // details of the particular store, and must have knowledge not only of this StoreCtx, but also of how to
         // interact with other StoreCtxs to fulfill the request.
@@ -2146,9 +2145,7 @@ namespace System.DirectoryServices.AccountManagement
                                                 serverName);
 
                         throw new PrincipalOperationException(
-                                String.Format(CultureInfo.CurrentCulture,
-                                                  SR.ADStoreCtxCantResolveSidForCrossStore,
-                                                  err));
+                                SR.Format(SR.ADStoreCtxCantResolveSidForCrossStore, err));
                     }
 
                     GlobalDebug.WriteLineIf(GlobalDebug.Info,
@@ -2174,8 +2171,8 @@ namespace System.DirectoryServices.AccountManagement
                                     (this.credentials != null ? credentials.UserName : null),
                                     (this.credentials != null ? credentials.Password : null),
                                     remoteOptions);
-                    
-#endif                
+
+#endif
                     foreignStoreCtx = remoteCtx.QueryCtx;
                 }
 
@@ -2275,7 +2272,7 @@ namespace System.DirectoryServices.AccountManagement
             };
             try
             {
-                //            de.RefreshCache(ldapAttributesUsed);            
+                //            de.RefreshCache(ldapAttributesUsed);
                 de.RefreshCache();
             }
             catch (System.Runtime.InteropServices.COMException e)
@@ -2323,7 +2320,7 @@ namespace System.DirectoryServices.AccountManagement
         /// Returns the DN of the Partition to which the user supplied
         /// context base (this.ctxBase) belongs.
         /// </summary>
-        /// 
+        ///
         internal string ContextBasePartitionDN
         {
             get
@@ -2480,7 +2477,7 @@ namespace System.DirectoryServices.AccountManagement
         protected StoreCapabilityMap storeCapability = 0;
 
         // Must be called inside of lock(domainInfoLock)
-        virtual protected void LoadDomainInfo()
+        protected virtual void LoadDomainInfo()
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "ADStoreCtx", "LoadComputerInfo");
 
@@ -2511,10 +2508,10 @@ namespace System.DirectoryServices.AccountManagement
                 {
                     // If it's not a "DC=" component, skip it
                     if ((component.Length > 3) &&
-                        (String.Compare(component.Substring(0, 3), "DC=", StringComparison.OrdinalIgnoreCase) == 0))
+                        string.Equals(component.Substring(0, 3), "DC=", StringComparison.OrdinalIgnoreCase))
                     {
-                        sb.Append(component.Substring(3));
-                        sb.Append(".");
+                        sb.Append(component, 3, component.Length - 3);
+                        sb.Append('.');
                     }
                 }
 
@@ -2537,10 +2534,29 @@ namespace System.DirectoryServices.AccountManagement
 
             // DS_IS_DNS_NAME | DS_RETURN_FLAT_NAME | DS_DIRECTORY_SERVICE_REQUIRED | DS_BACKGROUND_ONLY
             int flags = unchecked((int)(0x00020000 | 0x80000000 | 0x00000010 | 0x00000100));
-            UnsafeNativeMethods.DomainControllerInfo info = Utils.GetDcName(null, dnsDomainName, null, flags);
+            try
+            {
+                UnsafeNativeMethods.DomainControllerInfo info = Utils.GetDcName(null, dnsDomainName, null, flags);
 
-            this.domainFlatName = info.DomainName;
-            this.forestDnsName = info.DnsForestName;
+                this.domainFlatName = info.DomainName;
+                this.forestDnsName = info.DnsForestName;
+            }
+            catch (PrincipalOperationException ex) when (ex.ErrorCode == 1355) // ERROR_NO_SUCH_DOMAIN
+            {
+                // We couldn't get the NetBios name using DsGetDcName. This could be because we are running on
+                // a computer which is not connected to the forest of the domain at all. In such a case, we fall back
+                // to using the caller-specified DNS domain name. It may not work in 100% of cases, but it's better than
+                // simply failing outright, and if it's not good enough, we'll run into an appropriate error down the line
+                // when other calls fail.
+
+                GlobalDebug.WriteLineIf(GlobalDebug.Warn,
+                                        "ADStoreCtx",
+                                        "GetDcName failed, so falling back to the DNS domain name ({0}) for the Flat/DNS names",
+                                        dnsDomainName);
+
+                this.domainFlatName = dnsDomainName;
+                this.forestDnsName = dnsDomainName;
+            }
 
             GlobalDebug.WriteLineIf(GlobalDebug.Info,
                                     "ADStoreCtx",
@@ -2615,4 +2631,3 @@ namespace System.DirectoryServices.AccountManagement
 }
 
 //#endif  // PAPI_AD
-

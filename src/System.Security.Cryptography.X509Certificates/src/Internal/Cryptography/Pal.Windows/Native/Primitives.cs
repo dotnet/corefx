@@ -60,8 +60,8 @@ namespace Internal.Cryptography.Pal.Native
         //CERT_QUERY_CONTENT_FLAG_ALL)
          CERT_QUERY_CONTENT_FLAG_PFX_AND_LOAD = 1 << ContentType.CERT_QUERY_CONTENT_PFX_AND_LOAD,
 
-         CERT_QUERY_CONTENT_FLAG_ALL = 
-             CERT_QUERY_CONTENT_FLAG_CERT | 
+         CERT_QUERY_CONTENT_FLAG_ALL =
+             CERT_QUERY_CONTENT_FLAG_CERT |
              CERT_QUERY_CONTENT_FLAG_CTL |
              CERT_QUERY_CONTENT_FLAG_CRL |
              CERT_QUERY_CONTENT_FLAG_SERIALIZED_STORE |
@@ -69,7 +69,7 @@ namespace Internal.Cryptography.Pal.Native
              CERT_QUERY_CONTENT_FLAG_SERIALIZED_CTL |
              CERT_QUERY_CONTENT_FLAG_SERIALIZED_CRL |
              CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED |
-             CERT_QUERY_CONTENT_FLAG_PKCS7_UNSIGNED | 
+             CERT_QUERY_CONTENT_FLAG_PKCS7_UNSIGNED |
              CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED |
              CERT_QUERY_CONTENT_FLAG_PKCS10 |
              CERT_QUERY_CONTENT_FLAG_PFX |
@@ -98,7 +98,7 @@ namespace Internal.Cryptography.Pal.Native
     {
         //encoded single certificate
         CERT_QUERY_CONTENT_CERT                = 1,
-        //encoded single CTL                   
+        //encoded single CTL
         CERT_QUERY_CONTENT_CTL                 = 2,
         //encoded single CRL
         CERT_QUERY_CONTENT_CRL                 = 3,
@@ -169,11 +169,7 @@ namespace Internal.Cryptography.Pal.Native
         CERT_KEY_IDENTIFIER_PROP_ID  = 20,
         CERT_PUBKEY_ALG_PARA_PROP_ID = 22,
         CERT_NCRYPT_KEY_HANDLE_PROP_ID = 78,
-
-        // CERT_DELETE_KEYSET_PROP_ID is not defined by Windows. It's a custom property set by the framework
-        // as a backchannel message from the portion of X509Certificate2Collection.Import() that loads up the PFX
-        // to the X509Certificate2..ctor(IntPtr) call that creates the managed wrapper.
-        CERT_DELETE_KEYSET_PROP_ID = 101,
+        CERT_CLR_DELETE_KEY_PROP_ID = 125,
     }
 
     [Flags]
@@ -328,8 +324,8 @@ namespace Internal.Cryptography.Pal.Native
         CERT_STORE_READONLY_FLAG                        = 0x00008000,
         CERT_STORE_OPEN_EXISTING_FLAG                   = 0x00004000,
         CERT_STORE_CREATE_NEW_FLAG                      = 0x00002000,
-        CERT_STORE_MAXIMUM_ALLOWED_FLAG                 = 0x00001000,   
- 
+        CERT_STORE_MAXIMUM_ALLOWED_FLAG                 = 0x00001000,
+
         CERT_SYSTEM_STORE_CURRENT_USER                  = 0x00010000,
         CERT_SYSTEM_STORE_LOCAL_MACHINE                 = 0x00020000,
 
@@ -401,7 +397,7 @@ namespace Internal.Cryptography.Pal.Native
         EXPORT_PRIVATE_KEYS                   = 0x00000004,
         None                                  = 0x00000000,
     }
-    
+
     [StructLayout(LayoutKind.Sequential)]
     internal unsafe struct CRYPT_KEY_PROV_INFO
     {
@@ -445,14 +441,6 @@ namespace Internal.Cryptography.Pal.Native
     internal enum FormatObjectType : int
     {
         None = 0,
-    }
-
-    [Flags]
-    internal enum FormatObjectStringType : int
-    {
-        CRYPT_FORMAT_STR_MULTI_LINE = 0x00000001,
-        CRYPT_FORMAT_STR_NO_HEX     = 0x00000010,
-        None                        = 0x00000000,
     }
 
     internal enum FormatObjectStructType : int
@@ -781,5 +769,3 @@ namespace Internal.Cryptography.Pal.Native
         CRYPT_ACQUIRE_ONLY_NCRYPT_KEY_FLAG = 0x00040000,
     }
 }
-
-

@@ -6,9 +6,10 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
-public partial class CancelKeyPressTests : RemoteExecutorTestBase
+public partial class CancelKeyPressTests
 {
     private const int WaitFailTestTimeoutSeconds = 30;
 
@@ -18,7 +19,7 @@ public partial class CancelKeyPressTests : RemoteExecutorTestBase
         ConsoleCancelEventHandler handler = (sender, e) =>
         {
             // We don't actually want to do anything here.  This will only get called on the off chance
-            // that someone CTRL+C's the test run while the handler is hooked up.  This is just used to 
+            // that someone CTRL+C's the test run while the handler is hooked up.  This is just used to
             // validate that we can add and remove a handler, we don't care about exercising it.
         };
         Console.CancelKeyPress += handler;
@@ -28,13 +29,13 @@ public partial class CancelKeyPressTests : RemoteExecutorTestBase
     [Fact]
     public void CanAddAndRemoveHandler_Remote()
     {
-        // xunit registers a CancelKeyPress handler at the beginning of the test run and never 
+        // xunit registers a CancelKeyPress handler at the beginning of the test run and never
         // unregisters it, thus we can't execute all of the removal code in the same process.
-        RemoteInvoke(() =>
+        RemoteExecutor.Invoke(() =>
         {
             CanAddAndRemoveHandler();
             CanAddAndRemoveHandler(); // add and remove again
-            return SuccessExitCode;
+            return RemoteExecutor.SuccessExitCode;
         }).Dispose();
     }
 }

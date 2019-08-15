@@ -67,7 +67,7 @@ namespace CoreXml.Test.XLinq
                     XmlReader DataReader = GetReader();//GetReader(pGenericXml);
                     PositionOnElement(DataReader, strElem);
                     TestLog.Compare(DataReader.ReadOuterXml(), strOuterXml, "outer");
-                    TestLog.Compare(VerifyNode(DataReader, XmlNodeType.Text, String.Empty, "\n"), true, "vn2");
+                    TestLog.Compare(VerifyNode(DataReader, XmlNodeType.Text, string.Empty, "\n"), true, "vn2");
                 }
 
                 void TestOuterOnElement(string strElem, string strOuterXml, string strNextElemName, bool bWhitespace)
@@ -75,7 +75,7 @@ namespace CoreXml.Test.XLinq
                     XmlReader DataReader = GetReader();//GetReader(pGenericXml);
                     PositionOnElement(DataReader, strElem);
                     TestLog.Compare(DataReader.ReadOuterXml(), strOuterXml, "outer");
-                    TestLog.Compare(VerifyNode(DataReader, XmlNodeType.Element, strNextElemName, String.Empty), true, "vn2");
+                    TestLog.Compare(VerifyNode(DataReader, XmlNodeType.Element, strNextElemName, string.Empty), true, "vn2");
                 }
 
                 void TestOuterOnAttribute(string strElem, string strName, string strValue)
@@ -83,7 +83,7 @@ namespace CoreXml.Test.XLinq
                     XmlReader DataReader = GetReader();//GetReader(pGenericXml);
                     PositionOnElement(DataReader, strElem);
                     DataReader.MoveToAttribute(DataReader.AttributeCount / 2);
-                    string strExpected = String.Format("{0}=\"{1}\"", strName, strValue);
+                    string strExpected = string.Format("{0}=\"{1}\"", strName, strValue);
                     TestLog.Compare(DataReader.ReadOuterXml(), strExpected, "outer");
                     TestLog.Compare(VerifyNode(DataReader, XmlNodeType.Attribute, strName, strValue), true, "vn");
                 }
@@ -99,91 +99,91 @@ namespace CoreXml.Test.XLinq
                     string expValue = DataReader.Value;
 
                     PositionOnNodeType(DataReader, nt);
-                    TestLog.Compare(DataReader.ReadOuterXml(), String.Empty, "outer");
+                    TestLog.Compare(DataReader.ReadOuterXml(), string.Empty, "outer");
                     TestLog.Compare(VerifyNode(DataReader, expNt, expName, expValue), true, "vn");
                 }
 
                 //[Variation("ReadOuterXml on empty element w/o attributes", Priority = 0)]
-                public void ReadOuterXml1()
+                private void ReadOuterXml1()
                 {
                     TestOuterOnText(s_EMP1, s_EXP_EMP1, s_EMP2, true);
                 }
 
                 //[Variation("ReadOuterXml on empty element w/ attributes", Priority = 0)]
-                public void ReadOuterXml2()
+                private void ReadOuterXml2()
                 {
                     TestOuterOnText(s_EMP2, s_EXP_EMP2, s_EMP3, true);
                 }
 
                 //[Variation("ReadOuterXml on full empty element w/o attributes")]
-                public void ReadOuterXml3()
+                private void ReadOuterXml3()
                 {
                     TestOuterOnText(s_EMP3, s_EXP_EMP3, s_NEMP0, true);
                 }
 
                 //[Variation("ReadOuterXml on full empty element w/ attributes")]
-                public void ReadOuterXml4()
+                private void ReadOuterXml4()
                 {
                     TestOuterOnText(s_EMP4, s_EXP_EMP4, s_NEXT1, true);
                 }
 
                 //[Variation("ReadOuterXml on element with text content", Priority = 0)]
-                public void ReadOuterXml5()
+                private void ReadOuterXml5()
                 {
                     TestOuterOnText(s_NEMP1, s_EXP_NEMP1, s_NEMP2, true);
                 }
 
                 //[Variation("ReadOuterXml on element with attributes", Priority = 0)]
-                public void ReadOuterXml6()
+                private void ReadOuterXml6()
                 {
                     TestOuterOnText(s_NEMP2, s_EXP_NEMP2, s_NEXT2, true);
                 }
 
                 //[Variation("ReadOuterXml on element with text and markup content")]
-                public void ReadOuterXml7()
+                private void ReadOuterXml7()
                 {
                     TestOuterOnText(s_ELEM1, s_EXP_ELEM1, s_NEXT3, true);
                 }
 
                 //[Variation("ReadOuterXml with multiple level of elements")]
-                public void ReadOuterXml8()
+                private void ReadOuterXml8()
                 {
                     TestOuterOnElement(s_ELEM2, s_EXP_ELEM2, s_NEXT4, false);
                 }
 
                 //[Variation("ReadOuterXml with multiple level of elements, text and attributes", Priority = 0)]
-                public void ReadOuterXml9()
+                private void ReadOuterXml9()
                 {
                     string strExpected = s_EXP_ELEM3;
                     TestOuterOnText(s_ELEM3, strExpected, s_NEXT5, true);
                 }
 
                 //[Variation("ReadOuterXml on element with complex content (CDATA, PIs, Comments)", Priority = 0)]
-                public void ReadOuterXml10()
+                private void ReadOuterXml10()
                 {
                     TestOuterOnText(s_ELEM4, s_EXP_ELEM4, s_NEXT7, true);
                 }
 
                 //[Variation("ReadOuterXml on attribute node of empty element")]
-                public void ReadOuterXml12()
+                private void ReadOuterXml12()
                 {
                     TestOuterOnAttribute(s_EMP2, "val", "abc");
                 }
 
                 //[Variation("ReadOuterXml on attribute node of full empty element")]
-                public void ReadOuterXml13()
+                private void ReadOuterXml13()
                 {
                     TestOuterOnAttribute(s_EMP4, "val", "abc");
                 }
 
                 //[Variation("ReadOuterXml on attribute node", Priority = 0)]
-                public void ReadOuterXml14()
+                private void ReadOuterXml14()
                 {
                     TestOuterOnAttribute(s_NEMP2, "val", "abc");
                 }
 
                 //[Variation("ReadOuterXml on attribute with entities, EntityHandling = ExpandEntities", Priority = 0)]
-                public void ReadOuterXml15()
+                private void ReadOuterXml15()
                 {
                     XmlReader DataReader = GetReader();
                     PositionOnElement(DataReader, s_ENT1);
@@ -197,13 +197,13 @@ namespace CoreXml.Test.XLinq
                 }
 
                 //[Variation("ReadOuterXml on ProcessingInstruction")]
-                public void ReadOuterXml17()
+                private void ReadOuterXml17()
                 {
                     TestOuterOnNodeType(XmlNodeType.ProcessingInstruction);
                 }
 
                 //[Variation("ReadOuterXml on CDATA")]
-                public void ReadOuterXml24()
+                private void ReadOuterXml24()
                 {
                     TestOuterOnNodeType(XmlNodeType.CDATA);
                 }
@@ -220,13 +220,13 @@ namespace CoreXml.Test.XLinq
                             throw new TestException(TestResult.Failed, "");
                         }
                         catch (ArgumentOutOfRangeException) { }
-                        Assert.True(TestLog.Compare(DataReader.ReadOuterXml(), String.Empty, "outer"));
-                        Assert.True((DataReader.NodeType != XmlNodeType.Attribute) || (DataReader.Name != String.Empty) || (DataReader.Value != "UTF-8"));
+                        Assert.True(TestLog.Compare(DataReader.ReadOuterXml(), string.Empty, "outer"));
+                        Assert.True((DataReader.NodeType != XmlNodeType.Attribute) || (DataReader.Name != string.Empty) || (DataReader.Value != "UTF-8"));
                     }
                 }
 
                 //[Variation("ReadOuterXml on element with entities, EntityHandling = ExpandCharEntities")]
-                public void TRReadOuterXml27()
+                private void TRReadOuterXml27()
                 {
                     string strExpected = s_EXP_ENT1_EXPAND_CHAR;
 
@@ -234,11 +234,11 @@ namespace CoreXml.Test.XLinq
                     PositionOnElement(DataReader, s_ENT1);
 
                     TestLog.Compare(DataReader.ReadOuterXml(), strExpected, "outer");
-                    TestLog.Compare(VerifyNode(DataReader, XmlNodeType.Element, s_NEXT6, String.Empty), true, "vn");
+                    TestLog.Compare(VerifyNode(DataReader, XmlNodeType.Element, s_NEXT6, string.Empty), true, "vn");
                 }
 
                 //[Variation("ReadOuterXml on attribute with entities, EntityHandling = ExpandCharEntites")]
-                public void TRReadOuterXml28()
+                private void TRReadOuterXml28()
                 {
                     string strExpected = "att1=\"xxx&lt;xxxAxxxCxxxe1fooxxx\"";
                     XmlReader DataReader = GetReader();
@@ -249,9 +249,9 @@ namespace CoreXml.Test.XLinq
                 }
 
                 //[Variation("One large element")]
-                public void TestTextReadOuterXml29()
+                private void TestTextReadOuterXml29()
                 {
-                    String strp = "a                                                             ";
+                    string strp = "a                                                             ";
                     strp += strp;
                     strp += strp;
                     strp += strp;
@@ -268,7 +268,7 @@ namespace CoreXml.Test.XLinq
                 }
 
                 //[Variation("Read OuterXml when Namespaces=false and has an attribute xmlns")]
-                public void ReadOuterXmlWhenNamespacesEqualsToFalseAndHasAnAttributeXmlns()
+                private void ReadOuterXmlWhenNamespacesEqualsToFalseAndHasAnAttributeXmlns()
                 {
                     string xml = "<?xml version='1.0' encoding='utf-8' ?> <foo xmlns=\"testing\"><bar id=\"1\" /></foo>";
                     XmlReader DataReader = GetReaderStr(xml);

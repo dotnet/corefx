@@ -131,7 +131,7 @@ namespace System.Net.Primitives.Functional.Tests
             Assert.Equal(0, ip.ScopeId);
 
             ip.ScopeId = 700;
-            Assert.Equal(ip.ScopeId, 700);
+            Assert.Equal(700, ip.ScopeId);
 
             ip.ScopeId = 700;
         }
@@ -160,10 +160,10 @@ namespace System.Net.Primitives.Functional.Tests
             int i2 = (int)0x50130000;
             int i3 = (int)0x01234567;
             int i4 = (int)0x67452301;
-            
+
             short s1 = (short)0x1350;
             short s2 = (short)0x5013;
-            
+
             Assert.Equal(l2, IPAddress.HostToNetworkOrder(l1));
             Assert.Equal(l4, IPAddress.HostToNetworkOrder(l3));
             Assert.Equal(i2, IPAddress.HostToNetworkOrder(i1));
@@ -191,6 +191,9 @@ namespace System.Net.Primitives.Functional.Tests
 
             ip = new IPAddress(IPAddress.IPv6Loopback.GetAddressBytes()); //IpV6 loopback
             Assert.True(IPAddress.IsLoopback(ip));
+
+            ip = new IPAddress(IPAddress.Loopback.MapToIPv6().GetAddressBytes()); // IPv4 loopback mapped to IPv6
+            Assert.Equal(!PlatformDetection.IsFullFramework, IPAddress.IsLoopback(ip)); // https://github.com/dotnet/corefx/issues/35454
         }
 
         [Fact]
@@ -275,7 +278,7 @@ namespace System.Net.Primitives.Functional.Tests
             Assert.Equal(ip.GetHashCode(), clonedIp.GetHashCode());
         }
 
-        private static IEnumerable<object[]> GetValidIPAddresses()
+        public static IEnumerable<object[]> GetValidIPAddresses()
         {
             return IPAddressParsing.ValidIpv4Addresses
                 .Concat(IPAddressParsing.ValidIpv6Addresses)
@@ -310,6 +313,15 @@ namespace System.Net.Primitives.Functional.Tests
 
             Assert.Equal(ip1, ip2);
             Assert.Equal(ip1.GetHashCode(), ip2.GetHashCode());
+        }
+
+        [Fact]
+        public static void Address_ReadOnlyStatics_Set_Failure()
+        {
+            Assert.Throws<SocketException>(() => IPAddress.Any.Address = MaxAddress - 1);
+            Assert.Throws<SocketException>(() => IPAddress.Broadcast.Address = MaxAddress - 1);
+            Assert.Throws<SocketException>(() => IPAddress.Loopback.Address = MaxAddress - 1);
+            Assert.Throws<SocketException>(() => IPAddress.None.Address = MaxAddress - 1);
         }
 #pragma warning restore 618
     }

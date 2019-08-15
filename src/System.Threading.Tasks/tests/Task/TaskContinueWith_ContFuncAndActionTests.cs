@@ -3,13 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Diagnostics;
 
-namespace Test
+namespace System.Threading.Tasks.Tests
 {
     public class TaskContinueWith_ContFuncAndActionTests
     {
@@ -191,7 +187,7 @@ namespace Test
         #region Helper Methods
 
         // Chains a Task continuation to a Task.
-        public static void RunContinueWithTaskTask(TaskContinuationOptions options, bool runNegativeCases = false)
+        private static void RunContinueWithTaskTask(TaskContinuationOptions options, bool runNegativeCases = false)
         {
             bool ran = false;
             if (runNegativeCases)
@@ -221,7 +217,7 @@ namespace Test
         }
 
         // Chains a Task<T> continuation to a Task, with a Func<Task, T>.
-        public static void RunContinueWithTaskFuture(TaskContinuationOptions options, bool runNegativeCases = false)
+        private static void RunContinueWithTaskFuture(TaskContinuationOptions options, bool runNegativeCases = false)
         {
             bool ran = false;
             if (runNegativeCases)
@@ -251,7 +247,7 @@ namespace Test
         }
 
         // Chains a Task continuation to a Task<T>.
-        public static void RunContinueWithFutureTask(TaskContinuationOptions options, bool runNegativeCases = false)
+        private static void RunContinueWithFutureTask(TaskContinuationOptions options, bool runNegativeCases = false)
         {
             bool ran = false;
             if (runNegativeCases)
@@ -281,7 +277,7 @@ namespace Test
         }
 
         // Chains a Task<U> continuation to a Task<T>, with a Func<Task<T>, U>.
-        public static void RunContinueWithFutureFuture(TaskContinuationOptions options, bool runNegativeCases = false)
+        private static void RunContinueWithFutureFuture(TaskContinuationOptions options, bool runNegativeCases = false)
         {
             bool ran = false;
             if (runNegativeCases)
@@ -311,7 +307,7 @@ namespace Test
         }
 
         // Base logic for RunContinueWithXXXYYY() methods
-        public static void RunContinueWithBase(
+        private static void RunContinueWithBase(
             TaskContinuationOptions options,
             Action initRan,
             Func<Task, Task> continuationMaker,
@@ -364,7 +360,7 @@ namespace Test
         }
 
         // Base logic for RunContinueWithXXXYYY() methods
-        public static void RunContinueWithBase_NegativeCases(
+        private static void RunContinueWithBase_NegativeCases(
             TaskContinuationOptions options,
             Action initRan,
             Func<Task, Task> continuationMaker,

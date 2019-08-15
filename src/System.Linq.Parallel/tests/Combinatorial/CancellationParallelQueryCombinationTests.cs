@@ -605,6 +605,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
+        [ActiveIssue(21876, TestPlatforms.Linux)]
         [MemberData(nameof(UnaryCancelingOperators))]
         [MemberData(nameof(BinaryCancelingOperators))]
         [MemberData(nameof(OrderCancelingOperators))]
@@ -776,7 +777,6 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(UnaryCancelingOperators))]
         [MemberData(nameof(BinaryCancelingOperators))]
         [MemberData(nameof(OrderCancelingOperators))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Core bug fix https://github.com/dotnet/corefx/pull/2307")]
         public static void ToArray_OperationCanceledException_PreCanceled(Labeled<Func<ParallelQuery<int>, Action, ParallelQuery<int>>> operation)
         {
             AssertThrows.AlreadyCanceled(source => operation.Item(source, () => { }).ToArray());

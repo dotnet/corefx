@@ -9,18 +9,18 @@ namespace System.Numerics
     // This file contains the definitions for all of the JIT intrinsic methods and properties that are recognized by the current x64 JIT compiler.
     // The implementation defined here is used in any circumstance where the JIT fails to recognize these members as intrinsic.
     // The JIT recognizes these methods and properties by name and signature: if either is changed, the JIT will no longer recognize the member.
-    // Some methods declared here are not strictly intrinsic, but delegate to an intrinsic method. For example, only one overload of CopyTo() 
+    // Some methods declared here are not strictly intrinsic, but delegate to an intrinsic method. For example, only one overload of CopyTo()
 
     public partial struct Vector2
     {
         /// <summary>
         /// The X component of the vector.
         /// </summary>
-        public Single X;
+        public float X;
         /// <summary>
         /// The Y component of the vector.
         /// </summary>
-        public Single Y;
+        public float Y;
 
         #region Constructors
         /// <summary>
@@ -28,7 +28,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="value">The element to fill the vector with.</param>
         [Intrinsic]
-        public Vector2(Single value) : this(value, value) { }
+        public Vector2(float value) : this(value, value) { }
 
         /// <summary>
         /// Constructs a vector with the given individual elements.
@@ -36,7 +36,7 @@ namespace System.Numerics
         /// <param name="x">The X component.</param>
         /// <param name="y">The Y component.</param>
         [Intrinsic]
-        public Vector2(Single x, Single y)
+        public Vector2(float x, float y)
         {
             X = x;
             Y = y;
@@ -48,8 +48,9 @@ namespace System.Numerics
         /// Copies the contents of the vector into the given array.
         /// </summary>
         /// <param name="array">The destination array.</param>
+        [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyTo(Single[] array)
+        public readonly void CopyTo(float[] array)
         {
             CopyTo(array, 0);
         }
@@ -62,7 +63,8 @@ namespace System.Numerics
         /// <exception cref="ArgumentOutOfRangeException">If index is greater than end of the array or index is less than zero.</exception>
         /// <exception cref="ArgumentException">If number of elements in source vector is greater than those available in destination array
         /// or if there are not enough elements to copy.</exception>
-        public void CopyTo(Single[] array, int index)
+        [Intrinsic]
+        public readonly void CopyTo(float[] array, int index)
         {
             if (array == null)
             {
@@ -87,7 +89,7 @@ namespace System.Numerics
         /// <param name="other">The Vector2 to compare this instance to.</param>
         /// <returns>True if the other Vector2 is equal to this instance; False otherwise.</returns>
         [Intrinsic]
-        public bool Equals(Vector2 other)
+        public readonly bool Equals(Vector2 other)
         {
             return this.X == other.X && this.Y == other.Y;
         }
@@ -142,7 +144,7 @@ namespace System.Numerics
         /// Returns a vector whose elements are the absolute values of each of the source vector's elements.
         /// </summary>
         /// <param name="value">The source vector.</param>
-        /// <returns>The absolute value vector.</returns>        
+        /// <returns>The absolute value vector.</returns>
         [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 Abs(Vector2 value)
@@ -211,7 +213,7 @@ namespace System.Numerics
         /// <returns>The scaled vector.</returns>
         [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2 operator *(Single left, Vector2 right)
+        public static Vector2 operator *(float left, Vector2 right)
         {
             return new Vector2(left, left) * right;
         }
@@ -224,7 +226,7 @@ namespace System.Numerics
         /// <returns>The scaled vector.</returns>
         [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2 operator *(Vector2 left, Single right)
+        public static Vector2 operator *(Vector2 left, float right)
         {
             return left * new Vector2(right, right);
         }
@@ -271,6 +273,7 @@ namespace System.Numerics
         /// <param name="left">The first vector to compare.</param>
         /// <param name="right">The second vector to compare.</param>
         /// <returns>True if the vectors are equal; False otherwise.</returns>
+        [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Vector2 left, Vector2 right)
         {
@@ -283,6 +286,7 @@ namespace System.Numerics
         /// <param name="left">The first vector to compare.</param>
         /// <param name="right">The second vector to compare.</param>
         /// <returns>True if the vectors are not equal; False if they are equal.</returns>
+        [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Vector2 left, Vector2 right)
         {

@@ -89,7 +89,7 @@ namespace System.Xml
             {
                 if (xmlType != null)
                 {
-                    // special-case convertions to DateTimeOffset; typedValue is by default a DateTime 
+                    // special-case convertions to DateTimeOffset; typedValue is by default a DateTime
                     // which cannot preserve time zone, so we need to convert from the original string
                     if (returnType == typeof(DateTimeOffset) && xmlType.Datatype is Datatype_dateTimeBase)
                     {
@@ -185,7 +185,7 @@ namespace System.Xml
             {
                 if (xmlType != null)
                 {
-                    // special-case convertions to DateTimeOffset; typedValue is by default a DateTime 
+                    // special-case convertions to DateTimeOffset; typedValue is by default a DateTime
                     // which cannot preserve time zone, so we need to convert from the original string
                     if (returnType == typeof(DateTimeOffset) && xmlType.Datatype is Datatype_dateTimeBase)
                     {
@@ -302,7 +302,7 @@ namespace System.Xml
                         goto case ValidatingReaderState.Read;
                     }
 
-                case ValidatingReaderState.ReadAhead: //Will enter here on calling Skip() 
+                case ValidatingReaderState.ReadAhead: //Will enter here on calling Skip()
                     ClearAttributesInfo();
                     Task task = ProcessReaderEventAsync();
                     return ReadAsync_ReadAhead(task);
@@ -516,9 +516,6 @@ namespace System.Xml
             return Task.CompletedTask;
         }
 
-        // SxS: This function calls ValidateElement on XmlSchemaValidator which is annotated with ResourceExposure attribute.
-        // Since the resource names (namespace location) are not provided directly by the user (they are read from the source
-        // document) and the function does not expose any resources it is fine to suppress the SxS warning.
         private async Task ProcessElementEventAsync()
         {
             if (_processInlineSchema && IsXSDRoot(_coreReader.LocalName, _coreReader.NamespaceURI) && _coreReader.Depth > 0)
@@ -756,7 +753,7 @@ namespace System.Xml
                     typedValue = _atomicValue;
                 }
                 originalString = _originalAtomicValueString;
-                xmlType = ElementXmlType; //Set this for default values 
+                xmlType = ElementXmlType; //Set this for default values
                 await this.ReadAsync().ConfigureAwait(false);
 
                 tuple = new Tuple<XmlSchemaType, string, object>(xmlType, originalString, typedValue);
@@ -867,4 +864,3 @@ namespace System.Xml
         }
     }
 }
-

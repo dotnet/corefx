@@ -11,11 +11,11 @@ namespace System.Security.Cryptography
     {
         public sealed partial class ECDiffieHellmanSecurityTransforms : ECDiffieHellman
         {
-            private readonly EccSecurityTransforms _ecc = new EccSecurityTransforms();
+            private readonly EccSecurityTransforms _ecc = new EccSecurityTransforms(nameof(ECDiffieHellman));
 
             public ECDiffieHellmanSecurityTransforms()
             {
-                KeySize = 521;
+                base.KeySize = 521;
             }
 
             internal ECDiffieHellmanSecurityTransforms(SafeSecKeyRefHandle publicKey)
@@ -51,8 +51,13 @@ namespace System.Security.Cryptography
 
                     // Set the KeySize before freeing the key so that an invalid value doesn't throw away the key
                     base.KeySize = value;
-                    _ecc.Dispose();
+                    _ecc.DisposeKey();
                 }
+            }
+
+            private void ThrowIfDisposed()
+            {
+                _ecc.ThrowIfDisposed();
             }
 
             protected override void Dispose(bool disposing)
@@ -80,6 +85,31 @@ namespace System.Security.Cryptography
                 KeySizeValue = _ecc.ImportParameters(parameters);
             }
 
+            public override void ImportSubjectPublicKeyInfo(
+                ReadOnlySpan<byte> source,
+                out int bytesRead)
+            {
+                KeySizeValue = _ecc.ImportSubjectPublicKeyInfo(source, out bytesRead);
+            }
+
+            public override void ImportEncryptedPkcs8PrivateKey(
+                ReadOnlySpan<byte> passwordBytes,
+                ReadOnlySpan<byte> source,
+                out int bytesRead)
+            {
+                ThrowIfDisposed();
+                base.ImportEncryptedPkcs8PrivateKey(passwordBytes, source, out bytesRead);
+            }
+
+            public override void ImportEncryptedPkcs8PrivateKey(
+                ReadOnlySpan<char> password,
+                ReadOnlySpan<byte> source,
+                out int bytesRead)
+            {
+                ThrowIfDisposed();
+                base.ImportEncryptedPkcs8PrivateKey(password, source, out bytesRead);
+            }
+
             public override void GenerateKey(ECCurve curve)
             {
                 KeySizeValue = _ecc.GenerateKey(curve);
@@ -104,6 +134,8 @@ namespace System.Security.Cryptography
                 if (string.IsNullOrEmpty(hashAlgorithm.Name))
                     throw new ArgumentException(SR.Cryptography_HashAlgorithmNameNullOrEmpty, nameof(hashAlgorithm));
 
+                ThrowIfDisposed();
+
                 return ECDiffieHellmanDerivation.DeriveKeyFromHash(
                     otherPartyPublicKey,
                     hashAlgorithm,
@@ -124,6 +156,8 @@ namespace System.Security.Cryptography
                 if (string.IsNullOrEmpty(hashAlgorithm.Name))
                     throw new ArgumentException(SR.Cryptography_HashAlgorithmNameNullOrEmpty, nameof(hashAlgorithm));
 
+                ThrowIfDisposed();
+
                 return ECDiffieHellmanDerivation.DeriveKeyFromHmac(
                     otherPartyPublicKey,
                     hashAlgorithm,
@@ -142,6 +176,8 @@ namespace System.Security.Cryptography
                     throw new ArgumentNullException(nameof(prfLabel));
                 if (prfSeed == null)
                     throw new ArgumentNullException(nameof(prfSeed));
+
+                ThrowIfDisposed();
 
                 return ECDiffieHellmanDerivation.DeriveKeyTls(
                     otherPartyPublicKey,
@@ -228,7 +264,7 @@ namespace System.Security.Cryptography
                 public ECDiffieHellmanSecurityTransformsPublicKey(ECParameters ecParameters)
                 {
                     Debug.Assert(ecParameters.D == null);
-                    _ecc = new EccSecurityTransforms();
+                    _ecc = new EccSecurityTransforms(nameof(ECDiffieHellmanPublicKey));
                     _ecc.ImportParameters(ecParameters);
                 }
 
@@ -239,7 +275,7 @@ namespace System.Security.Cryptography
 
                 /// <summary>
                 /// There is no key blob format for OpenSSL ECDH like there is for Cng ECDH. Instead of allowing
-                /// this to return a potentially confusing empty byte array, we opt to throw instead. 
+                /// this to return a potentially confusing empty byte array, we opt to throw instead.
                 /// </summary>
                 public override byte[] ToByteArray()
                 {
@@ -251,7 +287,6 @@ namespace System.Security.Cryptography
                     if (disposing)
                     {
                         _ecc.Dispose();
-                        _ecc = null;
                     }
 
                     base.Dispose(disposing);
@@ -260,29 +295,11 @@ namespace System.Security.Cryptography
                 public override ECParameters ExportExplicitParameters() =>
                     throw new PlatformNotSupportedException(SR.Cryptography_ECC_NamedCurvesOnly);
 
-                public override ECParameters ExportParameters()
-                {
-                    if (_ecc == null)
-                    {
-                        throw new ObjectDisposedException(typeof(ECDiffieHellmanSecurityTransformsPublicKey).Name);
-                    }
+                public override ECParameters ExportParameters() =>
+                    _ecc.ExportParameters(includePrivateParameters: false, keySizeInBits: -1);
 
-                    return _ecc.ExportParameters(includePrivateParameters: false, keySizeInBIts: -1);
-                }
-
-                internal SafeSecKeyRefHandle KeyHandle
-                {
-                    get
-                    {
-                        if (_ecc == null)
-                        {
-                            throw new ObjectDisposedException(
-                                typeof(ECDiffieHellmanSecurityTransformsPublicKey).Name);
-                        }
-
-                        return _ecc.GetOrGenerateKeys(-1).PublicKey;
-                    }
-                }
+                internal SafeSecKeyRefHandle KeyHandle =>
+                    _ecc.GetOrGenerateKeys(-1).PublicKey;
             }
         }
     }

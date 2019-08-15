@@ -3,15 +3,15 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.ComponentModel.Design.Tests
 {
-    public class DesignerOptionServiceTests : RemoteExecutorTestBase
+    public class DesignerOptionServiceTests
     {
         [Fact]
         public void CreateOptionCollection_CreateMultipleTimes_ReturnsExpected()
@@ -182,7 +182,6 @@ namespace System.ComponentModel.Design.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Properties_GetBeforeAddingChild_ReturnsNonEmpty()
         {
             var service = new TestDesignerOptionService();
@@ -268,7 +267,7 @@ namespace System.ComponentModel.Design.Tests
         [Fact]
         public void DesignerOptionConverter_ConvertToString_ReturnsExpected()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
 

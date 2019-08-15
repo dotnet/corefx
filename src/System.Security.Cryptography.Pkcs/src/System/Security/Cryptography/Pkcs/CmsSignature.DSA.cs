@@ -17,7 +17,7 @@ namespace System.Security.Cryptography.Pkcs
             lookup.Add(Oids.DsaWithSha256, new DSACmsSignature(Oids.DsaWithSha256, HashAlgorithmName.SHA256));
             lookup.Add(Oids.DsaWithSha384, new DSACmsSignature(Oids.DsaWithSha384, HashAlgorithmName.SHA384));
             lookup.Add(Oids.DsaWithSha512, new DSACmsSignature(Oids.DsaWithSha512, HashAlgorithmName.SHA512));
-            lookup.Add(Oids.DsaPublicKey, new DSACmsSignature(null, default));
+            lookup.Add(Oids.Dsa, new DSACmsSignature(null, default));
         }
 
         private class DSACmsSignature : CmsSignature
@@ -37,8 +37,13 @@ namespace System.Security.Cryptography.Pkcs
             }
 
             internal override bool VerifySignature(
+#if netcoreapp || netstandard21
                 ReadOnlySpan<byte> valueHash,
                 ReadOnlyMemory<byte> signature,
+#else
+                byte[] valueHash,
+                byte[] signature,
+#endif
                 string digestAlgorithmOid,
                 HashAlgorithmName digestAlgorithmName,
                 ReadOnlyMemory<byte>? signatureParameters,
@@ -63,28 +68,36 @@ namespace System.Security.Cryptography.Pkcs
                 DSAParameters dsaParameters = dsa.ExportParameters(false);
                 int bufSize = 2 * dsaParameters.Q.Length;
 
-                ArrayPool<byte> pool = ArrayPool<byte>.Shared;
-                byte[] rented = pool.Rent(bufSize);
+#if netcoreapp || netstandard21
+                byte[] rented = CryptoPool.Rent(bufSize);
                 Span<byte> ieee = new Span<byte>(rented, 0, bufSize);
 
                 try
                 {
+#else
+                byte[] ieee = new byte[bufSize];
+#endif
                     if (!DsaDerToIeee(signature, ieee))
                     {
                         return false;
                     }
 
                     return dsa.VerifySignature(valueHash, ieee);
+#if netcoreapp || netstandard21
                 }
                 finally
                 {
-                    ieee.Clear();
-                    pool.Return(rented);
+                    CryptoPool.Return(rented, bufSize);
                 }
+#endif
             }
 
             protected override bool Sign(
+#if netcoreapp || netstandard21
                 ReadOnlySpan<byte> dataHash,
+#else
+                byte[] dataHash,
+#endif
                 HashAlgorithmName hashAlgorithmName,
                 X509Certificate2 certificate,
                 AsymmetricAlgorithm key,
@@ -120,9 +133,9 @@ namespace System.Security.Cryptography.Pkcs
 
                 signatureAlgorithm = new Oid(oidValue, oidValue);
 
-                ArrayPool<byte> pool = ArrayPool<byte>.Shared;
+#if netcoreapp || netstandard21
                 // The Q size cannot be bigger than the KeySize.
-                byte[] rented = pool.Rent(dsa.KeySize / 8);
+                byte[] rented = CryptoPool.Rent(dsa.KeySize / 8);
                 int bytesWritten = 0;
 
                 try
@@ -144,12 +157,16 @@ namespace System.Security.Cryptography.Pkcs
                 }
                 finally
                 {
-                    Array.Clear(rented, 0, bytesWritten);
-                    pool.Return(rented);
+                    CryptoPool.Return(rented, bytesWritten);
                 }
 
                 signatureValue = null;
                 return false;
+#else
+                byte[] signature = dsa.CreateSignature(dataHash);
+                signatureValue = DsaIeeeToDer(new ReadOnlySpan<byte>(signature));
+                return true;
+#endif
             }
         }
     }

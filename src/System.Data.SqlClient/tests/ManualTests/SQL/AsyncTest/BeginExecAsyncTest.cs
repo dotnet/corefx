@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -12,7 +12,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         {
             int suffix = (new Random()).Next(5000);
 
-            string commandText = 
+            string commandText =
                 $"CREATE TABLE #Shippers{suffix}(" +
                     $"[ShipperID][int] NULL," +
                     $"[CompanyName] [nvarchar] (40) NOT NULL," +
@@ -29,7 +29,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return commandText;
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void ExecuteTest()
         {
             using (SqlConnection connection = new SqlConnection(DataTestUtility.TcpConnStr))
@@ -67,7 +67,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void FailureTest()
         {
             using (SqlConnection connection = new SqlConnection(DataTestUtility.TcpConnStr))

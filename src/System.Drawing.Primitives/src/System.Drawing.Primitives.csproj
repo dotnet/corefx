@@ -1,19 +1,12 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <RootNamespace>System.Drawing</RootNamespace>
     <AssemblyName>System.Drawing.Primitives</AssemblyName>
     <ProjectGuid>{8F472B93-574C-4AEC-9D28-6C2360A55BBF}</ProjectGuid>
     <DefineConstants Condition="'$(TargetsWindows)' == 'true' And '$(TargetGroup)' != 'uap'">$(DefineConstants);FEATURE_WINDOWS_SYSTEM_COLORS</DefineConstants>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Reference Include="System.Collections" />
     <Reference Include="System.Diagnostics.Debug" />
@@ -23,8 +16,10 @@
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Runtime.InteropServices" />
     <Reference Include="System.ComponentModel.Primitives" />
+    <Reference Include="Microsoft.Win32.SystemEvents" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="System\Drawing\KnownColorNames.cs" />
     <Compile Include="System\Drawing\Point.cs" />
     <Compile Include="System\Drawing\PointF.cs" />
     <Compile Include="System\Drawing\Rectangle.cs" />
@@ -32,11 +27,14 @@
     <Compile Include="System\Drawing\Size.cs" />
     <Compile Include="System\Drawing\SizeF.cs" />
     <Compile Include="System\Drawing\Color.cs" />
+    <Compile Include="$(CommonPath)\System\Drawing\ColorConverterCommon.cs">
+      <Link>System\Drawing\ColorConverterCommon.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Drawing\ColorTable.cs">
       <Link>System\Drawing\ColorTable.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Drawing\ColorUtil.netcoreapp21.cs">
-      <Link>System\Drawing\ColorUtil.netcoreapp21.cs</Link>
+    <Compile Include="$(CommonPath)\System\Drawing\ColorTranslator.cs">
+      <Link>System\Drawing\ColorTranslator.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Drawing\KnownColor.cs">
       <Link>System\Drawing\KnownColor.cs</Link>
@@ -44,8 +42,11 @@
     <Compile Include="$(CommonPath)\System\Drawing\KnownColorTable.cs">
       <Link>System\Drawing\KnownColorTable.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Numerics\Hashing\HashHelpers.cs">
+    <Compile Include="$(CommonPath)\CoreLib\System\Numerics\Hashing\HashHelpers.cs">
       <Link>Common\System\Numerics\Hashing\HashHelpers.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Drawing\SystemColors.cs">
+      <Link>System\Drawing\SystemColors.cs</Link>
     </Compile>
   </ItemGroup>
   <!-- System color features require Win32 PInvoke's which are disallowed in UAP. -->
@@ -53,12 +54,11 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\user32\Interop.GetSysColor.cs">
-      <Link>Common\Interop\Windows\user32\Interop.GetSysColor.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\User32\Interop.GetSysColor.cs">
+      <Link>Common\Interop\Windows\User32\Interop.GetSysColor.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\user32\Interop.Win32SystemColors.cs">
-      <Link>Common\Interop\Windows\user32\Interop.Win32SystemColors.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\User32\Interop.Win32SystemColors.cs">
+      <Link>Common\Interop\Windows\User32\Interop.Win32SystemColors.cs</Link>
     </Compile>
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

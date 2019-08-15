@@ -10,7 +10,7 @@ namespace System.IO.Tests
     {
         #region Utilities
 
-        public virtual void Move(string sourceDir, string destDir)
+        protected virtual void Move(string sourceDir, string destDir)
         {
             Directory.Move(sourceDir, destDir);
         }
@@ -243,18 +243,6 @@ namespace System.IO.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public void WindowsWildCharacterPath_Desktop()
-        {
-            Assert.Throws<ArgumentException>(() => Move("*", GetTestFilePath()));
-            Assert.Throws<ArgumentException>(() => Move(TestDirectory, "*"));
-            Assert.Throws<ArgumentException>(() => Move(TestDirectory, "Test*t"));
-            Assert.Throws<ArgumentException>(() => Move(TestDirectory, "*Test"));
-        }
-
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void WindowsWildCharacterPath_Core()
         {
             Assert.ThrowsAny<IOException>(() => Move(Path.Combine(TestDirectory, "*"), GetTestFilePath()));
@@ -268,7 +256,7 @@ namespace System.IO.Tests
         public void UnixWildCharacterPath()
         {
             // Wildcards are allowed in paths for Unix move commands as literals as well as functional wildcards,
-            // but to implement the latter in .NET would be confusing (e.g. having a DirectoryInfo represent multiple directories), 
+            // but to implement the latter in .NET would be confusing (e.g. having a DirectoryInfo represent multiple directories),
             // so the implementation assumes the former.
             // Thus, any "*" characters will act the same as any other character when used in a file/directory name.
             string testDir = GetTestFilePath();
@@ -315,8 +303,8 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]  // Moving to existing directory causes IOException
-        public void WindowsExistingDirectory()
+        // Moving to existing directory causes IOException
+        public void ExistingDirectory()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
             string testDirSource = Path.Combine(testDir.FullName, GetTestFileName());

@@ -62,7 +62,7 @@ namespace System.Collections.ObjectModel.Tests
         [Fact]
         public static void CtorTests_Negative()
         {
-            Assert.Throws<ArgumentNullException>(() => { ReadOnlyDictionary<int, string> dict = new ReadOnlyDictionary<int, string>(null); });
+            AssertExtensions.Throws<ArgumentNullException>("dictionary", () => new ReadOnlyDictionary<int, string>(null));
         }
 
         /// <summary>
@@ -182,7 +182,7 @@ namespace System.Collections.ObjectModel.Tests
             helper.Item_get_Tests_Negative();
         }
 
-        /// <summary> 
+        /// <summary>
         /// Tests that a ReadOnlyDictionary cannot be modified. That is, that
         /// Add, Remove, Clear does not work.
         /// </summary>
@@ -211,7 +211,6 @@ namespace System.Collections.ObjectModel.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public static void DebuggerAttributeTests()
         {
             ReadOnlyDictionary<int, int> dict = new ReadOnlyDictionary<int, int>(new Dictionary<int, int>{{1, 2}, {2, 4}, {3, 6}});
@@ -235,16 +234,14 @@ namespace System.Collections.ObjectModel.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public static void DebuggerAttribute_NullDictionary_ThrowsArgumentNullException()
         {
             TargetInvocationException ex = Assert.Throws<TargetInvocationException>(() =>   DebuggerAttributes.ValidateDebuggerTypeProxyProperties(typeof(ReadOnlyDictionary<int, int>), null));
             ArgumentNullException argumentNullException = Assert.IsType<ArgumentNullException>(ex.InnerException);
             Assert.Equal("dictionary", argumentNullException.ParamName);
         }
-        
+
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public static void DebuggerAttribute_NullDictionaryKeys_ThrowsArgumentNullException()
         {
             TargetInvocationException ex = Assert.Throws<TargetInvocationException>(() => DebuggerAttributes.ValidateDebuggerTypeProxyProperties(typeof(ReadOnlyDictionary<int, int>.KeyCollection), new Type[] { typeof(int) }, null));
@@ -269,7 +266,7 @@ namespace System.Collections.ObjectModel.Tests
     public class DictionaryThatDoesntImplementNonGeneric<TKey, TValue> : IDictionary<TKey, TValue>
     {
         private readonly IDictionary<TKey, TValue> _inner;
-        
+
         public DictionaryThatDoesntImplementNonGeneric(IDictionary<TKey, TValue> inner)
         {
             _inner = inner;
@@ -486,7 +483,7 @@ namespace System.Collections.ObjectModel.Tests
                     "Err_5983muqjl Verifying ContainsKey the item in the collection and the expected existing items(" + _expectedItems[i].Key + ")");
             }
 
-            //Verify that the collection was not mutated 
+            //Verify that the collection was not mutated
             VerifyCollection(_collection, _expectedItems);
 
             KeyValuePair<TKey, TValue> nonExistingItem = _generateItem();
@@ -497,7 +494,7 @@ namespace System.Collections.ObjectModel.Tests
             TKey nonExistingKey = nonExistingItem.Key;
             Assert.False(_collection.ContainsKey(nonExistingKey), "Err_4713ebda Verifying ContainsKey the non-existing item in the collection and the expected non-existing items key:" + nonExistingKey);
 
-            //Verify that the collection was not mutated 
+            //Verify that the collection was not mutated
             VerifyCollection(_collection, _expectedItems);
         }
 
@@ -517,7 +514,7 @@ namespace System.Collections.ObjectModel.Tests
                 Assert.Equal(_expectedItems[i].Value, itemValue);
             }
 
-            //Verify that the collection was not mutated 
+            //Verify that the collection was not mutated
             VerifyCollection(_collection, _expectedItems);
 
             KeyValuePair<TKey, TValue> nonExistingItem = _generateItem();
@@ -529,7 +526,7 @@ namespace System.Collections.ObjectModel.Tests
             Assert.False(_collection.TryGetValue(nonExistingItem.Key, out nonExistingItemValue),
                 "Err_4561rtio Verifying TryGetValue returns false when looking for a non-existing item in the collection (" + nonExistingItem.Key + ")");
 
-            //Verify that the collection was not mutated 
+            //Verify that the collection was not mutated
             VerifyCollection(_collection, _expectedItems);
         }
 
@@ -583,7 +580,7 @@ namespace System.Collections.ObjectModel.Tests
                 TValue actualValue = _collection[expectedKey];
                 Assert.Equal(expectedValue, actualValue);
             }
-            //Verify that the collection was not mutated 
+            //Verify that the collection was not mutated
             VerifyCollection(_collection, _expectedItems);
         }
 
@@ -597,7 +594,7 @@ namespace System.Collections.ObjectModel.Tests
             TKey nonExistingKey = _generateItem().Key;
             Assert.Throws<KeyNotFoundException>(() => { TValue itemValue = _collection[nonExistingKey]; });
 
-            //Verify that the collection was not mutated 
+            //Verify that the collection was not mutated
             VerifyCollection(_collection, _expectedItems);
         }
 
@@ -638,7 +635,7 @@ namespace System.Collections.ObjectModel.Tests
                 KeyValuePair<TKey, TValue> currentItem = enumerator.Current;
                 KeyValuePair<TKey, TValue> tempItem;
 
-                // Verify we have not gotten more items then we expected                
+                // Verify we have not gotten more items then we expected
                 Assert.True(iterations < expectedCount,
                     "Err_9844awpa More items have been returned from the enumerator(" + iterations + " items) then are in the expectedElements(" + expectedCount + " items)");
 
@@ -689,7 +686,7 @@ namespace System.Collections.ObjectModel.Tests
             IEnumerator enumerator = collection.GetEnumerator();
             int iterations = 0;
             int expectedCount = expectedItems.Length;
-            
+
             // There is no sequential order to the collection, so we're testing that all the items
             // in the readonlydictionary exist in the array.
             bool[] itemsVisited = new bool[expectedCount];
@@ -699,7 +696,7 @@ namespace System.Collections.ObjectModel.Tests
                 object currentItem = enumerator.Current;
                 object tempItem;
 
-                // Verify we have not gotten more items then we expected                
+                // Verify we have not gotten more items then we expected
                 Assert.True(iterations < expectedCount,
                     "Err_9844awpa More items have been returned from the enumerator(" + iterations + " items) then are in the expectedElements(" + expectedCount + " items)");
 
@@ -741,7 +738,7 @@ namespace System.Collections.ObjectModel.Tests
         }
 
         /// <summary>
-        /// tests whether the given item's key is unique in a collection.  
+        /// tests whether the given item's key is unique in a collection.
         /// returns true if it is and false otherwise.
         /// </summary>
         private bool IsUniqueKey(KeyValuePair<TKey, TValue>[] items, KeyValuePair<TKey, TValue> item)

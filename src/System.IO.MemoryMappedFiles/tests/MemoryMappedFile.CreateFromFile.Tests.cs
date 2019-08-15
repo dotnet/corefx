@@ -293,10 +293,12 @@ namespace System.IO.MemoryMappedFiles.Tests
             new FileMode[] { FileMode.Open, FileMode.OpenOrCreate },
             new string[] { null, "CreateUniqueMapName()" },
             new long[] { 1, 256, -1 /*pagesize*/, 10000 },
-            new MemoryMappedFileAccess[] { MemoryMappedFileAccess.Read, MemoryMappedFileAccess.ReadWrite, MemoryMappedFileAccess.CopyOnWrite })]
+            new MemoryMappedFileAccess[] { MemoryMappedFileAccess.ReadWrite })]
         public void ValidArgumentCombinationsWithPath_ModesOpenOrCreate(
             FileMode mode, string mapName, long capacity, MemoryMappedFileAccess access)
         {
+            _ = access;
+
             // Test each of the four path-based CreateFromFile overloads
 
             using (TempFile file = new TempFile(GetTestFilePath(), capacity))
@@ -394,7 +396,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// </summary>
         /// <param name="modes">The modes to yield.</param>
         /// <param name="mapNames">
-        /// The names to yield.  
+        /// The names to yield.
         /// non-null may be excluded based on platform.
         /// "CreateUniqueMapName()" will be translated to an invocation of that method.
         /// </param>
@@ -481,7 +483,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// listed in the MemberData attribute (e.g. actual system page size instead of -1).
         /// </summary>
         /// <param name="mapNames">
-        /// The names to yield.  
+        /// The names to yield.
         /// non-null may be excluded based on platform.
         /// "CreateUniqueMapName()" will be translated to an invocation of that method.
         /// </param>
@@ -626,7 +628,6 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// Test to validate we can create multiple concurrent read-only maps from the same file path.
         /// </summary>
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "On netfx, the MMF.CreateFromFile default FileShare is None. We intentionally changed it in netcoreapp in #6092.")]
         public void FileInUse_CreateFromFile_SucceedsWithReadOnly()
         {
             const int Capacity = 4096;
@@ -647,7 +648,6 @@ namespace System.IO.MemoryMappedFiles.Tests
         [Theory]
         [InlineData(MemoryMappedFileAccess.ReadExecute)]
         [InlineData(MemoryMappedFileAccess.ReadWriteExecute)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "CreateFromFile in desktop uses FileStream's ctor that takes a FileSystemRights in order to specify execute privileges.")]
         public void FileNotOpenedForExecute(MemoryMappedFileAccess access)
         {
             using (TempFile file = new TempFile(GetTestFilePath(), 4096))
@@ -668,7 +668,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// If the test is being run under the superuser, however, modification of a ReadOnly
         /// file is allowed.
         /// </summary>
-        public void WriteToReadOnlyFile(MemoryMappedFileAccess access, bool succeeds)
+        private void WriteToReadOnlyFile(MemoryMappedFileAccess access, bool succeeds)
         {
             const int Capacity = 4096;
             using (TempFile file = new TempFile(GetTestFilePath(), Capacity))
@@ -700,17 +700,9 @@ namespace System.IO.MemoryMappedFiles.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "CreateFromFile in desktop uses FileStream's ctor that takes a FileSystemRights in order to specify execute privileges.")]
         public void WriteToReadOnlyFile_CopyOnWrite()
         {
             WriteToReadOnlyFile(MemoryMappedFileAccess.CopyOnWrite, (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && geteuid() == 0));
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "CreateFromFile in desktop uses FileStream's ctor that takes a FileSystemRights in order to specify execute privileges.")]
-        public void WriteToReadOnlyFile_CopyOnWrite_netfx()
-        {
-            WriteToReadOnlyFile(MemoryMappedFileAccess.CopyOnWrite, succeeds: true);
         }
 
         /// <summary>

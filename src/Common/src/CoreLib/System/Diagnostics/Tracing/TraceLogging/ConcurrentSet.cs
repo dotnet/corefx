@@ -26,11 +26,11 @@ namespace System.Diagnostics.Tracing
     internal struct ConcurrentSet<KeyType, ItemType>
         where ItemType : ConcurrentSetItem<KeyType, ItemType>
     {
-        private ItemType[] items;
+        private ItemType[]? items;
 
-        public ItemType TryGet(KeyType key)
+        public ItemType? TryGet(KeyType key)
         {
-            ItemType item;
+            ItemType? item;
             var oldItems = this.items;
 
             if (oldItems != null)
@@ -110,7 +110,7 @@ namespace System.Diagnostics.Tracing
                 Array.Copy(oldItems, lo, newItems, lo + 1, oldLength - lo);
             }
 
-            newItems = Interlocked.CompareExchange(ref this.items, newItems, oldItems);
+            newItems = Interlocked.CompareExchange(ref this.items, newItems, oldItems)!;
             if (oldItems != newItems)
             {
                 oldItems = newItems;

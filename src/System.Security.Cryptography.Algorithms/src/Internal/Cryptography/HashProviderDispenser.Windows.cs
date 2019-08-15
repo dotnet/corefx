@@ -9,20 +9,18 @@ using System.Security.Cryptography;
 namespace Internal.Cryptography
 {
     //
-    // Provides hash services via the native provider (CNG). 
+    // Provides hash services via the native provider (CNG).
     //
     internal static partial class HashProviderDispenser
     {
-        public static HashProvider CreateHashProvider(String hashAlgorithmId)
+        public static HashProvider CreateHashProvider(string hashAlgorithmId)
         {
             return new HashProviderCng(hashAlgorithmId, null);
         }
 
-        public static HashProvider CreateMacProvider(String hashAlgorithmId, byte[] key)
+        public static HashProvider CreateMacProvider(string hashAlgorithmId, byte[] key)
         {
             return new HashProviderCng(hashAlgorithmId, key);
         }
     }
 }
-
-

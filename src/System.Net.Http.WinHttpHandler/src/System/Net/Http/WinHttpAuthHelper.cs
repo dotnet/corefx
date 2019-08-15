@@ -52,7 +52,7 @@ namespace System.Net.Http
         // to boost performance and scalability.
         private readonly CredentialCache _credentialCache = new CredentialCache();
         private readonly object _credentialCacheLock = new object();
-        
+
         public void CheckResponseForAuthentication(
             WinHttpRequestState state,
             ref uint proxyAuthScheme,
@@ -75,12 +75,12 @@ namespace System.Net.Http
                 case HttpStatusCode.Unauthorized:
                     if (state.ServerCredentials == null || state.LastStatusCode == HttpStatusCode.Unauthorized)
                     {
-                        // Either we don't have server credentials or we already tried 
+                        // Either we don't have server credentials or we already tried
                         // to set the credentials and it failed before.
                         // So we will let the 401 be the final status code returned.
                         break;
                     }
-                    
+
                     state.LastStatusCode = statusCode;
 
                     // Determine authorization scheme to use. We ignore the firstScheme
@@ -115,7 +115,7 @@ namespace System.Net.Http
                             state.RetryRequest = true;
                         }
                     }
-                    
+
                     break;
 
                 case HttpStatusCode.ProxyAuthenticationRequired:
@@ -124,7 +124,7 @@ namespace System.Net.Http
                         // We tried already to set the credentials.
                         break;
                     }
-                    
+
                     state.LastStatusCode = statusCode;
 
                     // If we don't have any proxy credentials to try, then we end up with 407.
@@ -147,7 +147,7 @@ namespace System.Net.Http
                         out authTarget))
                     {
                         // WinHTTP returns an error for schemes it doesn't handle.
-                        // So, we need to ignore the error and just let it stay at 401.
+                        // So, we need to ignore the error and just let it stay at 407.
                         break;
                     }
 
@@ -155,7 +155,13 @@ namespace System.Net.Http
                     // But we can validate with assert.
                     Debug.Assert(authTarget == Interop.WinHttp.WINHTTP_AUTH_TARGET_PROXY);
 
-                    proxyAuthScheme = ChooseAuthScheme(supportedSchemes, state.Proxy.GetProxy(state.RequestMessage.RequestUri), proxyCreds);
+                    proxyAuthScheme = ChooseAuthScheme(
+                        supportedSchemes,
+                        // TODO: Issue #6997. If Proxy==null, we're using the system proxy which is possibly
+                        // discovered/calculated with a PAC file. So, we can't determine the actual proxy uri at
+                        // this point since it is calculated internally in WinHTTP. For now, pass in null for the uri.
+                        state.Proxy?.GetProxy(state.RequestMessage.RequestUri),
+                        proxyCreds);
                     state.RetryRequest = true;
                     break;
 
@@ -172,9 +178,9 @@ namespace System.Net.Http
         {
             // Set proxy credentials if we have them.
             // If a proxy authentication challenge was responded to, reset
-            // those credentials before each SendRequest, because the proxy  
-            // may require re-authentication after responding to a 401 or  
-            // to a redirect. If you don't, you can get into a 
+            // those credentials before each SendRequest, because the proxy
+            // may require re-authentication after responding to a 401 or
+            // to a redirect. If you don't, you can get into a
             // 407-401-407-401- loop.
             if (proxyAuthScheme != 0)
             {
@@ -217,7 +223,7 @@ namespace System.Net.Http
                         Interop.WinHttp.WINHTTP_AUTH_TARGET_SERVER);
                     state.LastStatusCode = HttpStatusCode.Unauthorized; // Remember we already set the creds.
                 }
-                
+
                 // No cached credential to use at this time. The request will first go out with no
                 // 'Authorization' header. Later, if a 401 occurs, we will be able to cache the credential
                 // since we will then know the proper auth scheme to use.
@@ -282,7 +288,7 @@ namespace System.Net.Http
             uint authTarget,
             bool allowDefaultCredentials)
         {
-            Debug.Assert(authTarget == Interop.WinHttp.WINHTTP_AUTH_TARGET_PROXY || 
+            Debug.Assert(authTarget == Interop.WinHttp.WINHTTP_AUTH_TARGET_PROXY ||
                          authTarget == Interop.WinHttp.WINHTTP_AUTH_TARGET_SERVER);
 
             uint optionData = allowDefaultCredentials ?
@@ -312,7 +318,7 @@ namespace System.Net.Http
 
             Debug.Assert(credentials != null);
             Debug.Assert(authScheme != 0);
-            Debug.Assert(authTarget == Interop.WinHttp.WINHTTP_AUTH_TARGET_PROXY || 
+            Debug.Assert(authTarget == Interop.WinHttp.WINHTTP_AUTH_TARGET_PROXY ||
                          authTarget == Interop.WinHttp.WINHTTP_AUTH_TARGET_SERVER);
 
             NetworkCredential networkCredential = credentials.GetCredential(uri, s_authSchemeStringMapping[authScheme]);
@@ -375,6 +381,15 @@ namespace System.Net.Http
         {
             if (credentials == null)
             {
+                return 0;
+            }
+
+            if (uri == null && !(credentials is NetworkCredential))
+            {
+                // TODO: Issue #6997.
+                // If the credentials are a NetworkCredential, the uri isn't used when calling .GetCredential() since
+                // it will work against all uri's. Otherwise, credentials is probably a CredentialCache and passing in
+                // null for a uri is invalid.
                 return 0;
             }
 

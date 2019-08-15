@@ -5,15 +5,14 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Net.Mail.Tests
 {
-    public class LoggingTest : RemoteExecutorTestBase
+    public class LoggingTest
     {
         [Fact]
-        [ActiveIssue(20470, TargetFrameworkMonikers.UapAot)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NetEventSource is only part of .NET Core.")]
         public void EventSource_ExistsWithCorrectId()
         {
             Type esType = typeof(SmtpClient).Assembly.GetType("System.Net.NetEventSource", throwOnError: true, ignoreCase: false);
@@ -26,11 +25,9 @@ namespace System.Net.Mail.Tests
         }
 
         [Fact]
-        [ActiveIssue(20470, TargetFrameworkMonikers.UapAot)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NetEventSource is only part of .NET Core.")]
         public void EventSource_EventsRaisedAsExpected()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 using (var listener = new TestEventListener("Microsoft-System-Net-Mail", EventLevel.Verbose))
                 {
@@ -43,7 +40,7 @@ namespace System.Net.Mail.Tests
                     Assert.DoesNotContain(events, ev => ev.EventId == 0); // errors from the EventSource itself
                     Assert.InRange(events.Count, 1, int.MaxValue);
                 }
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
     }

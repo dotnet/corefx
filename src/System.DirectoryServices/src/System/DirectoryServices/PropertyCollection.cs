@@ -32,7 +32,7 @@ namespace System.DirectoryServices
             get
             {
                 if (propertyName == null)
-                    throw new ArgumentNullException("propertyName");
+                    throw new ArgumentNullException(nameof(propertyName));
 
                 string name = propertyName.ToLower(CultureInfo.InvariantCulture);
                 if (valueTable.Contains(name))
@@ -64,7 +64,6 @@ namespace System.DirectoryServices
             }
         }
 
-        /// </devdoc>
         public ICollection PropertyNames => new KeysCollection(this);
 
         public ICollection Values => new ValuesCollection(this);
@@ -152,16 +151,16 @@ namespace System.DirectoryServices
 
         object ICollection.SyncRoot => this;
 
-        void ICollection.CopyTo(Array array, Int32 index)
+        void ICollection.CopyTo(Array array, int index)
         {
             if (array == null)
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
 
             if (array.Rank != 1)
-                throw new ArgumentException(SR.OnlyAllowSingleDimension, "array");
+                throw new ArgumentException(SR.OnlyAllowSingleDimension, nameof(array));
 
             if (index < 0)
-                throw new ArgumentOutOfRangeException(SR.LessThanZero, "index");
+                throw new ArgumentOutOfRangeException(SR.LessThanZero, nameof(index));
 
             if (((index + Count) > array.Length) || ((index + Count) < index))
                 throw new ArgumentException(SR.DestinationArrayNotLargeEnough);
@@ -175,8 +174,8 @@ namespace System.DirectoryServices
 
         private class PropertyEnumerator : IDictionaryEnumerator, IDisposable
         {
-            private DirectoryEntry _entry;               // clone (to be disposed)
-            private DirectoryEntry _parentEntry;         // original entry to pass to PropertyValueCollection
+            private readonly DirectoryEntry _entry;               // clone (to be disposed)
+            private readonly DirectoryEntry _parentEntry;         // original entry to pass to PropertyValueCollection
             private string _currentPropName = null;
 
             public PropertyEnumerator(DirectoryEntry parent, DirectoryEntry clone)

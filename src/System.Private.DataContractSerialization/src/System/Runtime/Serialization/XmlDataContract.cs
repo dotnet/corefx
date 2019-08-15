@@ -14,16 +14,12 @@ namespace System.Runtime.Serialization
     using System.Xml.Schema;
     using System.Security;
     using System.Linq;
+    using System.Runtime.CompilerServices;
 
-#if uapaot
-    public delegate IXmlSerializable CreateXmlSerializableDelegate();
-    public sealed class XmlDataContract : DataContract
-#else
     internal delegate IXmlSerializable CreateXmlSerializableDelegate();
     internal sealed class XmlDataContract : DataContract
-#endif
     {
-        private XmlDataContractCriticalHelper _helper;
+        private readonly XmlDataContractCriticalHelper _helper;
 
         public XmlDataContract() : base(new XmlDataContractCriticalHelper())
         {
@@ -90,14 +86,8 @@ namespace System.Runtime.Serialization
             set { _helper.IsTopLevelElementNullable = value; }
         }
 
-#if uapaot
-        private CreateXmlSerializableDelegate _createXmlSerializableDelegate;
-        public CreateXmlSerializableDelegate CreateXmlSerializableDelegate        
-#else
         internal CreateXmlSerializableDelegate CreateXmlSerializableDelegate
-#endif
         {
-#if !uapaot
             get
             {
                 // We create XmlSerializableDelegate via CodeGen when CodeGen is enabled;
@@ -121,22 +111,6 @@ namespace System.Runtime.Serialization
 
                 return () => ReflectionCreateXmlSerializable(this.UnderlyingType);
             }
-#else              
-            get
-            {
-                if (DataContractSerializer.Option == SerializationOption.CodeGenOnly 
-                 || (DataContractSerializer.Option == SerializationOption.ReflectionAsBackup && _createXmlSerializableDelegate != null))
-                {
-                    return _createXmlSerializableDelegate;
-                }
-
-                return () => ReflectionCreateXmlSerializable(this.UnderlyingType);
-            }
-            set
-            {
-                _createXmlSerializableDelegate = value;
-            }
-#endif            
         }
 
         internal override bool CanContainReferences => false;
@@ -284,7 +258,6 @@ namespace System.Runtime.Serialization
             return ctor;
         }
 
-#if !uapaot
         internal CreateXmlSerializableDelegate GenerateCreateXmlSerializableDelegate()
         {
             Type type = this.UnderlyingType;
@@ -325,7 +298,7 @@ namespace System.Runtime.Serialization
                         MethodInfo XName_op_Implicit = xName.GetMethod(
                             "op_Implicit",
                             BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public,
-                            new Type[] { typeof(String) }
+                            new Type[] { typeof(string) }
                             );
                         ConstructorInfo XElement_ctor = type.GetConstructor(
                             BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
@@ -377,7 +350,6 @@ namespace System.Runtime.Serialization
 
             return false;
         }
-#endif
 
         internal IXmlSerializable ReflectionCreateXmlSerializable(Type type)
         {
@@ -395,7 +367,7 @@ namespace System.Runtime.Serialization
                 else
                 {
                     ConstructorInfo ctor = GetConstructor();
-                    o = ctor.Invoke(new object[] { });
+                    o = ctor.Invoke(Array.Empty<object>());
                 }
 
                 return (IXmlSerializable)o;

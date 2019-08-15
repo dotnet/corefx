@@ -270,7 +270,7 @@ namespace System.Web.Util
                     int h2 = HttpEncoderUtility.HexToInt((char)bytes[pos + 2]);
 
                     if (h1 >= 0 && h2 >= 0)
-                    {   
+                    {
                         // valid 2 hex chars
                         b = (byte)((h1 << 4) | h2);
                         i += 2;
@@ -283,7 +283,7 @@ namespace System.Web.Util
             if (decodedBytesCount < decodedBytes.Length)
             {
                 byte[] newDecodedBytes = new byte[decodedBytesCount];
-                Array.Copy(decodedBytes, newDecodedBytes, decodedBytesCount);
+                Array.Copy(decodedBytes, 0, newDecodedBytes, 0, decodedBytesCount);
                 decodedBytes = newDecodedBytes;
             }
 
@@ -615,7 +615,7 @@ namespace System.Web.Util
             if (!isValidUrl)
             {
                 // If the value is not a valid url, we treat it as a relative url.
-                // We don't need to extract query string from the url since UrlPathEncode() 
+                // We don't need to extract query string from the url since UrlPathEncode()
                 // does not encode query string.
                 schemeAndAuthority = null;
                 path = value;
@@ -639,7 +639,7 @@ namespace System.Web.Util
             int i = value.IndexOf('?');
             if (i >= 0)
             {
-                return UrlPathEncodeImpl(value.Substring(0, i)) + value.Substring(i);
+                return string.Concat(UrlPathEncodeImpl(value.Substring(0, i)), value.AsSpan(i));
             }
 
             // encode DBCS characters and spaces only

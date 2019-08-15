@@ -4,6 +4,7 @@
 
 using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
+using Gdip = System.Drawing.SafeNativeMethods.Gdip;
 
 namespace System.Drawing
 {
@@ -22,11 +23,11 @@ namespace System.Drawing
             get
             {
                 IntPtr lineCap = IntPtr.Zero;
-                int status = SafeNativeMethods.Gdip.GdipGetPenCustomStartCap(new HandleRef(this, NativePen), out lineCap);
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                int status = Gdip.GdipGetPenCustomStartCap(new HandleRef(this, NativePen), out lineCap);
+                Gdip.CheckStatus(status);
                 if (lineCap == IntPtr.Zero)
                 {
-                    throw new ArgumentException(SR.Format(SR.GdiplusInvalidParameter));
+                    throw new ArgumentException(SR.GdiplusInvalidParameter);
                 }
 
                 return CustomLineCap.CreateCustomLineCapObject(lineCap);
@@ -38,9 +39,9 @@ namespace System.Drawing
                     throw new ArgumentException(SR.Format(SR.CantChangeImmutableObjects, nameof(Pen)));
                 }
 
-                int status = SafeNativeMethods.Gdip.GdipSetPenCustomStartCap(new HandleRef(this, NativePen),
+                int status = Gdip.GdipSetPenCustomStartCap(new HandleRef(this, NativePen),
                                                               new HandleRef(value, (value == null) ? IntPtr.Zero : value.nativeCap));
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                Gdip.CheckStatus(status);
             }
         }
 
@@ -54,7 +55,7 @@ namespace System.Drawing
                 // If the CustomEndCap has never been set, this accessor should throw.
                 if (_cachedEndCap == null)
                 {
-                    throw new ArgumentException(SR.Format(SR.GdiplusInvalidParameter));
+                    throw new ArgumentException(SR.GdiplusInvalidParameter);
                 }
 
                 return _cachedEndCap;
@@ -69,10 +70,10 @@ namespace System.Drawing
                 // Windows GDI+ clones the CustomLineCap before storing it in the Pen.
                 CustomLineCap clone = value == null ? null : (CustomLineCap)value.Clone();
 
-                int status = SafeNativeMethods.Gdip.GdipSetPenCustomEndCap(
+                int status = Gdip.GdipSetPenCustomEndCap(
                     new HandleRef(this, NativePen),
                     new HandleRef(clone, (clone == null) ? IntPtr.Zero : clone.nativeCap));
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                Gdip.CheckStatus(status);
                 _cachedEndCap = clone;
             }
         }

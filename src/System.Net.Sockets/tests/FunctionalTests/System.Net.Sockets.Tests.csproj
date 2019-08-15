@@ -1,14 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{8CBA022C-635F-4C8D-9D29-CD8AAC68C8E6}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="Accept.cs" />
     <Compile Include="AgnosticListenerTest.cs" />
@@ -18,27 +14,33 @@
     <Compile Include="Connect.cs" />
     <Compile Include="Close.cs" />
     <Compile Include="CreateSocketTests.cs" />
+    <Compile Include="CreateSocketTests.netcoreapp.cs" Condition="'$(TargetsNetCoreApp)' == 'true'" />
     <Compile Include="DisposedSocketTests.cs" />
+    <Compile Include="DisposedSocketTests.netcoreapp.cs" Condition="'$(TargetsNetCoreApp)' == 'true'" />
     <Compile Include="DnsEndPointTest.cs" />
     <Compile Include="DualModeSocketTest.cs" />
     <Compile Include="ExecutionContextFlowTest.cs" />
-    <Compile Include="ExecutionContextFlowTest.netcoreapp.cs" Condition="'$(TargetGroup)' != 'netstandard'" />
+    <Compile Include="ExecutionContextFlowTest.netcoreapp.cs" Condition="'$(TargetsNetCoreApp)' == 'true'" />
     <Compile Include="IPPacketInformationTest.cs" />
+    <Compile Include="KeepAliveTest.netcoreapp.cs" Condition="'$(TargetsNetCoreApp)' == 'true'" />
     <Compile Include="LingerStateTest.cs" />
     <Compile Include="LoggingTest.cs" />
     <Compile Include="NetworkStreamTest.cs" />
-    <Compile Include="NetworkStreamTest.netcoreapp.cs" Condition="'$(TargetGroup)' != 'netstandard'" />
+    <Compile Include="NetworkStreamTest.netcoreapp.cs" Condition="'$(TargetsNetCoreApp)' == 'true'" />
     <Compile Include="ReceiveMessageFrom.cs" />
     <Compile Include="ReceiveMessageFromAsync.cs" />
+    <Compile Include="SafeHandleTest.cs" />
     <Compile Include="SelectTest.cs" />
     <Compile Include="SendPacketsAsync.cs" />
+    <Compile Include="SendPacketsAsync.netcoreapp.cs" Condition="'$(TargetsNetCoreApp)' == 'true'" />
     <Compile Include="SendPacketsElementTest.cs" />
     <Compile Include="SendFile.cs" />
     <Compile Include="OSSupport.cs" />
+    <Compile Include="SendPacketsElementTest.netcoreapp.cs" Condition="'$(TargetsNetCoreApp)' == 'true'" />
     <Compile Include="SendReceive.cs" />
-    <Compile Include="SendReceive.netcoreapp.cs" Condition="'$(TargetGroup)' != 'netstandard'" />
+    <Compile Include="SendReceive.netcoreapp.cs" Condition="'$(TargetsNetCoreApp)' == 'true'" />
     <Compile Include="SocketTestHelper.cs" />
-    <Compile Include="SocketTestHelper.netcoreapp.cs" Condition="'$(TargetGroup)' != 'netstandard'" />
+    <Compile Include="SocketTestHelper.netcoreapp.cs" Condition="'$(TargetsNetCoreApp)' == 'true'" />
     <Compile Include="SelectAndPollTests.cs" />
     <Compile Include="SocketInformationTest.cs" />
     <Compile Include="TcpListenerTest.cs" />
@@ -46,11 +48,13 @@
     <Compile Include="TcpClientTest.cs" />
     <Compile Include="Shutdown.cs" />
     <Compile Include="SocketAsyncEventArgsTest.cs" />
-    <Compile Include="SocketAsyncEventArgsTest.netcoreapp.cs" Condition="'$(TargetGroup)' != 'netstandard'" />
+    <Compile Include="SocketAsyncEventArgsTest.netcoreapp.cs" Condition="'$(TargetsNetCoreApp)' == 'true'" />
     <Compile Include="SocketOptionNameTest.cs" />
+    <Compile Include="SocketOptionNameTest.Unix.cs" Condition="'$(TargetsUnix)' == 'true'" />
+    <Compile Include="SocketOptionNameTest.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="MulticastOptionTest.cs" />
     <Compile Include="UdpClientTest.cs" />
-    <Compile Include="UnixDomainSocketTest.netcoreapp.cs" Condition="'$(TargetGroup)' != 'netstandard'" />
+    <Compile Include="UnixDomainSocketTest.netcoreapp.cs" Condition="'$(TargetsNetCoreApp)' == 'true'" />
     <!-- Common Sockets files -->
     <Compile Include="$(CommonTestPath)\System\Net\Configuration.cs">
       <Link>SocketCommon\Configuration.cs</Link>
@@ -111,17 +115,4 @@
       <Link>Common\System\Net\Logging\NetEventSource.Common.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
-      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
-      <Name>RemoteExecutorConsoleApp</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -4,11 +4,11 @@
 
 /*============================================================
 **
-** Class:  SafeProcessHandle 
+** Class:  SafeProcessHandle
 **
 ** A wrapper for a process handle
 **
-** 
+**
 ===========================================================*/
 
 using System;
@@ -19,8 +19,6 @@ namespace Microsoft.Win32.SafeHandles
 {
     public sealed partial class SafeProcessHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
-        private const int DefaultInvalidHandleValue = 0;
-
         protected override bool ReleaseHandle()
         {
             return Interop.Kernel32.CloseHandle(handle);

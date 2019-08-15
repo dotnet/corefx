@@ -14,10 +14,10 @@ namespace System.Net.Mime
     /// </summary>
     internal class HeaderCollection : NameValueCollection
     {
-        private MimeBasePart _part = null;
+        private readonly MimeBasePart _part = null;
 
         // default constructor
-        // intentionally override the default comparer in the derived base class 
+        // intentionally override the default comparer in the derived base class
         internal HeaderCollection() : base(StringComparer.OrdinalIgnoreCase)
         {
         }
@@ -142,7 +142,7 @@ namespace System.Net.Mime
 
             if (!MimeBasePart.IsAscii(name, false))
             {
-                throw new FormatException(SR.Format(SR.InvalidHeaderName));
+                throw new FormatException(SR.InvalidHeaderName);
             }
 
             // normalize the case of well known headers

@@ -420,10 +420,10 @@ namespace System.Xml
         {
             Debug.Assert(_reader.NodeType == XmlNodeType.DocumentType);
 
-            String publicId = null;
-            String systemId = null;
-            String internalSubset = _reader.Value;
-            String localName = _reader.LocalName;
+            string publicId = null;
+            string systemId = null;
+            string internalSubset = _reader.Value;
+            string localName = _reader.LocalName;
             while (_reader.MoveToNextAttribute())
             {
                 switch (_reader.Name)
@@ -451,9 +451,9 @@ namespace System.Xml
             return dtNode;
         }
 
-        // LoadNodeDirect does not use creator functions on XmlDocument. It is used loading nodes that are children of entity nodes, 
-        // because we do not want to let users extend these (if we would allow this, XmlDataDocument would have a problem, because 
-        // they do not know that those nodes should not be mapped). It can be also used for an optimized load path when if the 
+        // LoadNodeDirect does not use creator functions on XmlDocument. It is used loading nodes that are children of entity nodes,
+        // because we do not want to let users extend these (if we would allow this, XmlDataDocument would have a problem, because
+        // they do not know that those nodes should not be mapped). It can be also used for an optimized load path when if the
         // XmlDocument is not extended if XmlDocumentType and XmlDeclaration handling is added.
         private XmlNode LoadNodeDirect()
         {
@@ -686,10 +686,10 @@ namespace System.Xml
 
         private XmlParserContext GetContext(XmlNode node)
         {
-            String lang = null;
+            string lang = null;
             XmlSpace spaceMode = XmlSpace.None;
             XmlDocumentType docType = _doc.DocumentType;
-            String baseURI = _doc.BaseURI;
+            string baseURI = _doc.BaseURI;
             //constructing xmlnamespace
             HashSet<string> prefixes = new HashSet<string>();
             XmlNameTable nt = _doc.NameTable;
@@ -714,7 +714,7 @@ namespace System.Xml
                         else if (!bHasDefXmlnsAttr && attr.Prefix.Length == 0 && attr.LocalName == _doc.strXmlns)
                         {
                             // Save the case xmlns="..." where xmlns is the LocalName
-                            mgr.AddNamespace(String.Empty, attr.Value);
+                            mgr.AddNamespace(string.Empty, attr.Value);
                             bHasDefXmlnsAttr = true;
                         }
                         else if (spaceMode == XmlSpace.None && attr.Prefix == _doc.strXml && attr.LocalName == _doc.strSpace)
@@ -862,7 +862,7 @@ namespace System.Xml
             mgr.PopScope();
         }
 
-        private String EntitizeName(String name)
+        private string EntitizeName(string name)
         {
             return "&" + name + ";";
         }
@@ -928,7 +928,7 @@ namespace System.Xml
 
 #pragma warning disable 618
         // Creates a XmlValidatingReader suitable for parsing InnerXml strings
-        private XmlReader CreateInnerXmlReader(String xmlFragment, XmlNodeType nt, XmlParserContext context, XmlDocument doc)
+        private XmlReader CreateInnerXmlReader(string xmlFragment, XmlNodeType nt, XmlParserContext context, XmlDocument doc)
         {
             XmlNodeType contentNT = nt;
             if (contentNT == XmlNodeType.Entity || contentNT == XmlNodeType.EntityReference)
@@ -960,7 +960,7 @@ namespace System.Xml
                     XmlTextReaderImpl.DtdParserProxy proxy = new XmlTextReaderImpl.DtdParserProxy(tr);
 
                     IDtdInfo dtdInfo = dtdParser.ParseFreeFloatingDtd(context.BaseURI, context.DocTypeName, context.PublicId, context.SystemId, context.InternalSubset, proxy);
-                    
+
                     dtdNode.DtdSchemaInfo = dtdInfo as SchemaInfo;
                     tr.SetDtdInfo(dtdInfo);
                 }
@@ -1002,7 +1002,7 @@ namespace System.Xml
 
         internal static Exception UnexpectedNodeType(XmlNodeType nodetype)
         {
-            return new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, SR.Xml_UnexpectedNodeType, nodetype.ToString()));
+            return new InvalidOperationException(SR.Format(CultureInfo.InvariantCulture, SR.Xml_UnexpectedNodeType, nodetype.ToString()));
         }
     }
 }

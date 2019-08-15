@@ -389,7 +389,7 @@ namespace System.DirectoryServices
 
             if (access < PropertyAccess.Read || access > PropertyAccess.Write)
             {
-                throw new InvalidEnumArgumentException("access", (int)access, typeof(PropertyAccess));
+                throw new InvalidEnumArgumentException(nameof(access), (int)access, typeof(PropertyAccess));
             }
 
             switch (access)
@@ -409,11 +409,11 @@ namespace System.DirectoryServices
                 default:
 
                     //
-                    // This should not happen. Indicates a problem with the 
+                    // This should not happen. Indicates a problem with the
                     // internal logic.
                     //
                     Debug.Fail("Invalid PropertyAccess value");
-                    throw new ArgumentException("access");
+                    throw new ArgumentException(nameof(access));
             }
             return accessMask;
         }
@@ -431,7 +431,7 @@ namespace System.DirectoryServices
         //  None                None                    None
         //  All                 ContainerInherit        None
         //  Descendents         ContainerInherit        InheritOnly
-        //  SelfAndChildren     ContainerInherit        NoPropogateInherit                                    
+        //  SelfAndChildren     ContainerInherit        NoPropogateInherit
         //  Children            ContainerInherit        InheritOnly | NoPropagateInherit
         //
         internal static InheritanceFlags[] ITToIF = new InheritanceFlags[] {
@@ -454,7 +454,7 @@ namespace System.DirectoryServices
         {
             if (inheritanceType < ActiveDirectorySecurityInheritance.None || inheritanceType > ActiveDirectorySecurityInheritance.Children)
             {
-                throw new InvalidEnumArgumentException("inheritanceType", (int)inheritanceType, typeof(ActiveDirectorySecurityInheritance));
+                throw new InvalidEnumArgumentException(nameof(inheritanceType), (int)inheritanceType, typeof(ActiveDirectorySecurityInheritance));
             }
 
             return ITToIF[(int)inheritanceType];
@@ -464,7 +464,7 @@ namespace System.DirectoryServices
         {
             if (inheritanceType < ActiveDirectorySecurityInheritance.None || inheritanceType > ActiveDirectorySecurityInheritance.Children)
             {
-                throw new InvalidEnumArgumentException("inheritanceType", (int)inheritanceType, typeof(ActiveDirectorySecurityInheritance));
+                throw new InvalidEnumArgumentException(nameof(inheritanceType), (int)inheritanceType, typeof(ActiveDirectorySecurityInheritance));
             }
 
             return ITToPF[(int)inheritanceType];
@@ -505,11 +505,11 @@ namespace System.DirectoryServices
                     default:
 
                         //
-                        // This should not happen. Indicates a problem with the 
+                        // This should not happen. Indicates a problem with the
                         // internal logic.
                         //
                         Debug.Fail("Invalid PropagationFlags value");
-                        throw new ArgumentException("propagationFlags");
+                        throw new ArgumentException(nameof(propagationFlags));
                 }
             }
 

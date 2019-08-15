@@ -77,14 +77,6 @@ namespace System.Linq.Parallel
         }
 
         //---------------------------------------------------------------------------------------
-        // Accessor the key selector.
-        //
-
-        //---------------------------------------------------------------------------------------
-        // Accessor the key comparer.
-        //
-
-        //---------------------------------------------------------------------------------------
         // Opens the current operator. This involves opening the child operator tree, enumerating
         // the results, sorting them, and then returning an enumerator that walks the result.
         //
@@ -135,7 +127,7 @@ namespace System.Linq.Parallel
     internal class SortQueryOperatorResults<TInputOutput, TSortKey> : QueryResults<TInputOutput>
     {
         protected QueryResults<TInputOutput> _childQueryResults; // Results of the child query
-        private SortQueryOperator<TInputOutput, TSortKey> _op; // Operator that generated these results
+        private readonly SortQueryOperator<TInputOutput, TSortKey> _op; // Operator that generated these results
         private QuerySettings _settings; // Settings collected from the query
 
         internal SortQueryOperatorResults(
@@ -159,8 +151,8 @@ namespace System.Linq.Parallel
 
         private class ChildResultsRecipient : IPartitionedStreamRecipient<TInputOutput>
         {
-            private IPartitionedStreamRecipient<TInputOutput> _outputRecipient;
-            private SortQueryOperator<TInputOutput, TSortKey> _op;
+            private readonly IPartitionedStreamRecipient<TInputOutput> _outputRecipient;
+            private readonly SortQueryOperator<TInputOutput, TSortKey> _op;
             private QuerySettings _settings;
 
             internal ChildResultsRecipient(IPartitionedStreamRecipient<TInputOutput> outputRecipient, SortQueryOperator<TInputOutput, TSortKey> op, QuerySettings settings)
@@ -199,9 +191,6 @@ namespace System.Linq.Parallel
             _source = source;
             _keySelector = keySelector;
         }
-        //---------------------------------------------------------------------------------------
-        // Accessor for the key comparison routine.
-        //
 
         //---------------------------------------------------------------------------------------
         // Moves to the next element in the sorted output. When called for the first time, the

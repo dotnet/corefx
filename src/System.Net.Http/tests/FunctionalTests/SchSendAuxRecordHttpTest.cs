@@ -11,17 +11,12 @@ using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "dotnet/corefx #20010")]
-    public abstract class SchSendAuxRecordHttpTest : HttpClientTestBase
+    [ActiveIssue(26539)]    // Flaky test
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "HttpsTestServer not compatible on UAP")]
+    public abstract class SchSendAuxRecordHttpTest : HttpClientHandlerTestBase
     {
-        readonly ITestOutputHelper _output;
-        
-        public SchSendAuxRecordHttpTest(ITestOutputHelper output)
-        {
-            _output = output;
-        }
+        public SchSendAuxRecordHttpTest(ITestOutputHelper output) : base(output) { }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
         public async Task HttpClient_ClientUsesAuxRecord_Ok()
@@ -31,7 +26,7 @@ namespace System.Net.Http.Functional.Tests
 
             using (var server = new HttpsTestServer(options))
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
                 server.Start();

@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using Microsoft.DotNet.XUnitExtensions;
 using Xunit;
 
 public class Color
@@ -25,8 +26,8 @@ public class Color
         Console.ForegroundColor = Console.ForegroundColor;
 
         // Changing color on Windows doesn't have effect in some testing environments
-        // when there is no associated console, such as when run under a profiler like 
-        // our code coverage tools, so we don't assert that the change took place and 
+        // when there is no associated console, such as when run under a profiler like
+        // our code coverage tools, so we don't assert that the change took place and
         // simple ensure that getting/setting doesn't throw.
     }
 
@@ -35,7 +36,7 @@ public class Color
     {
         // Make sure that redirecting to a memory stream causes Console not to write out the ANSI sequences
 
-        Helpers.RunInRedirectedOutput((data) => 
+        Helpers.RunInRedirectedOutput((data) =>
         {
             Console.Write('1');
             Console.ForegroundColor = ConsoleColor.Blue;
@@ -51,7 +52,8 @@ public class Color
         });
     }
 
-    //[Fact] // the CI system redirects stdout, so we can't easily test non-redirected behavior
+    [Fact]
+    [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // the CI system redirects stdout, so we can't easily test non-redirected behavior
     [PlatformSpecific(TestPlatforms.AnyUnix)]
     public static void NonRedirectedOutputDoesUseAnsiSequences()
     {

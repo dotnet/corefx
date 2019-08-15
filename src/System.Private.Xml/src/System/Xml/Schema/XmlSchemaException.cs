@@ -12,13 +12,12 @@ using System.Diagnostics;
 
 namespace System.Xml.Schema
 {
-    /// <include file='doc\XmlSchemaException.uex' path='docs/doc[@for="XmlSchemaException"]/*' />
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class XmlSchemaException : SystemException
     {
-        private string _res;
-        private string[] _args;
+        private readonly string _res;
+        private readonly string[] _args;
         private string _sourceUri;
         private int _lineNumber;
         private int _linePosition;
@@ -27,9 +26,8 @@ namespace System.Xml.Schema
 
         // message != null for V1 exceptions deserialized in Whidbey
         // message == null for V2 or higher exceptions; the exception message is stored on the base class (Exception._message)
-        private string _message;
+        private readonly string _message;
 
-        /// <include file='doc\XmlSchemaException.uex' path='docs/doc[@for="XmlSchemaException.XmlSchemaException5"]/*' />
         protected XmlSchemaException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
             _res = (string)info.GetValue("res", typeof(string));
@@ -60,7 +58,6 @@ namespace System.Xml.Schema
             }
         }
 
-        /// <include file='doc\XmlSchemaException.uex' path='docs/doc[@for="XmlSchemaException.GetObjectData"]/*' />
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
@@ -72,26 +69,22 @@ namespace System.Xml.Schema
             info.AddValue("version", "2.0");
         }
 
-        /// <include file='doc\XmlSchemaException.uex' path='docs/doc[@for="XmlSchemaException.XmlSchemaException1"]/*' />
         public XmlSchemaException() : this(null)
         {
         }
 
-        /// <include file='doc\XmlSchemaException.uex' path='docs/doc[@for="XmlSchemaException.XmlSchemaException2"]/*' />
-        public XmlSchemaException(String message) : this(message, ((Exception)null), 0, 0)
+        public XmlSchemaException(string message) : this(message, ((Exception)null), 0, 0)
         {
 #if DEBUG
             Debug.Assert(message == null || !message.StartsWith("Sch_", StringComparison.Ordinal), "Do not pass a resource here!");
 #endif
         }
 
-        /// <include file='doc\XmlSchemaException.uex' path='docs/doc[@for="XmlSchemaException.XmlSchemaException0"]/*' />
-        public XmlSchemaException(String message, Exception innerException) : this(message, innerException, 0, 0)
+        public XmlSchemaException(string message, Exception innerException) : this(message, innerException, 0, 0)
         {
         }
 
-        /// <include file='doc\XmlSchemaException.uex' path='docs/doc[@for="XmlSchemaException.XmlSchemaException3"]/*' />
-        public XmlSchemaException(String message, Exception innerException, int lineNumber, int linePosition) :
+        public XmlSchemaException(string message, Exception innerException, int lineNumber, int linePosition) :
             this((message == null ? SR.Sch_DefaultException : SR.Xml_UserException), new string[] { message }, innerException, null, lineNumber, linePosition, null)
         {
         }
@@ -172,25 +165,22 @@ namespace System.Xml.Schema
                 return _args;
             }
         }
-        /// <include file='doc\XmlSchemaException.uex' path='docs/doc[@for="XmlSchemaException.SourceUri"]/*' />
+
         public string SourceUri
         {
             get { return _sourceUri; }
         }
 
-        /// <include file='doc\XmlSchemaException.uex' path='docs/doc[@for="XmlSchemaException.LineNumber"]/*' />
         public int LineNumber
         {
             get { return _lineNumber; }
         }
 
-        /// <include file='doc\XmlSchemaException.uex' path='docs/doc[@for="XmlSchemaException.LinePosition"]/*' />
         public int LinePosition
         {
             get { return _linePosition; }
         }
 
-        /// <include file='doc\XmlSchemaException.uex' path='docs/doc[@for="XmlSchemaException.SourceObject"]/*' />
         public XmlSchemaObject SourceSchemaObject
         {
             get { return _sourceSchemaObject; }
@@ -229,5 +219,3 @@ namespace System.Xml.Schema
         }
     };
 }
-
-

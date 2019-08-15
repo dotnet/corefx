@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -31,34 +31,11 @@ namespace System.Xml
             }
         }
 
-        private static readonly byte s_NUMERIC_MAX_PRECISION = 38;            // Maximum precision of numeric
-        private static readonly byte s_maxPrecision = s_NUMERIC_MAX_PRECISION;  // max SS precision
-        private static readonly byte s_maxScale = s_NUMERIC_MAX_PRECISION;      // max SS scale
+        private const byte s_NUMERIC_MAX_PRECISION = 38;            // Maximum precision of numeric
+        private const byte s_maxPrecision = s_NUMERIC_MAX_PRECISION;  // max SS precision
 
-        private static readonly int s_cNumeMax = 4;
-        private static readonly long s_lInt32Base = ((long)1) << 32;      // 2**32
-        private static readonly ulong s_ulInt32Base = ((ulong)1) << 32;     // 2**32
-        private static readonly ulong s_ulInt32BaseForMod = s_ulInt32Base - 1;    // 2**32 - 1 (0xFFF...FF)
-        internal static readonly ulong x_llMax = Int64.MaxValue;   // Max of Int64
-        //private static readonly uint x_ulBase10 = 10;
-        private static readonly double s_DUINT_BASE = (double)s_lInt32Base;     // 2**32
-        private static readonly double s_DUINT_BASE2 = s_DUINT_BASE * s_DUINT_BASE;  // 2**64
-        private static readonly double s_DUINT_BASE3 = s_DUINT_BASE2 * s_DUINT_BASE; // 2**96
-        //private static readonly double DMAX_NUME = 1.0e+38;                  // Max value of numeric
-        //private static readonly uint DBL_DIG = 17;                       // Max decimal digits of double
-        //private static readonly byte x_cNumeDivScaleMin = 6;     // Minimum result scale of numeric division
-        // Array of multipliers for lAdjust and Ceiling/Floor.
-        private static readonly uint[] s_rgulShiftBase = new uint[9] {
-            10,
-            10 * 10,
-            10 * 10 * 10,
-            10 * 10 * 10 * 10,
-            10 * 10 * 10 * 10 * 10,
-            10 * 10 * 10 * 10 * 10 * 10,
-            10 * 10 * 10 * 10 * 10 * 10 * 10,
-            10 * 10 * 10 * 10 * 10 * 10 * 10 * 10,
-            10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10
-        };
+        private const int s_cNumeMax = 4;
+        internal const ulong x_llMax = long.MaxValue;   // Max of Int64
 
         public BinXmlSqlDecimal(byte[] data, int offset, bool trim)
         {
@@ -175,12 +152,12 @@ namespace System.Xml
             return (char)(uiDigit + '0');
         }
 
-        public Decimal ToDecimal()
+        public decimal ToDecimal()
         {
             if ((int)m_data4 != 0 || m_bScale > 28)
                 throw new XmlException(SR.SqlTypes_ArithOverflow, (string)null);
 
-            return new Decimal((int)m_data1, (int)m_data2, (int)m_data3, !IsPositive, m_bScale);
+            return new decimal((int)m_data1, (int)m_data2, (int)m_data3, !IsPositive, m_bScale);
         }
 
         private void TrimTrailingZeros()
@@ -220,7 +197,7 @@ namespace System.Xml
                 m_bLen = 1;
         }
 
-        public override String ToString()
+        public override string ToString()
         {
             AssertValid();
 
@@ -276,7 +253,7 @@ namespace System.Xml
 
             AssertValid();
 
-            return new String(szResult);
+            return new string(szResult);
         }
 
 
@@ -308,12 +285,12 @@ namespace System.Xml
 
     internal struct BinXmlSqlMoney
     {
-        private long _data;
+        private readonly long _data;
 
         public BinXmlSqlMoney(int v) { _data = v; }
         public BinXmlSqlMoney(long v) { _data = v; }
 
-        public Decimal ToDecimal()
+        public decimal ToDecimal()
         {
             bool neg;
             ulong v;
@@ -329,12 +306,12 @@ namespace System.Xml
             }
             // SQL Server stores money8 as ticks of 1/10000.
             const byte MoneyScale = 4;
-            return new Decimal(unchecked((int)v), unchecked((int)(v >> 32)), 0, neg, MoneyScale);
+            return new decimal(unchecked((int)v), unchecked((int)(v >> 32)), 0, neg, MoneyScale);
         }
 
-        public override String ToString()
+        public override string ToString()
         {
-            Decimal money = ToDecimal();
+            decimal money = ToDecimal();
             // Formatting of SqlMoney: At least two digits after decimal point
             return money.ToString("#0.00##", CultureInfo.InvariantCulture);
         }
@@ -627,11 +604,10 @@ Error:
         }
 
         // Number of (100ns) ticks per time unit
-        private static readonly double s_SQLTicksPerMillisecond = 0.3;
-        public static readonly int SQLTicksPerSecond = 300;
-        public static readonly int SQLTicksPerMinute = SQLTicksPerSecond * 60;
-        public static readonly int SQLTicksPerHour = SQLTicksPerMinute * 60;
-        private static readonly int s_SQLTicksPerDay = SQLTicksPerHour * 24;
+        private const double s_SQLTicksPerMillisecond = 0.3;
+        internal const int SQLTicksPerSecond = 300;
+        internal const int SQLTicksPerMinute = SQLTicksPerSecond * 60;
+        internal const int SQLTicksPerHour = SQLTicksPerMinute * 60;
 
 
         public static string SqlSmallDateTimeToString(short dateticks, ushort timeticks)

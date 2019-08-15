@@ -40,7 +40,7 @@ namespace System.ComponentModel.Composition
             set { data[index] = value; }
         }
     }
-    
+
     public class ImportAttributeTests
     {
         [Fact]
@@ -111,7 +111,7 @@ namespace System.ComponentModel.Composition
         [Fact]
         public void Constructor3_ShouldSetAllowDefaultPropertyToFalse()
         {
-            var attribute = new ImportAttribute(typeof(String));
+            var attribute = new ImportAttribute(typeof(string));
 
             Assert.False(attribute.AllowDefault);
         }
@@ -135,7 +135,7 @@ namespace System.ComponentModel.Composition
         [Fact]
         public void Constructor3_ShouldSetAllowRecompositionPropertyToFalse()
         {
-            var attribute = new ImportAttribute(typeof(String));
+            var attribute = new ImportAttribute(typeof(string));
 
             Assert.False(attribute.AllowRecomposition);
         }

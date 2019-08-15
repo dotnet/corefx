@@ -14,7 +14,7 @@ using System.Transactions;
 
 namespace System.Data.SqlClient
 {
-    abstract internal class SqlInternalConnection : DbConnectionInternal
+    internal abstract class SqlInternalConnection : DbConnectionInternal
     {
         private readonly SqlConnectionString _connectionOptions;
         private bool _isEnlistedInTransaction; // is the server-side connection enlisted? true while we're enlisted, reset only after we send a null...
@@ -70,15 +70,15 @@ namespace System.Data.SqlClient
             }
         }
 
-        abstract internal SqlInternalTransaction CurrentTransaction
+        internal abstract SqlInternalTransaction CurrentTransaction
         {
             get;
         }
 
         //  Get the internal transaction that should be hooked to a new outer transaction
-        //  during a BeginTransaction API call.  In some cases (i.e. connection is going to 
+        //  during a BeginTransaction API call.  In some cases (i.e. connection is going to
         //  be reset), CurrentTransaction should not be hooked up this way.
-        virtual internal SqlInternalTransaction AvailableInternalTransaction
+        internal virtual SqlInternalTransaction AvailableInternalTransaction
         {
             get
             {
@@ -86,12 +86,12 @@ namespace System.Data.SqlClient
             }
         }
 
-        abstract internal SqlInternalTransaction PendingTransaction
+        internal abstract SqlInternalTransaction PendingTransaction
         {
             get;
         }
 
-        override protected internal bool IsNonPoolableTransactionRoot
+        protected internal override bool IsNonPoolableTransactionRoot
         {
             get
             {
@@ -99,7 +99,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override internal bool IsTransactionRoot
+        internal override bool IsTransactionRoot
         {
             get
             {
@@ -137,13 +137,13 @@ namespace System.Data.SqlClient
             }
         }
 
-        abstract internal bool IsLockedForBulkCopy
+        internal abstract bool IsLockedForBulkCopy
         {
             get;
         }
 
 
-        abstract internal bool IsKatmaiOrNewer
+        internal abstract bool IsKatmaiOrNewer
         {
             get;
         }
@@ -184,12 +184,12 @@ namespace System.Data.SqlClient
             }
         }
 
-        override public DbTransaction BeginTransaction(IsolationLevel iso)
+        public override DbTransaction BeginTransaction(IsolationLevel iso)
         {
             return BeginSqlTransaction(iso, null, false);
         }
 
-        virtual internal SqlTransaction BeginSqlTransaction(IsolationLevel iso, string transactionName, bool shouldReconnect)
+        internal virtual SqlTransaction BeginSqlTransaction(IsolationLevel iso, string transactionName, bool shouldReconnect)
         {
             SqlStatistics statistics = null;
             try
@@ -218,7 +218,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override public void ChangeDatabase(string database)
+        public override void ChangeDatabase(string database)
         {
             if (string.IsNullOrEmpty(database))
             {
@@ -230,11 +230,11 @@ namespace System.Data.SqlClient
             ChangeDatabaseInternal(database);  // do the real work...
         }
 
-        abstract protected void ChangeDatabaseInternal(string database);
+        protected abstract void ChangeDatabaseInternal(string database);
 
-        override protected void CleanupTransactionOnCompletion(Transaction transaction)
+        protected override void CleanupTransactionOnCompletion(Transaction transaction)
         {
-            // Note: unlocked, potentially multi-threaded code, so pull delegate to local to 
+            // Note: unlocked, potentially multi-threaded code, so pull delegate to local to
             //  ensure it doesn't change between test and call.
             SqlDelegatedTransaction delegatedTransaction = DelegatedTransaction;
             if (null != delegatedTransaction)
@@ -243,12 +243,12 @@ namespace System.Data.SqlClient
             }
         }
 
-        override protected DbReferenceCollection CreateReferenceCollection()
+        protected override DbReferenceCollection CreateReferenceCollection()
         {
             return new SqlReferenceCollection();
         }
 
-        override protected void Deactivate()
+        protected override void Deactivate()
         {
             try
             {
@@ -275,9 +275,9 @@ namespace System.Data.SqlClient
             }
         }
 
-        abstract internal void DisconnectTransaction(SqlInternalTransaction internalTransaction);
+        internal abstract void DisconnectTransaction(SqlInternalTransaction internalTransaction);
 
-        override public void Dispose()
+        public override void Dispose()
         {
             _whereAbouts = null;
             base.Dispose();
@@ -285,12 +285,12 @@ namespace System.Data.SqlClient
 
         protected void Enlist(Transaction tx)
         {
-            // This method should not be called while the connection has a 
+            // This method should not be called while the connection has a
             // reference to an active delegated transaction.
             // Manual enlistment via SqlConnection.EnlistTransaction
             // should catch this case and throw an exception.
             //
-            // Automatic enlistment isn't possible because 
+            // Automatic enlistment isn't possible because
             // Sys.Tx keeps the connection alive until the transaction is completed.
             Debug.Assert(!IsNonPoolableTransactionRoot, "cannot defect an active delegated transaction!");  // potential race condition, but it's an assert
 
@@ -364,7 +364,7 @@ namespace System.Data.SqlClient
                 // our delegated transaction, and proceed to enlist
                 // in the promoted one.
 
-                // NOTE: Global Transactions is an Azure SQL DB only 
+                // NOTE: Global Transactions is an Azure SQL DB only
                 // feature where the Transaction Manager (TM) is not
                 // MS-DTC. Sys.Tx added APIs to support Non MS-DTC
                 // promoter types/TM in .NET 4.6.1. Following directions
@@ -382,7 +382,7 @@ namespace System.Data.SqlClient
                 {
                     if (SysTxForGlobalTransactions.EnlistPromotableSinglePhase == null)
                     {
-                        // This could be a local Azure SQL DB transaction. 
+                        // This could be a local Azure SQL DB transaction.
                         hasDelegatedTransaction = tx.EnlistPromotableSinglePhase(delegatedTransaction);
                     }
                     else
@@ -463,17 +463,17 @@ namespace System.Data.SqlClient
             EnlistedTransaction = tx; // Tell the base class about our enlistment
 
 
-            // If we're on a Yukon or newer server, and we we delegate the 
-            // transaction successfully, we will have done a begin transaction, 
+            // If we're on a Yukon or newer server, and we delegate the
+            // transaction successfully, we will have done a begin transaction,
             // which produces a transaction id that we should execute all requests
             // on.  The TdsParser or SmiEventSink will store this information as
             // the current transaction.
-            // 
+            //
             // Likewise, propagating a transaction to a Yukon or newer server will
-            // produce a transaction id that The TdsParser or SmiEventSink will 
+            // produce a transaction id that The TdsParser or SmiEventSink will
             // store as the current transaction.
             //
-            // In either case, when we're working with a Yukon or newer server 
+            // In either case, when we're working with a Yukon or newer server
             // we better have a current transaction by now.
 
             Debug.Assert(null != CurrentTransaction, "delegated/enlisted transaction with null current transaction?");
@@ -498,17 +498,17 @@ namespace System.Data.SqlClient
             _isEnlistedInTransaction = false;
             EnlistedTransaction = null; // Tell the base class about our enlistment
 
-            // The EnlistTransaction above will return an TransactionEnded event, 
+            // The EnlistTransaction above will return an TransactionEnded event,
             // which causes the TdsParser or SmiEventSink should to clear the
             // current transaction.
             //
-            // In either case, when we're working with a Yukon or newer server 
+            // In either case, when we're working with a Yukon or newer server
             // we better not have a current transaction at this point.
 
             Debug.Assert(null == CurrentTransaction, "unenlisted transaction with non-null current transaction?");   // verify it!
         }
 
-        override public void EnlistTransaction(Transaction transaction)
+        public override void EnlistTransaction(Transaction transaction)
         {
             ValidateConnectionForExecute(null);
 
@@ -557,7 +557,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        abstract internal void ExecuteTransaction(TransactionRequest transactionRequest, string name, IsolationLevel iso, SqlInternalTransaction internalTransaction, bool isDelegateControlRequest);
+        internal abstract void ExecuteTransaction(TransactionRequest transactionRequest, string name, IsolationLevel iso, SqlInternalTransaction internalTransaction, bool isDelegateControlRequest);
 
         internal SqlDataReader FindLiveReader(SqlCommand command)
         {
@@ -581,9 +581,9 @@ namespace System.Data.SqlClient
             return command;
         }
 
-        abstract protected byte[] GetDTCAddress();
+        protected abstract byte[] GetDTCAddress();
 
-        static private byte[] GetTransactionCookie(Transaction transaction, byte[] whereAbouts)
+        private static byte[] GetTransactionCookie(Transaction transaction, byte[] whereAbouts)
         {
             byte[] transactionCookie = null;
             if (null != transaction)
@@ -593,7 +593,7 @@ namespace System.Data.SqlClient
             return transactionCookie;
         }
 
-        virtual protected void InternalDeactivate()
+        protected virtual void InternalDeactivate()
         {
         }
 
@@ -619,8 +619,8 @@ namespace System.Data.SqlClient
             }
         }
 
-        abstract protected void PropagateTransactionCookie(byte[] transactionCookie);
+        protected abstract void PropagateTransactionCookie(byte[] transactionCookie);
 
-        abstract internal void ValidateConnectionForExecute(SqlCommand command);
+        internal abstract void ValidateConnectionForExecute(SqlCommand command);
     }
 }

@@ -6,14 +6,15 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Tests;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Text.Tests
 {
-    public partial class StringBuilderTests : RemoteExecutorTestBase
+    public partial class StringBuilderTests
     {
         private static readonly string s_chunkSplitSource = new string('a', 30);
-        private static readonly string s_noCapacityParamName = PlatformDetection.IsFullFramework ? "requiredLength" : "valueCount";
+        private static readonly string s_noCapacityParamName = "valueCount";
 
         private static StringBuilder StringBuilderWithMultipleChunks() => new StringBuilder(20).Append(s_chunkSplitSource);
 
@@ -258,7 +259,7 @@ namespace System.Text.Tests
         [Fact]
         public static void Test_Append_Decimal()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
@@ -266,7 +267,7 @@ namespace System.Text.Tests
                 {
                     Append_Decimal((string)testdata[0], (double)testdata[1], (string)testdata[2]);
                 }
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -295,14 +296,14 @@ namespace System.Text.Tests
         [Fact]
         public static void Test_Append_Double()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
                 foreach (var testdata in Append_Double_TestData())
                 {
                     Append_Double((string)testdata[0], (double)testdata[1], (string)testdata[2]);
                 }
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -434,14 +435,14 @@ namespace System.Text.Tests
         [Fact]
         public static void Test_Append_Float()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
                 foreach (var testdata in Append_Float_TestData())
                 {
                     Append_Float((string)testdata[0], (float)testdata[1], (string)testdata[2]);
                 }
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -570,6 +571,7 @@ namespace System.Text.Tests
         [InlineData("Hello", null, 0, "Hello")]
         public static unsafe void Append_CharPointer(string original, char[] charArray, int valueCount, string expected)
         {
+            _ = charArray; // https://github.com/xunit/xunit/issues/1969
             fixed (char* value = charArray)
             {
                 var builder = new StringBuilder(original);
@@ -695,7 +697,6 @@ namespace System.Text.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void Append_CharArray_Invalid()
         {
             var builder = new StringBuilder(0, 5);
@@ -711,25 +712,6 @@ namespace System.Text.Tests
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("valueCount", () => builder.Append(new char[] { 'a' })); // New length > builder.MaxCapacity
             AssertExtensions.Throws<ArgumentOutOfRangeException>("valueCount", () => builder.Append(new char[] { 'a' }, 0, 1)); // New length > builder.MaxCapacity
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public static void Append_CharArray_InvalidDesktop()
-        {
-            var builder = new StringBuilder(0, 5);
-            builder.Append("Hello");
-
-            AssertExtensions.Throws<ArgumentNullException>("value", () => builder.Append((char[])null, 1, 1)); // Value is null, startIndex > 0 and count > 0
-
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => builder.Append(new char[0], -1, 0)); // Start index < 0
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => builder.Append(new char[0], 0, -1)); // Count < 0
-
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => builder.Append(new char[5], 6, 0)); // Start index + count > value.Length
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => builder.Append(new char[5], 5, 1)); // Start index + count > value.Length
-
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("requiredLength", () => builder.Append(new char[] { 'a' }));
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("requiredLength", () => builder.Append(new char[] { 'a' }, 0, 1));
         }
 
         public static IEnumerable<object[]> AppendFormat_TestData()
@@ -763,7 +745,6 @@ namespace System.Text.Tests
             yield return new object[] { "Hello", null, ", Foo {0,9:D6}", new object[] { 1 }, "Hello, Foo    000001" }; // Positive minimum length and custom format
             yield return new object[] { "Hello", null, ", Foo {0,-9:D6}", new object[] { 1 }, "Hello, Foo 000001   " }; // Negative length and custom format
 
-            yield return new object[] { "Hello", null, ", Foo {0:{{X}}Y{{Z}}} {0:X{{Y}}Z}", new object[] { 1 }, "Hello, Foo {X}Y{Z} X{Y}Z" }; // Custom format (with escaped curly braces)
             yield return new object[] { "Hello", null, ", Foo {{{0}", new object[] { 1 }, "Hello, Foo {1" }; // Escaped open curly braces
             yield return new object[] { "Hello", null, ", Foo }}{0}", new object[] { 1 }, "Hello, Foo }1" }; // Escaped closed curly braces
             yield return new object[] { "Hello", null, ", Foo {0} {{0}}", new object[] { 1 }, "Hello, Foo 1 {0}" }; // Escaped placeholder
@@ -893,6 +874,7 @@ namespace System.Text.Tests
 
             Assert.Throws<FormatException>(() => builder.AppendFormat("}", "")); // Format has unescaped }
             Assert.Throws<FormatException>(() => builder.AppendFormat("}a", "")); // Format has unescaped }
+            Assert.Throws<FormatException>(() => builder.AppendFormat("{0:}}", "")); // Format has unescaped }
 
             Assert.Throws<FormatException>(() => builder.AppendFormat("{\0", "")); // Format has invalid character after {
             Assert.Throws<FormatException>(() => builder.AppendFormat("{a", "")); // Format has invalid character after {
@@ -916,6 +898,21 @@ namespace System.Text.Tests
             Assert.Throws<FormatException>(() => builder.AppendFormat("{0:    ", new string[10])); // Format with colon and spaces is not closed
 
             Assert.Throws<FormatException>(() => builder.AppendFormat("{0:{", new string[10])); // Format with custom format contains unescaped {
+            Assert.Throws<FormatException>(() => builder.AppendFormat("{0:{}", new string[10])); // Format with custom format contains unescaped {
+        }
+
+        [Fact]
+        public static void AppendFormat_NoEscapedBracesInCustomFormatSpecifier()
+        {
+            // Tests new rule which does not allow escaped braces in the custom format specifier
+            var builder = new StringBuilder();
+            builder.AppendFormat("{0:}}}", 0);
+
+            // Previous behavior: first two closing braces would be escaped and passed in as the custom format specifier, thus result = "}"
+            // New behavior: first closing brace closes the argument hole and next two are escaped as part of the format, thus result = "0}"
+            Assert.Equal("0}", builder.ToString());
+            // Previously this would be allowed and escaped brace would be passed into the custom format, now this is unsupported
+            Assert.Throws<FormatException>(() => builder.AppendFormat("{0:{{}", 0)); // Format with custom format contains {
         }
 
         [Fact]
@@ -1086,26 +1083,19 @@ namespace System.Text.Tests
 
             var sb4 = new StringBuilder(10, 20);
             var sb5 = new StringBuilder(10, 20);
-            var sb6 = new StringBuilder(10, 21);
-            var sb7 = new StringBuilder(11, 20);
 
-            var sb8 = new StringBuilder(10, 20);
-            sb8.Append("Hello");
-            var sb9 = new StringBuilder(10, 20);
-            sb9.Append("Hello");
-            var sb10 = new StringBuilder(10, 20);
-            sb10.Append("HelloX");
+            var sb6 = new StringBuilder(10, 20).Append("Hello");
+            var sb7 = new StringBuilder(10, 20).Append("Hello");
+            var sb8 = new StringBuilder(10, 20).Append("HelloX");
 
             yield return new object[] { sb1, sb1, true };
             yield return new object[] { sb1, sb2, true };
             yield return new object[] { sb1, sb3, false };
 
             yield return new object[] { sb4, sb5, true };
-            yield return new object[] { sb4, sb6, false };
-            yield return new object[] { sb4, sb7, false };
 
-            yield return new object[] { sb8, sb9, true };
-            yield return new object[] { sb8, sb10, false };
+            yield return new object[] { sb6, sb7, true };
+            yield return new object[] { sb6, sb8, false };
 
             yield return new object[] { sb1, null, false };
 
@@ -1268,14 +1258,14 @@ namespace System.Text.Tests
         [Fact]
         public static void Test_Insert_Float()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
                 foreach (var testdata in Insert_Float_TestData())
                 {
                     Insert_Float((string)testdata[0], (int)testdata[1], (float)testdata[2], (string)testdata[3]);
                 }
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -1397,14 +1387,14 @@ namespace System.Text.Tests
         [Fact]
         public static void Test_Insert_Double()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
                 foreach (var testdata in Insert_Double_TestData())
                 {
                     Insert_Double((string)testdata[0], (int)testdata[1], (double)testdata[2], (string)testdata[3]);
                 }
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -1436,14 +1426,14 @@ namespace System.Text.Tests
         [Fact]
         public static void Test_Insert_Decimal()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
                 foreach (var testdata in Test_Insert_Decimal_TestData())
                 {
                     Insert_Decimal((string)testdata[0], (int)testdata[1], (double)testdata[2], (string)testdata[3]);
                 }
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -1582,7 +1572,6 @@ namespace System.Text.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void Insert_CharArray_InvalidCount()
         {
             var builder = new StringBuilder(0, 5);
@@ -1591,30 +1580,11 @@ namespace System.Text.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public static void Insert_CharArray_InvalidCount_Desktop()
-        {
-            var builder = new StringBuilder(0, 5);
-            builder.Append("Hello");
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => builder.Insert(0, new char[0], 0, -1)); // Char count < 0
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void Insert_CharArray_InvalidCharCount()
         {
             var builder = new StringBuilder(0, 5);
             builder.Append("Hello");
             AssertExtensions.Throws<ArgumentOutOfRangeException>("charCount", () => builder.Insert(0, new char[0], 0, -1)); // Char count < 0
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public static void Insert_CharArray_InvalidCharCount_Desktop()
-        {
-            var builder = new StringBuilder(0, 5);
-            builder.Append("Hello");
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => builder.Insert(0, new char[0], 0, -1)); // Char count < 0
         }
 
         [Theory]
@@ -1644,7 +1614,6 @@ namespace System.Text.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void Remove_Invalid()
         {
             var builder = new StringBuilder("Hello");
@@ -1653,18 +1622,6 @@ namespace System.Text.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => builder.Remove(6, 0)); // Start index + length > 0
             AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => builder.Remove(5, 1)); // Start index + length > 0
             AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => builder.Remove(4, 2)); // Start index + length > 0
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public static void Remove_Invalid_Desktop()
-        {
-            var builder = new StringBuilder("Hello");
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () => builder.Remove(-1, 0)); // Start index < 0
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => builder.Remove(0, -1)); // Length < 0
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => builder.Remove(6, 0)); // Start index + length > 0
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => builder.Remove(5, 1)); // Start index + length > 0
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => builder.Remove(4, 2)); // Start index + length > 0
         }
 
         [Theory]

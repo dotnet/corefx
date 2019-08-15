@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.Text.Tests
 {
-    public partial class StringBuilderTests : RemoteExecutorTestBase
+    public partial class StringBuilderTests
     {
         [Fact]
         public static void AppendJoin_NullValues_ThrowsArgumentNullException()
@@ -142,6 +142,19 @@ namespace System.Text.Tests
         }
 
         [Theory]
+        [InlineData("Hello", new char[] { 'a' }, "Helloa")]
+        [InlineData("Hello", new char[] { 'b', 'c', 'd' }, "Hellobcd")]
+        [InlineData("Hello", new char[] { 'b', '\0', 'd' }, "Hellob\0d")]
+        [InlineData("", new char[] { 'e', 'f', 'g' }, "efg")]
+        [InlineData("Hello", new char[0], "Hello")]
+        public static void Append_CharMemory(string original, char[] value, string expected)
+        {
+            var builder = new StringBuilder(original);
+            builder.Append(value.AsMemory());
+            Assert.Equal(expected, builder.ToString());
+        }
+
+        [Theory]
         [InlineData(1)]
         [InlineData(10000)]
         public static void Clear_AppendAndInsertBeforeClearManyTimes_CapacityStaysWithinRange(int times)
@@ -261,7 +274,7 @@ namespace System.Text.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("requiredLength", () => builder.Insert(builder.Length, new ReadOnlySpan<char>(new char[1]))); // New length > builder.MaxCapacity
         }
 
-        private static IEnumerable<object[]> Append_StringBuilder_TestData()
+        public static IEnumerable<object[]> Append_StringBuilder_TestData()
         {
             string mediumString = new string('a', 30);
             string largeString = new string('b', 1000);
@@ -297,7 +310,7 @@ namespace System.Text.Tests
             Assert.Equal(s, s1.Append(s2).ToString());
         }
 
-        private static IEnumerable<object[]> Append_StringBuilder_Substring_TestData()
+        public static IEnumerable<object[]> Append_StringBuilder_Substring_TestData()
         {
             string mediumString = new string('a', 30);
             string largeString = new string('b', 1000);
@@ -346,7 +359,7 @@ namespace System.Text.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => sb.Append(sb, -1, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => sb.Append(sb, 0, -1));
             Assert.Throws<ArgumentOutOfRangeException>(() => sb.Append(sb, 4, 5));
-            
+
             Assert.Throws<ArgumentNullException>(() => sb.Append( (StringBuilder)null, 2, 2));
             Assert.Throws<ArgumentNullException>(() => sb.Append((StringBuilder)null, 2, 3));
             Assert.Throws<ArgumentOutOfRangeException>(() => new StringBuilder(3, 6).Append("Hello").Append(sb));
@@ -387,6 +400,63 @@ namespace System.Text.Tests
         public static void Equals(StringBuilder sb1, string value, bool expected)
         {
             Assert.Equal(expected, sb1.Equals(value.AsSpan()));
+        }
+
+        [Fact]
+        public static void ForEach()
+        {
+            // Test on a variety of lengths, at least up to the point of 9 8K chunks = 72K because this is where
+            // we start using a different technique for creating the ChunkEnumerator.   200 * 500 = 100K which hits this.
+            for (int i = 0; i < 200; i++)
+            {
+                StringBuilder inBuilder = new StringBuilder();
+                for (int j = 0; j < i; j++)
+                {
+                    // Make some unique strings that are at least 500 bytes long.
+                    inBuilder.Append(j);
+                    inBuilder.Append("_abcdefghijklmnopqrstuvwxyz01234567890__Abcdefghijklmnopqrstuvwxyz01234567890__ABcdefghijklmnopqrstuvwxyz01_");
+                    inBuilder.Append("_abcdefghijklmnopqrstuvwxyz01234567890__Abcdefghijklmnopqrstuvwxyz01234567890__ABcdefghijklmnopqrstuvwxyz0123_");
+                    inBuilder.Append("_abcdefghijklmnopqrstuvwxyz01234567890__Abcdefghijklmnopqrstuvwxyz01234567890__ABcdefghijklmnopqrstuvwxyz012345_");
+                    inBuilder.Append("_abcdefghijklmnopqrstuvwxyz01234567890__Abcdefghijklmnopqrstuvwxyz01234567890__ABcdefghijklmnopqrstuvwxyz012345678_");
+                    inBuilder.Append("_abcdefghijklmnopqrstuvwxyz01234567890__Abcdefghijklmnopqrstuvwxyz01234567890__ABcdefghijklmnopqrstuvwxyz01234567890_");
+                }
+
+                // Copy the string out (not using StringBuilder).
+                string outStr = "";
+                foreach (ReadOnlyMemory<char> chunk in inBuilder.GetChunks())
+                    outStr += new string(chunk.Span);
+
+                // The strings formed by concatenating the chunks should be the same as the value in the StringBuilder.
+                Assert.Equal(outStr, inBuilder.ToString());
+            }
+        }
+
+        [Fact]
+        public static void EqualsIgnoresCapacity()
+        {
+            var sb1 = new StringBuilder(5);
+            var sb2 = new StringBuilder(10);
+
+            Assert.True(sb1.Equals(sb2));
+
+            sb1.Append("12345");
+            sb2.Append("12345");
+
+            Assert.True(sb1.Equals(sb2));
+        }
+
+        [Fact]
+        public static void EqualsIgnoresMaxCapacity()
+        {
+            var sb1 = new StringBuilder(5, 5);
+            var sb2 = new StringBuilder(5, 10);
+
+            Assert.True(sb1.Equals(sb2));
+
+            sb1.Append("12345");
+            sb2.Append("12345");
+
+            Assert.True(sb1.Equals(sb2));
         }
     }
 }

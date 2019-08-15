@@ -21,6 +21,40 @@ namespace System.Net.Http
                 _contentBytesRemaining = contentLength;
             }
 
+            public override int Read(Span<byte> buffer)
+            {
+                if (_connection == null || buffer.Length == 0)
+                {
+                    // Response body fully consumed or the caller didn't ask for any data.
+                    return 0;
+                }
+
+                Debug.Assert(_contentBytesRemaining > 0);
+                if ((ulong)buffer.Length > _contentBytesRemaining)
+                {
+                    buffer = buffer.Slice(0, (int)_contentBytesRemaining);
+                }
+
+                int bytesRead = _connection.Read(buffer);
+                if (bytesRead <= 0)
+                {
+                    // Unexpected end of response stream.
+                    throw new IOException(SR.Format(SR.net_http_invalid_response_premature_eof_bytecount, _contentBytesRemaining));
+                }
+
+                Debug.Assert((ulong)bytesRead <= _contentBytesRemaining);
+                _contentBytesRemaining -= (ulong)bytesRead;
+
+                if (_contentBytesRemaining == 0)
+                {
+                    // End of response body
+                    _connection.CompleteResponse();
+                    _connection = null;
+                }
+
+                return bytesRead;
+            }
+
             public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken)
             {
                 CancellationHelper.ThrowIfCancellationRequested(cancellationToken);
@@ -67,7 +101,7 @@ namespace System.Net.Http
                     CancellationHelper.ThrowIfCancellationRequested(cancellationToken);
 
                     // Unexpected end of response stream.
-                    throw new IOException(SR.net_http_invalid_response);
+                    throw new IOException(SR.Format(SR.net_http_invalid_response_premature_eof_bytecount, _contentBytesRemaining));
                 }
 
                 Debug.Assert((ulong)bytesRead <= _contentBytesRemaining);
@@ -98,7 +132,7 @@ namespace System.Net.Http
                     return Task.CompletedTask;
                 }
 
-                Task copyTask = _connection.CopyToExactLengthAsync(destination, _contentBytesRemaining, cancellationToken);
+                Task copyTask = _connection.CopyToContentLengthAsync(destination, _contentBytesRemaining, bufferSize, cancellationToken);
                 if (copyTask.IsCompletedSuccessfully)
                 {
                     Finish();

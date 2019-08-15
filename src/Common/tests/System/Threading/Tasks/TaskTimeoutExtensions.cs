@@ -12,33 +12,52 @@ namespace System.Threading.Tasks
 {
     public static class TaskTimeoutExtensions
     {
-        public static async Task TimeoutAfter(this Task task, int millisecondsTimeout)
+        public static async Task WithCancellation(this Task task, CancellationToken cancellationToken)
+        {
+            var tcs = new TaskCompletionSource<bool>();
+            using (cancellationToken.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs))
+            {
+                if (task != await Task.WhenAny(task, tcs.Task).ConfigureAwait(false))
+                {
+                    throw new OperationCanceledException(cancellationToken);
+                }
+                await task; // already completed; propagate any exception
+            }
+        }
+
+        public static Task TimeoutAfter(this Task task, int millisecondsTimeout)
+            => task.TimeoutAfter(TimeSpan.FromMilliseconds(millisecondsTimeout));
+
+        public static async Task TimeoutAfter(this Task task, TimeSpan timeout)
         {
             var cts = new CancellationTokenSource();
 
-            if (task == await Task.WhenAny(task, Task.Delay(millisecondsTimeout, cts.Token)).ConfigureAwait(false))
+            if (task == await Task.WhenAny(task, Task.Delay(timeout, cts.Token)).ConfigureAwait(false))
             {
                 cts.Cancel();
                 await task.ConfigureAwait(false);
             }
             else
             {
-                throw new TimeoutException($"Task timed out after {millisecondsTimeout}");
+                throw new TimeoutException($"Task timed out after {timeout}");
             }
         }
 
-        public static async Task<TResult> TimeoutAfter<TResult>(this Task<TResult> task, int millisecondsTimeout)
+        public static Task<TResult> TimeoutAfter<TResult>(this Task<TResult> task, int millisecondsTimeout)
+            => task.TimeoutAfter(TimeSpan.FromMilliseconds(millisecondsTimeout));
+
+        public static async Task<TResult> TimeoutAfter<TResult>(this Task<TResult> task, TimeSpan timeout)
         {
             var cts = new CancellationTokenSource();
 
-            if (task == await Task<TResult>.WhenAny(task, Task<TResult>.Delay(millisecondsTimeout, cts.Token)).ConfigureAwait(false))
+            if (task == await Task<TResult>.WhenAny(task, Task<TResult>.Delay(timeout, cts.Token)).ConfigureAwait(false))
             {
                 cts.Cancel();
                 return await task.ConfigureAwait(false);
             }
             else
             {
-                throw new TimeoutException($"Task timed out after {millisecondsTimeout}");
+                throw new TimeoutException($"Task timed out after {timeout}");
             }
         }
 
@@ -53,7 +72,7 @@ namespace System.Threading.Tasks
             }
             else
             {
-                throw new TimeoutException($"{nameof(WhenAllOrAnyFailed)} timed out after {millisecondsTimeout}");
+                throw new TimeoutException($"{nameof(WhenAllOrAnyFailed)} timed out after {millisecondsTimeout}ms");
             }
         }
 

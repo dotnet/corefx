@@ -23,33 +23,24 @@ internal static partial class Interop
             EAI_NOMORE = 7,     // No more entries are present in the list.
         }
 
-        internal enum GetHostErrorCodes : int
-        {
-            HOST_NOT_FOUND = 1,
-            TRY_AGAIN = 2,
-            NO_RECOVERY = 3,
-            NO_DATA = 4,
-            NO_ADDRESS = NO_DATA,
-        }
-
         //opaque structure to maintain consistency with native function signature
         internal unsafe struct addrinfo
         {
-            
-        }    
-        
+
+        }
+
         [StructLayout(LayoutKind.Sequential)]
         internal unsafe struct HostEntry
         {
             internal byte* CanonicalName;     // Canonical Name of the Host
             internal byte** Aliases;          // List of aliases for the host
             internal addrinfo* AddressListHandle; // Handle for socket address list
-            internal int IPAddressCount;      // Number of IP addresses in the list            
+            internal int IPAddressCount;      // Number of IP addresses in the list
         }
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetHostEntryForName")]
         internal static extern unsafe int GetHostEntryForName(string address, HostEntry* entry);
-        
+
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetNextIPAddress")]
         internal static extern unsafe int GetNextIPAddress(HostEntry* entry, addrinfo** addressListHandle, IPAddress* endPoint);
 

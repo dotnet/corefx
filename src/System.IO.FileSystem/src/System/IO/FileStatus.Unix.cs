@@ -1,6 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
+
+using System.Runtime.InteropServices;
 
 namespace System.IO
 {
@@ -82,8 +84,8 @@ namespace System.IO
             if (_isDirectory)
                 attributes |= FileAttributes.Directory;
 
-            // If the filename starts with a period, it's hidden.
-            if (fileName.Length > 0 && fileName[0] == '.')
+            // If the filename starts with a period or has UF_HIDDEN flag set, it's hidden.
+            if (fileName.Length > 0 && (fileName[0] == '.' || (_fileStatus.UserFlags & (uint)Interop.Sys.UserFlags.UF_HIDDEN) == (uint)Interop.Sys.UserFlags.UF_HIDDEN))
                 attributes |= FileAttributes.Hidden;
 
             return attributes != default ? attributes : FileAttributes.Normal;
@@ -96,10 +98,10 @@ namespace System.IO
             const FileAttributes allValidFlags =
                 FileAttributes.Archive | FileAttributes.Compressed | FileAttributes.Device |
                 FileAttributes.Directory | FileAttributes.Encrypted | FileAttributes.Hidden |
-                FileAttributes.Hidden | FileAttributes.IntegrityStream | FileAttributes.Normal |
-                FileAttributes.NoScrubData | FileAttributes.NotContentIndexed | FileAttributes.Offline |
-                FileAttributes.ReadOnly | FileAttributes.ReparsePoint | FileAttributes.SparseFile |
-                FileAttributes.System | FileAttributes.Temporary;
+                FileAttributes.IntegrityStream | FileAttributes.Normal | FileAttributes.NoScrubData |
+                FileAttributes.NotContentIndexed | FileAttributes.Offline | FileAttributes.ReadOnly |
+                FileAttributes.ReparsePoint | FileAttributes.SparseFile | FileAttributes.System |
+                FileAttributes.Temporary;
             if ((attributes & ~allValidFlags) != 0)
             {
                 // Using constant string for argument to match historical throw
@@ -110,6 +112,26 @@ namespace System.IO
 
             if (!_exists)
                 FileSystemInfo.ThrowNotFound(path);
+
+            if (Interop.Sys.CanSetHiddenFlag)
+            {
+                if ((attributes & FileAttributes.Hidden) != 0)
+                {
+                    if ((_fileStatus.UserFlags & (uint)Interop.Sys.UserFlags.UF_HIDDEN) == 0)
+                    {
+                        // If Hidden flag is set and cached file status does not have the flag set then set it
+                        Interop.CheckIo(Interop.Sys.LChflags(path, (_fileStatus.UserFlags | (uint)Interop.Sys.UserFlags.UF_HIDDEN)), path, InitiallyDirectory);
+                    }
+                }
+                else
+                {
+                    if ((_fileStatus.UserFlags & (uint)Interop.Sys.UserFlags.UF_HIDDEN) == (uint)Interop.Sys.UserFlags.UF_HIDDEN)
+                    {
+                        // If Hidden flag is not set and cached file status does have the flag set then remove it
+                        Interop.CheckIo(Interop.Sys.LChflags(path, (_fileStatus.UserFlags & ~(uint)Interop.Sys.UserFlags.UF_HIDDEN)), path, InitiallyDirectory);
+                    }
+                }
+            }
 
             // The only thing we can reasonably change is whether the file object is readonly by changing permissions.
 
@@ -161,10 +183,16 @@ namespace System.IO
 
         internal void SetCreationTime(string path, DateTimeOffset time)
         {
-            // There isn't a reliable way to set this; however, we can't just do nothing since the
-            // FileSystemWatcher specifically looks for this call to make a Metadata Change, so we
-            // should set the LastAccessTime of the file to cause the metadata change we need.
-            SetLastAccessTime(path, time);
+            // Unix provides APIs to update the last access time (atime) and last modification time (mtime).
+            // There is no API to update the CreationTime.
+            // Some platforms (e.g. Linux) don't store a creation time. On those platforms, the creation time
+            // is synthesized as the oldest of last status change time (ctime) and last modification time (mtime).
+            // We update the LastWriteTime (mtime).
+            // This triggers a metadata change for FileSystemWatcher NotifyFilters.CreationTime.
+            // Updating the mtime, causes the ctime to be set to 'now'. So, on platforms that don't store a
+            // CreationTime, GetCreationTime will return the value that was previously set (when that value
+            // wasn't in the future).
+            SetLastWriteTime(path, time);
         }
 
         internal DateTimeOffset GetLastAccessTime(ReadOnlySpan<char> path, bool continueOnError = false)
@@ -175,8 +203,7 @@ namespace System.IO
             return UnixTimeToDateTimeOffset(_fileStatus.ATime, _fileStatus.ATimeNsec);
         }
 
-        internal void SetLastAccessTime(string path, DateTimeOffset time)
-            => SetAccessWriteTimes(path, time.ToUnixTimeSeconds(), null);
+        internal void SetLastAccessTime(string path, DateTimeOffset time) => SetAccessOrWriteTime(path, time, isAccessTime: true);
 
         internal DateTimeOffset GetLastWriteTime(ReadOnlySpan<char> path, bool continueOnError = false)
         {
@@ -186,24 +213,45 @@ namespace System.IO
             return UnixTimeToDateTimeOffset(_fileStatus.MTime, _fileStatus.MTimeNsec);
         }
 
-        internal void SetLastWriteTime(string path, DateTimeOffset time)
-            => SetAccessWriteTimes(path, null, time.ToUnixTimeSeconds());
+        internal void SetLastWriteTime(string path, DateTimeOffset time) => SetAccessOrWriteTime(path, time, isAccessTime: false);
 
         private DateTimeOffset UnixTimeToDateTimeOffset(long seconds, long nanoseconds)
         {
             return DateTimeOffset.FromUnixTimeSeconds(seconds).AddTicks(nanoseconds / NanosecondsPerTick).ToLocalTime();
         }
 
-        private void SetAccessWriteTimes(string path, long? accessTime, long? writeTime)
+        private unsafe void SetAccessOrWriteTime(string path, DateTimeOffset time, bool isAccessTime)
         {
             // force a refresh so that we have an up-to-date times for values not being overwritten
             _fileStatusInitialized = -1;
             EnsureStatInitialized(path);
-            Interop.Sys.UTimBuf buf;
-            // we use utime() not utimensat() so we drop the subsecond part
-            buf.AcTime = accessTime ?? _fileStatus.ATime;
-            buf.ModTime = writeTime ?? _fileStatus.MTime;
-            Interop.CheckIo(Interop.Sys.UTime(path, ref buf), path, InitiallyDirectory);
+
+            // we use utimes()/utimensat() to set the accessTime and writeTime
+            Interop.Sys.TimeSpec* buf = stackalloc Interop.Sys.TimeSpec[2];
+
+            long seconds = time.ToUnixTimeSeconds();
+
+            const long TicksPerMillisecond = 10000;
+            const long TicksPerSecond = TicksPerMillisecond * 1000;
+            long nanoseconds = (time.UtcDateTime.Ticks - DateTimeOffset.UnixEpoch.Ticks - seconds * TicksPerSecond) * NanosecondsPerTick;
+
+            if (isAccessTime)
+            {
+                buf[0].TvSec = seconds;
+                buf[0].TvNsec = nanoseconds;
+                buf[1].TvSec = _fileStatus.MTime;
+                buf[1].TvNsec = _fileStatus.MTimeNsec;
+            }
+            else
+            {
+                buf[0].TvSec = _fileStatus.ATime;
+                buf[0].TvNsec = _fileStatus.ATimeNsec;
+                buf[1].TvSec = seconds;
+                buf[1].TvNsec = nanoseconds;
+            }
+
+            Interop.CheckIo(Interop.Sys.UTimensat(path, buf), path, InitiallyDirectory);
+
             _fileStatusInitialized = -1;
         }
 
@@ -223,7 +271,7 @@ namespace System.IO
             // storing those results separately.  We only report failure if the initial
             // lstat fails, as a broken symlink should still report info on exists, attributes, etc.
             _isDirectory = false;
-            path = PathInternal.TrimEndingDirectorySeparator(path);
+            path = Path.TrimEndingDirectorySeparator(path);
             int result = Interop.Sys.LStat(path, out _fileStatus);
             if (result < 0)
             {

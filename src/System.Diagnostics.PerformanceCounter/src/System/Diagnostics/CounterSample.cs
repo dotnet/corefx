@@ -6,7 +6,7 @@ namespace System.Diagnostics
 {
     /// <summary>
     ///     A struct holding the raw data for a performance counter.
-    /// </summary>    
+    /// </summary>
     public readonly struct CounterSample
     {
         private readonly long _rawValue;
@@ -156,7 +156,7 @@ namespace System.Diagnostics
             return CounterSampleCalculator.ComputeCounterValue(counterSample, nextCounterSample);
         }
 
-        public override bool Equals(Object o)
+        public override bool Equals(object o)
         {
             return (o is CounterSample) && Equals((CounterSample)o);
         }

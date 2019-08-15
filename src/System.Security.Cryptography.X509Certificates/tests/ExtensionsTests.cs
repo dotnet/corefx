@@ -190,6 +190,27 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        public static void KeyUsageExtension_KeyAgreementAndDecipherOnly()
+        {
+            TestKeyUsageExtension(
+                X509KeyUsageFlags.KeyAgreement | X509KeyUsageFlags.DecipherOnly,
+                false,
+                "0303070880".HexToByteArray());
+        }
+
+        [Fact]
+        public static void KeyUsageExtension_BER()
+        {
+            // Extensions encoded inside PKCS#8 on Windows may use BER encoding that would be invalid DER.
+            // Ensure that no exception is thrown and the value is decoded correctly.
+            X509KeyUsageExtension ext;
+            ext = new X509KeyUsageExtension(new AsnEncodedData("230403020080".HexToByteArray()), false);
+            Assert.Equal(X509KeyUsageFlags.DigitalSignature, ext.KeyUsages);
+            ext = new X509KeyUsageExtension(new AsnEncodedData("038200020080".HexToByteArray()), false);
+            Assert.Equal(X509KeyUsageFlags.DigitalSignature, ext.KeyUsages);
+        }
+
+        [Fact]
         public static void BasicConstraintsExtensionDefault()
         {
             X509BasicConstraintsExtension e = new X509BasicConstraintsExtension();
@@ -252,6 +273,18 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         };
 
         [Fact]
+        public static void BasicConstraintsExtension_BER()
+        {
+            // Extensions encoded inside PKCS#8 on Windows may use BER encoding that would be invalid DER.
+            // Ensure that no exception is thrown and the value is decoded correctly.
+            X509BasicConstraintsExtension ext;
+            ext = new X509BasicConstraintsExtension(new AsnEncodedData("30800101000201080000".HexToByteArray()), false);
+            Assert.False(ext.CertificateAuthority);
+            Assert.True(ext.HasPathLengthConstraint);
+            Assert.Equal(8, ext.PathLengthConstraint);
+        }
+
+        [Fact]
         public static void EnhancedKeyUsageExtensionDefault()
         {
             X509EnhancedKeyUsageExtension e = new X509EnhancedKeyUsageExtension();
@@ -296,6 +329,20 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             };
 
             Assert.ThrowsAny<CryptographicException>(() => new X509EnhancedKeyUsageExtension(oids, false));
+        }
+
+        [Fact]
+        public static void EnhancedKeyUsageExtension_ImmutableOids()
+        {
+            Oid oid1 = new Oid("1.3.6.1.5.5.7.3.1");
+            OidCollection usages = new OidCollection();
+            X509EnhancedKeyUsageExtension e = new X509EnhancedKeyUsageExtension(usages, false);
+            Assert.Equal(0, e.EnhancedKeyUsages.Count);
+            usages.Add(oid1);
+            Assert.Equal(0, e.EnhancedKeyUsages.Count);
+            e.EnhancedKeyUsages.Add(oid1);
+            Assert.Equal(0, e.EnhancedKeyUsages.Count);
+            Assert.NotSame(e.EnhancedKeyUsages, e.EnhancedKeyUsages);
         }
 
         [Fact]
@@ -392,6 +439,18 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 false,
                 "0414a260a870be1145ed71e2bb5aa19463a4fe9dcc41".HexToByteArray(),
                 "A260A870BE1145ED71E2BB5AA19463A4FE9DCC41");
+        }
+
+        [Fact]
+        public static void SubjectKeyIdentifierExtension_BER()
+        {
+            // Extensions encoded inside PKCS#8 on Windows may use BER encoding that would be invalid DER.
+            // Ensure that no exception is thrown and the value is decoded correctly.
+            X509SubjectKeyIdentifierExtension ext;
+            byte[] rawData = "0481145971a65a334dda980780ff841ebe87f9723241f2".HexToByteArray();
+            ext = new X509SubjectKeyIdentifierExtension(new AsnEncodedData(rawData), false);
+            string skid = ext.SubjectKeyIdentifier;
+            Assert.Equal("5971A65A334DDA980780FF841EBE87F9723241F2", skid);
         }
 
         [Fact]

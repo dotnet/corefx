@@ -16,8 +16,8 @@ namespace System.Net
     {
         private const WebExceptionStatus DefaultStatus = WebExceptionStatus.UnknownError;
 
-        private WebExceptionStatus _status = DefaultStatus;
-        private WebResponse _response = null;
+        private readonly WebExceptionStatus _status = DefaultStatus;
+        private readonly WebResponse _response = null;
 
         public WebException()
         {
@@ -53,7 +53,7 @@ namespace System.Net
             }
         }
 
-        protected WebException(SerializationInfo serializationInfo, StreamingContext streamingContext) 
+        protected WebException(SerializationInfo serializationInfo, StreamingContext streamingContext)
             : base(serializationInfo, streamingContext)
         {
         }
@@ -91,7 +91,7 @@ namespace System.Net
             {
                 Exception inner = exception.InnerException;
                 string message = inner != null ?
-                    string.Format("{0} {1}", exception.Message, inner.Message) :
+                    exception.Message + " " + inner.Message :
                     exception.Message;
 
                 return new WebException(
@@ -111,7 +111,7 @@ namespace System.Net
 
             return exception;
         }
-        
+
         private static WebExceptionStatus GetStatusFromExceptionHelper(HttpRequestException ex)
         {
             SocketException socketEx = ex.InnerException as SocketException;
@@ -124,6 +124,7 @@ namespace System.Net
             WebExceptionStatus status;
             switch (socketEx.SocketErrorCode)
             {
+                case SocketError.NoData:
                 case SocketError.HostNotFound:
                     status = WebExceptionStatus.NameResolutionFailure;
                     break;

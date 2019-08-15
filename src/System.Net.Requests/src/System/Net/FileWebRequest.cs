@@ -17,7 +17,7 @@ namespace System.Net
         private ManualResetEventSlim _blockReaderUntilRequestStreamDisposed;
         private WebResponse _response;
         private WebFileStream _stream;
-        private Uri _uri;
+        private readonly Uri _uri;
         private long _contentLength;
         private int _timeout = DefaultTimeoutMilliseconds;
         private bool _readPending;
@@ -36,7 +36,7 @@ namespace System.Net
             _uri = uri;
         }
 
-        [Obsolete("Serialization is obsoleted for this type. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("Serialization is obsoleted for this type. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected FileWebRequest(SerializationInfo serializationInfo, StreamingContext streamingContext) : base(serializationInfo, streamingContext)
         {
             throw new PlatformNotSupportedException();

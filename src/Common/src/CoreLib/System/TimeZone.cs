@@ -6,13 +6,13 @@
 **
 **
 **
-** Purpose: 
+** Purpose:
 ** This class is used to represent a TimeZone.  It
 ** has methods for converting a DateTime to UTC from local time
-** and to local time from UTC and methods for getting the 
-** standard name and daylight name of the time zone.  
+** and to local time from UTC and methods for getting the
+** standard name and daylight name of the time zone.
 **
-** The only TimeZone that we support in version 1 is the 
+** The only TimeZone that we support in version 1 is the
 ** CurrentTimeZone as determined by the system timezone.
 **
 **
@@ -29,18 +29,18 @@ namespace System
     [Obsolete("System.TimeZone has been deprecated.  Please investigate the use of System.TimeZoneInfo instead.")]
     public abstract class TimeZone
     {
-        private static volatile TimeZone currentTimeZone = null;
+        private static volatile TimeZone? currentTimeZone = null;
 
         // Private object for locking instead of locking on a public type for SQL reliability work.
-        private static Object s_InternalSyncObject;
-        private static Object InternalSyncObject
+        private static object? s_InternalSyncObject;
+        private static object InternalSyncObject
         {
             get
             {
                 if (s_InternalSyncObject == null)
                 {
-                    Object o = new Object();
-                    Interlocked.CompareExchange<Object>(ref s_InternalSyncObject, o, null);
+                    object o = new object();
+                    Interlocked.CompareExchange<object?>(ref s_InternalSyncObject, o, null);
                 }
                 return s_InternalSyncObject;
             }
@@ -57,7 +57,7 @@ namespace System
             {
                 //Grabbing the cached value is required at the top of this function so that
                 //we don't incur a race condition with the ResetTimeZone method below.
-                TimeZone tz = currentTimeZone;
+                TimeZone? tz = currentTimeZone;
                 if (tz == null)
                 {
                     lock (InternalSyncObject)
@@ -74,7 +74,7 @@ namespace System
         }
 
         //This method is called by CultureInfo.ClearCachedData in response to control panel
-        //change events.  It must be synchronized because otherwise there is a race condition 
+        //change events.  It must be synchronized because otherwise there is a race condition
         //with the CurrentTimeZone property above.
         internal static void ResetTimeZone()
         {
@@ -87,12 +87,12 @@ namespace System
             }
         }
 
-        public abstract String StandardName
+        public abstract string StandardName
         {
             get;
         }
 
-        public abstract String DaylightName
+        public abstract string DaylightName
         {
             get;
         }
@@ -100,7 +100,7 @@ namespace System
         public abstract TimeSpan GetUtcOffset(DateTime time);
 
         //
-        // Converts the specified datatime to the Universal time base on the current timezone 
+        // Converts the specified datatime to the Universal time base on the current timezone
         //
         public virtual DateTime ToUniversalTime(DateTime time)
         {
@@ -129,8 +129,8 @@ namespace System
             {
                 return time;
             }
-            Boolean isAmbiguousLocalDst = false;
-            Int64 offset = ((CurrentSystemTimeZone)(TimeZone.CurrentTimeZone)).GetUtcOffsetFromUniversalTime(time, ref isAmbiguousLocalDst);
+            bool isAmbiguousLocalDst = false;
+            long offset = ((CurrentSystemTimeZone)(TimeZone.CurrentTimeZone)).GetUtcOffsetFromUniversalTime(time, ref isAmbiguousLocalDst);
             return new DateTime(time.Ticks + offset, DateTimeKind.Local, isAmbiguousLocalDst);
         }
 
@@ -153,7 +153,7 @@ namespace System
 
         //
         // NOTENOTE: Implementation detail
-        // In the transition from standard time to daylight saving time, 
+        // In the transition from standard time to daylight saving time,
         // if we convert local time to Universal time, we can have the
         // following (take PST as an example):
         //      Local               Universal       UTC Offset
@@ -163,7 +163,7 @@ namespace System
         //      03:00               10:00           -7:00
         //      04:00               11:00           -7:00
         //      05:00               12:00           -7:00
-        //      
+        //
         //      So from 02:00 - 02:59:59, we should return the standard offset, instead of the daylight saving offset.
         //
         // In the transition from daylight saving time to standard time,
@@ -172,17 +172,17 @@ namespace System
         //      Local               Universal       UTC Offset
         //      -----               ---------       ----------
         //      01:00AM             08:00           -7:00
-        //      02:00 (=> 01:00)    09:00           -8:00   
+        //      02:00 (=> 01:00)    09:00           -8:00
         //      02:00               10:00           -8:00
         //      03:00               11:00           -8:00
         //      04:00               12:00           -8:00
-        //      
+        //
         //      So in this case, the 02:00 does exist after the first 2:00 rolls back to 01:00. We don't need to special case this.
         //      But note that there are two 01:00 in the local time.
 
         //
         // And imagine if the daylight saving offset is negative (although this does not exist in real life)
-        // In the transition from standard time to daylight saving time, 
+        // In the transition from standard time to daylight saving time,
         // if we convert local time to Universal time, we can have the
         // following (take PST as an example, but the daylight saving offset is -01:00):
         //      Local               Universal       UTC Offset
@@ -193,7 +193,7 @@ namespace System
         //      03:00               12:00           -9:00
         //      04:00               13:00           -9:00
         //      05:00               14:00           -9:00
-        //      
+        //
         //      So in this case, the 02:00 does exist after the first 2:00 rolls back to 01:00. We don't need to special case this.
         //
         // In the transition from daylight saving time to standard time,
@@ -208,7 +208,7 @@ namespace System
         //      04:00               12:00           -8:00
         //      05:00               13:00           -8:00
         //      06:00               14:00           -8:00
-        //      
+        //
         //      So from 02:00 - 02:59:59, we should return the daylight saving offset, instead of the standard offset.
         //
         internal static TimeSpan CalculateUtcOffset(DateTime time, DaylightTime daylightTimes)
@@ -226,12 +226,12 @@ namespace System
             DateTime startTime;
             DateTime endTime;
 
-            // startTime and endTime represent the period from either the start of DST to the end and includes the 
+            // startTime and endTime represent the period from either the start of DST to the end and includes the
             // potentially overlapped times
             startTime = daylightTimes.Start + daylightTimes.Delta;
             endTime = daylightTimes.End;
 
-            // For normal time zones, the ambiguous hour is the last hour of daylight saving when you wind the 
+            // For normal time zones, the ambiguous hour is the last hour of daylight saving when you wind the
             // clock back. It is theoretically possible to have a positive delta, (which would really be daylight
             // reduction time), where you would have to wind the clock back in the begnning.
             DateTime ambiguousStart;
@@ -247,7 +247,7 @@ namespace System
                 ambiguousEnd = startTime - daylightTimes.Delta;
             }
 
-            Boolean isDst = false;
+            bool isDst = false;
             if (startTime > endTime)
             {
                 // In southern hemisphere, the daylight saving time starts later in the year, and ends in the beginning of next year.
@@ -264,7 +264,7 @@ namespace System
             }
 
             // If this date was previously converted from a UTC date and we were able to detect that the local
-            // DateTime would be ambiguous, this data is stored in the DateTime to resolve this ambiguity. 
+            // DateTime would be ambiguous, this data is stored in the DateTime to resolve this ambiguity.
             if (isDst && time >= ambiguousStart && time < ambiguousEnd)
             {
                 isDst = time.IsAmbiguousDaylightSavingTime();

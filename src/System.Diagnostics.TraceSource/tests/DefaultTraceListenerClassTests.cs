@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Diagnostics.TraceSourceTests
 {
-    public partial class DefaultTraceListenerClassTests : RemoteExecutorTestBase
+    public partial class DefaultTraceListenerClassTests : FileCleanupTestBase
     {
         private class TestDefaultTraceListener : DefaultTraceListener
         {
@@ -21,7 +21,7 @@ namespace System.Diagnostics.TraceSourceTests
                 AssertUiEnabled = false;
             }
 
-            public String Output
+            public string Output
             {
                 get { return _writer.ToString(); }
             }
@@ -65,7 +65,7 @@ namespace System.Diagnostics.TraceSourceTests
             var listener = new TestDefaultTraceListener();
             listener.ShouldOverrideWriteLine = false;
             listener.Fail("FAIL");
-            Assert.False(listener.Output.Contains("FAIL"));
+            Assert.DoesNotContain("FAIL", listener.Output);
         }
 
         [Fact]
@@ -77,7 +77,7 @@ namespace System.Diagnostics.TraceSourceTests
             listener.LogFileName = pathToLogFile;
             listener.ShouldOverrideWriteLine = false;
             listener.Fail("FAIL");
-            
+
             Assert.True(File.Exists(pathToLogFile));
             Assert.Contains("FAIL", File.ReadAllText(pathToLogFile));
         }
@@ -113,7 +113,7 @@ namespace System.Diagnostics.TraceSourceTests
         public void WriteLongMessage()
         {
             var listener = new DefaultTraceListener();
-            var longString = new String('a', 0x40000);
+            var longString = new string('a', 0x40000);
             listener.Write(longString);
             // nothing to assert, the output is written to Debug.Write
             // this simply provides code-coverage
@@ -133,7 +133,7 @@ namespace System.Diagnostics.TraceSourceTests
         public void LogFileNamePropertyTest(string expectedLogFileName)
         {
             var listener = new DefaultTraceListener();
-            
+
             //it should be initialized with the default
             Assert.Equal(string.Empty, listener.LogFileName);
             listener.LogFileName = expectedLogFileName;

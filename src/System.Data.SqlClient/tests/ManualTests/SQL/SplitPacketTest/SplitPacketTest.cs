@@ -27,7 +27,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
             Task.Factory.StartNew(() => { SetupProxy(actualHost, actualPort); });
 
-            for(int i = 0; i < 10 && Port == -1; i++)
+            for (int i = 0; i < 10 && Port == -1; i++)
             {
                 Thread.Sleep(500);
             }
@@ -35,44 +35,44 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
             builder.DataSource = "tcp:127.0.0.1," + Port;
             BaseConnString = builder.ConnectionString;
-        } 
+        }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public void OneByteSplitTest()
         {
             SplitPacketSize = 1;
             OpenConnection();
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public void AlmostFullHeaderTest()
         {
             SplitPacketSize = 7;
             OpenConnection();
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public void FullHeaderTest()
         {
             SplitPacketSize = 8;
             OpenConnection();
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public void HeaderPlusOneTest()
         {
             SplitPacketSize = 9;
             OpenConnection();
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public void MARSSplitTest()
         {
             SplitPacketSize = 1;
             OpenMarsConnection("select * from Orders");
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public void MARSReplicateTest()
         {
             SplitPacketSize = 1;
@@ -156,12 +156,12 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         private static void GetTcpInfoFromDataSource(string dataSource, out string hostName, out int port)
         {
             string[] dataSourceParts = dataSource.Split(',');
-            if(dataSourceParts.Length == 1)
+            if (dataSourceParts.Length == 1)
             {
                 hostName = dataSourceParts[0].Replace("tcp:", "");
                 port = 1433;
             }
-            else if(dataSourceParts.Length == 2)
+            else if (dataSourceParts.Length == 2)
             {
                 hostName = dataSourceParts[0].Replace("tcp:", "");
                 port = int.Parse(dataSourceParts[1]);

@@ -55,8 +55,7 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal("(i, j, k, l) => i", lambda.ToString());
         }
 
-        // Possible issue with AOT? See https://github.com/dotnet/corefx/pull/8116/files#r61346743
-        [Theory(Skip = "870811"), ClassData(typeof(CompilationTypes))]
+        [Theory, ClassData(typeof(CompilationTypes))]
         public void InvokeComputedLambda(bool useInterpreter)
         {
             ParameterExpression x = Expression.Parameter(typeof(int), "x");
@@ -270,7 +269,7 @@ namespace System.Linq.Expressions.Tests
                 bool>), exp.Type);
 
 #if FEATURE_COMPILE
-            // From this point on, the tests require FEATURE_COMPILE (RefEmit) support as SLE needs to create delegate types on the fly. 
+            // From this point on, the tests require FEATURE_COMPILE (RefEmit) support as SLE needs to create delegate types on the fly.
             // You can't instantiate Func<> over 20 arguments or over byrefs.
             ParameterExpression[] paramList = Enumerable.Range(0, 20).Select(_ => Expression.Variable(typeof(int))).ToArray();
             exp = Expression.Lambda(
@@ -282,7 +281,7 @@ namespace System.Linq.Expressions.Tests
             Type delType = exp.Type;
             Assert.Equal(new[] { delType }, exp.GetType().GetGenericArguments());
             MethodInfo delMethod = delType.GetMethod("Invoke");
-            Assert.Equal(delMethod.ReturnType, typeof(int));
+            Assert.Equal(typeof(int), delMethod.ReturnType);
             Assert.Equal(20, delMethod.GetParameters().Length);
             Assert.True(delMethod.GetParameters().All(p => p.ParameterType == typeof(int)));
             Assert.Same(delType, Expression.Lambda(Expression.Constant(9), paramList).Type);
@@ -299,7 +298,7 @@ namespace System.Linq.Expressions.Tests
             delType = exp.Type;
             Assert.Equal(new[] { delType }, exp.GetType().GetGenericArguments());
             delMethod = delType.GetMethod("Invoke");
-            Assert.Equal(delMethod.ReturnType, typeof(long));
+            Assert.Equal(typeof(long), delMethod.ReturnType);
             Assert.Equal(1, delMethod.GetParameters().Length);
             Assert.Equal(typeof(int).MakeByRefType(), delMethod.GetParameters()[0].ParameterType);
             Assert.Same(delType, Expression.Lambda(Expression.Constant(3L), Expression.Parameter(typeof(int).MakeByRefType())).Type);
@@ -731,7 +730,7 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal(84, i());
         }
 
-        private static IEnumerable<object[]> LambdaTypes() =>
+        public static IEnumerable<object[]> LambdaTypes() =>
             from parCount in Enumerable.Range(0, 6)
             from name in new[] {null, "Lambda"}
             from tailCall in new[] {false, true}
@@ -792,8 +791,8 @@ namespace System.Linq.Expressions.Tests
         }
 
 #if FEATURE_COMPILE
-        [Theory, ClassData(typeof(CompilationTypes))]
-        public void AboveByteMaxArityArgIL(bool useInterpreter)
+        [Fact]
+        public void AboveByteMaxArityArgIL()
         {
             ParameterExpression[] pars = Enumerable.Range(0, 300)
                 .Select(_ => Expression.Parameter(typeof(int)))
@@ -805,7 +804,7 @@ namespace System.Linq.Expressions.Tests
   .maxstack 1
 
   IL_0000: ldarg      V_300
-  IL_0004: ret        
+  IL_0004: ret
 }
 ");
         }
@@ -900,7 +899,7 @@ namespace System.Linq.Expressions.Tests
 
   IL_0000: ldarga     V_300
   IL_0004: call       instance valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.LambdaTests+Mutable valuetype [System.Linq.Expressions.Tests]System.Linq.Expressions.Tests.LambdaTests+Mutable::Mutate()
-  IL_0009: ret        
+  IL_0009: ret
 }
 ");
         }

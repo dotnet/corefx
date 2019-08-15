@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using Gdip = System.Drawing.SafeNativeMethods.Gdip;
 
 namespace System.Drawing
 {
@@ -55,16 +56,16 @@ namespace System.Drawing
 
         public static Brush FromSystemColor(Color c)
         {
-            if (!ColorUtil.IsSystemColor(c))
+            if (!c.IsSystemColor)
             {
                 throw new ArgumentException(SR.Format(SR.ColorNotSystemColor, c.ToString()));
             }
 
-            Brush[] systemBrushes = (Brush[])SafeNativeMethods.Gdip.ThreadData[s_systemBrushesKey];
+            Brush[] systemBrushes = (Brush[])Gdip.ThreadData[s_systemBrushesKey];
             if (systemBrushes == null)
             {
                 systemBrushes = new Brush[(int)KnownColor.WindowText + (int)KnownColor.MenuHighlight - (int)KnownColor.YellowGreen];
-                SafeNativeMethods.Gdip.ThreadData[s_systemBrushesKey] = systemBrushes;
+                Gdip.ThreadData[s_systemBrushesKey] = systemBrushes;
             }
             int idx = (int)c.ToKnownColor();
             if (idx > (int)KnownColor.YellowGreen)
@@ -84,4 +85,3 @@ namespace System.Drawing
         }
     }
 }
-

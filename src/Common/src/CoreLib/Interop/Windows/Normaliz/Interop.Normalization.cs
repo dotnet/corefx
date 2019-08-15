@@ -17,8 +17,8 @@ internal partial class Interop
                                         int normForm,
                                         string source,
                                         int sourceLength,
-                                        [System.Runtime.InteropServices.OutAttribute()]
-                                        char[] destination,
+                                        [System.Runtime.InteropServices.OutAttribute]
+                                        char[]? destination,
                                         int destinationLength);
     }
 }

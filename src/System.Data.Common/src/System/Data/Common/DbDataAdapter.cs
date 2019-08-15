@@ -925,7 +925,6 @@ namespace System.Data.Common
 
                 int rowsAffected = 0;
 
-                System.Data.MissingMappingAction missingMapping = UpdateMappingAction;
                 DataTableMapping tableMapping = GetTableMappingBySchemaAction(srcTable, srcTable, UpdateMappingAction);
                 Debug.Assert(null != tableMapping, "null TableMapping when MissingMappingAction.Error");
 
@@ -1027,7 +1026,7 @@ namespace System.Data.Common
                                     dataCommand = _IDbDataAdapter.UpdateCommand;
                                     break;
                                 default:
-                                    Debug.Assert(false, "InvalidDataRowState");
+                                    Debug.Fail("InvalidDataRowState");
                                     throw ADP.InvalidDataRowState(dataRow.RowState); // out of Update without completing batch
                             }
 
@@ -1540,7 +1539,7 @@ namespace System.Data.Common
             else
             {
                 // StatementType.Select, StatementType.Batch
-                Debug.Assert(false, "unexpected StatementType");
+                Debug.Fail("unexpected StatementType");
             }
 
             // map the parameter results to the dataSet

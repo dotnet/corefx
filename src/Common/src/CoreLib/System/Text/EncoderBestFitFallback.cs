@@ -15,8 +15,8 @@ namespace System.Text
     internal class InternalEncoderBestFitFallback : EncoderFallback
     {
         // Our variables
-        internal Encoding _encoding = null;
-        internal char[] _arrayBestFit = null;
+        internal Encoding _encoding;
+        internal char[]? _arrayBestFit = null;
 
         internal InternalEncoderBestFitFallback(Encoding encoding)
         {
@@ -38,14 +38,13 @@ namespace System.Text
             }
         }
 
-        public override bool Equals(Object value)
+        public override bool Equals(object? value)
         {
-            InternalEncoderBestFitFallback that = value as InternalEncoderBestFitFallback;
-            if (that != null)
+            if (value is InternalEncoderBestFitFallback that)
             {
-                return (_encoding.CodePage == that._encoding.CodePage);
+                return _encoding.CodePage == that._encoding.CodePage;
             }
-            return (false);
+            return false;
         }
 
         public override int GetHashCode()
@@ -58,20 +57,20 @@ namespace System.Text
     {
         // Our variables
         private char _cBestFit = '\0';
-        private InternalEncoderBestFitFallback _oFallback;
+        private readonly InternalEncoderBestFitFallback _oFallback;
         private int _iCount = -1;
         private int _iSize;
 
         // Private object for locking instead of locking on a public type for SQL reliability work.
-        private static Object s_InternalSyncObject;
-        private static Object InternalSyncObject
+        private static object? s_InternalSyncObject;
+        private static object InternalSyncObject
         {
             get
             {
                 if (s_InternalSyncObject == null)
                 {
-                    Object o = new Object();
-                    Interlocked.CompareExchange<Object>(ref s_InternalSyncObject, o, null);
+                    object o = new object();
+                    Interlocked.CompareExchange<object?>(ref s_InternalSyncObject, o, null);
                 }
                 return s_InternalSyncObject;
             }
@@ -113,12 +112,12 @@ namespace System.Text
         public override bool Fallback(char charUnknownHigh, char charUnknownLow, int index)
         {
             // Double check input surrogate pair
-            if (!Char.IsHighSurrogate(charUnknownHigh))
+            if (!char.IsHighSurrogate(charUnknownHigh))
                 throw new ArgumentOutOfRangeException(nameof(charUnknownHigh),
                     SR.Format(SR.ArgumentOutOfRange_Range,
                     0xD800, 0xDBFF));
 
-            if (!Char.IsLowSurrogate(charUnknownLow))
+            if (!char.IsLowSurrogate(charUnknownLow))
                 throw new ArgumentOutOfRangeException(nameof(charUnknownLow),
                     SR.Format(SR.ArgumentOutOfRange_Range,
                     0xDC00, 0xDFFF));
@@ -191,6 +190,7 @@ namespace System.Text
         {
             // Need to figure out our best fit character, low is beginning of array, high is 1 AFTER end of array
             int lowBound = 0;
+            Debug.Assert(_oFallback._arrayBestFit != null);
             int highBound = _oFallback._arrayBestFit.Length;
             int index;
 
@@ -239,4 +239,3 @@ namespace System.Text
         }
     }
 }
-

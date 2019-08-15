@@ -22,15 +22,15 @@ namespace System.Diagnostics.Tracing
     {
         /// <summary>
         /// Insure that eventIds strictly less than 'eventId' will not be
-        /// used by the SelfDescribing events.   
+        /// used by the SelfDescribing events.
         /// </summary>
         internal static void ReserveEventIDsBelow(int eventId)
         {
-            for(;;)
+            for (;;)
             {
                 int snapshot = lastIdentity;
                 int newIdentity = (lastIdentity & ~0xFFFFFF) + eventId;
-                newIdentity = Math.Max(newIdentity, snapshot);      // Should be redundant.  as we only create descriptors once.  
+                newIdentity = Math.Max(newIdentity, snapshot);      // Should be redundant.  as we only create descriptors once.
                 if (Interlocked.CompareExchange(ref lastIdentity, newIdentity, snapshot) == snapshot)
                     break;
             }
@@ -41,10 +41,6 @@ namespace System.Diagnostics.Tracing
         internal readonly EventTags tags;
         internal readonly int identity;
         internal readonly byte[] nameMetadata;
-
-#if FEATURE_PERFTRACING
-        private readonly object eventHandleCreationLock = new object();
-#endif
 
         public NameInfo(string name, EventTags tags, int typeMetadataSize)
         {
@@ -82,16 +78,16 @@ namespace System.Diagnostics.Tracing
         }
 
 #if FEATURE_PERFTRACING
-        public IntPtr GetOrCreateEventHandle(EventProvider provider, ConcurrentDictionary<int, IntPtr> eventHandleMap, EventDescriptor descriptor, TraceLoggingEventTypes eventTypes)
+        public IntPtr GetOrCreateEventHandle(EventProvider provider, TraceLoggingEventHandleTable eventHandleTable, EventDescriptor descriptor, TraceLoggingEventTypes eventTypes)
         {
-            IntPtr eventHandle = IntPtr.Zero;
-            if(!eventHandleMap.TryGetValue(descriptor.EventId, out eventHandle))
+            IntPtr eventHandle;
+            if ((eventHandle = eventHandleTable[descriptor.EventId]) == IntPtr.Zero)
             {
-                lock (eventHandleCreationLock)
+                lock (eventHandleTable)
                 {
-                    if (!eventHandleMap.TryGetValue(descriptor.EventId, out eventHandle))
+                    if ((eventHandle = eventHandleTable[descriptor.EventId]) == IntPtr.Zero)
                     {
-                        byte[] metadataBlob = EventPipeMetadataGenerator.Instance.GenerateEventMetadata(
+                        byte[]? metadataBlob = EventPipeMetadataGenerator.Instance.GenerateEventMetadata(
                             descriptor.EventId,
                             name,
                             (EventKeywords)descriptor.Keywords,
@@ -115,6 +111,9 @@ namespace System.Diagnostics.Tracing
                                     metadataLength);
                             }
                         }
+
+                        // Cache the event handle.
+                        eventHandleTable.SetEventHandle(descriptor.EventId, eventHandle);
                     }
                 }
             }

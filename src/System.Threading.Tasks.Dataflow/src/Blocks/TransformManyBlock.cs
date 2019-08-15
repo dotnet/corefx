@@ -14,7 +14,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading.Tasks.Dataflow.Internal;
 using System.Collections.ObjectModel;
@@ -40,7 +39,7 @@ namespace System.Threading.Tasks.Dataflow
 
         /// <summary>Gets the object to use for writing to the source when multiple threads may be involved.</summary>
         /// <remarks>
-        /// If a reordering buffer is used, it is safe for multiple threads to write to concurrently and handles safe 
+        /// If a reordering buffer is used, it is safe for multiple threads to write to concurrently and handles safe
         /// access to the source. If there's no reordering buffer because no parallelism is used, then only one thread at
         /// a time will try to access the source, anyway.  But, if there's no reordering buffer and parallelism is being
         /// employed, then multiple threads may try to access the source concurrently, in which case we need to manually
@@ -109,7 +108,6 @@ namespace System.Threading.Tasks.Dataflow
             if (dataflowBlockOptions == null) throw new ArgumentNullException(nameof(dataflowBlockOptions));
 
             Debug.Assert(transformSync == null ^ transformAsync == null, "Exactly one of transformSync and transformAsync must be null.");
-            Contract.EndContractBlock();
 
             // Ensure we have options that can't be changed by the caller
             dataflowBlockOptions = dataflowBlockOptions.DefaultOrClone();
@@ -154,10 +152,10 @@ namespace System.Threading.Tasks.Dataflow
                     _reorderingBuffer, dataflowBlockOptions, TargetCoreOptions.UsesAsyncCompletion);
             }
 
-            // Link up the target half with the source half.  In doing so, 
+            // Link up the target half with the source half.  In doing so,
             // ensure exceptions are propagated, and let the source know no more messages will arrive.
             // As the target has completed, and as the target synchronously pushes work
-            // through the reordering buffer when async processing completes, 
+            // through the reordering buffer when async processing completes,
             // we know for certain that no more messages will need to be sent to the source.
             _target.Completion.ContinueWith((completed, state) =>
             {
@@ -167,7 +165,7 @@ namespace System.Threading.Tasks.Dataflow
             }, _source, CancellationToken.None, Common.GetContinuationOptions(), TaskScheduler.Default);
 
             // It is possible that the source half may fault on its own, e.g. due to a task scheduler exception.
-            // In those cases we need to fault the target half to drop its buffered messages and to release its 
+            // In those cases we need to fault the target half to drop its buffered messages and to release its
             // reservations. This should not create an infinite loop, because all our implementations are designed
             // to handle multiple completion requests and to carry over only one.
             _source.Completion.ContinueWith((completed, state) =>
@@ -211,7 +209,7 @@ namespace System.Threading.Tasks.Dataflow
             }
             finally
             {
-                // If the user delegate failed, store an empty set in order 
+                // If the user delegate failed, store an empty set in order
                 // to update the bounding count and reordering buffer.
                 if (!userDelegateSucceeded) StoreOutputItems(messageWithId, null);
             }
@@ -237,7 +235,7 @@ namespace System.Threading.Tasks.Dataflow
             // If no task is available, either because null was returned or an exception was thrown, we're done.
             if (task == null)
             {
-                // If we didn't get a task because an exception occurred, store it 
+                // If we didn't get a task because an exception occurred, store it
                 // (or if the exception was cancellation, just ignore it).
                 if (caughtException != null && !Common.IsCooperativeCancellation(caughtException))
                 {
@@ -257,7 +255,7 @@ namespace System.Threading.Tasks.Dataflow
                 else
                 {
                     // As a fast path if we're not reordering, decrement the bounding
-                    // count as part of our signaling that we're done, since this will 
+                    // count as part of our signaling that we're done, since this will
                     // internally take the lock only once, whereas the above path will
                     // take the lock twice.
                     _target.SignalOneAsyncMessageCompleted(boundingCountChange: -1);
@@ -266,7 +264,7 @@ namespace System.Threading.Tasks.Dataflow
             }
 
             // We got back a task.  Now wait for it to complete and store its results.
-            // Unlike with TransformBlock and ActionBlock, We run the continuation on the user-provided 
+            // Unlike with TransformBlock and ActionBlock, We run the continuation on the user-provided
             // scheduler as we'll be running user code through enumerating the returned enumerable.
             task.ContinueWith((completed, state) =>
             {
@@ -299,12 +297,12 @@ namespace System.Threading.Tasks.Dataflow
                     }
                     catch (Exception exc)
                     {
-                        // Enumerating the user's collection failed. If this exception represents cancellation, 
+                        // Enumerating the user's collection failed. If this exception represents cancellation,
                         // swallow it rather than shutting down the block.
                         if (!Common.IsCooperativeCancellation(exc))
                         {
-                            // The exception was not for cancellation. We must add the exception before declining 
-                            // and signaling completion, as the exception is part of the operation, and the completion 
+                            // The exception was not for cancellation. We must add the exception before declining
+                            // and signaling completion, as the exception is part of the operation, and the completion
                             // conditions depend on this.
                             Common.StoreDataflowMessageValueIntoExceptionData(exc, messageWithId.Key);
                             _target.Complete(exc, dropPendingMessages: true, storeExceptionEvenIfAlreadyCompleting: true, unwrapInnerExceptions: false);
@@ -313,7 +311,7 @@ namespace System.Threading.Tasks.Dataflow
                     break;
 
                 case TaskStatus.Faulted:
-                    // We must add the exception before declining and signaling completion, as the exception 
+                    // We must add the exception before declining and signaling completion, as the exception
                     // is part of the operation, and the completion conditions depend on this.
                     AggregateException aggregate = completed.Exception;
                     Common.StoreDataflowMessageValueIntoExceptionData(aggregate, messageWithId.Key, targetInnerExceptions: true);
@@ -396,7 +394,7 @@ namespace System.Threading.Tasks.Dataflow
 
             // If we can eagerly get the number of items in the collection, update the bounding count.
             // This avoids the cost of updating it once per output item (since each update requires synchronization).
-            // Even if we're not bounding, we still want to determine whether the item is trusted so that we 
+            // Even if we're not bounding, we still want to determine whether the item is trusted so that we
             // can immediately dump it out once we take the lock if we're the next item.
             IList<TOutput> itemAsTrustedList = item as TOutput[];
             if (itemAsTrustedList == null) itemAsTrustedList = item as List<TOutput>;
@@ -454,7 +452,7 @@ namespace System.Threading.Tasks.Dataflow
             finally
             {
                 // Tell the base reordering buffer that we're done.  If we already output
-                // all of the data, itemCopy will be null, and we just pass down the invalid item.  
+                // all of the data, itemCopy will be null, and we just pass down the invalid item.
                 // If we haven't, pass down the real thing.  We do this even in the case of an exception,
                 // in which case this will be a dummy element.
                 _reorderingBuffer.AddItem(id, itemCopy, itemIsValid: itemCopy != null);
@@ -492,7 +490,14 @@ namespace System.Threading.Tasks.Dataflow
         /// <param name="outputItems">The untrusted enumerable.</param>
         private void StoreOutputItemsNonReorderedWithIteration(IEnumerable<TOutput> outputItems)
         {
-            bool isSerial = _target.DataflowBlockOptions.MaxDegreeOfParallelism == 1;
+            // The _source we're adding to isn't thread-safe, so we need to determine
+            // whether we need to lock.  If the block is configured with a max degree
+            // of parallelism of 1, then only one transform can run at a time, and so
+            // we don't need to lock.  Similarly, if there's a reordering buffer, then
+            // it guarantees that we're invoked serially, and we don't need to lock.
+            bool isSerial =
+                _target.DataflowBlockOptions.MaxDegreeOfParallelism == 1 ||
+                _reorderingBuffer != null;
 
             // If we're bounding, we need to increment the bounded count
             // for each individual item as we enumerate it.
@@ -538,10 +543,12 @@ namespace System.Threading.Tasks.Dataflow
                 }
                 else
                 {
-                    lock (ParallelSourceLock) // don't hold lock while enumerating
+                    foreach (TOutput item in outputItems)
                     {
-                        foreach (TOutput item in outputItems)
+                        lock (ParallelSourceLock) // don't hold lock while enumerating
+                        {
                             _source.AddMessage(item);
+                        }
                     }
                 }
             }
@@ -572,7 +579,6 @@ namespace System.Threading.Tasks.Dataflow
         void IDataflowBlock.Fault(Exception exception)
         {
             if (exception == null) throw new ArgumentNullException(nameof(exception));
-            Contract.EndContractBlock();
 
             _target.Complete(exception, dropPendingMessages: true);
         }
@@ -581,7 +587,7 @@ namespace System.Threading.Tasks.Dataflow
         public IDisposable LinkTo(ITargetBlock<TOutput> target, DataflowLinkOptions linkOptions) { return _source.LinkTo(target, linkOptions); }
 
         /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="TryReceive"]/*' />
-        public Boolean TryReceive(Predicate<TOutput> filter, out TOutput item) { return _source.TryReceive(filter, out item); }
+        public bool TryReceive(Predicate<TOutput> filter, out TOutput item) { return _source.TryReceive(filter, out item); }
 
         /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="TryReceiveAll"]/*' />
         public bool TryReceiveAll(out IList<TOutput> items) { return _source.TryReceiveAll(out items); }
@@ -596,13 +602,13 @@ namespace System.Threading.Tasks.Dataflow
         public int OutputCount { get { return _source.OutputCount; } }
 
         /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Targets/Member[@name="OfferMessage"]/*' />
-        DataflowMessageStatus ITargetBlock<TInput>.OfferMessage(DataflowMessageHeader messageHeader, TInput messageValue, ISourceBlock<TInput> source, Boolean consumeToAccept)
+        DataflowMessageStatus ITargetBlock<TInput>.OfferMessage(DataflowMessageHeader messageHeader, TInput messageValue, ISourceBlock<TInput> source, bool consumeToAccept)
         {
             return _target.OfferMessage(messageHeader, messageValue, source, consumeToAccept);
         }
 
         /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="ConsumeMessage"]/*' />
-        TOutput ISourceBlock<TOutput>.ConsumeMessage(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target, out Boolean messageConsumed)
+        TOutput ISourceBlock<TOutput>.ConsumeMessage(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target, out bool messageConsumed)
         {
             return _source.ConsumeMessage(messageHeader, target, out messageConsumed);
         }
@@ -670,7 +676,7 @@ namespace System.Threading.Tasks.Dataflow
             public IEnumerable<TOutput> OutputQueue { get { return _sourceDebuggingInformation.OutputQueue; } }
 
             /// <summary>Gets the number of input operations currently in flight.</summary>
-            public Int32 CurrentDegreeOfParallelism { get { return _targetDebuggingInformation.CurrentDegreeOfParallelism; } }
+            public int CurrentDegreeOfParallelism { get { return _targetDebuggingInformation.CurrentDegreeOfParallelism; } }
             /// <summary>Gets the task being used for output processing.</summary>
             public Task TaskForOutputProcessing { get { return _sourceDebuggingInformation.TaskForOutputProcessing; } }
 

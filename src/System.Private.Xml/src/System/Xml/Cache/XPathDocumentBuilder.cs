@@ -38,7 +38,7 @@ namespace MS.Internal.Xml.Cache
         private NodePageFactory _nmspPageFact;   // Creates namespace node pages
         private TextBlockBuilder _textBldr;      // Concatenates adjacent text blocks
 
-        private Stack<XPathNodeRef> _stkNmsp;    // In-scope namespaces
+        private readonly Stack<XPathNodeRef> _stkNmsp;    // In-scope namespaces
         private XPathNodeInfoTable _infoTable;   // Atomization table for shared node information
         private XPathDocument _doc;              // Currently building document
         private IXmlLineInfo _lineInfo;          // Line information provider
@@ -408,7 +408,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public override void WriteCharEntity(char ch)
         {
-            WriteString(new string(ch, 1), TextBlockType.Text);
+            WriteString(char.ToString(ch), TextBlockType.Text);
         }
 
         /// <summary>
@@ -416,7 +416,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public override void WriteSurrogateCharEntity(char lowChar, char highChar)
         {
-            char[] chars = { highChar, lowChar };
+            ReadOnlySpan<char> chars = stackalloc char[] { highChar, lowChar };
             WriteString(new string(chars), TextBlockType.Text);
         }
 

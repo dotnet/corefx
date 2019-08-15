@@ -13,7 +13,7 @@ namespace System.Xml.Xsl.XsltOld
     {
         private InputScope _scopeStack;
         private string _defaultNS = string.Empty;
-        private XPathNavigator _navigator;    // We need this nsvigator for document() function implementation
+        private readonly XPathNavigator _navigator;    // We need this nsvigator for document() function implementation
 
         public InputScopeManager(XPathNavigator navigator, InputScope rootScope)
         {
@@ -145,7 +145,7 @@ namespace System.Xml.Xsl.XsltOld
             }
         }
 
-        internal bool IsExtensionNamespace(String nspace)
+        internal bool IsExtensionNamespace(string nspace)
         {
             Debug.Assert(_scopeStack != null, "PushScope wasn't called");
             for (InputScope inputScope = _scopeStack; inputScope != null; inputScope = inputScope.Parent)
@@ -168,7 +168,7 @@ namespace System.Xml.Xsl.XsltOld
             }
         }
 
-        internal bool IsExcludedNamespace(String nspace)
+        internal bool IsExcludedNamespace(string nspace)
         {
             Debug.Assert(_scopeStack != null, "PushScope wasn't called");
             for (InputScope inputScope = _scopeStack; inputScope != null; inputScope = inputScope.Parent)
@@ -182,4 +182,3 @@ namespace System.Xml.Xsl.XsltOld
         }
     }
 }
-

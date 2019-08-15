@@ -26,182 +26,258 @@ namespace System.Net
         private const int UNICODE_PLANE16_END = 0x10FFFF;
 
         private const int UnicodeReplacementChar = '\uFFFD';
+        private const int MaxInt32Digits = 10;
 
         #region HtmlEncode / HtmlDecode methods
 
-        private static readonly char[] s_htmlEntityEndingChars = new char[] { ';', '&' };
-
-        public static string HtmlEncode(string value)
+        [return: NotNullIfNotNull("value")]
+        public static string? HtmlEncode(string? value)
         {
             if (string.IsNullOrEmpty(value))
             {
                 return value;
             }
 
-            // Don't create StringBuilder if we don't have anything to encode
-            int index = IndexOfHtmlEncodingChars(value, 0);
+            ReadOnlySpan<char> valueSpan = value.AsSpan();
+
+            // Don't create ValueStringBuilder if we don't have anything to encode
+            int index = IndexOfHtmlEncodingChars(valueSpan);
             if (index == -1)
             {
                 return value;
             }
 
-            StringBuilder sb = StringBuilderCache.Acquire(value.Length);
-            HtmlEncode(value, index, sb);
-            return StringBuilderCache.GetStringAndRelease(sb);
+            // For small inputs we allocate on the stack. In most cases a buffer three
+            // times larger the original string should be sufficient as usually not all
+            // characters need to be encoded.
+            // For larger string we rent the input string's length plus a fixed
+            // conservative amount of chars from the ArrayPool.
+            Span<char> buffer = value.Length < 80 ?
+                stackalloc char[256] :
+                null;
+            ValueStringBuilder sb = buffer != null ?
+                new ValueStringBuilder(buffer) :
+                new ValueStringBuilder(value.Length + 200);
+
+            sb.Append(valueSpan.Slice(0, index));
+            HtmlEncode(valueSpan.Slice(index), ref sb);
+
+            return sb.ToString();
         }
 
-        public static void HtmlEncode(string value, TextWriter output)
+        public static void HtmlEncode(string? value, TextWriter output)
         {
-            output.Write(HtmlEncode(value));
-        }
-
-        private static unsafe void HtmlEncode(string value, int index, StringBuilder output)
-        {
-            Debug.Assert(value != null);
-            Debug.Assert(output != null);
-            Debug.Assert(0 <= index && index <= value.Length, "0 <= index && index <= value.Length");
-
-            int cch = value.Length - index;
-            fixed (char* str = value)
+            if (output == null)
             {
-                char* pch = str;
-                while (index-- > 0)
-                {
-                    output.Append(*pch++);
-                }
+                throw new ArgumentNullException(nameof(output));
+            }
+            if (string.IsNullOrEmpty(value))
+            {
+                output.Write(value);
+                return;
+            }
 
-                for (; cch > 0; cch--, pch++)
+            ReadOnlySpan<char> valueSpan = value.AsSpan();
+
+            // Don't create ValueStringBuilder if we don't have anything to encode
+            int index = IndexOfHtmlEncodingChars(valueSpan);
+            if (index == -1)
+            {
+                output.Write(value);
+                return;
+            }
+
+            // For small inputs we allocate on the stack. In most cases a buffer three
+            // times larger the original string should be sufficient as usually not all
+            // characters need to be encoded.
+            // For larger string we rent the input string's length plus a fixed
+            // conservative amount of chars from the ArrayPool.
+            Span<char> buffer = value.Length < 80 ?
+                stackalloc char[256] :
+                null;
+            ValueStringBuilder sb = buffer != null ?
+                new ValueStringBuilder(buffer) :
+                new ValueStringBuilder(value.Length + 200);
+
+            sb.Append(valueSpan.Slice(0, index));
+            HtmlEncode(valueSpan.Slice(index), ref sb);
+
+            output.Write(sb.AsSpan());
+            sb.Dispose();
+        }
+
+        private static void HtmlEncode(ReadOnlySpan<char> input, ref ValueStringBuilder output)
+        {
+            for (int i = 0; i < input.Length; i++)
+            {
+                char ch = input[i];
+                if (ch <= '>')
                 {
-                    char ch = *pch;
-                    if (ch <= '>')
+                    switch (ch)
                     {
-                        switch (ch)
+                        case '<':
+                            output.Append("&lt;");
+                            break;
+                        case '>':
+                            output.Append("&gt;");
+                            break;
+                        case '"':
+                            output.Append("&quot;");
+                            break;
+                        case '\'':
+                            output.Append("&#39;");
+                            break;
+                        case '&':
+                            output.Append("&amp;");
+                            break;
+                        default:
+                            output.Append(ch);
+                            break;
+                    }
+                }
+                else
+                {
+                    int valueToEncode = -1; // set to >= 0 if needs to be encoded
+
+#if ENTITY_ENCODE_HIGH_ASCII_CHARS
+                    if (ch >= 160 && ch < 256)
+                    {
+                        // The seemingly arbitrary 160 comes from RFC
+                        valueToEncode = ch;
+                    }
+                    else
+#endif // ENTITY_ENCODE_HIGH_ASCII_CHARS
+                        if (char.IsSurrogate(ch))
+                    {
+                        int scalarValue = GetNextUnicodeScalarValueFromUtf16Surrogate(input, ref i);
+                        if (scalarValue >= UNICODE_PLANE01_START)
                         {
-                            case '<':
-                                output.Append("&lt;");
-                                break;
-                            case '>':
-                                output.Append("&gt;");
-                                break;
-                            case '"':
-                                output.Append("&quot;");
-                                break;
-                            case '\'':
-                                output.Append("&#39;");
-                                break;
-                            case '&':
-                                output.Append("&amp;");
-                                break;
-                            default:
-                                output.Append(ch);
-                                break;
+                            valueToEncode = scalarValue;
                         }
+                        else
+                        {
+                            // Don't encode BMP characters (like U+FFFD) since they wouldn't have
+                            // been encoded if explicitly present in the string anyway.
+                            ch = (char)scalarValue;
+                        }
+                    }
+
+                    if (valueToEncode >= 0)
+                    {
+                        // value needs to be encoded
+                        output.Append("&#");
+
+                        // Use the buffer directly and reserve a conservative estimate of 10 chars.
+                        Span<char> encodingBuffer = output.AppendSpan(MaxInt32Digits);
+                        valueToEncode.TryFormat(encodingBuffer, out int charsWritten); // Invariant
+                        output.Length -= (MaxInt32Digits - charsWritten);
+
+                        output.Append(';');
                     }
                     else
                     {
-                        int valueToEncode = -1; // set to >= 0 if needs to be encoded
-
-#if ENTITY_ENCODE_HIGH_ASCII_CHARS
-                        if (ch >= 160 && ch < 256)
-                        {
-                            // The seemingly arbitrary 160 comes from RFC
-                            valueToEncode = ch;
-                        }
-                        else
-#endif // ENTITY_ENCODE_HIGH_ASCII_CHARS
-                        if (Char.IsSurrogate(ch))
-                        {
-                            int scalarValue = GetNextUnicodeScalarValueFromUtf16Surrogate(ref pch, ref cch);
-                            if (scalarValue >= UNICODE_PLANE01_START)
-                            {
-                                valueToEncode = scalarValue;
-                            }
-                            else
-                            {
-                                // Don't encode BMP characters (like U+FFFD) since they wouldn't have
-                                // been encoded if explicitly present in the string anyway.
-                                ch = (char)scalarValue;
-                            }
-                        }
-
-                        if (valueToEncode >= 0)
-                        {
-                            // value needs to be encoded
-                            output.Append("&#");
-                            output.Append(valueToEncode.ToString(CultureInfo.InvariantCulture));
-                            output.Append(';');
-                        }
-                        else
-                        {
-                            // write out the character directly
-                            output.Append(ch);
-                        }
+                        // write out the character directly
+                        output.Append(ch);
                     }
                 }
             }
         }
 
-        public static string HtmlDecode(string value)
+        [return: NotNullIfNotNull("value")]
+        public static string? HtmlDecode(string? value)
         {
             if (string.IsNullOrEmpty(value))
             {
                 return value;
             }
 
-            // Don't create StringBuilder if we don't have anything to encode
-            if (!StringRequiresHtmlDecoding(value))
+            ReadOnlySpan<char> valueSpan = value.AsSpan();
+
+            int index = IndexOfHtmlDecodingChars(valueSpan);
+            if (index == -1)
             {
                 return value;
             }
 
-            StringBuilder sb = StringBuilderCache.Acquire(value.Length);
-            HtmlDecode(value, sb);
-            return StringBuilderCache.GetStringAndRelease(sb);
+            // In the worst case the decoded string has the same length.
+            // For small inputs we use stack allocation.
+            Span<char> buffer = value.Length <= 256 ?
+                stackalloc char[256] :
+                null;
+            ValueStringBuilder sb = buffer != null ?
+                new ValueStringBuilder(buffer) :
+                new ValueStringBuilder(value.Length);
+
+            sb.Append(valueSpan.Slice(0, index));
+            HtmlDecode(valueSpan.Slice(index), ref sb);
+
+            return sb.ToString();
         }
 
-        public static void HtmlDecode(string value, TextWriter output)
+        public static void HtmlDecode(string? value, TextWriter output)
         {
-            output.Write(HtmlDecode(value));
-        }
-
-        [SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults", MessageId = "System.UInt16.TryParse(System.String,System.Globalization.NumberStyles,System.IFormatProvider,System.UInt16@)", Justification = "UInt16.TryParse guarantees that result is zero if the parse fails.")]
-        private static void HtmlDecode(string value, StringBuilder output)
-        {
-            Debug.Assert(output != null);
-
-            int l = value.Length;
-            for (int i = 0; i < l; i++)
+            if (output == null)
             {
-                char ch = value[i];
+                throw new ArgumentNullException(nameof(output));
+            }
+
+            if (string.IsNullOrEmpty(value))
+            {
+                output.Write(value);
+                return;
+            }
+
+            ReadOnlySpan<char> valueSpan = value.AsSpan();
+
+            int index = IndexOfHtmlDecodingChars(valueSpan);
+            if (index == -1)
+            {
+                output.Write(value);
+                return;
+            }
+
+            // In the worst case the decoded string has the same length.
+            // For small inputs we use stack allocation.
+            Span<char> buffer = value.Length <= 256 ?
+                stackalloc char[256] :
+                null;
+            ValueStringBuilder sb = buffer != null ?
+                new ValueStringBuilder(buffer) :
+                new ValueStringBuilder(value.Length);
+
+            sb.Append(valueSpan.Slice(0, index));
+            HtmlDecode(valueSpan.Slice(index), ref sb);
+
+            output.Write(sb.AsSpan());
+            sb.Dispose();
+        }
+
+        private static void HtmlDecode(ReadOnlySpan<char> input, ref ValueStringBuilder output)
+        {
+            for (int i = 0; i < input.Length; i++)
+            {
+                char ch = input[i];
 
                 if (ch == '&')
                 {
                     // We found a '&'. Now look for the next ';' or '&'. The idea is that
                     // if we find another '&' before finding a ';', then this is not an entity,
                     // and the next '&' might start a real entity (VSWhidbey 275184)
-                    int index = value.IndexOfAny(s_htmlEntityEndingChars, i + 1);
-                    if (index > 0 && value[index] == ';')
+                    ReadOnlySpan<char> inputSlice = input.Slice(i + 1);
+                    int entityLength = inputSlice.IndexOf(';');
+                    if (entityLength >= 0)
                     {
-                        int entityOffset = i + 1;
-                        int entityLength = index - entityOffset;
-
-                        if (entityLength > 1 && value[entityOffset] == '#')
+                        int entityEndPosition = (i + 1) + entityLength;
+                        if (entityLength > 1 && inputSlice[0] == '#')
                         {
                             // The # syntax can be in decimal or hex, e.g.
                             //      &#229;  --> decimal
                             //      &#xE5;  --> same char in hex
                             // See http://www.w3.org/TR/REC-html40/charset.html#entities
 
-                            bool parsedSuccessfully;
-                            uint parsedValue;
-                            if (value[entityOffset + 1] == 'x' || value[entityOffset + 1] == 'X')
-                            {
-                                parsedSuccessfully = uint.TryParse(value.AsSpan(entityOffset + 2, entityLength - 2), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out parsedValue);
-                            }
-                            else
-                            {
-                                parsedSuccessfully = uint.TryParse(value.AsSpan(entityOffset + 1, entityLength - 1), NumberStyles.Integer, CultureInfo.InvariantCulture, out parsedValue);
-                            }
+                            bool parsedSuccessfully = inputSlice[1] == 'x' || inputSlice[1] == 'X'
+                                ? uint.TryParse(inputSlice.Slice(2, entityLength - 2), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out uint parsedValue)
+                                : uint.TryParse(inputSlice.Slice(1, entityLength - 1), NumberStyles.Integer, CultureInfo.InvariantCulture, out parsedValue);
 
                             if (parsedSuccessfully)
                             {
@@ -219,22 +295,21 @@ namespace System.Net
                                 else
                                 {
                                     // multi-character
-                                    char leadingSurrogate, trailingSurrogate;
-                                    ConvertSmpToUtf16(parsedValue, out leadingSurrogate, out trailingSurrogate);
+                                    ConvertSmpToUtf16(parsedValue, out char leadingSurrogate, out char trailingSurrogate);
                                     output.Append(leadingSurrogate);
                                     output.Append(trailingSurrogate);
                                 }
 
-                                i = index; // already looked at everything until semicolon
+                                i = entityEndPosition; // already looked at everything until semicolon
                                 continue;
                             }
                         }
                         else
                         {
-                            ReadOnlySpan<char> entity = value.AsSpan(entityOffset, entityLength);
-                            i = index; // already looked at everything until semicolon
-
+                            ReadOnlySpan<char> entity = inputSlice.Slice(0, entityLength);
+                            i = entityEndPosition; // already looked at everything until semicolon
                             char entityChar = HtmlEntities.Lookup(entity);
+
                             if (entityChar != (char)0)
                             {
                                 ch = entityChar;
@@ -254,38 +329,32 @@ namespace System.Net
             }
         }
 
-        private static unsafe int IndexOfHtmlEncodingChars(string s, int startPos)
+        private static int IndexOfHtmlEncodingChars(ReadOnlySpan<char> input)
         {
-            Debug.Assert(0 <= startPos && startPos <= s.Length, "0 <= startPos && startPos <= s.Length");
-
-            int cch = s.Length - startPos;
-            fixed (char* str = s)
+            for (int i = 0; i < input.Length; i++)
             {
-                for (char* pch = &str[startPos]; cch > 0; pch++, cch--)
+                char ch = input[i];
+                if (ch <= '>')
                 {
-                    char ch = *pch;
-                    if (ch <= '>')
+                    switch (ch)
                     {
-                        switch (ch)
-                        {
-                            case '<':
-                            case '>':
-                            case '"':
-                            case '\'':
-                            case '&':
-                                return s.Length - cch;
-                        }
+                        case '<':
+                        case '>':
+                        case '"':
+                        case '\'':
+                        case '&':
+                            return i;
                     }
+                }
 #if ENTITY_ENCODE_HIGH_ASCII_CHARS
-                    else if (ch >= 160 && ch < 256)
-                    {
-                        return s.Length - cch;
-                    }
+                else if (ch >= 160 && ch < 256)
+                {
+                    return i;
+                }
 #endif // ENTITY_ENCODE_HIGH_ASCII_CHARS
-                    else if (Char.IsSurrogate(ch))
-                    {
-                        return s.Length - cch;
-                    }
+                else if (char.IsSurrogate(ch))
+                {
+                    return i;
                 }
             }
 
@@ -295,7 +364,7 @@ namespace System.Net
         #endregion
 
         #region UrlEncode implementation
-        
+
         private static void GetEncodedBytes(byte[] originalBytes, int offset, int count, byte[] expandedBytes)
         {
             int pos = 0;
@@ -331,12 +400,13 @@ namespace System.Net
             }
         }
 
-#endregion
+        #endregion
 
-#region UrlEncode public methods
+        #region UrlEncode public methods
 
         [SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings", Justification = "Already shipped public API; code moved here as part of API consolidation")]
-        public static string UrlEncode(string value)
+        [return: NotNullIfNotNull("value")]
+        public static string? UrlEncode(string? value)
         {
             if (string.IsNullOrEmpty(value))
                 return value;
@@ -374,7 +444,7 @@ namespace System.Net
             int byteIndex = unsafeByteCount * 2;
 
             // Instead of allocating one array of length `byteCount` to store
-            // the UTF-8 encoded bytes, and then a second array of length 
+            // the UTF-8 encoded bytes, and then a second array of length
             // `3 * byteCount - 2 * unexpandedCount`
             // to store the URL-encoded UTF-8 bytes, we allocate a single array of
             // the latter and encode the data in place, saving the first allocation.
@@ -382,12 +452,13 @@ namespace System.Net
             // beginning of the array.
             byte[] newBytes = new byte[byteCount + byteIndex];
             Encoding.UTF8.GetBytes(value, 0, value.Length, newBytes, byteIndex);
-            
+
             GetEncodedBytes(newBytes, byteIndex, byteCount, newBytes);
             return Encoding.UTF8.GetString(newBytes);
         }
 
-        public static byte[] UrlEncodeToBytes(byte[] value, int offset, int count)
+        [return: NotNullIfNotNull("value")]
+        public static byte[]? UrlEncodeToBytes(byte[]? value, int offset, int count)
         {
             if (!ValidateUrlEncodingParameters(value, offset, count))
             {
@@ -400,7 +471,7 @@ namespace System.Net
             // count them first
             for (int i = 0; i < count; i++)
             {
-                char ch = (char)value[offset + i];
+                char ch = (char)value![offset + i];
 
                 if (ch == ' ')
                     foundSpaces = true;
@@ -412,21 +483,22 @@ namespace System.Net
             if (!foundSpaces && unsafeCount == 0)
             {
                 var subarray = new byte[count];
-                Buffer.BlockCopy(value, offset, subarray, 0, count);
+                Buffer.BlockCopy(value!, offset, subarray, 0, count);
                 return subarray;
             }
 
             // expand not 'safe' characters into %XX, spaces to +s
             byte[] expandedBytes = new byte[count + unsafeCount * 2];
-            GetEncodedBytes(value, offset, count, expandedBytes);
+            GetEncodedBytes(value!, offset, count, expandedBytes);
             return expandedBytes;
         }
 
-#endregion
+        #endregion
 
-#region UrlDecode implementation
+        #region UrlDecode implementation
 
-        private static string UrlDecodeInternal(string value, Encoding encoding)
+        [return: NotNullIfNotNull("value")]
+        private static string? UrlDecodeInternal(string? value, Encoding encoding)
         {
             if (string.IsNullOrEmpty(value))
             {
@@ -472,7 +544,7 @@ namespace System.Net
                 else
                     helper.AddChar(ch);
             }
-            
+
             if (!needsDecodingUnsafe)
             {
                 if (needsDecodingSpaces)
@@ -488,7 +560,8 @@ namespace System.Net
             return helper.GetString();
         }
 
-        private static byte[] UrlDecodeInternal(byte[] bytes, int offset, int count)
+        [return: NotNullIfNotNull("bytes")]
+        private static byte[]? UrlDecodeInternal(byte[]? bytes, int offset, int count)
         {
             if (!ValidateUrlEncodingParameters(bytes, offset, count))
             {
@@ -501,7 +574,7 @@ namespace System.Net
             for (int i = 0; i < count; i++)
             {
                 int pos = offset + i;
-                byte b = bytes[pos];
+                byte b = bytes![pos];
 
                 if (b == '+')
                 {
@@ -530,25 +603,27 @@ namespace System.Net
             return decodedBytes;
         }
 
-#endregion
+        #endregion
 
-#region UrlDecode public methods
+        #region UrlDecode public methods
 
 
         [SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings", Justification = "Already shipped public API; code moved here as part of API consolidation")]
-        public static string UrlDecode(string encodedValue)
+        [return: NotNullIfNotNull("encodedValue")]
+        public static string? UrlDecode(string? encodedValue)
         {
             return UrlDecodeInternal(encodedValue, Encoding.UTF8);
         }
 
-        public static byte[] UrlDecodeToBytes(byte[] encodedValue, int offset, int count)
+        [return: NotNullIfNotNull("encodedValue")]
+        public static byte[]? UrlDecodeToBytes(byte[]? encodedValue, int offset, int count)
         {
             return UrlDecodeInternal(encodedValue, offset, count);
         }
 
-#endregion
+        #endregion
 
-#region Helper methods
+        #region Helper methods
 
         // similar to Char.ConvertFromUtf32, but doesn't check arguments or generate strings
         // input is assumed to be an SMP character
@@ -561,35 +636,32 @@ namespace System.Net
             trailingSurrogate = (char)((utf32 % 0x400) + LOW_SURROGATE_START);
         }
 
-        private static unsafe int GetNextUnicodeScalarValueFromUtf16Surrogate(ref char* pch, ref int charsRemaining)
+        private static int GetNextUnicodeScalarValueFromUtf16Surrogate(ReadOnlySpan<char> input, ref int index)
         {
             // invariants
-            Debug.Assert(charsRemaining >= 1);
-            Debug.Assert(Char.IsSurrogate(*pch));
+            Debug.Assert(input.Length >= 1);
+            Debug.Assert(char.IsSurrogate(input[0]));
 
-            if (charsRemaining <= 1)
+            if (input.Length <= 1)
             {
                 // not enough characters remaining to resurrect the original scalar value
                 return UnicodeReplacementChar;
             }
 
-            char leadingSurrogate = pch[0];
-            char trailingSurrogate = pch[1];
+            char leadingSurrogate = input[0];
+            char trailingSurrogate = input[1];
 
-            if (Char.IsSurrogatePair(leadingSurrogate, trailingSurrogate))
-            {
-                // we're going to consume an extra char
-                pch++;
-                charsRemaining--;
-
-                // below code is from Char.ConvertToUtf32, but without the checks (since we just performed them)
-                return (((leadingSurrogate - HIGH_SURROGATE_START) * 0x400) + (trailingSurrogate - LOW_SURROGATE_START) + UNICODE_PLANE01_START);
-            }
-            else
+            if (!char.IsSurrogatePair(leadingSurrogate, trailingSurrogate))
             {
                 // unmatched surrogate
                 return UnicodeReplacementChar;
             }
+
+            // we're going to consume an extra char
+            index++;
+
+            // below code is from Char.ConvertToUtf32, but without the checks (since we just performed them)
+            return (((leadingSurrogate - HIGH_SURROGATE_START) * 0x400) + (trailingSurrogate - LOW_SURROGATE_START) + UNICODE_PLANE01_START);
         }
 
         private static int HexToInt(char h)
@@ -653,7 +725,7 @@ namespace System.Net
             }
         }
 
-        private static bool ValidateUrlEncodingParameters(byte[] bytes, int offset, int count)
+        private static bool ValidateUrlEncodingParameters(byte[]? bytes, int offset, int count)
         {
             if (bytes == null && count == 0)
                 return false;
@@ -673,37 +745,38 @@ namespace System.Net
             return true;
         }
 
-        private static bool StringRequiresHtmlDecoding(string s)
+        private static int IndexOfHtmlDecodingChars(ReadOnlySpan<char> input)
         {
             // this string requires html decoding if it contains '&' or a surrogate character
-            for (int i = 0; i < s.Length; i++)
+            for (int i = 0; i < input.Length; i++)
             {
-                char c = s[i];
-                if (c == '&' || Char.IsSurrogate(c))
+                char c = input[i];
+                if (c == '&' || char.IsSurrogate(c))
                 {
-                    return true;
+                    return i;
                 }
             }
-            return false;
+
+            return -1;
         }
 
-#endregion
+        #endregion
 
         // Internal struct to facilitate URL decoding -- keeps char buffer and byte buffer, allows appending of either chars or bytes
         private struct UrlDecoder
         {
-            private int _bufferSize;
+            private readonly int _bufferSize;
 
             // Accumulate characters in a special array
             private int _numChars;
-            private char[] _charBuffer;
+            private char[]? _charBuffer;
 
             // Accumulate bytes for decoding into characters in a special array
             private int _numBytes;
-            private byte[] _byteBuffer;
+            private byte[]? _byteBuffer;
 
             // Encoding to convert chars to bytes
-            private Encoding _encoding;
+            private readonly Encoding _encoding;
 
             private void FlushBytes()
             {
@@ -711,7 +784,7 @@ namespace System.Net
                 if (_charBuffer == null)
                     _charBuffer = new char[_bufferSize];
 
-                _numChars += _encoding.GetChars(_byteBuffer, 0, _numBytes, _charBuffer, _numChars);
+                _numChars += _encoding.GetChars(_byteBuffer!, 0, _numBytes, _charBuffer, _numChars);
                 _numBytes = 0;
             }
 
@@ -746,13 +819,13 @@ namespace System.Net
                 _byteBuffer[_numBytes++] = b;
             }
 
-            internal String GetString()
+            internal string GetString()
             {
                 if (_numBytes > 0)
                     FlushBytes();
 
                 Debug.Assert(_numChars > 0);
-                return new string(_charBuffer, 0, _numChars);
+                return new string(_charBuffer!, 0, _numChars);
             }
         }
 
@@ -1044,7 +1117,7 @@ namespace System.Net
                 {
                     // Currently, there are no entities that are longer than 8 characters.
                     return (char)0;
-                } 
+                }
             }
 
             private static ulong ToUInt64Key(ReadOnlySpan<char> entity)

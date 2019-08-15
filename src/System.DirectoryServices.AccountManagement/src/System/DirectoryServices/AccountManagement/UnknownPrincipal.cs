@@ -5,7 +5,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Security.Permissions;
 using System.Security.Principal;
 
 namespace System.DirectoryServices.AccountManagement
@@ -28,7 +27,7 @@ namespace System.DirectoryServices.AccountManagement
         //
         // Internal "constructor": Used for constructing UnknownPrincipal
         //
-        static internal UnknownPrincipal CreateUnknownPrincipal(PrincipalContext ctx, byte[] sid, string name)
+        internal static UnknownPrincipal CreateUnknownPrincipal(PrincipalContext ctx, byte[] sid, string name)
         {
             UnknownPrincipal up = new UnknownPrincipal(ctx);
             up.unpersisted = false;

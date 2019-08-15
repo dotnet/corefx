@@ -2,7 +2,7 @@
 // See the LICENSE file in the project root for more information.
 
 // Copyright (c) 2004 Mainsoft Co.
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
 // "Software"), to deal in the Software without restriction, including
@@ -10,10 +10,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -80,7 +80,7 @@ namespace System.Data.Tests
             dt.PrimaryKey = new DataColumn[] { dt.Columns[0] };
             dt.Rows.RemoveAt(3);
             Assert.Equal(counter - 1, dt.Rows.Count);
-            Assert.Equal(null, dt.Rows.Find(4));
+            Assert.Null(dt.Rows.Find(4));
         }
 
         [Fact]
@@ -92,7 +92,7 @@ namespace System.Data.Tests
             Assert.Equal(dt.Rows[0], dt.Rows.Find(1));
             dt.Rows.Remove(dt.Rows[0]);
             Assert.Equal(counter - 1, dt.Rows.Count);
-            Assert.Equal(null, dt.Rows.Find(1));
+            Assert.Null(dt.Rows.Find(1));
         }
 
         [Fact]
@@ -158,7 +158,7 @@ namespace System.Data.Tests
             Assert.Equal("1-String2", dt.Rows[0]["String2"]);
             Assert.Equal(new DateTime(2005, 1, 1, 0, 0, 0, 0), dt.Rows[0]["ParentDateTime"]);
             Assert.Equal(1.534, dt.Rows[0]["ParentDouble"]);
-            Assert.Equal(true, dt.Rows[0]["ParentBool"]);
+            Assert.Equal((object)true, dt.Rows[0]["ParentBool"]);
         }
 
         [Fact]
@@ -245,7 +245,7 @@ namespace System.Data.Tests
         {
             DataTable dt = DataProvider.CreateParentDataTable();
             int count = dt.Rows.Count;
-            Assert.Equal(count != 0, true);
+            Assert.NotEqual(0, count);
             dt.Rows.Clear();
             Assert.Equal(0, dt.Rows.Count);
         }
@@ -255,9 +255,9 @@ namespace System.Data.Tests
         {
             Assert.Throws<InvalidConstraintException>(() =>
             {
-                DataSet ds = DataProvider.CreateForigenConstraint();
+                DataSet ds = DataProvider.CreateForeignConstraint();
 
-                ds.Tables[0].Rows.Clear(); //Try to clear the parent table		
+                ds.Tables[0].Rows.Clear(); //Try to clear the parent table
             });
         }
 
@@ -267,8 +267,8 @@ namespace System.Data.Tests
             DataTable dt = DataProvider.CreateParentDataTable();
             dt.PrimaryKey = new DataColumn[] { dt.Columns[0] };
 
-            Assert.Equal(true, dt.Rows.Contains(1));
-            Assert.Equal(false, dt.Rows.Contains(10));
+            Assert.True(dt.Rows.Contains(1));
+            Assert.False(dt.Rows.Contains(10));
         }
 
         [Fact]
@@ -277,7 +277,7 @@ namespace System.Data.Tests
             Assert.Throws<MissingPrimaryKeyException>(() =>
            {
                DataTable dt = DataProvider.CreateParentDataTable();
-               Assert.Equal(false, dt.Rows.Contains(1));
+               Assert.False(dt.Rows.Contains(1));
            });
         }
 
@@ -292,11 +292,11 @@ namespace System.Data.Tests
             arr[0] = 1;
             arr[1] = "1-String1";
 
-            Assert.Equal(true, dt.Rows.Contains(arr));
+            Assert.True(dt.Rows.Contains(arr));
 
             arr[0] = 8;
 
-            Assert.Equal(false, dt.Rows.Contains(arr));
+            Assert.False(dt.Rows.Contains(arr));
         }
 
         [Fact]
@@ -311,7 +311,7 @@ namespace System.Data.Tests
                object[] arr = new object[1];
                arr[0] = 1;
 
-               Assert.Equal(false, dt.Rows.Contains(arr));
+               Assert.False(dt.Rows.Contains(arr));
            });
         }
 
@@ -322,7 +322,7 @@ namespace System.Data.Tests
             dt.PrimaryKey = new DataColumn[] { dt.Columns[0] };
 
             Assert.Equal(dt.Rows[0], dt.Rows.Find(1));
-            Assert.Equal(null, dt.Rows.Find(10));
+            Assert.Null(dt.Rows.Find(10));
         }
 
         [Fact]
@@ -332,7 +332,7 @@ namespace System.Data.Tests
            {
                DataTable dt = DataProvider.CreateParentDataTable();
 
-               Assert.Equal(null, dt.Rows.Find(1));
+               Assert.Null(dt.Rows.Find(1));
            });
         }
 
@@ -351,7 +351,7 @@ namespace System.Data.Tests
 
             arr[0] = 8;
 
-            Assert.Equal(null, dt.Rows.Find(arr));
+            Assert.Null(dt.Rows.Find(arr));
         }
 
         [Fact]
@@ -366,7 +366,7 @@ namespace System.Data.Tests
                object[] arr = new object[1];
                arr[0] = 1;
 
-               Assert.Equal(null, dt.Rows.Find(arr));
+               Assert.Null(dt.Rows.Find(arr));
            });
         }
 

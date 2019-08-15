@@ -699,7 +699,7 @@ namespace System.Reflection.Metadata.Ecma335
             _IsHasConstantRefSizeSmall = hasConstantRefSize == 2;
             _IsBlobHeapRefSizeSmall = blobHeapRefSize == 2;
             _TypeOffset = 0;
-            _ParentOffset = _TypeOffset + sizeof(Byte) + 1; // Alignment here (+1)...
+            _ParentOffset = _TypeOffset + sizeof(byte) + 1; // Alignment here (+1)...
             _ValueOffset = _ParentOffset + hasConstantRefSize;
             this.RowSize = _ValueOffset + blobHeapRefSize;
             this.Block = containingBlock.GetMemoryBlockAt(containingBlockOffset, this.RowSize * numberOfRows);
@@ -1060,8 +1060,8 @@ namespace System.Reflection.Metadata.Ecma335
         {
             return 1 + this.Block.BinarySearchReference(
                 this.NumberOfRows,
-                this.RowSize, 
-                _ParentOffset, 
+                this.RowSize,
+                _ParentOffset,
                 (uint)typeDef.RowId,
                 _IsTypeDefTableRowRefSizeSmall);
         }
@@ -1102,7 +1102,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
 
         /// <summary>
-        /// Returns field offset for given field RowId, or -1 if not available. 
+        /// Returns field offset for given field RowId, or -1 if not available.
         /// </summary>
         internal int FindFieldLayoutRowId(FieldDefinitionHandle handle)
         {
@@ -1813,7 +1813,7 @@ namespace System.Reflection.Metadata.Ecma335
             MetadataStreamKind metadataStreamKind)
         {
             // EnC tables are not allowed in a compressed stream.
-            // However when asked for a snapshot of the current metadata after an EnC change has been applied 
+            // However when asked for a snapshot of the current metadata after an EnC change has been applied
             // the CLR includes the EnCLog table into the snapshot (but not EnCMap). We pretend EnCLog is empty.
             this.NumberOfRows = (metadataStreamKind == MetadataStreamKind.Compressed) ? 0 : numberOfRows;
 

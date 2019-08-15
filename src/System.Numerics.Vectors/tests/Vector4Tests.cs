@@ -306,20 +306,20 @@ namespace System.Numerics.Tests
 
             // Case W1: specified value is in the range.
             a = new Vector4(0.5f, 0.3f, 0.33f, 0.44f);
-            expected = min;
+            expected = max;
             actual = Vector4.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Clamp did not return the expected value.");
 
             // Normal case.
             // Case W2: specified value is bigger than max and min value.
             a = new Vector4(2.0f, 3.0f, 4.0f, 5.0f);
-            expected = min;
+            expected = max;
             actual = Vector4.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Clamp did not return the expected value.");
 
             // Case W3: specified value is smaller than min and max value.
             a = new Vector4(-2.0f, -3.0f, -4.0f, -5.0f);
-            expected = min;
+            expected = max;
             actual = Vector4.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Clamp did not return the expected value.");
         }
@@ -472,7 +472,7 @@ namespace System.Numerics.Tests
             actual = Vector4.Transform(v, m);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
-            // 
+            //
             v.W = 1.0f;
 
             expected = new Vector4(12.19198728f, 21.53349376f, 32.61602545f, 1.0f);
@@ -655,7 +655,7 @@ namespace System.Numerics.Tests
             actual = Vector4.Transform(v, q);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
-            // 
+            //
             v.W = 1.0f;
             expected.W = 1.0f;
             actual = Vector4.Transform(v, q);
@@ -976,7 +976,7 @@ namespace System.Numerics.Tests
             Vector4 v2 = new Vector4(5.5f, 4.5f, 6.5f, 7.5f);
 
             Vector4 v3 = v1 + v2;
-            Vector4 v5 = new Vector4(-1.0f, 0.0f, 0.0f, Single.NaN);
+            Vector4 v5 = new Vector4(-1.0f, 0.0f, 0.0f, float.NaN);
             Vector4 v4 = v1 + v5;
             Assert.Equal(8.0f, v3.X);
             Assert.Equal(6.5f, v3.Y);
@@ -985,7 +985,7 @@ namespace System.Numerics.Tests
             Assert.Equal(1.5f, v4.X);
             Assert.Equal(2.0f, v4.Y);
             Assert.Equal(3.0f, v4.Z);
-            Assert.Equal(Single.NaN, v4.W);
+            Assert.Equal(float.NaN, v4.W);
         }
 
         // A test for Vector4f (float, float, float, float)
@@ -1036,10 +1036,10 @@ namespace System.Numerics.Tests
         {
             Vector4 a = new Vector4();
 
-            Assert.Equal(a.X, 0.0f);
-            Assert.Equal(a.Y, 0.0f);
-            Assert.Equal(a.Z, 0.0f);
-            Assert.Equal(a.W, 0.0f);
+            Assert.Equal(0.0f, a.X);
+            Assert.Equal(0.0f, a.Y);
+            Assert.Equal(0.0f, a.Z);
+            Assert.Equal(0.0f, a.W);
         }
 
         // A test for Vector4f ()
@@ -1345,16 +1345,16 @@ namespace System.Numerics.Tests
         public void Vector4AbsTest()
         {
             Vector4 v1 = new Vector4(-2.5f, 2.0f, 3.0f, 3.3f);
-            Vector4 v3 = Vector4.Abs(new Vector4(Single.PositiveInfinity, 0.0f, Single.NegativeInfinity, Single.NaN));
+            Vector4 v3 = Vector4.Abs(new Vector4(float.PositiveInfinity, 0.0f, float.NegativeInfinity, float.NaN));
             Vector4 v = Vector4.Abs(v1);
             Assert.Equal(2.5f, v.X);
             Assert.Equal(2.0f, v.Y);
             Assert.Equal(3.0f, v.Z);
             Assert.Equal(3.3f, v.W);
-            Assert.Equal(Single.PositiveInfinity, v3.X);
+            Assert.Equal(float.PositiveInfinity, v3.X);
             Assert.Equal(0.0f, v3.Y);
-            Assert.Equal(Single.PositiveInfinity, v3.Z);
-            Assert.Equal(Single.NaN, v3.W);
+            Assert.Equal(float.PositiveInfinity, v3.Z);
+            Assert.Equal(float.NaN, v3.W);
         }
 
         [Fact]
@@ -1366,7 +1366,7 @@ namespace System.Numerics.Tests
             Assert.Equal(2, (int)Vector4.SquareRoot(v2).Y);
             Assert.Equal(2, (int)Vector4.SquareRoot(v2).Z);
             Assert.Equal(2, (int)Vector4.SquareRoot(v2).W);
-            Assert.Equal(Single.NaN, Vector4.SquareRoot(v1).X);
+            Assert.Equal(float.NaN, Vector4.SquareRoot(v1).X);
         }
 
         // A test to make sure these types are blittable directly into GPU buffer memory layouts

@@ -25,7 +25,6 @@ namespace System.ServiceProcess
     {
         private SERVICE_STATUS _status = new SERVICE_STATUS();
         private IntPtr _statusHandle;
-        private ServiceControlCallback _commandCallback;
         private ServiceControlCallbackEx _commandCallbackEx;
         private ServiceMainCallback _mainCallback;
         private IntPtr _handleName;
@@ -239,9 +238,9 @@ namespace System.ServiceProcess
         /// can be used to write notification of service command calls, such as Start and Stop, to the Application event log. This property is read-only.
         /// </devdoc>
         [Browsable (false), DesignerSerializationVisibility (DesignerSerializationVisibility.Hidden)]
-        public virtual EventLog EventLog 
+        public virtual EventLog EventLog
         {
-            get 
+            get
             {
                 if (_eventLog == null)
                 {
@@ -417,7 +416,7 @@ namespace System.ServiceProcess
                 catch (Exception e)
                 {
                     _status.currentState = ServiceControlStatus.STATE_PAUSED;
-                    WriteLogEntry(SR.Format(SR.ContinueFailed, e.ToString()), true);
+                    WriteLogEntry(SR.Format(SR.ContinueFailed, e), true);
 
                     // We re-throw the exception so that the advapi32 code can report
                     // ERROR_EXCEPTION_IN_SERVICE as it would for native services.
@@ -439,7 +438,7 @@ namespace System.ServiceProcess
             }
             catch (Exception e)
             {
-                WriteLogEntry(SR.Format(SR.CommandFailed, e.ToString()), true);
+                WriteLogEntry(SR.Format(SR.CommandFailed, e), true);
 
                 // We should re-throw the exception so that the advapi32 code can report
                 // ERROR_EXCEPTION_IN_SERVICE as it would for native services.
@@ -460,7 +459,7 @@ namespace System.ServiceProcess
                 catch (Exception e)
                 {
                     _status.currentState = ServiceControlStatus.STATE_RUNNING;
-                    WriteLogEntry(SR.Format(SR.PauseFailed, e.ToString()), true);
+                    WriteLogEntry(SR.Format(SR.PauseFailed, e), true);
 
                     // We re-throw the exception so that the advapi32 code can report
                     // ERROR_EXCEPTION_IN_SERVICE as it would for native services.
@@ -488,7 +487,7 @@ namespace System.ServiceProcess
             }
             catch (Exception e)
             {
-                WriteLogEntry(SR.Format(SR.PowerEventFailed, e.ToString()), true);
+                WriteLogEntry(SR.Format(SR.PowerEventFailed, e), true);
 
                 // We rethrow the exception so that advapi32 code can report
                 // ERROR_EXCEPTION_IN_SERVICE as it would for native services.
@@ -504,7 +503,7 @@ namespace System.ServiceProcess
             }
             catch (Exception e)
             {
-                WriteLogEntry(SR.Format(SR.SessionChangeFailed, e.ToString()), true);
+                WriteLogEntry(SR.Format(SR.SessionChangeFailed, e), true);
 
                 // We rethrow the exception so that advapi32 code can report
                 // ERROR_EXCEPTION_IN_SERVICE as it would for native services.
@@ -536,7 +535,7 @@ namespace System.ServiceProcess
                 {
                     _status.currentState = previousState;
                     SetServiceStatus(_statusHandle, pStatus);
-                    WriteLogEntry(SR.Format(SR.StopFailed, e.ToString()), true);
+                    WriteLogEntry(SR.Format(SR.StopFailed, e), true);
                     throw;
                 }
             }
@@ -547,7 +546,7 @@ namespace System.ServiceProcess
             try
             {
                 OnShutdown();
-                WriteLogEntry(SR.Format(SR.ShutdownOK));
+                WriteLogEntry(SR.ShutdownOK);
 
                 if (_status.currentState == ServiceControlStatus.STATE_PAUSED || _status.currentState == ServiceControlStatus.STATE_RUNNING)
                 {
@@ -562,7 +561,7 @@ namespace System.ServiceProcess
             }
             catch (Exception e)
             {
-                WriteLogEntry(SR.Format(SR.ShutdownFailed, e.ToString()), true);
+                WriteLogEntry(SR.Format(SR.ShutdownFailed, e), true);
                 throw;
             }
         }
@@ -600,60 +599,67 @@ namespace System.ServiceProcess
             if (services == null || services.Length == 0)
                 throw new ArgumentException(SR.NoServices);
 
-            int sizeOfSERVICE_TABLE_ENTRY = Marshal.SizeOf<SERVICE_TABLE_ENTRY>();            
+            int sizeOfSERVICE_TABLE_ENTRY = Marshal.SizeOf<SERVICE_TABLE_ENTRY>();
 
             IntPtr entriesPointer = Marshal.AllocHGlobal(checked((services.Length + 1) * sizeOfSERVICE_TABLE_ENTRY));
-            SERVICE_TABLE_ENTRY[] entries = new SERVICE_TABLE_ENTRY[services.Length];
-            bool multipleServices = services.Length > 1;
-            IntPtr structPtr;
-
-            for (int index = 0; index < services.Length; ++index)
+            try
             {
-                services[index].Initialize(multipleServices);
-                entries[index] = services[index].GetEntry();
-                structPtr = entriesPointer + sizeOfSERVICE_TABLE_ENTRY * index;
-                Marshal.StructureToPtr(entries[index], structPtr, fDeleteOld: false);
-            }
+                SERVICE_TABLE_ENTRY[] entries = new SERVICE_TABLE_ENTRY[services.Length];
+                bool multipleServices = services.Length > 1;
+                IntPtr structPtr;
 
-            SERVICE_TABLE_ENTRY lastEntry = new SERVICE_TABLE_ENTRY();
-
-            lastEntry.callback = null;
-            lastEntry.name = (IntPtr)0;
-            structPtr = entriesPointer + sizeOfSERVICE_TABLE_ENTRY * services.Length;
-            Marshal.StructureToPtr(lastEntry, structPtr, fDeleteOld: false);
-
-            // While the service is running, this function will never return. It will return when the service
-            // is stopped.
-            // After it returns, SCM might terminate the process at any time
-            // (so subsequent code is not guaranteed to run).
-            bool res = StartServiceCtrlDispatcher(entriesPointer);
-
-            foreach (ServiceBase service in services)
-            {
-                if (service._startFailedException != null)
+                for (int index = 0; index < services.Length; ++index)
                 {
-                    // Propagate exceptions throw during OnStart.
-                    // Note that this same exception is also thrown from ServiceMainCallback
-                    // (so SCM can see it as well).
-                    service._startFailedException.Throw();
+                    services[index].Initialize(multipleServices);
+                    entries[index] = services[index].GetEntry();
+                    structPtr = entriesPointer + sizeOfSERVICE_TABLE_ENTRY * index;
+                    Marshal.StructureToPtr(entries[index], structPtr, fDeleteOld: false);
                 }
-            }
 
-            string errorMessage = "";
+                SERVICE_TABLE_ENTRY lastEntry = new SERVICE_TABLE_ENTRY();
 
-            if (!res)
-            {
-                errorMessage = new Win32Exception().Message;
-                Console.WriteLine(SR.CantStartFromCommandLine);
-            }
+                lastEntry.callback = null;
+                lastEntry.name = (IntPtr)0;
+                structPtr = entriesPointer + sizeOfSERVICE_TABLE_ENTRY * services.Length;
+                Marshal.StructureToPtr(lastEntry, structPtr, fDeleteOld: false);
 
-            foreach (ServiceBase service in services)
-            {
-                service.Dispose();
+                // While the service is running, this function will never return. It will return when the service
+                // is stopped.
+                // After it returns, SCM might terminate the process at any time
+                // (so subsequent code is not guaranteed to run).
+                bool res = StartServiceCtrlDispatcher(entriesPointer);
+
+                foreach (ServiceBase service in services)
+                {
+                    if (service._startFailedException != null)
+                    {
+                        // Propagate exceptions throw during OnStart.
+                        // Note that this same exception is also thrown from ServiceMainCallback
+                        // (so SCM can see it as well).
+                        service._startFailedException.Throw();
+                    }
+                }
+
+                string errorMessage = "";
+
                 if (!res)
                 {
-                    service.WriteLogEntry(SR.Format(SR.StartFailed, errorMessage), true);
+                    errorMessage = new Win32Exception().Message;
+                    Console.WriteLine(SR.CantStartFromCommandLine);
                 }
+
+                foreach (ServiceBase service in services)
+                {
+                    service.Dispose();
+                    if (!res)
+                    {
+                        service.WriteLogEntry(SR.Format(SR.StartFailed, errorMessage), true);
+                    }
+                }
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(entriesPointer);
             }
         }
 
@@ -701,7 +707,6 @@ namespace System.ServiceProcess
                 _status.waitHint = 0;
 
                 _mainCallback = new ServiceMainCallback(this.ServiceMainCallback);
-                _commandCallback = new ServiceControlCallback(this.ServiceCommandCallback);
                 _commandCallbackEx = new ServiceControlCallbackEx(this.ServiceCommandCallbackEx);
                 _handleName = Marshal.StringToHGlobalUni(this.ServiceName);
 
@@ -846,7 +851,7 @@ namespace System.ServiceProcess
             }
             catch (Exception e)
             {
-                WriteLogEntry(SR.Format(SR.StartFailed, e.ToString()), true);
+                WriteLogEntry(SR.Format(SR.StartFailed, e), true);
                 _status.currentState = ServiceControlStatus.STATE_STOPPED;
 
                 // We capture the exception so that it can be propagated
@@ -893,7 +898,7 @@ namespace System.ServiceProcess
                     Initialize(true);
                 }
 
-                _statusHandle = RegisterServiceCtrlHandlerEx(ServiceName, (Delegate)_commandCallbackEx, (IntPtr)0);
+                _statusHandle = RegisterServiceCtrlHandlerEx(ServiceName, _commandCallbackEx, (IntPtr)0);
 
                 _nameFrozen = true;
                 if (_statusHandle == (IntPtr)0)
@@ -952,17 +957,17 @@ namespace System.ServiceProcess
         private void WriteLogEntry(string message, bool error = false)
         {
             // EventLog failures shouldn't affect the service operation
-            try 
+            try
             {
                 if (AutoLog)
                 {
-                    EventLog.WriteEntry(message); 
+                    EventLog.WriteEntry(message);
                 }
             }
-            catch  
+            catch
             {
                 // Do nothing.  Not having the event log is bad, but not starting the service as a result is worse.
-            }        
+            }
         }
     }
 }

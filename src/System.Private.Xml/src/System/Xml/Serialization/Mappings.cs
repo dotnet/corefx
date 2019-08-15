@@ -646,7 +646,7 @@ namespace System.Xml.Serialization
             {
                 _hasSimpleContent = false;
             }
-            if (!_hasSimpleContent && text != null && !text.Mapping.TypeDesc.CanBeTextValue)
+            if (!_hasSimpleContent && text != null && !text.Mapping.TypeDesc.CanBeTextValue && !(BaseMapping != null && !BaseMapping.TypeDesc.IsRoot && (text.Mapping.TypeDesc.IsEnum || text.Mapping.TypeDesc.IsPrimitive)))
             {
                 throw new InvalidOperationException(SR.Format(SR.XmlIllegalTypedTextAttribute, TypeDesc.FullName, text.Name, text.Mapping.TypeDesc.FullName));
             }
@@ -1065,7 +1065,7 @@ namespace System.Xml.Serialization
         private bool _needSchema = true;
 
         // new implementation of the IXmlSerializable
-        private MethodInfo _getSchemaMethod;
+        private readonly MethodInfo _getSchemaMethod;
         private XmlQualifiedName _xsiType;
         private XmlSchemaType _xsdType;
         private XmlSchemaSet _schemas;
@@ -1378,4 +1378,3 @@ namespace System.Xml.Serialization
         }
     }
 }
-

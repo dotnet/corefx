@@ -10,13 +10,13 @@ namespace System.Data.SqlClient.ManualTesting.Tests
     public static class ConnectionSchemaTest
     {
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void GetAllTablesFromSchema()
         {
             VerifySchemaTable(SqlClientMetaDataCollectionNames.Tables, new string[] {"TABLE_CATALOG", "TABLE_SCHEMA", "TABLE_NAME", "TABLE_TYPE" });
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void GetAllProceduresFromSchema()
         {
             VerifySchemaTable(SqlClientMetaDataCollectionNames.Procedures, new string[] { "ROUTINE_SCHEMA", "ROUTINE_NAME", "ROUTINE_TYPE" });
@@ -31,16 +31,16 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
-                // Connect to the database then retrieve the schema information.  
+                // Connect to the database then retrieve the schema information.
                 connection.Open();
                 DataTable table = connection.GetSchema(schemaItemName);
 
-                // Display the contents of the table.  
+                // Display the contents of the table.
                 Assert.InRange<int>(table.Rows.Count, 1, int.MaxValue);
 
-                // Get all table columns 
+                // Get all table columns
                 HashSet<string> columnNames = new HashSet<string>();
-                
+
                 foreach (DataColumn column in table.Columns)
                 {
                     columnNames.Add(column.ColumnName);

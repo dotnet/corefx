@@ -24,7 +24,7 @@ namespace System.Xml.Tests
         public bool bWarningCallback = false;
         public bool bErrorCallback = false;
 
-        public void ValidationCallback(object sender, ValidationEventArgs args)
+        private void ValidationCallback(object sender, ValidationEventArgs args)
         {
             if (args.Severity == XmlSeverityType.Warning)
             {
@@ -41,8 +41,7 @@ namespace System.Xml.Tests
 
         //-----------------------------------------------------------------------------------
         //[Variation(Desc = "v1 - RemoveRecursive with null", Priority = 0)]
-        [InlineData()]
-        [Theory]
+        [Fact]
         public void v1()
         {
             try
@@ -60,8 +59,7 @@ namespace System.Xml.Tests
 
         //-----------------------------------------------------------------------------------
         //[Variation(Desc = "v2 - RemoveRecursive with just added schema", Priority = 0)]
-        [InlineData()]
-        [Theory]
+        [Fact]
         public void v2()
         {
             XmlSchemaSet sc = new XmlSchemaSet();
@@ -84,8 +82,7 @@ namespace System.Xml.Tests
 
         //-----------------------------------------------------------------------------------
         //[Variation(Desc = "v3 - RemoveRecursive first added schema, check the rest")]
-        [InlineData()]
-        [Theory]
+        [Fact]
         public void v3()
         {
             XmlSchemaSet sc = new XmlSchemaSet();
@@ -187,8 +184,7 @@ namespace System.Xml.Tests
 
         //-----------------------------------------------------------------------------------
         //[Variation(Desc = "v6 - Remove: Add B(NONS) to a namespace, Add A(ns-a) which imports B, Remove B(ns-b) then A(ns-a)", Priority = 1)]
-        [InlineData()]
-        [Theory]
+        [Fact]
         public void v6()
         {
             XmlSchemaSet sc = new XmlSchemaSet();
@@ -203,14 +199,14 @@ namespace System.Xml.Tests
                 sc.RemoveRecursive(Schema1);
                 CError.Compare(sc.Count, 2, "Count");
                 CError.Compare(sc.Contains("ns-b"), false, "Contains");
-                CError.Compare(sc.Contains(String.Empty), true, "Contains");
+                CError.Compare(sc.Contains(string.Empty), true, "Contains");
                 CError.Compare(sc.Contains("ns-a"), true, "Contains");
 
                 sc.RemoveRecursive(Schema2);
                 ICollection Col = sc.Schemas();
                 CError.Compare(Col.Count, 0, "ICollection.Count");
                 CError.Compare(sc.Contains("ns-b"), false, "Contains");
-                CError.Compare(sc.Contains(String.Empty), false, "Contains");
+                CError.Compare(sc.Contains(string.Empty), false, "Contains");
                 CError.Compare(sc.Contains("ns-a"), false, "Contains");
 
                 //before compile
@@ -219,13 +215,13 @@ namespace System.Xml.Tests
                 sc.RemoveRecursive(Schema1);
                 CError.Compare(sc.Count, 2, "Count");
                 CError.Compare(sc.Contains("ns-b"), false, "Contains");
-                CError.Compare(sc.Contains(String.Empty), true, "Contains");
+                CError.Compare(sc.Contains(string.Empty), true, "Contains");
                 CError.Compare(sc.Contains("ns-a"), true, "Contains");
                 sc.RemoveRecursive(Schema2);
                 Col = sc.Schemas();
                 CError.Compare(Col.Count, 0, "ICollection.Count");
                 CError.Compare(sc.Contains("ns-b"), false, "Contains");
-                CError.Compare(sc.Contains(String.Empty), false, "Contains");
+                CError.Compare(sc.Contains(string.Empty), false, "Contains");
                 CError.Compare(sc.Contains("ns-a"), false, "Contains");
             }
             catch (Exception e)
@@ -318,8 +314,7 @@ namespace System.Xml.Tests
 
         //-----------------------------------------------------------------------------------
         //[Variation(Desc = "v9 - Import: B(ns-b) added, A(ns-a) imports B's NS", Priority = 2)]
-        [InlineData()]
-        [Theory]
+        [Fact]
         public void v9()
         {
             try

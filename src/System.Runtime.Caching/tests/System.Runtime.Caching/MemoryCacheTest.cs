@@ -15,10 +15,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -55,7 +55,7 @@ namespace MonoTests.System.Runtime.Caching
 
             Assert.Throws<ArgumentException>(() =>
             {
-                mc = new MemoryCache(String.Empty);
+                mc = new MemoryCache(string.Empty);
             });
 
             Assert.Throws<ArgumentException>(() =>
@@ -316,15 +316,15 @@ namespace MonoTests.System.Runtime.Caching
             Assert.False(monitor.HasChanged);
 
             // The actual unique id is constructed from key names followed by the hex value of ticks of their last modifed time
-            Assert.False(String.IsNullOrEmpty(monitor.UniqueId));
+            Assert.False(string.IsNullOrEmpty(monitor.UniqueId));
 
-			monitor = mc.CreateCacheEntryChangeMonitor (new string [] { "key1", "doesnotexist" });
-			Assert.NotNull (monitor);
-			Assert.Equal ("System.Runtime.Caching.MemoryCacheEntryChangeMonitor", monitor.GetType ().ToString ());
-			Assert.Equal (2, monitor.CacheKeys.Count);
-			Assert.Equal ("key1", monitor.CacheKeys [0]);
-			Assert.Null (monitor.RegionName);
-			Assert.True (monitor.HasChanged);
+            monitor = mc.CreateCacheEntryChangeMonitor (new string [] { "key1", "doesnotexist" });
+            Assert.NotNull (monitor);
+            Assert.Equal ("System.Runtime.Caching.MemoryCacheEntryChangeMonitor", monitor.GetType ().ToString ());
+            Assert.Equal (2, monitor.CacheKeys.Count);
+            Assert.Equal ("key1", monitor.CacheKeys [0]);
+            Assert.Null (monitor.RegionName);
+            Assert.True (monitor.HasChanged);
         }
 
         [Fact]
@@ -479,7 +479,7 @@ namespace MonoTests.System.Runtime.Caching
                 ci2 = mc.AddOrGetExisting(ci, null);
             });
 
-            ci = new CacheItem(String.Empty, "value");
+            ci = new CacheItem(string.Empty, "value");
             ci2 = mc.AddOrGetExisting(ci, null);
             Assert.NotNull(ci2);
             Assert.NotEqual(ci, ci2);
@@ -918,7 +918,7 @@ namespace MonoTests.System.Runtime.Caching
             Assert.Equal("value3", value["key3"]);
             Assert.Equal(typeof(Dictionary<string, object>), value.GetType());
 
-            // MSDN says the number of items in the returned dictionary should be the same as in the 
+            // MSDN says the number of items in the returned dictionary should be the same as in the
             // 'keys' collection - this is not the case. The returned dictionary contains only entries for keys
             // that exist in the cache.
             value = mc.GetValues(new string[] { "key1", "key3", "nosuchkey" });
@@ -1082,11 +1082,11 @@ namespace MonoTests.System.Runtime.Caching
 
                     if (sw.ElapsedMilliseconds < SlidingExpirationThresholdMSec)
                     {
-                        Assert.NotEqual(null, item);
+                        Assert.NotNull(item);
                     }
                     else
                     {
-                        // for the sake of simplicity skip an inversed assert here (Assert.Equal(null, item)) 
+                        // for the sake of simplicity skip an inversed assert here (Assert.Null(item))
                         // (to avoid further complicating the test as we would need to address a few more subtle timing cases)
                     }
                 }
@@ -1236,7 +1236,7 @@ namespace MonoTests.System.Runtime.Caching
             };
 
             mc.Set("key4", "value4", cip);
-            // wait past "key4" AbsoluteExpiration 
+            // wait past "key4" AbsoluteExpiration
             Thread.Sleep(500);
 
             enumerator = ((IEnumerable)mc).GetEnumerator();
@@ -1372,7 +1372,7 @@ namespace MonoTests.System.Runtime.Caching
 
                 Assert.Equal(HEAP_RESIZE_SHORT_ENTRIES, mc.GetCount());
 
-                // add some long duration entries				
+                // add some long duration entries
                 for (int i = 0; i < HEAP_RESIZE_LONG_ENTRIES; i++)
                 {
                     var expireAt = DateTimeOffset.Now.AddSeconds(42);
