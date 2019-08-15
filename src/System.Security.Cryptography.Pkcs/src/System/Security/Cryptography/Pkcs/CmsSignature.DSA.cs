@@ -133,7 +133,7 @@ namespace System.Security.Cryptography.Pkcs
 
                 signatureAlgorithm = new Oid(oidValue, oidValue);
 
-#if netcoreapp || netstandard21
+#if netcoreapp || netcoreapp30 || netstandard21
                 // The Q size cannot be bigger than the KeySize.
                 byte[] rented = CryptoPool.Rent(dsa.KeySize / 8);
                 int bytesWritten = 0;
