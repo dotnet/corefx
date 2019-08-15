@@ -19,6 +19,8 @@ namespace HttpStress
 {
     public class StressClient : IDisposable
     {
+        private const string UNENCRYPTED_HTTP2_ENV_VAR = "DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT";
+
         private readonly (string name, Func<RequestContext, Task> operation)[] _clientOperations;
         private readonly Configuration _config;
         private readonly StressResultAggregator _aggregator;
@@ -77,6 +79,11 @@ namespace HttpStress
 
         private async Task StartCore()
         {
+            if (_config.ServerUri.Scheme == "http")
+            {
+                Environment.SetEnvironmentVariable(UNENCRYPTED_HTTP2_ENV_VAR, "1");
+            }
+
             var handler = new SocketsHttpHandler()
             {
                 PooledConnectionLifetime = _config.ConnectionLifetime.GetValueOrDefault(Timeout.InfiniteTimeSpan),

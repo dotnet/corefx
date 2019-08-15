@@ -166,7 +166,7 @@ namespace HttpStress
                 ("GET",
                 async ctx =>
                 {
-                    using var req = new HttpRequestMessage(HttpMethod.Get, "/");
+                    using var req = new HttpRequestMessage(HttpMethod.Get, "/get");
                     int expectedLength = ctx.SetExpectedResponseContentLengthHeader(req.Headers);
                     using HttpResponseMessage m = await ctx.SendAsync(req);
                     
@@ -205,7 +205,7 @@ namespace HttpStress
 
                     await res.Content.ReadAsStringAsync();
 
-                    bool isValidChecksum = ValidateServerChecksum(res.TrailingHeaders, expectedChecksum);
+                    bool isValidChecksum = ValidateServerChecksum(res.Headers, expectedChecksum);
 
                     // Validate that request headers are being echoed
                     foreach (KeyValuePair<string, IEnumerable<string>> reqHeader in req.Headers)
@@ -341,9 +341,10 @@ namespace HttpStress
                     ValidateStatusCode(m);
                     var response = await m.Content.ReadAsStringAsync();
 
-                    bool isValidChecksum = ValidateServerChecksum(m.TrailingHeaders, checksum);
+                    // trailing headers not supported for all servers, so do not require checksums
+                    bool isValidChecksum = ValidateServerChecksum(m.TrailingHeaders, checksum, required: false);
 
-                    ValidateContent(content, response, details: $"server checksum {(isValidChecksum ? "matches" : "does not match")} client");
+                    ValidateContent(content, response, details: $"server checksum {(isValidChecksum ? "matches" : "does not match")} client value.");
 
                     if (!isValidChecksum)
                     {
@@ -548,15 +549,21 @@ namespace HttpStress
             return (sb.ToString(), multipartContent);
         }
 
-        private static bool ValidateServerChecksum(HttpResponseHeaders headers, uint expectedChecksum)
+        private static bool ValidateServerChecksum(HttpResponseHeaders headers, uint expectedChecksum, bool required = true)
         {
-            if (headers.TryGetValues("crc32", out IEnumerable<string> values) && 
+            if (headers.TryGetValues("crc32", out IEnumerable<string> values) &&
                 uint.TryParse(values.First(), out uint serverChecksum))
             {
                 return serverChecksum == expectedChecksum;
             }
-
-            throw new Exception("could not find checksum header in server response");
+            else if (required)
+            {
+                throw new Exception("could not find checksum header in server response");
+            }
+            else
+            {
+                return true;
+            }
         }
 
         /// <summary>HttpContent that's similar to StringContent but that can be used with HTTP/2 duplex communication.</summary>

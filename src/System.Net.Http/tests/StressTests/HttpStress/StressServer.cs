@@ -24,6 +24,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 namespace HttpStress
 {
@@ -71,19 +72,29 @@ namespace HttpStress
 
                     ko.Listen(iPAddress, configuration.ServerUri.Port, listenOptions =>
                     {
-                        // Create self-signed cert for server.
-                        using (RSA rsa = RSA.Create())
+                        if (configuration.ServerUri.Scheme == "https")
                         {
-                            var certReq = new CertificateRequest($"CN={ServerUri.Host}", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-                            certReq.CertificateExtensions.Add(new X509BasicConstraintsExtension(false, false, 0, false));
-                            certReq.CertificateExtensions.Add(new X509EnhancedKeyUsageExtension(new OidCollection { new Oid("1.3.6.1.5.5.7.3.1") }, false));
-                            certReq.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature, false));
-                            X509Certificate2 cert = certReq.CreateSelfSigned(DateTimeOffset.UtcNow.AddMonths(-1), DateTimeOffset.UtcNow.AddMonths(1));
-                            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                            // Create self-signed cert for server.
+                            using (RSA rsa = RSA.Create())
                             {
-                                cert = new X509Certificate2(cert.Export(X509ContentType.Pfx));
+                                var certReq = new CertificateRequest($"CN={ServerUri.Host}", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                                certReq.CertificateExtensions.Add(new X509BasicConstraintsExtension(false, false, 0, false));
+                                certReq.CertificateExtensions.Add(new X509EnhancedKeyUsageExtension(new OidCollection { new Oid("1.3.6.1.5.5.7.3.1") }, false));
+                                certReq.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature, false));
+                                X509Certificate2 cert = certReq.CreateSelfSigned(DateTimeOffset.UtcNow.AddMonths(-1), DateTimeOffset.UtcNow.AddMonths(1));
+                                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                                {
+                                    cert = new X509Certificate2(cert.Export(X509ContentType.Pfx));
+                                }
+                                listenOptions.UseHttps(cert);
                             }
-                            listenOptions.UseHttps(cert);
+                        }
+                        else
+                        {
+                            listenOptions.Protocols = 
+                                configuration.HttpVersion == new Version(2,0) ?
+                                HttpProtocols.Http2:
+                                HttpProtocols.Http1;
                         }
                     });
                 });
@@ -116,6 +127,10 @@ namespace HttpStress
 
             endpoints.MapGet("/", async context =>
             {
+                await context.Response.WriteAsync("ok");
+            });
+            endpoints.MapGet("/get", async context =>
+            {
                 // Get requests just send back the requested content.
                 string content = CreateResponseContent(context);
                 await context.Response.WriteAsync(content);
@@ -145,14 +160,14 @@ namespace HttpStress
                     context.Response.Headers.Add(name, values);
                 }
 
+                // send back a checksum of all the echoed headers
+                uint checksum = ChecksumHelpers.ComputeHeaderChecksum(headersToEcho);
+                context.Response.Headers.Add("crc32", checksum.ToString());
+
                 await context.Response.WriteAsync("ok");
 
                 if (context.Response.SupportsTrailers())
                 {
-                    // send back a checksum of all the echoed headers
-                    uint checksum = ChecksumHelpers.ComputeHeaderChecksum(headersToEcho);
-                    context.Response.AppendTrailer("crc32", checksum.ToString());
-
                     // just add variations of already echoed headers as trailers
                     foreach ((string name, StringValues values) in headersToEcho)
                     {
