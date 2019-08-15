@@ -484,12 +484,6 @@ namespace System.Collections.Generic
             _comparer = (IEqualityComparer<T>)_siInfo.GetValue(ComparerName, typeof(IEqualityComparer<T>))!;
             _freeList = -1;
 
-            // "==" would fail since they're different instances
-            if (Equals(_comparer, EqualityComparer<T>.Default))
-            {
-                _comparer = null;
-            }
-
             if (capacity != 0)
             {
                 _buckets = new int[capacity];
