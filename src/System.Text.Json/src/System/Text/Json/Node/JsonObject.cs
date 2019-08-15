@@ -372,6 +372,27 @@ namespace System.Text.Json
         }
 
         /// <summary>
+        ///   Adds the property values from the specified collection as a <see cref="JsonArray"/> property to the JSON object.
+        /// </summary>
+        /// <param name="propertyName">Name of the <see cref="JsonArray"/> property to add.</param>
+        /// <param name="propertyValues">Properties to add.</param>
+        /// <exception cref="ArgumentException">
+        ///   Provided collection contains duplicates if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///   Some of property names are null.
+        /// </exception>
+        public void Add(string propertyName, IEnumerable<JsonNode> propertyValues)
+        {
+            var jsonArray = new JsonArray();
+            foreach (JsonNode value in propertyValues)
+            {
+                jsonArray.Add(value);
+            }
+            Add(propertyName, (JsonNode)jsonArray);
+        }
+
+        /// <summary>
         ///   Removes the property with the specified name.
         /// </summary>
         /// <param name="propertyName"></param>
@@ -472,6 +493,51 @@ namespace System.Text.Json
             }
 
             jsonObject = null;
+            return false;
+        }
+
+        /// <summary>
+        ///   Returns the JSON array value of a property with the specified name.
+        /// </summary>
+        /// <param name="propertyName">Name of the property to return.</param>
+        /// <returns>JSON objectvalue of a property with the specified name.</returns>
+        /// <exception cref="KeyNotFoundException">
+        ///   Property with specified name is not found in JSON array.
+        /// </exception>
+        /// <exception cref="InvalidCastException">
+        ///   Property with specified name is not a JSON array.
+        /// </exception>
+        public JsonArray GetJsonArrayProperty(string propertyName)
+        {
+            if (GetPropertyValue(propertyName) is JsonArray jsonArray)
+            {
+                return jsonArray;
+            }
+
+            throw new InvalidCastException(SR.Format(SR.PropertyTypeMismatch, propertyName));
+        }
+
+        /// <summary>
+        ///   Returns the JSON array value of a property with the specified name.
+        /// </summary>
+        /// <param name="propertyName">Name of the property to return.</param>
+        /// <param name="jsonArray">JSON array value of the property with specified name.</param>
+        /// <returns>
+        ///  <see langword="true"/> if JSON array property with specified name was found;
+        ///  otherwise, <see langword="false"/>
+        /// </returns>
+        public bool TryGetArrayProperty(string propertyName, out JsonArray jsonArray)
+        {
+            if (TryGetPropertyValue(propertyName, out JsonNode jsonNode))
+            {
+                if (jsonNode is JsonArray jsonNodeCasted)
+                {
+                    jsonArray = jsonNodeCasted;
+                    return true;
+                }
+            }
+
+            jsonArray = null;
             return false;
         }
 
