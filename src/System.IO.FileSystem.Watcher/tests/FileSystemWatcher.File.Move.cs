@@ -1,7 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
-
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.IO.Tests
@@ -50,10 +50,12 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [ActiveIssue(40034, TestPlatforms.OSX)]
         public void File_Move_From_Unwatched_To_Watched()
         {
-            FileMove_FromUnwatchedToWatched(WatcherChangeTypes.Created);
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || Environment.OSVersion.Version.Major < 19)
+            {
+                FileMove_FromUnwatchedToWatched(WatcherChangeTypes.Created);
+            }
         }
 
         [Theory]
