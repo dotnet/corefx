@@ -142,6 +142,61 @@ namespace System.Text.Json.Tests
             Assert.Equal(expectedBytesConsumed, jsonReader.BytesConsumed);
         }
 
+        private static void InvalidReadHelper(ref Utf8JsonReader jsonReader, int expectedBytePositionInLine, int numberOfSuccessfulReads, int expectedConsumed)
+        {
+            try
+            {
+                for (int i = 0; i < numberOfSuccessfulReads; i++)
+                {
+                    Assert.True(jsonReader.Read());
+                }
+                Assert.False(jsonReader.Read());
+            }
+            catch (JsonException ex)
+            {
+                Assert.Equal(0, ex.LineNumber);
+                Assert.Equal(expectedBytePositionInLine, ex.BytePositionInLine);
+                Assert.Equal(expectedConsumed, jsonReader.BytesConsumed);
+                if (expectedConsumed != 0)
+                {
+                    Assert.Equal(4, jsonReader.TokenStartIndex);
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData("0{", 1, 0, 0)]
+        [InlineData("0e+1b", 4, 0, 0)]
+        [InlineData("1e+0}", 4, 1, 4)]
+        public static void InvalidJsonVariousSegmentSizes(string input, int expectedBytePositionInLine, int numberOfSuccessfulReads, int expectedConsumed)
+        {
+            byte[] utf8 = Encoding.UTF8.GetBytes(input);
+
+            var jsonReader = new Utf8JsonReader(utf8);
+            InvalidReadHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedConsumed);
+
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(utf8, 1);
+            jsonReader = new Utf8JsonReader(sequence);
+            InvalidReadHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedConsumed);
+
+            for (int splitLocation = 0; splitLocation < utf8.Length; splitLocation++)
+            {
+                sequence = JsonTestHelper.CreateSegments(utf8, splitLocation);
+                jsonReader = new Utf8JsonReader(sequence);
+                InvalidReadHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedConsumed);
+            }
+
+            for (int firstSplit = 0; firstSplit < utf8.Length; firstSplit++)
+            {
+                for (int secondSplit = firstSplit; secondSplit < utf8.Length; secondSplit++)
+                {
+                    sequence = JsonTestHelper.CreateSegments(utf8, firstSplit, secondSplit);
+                    jsonReader = new Utf8JsonReader(sequence);
+                    InvalidReadHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedConsumed);
+                }
+            }
+        }
+
         [Fact]
         public static void InitialStateSimpleCtorMultiSegment()
         {

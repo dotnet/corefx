@@ -1529,7 +1529,7 @@ namespace System.Text.Json
             Debug.Assert(resultExponent == ConsumeNumberResult.OperationIncomplete);
 
             _bytePositionInLine += i;
-            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, nextByte);
+            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, data[i]);
 
         Done:
             ValueSpan = data.Slice(0, i);
