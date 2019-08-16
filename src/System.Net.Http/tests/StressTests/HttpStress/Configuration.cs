@@ -27,6 +27,7 @@ namespace HttpStress
         public bool ListOperations { get; set; }
 
         public Version HttpVersion { get; set; }
+        public bool UseWinHttpHandler { get; set; }
         public int ConcurrentRequests { get; set; }
         public int RandomSeed { get; set; }
         public int MaxContentLength { get; set; }

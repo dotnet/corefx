@@ -25,33 +25,28 @@ namespace HttpStress
         private readonly Random _random;
         private readonly HttpClient _client;
         private readonly CancellationToken _globalToken;
-        private readonly double _cancellationProbability;
+        private readonly Configuration _config;
 
         public RequestContext(Configuration config, HttpClient httpClient, Random random, CancellationToken globalToken, int taskNum)
         {
             _random = random;
             _client = httpClient;
-            _cancellationProbability = config.CancellationProbability;
             _globalToken = globalToken;
+            _config = config;
 
             TaskNum = taskNum;
-            HttpVersion = config.HttpVersion;
             IsCancellationRequested = false;
-            MaxRequestParameters = config.MaxParameters;
-            MaxRequestUriSize = config.MaxRequestUriSize;
-            MaxRequestHeaderCount = config.MaxRequestHeaderCount;
-            MaxRequestHeaderTotalSize = config.MaxRequestHeaderTotalSize;
-            MaxContentLength = config.MaxContentLength;
         }
 
         public int TaskNum { get; }
-        public Version HttpVersion { get; }
-        public bool IsCancellationRequested { get; set; }
-        public int MaxRequestParameters { get; }
-        public int MaxRequestUriSize { get; }
-        public int MaxRequestHeaderCount { get; }
-        public int MaxRequestHeaderTotalSize { get; }
-        public int MaxContentLength { get; }
+        public bool IsCancellationRequested { get; private set; }
+
+        public Version HttpVersion => _config.HttpVersion;
+        public int MaxRequestParameters => _config.MaxParameters;
+        public int MaxRequestUriSize => _config.MaxRequestUriSize;
+        public int MaxRequestHeaderCount => _config.MaxRequestHeaderCount;
+        public int MaxRequestHeaderTotalSize => _config.MaxRequestHeaderTotalSize;
+        public int MaxContentLength => _config.MaxContentLength;
         public Uri BaseAddress => _client.BaseAddress;
 
         // HttpClient.SendAsync() wrapper that wires randomized cancellation
@@ -63,9 +58,9 @@ namespace HttpStress
             {
                 // user-supplied cancellation token overrides random cancellation
                 using var cts = CancellationTokenSource.CreateLinkedTokenSource(_globalToken, token.Value);
-                return await _client.SendAsync(request, httpCompletion, cts.Token);
+                return WithVersionValidation(await _client.SendAsync(request, httpCompletion, cts.Token));
             }
-            else if (GetRandomBoolean(_cancellationProbability))
+            else if (GetRandomBoolean(_config.CancellationProbability))
             {
                 // trigger a random cancellation
                 using var cts = CancellationTokenSource.CreateLinkedTokenSource(_globalToken);
@@ -89,12 +84,23 @@ namespace HttpStress
 
                 cts.Cancel();
                 IsCancellationRequested = true;
-                return await task;
+                return WithVersionValidation(await task);
             }
             else
             {
                 // no cancellation
-                return await _client.SendAsync(request, httpCompletion, _globalToken);
+                return WithVersionValidation(await _client.SendAsync(request, httpCompletion, _globalToken));
+            }
+
+            HttpResponseMessage WithVersionValidation(HttpResponseMessage m)
+            {
+                // WinHttpHandler seems to not report HttpResponseMessage.Version correctly
+                if (!_config.UseWinHttpHandler && m.Version != HttpVersion)
+                {
+                    throw new Exception($"Expected response version {HttpVersion}, got {m.Version}");
+                }
+
+                return m;
             }
         }
 
@@ -178,7 +184,6 @@ namespace HttpStress
                     int expectedLength = ctx.SetExpectedResponseContentLengthHeader(req.Headers);
                     using HttpResponseMessage m = await ctx.SendAsync(req);
                     
-                    ValidateHttpVersion(m, ctx.HttpVersion);
                     ValidateStatusCode(m);
                     ValidateServerContent(await m.Content.ReadAsStringAsync(), expectedLength);
                 }),
@@ -190,7 +195,6 @@ namespace HttpStress
                     int expectedLength = ctx.SetExpectedResponseContentLengthHeader(req.Headers, minLength: 2);
                     using HttpResponseMessage m = await ctx.SendAsync(req, HttpCompletionOption.ResponseHeadersRead);
 
-                    ValidateHttpVersion(m, ctx.HttpVersion);
                     ValidateStatusCode(m);
 
                     using (Stream s = await m.Content.ReadAsStreamAsync())
@@ -208,7 +212,6 @@ namespace HttpStress
 
                     using HttpResponseMessage res = await ctx.SendAsync(req);
 
-                    ValidateHttpVersion(res, ctx.HttpVersion);
                     ValidateStatusCode(res);
 
                     await res.Content.ReadAsStringAsync();
@@ -262,7 +265,6 @@ namespace HttpStress
                     using var req = new HttpRequestMessage(HttpMethod.Get, uri);
                     using HttpResponseMessage m = await ctx.SendAsync(req);
 
-                    ValidateHttpVersion(m, ctx.HttpVersion);
                     ValidateStatusCode(m);
                     ValidateContent(expectedResponse, await m.Content.ReadAsStringAsync(), $"Uri: {uri}");
                 }),
@@ -320,7 +322,6 @@ namespace HttpStress
                     using var req = new HttpRequestMessage(HttpMethod.Post, "/") { Content = new StringDuplexContent(content) };
                     using HttpResponseMessage m = await ctx.SendAsync(req);
 
-                    ValidateHttpVersion(m, ctx.HttpVersion);
                     ValidateStatusCode(m);
                     ValidateContent(content, await m.Content.ReadAsStringAsync());
                 }),
@@ -333,7 +334,6 @@ namespace HttpStress
                     using var req = new HttpRequestMessage(HttpMethod.Post, "/") { Content = formData.formDataContent };
                     using HttpResponseMessage m = await ctx.SendAsync(req);
 
-                    ValidateHttpVersion(m, ctx.HttpVersion);
                     ValidateStatusCode(m);
                     ValidateContent($"{formData.expected}", await m.Content.ReadAsStringAsync());
                 }),
@@ -346,7 +346,6 @@ namespace HttpStress
                     using var req = new HttpRequestMessage(HttpMethod.Post, "/duplex") { Content = new StringDuplexContent(content) };
                     using HttpResponseMessage m = await ctx.SendAsync(req, HttpCompletionOption.ResponseHeadersRead);
 
-                    ValidateHttpVersion(m, ctx.HttpVersion);
                     ValidateStatusCode(m);
                     ValidateContent(content, await m.Content.ReadAsStringAsync());
                 }),
@@ -361,7 +360,6 @@ namespace HttpStress
                     using var req = new HttpRequestMessage(HttpMethod.Post, "/duplexSlow") { Content = new ByteAtATimeNoLengthContent(byteContent) };
                     using HttpResponseMessage m = await ctx.SendAsync(req, HttpCompletionOption.ResponseHeadersRead);
 
-                    ValidateHttpVersion(m, ctx.HttpVersion);
                     ValidateStatusCode(m);
                     var response = await m.Content.ReadAsStringAsync();
 
@@ -386,7 +384,6 @@ namespace HttpStress
                     using var req = new HttpRequestMessage(HttpMethod.Post, "/duplex") { Content = new StringDuplexContent(content) };
                     using HttpResponseMessage m = await ctx.SendAsync(req, HttpCompletionOption.ResponseHeadersRead);
 
-                    ValidateHttpVersion(m, ctx.HttpVersion);
                     ValidateStatusCode(m);
                     // Cause the response to be disposed without reading the response body, which will cause the client to cancel the request
                 }),
@@ -401,7 +398,6 @@ namespace HttpStress
                     req.Headers.ExpectContinue = true;
                     using HttpResponseMessage m = await ctx.SendAsync(req, HttpCompletionOption.ResponseHeadersRead);
 
-                    ValidateHttpVersion(m, ctx.HttpVersion);
                     ValidateStatusCode(m);
                     ValidateContent(content, await m.Content.ReadAsStringAsync());
                 }),
@@ -413,7 +409,6 @@ namespace HttpStress
                     int expectedLength = ctx.SetExpectedResponseContentLengthHeader(req.Headers);
                     using HttpResponseMessage m = await ctx.SendAsync(req);
 
-                    ValidateHttpVersion(m, ctx.HttpVersion);
                     ValidateStatusCode(m);
 
                     if (m.Content.Headers.ContentLength != expectedLength)
@@ -432,7 +427,6 @@ namespace HttpStress
                     using var req = new HttpRequestMessage(HttpMethod.Put, "/") { Content = new StringContent(content) };
                     using HttpResponseMessage m = await ctx.SendAsync(req);
 
-                    ValidateHttpVersion(m, ctx.HttpVersion);
                     ValidateStatusCode(m);
 
                     string r = await m.Content.ReadAsStringAsync();
@@ -447,7 +441,6 @@ namespace HttpStress
                     using var req = new HttpRequestMessage(HttpMethod.Put, "/") { Content = new ByteAtATimeNoLengthContent(Encoding.ASCII.GetBytes(content)) };
                     using HttpResponseMessage m = await ctx.SendAsync(req);
 
-                    ValidateHttpVersion(m, ctx.HttpVersion);
                     ValidateStatusCode(m);
 
                     string r = await m.Content.ReadAsStringAsync();
@@ -461,20 +454,10 @@ namespace HttpStress
                     int expectedLength = ctx.SetExpectedResponseContentLengthHeader(req.Headers);
                     using HttpResponseMessage m = await ctx.SendAsync(req);
 
-                    ValidateHttpVersion(m, ctx.HttpVersion);
                     ValidateStatusCode(m);
                     ValidateServerContent(await m.Content.ReadAsStringAsync(), expectedLength);
                 }),
             };
-
-        // Validation of a response message
-        private static void ValidateHttpVersion(HttpResponseMessage m, Version expectedVersion)
-        {
-            if (m.Version != expectedVersion)
-            {
-                throw new Exception($"Expected response version {expectedVersion}, got {m.Version}");
-            }
-        }
 
         private static void ValidateStatusCode(HttpResponseMessage m, HttpStatusCode expectedStatus = HttpStatusCode.OK)
         {

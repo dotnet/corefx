@@ -83,16 +83,29 @@ namespace HttpStress
                 Environment.SetEnvironmentVariable(UNENCRYPTED_HTTP2_ENV_VAR, "1");
             }
 
-            var handler = new SocketsHttpHandler()
+            HttpMessageHandler CreateHttpHandler()
             {
-                PooledConnectionLifetime = _config.ConnectionLifetime.GetValueOrDefault(Timeout.InfiniteTimeSpan),
-                SslOptions = new SslClientAuthenticationOptions
+                if (_config.UseWinHttpHandler)
                 {
-                    RemoteCertificateValidationCallback = delegate { return true; }
+                    return new System.Net.Http.WinHttpHandler()
+                    {
+                        ServerCertificateValidationCallback = delegate { return true; }
+                    };
                 }
-            };
+                else
+                {
+                    return new SocketsHttpHandler()
+                    {
+                        PooledConnectionLifetime = _config.ConnectionLifetime.GetValueOrDefault(Timeout.InfiniteTimeSpan),
+                        SslOptions = new SslClientAuthenticationOptions
+                        {
+                            RemoteCertificateValidationCallback = delegate { return true; }
+                        }
+                    };
+                }
+            }
 
-            using var client = new HttpClient(handler) { BaseAddress = _config.ServerUri, Timeout = _config.DefaultTimeout };
+            using var client = new HttpClient(CreateHttpHandler()) { BaseAddress = _config.ServerUri, Timeout = _config.DefaultTimeout };
 
             async Task RunWorker(int taskNum)
             {

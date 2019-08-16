@@ -95,8 +95,8 @@ namespace HttpStress
                         {
                             listenOptions.Protocols = 
                                 configuration.HttpVersion == new Version(2,0) ?
-                                HttpProtocols.Http2:
-                                HttpProtocols.Http1;
+                                HttpProtocols.Http2 :
+                                HttpProtocols.Http1 ;
                         }
                     });
                 });
