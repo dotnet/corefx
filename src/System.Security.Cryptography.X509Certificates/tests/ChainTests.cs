@@ -227,7 +227,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        public static void BuildChainCustomTrustStorePinnedCertificate()
+        public static void BuildChainCustomTrustStore()
         {
             using (var testCert = new X509Certificate2(Path.Combine("TestData", "test.pfx"), TestData.ChainPfxPassword))
             using (var microsoftDotCom = new X509Certificate2(TestData.MicrosoftDotComSslCertBytes))
@@ -268,6 +268,16 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 // Add valid root certificate to CustomTrustStore
                 chain.ChainPolicy.CustomTrustStore.Add(rootCert);
                 chain.ChainPolicy.ExtraStore.Remove(rootCert);
+
+                Assert.True(chain.Build(microsoftDotCom));
+                Assert.Equal(3, chain.ChainElements.Count);
+                Assert.Equal(X509ChainStatusFlags.NoError, chain.AllStatusFlags());
+
+                // Ensure trust only affects a single call
+                chain.ChainPolicy.CustomTrustStore.Remove(rootCert);
+                chain.ChainPolicy.CustomTrustStore.Remove(intermediateCert);
+                chain.ChainPolicy.CustomTrustStore.Remove(testCert);
+                chain.ChainPolicy.TrustMode = X509ChainTrustMode.System;
 
                 Assert.True(chain.Build(microsoftDotCom));
                 Assert.Equal(3, chain.ChainElements.Count);

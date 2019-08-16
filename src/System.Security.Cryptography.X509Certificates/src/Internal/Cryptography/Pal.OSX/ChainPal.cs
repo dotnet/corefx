@@ -59,7 +59,6 @@ namespace Internal.Cryptography.Pal
                 customCertsArray = PrepareCustomCertsArray(customTrustStore);
                 Interop.AppleCrypto.X509ChainSetTrustAnchorCertificates(chain, customCertsArray);
             }
-
             if (ret == 1)
             {
                 _chainHandle = chain;
