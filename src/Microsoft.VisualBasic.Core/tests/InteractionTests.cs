@@ -149,8 +149,9 @@ namespace Microsoft.VisualBasic.Tests
             var pairs = GetEnvironmentVariables();
             int n = Math.Min(pairs.Length, 255);
 
-            Assert.Throws<ArgumentException>(() => Interaction.Environ(0)).ToString();
-            Assert.Throws<ArgumentException>(() => Interaction.Environ(256)).ToString();
+            // Exception.ToString() called to verify message is constructed successfully.
+            _ = Assert.Throws<ArgumentException>(() => Interaction.Environ(0)).ToString();
+            _ = Assert.Throws<ArgumentException>(() => Interaction.Environ(256)).ToString();
 
             for (int i = 0; i < n; i++)
             {
@@ -169,8 +170,9 @@ namespace Microsoft.VisualBasic.Tests
         {
             var pairs = GetEnvironmentVariables();
 
-            Assert.Throws<ArgumentException>(() => Interaction.Environ("")).ToString();
-            Assert.Throws<ArgumentException>(() => Interaction.Environ(" ")).ToString();
+            // Exception.ToString() called to verify message is constructed successfully.
+            _ = Assert.Throws<ArgumentException>(() => Interaction.Environ("")).ToString();
+            _ = Assert.Throws<ArgumentException>(() => Interaction.Environ(" ")).ToString();
 
             foreach (var (key, value) in pairs)
             {
