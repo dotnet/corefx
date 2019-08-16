@@ -235,7 +235,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (short)0, (short)0 };
             yield return new object[] { (short)1, (short)1 };
             yield return new object[] { short.MaxValue, short.MaxValue };
-            // Add more...
         }
 
         public static IEnumerable<object[]> Fix_Integer_TestData()
@@ -245,7 +244,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { 0, 0 };
             yield return new object[] { 1, 1 };
             yield return new object[] { int.MaxValue, int.MaxValue };
-            // Add more...
         }
 
         public static IEnumerable<object[]> Fix_Long_TestData()
@@ -255,7 +253,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { 0L, 0L };
             yield return new object[] { 1L, 1L };
             yield return new object[] { long.MaxValue, long.MaxValue };
-            // Add more...
         }
 
         public static IEnumerable<object[]> Fix_Single_TestData()
@@ -267,7 +264,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { 1.9f, 1.0f };
             yield return new object[] { 999.999f, 999.0f };
             yield return new object[] { float.MaxValue, float.MaxValue };
-            // Add more...
         }
 
         public static IEnumerable<object[]> Fix_Double_TestData()
@@ -281,7 +277,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { double.MaxValue, double.MaxValue };
             yield return new object[] { Math.E, (double)2 };
             yield return new object[] { Math.PI, (double)3 };
-            // Add more...
         }
 
         public static IEnumerable<object[]> Fix_Decimal_TestData()
@@ -293,7 +288,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (decimal)1.9, (decimal)1.0 };
             yield return new object[] { (decimal)999.999, (decimal)999.0 };
             yield return new object[] { decimal.MaxValue, decimal.MaxValue };
-            // Add more...
         }
 
         [Theory]
@@ -416,7 +410,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { byte.MinValue, "0" };
             yield return new object[] { (byte)0, "0" };
             yield return new object[] { byte.MaxValue, "FF" };
-            yield break; // Add more...
         }
 
         public static IEnumerable<object[]> Hex_SByte_TestData()
@@ -427,7 +420,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (sbyte)1, "1" };
             yield return new object[] { (sbyte)15, "F" };
             yield return new object[] { sbyte.MaxValue, "7F" };
-            yield break; // Add more...
         }
 
         public static IEnumerable<object[]> Hex_UShort_TestData()
@@ -436,7 +428,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (ushort)0, "0" };
             yield return new object[] { (ushort)15, "F" };
             yield return new object[] { ushort.MaxValue, "FFFF" };
-            yield break; // Add more...
         }
 
         public static IEnumerable<object[]> Hex_Short_TestData()
@@ -455,7 +446,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (uint)0, "0" };
             yield return new object[] { (uint)15, "F" };
             yield return new object[] { uint.MaxValue, "FFFFFFFF" };
-            yield break; // Add more...
         }
 
         public static IEnumerable<object[]> Hex_Integer_TestData()
@@ -466,7 +456,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { 1, "1" };
             yield return new object[] { 15, "F" };
             yield return new object[] { int.MaxValue, "7FFFFFFF" };
-            yield break; // Add more...
         }
 
         public static IEnumerable<object[]> Hex_ULong_TestData()
@@ -475,7 +464,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (ulong)0, "0" };
             yield return new object[] { (ulong)15, "F" };
             yield return new object[] { ulong.MaxValue, "FFFFFFFFFFFFFFFF" };
-            yield break; // Add more...
         }
 
         public static IEnumerable<object[]> Hex_Long_TestData()
@@ -485,7 +473,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (long)1, "1" };
             yield return new object[] { (long)15, "F" };
             yield return new object[] { long.MaxValue, "7FFFFFFFFFFFFFFF" };
-            yield break; // Add more...
         }
 
         public static IEnumerable<object[]> Hex_Single_TestData()
@@ -583,7 +570,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { short.MinValue, short.MinValue };
             yield return new object[] { (short)0, (short)0 };
             yield return new object[] { short.MaxValue, short.MaxValue };
-            // Add more...
         }
 
         public static IEnumerable<object[]> Int_Integer_TestData()
@@ -591,7 +577,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { int.MinValue, int.MinValue };
             yield return new object[] { 0, 0 };
             yield return new object[] { int.MaxValue, int.MaxValue };
-            // Add more...
         }
 
         public static IEnumerable<object[]> Int_Long_TestData()
@@ -599,7 +584,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { long.MinValue, long.MinValue };
             yield return new object[] { 0L, 0L };
             yield return new object[] { long.MaxValue, long.MaxValue };
-            // Add more...
         }
 
         public static IEnumerable<object[]> Int_Single_TestData()
@@ -611,7 +595,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { 1.9f, 1.0f };
             yield return new object[] { 999.999f, 999.0f };
             yield return new object[] { float.MaxValue, float.MaxValue };
-            // Add more...
         }
 
         public static IEnumerable<object[]> Int_Double_TestData()
@@ -625,7 +608,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { double.MaxValue, double.MaxValue };
             yield return new object[] { Math.E, (double)2 };
             yield return new object[] { Math.PI, (double)3 };
-            // Add more...
         }
 
         public static IEnumerable<object[]> Int_Decimal_TestData()
@@ -637,7 +619,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (decimal)1.9, (decimal)1.0 };
             yield return new object[] { (decimal)999.999, (decimal)999.0 };
             yield return new object[] { decimal.MaxValue, decimal.MaxValue };
-            // Add more...
         }
 
         [Theory]
@@ -762,7 +743,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (byte)0, "0" };
             yield return new object[] { (byte)15, "17" };
             yield return new object[] { byte.MaxValue, "377" };
-            yield break; // Add more...
         }
 
         public static IEnumerable<object[]> Oct_SByte_TestData()
@@ -773,7 +753,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (sbyte)1, "1" };
             yield return new object[] { (sbyte)15, "17" };
             yield return new object[] { sbyte.MaxValue, "177" };
-            yield break; // Add more...
         }
 
         public static IEnumerable<object[]> Oct_UShort_TestData()
@@ -783,7 +762,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (ushort)1, "1" };
             yield return new object[] { (ushort)15, "17" };
             yield return new object[] { ushort.MaxValue, "177777" };
-            yield break; // Add more...
         }
 
         public static IEnumerable<object[]> Oct_Short_TestData()
@@ -803,7 +781,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (uint)1, "1" };
             yield return new object[] { (uint)15, "17" };
             yield return new object[] { uint.MaxValue, "37777777777" };
-            yield break; // Add more...
         }
 
         public static IEnumerable<object[]> Oct_Integer_TestData()
@@ -814,7 +791,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { 1, "1" };
             yield return new object[] { 15, "17" };
             yield return new object[] { int.MaxValue, "17777777777" };
-            yield break; // Add more...
         }
 
         public static IEnumerable<object[]> Oct_ULong_TestData()
@@ -824,7 +800,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (ulong)1, "1" };
             yield return new object[] { (ulong)15, "17" };
             yield return new object[] { ulong.MaxValue, "1777777777777777777777" };
-            yield break; // Add more...
         }
 
         public static IEnumerable<object[]> Oct_Long_TestData()
@@ -834,7 +809,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (long)1, "1" };
             yield return new object[] { (long)15, "17" };
             yield return new object[] { long.MaxValue, "777777777777777777777" };
-            yield break; // Add more...
         }
 
         public static IEnumerable<object[]> Oct_Single_TestData()
@@ -882,14 +856,12 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { true, "True" };
             yield return new object[] { false, "False" };
             yield return new object[] { "0", " 0" };
-            // Add more...
         }
 
         public static IEnumerable<object[]> Str_Object_InvalidCastException_TestData()
         {
             yield return new object[] { new object() };
             yield return new object[] { string.Empty };
-            // Add more...
         }
 
         [Theory]
@@ -968,7 +940,6 @@ namespace Microsoft.VisualBasic.Tests
         {
             yield return new object[] { 0, "0" };
             yield return new object[] { 1, " 1" };
-            // Add more...
         }
 
         public static IEnumerable<object[]> Val_Object_ArgumentException_TestData()
