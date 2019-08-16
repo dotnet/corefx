@@ -139,7 +139,14 @@ namespace Microsoft.VisualBasic.Tests
         [Fact]
         public void DeleteSetting()
         {
-            Assert.Throws<ArgumentException>(() => Interaction.DeleteSetting(AppName: "", Section: null, Key: null));
+            if (PlatformDetection.IsWindows)
+            {
+                Assert.Throws<ArgumentException>(() => Interaction.DeleteSetting(AppName: "", Section: null, Key: null));
+            }
+            else
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => Interaction.DeleteSetting(AppName: "", Section: null, Key: null));
+            }
             // Not tested: valid arguments.
         }
 
@@ -201,7 +208,28 @@ namespace Microsoft.VisualBasic.Tests
         [Fact]
         public void GetAllSettings()
         {
-            Assert.Throws<ArgumentException>(() => Interaction.GetAllSettings(AppName: "", Section: ""));
+            if (PlatformDetection.IsWindows)
+            {
+                Assert.Throws<ArgumentException>(() => Interaction.GetAllSettings(AppName: "", Section: ""));
+            }
+            else
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => Interaction.GetAllSettings(AppName: "", Section: ""));
+            }
+            // Not tested: valid arguments.
+        }
+
+        [Fact]
+        public void GetSetting()
+        {
+            if (PlatformDetection.IsWindows)
+            {
+                Assert.Throws<ArgumentException>(() => Interaction.GetSetting(AppName: "", Section: "", Key: "", Default: ""));
+            }
+            else
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => Interaction.GetSetting(AppName: "", Section: "", Key: "", Default: ""));
+            }
             // Not tested: valid arguments.
         }
 
@@ -276,7 +304,15 @@ namespace Microsoft.VisualBasic.Tests
         [Fact]
         public void SaveSetting()
         {
-            Assert.Throws<ArgumentException>(() => Interaction.SaveSetting(AppName: "", Section: "", Key: "", Setting: ""));
+            if (PlatformDetection.IsWindows)
+            {
+                Assert.Throws<ArgumentException>(() => Interaction.SaveSetting(AppName: "", Section: "", Key: "", Setting: ""));
+
+            }
+            else
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => Interaction.SaveSetting(AppName: "", Section: "", Key: "", Setting: ""));
+            }
             // Not tested: valid arguments.
         }
 
