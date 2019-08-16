@@ -17,7 +17,11 @@ namespace HttpStress
 
         public static void Append(string text, ref uint accumulator, Encoding encoding = null)
         {
-            if (encoding == null) encoding = Encoding.ASCII;
+            if (encoding == null) 
+            {
+                encoding = Encoding.ASCII;
+            }
+            
             accumulator = Crc32.Append(accumulator, encoding.GetBytes(text));
         }
 
@@ -33,7 +37,10 @@ namespace HttpStress
             foreach ((string name, IEnumerable<string> values) in headers)
             {
                 Append(name, ref checksum);
-                foreach (string value in values) Append(value, ref checksum);
+                foreach (string value in values) 
+                {
+                    Append(value, ref checksum);
+                }
             }
 
             return checksum;

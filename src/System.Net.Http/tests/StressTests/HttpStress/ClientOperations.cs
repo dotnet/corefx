@@ -152,7 +152,12 @@ namespace HttpStress
                 string CreateHeaderValue() => HttpUtility.UrlEncode(GetRandomString(1, 30, alphaNumericOnly: false));
                 string[] values = Enumerable.Range(0, _random.Next(1, 6)).Select(_ => CreateHeaderValue()).ToArray();
                 totalSize += name.Length + values.Select(v => v.Length + 2).Sum();
-                if (totalSize > MaxRequestHeaderTotalSize) break;
+                
+                if (totalSize > MaxRequestHeaderTotalSize) 
+                {
+                    break;
+                }
+
                 headers.Add(name, values);
             }
         }
@@ -361,7 +366,7 @@ namespace HttpStress
                     using HttpResponseMessage m = await ctx.SendAsync(req, HttpCompletionOption.ResponseHeadersRead);
 
                     ValidateStatusCode(m);
-                    var response = await m.Content.ReadAsStringAsync();
+                    HttpResponseMessage response = await m.Content.ReadAsStringAsync();
 
                     // trailing headers not supported for all servers, so do not require checksums
                     bool isValidChecksum = ValidateServerChecksum(m.TrailingHeaders, checksum, required: false);
