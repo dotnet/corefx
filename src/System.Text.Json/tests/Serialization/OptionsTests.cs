@@ -337,22 +337,20 @@ namespace System.Text.Json.Serialization.Tests
 
             JsonConverter<T> converter = (JsonConverter<T>)options.GetConverter(typeof(T));
             Assert.Equal(converterName, converter.GetType().Name);
-            
+
             ReadOnlySpan<byte> data = Encoding.UTF8.GetBytes(stringValue);
             Utf8JsonReader reader = new Utf8JsonReader(data);
-            reader.Read();
+            Assert.True(reader.Read());
+
             T readValue = converter.Read(ref reader, typeof(T), null);
 
+            Assert.True(readValue is JsonElement, "Must be JsonElement");
             if (readValue is JsonElement element)
             {
                 Assert.Equal(JsonValueKind.Array, element.ValueKind);
                 JsonElement.ArrayEnumerator iterator = element.EnumerateArray();
                 Assert.True(iterator.MoveNext());
                 Assert.Equal(3, iterator.Current.GetInt32());
-            }
-            else
-            {
-                Assert.True(false, "Must be JsonElement");
             }
 
             using (var stream = new MemoryStream())
