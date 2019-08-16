@@ -13,6 +13,7 @@ namespace Microsoft.VisualBasic.Tests
         [Fact]
         public void Clear()
         {
+            ProjectData.ClearProjectError();
             ProjectData.SetProjectError(new ArgumentException(), 3);
             var errObj = Information.Err();
             errObj.Number = 5;
@@ -35,6 +36,8 @@ namespace Microsoft.VisualBasic.Tests
         [Fact]
         public void Raise()
         {
+            ProjectData.ClearProjectError();
+
             ProjectData.SetProjectError(new Exception());
             _ = Assert.Throws<ArgumentException>(() => Information.Err().Raise(0)).ToString();
 
@@ -54,6 +57,8 @@ namespace Microsoft.VisualBasic.Tests
         [Fact]
         public void Source()
         {
+            ProjectData.ClearProjectError();
+
             ProjectData.SetProjectError(new Exception() { Source = null });
             Assert.Null(Information.Err().Source);
 
@@ -71,6 +76,8 @@ namespace Microsoft.VisualBasic.Tests
         [Fact]
         public void FilterDefaultMessage()
         {
+            ProjectData.ClearProjectError();
+
             string message = "Description";
             ProjectData.SetProjectError(new System.IO.FileNotFoundException(message));
             Assert.Equal(message, Information.Err().Description);
@@ -87,6 +94,8 @@ namespace Microsoft.VisualBasic.Tests
         [Fact]
         public void MakeHelpLink()
         {
+            ProjectData.ClearProjectError();
+
             ProjectData.SetProjectError(new ArgumentException());
             Assert.Equal("#0", Assert.Throws<OutOfMemoryException>(() => Information.Err().Raise(7)).HelpLink);
 
@@ -114,6 +123,7 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData("MyFile4#4", 4, "MyFile4")]
         public void ParseHelpLink(string helpLink, int expectedHelpContext, string expectedHelpFile)
         {
+            ProjectData.ClearProjectError();
             ProjectData.SetProjectError(new ArgumentException() { HelpLink = helpLink });
             Assert.Equal(expectedHelpContext, Information.Err().HelpContext);
             Assert.Equal(expectedHelpFile, Information.Err().HelpFile);
@@ -127,6 +137,7 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData("MyFile3##")]
         public void ParseHelpLink_InvalidCastException(string helpLink)
         {
+            ProjectData.ClearProjectError();
             ProjectData.SetProjectError(new ArgumentException() { HelpLink = helpLink });
             Assert.Throws<InvalidCastException>(() => Information.Err().HelpContext);
             Assert.Throws<InvalidCastException>(() => Information.Err().HelpFile);
