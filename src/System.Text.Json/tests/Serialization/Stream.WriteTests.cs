@@ -494,7 +494,7 @@ namespace System.Text.Json.Serialization.Tests
                             },
                             WordCount = 1000 + i,
                             ImageCount = i,
-                            ReadingTime = 5.6632075471698 + i,
+                            ReadingTime = 3.14 + i,
                             Subtitle = "Lorem ipsam subtitle of virtuals",
                             UserPostRelation = new UserPostRelation
                             {
@@ -508,7 +508,7 @@ namespace System.Text.Json.Serialization.Tests
                             UsersBySocialRecommends = new List<object>(),
                             NoIndex = false,
                             IsBookmarked = true,
-                            Recommends = 100 + i,
+                            Recommends = 10 + i,
                             Tags = new List<Tag>
                             {
                                 new Tag
@@ -533,8 +533,8 @@ namespace System.Text.Json.Serialization.Tests
                                 },
                                 new Tag
                                 {
-                                    Slug =  "software-development",
-                                    Name = "Software Development",
+                                    Slug =  "software-engineering",
+                                    Name = "Software Engineering",
                                     PostCount = 62810,
                                     Metadata = new Metadata1
                                     {
@@ -592,7 +592,7 @@ namespace System.Text.Json.Serialization.Tests
                                 new Topic
                                 {
                                     TopicId = "TopicID52b64",
-                                    Slug = "programming",
+                                    Slug = "development",
                                     CreatedAt  = 1493934116328,
                                     DeletedAt = 0,
                                     Image = new Image
@@ -601,7 +601,7 @@ namespace System.Text.Json.Serialization.Tests
                                         OriginalWidth = 6016,
                                         OriginalHeight = 4016
                                     },
-                                    Name = "Programming",
+                                    Name = "Development",
                                     Description = "Once upon a time.",
                                     RelatedTopics = new List<Post>(),
                                     Visibility = 1,
@@ -643,7 +643,7 @@ namespace System.Text.Json.Serialization.Tests
                                     },
                                     new Paragraph
                                     {
-                                        Name = "97c6",
+                                        Name = "Paragraph 2",
                                         Type = 3,
                                         Text = "There were doors all round the hall, but they were all locked",
                                         Markups = new List<Markup>(),
@@ -651,7 +651,7 @@ namespace System.Text.Json.Serialization.Tests
                                     },
                                     new Paragraph
                                     {
-                                        Name = "d1b2",
+                                        Name = "Paragraph 3",
                                         Type = 13,
                                         Text = "There were doors all round the hall, but they were all locked",
                                         Markups = new List<Markup>
@@ -808,7 +808,7 @@ namespace System.Text.Json.Serialization.Tests
                             SocialStats = new SocialStats
                             {
                                 UserId = "777hhh99888",
-                                UsersFollowedByCount = 4000 + i,
+                                UsersFollowedByCount = 40 + i,
                                 UsersFollowedCount = i,
                                 Type = "SocialStats"
                             },
@@ -835,7 +835,7 @@ namespace System.Text.Json.Serialization.Tests
                         SocialStats = new SocialStats
                         {
                             UserId = "2299kkhhh77gglll",
-                            UsersFollowedByCount = 4000 + i,
+                            UsersFollowedByCount = 40 + i,
                             UsersFollowedCount = i,
                             Type = "SocialStats"
                         }
