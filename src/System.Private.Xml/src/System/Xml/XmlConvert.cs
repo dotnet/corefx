@@ -37,7 +37,7 @@ namespace System.Xml
         // Static fields with implicit initialization
         //
         private static XmlCharType s_xmlCharType = XmlCharType.Instance;
-        private static CultureInfo s_invariantCultureInfo = CultureInfo.InvariantCulture;
+        private static readonly CultureInfo s_invariantCultureInfo = CultureInfo.InvariantCulture;
 
         internal static char[] crt = new char[] { '\n', '\r', '\t' };
 
@@ -605,7 +605,7 @@ namespace System.Xml
         }
 #endif
 
-        // Valid XML character – as defined in XML 1.0 spec (fifth edition) production [2] Char
+        // Valid XML character - as defined in XML 1.0 spec (fifth edition) production [2] Char
         public static unsafe bool IsXmlChar(char ch)
         {
             return s_xmlCharType.IsCharData(ch);
@@ -616,13 +616,13 @@ namespace System.Xml
             return XmlCharType.IsHighSurrogate(highChar) && XmlCharType.IsLowSurrogate(lowChar);
         }
 
-        // Valid PUBLIC ID character – as defined in XML 1.0 spec (fifth edition) production [13] PublidChar
+        // Valid PUBLIC ID character - as defined in XML 1.0 spec (fifth edition) production [13] PublidChar
         public static bool IsPublicIdChar(char ch)
         {
             return s_xmlCharType.IsPubidChar(ch);
         }
 
-        // Valid Xml whitespace – as defined in XML 1.0 spec (fifth edition) production [3] S
+        // Valid Xml whitespace - as defined in XML 1.0 spec (fifth edition) production [3] S
         public static unsafe bool IsWhitespaceChar(char ch)
         {
             return s_xmlCharType.IsWhiteSpace(ch);

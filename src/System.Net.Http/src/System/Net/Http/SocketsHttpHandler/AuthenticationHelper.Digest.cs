@@ -38,7 +38,7 @@ namespace System.Net.Http
 
         // Define alphanumeric characters for cnonce
         // 48='0', 65='A', 97='a'
-        private static int[] s_alphaNumChooser = new int[] { 48, 65, 97 };
+        private static readonly int[] s_alphaNumChooser = new int[] { 48, 65, 97 };
 
         public static async Task<string> GetDigestTokenForCredential(NetworkCredential credential, HttpRequestMessage request, DigestResponse digestResponse)
         {
@@ -55,7 +55,7 @@ namespace System.Net.Http
                     !algorithm.Equals(Sha256Sess, StringComparison.OrdinalIgnoreCase) &&
                     !algorithm.Equals(MD5Sess, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (NetEventSource.IsEnabled) NetEventSource.Error(digestResponse, "Algorithm not supported: {algorithm}");
+                    if (NetEventSource.IsEnabled) NetEventSource.Error(digestResponse, $"Algorithm not supported: {algorithm}");
                     return null;
                 }
             }

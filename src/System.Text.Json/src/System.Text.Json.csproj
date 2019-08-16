@@ -205,13 +205,17 @@
     <Reference Include="System.Numerics.Vectors" />
     <Reference Include="System.Runtime.CompilerServices.Unsafe" />
     <Reference Include="System.Text.Encodings.Web" />
+    <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Threading.Tasks.Extensions" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="System\Text\Json\Node\DuplicatePropertyNameHandling.cs" />
     <Compile Include="System\Text\Json\Node\JsonBoolean.cs" />
     <Compile Include="System\Text\Json\Node\JsonNode.cs" />
-	  <Compile Include="System\Text\Json\Node\JsonNumber.cs" />
+    <Compile Include="System\Text\Json\Node\JsonNumber.cs" />
+    <Compile Include="System\Text\Json\Node\JsonObject.cs" />
+    <Compile Include="System\Text\Json\Node\JsonObjectEnumerator.cs" />
     <Compile Include="System\Text\Json\Node\JsonString.cs" />
   </ItemGroup>
 </Project>

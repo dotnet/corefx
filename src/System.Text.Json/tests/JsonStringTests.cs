@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -22,7 +22,7 @@ namespace System.Text.Json.Tests
         [InlineData("new lines\r\n")]
         [InlineData("tabs\ttabs\t")]
         [InlineData("\\u003e\\u003e\\u003e\\u003e\\u003e")]
-        [InlineData("zażółć gęślą jaźń")]
+        [InlineData("za\u017C\u00F3\u0142\u0107 g\u0119\u015Bl\u0105 ja\u017A\u0144")]
         [InlineData("\u6f22\u5b57 \u6f22\u5b57")]
         [InlineData(">><++>>>\">>\\>>&>>>\u6f22\u5B57>>>")]
         [InlineData("Here is a string: \\\"\\\"\":\"Here is a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str")]
@@ -61,12 +61,38 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void TestReadonlySpan()
         {
-            var spanValue = new ReadOnlySpan<char>(new char[] { 's', 'p', 'a', 'n'});
+            var spanValue = new ReadOnlySpan<char>(new char[] { 's', 'p', 'a', 'n' });
             Assert.Equal("span", new JsonString(spanValue).Value);
 
             string property = null;
             spanValue = property.AsSpan();
             var jsonString = new JsonString(spanValue);
+            Assert.Equal("", jsonString.Value);
+        }
+
+        [Fact]
+        public static void TestGuid()
+        {
+            var guidString = "ca761232-ed42-11ce-bacd-00aa0057b223";
+            Guid guid = new Guid(guidString);
+            var jsonString = new JsonString(guid);
+            Assert.Equal(guidString, jsonString);
+        }
+
+        [Fact]
+        public static void TestDateTime()
+        {
+            DateTime dateTime = new DateTime(DateTime.MinValue.Ticks);
+            var jsonString = new JsonString(dateTime);
+            Assert.Equal(dateTime.ToString(), jsonString);
+        }
+
+        [Fact]
+        public static void TestDateTimeOffset()
+        {
+            DateTimeOffset dateTimeOffset = new DateTime(DateTime.MinValue.Ticks);
+            var jsonString = new JsonString(dateTimeOffset);
+            Assert.Equal(dateTimeOffset.ToString(), jsonString);
         }
 
         [Fact]

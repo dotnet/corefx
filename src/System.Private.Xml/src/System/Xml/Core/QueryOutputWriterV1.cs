@@ -23,13 +23,13 @@ namespace System.Xml
     /// </summary>
     internal class QueryOutputWriterV1 : XmlWriter
     {
-        private XmlWriter _wrapped;
+        private readonly XmlWriter _wrapped;
         private bool _inCDataSection;
-        private Dictionary<XmlQualifiedName, XmlQualifiedName> _lookupCDataElems;
-        private BitStack _bitsCData;
-        private XmlQualifiedName _qnameCData;
+        private readonly Dictionary<XmlQualifiedName, XmlQualifiedName> _lookupCDataElems;
+        private readonly BitStack _bitsCData;
+        private readonly XmlQualifiedName _qnameCData;
         private bool _outputDocType, _inAttr;
-        private string _systemId, _publicId;
+        private readonly string _systemId, _publicId;
 
         public QueryOutputWriterV1(XmlWriter writer, XmlWriterSettings settings)
         {
@@ -239,10 +239,12 @@ namespace System.Xml
 
         public override void WriteBase64(byte[] buffer, int index, int count)
         {
-            if (!_inAttr && (_inCDataSection || StartCDataSection()))
-                _wrapped.WriteBase64(buffer, index, count);
-            else
-                _wrapped.WriteBase64(buffer, index, count);
+            if (!_inAttr && !_inCDataSection)
+            {
+                StartCDataSection();
+            }
+
+            _wrapped.WriteBase64(buffer, index, count);
         }
 
         public override void WriteEntityRef(string name)

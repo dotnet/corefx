@@ -397,8 +397,8 @@ namespace System.Text.RegularExpressions
             new LowerCaseMapping('\uFF21', '\uFF3A', LowercaseAdd, 32),
         };
 
-        private List<SingleRange> _rangelist;
-        private StringBuilder _categories;
+        private readonly List<SingleRange> _rangelist;
+        private readonly StringBuilder _categories;
         private bool _canonical;
         private bool _negate;
         private RegexCharClass _subtractor;
@@ -517,8 +517,7 @@ namespace System.Text.RegularExpressions
         public void AddRange(char first, char last)
         {
             _rangelist.Add(new SingleRange(first, last));
-            if (_canonical && _rangelist.Count > 0 &&
-                first <= _rangelist[_rangelist.Count - 1].Last)
+            if (_canonical && first <= last)
             {
                 _canonical = false;
             }
