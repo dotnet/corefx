@@ -11,6 +11,103 @@ namespace System.Text.Json.Tests
     public static partial class JsonArrayTests
     {
         [Fact]
+        public static void TestAdd()
+        {
+            var jsonArray = new JsonArray();
+            int idx = 0;
+
+            jsonArray.Add("value");
+            Assert.Equal("value", (JsonString)jsonArray[idx++]);
+            Assert.True(jsonArray.Contains("value"));
+
+            jsonArray.Add(true);
+            Assert.True(((JsonBoolean)jsonArray[idx++]).Value);
+            Assert.True(jsonArray.Contains(true));
+
+            jsonArray.Add(byte.MaxValue);
+            Assert.Equal(byte.MaxValue, ((JsonNumber)jsonArray[idx++]).GetByte());
+            Assert.True(jsonArray.Contains(byte.MaxValue));
+
+            jsonArray.Add(short.MaxValue);
+            Assert.Equal(short.MaxValue, ((JsonNumber)jsonArray[idx++]).GetInt16());
+            Assert.True(jsonArray.Contains(short.MaxValue));
+
+            jsonArray.Add(int.MaxValue);
+            Assert.Equal(int.MaxValue, ((JsonNumber)jsonArray[idx++]).GetInt32());
+            Assert.True(jsonArray.Contains(int.MaxValue));
+
+            jsonArray.Add(long.MaxValue);
+            Assert.Equal(long.MaxValue, ((JsonNumber)jsonArray[idx++]).GetInt64());
+            Assert.True(jsonArray.Contains(long.MaxValue));
+
+            jsonArray.Add(3.14f);
+            Assert.Equal(3.14f, ((JsonNumber)jsonArray[idx++]).GetSingle());
+
+            jsonArray.Add(3.14);
+            Assert.Equal(3.14, ((JsonNumber)jsonArray[idx++]).GetDouble());
+
+            jsonArray.Add(sbyte.MaxValue);
+            Assert.Equal(sbyte.MaxValue, ((JsonNumber)jsonArray[idx++]).GetSByte());
+
+            jsonArray.Add(ushort.MaxValue);
+            Assert.Equal(ushort.MaxValue, ((JsonNumber)jsonArray[idx++]).GetUInt16());
+
+            jsonArray.Add(uint.MaxValue);
+            Assert.Equal(uint.MaxValue, ((JsonNumber)jsonArray[idx++]).GetUInt32());
+
+            jsonArray.Add(ulong.MaxValue);
+            Assert.Equal(ulong.MaxValue, ((JsonNumber)jsonArray[idx++]).GetUInt64());
+
+            jsonArray.Add(decimal.One);
+            Assert.Equal(decimal.One, ((JsonNumber)jsonArray[idx++]).GetDecimal());
+        }
+
+        [Fact]
+        public static void TestInsert()
+        {
+            var jsonArray = new JsonArray();
+
+            jsonArray.Insert(0, "value");
+            Assert.Equal("value", (JsonString)jsonArray[0]);
+
+            jsonArray.Insert(0, true);
+            Assert.True(((JsonBoolean)jsonArray[0]).Value);
+
+            jsonArray.Insert(0, byte.MaxValue);
+            Assert.Equal(byte.MaxValue, ((JsonNumber)jsonArray[0]).GetByte());
+
+            jsonArray.Insert(0, short.MaxValue);
+            Assert.Equal(short.MaxValue, ((JsonNumber)jsonArray[0]).GetInt16());
+
+            jsonArray.Insert(0, int.MaxValue);
+            Assert.Equal(int.MaxValue, ((JsonNumber)jsonArray[0]).GetInt32());
+
+            jsonArray.Insert(0, long.MaxValue);
+            Assert.Equal(long.MaxValue, ((JsonNumber)jsonArray[0]).GetInt64());
+
+            jsonArray.Insert(0, 3.14f);
+            Assert.Equal(3.14f, ((JsonNumber)jsonArray[0]).GetSingle());
+
+            jsonArray.Insert(0, 3.14);
+            Assert.Equal(3.14, ((JsonNumber)jsonArray[0]).GetDouble());
+
+            jsonArray.Insert(0, sbyte.MaxValue);
+            Assert.Equal(sbyte.MaxValue, ((JsonNumber)jsonArray[0]).GetSByte());
+
+            jsonArray.Insert(0, ushort.MaxValue);
+            Assert.Equal(ushort.MaxValue, ((JsonNumber)jsonArray[0]).GetUInt16());
+
+            jsonArray.Insert(0, uint.MaxValue);
+            Assert.Equal(uint.MaxValue, ((JsonNumber)jsonArray[0]).GetUInt32());
+
+            jsonArray.Insert(0, ulong.MaxValue);
+            Assert.Equal(ulong.MaxValue, ((JsonNumber)jsonArray[0]).GetUInt64());
+
+            jsonArray.Insert(0, decimal.One);
+            Assert.Equal(decimal.One, ((JsonNumber)jsonArray[0]).GetDecimal());
+        }
+
+        [Fact]
         public static void TestAddingJsonArray()
         {
             var preferences = new JsonObject()
