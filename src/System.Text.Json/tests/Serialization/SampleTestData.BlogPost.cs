@@ -1,10 +1,13 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
 using System.Net;
-using System.Text;
 
 namespace System.Text.Json.Serialization.Tests.Schemas.BlogPost
-{
+{ 
+// This schema populated using blogpost structure of https://medium.com
     public class Post
     {
         public Value Value { get; set; }

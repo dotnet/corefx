@@ -395,6 +395,10 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData(65536)]
         public static async void FlushThresholdTest(int bufferSize)
         {
+            // bufferSize * 0.9 is the threshold size from codebase, substruct 2 for [" characters, then create a 
+            // string containing (threshold - 2) amount of char 'a' which when written into output buffer produces buffer 
+            // which size equal to or very close to threshold size, then adding the string to the list, then adding a big 
+            // object to the list which changes depth of written json and should cause buffer flush
             int thresholdSize = (int)(bufferSize * 0.9 - 2);
             FlushThresholdTestClass serializeObject = new FlushThresholdTestClass(GenerateListOfSize(bufferSize));
             List<object> list = new List<object>();
@@ -453,7 +457,7 @@ namespace System.Text.Json.Serialization.Tests
                         VersionId = $"version{i}",
                         CreatorId = $"{i}creatorId",
                         HomeCollectionId = $"HomeCollectionId{i}",
-                        Title = $"A Smart Programmer Understands The Problems Worth Fixing {i}",
+                        Title = $"The Adventure of the Engineer’s Thumb {i}",
                         LatestVersion = $"LatestVersion{i}.{i}",
                         LatestPublishedVersion = $"LatestPublishedVersion{i}",
                         DetectedLanguage = "en",
@@ -468,7 +472,7 @@ namespace System.Text.Json.Serialization.Tests
                         DisplayAuthor = $"Author: {i}",
                         Content = new Content()
                         {
-                            Subtitle = $"The difference between solving any problem and the right one {i}",
+                            Subtitle = $"The Five Orange Pips {i}",
                             BodyModel = new BodyModel()
                             {
                                 Paragraphs = new List<Paragraph>(),  
@@ -481,7 +485,7 @@ namespace System.Text.Json.Serialization.Tests
                             AllowNotes = i % 2 == 0,
                             PreviewImage = new PreviewImage
                             {
-                                ImageId = $"1*SNhelFbiMUTGX73GF_c_{i}.jpeg",  
+                                ImageId = $"1-Image-{i}.jpeg",  
                                 OriginalWidth = 1200 + i,
                                 OriginalHeight = 400 + i,
                                 Strategy = "resample",
@@ -491,14 +495,14 @@ namespace System.Text.Json.Serialization.Tests
                             WordCount = 1000 + i,
                             ImageCount = i,
                             ReadingTime = 5.6632075471698 + i,
-                            Subtitle = "The difference between solving any problem and the right one",
+                            Subtitle = "Lorem ipsam subtitle of virtuals",
                             UserPostRelation = new UserPostRelation
                             {
-                                UserId = $"78aeffcb483e{i}",
-                                PostId = $"dcf15871f943{i}",
+                                UserId = $"UserPostRelation_UsrId{i}",
+                                PostId = $"UserPostRelation_PostId{i}",
                                 ViewedAt = DateTime.Now,
                                 PresentedCountInStream = i,
-                                LastReadSectionName = $"Section {i}",
+                                LastReadSectionName = $"Last Read Section {i}",
                                 ClapCount = 0
                             },
                             UsersBySocialRecommends = new List<object>(),
@@ -509,15 +513,15 @@ namespace System.Text.Json.Serialization.Tests
                             {
                                 new Tag
                                 {
-                                    Slug = "javascript",
-                                    Name = "JavaScript",
+                                    Slug = "csharp",
+                                    Name = "C#",
                                     PostCount = 98130,
                                     Metadata = new Metadata1
                                     {
                                         PostCount = 98130,
                                         CoverImage = new CoverImage
                                         {
-                                            Id = "1*uq5ZTlw6HLRRqbHaPYYL0g.png",
+                                            Id = "CoverImageId.png",
                                             OriginalWidth = 1112,
                                             OriginalHeight = 556,
                                             IsFeatured = true,
@@ -537,11 +541,11 @@ namespace System.Text.Json.Serialization.Tests
                                         PostCount = 62810,
                                         CoverImage = new CoverImage
                                         {
-                                            Id = "0*R1c-uLLQzlqqiA-b",
-                                            OriginalWidth = 8192,
-                                            OriginalHeight = 5461,
+                                            Id = "cover-image-id-b",
+                                            OriginalWidth = 812,
+                                            OriginalHeight = 461,
                                             IsFeatured = true,
-                                            UnsplashPhotoId = "UKdCsFKBbkQ"
+                                            UnsplashPhotoId = "PhotoId1"
                                         }
                                     },
                                     Type = "Tag"
@@ -587,18 +591,18 @@ namespace System.Text.Json.Serialization.Tests
                             {
                                 new Topic
                                 {
-                                    TopicId = "decb52b64abf",
+                                    TopicId = "TopicID52b64",
                                     Slug = "programming",
                                     CreatedAt  = 1493934116328,
                                     DeletedAt = 0,
                                     Image = new Image
                                     {
-                                        Id = "1*iPa136b1cGEO7lvoXg6uHQ@2x.jpeg",
+                                        Id = "1*TopitImageid@2x.jpeg",
                                         OriginalWidth = 6016,
                                         OriginalHeight = 4016
                                     },
                                     Name = "Programming",
-                                    Description = "The good, the bad, the buggy.",
+                                    Description = "Once upon a time.",
                                     RelatedTopics = new List<Post>(),
                                     Visibility = 1,
                                     Type = "Topic"
@@ -606,7 +610,7 @@ namespace System.Text.Json.Serialization.Tests
                             }
                         },
                         Coverless = i % 3 == 0,
-                        Slug = $"a smart programmer understands the problems worth fixing{i}",
+                        Slug = $"Lorem ipsam mampsa sorem{i}",
                         TranslationSourcePostId = string.Empty,
                         TranslationSourceCreatorId = string.Empty,
                         IsApprovedTranslation = false,
@@ -617,7 +621,7 @@ namespace System.Text.Json.Serialization.Tests
                         ImportedUrl = string.Empty,
                         ImportedPublishedAt = 0,
                         Visibility = 1,
-                        UniqueSlug = $"a smart programmer understands the problems worth fixing dcf15871f943{i}",
+                        UniqueSlug = $"There were doors all round the hall, but they were all locked {i}",
                         PreviewContent = new PreviewContent {
                             BodyModel = new BodyModel
                             {
@@ -631,7 +635,7 @@ namespace System.Text.Json.Serialization.Tests
                                         Layout = 10,
                                         Metadata = new Metadata
                                         {
-                                            Id = "1*SNhelFbiMUTGX73GF_c_ew.jpeg",
+                                            Id = "1-pararagraph-id.jpeg",
                                             OriginalWidth = 1200,
                                             OriginalHeight = 412,
                                             IsFeatured = true
@@ -641,7 +645,7 @@ namespace System.Text.Json.Serialization.Tests
                                     {
                                         Name = "97c6",
                                         Type = 3,
-                                        Text = "A Smart Programmer Understands The Problems Worth Fixing",
+                                        Text = "There were doors all round the hall, but they were all locked",
                                         Markups = new List<Markup>(),
                                         Alignment = 1
                                     },
@@ -649,7 +653,7 @@ namespace System.Text.Json.Serialization.Tests
                                     {
                                         Name = "d1b2",
                                         Type = 13,
-                                        Text = "The difference between solving any problem\u2026",
+                                        Text = "There were doors all round the hall, but they were all locked",
                                         Markups = new List<Markup>
                                         {
                                             new Markup
@@ -675,7 +679,7 @@ namespace System.Text.Json.Serialization.Tests
                                 }
                             },
                             IsFullContent = false,
-                            Subtitle = "The difference between solving any problem and the right one"
+                            Subtitle = "There were doors all round the hall, but they were all locked"
                         },
                         License = i,
                         InResponseToMediaResourceId = string.Empty,
@@ -710,7 +714,7 @@ namespace System.Text.Json.Serialization.Tests
                         CurationEligibleAt = i,
                         PrimaryTopic = new Topic
                         {
-                            TopicId = $"{i}decb52b64abf",
+                            TopicId = $"{i}decTopicId",
                             Slug = "programming",
                             CreatedAt = 1493934116328,
                             DeletedAt = 0,
@@ -719,14 +723,14 @@ namespace System.Text.Json.Serialization.Tests
                                 
                             },
                             Name = "Programming",
-                            Description = "The good, the bad, the buggy.",
+                            Description = "Lorem ipsam programming.",
                             RelatedTopics = new List<Post>(),
                             Visibility = i,
                             RelatedTags = new List<object>(),
                             RelatedTopicIds = new List<object>(),
                             Type = "Topic"
                         },
-                        PrimaryTopicId = $"{i}decb52b64abf",
+                        PrimaryTopicId = $"{i}PrimaryTopicId",
                         IsProxyPost = false,
                         ProxyPostFaviconUrl = string.Empty,
                         ProxyPostProviderName = "ProxyPostProviderName",
@@ -737,7 +741,7 @@ namespace System.Text.Json.Serialization.Tests
                     {
                         new MentionedUser()
                         {
-                            UserId = "c4ccb3ab8d17",
+                            UserId = "cccccaaaabbbbbb",
                             Name = "Lorem Ipsam ",
                             Username = "loremipsam",
                             CreatedAt = 1438064675373,
@@ -745,7 +749,7 @@ namespace System.Text.Json.Serialization.Tests
                             BackgroundImageId = string.Empty,
                             Bio = string.Empty,
                             TwitterScreenName = string.Empty,
-                            FacebookAccountId = "987654321987654",
+                            FacebookAccountId = "9988998877662222111",
                             AllowNotes = 1,
                             MediumMemberAt = 0,
                             IsNsfw = false,
@@ -760,7 +764,7 @@ namespace System.Text.Json.Serialization.Tests
                         {
                             User  = new User
                             {
-                                UserId = "c4ccb3ab8d17",
+                                UserId = "222ffbbb888kkk",
                                 Name = "Green Field",
                                 Username = "greenfield",
                                 CreatedAt = 1438064675373,
@@ -784,34 +788,34 @@ namespace System.Text.Json.Serialization.Tests
                     {
                         new CollectionUserRelation
                         {
-                            CollectionId = "6b0b79fe3153",
+                            CollectionId = "6666ddd777ddd",
                             Role = "ADMIN",
-                            UserId = "78aeffcb483e"
+                            UserId = "9999ddd9999"
                         }
                     },
                     References = new References
                     {
                         User = new User
                         {
-                            UserId = $"7ef192b7f545",
+                            UserId = $"777hhh99888",
                             Username = "johndoe",
                             Name = "John Doe",
                             CreatedAt = 1456628553936,
-                            ImageId = $"{i}*h8Ph7pgNeQHZTiLlah3h-A.jpeg",
+                            ImageId = $"{i}image-id-A.jpeg",
                             BackgroundImageId = string.Empty,
-                            Bio = "I believe ideas should be open and free. This is a non-profit initiative to write about fundamentals you won't find anywhere else.",
+                            Bio = "Do cats eat bats? Do cats eat bats. Do cats eat bats? Do cats eat bats. Do cats eat bats? Do cats eat bats. Do cats eat bats? Do cats eat bats",
                             TwitterScreenName = "JohnDoe",
                             SocialStats = new SocialStats
                             {
-                                UserId = "7ef192b7f545",
+                                UserId = "777hhh99888",
                                 UsersFollowedByCount = 4000 + i,
                                 UsersFollowedCount = i,
                                 Type = "SocialStats"
                             },
                             Social = new Social
                             {
-                                UserId = "78aeffcb483e",
-                                TargetUserId = "7ef192b7f545",
+                                UserId = "2299kkhhh77gglll",
+                                TargetUserId = "22kkoobbb777",
                                 Type = "Social"
                             },
                             FacebookAccountId = string.Empty,
@@ -824,13 +828,13 @@ namespace System.Text.Json.Serialization.Tests
                         },
                         Social = new Social
                         {
-                            UserId = "78aeffcb483e",
-                            TargetUserId = "7ef192b7f545",
+                            UserId = "888hh99kkk222",
+                            TargetUserId = "2299kkhhh77gglll",
                             Type = "Social"
                         },
                         SocialStats = new SocialStats
                         {
-                            UserId = "7ef192b7f545",
+                            UserId = "2299kkhhh77gglll",
                             UsersFollowedByCount = 4000 + i,
                             UsersFollowedCount = i,
                             Type = "SocialStats"
@@ -844,7 +848,7 @@ namespace System.Text.Json.Serialization.Tests
                     {
                         Name = $"a{i}b{j}",
                         Type = i,
-                        Text = "The picture of two firefighters clearing up the snow surrounding a hydrant. In case there's an emergency, the cost in lives due to having snow blocking the hydrant is more significant than the cost of clearing them all beforehand. Clearing a hydrant after a snowfall is a problem worth solving.",
+                        Text = "Down, down, down. Would the fall never come to an end! ‘I wonder how many miles I’ve fallen by this time. I think—’ (for, you see, Alice had learnt several things of this sort in her lessons in the schoolroom, and though this was not a very good opportunity for showing off her knowledge, as there was no one to listen to her, still it was good practice to say it over) ‘—yes, that’s about the right distance—but then I wonder what Latitude or Longitude I’ve got to",
                         Markups = new List<Markup>(), 
                     };
                     if (j % 2 == 0)
@@ -868,7 +872,7 @@ namespace System.Text.Json.Serialization.Tests
                         purpleParagraph.Metadata = new Metadata
                         {
                             IsFeatured = i % 6 == 0,
-                            Id = $"{i}*{j}5XZrAmo8ToLaZsP5vxSY9A.png",
+                            Id = $"{i}*{j}paragraph-id.png",
                             OriginalHeight = 500 + i + j,
                             OriginalWidth = 500 + i + j
                         };
