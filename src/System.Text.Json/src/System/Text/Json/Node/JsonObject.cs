@@ -139,7 +139,7 @@ namespace System.Text.Json
         ///   Adds the specified property as a <see cref="JsonString"/> to the JSON object.
         /// </summary>
         /// <param name="propertyName">Name of the property to add.</param>
-        /// <param name="propertyValue"><see cref="ReadOnlySpan{T}"/> value of the property to add.</param>
+        /// <param name="propertyValue"><see cref="ReadOnlySpan{Char}"/> value of the property to add.</param>
         /// <exception cref="ArgumentException">
         ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
         /// </exception>

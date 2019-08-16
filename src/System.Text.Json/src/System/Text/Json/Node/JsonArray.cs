@@ -23,7 +23,7 @@ namespace System.Text.Json
         ///   Initializes a new instance of the <see cref="JsonArray"/> class representing the specified collection.
         /// </summary>
         /// <param name="values">Collection to represent.</param>
-        public JsonArray(IEnumerable<JsonNode> values) => new List<JsonNode>(values);
+        public JsonArray(IEnumerable<JsonNode> values) => _list = new List<JsonNode>(values);
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="JsonArray"/> class representing the specified collection of <see cref="string"/>s.
