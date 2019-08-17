@@ -7,7 +7,7 @@ using System.Net;
 
 namespace System.Text.Json.Serialization.Tests.Schemas.BlogPost
 { 
-// This schema populated using blogpost structure of https://medium.com
+    // This schema populated using blogpost structure of https://medium.com
     public class Post
     {
         public Value Value { get; set; }

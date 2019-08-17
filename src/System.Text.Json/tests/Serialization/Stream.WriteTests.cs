@@ -385,7 +385,6 @@ namespace System.Text.Json.Serialization.Tests
             }
         }
 
-
         [Theory]
         [InlineData(128)]
         [InlineData(1024)]
@@ -395,7 +394,7 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData(65536)]
         public static async void FlushThresholdTest(int bufferSize)
         {
-            // bufferSize * 0.9 is the threshold size from codebase, substruct 2 for [" characters, then create a 
+            // bufferSize * 0.9 is the threshold size from codebase, subtract 2 for [" characters, then create a 
             // string containing (threshold - 2) amount of char 'a' which when written into output buffer produces buffer 
             // which size equal to or very close to threshold size, then adding the string to the list, then adding a big 
             // object to the list which changes depth of written json and should cause buffer flush
@@ -425,7 +424,8 @@ namespace System.Text.Json.Serialization.Tests
             }
         }
 
-        private class FlushThresholdTestClass {
+        private class FlushThresholdTestClass 
+        {
             public string StringProperty { get; set; }
             public List<int> ListOfInts { get; set; }
             public FlushThresholdTestClass(List<int> list)
