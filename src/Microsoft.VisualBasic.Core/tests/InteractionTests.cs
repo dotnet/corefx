@@ -11,6 +11,8 @@ namespace Microsoft.VisualBasic.Tests
 {
     public class InteractionTests
     {
+        private static readonly bool s_SupportRegistry = !PlatformDetection.IsUap;
+
         [Fact]
         public void AppActivate_ProcessId()
         {
@@ -139,7 +141,7 @@ namespace Microsoft.VisualBasic.Tests
         [Fact]
         public void DeleteSetting()
         {
-            if (PlatformDetection.IsWindows)
+            if (s_SupportRegistry)
             {
                 Assert.Throws<ArgumentException>(() => Interaction.DeleteSetting(AppName: "", Section: null, Key: null));
             }
@@ -208,7 +210,7 @@ namespace Microsoft.VisualBasic.Tests
         [Fact]
         public void GetAllSettings()
         {
-            if (PlatformDetection.IsWindows)
+            if (s_SupportRegistry)
             {
                 Assert.Throws<ArgumentException>(() => Interaction.GetAllSettings(AppName: "", Section: ""));
             }
@@ -222,7 +224,7 @@ namespace Microsoft.VisualBasic.Tests
         [Fact]
         public void GetSetting()
         {
-            if (PlatformDetection.IsWindows)
+            if (s_SupportRegistry)
             {
                 Assert.Throws<ArgumentException>(() => Interaction.GetSetting(AppName: "", Section: "", Key: "", Default: ""));
             }
@@ -304,7 +306,7 @@ namespace Microsoft.VisualBasic.Tests
         [Fact]
         public void SaveSetting()
         {
-            if (PlatformDetection.IsWindows)
+            if (s_SupportRegistry)
             {
                 Assert.Throws<ArgumentException>(() => Interaction.SaveSetting(AppName: "", Section: "", Key: "", Setting: ""));
 
