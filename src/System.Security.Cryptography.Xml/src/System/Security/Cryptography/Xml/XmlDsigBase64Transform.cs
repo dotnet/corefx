@@ -66,7 +66,7 @@ namespace System.Security.Cryptography.Xml
 
         private void LoadStreamInput(Stream inputStream)
         {
-            if (inputStream == null) throw new ArgumentException("obj");
+            if (inputStream == null) throw new ArgumentException(nameof(inputStream));
             MemoryStream ms = new MemoryStream();
             byte[] buffer = new byte[1024];
             int bytesRead;
