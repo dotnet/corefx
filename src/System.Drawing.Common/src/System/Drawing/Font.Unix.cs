@@ -100,7 +100,7 @@ namespace System.Drawing
                     inchs = nSrc / 72f;
                     break;
                 default:
-                    throw new ArgumentException("Invalid GraphicsUnit");
+                    throw new ArgumentException(SR.InvalidGraphicsUnit);
             }
 
             switch (toUnit)
@@ -125,7 +125,7 @@ namespace System.Drawing
                     nTrg = inchs * 72;
                     break;
                 default:
-                    throw new ArgumentException("Invalid GraphicsUnit");
+                    throw new ArgumentException(SR.InvalidGraphicsUnit);
             }
         }
 
@@ -215,7 +215,7 @@ namespace System.Drawing
         public IntPtr ToHfont()
         {
             if (_nativeFont == IntPtr.Zero)
-                throw new ArgumentException("Object has been disposed.");
+                throw new ArgumentException(SR.ObjectDisposed);
 
             return _nativeFont;
         }

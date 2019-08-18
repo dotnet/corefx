@@ -78,7 +78,7 @@ namespace System.Drawing.Drawing2D
             if (pts == null)
                 throw new ArgumentNullException(nameof(pts));
             if (pts.Length != types.Length)
-                throw new ArgumentException("Invalid parameter passed. Number of points and types must be same.");
+                throw new ArgumentException(SR.NumberOfPointsAndTypesMustBeSame);
 
             int status = Gdip.GdipCreatePath2I(pts, types, pts.Length, fillMode, out _nativePath);
             Gdip.CheckStatus(status);
@@ -89,7 +89,7 @@ namespace System.Drawing.Drawing2D
             if (pts == null)
                 throw new ArgumentNullException(nameof(pts));
             if (pts.Length != types.Length)
-                throw new ArgumentException("Invalid parameter passed. Number of points and types must be same.");
+                throw new ArgumentException(SR.NumberOfPointsAndTypesMustBeSame);
 
             int status = Gdip.GdipCreatePath2(pts, types, pts.Length, fillMode, out _nativePath);
             Gdip.CheckStatus(status);
@@ -141,7 +141,7 @@ namespace System.Drawing.Drawing2D
             set
             {
                 if ((value < FillMode.Alternate) || (value > FillMode.Winding))
-                    throw new InvalidEnumArgumentException("FillMode", (int)value, typeof(FillMode));
+                    throw new InvalidEnumArgumentException(nameof(FillMode), (int)value, typeof(FillMode));
 
                 int status = Gdip.GdipSetPathFillMode(_nativePath, value);
                 Gdip.CheckStatus(status);
@@ -185,7 +185,7 @@ namespace System.Drawing.Drawing2D
                 int status = Gdip.GdipGetPointCount(_nativePath, out count);
                 Gdip.CheckStatus(status);
                 if (count == 0)
-                    throw new ArgumentException("PathPoints");
+                    throw new ArgumentException(nameof(PathPoints));
 
                 PointF[] points = new PointF[count];
                 status = Gdip.GdipGetPathPoints(_nativePath, points, count);
@@ -203,7 +203,7 @@ namespace System.Drawing.Drawing2D
                 int status = Gdip.GdipGetPointCount(_nativePath, out count);
                 Gdip.CheckStatus(status);
                 if (count == 0)
-                    throw new ArgumentException("PathTypes");
+                    throw new ArgumentException(nameof(PathTypes));
 
                 byte[] types = new byte[count];
                 status = Gdip.GdipGetPathTypes(_nativePath, types, count);
