@@ -85,7 +85,7 @@ namespace System.Composition.Hosting.Core
                 ExportDescriptor relay = _descriptor.Value;
                 if (relay == null)
                 {
-                    throw new ArgumentNullException("descriptor");
+                    throw new ArgumentNullException(nameof(_descriptor));
                 }
                 return relay;
             }
