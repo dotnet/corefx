@@ -120,6 +120,9 @@
   <data name="ActivityIdFormatInvalid" xml:space="preserve">
     <value>"Value must be a valid ActivityIdFormat value"</value>
   </data>
+  <data name="ActivityNotRunning" xml:space="preserve">
+    <value>Trying to set an Activity that is not running</value>
+  </data>
   <data name="ActivityNotStarted" xml:space="preserve">
     <value>"Can not stop an Activity that was not started"</value>
   </data>
