@@ -15,12 +15,12 @@ internal static partial class Interop
         internal enum Signals
         {
             None = 0,
-            SignalDtr = 0b000001,
-            SignalDsr = 0b000010,
-            SignalRts = 0b000100,
-            SignalCts = 0b001000,
-            SignalDcd = 0b010000,
-            SignalRng = 0b100000,
+            SignalDtr = 1 << 0,
+            SignalDsr = 1 << 1,
+            SignalRts = 1 << 2,
+            SignalCts = 1 << 3,
+            SignalDcd = 1 << 4,
+            SignalRng = 1 << 5,
             Error = -1,
         }
 

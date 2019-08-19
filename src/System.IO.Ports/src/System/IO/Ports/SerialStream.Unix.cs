@@ -650,11 +650,7 @@ namespace System.IO.Ports
             {
                 ThreadPool.QueueUserWorkItem(s => {
                         var thisRef = (SerialStream)s;
-                        SerialDataReceivedEventHandler dataReceived = thisRef._dataReceived;
-                        if (dataReceived != null)
-                        {
-                            dataReceived(thisRef, new SerialDataReceivedEventArgs(SerialData.Chars));
-                        }
+                        thisRef._dataReceived?.Invoke(thisRef, new SerialDataReceivedEventArgs(SerialData.Chars));
                     }, this);
             }
         }
@@ -665,11 +661,7 @@ namespace System.IO.Ports
             {
                 ThreadPool.QueueUserWorkItem(s => {
                         var thisRef = (SerialStream)s;
-                        SerialPinChangedEventHandler pinChangedHandler = thisRef._pinChanged;
-                        if (pinChangedHandler != null)
-                        {
-                            pinChangedHandler(thisRef, new SerialPinChangedEventArgs(pinChanged));
-                        }
+                        thisRef._pinChanged?.Invoke(thisRef, new SerialPinChangedEventArgs(pinChanged));
                     }, this);
             }
         }
@@ -892,8 +884,6 @@ namespace System.IO.Ports
                     // user didn't have time to respond.
                     // Diffing seems like a better solution.
                     Signals current = Interop.Termios.TermiosGetAllSignals(_handle);
-                    if (current != lastSignals)
-                        Console.WriteLine($"{lastSignals} => {current}");
 
                     // There is no really good action we can take when this errors so just ignore
                     // a sinle event.
