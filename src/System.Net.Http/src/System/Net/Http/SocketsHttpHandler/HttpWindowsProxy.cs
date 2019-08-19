@@ -22,8 +22,7 @@ namespace System.Net.Http
 
         private readonly MultiProxy _insecureProxy;    // URI of the http system proxy if set
         private readonly MultiProxy _secureProxy;      // URI of the https system proxy if set
-        private readonly ConcurrentDictionary<string, CachedProxy> _cachedProxies;
-        private readonly Timer _cacheCleanupTimer;
+        private readonly FailedProxyCache _failedProxyCache = new FailedProxyCache();
         private readonly List<Regex> _bypass;          // list of domains not to proxy
         private readonly bool _bypassLocal = false;    // we should bypass domain considered local
         private readonly List<IPAddress> _localIp;
@@ -77,10 +76,8 @@ namespace System.Net.Http
             {
                 if (NetEventSource.IsEnabled) NetEventSource.Info(proxyHelper, $"ManualSettingsUsed, {proxyHelper.Proxy}");
 
-                if (!string.IsNullOrEmpty(proxyHelper.Proxy))
-                {
-                    ParseProxyConfig(proxyHelper.Proxy, out _secureProxy, out _insecureProxy);
-                }
+                _secureProxy = MultiProxy.Parse(proxyHelper.Proxy, true);
+                _insecureProxy = MultiProxy.Parse(proxyHelper.Proxy, false);
 
                 if (!string.IsNullOrWhiteSpace(proxyHelper.ProxyBypass))
                 {
@@ -179,21 +176,6 @@ namespace System.Net.Http
                     }
                 }
             }
-
-            _cachedProxies = new ConcurrentDictionary<string, CachedProxy>();
-            _cacheCleanupTimer = new Timer(state =>
-            {
-                var cachedProxies = (ConcurrentDictionary<string, CachedProxy>)state;
-                int ticks = Environment.TickCount;
-
-                foreach (KeyValuePair<string, CachedProxy> kvp in cachedProxies)
-                {
-                    if ((ticks - kvp.Value.LastAccessTicks) > CacheCleanupAgeMilliseconds)
-                    {
-                        cachedProxies.TryRemove(kvp.Key, out _);
-                    }
-                }
-            }, _cachedProxies, CacheCleanupFrequencyMilliseconds, CacheCleanupFrequencyMilliseconds);
         }
 
         public void Dispose()
@@ -206,122 +188,6 @@ namespace System.Net.Http
                 {
                     SafeWinHttpHandle.DisposeAndClearHandle(ref _sessionHandle);
                 }
-
-                _cacheCleanupTimer.Dispose();
-            }
-        }
-
-        /// <summary>
-        /// This function is used to parse WinINet Proxy strings. The strings are a semicolon
-        /// or whitespace separated list, with each entry in the following format:
-        /// ([&lt;scheme&gt;=][&lt;scheme&gt;"://"]&lt;server&gt;[":"&lt;port&gt;])
-        /// </summary>
-        private static void ParseProxyConfig(ReadOnlySpan<char> proxyString, out MultiProxy secureProxy, out MultiProxy insecureProxy)
-        {
-            Uri[] secureUris = new Uri[4], insecureUris = new Uri[4];
-            int secureUriCount = 0, insecureUriCount = 0;
-            int iter = 0;
-
-            while (true)
-            {
-                // Skip any delimiters.
-                while(iter < proxyString.Length && Array.IndexOf(s_proxyDelimiters, proxyString[iter]) != -1)
-                {
-                    ++iter;
-                }
-
-                if (iter == proxyString.Length)
-                {
-                    break;
-                }
-
-                // Determine which scheme this part is for.
-                bool isSecure = true, isInsecure = true;
-
-                if (proxyString.Slice(iter).StartsWith("http="))
-                {
-                    isSecure = false;
-                    iter += 5;
-                }
-                else if (proxyString.Slice(iter).StartsWith("https="))
-                {
-                    isInsecure = false;
-                    iter += 6;
-                }
-
-                if (proxyString.Slice(iter).StartsWith("http://"))
-                {
-                    isSecure = false;
-                    isInsecure = true;
-                    iter += 7;
-                }
-                else if (proxyString.Slice(iter).StartsWith("https://"))
-                {
-                    isSecure = true;
-                    isInsecure = false;
-                    iter += 8;
-                }
-
-                // Find the next delimiter.
-                int end = iter;
-                while (end < proxyString.Length && Array.IndexOf(s_proxyDelimiters, proxyString[end]) == -1)
-                {
-                    ++end;
-                }
-
-                // return URI if it's a match to what we want.
-                if (Uri.TryCreate(string.Concat("http://", proxyString.Slice(iter, end - iter)), UriKind.Absolute, out Uri uri))
-                {
-                    if (isSecure)
-                    {
-                        if (secureUriCount == secureUris.Length)
-                        {
-                            Array.Resize(ref secureUris, secureUriCount * 3 / 2);
-                        }
-
-                        secureUris[secureUriCount++] = uri;
-                    }
-
-                    if (isInsecure)
-                    {
-                        if (insecureUriCount == insecureUris.Length)
-                        {
-                            Array.Resize(ref insecureUris, insecureUriCount * 3 / 2);
-                        }
-
-                        insecureUris[insecureUriCount++] = uri;
-                    }
-                }
-
-                iter = end;
-            }
-
-            if (secureUriCount != 0)
-            {
-                if (secureUriCount != secureUris.Length)
-                {
-                    Array.Resize(ref secureUris, secureUriCount);
-                }
-
-                secureProxy = new MultiProxy(secureUris);
-            }
-            else
-            {
-                secureProxy = null;
-            }
-
-            if (insecureUriCount != 0)
-            {
-                if (insecureUriCount != insecureUris.Length)
-                {
-                    Array.Resize(ref insecureUris, insecureUriCount);
-                }
-
-                insecureProxy = new MultiProxy(insecureUris);
-            }
-            else
-            {
-                insecureProxy = null;
             }
         }
 
