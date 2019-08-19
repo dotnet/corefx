@@ -1,6 +1,10 @@
 ﻿<Project>
   <PropertyGroup>
+    <PackageConfigurations>
+      netcoreapp3.0;
+    </PackageConfigurations>
     <BuildConfigurations>
+      $(PackageConfigurations);
       netcoreapp;
       uap-Windows_NT;
     </BuildConfigurations>
