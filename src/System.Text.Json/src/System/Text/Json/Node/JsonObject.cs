@@ -572,5 +572,10 @@ namespace System.Text.Json
 
             return jsonObject;
         }
+
+        /// <summary>
+        ///   Returns <see cref="JsonNodeKind.Object"/>
+        /// </summary>
+        public override JsonNodeKind NodeKind { get => JsonNodeKind.Object; }
     }
 }

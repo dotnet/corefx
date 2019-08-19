@@ -100,5 +100,10 @@ namespace System.Text.Json
         /// </summary>
         /// <returns>A new JSON boolean that is a copy of this instance.</returns>
         public override JsonNode Clone() => new JsonBoolean(Value);
+
+        /// <summary>
+        ///   Returns <see cref="JsonNodeKind.Boolean"/>
+        /// </summary>
+        public override JsonNodeKind NodeKind { get => JsonNodeKind.Boolean; }
     }
 }

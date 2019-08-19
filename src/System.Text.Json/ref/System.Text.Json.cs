@@ -37,6 +37,7 @@ namespace System.Text.Json
         public int Count { get { throw null; } }
         public bool IsReadOnly { get { throw null; } }
         public System.Text.Json.JsonNode this[int idx] { get { throw null; } set { } }
+        public override System.Text.Json.JsonNodeKind NodeKind { get { throw null; } }
         public void Add(bool value) { }
         public void Add(byte value) { }
         public void Add(decimal value) { }
@@ -106,6 +107,7 @@ namespace System.Text.Json
     {
         public JsonBoolean() { }
         public JsonBoolean(bool value) { }
+        public override System.Text.Json.JsonNodeKind NodeKind { get { throw null; } }
         public bool Value { get { throw null; } set { } }
         public override System.Text.Json.JsonNode Clone() { throw null; }
         public override bool Equals(object obj) { throw null; }
@@ -268,6 +270,7 @@ namespace System.Text.Json
     public abstract partial class JsonNode
     {
         internal JsonNode() { }
+        public abstract System.Text.Json.JsonNodeKind NodeKind { get; }
         public System.Text.Json.JsonElement AsJsonElement() { throw null; }
         public abstract System.Text.Json.JsonNode Clone();
         public static System.Text.Json.JsonNode DeepCopy(System.Text.Json.JsonDocument jsonDocument) { throw null; }
@@ -280,6 +283,14 @@ namespace System.Text.Json
         public static System.Text.Json.JsonNode Parse(System.ReadOnlyMemory<char> json) { throw null; }
         public static System.Text.Json.JsonNode Parse(string json) { throw null; }
         public static bool TryGetNode(System.Text.Json.JsonElement jsonElement, out System.Text.Json.JsonNode jsonNode) { throw null; }
+    }
+    public enum JsonNodeKind : byte
+    {
+        Object = (byte)0,
+        Array = (byte)1,
+        String = (byte)2,
+        Number = (byte)3,
+        Boolean = (byte)4,
     }
     public sealed partial class JsonNumber : System.Text.Json.JsonNode, System.IEquatable<System.Text.Json.JsonNumber>
     {
@@ -300,6 +311,7 @@ namespace System.Text.Json
         public JsonNumber(uint value) { }
         [System.CLSCompliantAttribute(false)]
         public JsonNumber(ulong value) { }
+        public override System.Text.Json.JsonNodeKind NodeKind { get { throw null; } }
         public override System.Text.Json.JsonNode Clone() { throw null; }
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.Text.Json.JsonNumber other) { throw null; }
@@ -374,6 +386,7 @@ namespace System.Text.Json
         public JsonObject(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>> jsonProperties, System.Text.Json.DuplicatePropertyNameHandling duplicatePropertyNameHandling = System.Text.Json.DuplicatePropertyNameHandling.Replace) { }
         public JsonObject(System.Text.Json.DuplicatePropertyNameHandling duplicatePropertyNameHandling = System.Text.Json.DuplicatePropertyNameHandling.Replace) { }
         public System.Text.Json.JsonNode this[string propertyName] { get { throw null; } set { } }
+        public override System.Text.Json.JsonNodeKind NodeKind { get { throw null; } }
         public System.Collections.Generic.ICollection<string> PropertyNames { get { throw null; } }
         public System.Collections.Generic.ICollection<System.Text.Json.JsonNode> PropertyValues { get { throw null; } }
         public void Add(System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode> jsonProperty) { }
@@ -492,6 +505,7 @@ namespace System.Text.Json
         public JsonString(System.Guid value) { }
         public JsonString(System.ReadOnlySpan<char> value) { }
         public JsonString(string value) { }
+        public override System.Text.Json.JsonNodeKind NodeKind { get { throw null; } }
         public string Value { get { throw null; } set { } }
         public override System.Text.Json.JsonNode Clone() { throw null; }
         public override bool Equals(object obj) { throw null; }

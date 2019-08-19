@@ -690,5 +690,10 @@ namespace System.Text.Json
         /// </summary>
         /// <returns>A new JSON number that is a copy of this instance.</returns>
         public override JsonNode Clone() => new JsonNumber(_value);
+
+        /// <summary>
+        ///   Returns <see cref="JsonNodeKind.Number"/>
+        /// </summary>
+        public override JsonNodeKind NodeKind { get => JsonNodeKind.Number; }
     }
 }

@@ -19,16 +19,52 @@ namespace System.Text.Json
 
         public JsonElement AsJsonElement() { throw null; }
 
+        public abstract JsonNodeKind NodeKind { get; }
+
         public static JsonNode GetNode(JsonElement jsonElement) { throw null; }
+
         public static bool TryGetNode(JsonElement jsonElement, out JsonNode jsonNode) { throw null; }
 
-        public static JsonNode Parse(string json) { throw null; }
-        public static JsonNode Parse(ReadOnlySequence<byte> utf8Json) { throw null; }
-        public static JsonNode Parse(Stream utf8Json) { throw null; }
-        public static JsonNode Parse(ReadOnlyMemory<byte> utf8Json) { throw null; }
-        public static JsonNode Parse(ReadOnlyMemory<char> json) { throw null; }
+        public static JsonNode Parse(string json)
+        {
+            using (JsonDocument document = JsonDocument.Parse(json))
+            {
+                return DeepCopy(document);
+            }
+        }
 
-        // IClonable on all primary types?
+        public static JsonNode Parse(ReadOnlySequence<byte> utf8Json)
+        {
+            using (JsonDocument document = JsonDocument.Parse(utf8Json))
+            {
+                return DeepCopy(document);
+            }
+        }
+
+        public static JsonNode Parse(Stream utf8Json)
+        {
+            using (JsonDocument document = JsonDocument.Parse(utf8Json))
+            {
+                return DeepCopy(document);
+            }
+        }
+
+        public static JsonNode Parse(ReadOnlyMemory<byte> utf8Json)
+        {
+            using (JsonDocument document = JsonDocument.Parse(utf8Json))
+            {
+                return DeepCopy(document);
+            }
+        }
+
+        public static JsonNode Parse(ReadOnlyMemory<char> json)
+        {
+            using (JsonDocument document = JsonDocument.Parse(json))
+            {
+                return DeepCopy(document);
+            }
+        }
+
         public static JsonNode DeepCopy(JsonNode jsonNode) => jsonNode.Clone();
 
         public abstract JsonNode Clone();

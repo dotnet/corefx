@@ -659,5 +659,10 @@ namespace System.Text.Json
         /// </summary>
         /// <returns>A new JSON array that is a copy of this instance.</returns>
         public override JsonNode Clone() => new JsonArray(_list);
+
+        /// <summary>
+        ///   Returns <see cref="JsonNodeKind.Array"/>
+        /// </summary>
+        public override JsonNodeKind NodeKind { get => JsonNodeKind.Array;}
     }
 }

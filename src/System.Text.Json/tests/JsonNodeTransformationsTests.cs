@@ -2,17 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
+using System.Buffers;
+using System.IO;
 using Xunit;
 
 namespace System.Text.Json.Tests
 {
     public static class JsonNodeTransformationsTests
     {
-        [Fact]
-        public static void TestJsonDocumentToJsonNode()
-        {
-            var jsonString = @"
+        private static string jsonSampleString = @"
             {
                 ""text"": ""property value"",
                 ""boolean true"": true,
@@ -28,9 +26,8 @@ namespace System.Text.Json.Tests
                 }
             }";
 
-            JsonDocument jsonDocument = JsonDocument.Parse(jsonString);
-            JsonNode node = JsonNode.DeepCopy(jsonDocument);
-
+        private static void CheckNodeFromSampleString(JsonNode node)
+        {
             var jsonObject = (JsonObject)node;
             Assert.Equal(9, jsonObject.PropertyNames.Count);
             Assert.Equal(9, jsonObject.PropertyValues.Count);
@@ -53,7 +50,50 @@ namespace System.Text.Json.Tests
             Assert.Equal(1, innerObject.PropertyValues.Count);
             Assert.Equal("value", (JsonString)innerObject["inner property"]);
         }
-        
+
+        [Fact]
+        public static void TestJsonDocumentToJsonNode()
+        {
+            JsonDocument jsonDocument = JsonDocument.Parse(jsonSampleString);
+            JsonNode node = JsonNode.DeepCopy(jsonDocument);
+            CheckNodeFromSampleString(node);
+        }
+
+        [Fact]
+        public static void TestParseStringToJsonNode()
+        {
+            JsonNode node = JsonNode.Parse(jsonSampleString);
+            CheckNodeFromSampleString(node);
+        }
+
+        [Fact]
+        public static void TestParseBytesToJsonNode()
+        {
+            JsonNode node = JsonNode.Parse(new ReadOnlySequence<byte>(Encoding.UTF8.GetBytes(jsonSampleString).AsMemory())); 
+            CheckNodeFromSampleString(node);
+        }
+
+        [Fact]
+        public static void TestParseByteMemoryToJsonNode()
+        {
+            JsonNode node = JsonNode.Parse(Encoding.UTF8.GetBytes(jsonSampleString).AsMemory());
+            CheckNodeFromSampleString(node);
+        }
+
+        [Fact]
+        public static void TestParseCharMemoryToJsonNode()
+        {
+            JsonNode node = JsonNode.Parse(jsonSampleString.AsMemory());
+            CheckNodeFromSampleString(node);
+        }
+
+        [Fact]
+        public static void TestParseStreamToJsonNode()
+        {
+            JsonNode node = JsonNode.Parse(new MemoryStream(Encoding.UTF8.GetBytes(jsonSampleString)));
+            CheckNodeFromSampleString(node);
+        }
+
         [Fact]
         public static void TestCloneJsonArray()
         {
@@ -76,7 +116,7 @@ namespace System.Text.Json.Tests
             };
 
             var jsonObjectCopy = (JsonObject)JsonNode.DeepCopy(jsonObject);
-            
+
             jsonObject["text"] = (JsonString)"something different";
             Assert.Equal("property value", (JsonString)jsonObjectCopy["text"]);
 
@@ -88,7 +128,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(2, jsonObjectCopy.GetJsonArrayProperty("array").Count);
 
             jsonObject.Add("new one", 123);
-            Assert.Equal(4, jsonObjectCopy.PropertyNames.Count);            
+            Assert.Equal(4, jsonObjectCopy.PropertyNames.Count);
         }
     }
 }

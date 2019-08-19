@@ -137,5 +137,10 @@ namespace System.Text.Json
         /// </summary>
         /// <returns>A new JSON string that is a copy of this instance.</returns>
         public override JsonNode Clone() => new JsonString(Value);
+
+        /// <summary>
+        ///   Returns <see cref="JsonNodeKind.String"/>
+        /// </summary>
+        public override JsonNodeKind NodeKind { get => JsonNodeKind.String; }
     }
 }
