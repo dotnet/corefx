@@ -318,6 +318,7 @@ namespace System.Text.Json.Tests
         [InlineData("\"abc\\u1234\\\"", 12)]
         [InlineData("\"abc\\u1234X\\\"", 13)]
         [InlineData("\"abc\\u1234", 10)]
+        [InlineData("\"abcdefg", 8)]
         [InlineData("\"\\u1234", 7)]
         [InlineData("{\"name\": \"abc\\t", 6 + 9, 2, 0, 9)]
         [InlineData("{\"name\": \"abc\\t\\\"", 8 + 9, 2, 0, 9)]
@@ -343,6 +344,7 @@ namespace System.Text.Json.Tests
         [InlineData("{\"name\": \"abc\\u1234\\\"", 12 + 9, 2, 0, 9)]
         [InlineData("{\"name\": \"abc\\u1234X\\\"", 13 + 9, 2, 0, 9)]
         [InlineData("{\"name\": \"abc\\u1234", 10 + 9, 2, 0, 9)]
+        [InlineData("{\"name\": \"abcdefg", 8 + 9, 2, 0, 9)]
         [InlineData("{\"name\": \"\\u1234", 7 + 9, 2, 0, 9)]
         public static void InvalidJsonStringVariousSegmentSizes(string input, int expectedBytePositionInLine, int numberOfSuccessfulReads = 0, int expectedLineNumber = 0, int expectedConsumed = 0)
         {

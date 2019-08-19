@@ -781,7 +781,7 @@ namespace System.Text.Json
             {
                 if (IsLastSpan)
                 {
-                    _bytePositionInLine += localBuffer.Length;
+                    _bytePositionInLine += localBuffer.Length + 1;  // Account for the start quote
                     ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.EndOfStringNotFound);
                 }
                 return ConsumeStringNextSegment();
@@ -818,6 +818,7 @@ namespace System.Text.Json
                 {
                     if (IsLastSpan)
                     {
+                        _bytePositionInLine += leftOver;
                         RollBackStateWhenParsingString(rollBackState, isError: true);
                         ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.EndOfStringNotFound);
                     }
