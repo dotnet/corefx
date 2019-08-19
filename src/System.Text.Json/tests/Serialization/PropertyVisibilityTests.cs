@@ -180,7 +180,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(@"{""MyClass"":{}}", JsonSerializer.Serialize(new WrapperForClassWithIgnoredUnsupportedDictionary()
             {
                 MyClass = new ClassWithIgnoredUnsupportedDictionary(),
-            }, options)); ;
+            }, options));
         }
 
         [Fact]
