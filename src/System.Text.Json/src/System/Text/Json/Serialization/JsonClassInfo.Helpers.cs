@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
+using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json
@@ -130,6 +131,7 @@ namespace System.Text.Json
             Type parentClassType,
             Type queryType,
             PropertyInfo propertyInfo,
+            out JsonConverter converter,
             JsonSerializerOptions options)
         {
             Debug.Assert(queryType != null);
@@ -139,8 +141,15 @@ namespace System.Text.Json
                 queryType.IsAbstract ||
                 queryType.IsInterface ||
                 queryType.IsArray ||
-                IsNativelySupportedCollection(queryType) ||
-                options.DetermineConverterForProperty(parentClassType, queryType, propertyInfo) != null)
+                IsNativelySupportedCollection(queryType))
+            {
+                converter = null;
+                return queryType;
+            }
+
+            // If a converter was provided, we should not detect implemented types and instead use the converter later.
+            converter = options.DetermineConverterForProperty(parentClassType, queryType, propertyInfo);
+            if (converter != null)
             {
                 return queryType;
             }
