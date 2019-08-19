@@ -661,8 +661,8 @@ namespace System.Text.Json
         public override JsonNode Clone() => new JsonArray(_list);
 
         /// <summary>
-        ///   Returns <see cref="JsonNodeKind.Array"/>
+        ///   Returns <see cref="JsonValueKind.Array"/>
         /// </summary>
-        public override JsonNodeKind NodeKind { get => JsonNodeKind.Array;}
+        public override JsonValueKind ValueKind { get => JsonValueKind.Array;}
     }
 }

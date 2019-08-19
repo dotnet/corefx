@@ -102,8 +102,8 @@ namespace System.Text.Json
         public override JsonNode Clone() => new JsonBoolean(Value);
 
         /// <summary>
-        ///   Returns <see cref="JsonNodeKind.Boolean"/>
+        ///   Returns <see cref="JsonValueKind.True"/> or <see cref="JsonValueKind.False"/>, accordingly to the represented value.
         /// </summary>
-        public override JsonNodeKind NodeKind { get => JsonNodeKind.Boolean; }
+        public override JsonValueKind ValueKind { get => Value ? JsonValueKind.True : JsonValueKind.False; }
     }
 }

@@ -17,13 +17,23 @@ namespace System.Text.Json
     {
         private protected JsonNode() { }
 
-        public JsonElement AsJsonElement() { throw null; }
+        public JsonElement AsJsonElement() => new JsonElement(this);
 
-        public abstract JsonNodeKind NodeKind { get; }
+        public abstract JsonValueKind ValueKind { get; }
 
-        public static JsonNode GetNode(JsonElement jsonElement) { throw null; }
+        public static JsonNode GetNode(JsonElement jsonElement) => (JsonNode)jsonElement._parent;
 
-        public static bool TryGetNode(JsonElement jsonElement, out JsonNode jsonNode) { throw null; }
+        public static bool TryGetNode(JsonElement jsonElement, out JsonNode jsonNode)
+        {
+            if (!jsonElement.IsImmutable)
+            {
+                jsonNode = (JsonNode)jsonElement._parent;
+                return true;
+            }
+
+            jsonNode = null;
+            return false;
+        }
 
         public static JsonNode Parse(string json)
         {

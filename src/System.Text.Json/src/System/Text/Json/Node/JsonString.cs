@@ -139,8 +139,8 @@ namespace System.Text.Json
         public override JsonNode Clone() => new JsonString(Value);
 
         /// <summary>
-        ///   Returns <see cref="JsonNodeKind.String"/>
+        ///   Returns <see cref="JsonValueKind.String"/>
         /// </summary>
-        public override JsonNodeKind NodeKind { get => JsonNodeKind.String; }
+        public override JsonValueKind ValueKind { get => JsonValueKind.String; }
     }
 }

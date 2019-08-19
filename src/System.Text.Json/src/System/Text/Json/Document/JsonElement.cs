@@ -13,7 +13,7 @@ namespace System.Text.Json
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public readonly partial struct JsonElement
     {
-        private readonly JsonDocument _parent;
+        internal readonly object _parent;
         private readonly int _idx;
 
         internal JsonElement(JsonDocument parent, int idx)
@@ -27,8 +27,26 @@ namespace System.Text.Json
             _idx = idx;
         }
 
-        private JsonTokenType TokenType => _parent?.GetJsonTokenType(_idx) ?? JsonTokenType.None;
+        internal JsonElement(JsonNode parent)
+        {
+            _parent = parent;
+            _idx = -1;
+        }
 
+        /// <summary>
+        ///   Indicates if JSON element instance is immutable.
+        /// </summary>
+        public bool IsImmutable => _idx != -1;
+
+
+        private JsonTokenType TokenType
+        {
+            get
+            {
+                JsonDocument document = (JsonDocument)_parent;
+                return document?.GetJsonTokenType(_idx) ?? JsonTokenType.None;
+            }
+        }
         /// <summary>
         ///   The <see cref="JsonValueKind"/> that the value is.
         /// </summary>
@@ -56,7 +74,19 @@ namespace System.Text.Json
             {
                 CheckValidInstance();
 
-                return _parent.GetArrayIndexElement(_idx, index);
+                if (_parent is JsonDocument document)
+                {
+                    return document.GetArrayIndexElement(_idx, index);
+                }
+
+                JsonNode node = (JsonNode)_parent;
+
+                if (node is JsonArray jsonArray)
+                {
+                    return jsonArray[index].AsJsonElement();
+                }
+
+                throw new InvalidOperationException();
             }
         }
 
@@ -74,7 +104,19 @@ namespace System.Text.Json
         {
             CheckValidInstance();
 
-            return _parent.GetArrayLength(_idx);
+            if (_parent is JsonDocument document)
+            {
+                return document.GetArrayLength(_idx);
+            }
+
+            JsonNode node = (JsonNode)_parent;
+
+            if (node is JsonArray jsonArray)
+            {
+                return jsonArray.Count;
+            }
+
+            throw new InvalidOperationException();
         }
 
         /// <summary>
@@ -1436,6 +1478,8 @@ namespace System.Text.Json
             {
                 throw new InvalidOperationException();
             }
+
+            Debug.Assert(_parent is JsonDocument || _parent is JsonNode, "JsonElement can be backed only by JsonDocument or JsonNode");
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
