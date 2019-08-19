@@ -190,12 +190,25 @@ namespace System.Text.Json
 
         internal JsonPropertyInfo CreateRootObject(JsonSerializerOptions options)
         {
-            return CreateProperty(Type, Type, Type, null, Type, null, options);
+            return CreateProperty(
+                declaredPropertyType: Type,
+                runtimePropertyType: Type,
+                implementedPropertyType: Type,
+                propertyInfo: null,
+                parentClassType: Type,
+                converter: null,
+                options: options);
         }
 
         internal JsonPropertyInfo CreatePolymorphicProperty(JsonPropertyInfo property, Type runtimePropertyType, JsonSerializerOptions options)
         {
-            JsonPropertyInfo runtimeProperty = CreateProperty(property.DeclaredPropertyType, runtimePropertyType, property.ImplementedPropertyType, property.PropertyInfo, Type, null, options);
+            JsonPropertyInfo runtimeProperty = CreateProperty(
+                property.DeclaredPropertyType, runtimePropertyType,
+                property.ImplementedPropertyType,
+                property.PropertyInfo,
+                parentClassType: Type,
+                converter: null,
+                options: options);
             property.CopyRuntimeSettingsTo(runtimeProperty);
 
             return runtimeProperty;
