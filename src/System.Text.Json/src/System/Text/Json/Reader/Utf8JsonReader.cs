@@ -1300,6 +1300,7 @@ namespace System.Text.Json
             {
                 if (IsLastSpan)
                 {
+                    _bytePositionInLine += localBuffer.Length;
                     ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.EndOfStringNotFound);
                 }
                 return false;

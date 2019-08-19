@@ -143,25 +143,46 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData("0{", 1, 0, 0)]
-        [InlineData("0e+1b", 4, 0, 0)]
-        [InlineData("1e+0}", 4, 1, 4)]
-        public static void InvalidJsonNumberVariousSegmentSizes(string input, int expectedBytePositionInLine, int numberOfSuccessfulReads, int expectedConsumed)
+        [InlineData("0{", 1, 0, 0, '{')]
+        [InlineData("0e+1b", 4, 0, 0, 'b')]
+        [InlineData("1e+0}", 4, 1, 4, '}')]
+        [InlineData("12345.1. ", 7, 0, 0, '.')]
+        [InlineData("- ", 1, 0, 0, ' ')]
+        [InlineData("-f ", 1, 0, 0, 'f')]
+        [InlineData("-} ", 1, 0, 0, '}')]
+        [InlineData("1.f ", 2, 0, 0, 'f')]
+        [InlineData("1.} ", 2, 0, 0, '}')]
+        [InlineData("0. ", 2, 0, 0, ' ')]
+        [InlineData("0.1f ", 3, 0, 0, 'f')]
+        [InlineData("0.1} ", 3, 1, 3, '}')]
+        [InlineData("0.1e1f ", 5, 0, 0, 'f')]
+        [InlineData("+0 ", 0, 0, 0, '+')]
+        [InlineData("+1 ", 0, 0, 0, '+')]
+        [InlineData("0e ", 2, 0, 0, ' ')]
+        [InlineData("0.1e ", 4, 0, 0, ' ')]
+        [InlineData("01 ", 1, 0, 0, '1')]
+        [InlineData("1a ", 1, 0, 0, 'a')]
+        [InlineData("-01 ", 2, 0, 0, '1')]
+        [InlineData("10.5e ", 5, 0, 0, ' ')]
+        [InlineData("10.5e- ", 6, 0, 0, ' ')]
+        [InlineData("10.5e+ ", 6, 0, 0, ' ')]
+        [InlineData("10.5e-0.2 ", 7, 0, 0, '.')]
+        public static void InvalidJsonNumberVariousSegmentSizes(string input, int expectedBytePositionInLine, int numberOfSuccessfulReads, int expectedConsumed, char invalidChar)
         {
             byte[] utf8 = Encoding.UTF8.GetBytes(input);
 
             var jsonReader = new Utf8JsonReader(utf8);
-            InvalidReadNumberHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedConsumed);
+            InvalidReadNumberHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedConsumed, invalidChar);
 
             ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(utf8, 1);
             jsonReader = new Utf8JsonReader(sequence);
-            InvalidReadNumberHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedConsumed);
+            InvalidReadNumberHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedConsumed, invalidChar);
 
             for (int splitLocation = 0; splitLocation < utf8.Length; splitLocation++)
             {
                 sequence = JsonTestHelper.CreateSegments(utf8, splitLocation);
                 jsonReader = new Utf8JsonReader(sequence);
-                InvalidReadNumberHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedConsumed);
+                InvalidReadNumberHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedConsumed, invalidChar);
             }
 
             for (int firstSplit = 0; firstSplit < utf8.Length; firstSplit++)
@@ -170,12 +191,12 @@ namespace System.Text.Json.Tests
                 {
                     sequence = JsonTestHelper.CreateSegments(utf8, firstSplit, secondSplit);
                     jsonReader = new Utf8JsonReader(sequence);
-                    InvalidReadNumberHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedConsumed);
+                    InvalidReadNumberHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedConsumed, invalidChar);
                 }
             }
         }
 
-        private static void InvalidReadNumberHelper(ref Utf8JsonReader jsonReader, int expectedBytePositionInLine, int numberOfSuccessfulReads, int expectedConsumed)
+        private static void InvalidReadNumberHelper(ref Utf8JsonReader jsonReader, int expectedBytePositionInLine, int numberOfSuccessfulReads, int expectedConsumed, char invalidChar)
         {
             try
             {
@@ -184,10 +205,9 @@ namespace System.Text.Json.Tests
                     Assert.True(jsonReader.Read());
 
                     long tokenLength = jsonReader.HasValueSequence ? jsonReader.ValueSequence.Length : jsonReader.ValueSpan.Length;
-                    Assert.Equal(4, tokenLength);
+                    Assert.Equal(expectedConsumed, tokenLength);
                     Assert.Equal(0, jsonReader.TokenStartIndex);
-                    Assert.Equal(4, jsonReader.BytesConsumed - jsonReader.TokenStartIndex);
-                    Assert.Equal(1, jsonReader.GetDouble());
+                    Assert.Equal(expectedConsumed, jsonReader.BytesConsumed - jsonReader.TokenStartIndex);
                 }
                 Assert.False(jsonReader.Read());
                 Assert.True(false, "Expected JsonException was not thrown for incomplete/invalid JSON payload reading.");
@@ -197,27 +217,40 @@ namespace System.Text.Json.Tests
                 Assert.Equal(0, ex.LineNumber);
                 Assert.Equal(expectedBytePositionInLine, ex.BytePositionInLine);
                 Assert.Equal(expectedConsumed, jsonReader.BytesConsumed);
+                Assert.Contains($"'{invalidChar}'", ex.Message);
             }
         }
 
         [Theory]
-        [InlineData("{\"\\\"\"", 5, 1, 5)]
-        public static void InvalidJsonStringVariousSegmentSizes(string input, int expectedBytePositionInLine, int numberOfSuccessfulReads, int expectedConsumed)
+        [InlineData("{\"\\\"\"", 5, 2, 5, "\"", 2)]
+        [InlineData("\"\\\"\"}", 4, 1, 4, "\"", 2)]
+        [InlineData("\"\\\"\"5", 4, 1, 4, "\"", 2)]
+        [InlineData("\"\\\"\":", 4, 1, 4, "\"", 2)]
+        [InlineData("\"\\\"\",", 4, 1, 4, "\"", 2)]
+        [InlineData("\"abc\\t\"}", 7, 1, 7, "abc\t", 5)]
+        [InlineData("\"abc\\u0061\"}", 11, 1, 11, "abca", 9)]
+        [InlineData("\"abc\\u0061abc\"}", 14, 1, 14, "abcaabc", 12)]
+        [InlineData("\"abc\\t\\\"\"}", 9, 1, 9, "abc\t\"", 7)]
+        [InlineData("\"abc\\n\"}", 1, 1, 7, "abc\n", 5, 1)]
+        [InlineData("\"abc\\na\"}", 2, 1, 8, "abc\na", 6, 1)]
+        [InlineData("\"abc\\u0061X\"}", 12, 1, 12, "abcaX", 10)]
+        [InlineData("\"\\u0061\"}", 8, 1, 8, "a", 6)]
+        public static void ValidStringWithinInvalidJsonVariousSegmentSizes(string input, int expectedBytePositionInLine, int numberOfSuccessfulReads, int expectedConsumed, string expectedStr, int expectedTokenLength, int expectedLineNumber = 0)
         {
             byte[] utf8 = Encoding.UTF8.GetBytes(input);
 
             var jsonReader = new Utf8JsonReader(utf8);
-            InvalidReadStringHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedConsumed);
+            ValidReadStringHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedConsumed, expectedStr, expectedTokenLength, expectedLineNumber);
 
             ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(utf8, 1);
             jsonReader = new Utf8JsonReader(sequence);
-            InvalidReadStringHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedConsumed);
+            ValidReadStringHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedConsumed, expectedStr, expectedTokenLength, expectedLineNumber);
 
             for (int splitLocation = 0; splitLocation < utf8.Length; splitLocation++)
             {
                 sequence = JsonTestHelper.CreateSegments(utf8, splitLocation);
                 jsonReader = new Utf8JsonReader(sequence);
-                InvalidReadStringHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedConsumed);
+                ValidReadStringHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedConsumed, expectedStr, expectedTokenLength, expectedLineNumber);
             }
 
             for (int firstSplit = 0; firstSplit < utf8.Length; firstSplit++)
@@ -226,30 +259,135 @@ namespace System.Text.Json.Tests
                 {
                     sequence = JsonTestHelper.CreateSegments(utf8, firstSplit, secondSplit);
                     jsonReader = new Utf8JsonReader(sequence);
-                    InvalidReadStringHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedConsumed);
+                    ValidReadStringHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedConsumed, expectedStr, expectedTokenLength, expectedLineNumber);
                 }
             }
         }
 
-        private static void InvalidReadStringHelper(ref Utf8JsonReader jsonReader, int expectedBytePositionInLine, int numberOfSuccessfulReads, int expectedConsumed)
+        private static void ValidReadStringHelper(ref Utf8JsonReader jsonReader, int expectedBytePositionInLine, int numberOfSuccessfulReads, int expectedConsumed, string expectedStr, int expectedTokenLength, int expectedLineNumber)
+        {
+            try
+            {
+                string strToken = null;
+                for (int i = 0; i < numberOfSuccessfulReads; i++)
+                {
+                    Assert.True(jsonReader.Read());
+                    if (jsonReader.TokenType == JsonTokenType.String)
+                    {
+                        long tokenLength = jsonReader.HasValueSequence ? jsonReader.ValueSequence.Length : jsonReader.ValueSpan.Length;
+                        Assert.Equal(expectedTokenLength, tokenLength);
+                        Assert.Equal(expectedTokenLength + 2, jsonReader.BytesConsumed - jsonReader.TokenStartIndex);
+                        strToken = jsonReader.GetString();
+                        Assert.Equal(expectedStr, strToken);
+                    }
+                }
+                Assert.NotNull(strToken);
+                Assert.False(jsonReader.Read());
+                Assert.True(false, "Expected JsonException was not thrown for incomplete/invalid JSON payload reading.");
+            }
+            catch (JsonException ex)
+            {
+                Assert.Equal(expectedLineNumber, ex.LineNumber);
+                Assert.Equal(expectedBytePositionInLine, ex.BytePositionInLine);
+                Assert.Equal(expectedConsumed, jsonReader.BytesConsumed);
+            }
+        }
+
+        [Theory]
+        [InlineData("\"abc\\t", 6)]
+        [InlineData("\"abc\\t\\\"", 8)]
+        [InlineData("\"abc\\n", 0, 0, 1)]
+        [InlineData("\"abc\\nabc", 3, 0, 1)]
+        [InlineData("\"abc\\n\\\"", 2, 0, 1)]
+        [InlineData("\"abc\u0010\"", 4)]
+        [InlineData("\"abc\u0010abc\"", 4)]
+        [InlineData("\"abc\\p\"", 5)]
+        [InlineData("\"abc\\p", 5)]
+        [InlineData("\"abc\\u\"", 6)]
+        [InlineData("\"abc\\uX\"", 6)]
+        [InlineData("\"abc\\u", 6)]
+        [InlineData("\"abc\\u1\"", 7)]
+        [InlineData("\"abc\\u1X\"", 7)]
+        [InlineData("\"abc\\u1", 7)]
+        [InlineData("\"abc\\u12\"", 8)]
+        [InlineData("\"abc\\u12X\"", 8)]
+        [InlineData("\"abc\\u12", 8)]
+        [InlineData("\"abc\\u123\"", 9)]
+        [InlineData("\"abc\\u123X\"", 9)]
+        [InlineData("\"abc\\u123", 9)]
+        [InlineData("\"abc\\u1234\\\"", 12)]
+        [InlineData("\"abc\\u1234X\\\"", 13)]
+        [InlineData("\"abc\\u1234", 10)]
+        [InlineData("\"\\u1234", 7)]
+        [InlineData("{\"name\": \"abc\\t", 6 + 9, 2, 0, 9)]
+        [InlineData("{\"name\": \"abc\\t\\\"", 8 + 9, 2, 0, 9)]
+        [InlineData("{\"name\": \"abc\\n", 0, 2, 1, 9)]
+        [InlineData("{\"name\": \"abc\\nabc", 3, 2, 1, 9)]
+        [InlineData("{\"name\": \"abc\\n\\\"", 2, 2, 1, 9)]
+        [InlineData("{\"name\": \"abc\u0010\"", 4 + 9, 2, 0, 9)]
+        [InlineData("{\"name\": \"abc\u0010abc\"", 4 + 9, 2, 0, 9)]
+        [InlineData("{\"name\": \"abc\\p\"", 5 + 9, 2, 0, 9)]
+        [InlineData("{\"name\": \"abc\\p", 5 + 9, 2, 0, 9)]
+        [InlineData("{\"name\": \"abc\\u\"", 6 + 9, 2, 0, 9)]
+        [InlineData("{\"name\": \"abc\\uX\"", 6 + 9, 2, 0, 9)]
+        [InlineData("{\"name\": \"abc\\u", 6 + 9, 2, 0, 9)]
+        [InlineData("{\"name\": \"abc\\u1\"", 7 + 9, 2, 0, 9)]
+        [InlineData("{\"name\": \"abc\\u1X\"", 7 + 9, 2, 0, 9)]
+        [InlineData("{\"name\": \"abc\\u1", 7 + 9, 2, 0, 9)]
+        [InlineData("{\"name\": \"abc\\u12\"", 8 + 9, 2, 0, 9)]
+        [InlineData("{\"name\": \"abc\\u12X\"", 8 + 9, 2, 0, 9)]
+        [InlineData("{\"name\": \"abc\\u12", 8 + 9, 2, 0, 9)]
+        [InlineData("{\"name\": \"abc\\u123\"", 9 + 9, 2, 0, 9)]
+        [InlineData("{\"name\": \"abc\\u123X\"", 9 + 9, 2, 0, 9)]
+        [InlineData("{\"name\": \"abc\\u123", 9 + 9, 2, 0, 9)]
+        [InlineData("{\"name\": \"abc\\u1234\\\"", 12 + 9, 2, 0, 9)]
+        [InlineData("{\"name\": \"abc\\u1234X\\\"", 13 + 9, 2, 0, 9)]
+        [InlineData("{\"name\": \"abc\\u1234", 10 + 9, 2, 0, 9)]
+        [InlineData("{\"name\": \"\\u1234", 7 + 9, 2, 0, 9)]
+        public static void InvalidJsonStringVariousSegmentSizes(string input, int expectedBytePositionInLine, int numberOfSuccessfulReads = 0, int expectedLineNumber = 0, int expectedConsumed = 0)
+        {
+            byte[] utf8 = Encoding.UTF8.GetBytes(input);
+
+            var jsonReader = new Utf8JsonReader(utf8);
+            InvalidReadStringHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedLineNumber, expectedConsumed);
+
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(utf8, 1);
+            jsonReader = new Utf8JsonReader(sequence);
+            InvalidReadStringHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedLineNumber, expectedConsumed);
+
+            for (int splitLocation = 0; splitLocation < utf8.Length; splitLocation++)
+            {
+                sequence = JsonTestHelper.CreateSegments(utf8, splitLocation);
+                jsonReader = new Utf8JsonReader(sequence);
+                InvalidReadStringHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedLineNumber, expectedConsumed);
+            }
+
+            for (int firstSplit = 0; firstSplit < utf8.Length; firstSplit++)
+            {
+                for (int secondSplit = firstSplit; secondSplit < utf8.Length; secondSplit++)
+                {
+                    sequence = JsonTestHelper.CreateSegments(utf8, firstSplit, secondSplit);
+                    jsonReader = new Utf8JsonReader(sequence);
+                    InvalidReadStringHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedLineNumber, expectedConsumed);
+                }
+            }
+        }
+
+        private static void InvalidReadStringHelper(ref Utf8JsonReader jsonReader, int expectedBytePositionInLine, int numberOfSuccessfulReads, int expectedLineNumber, int expectedConsumed)
         {
             try
             {
                 for (int i = 0; i < numberOfSuccessfulReads; i++)
                 {
                     Assert.True(jsonReader.Read());
-                    long tokenLength = jsonReader.HasValueSequence ? jsonReader.ValueSequence.Length : jsonReader.ValueSpan.Length;
-                    Assert.Equal(2, tokenLength);
-                    Assert.Equal(1, jsonReader.TokenStartIndex);
-                    Assert.Equal(2, jsonReader.BytesConsumed - jsonReader.TokenStartIndex);
-                    Assert.Equal("\"", jsonReader.GetString());
                 }
+
                 Assert.False(jsonReader.Read());
                 Assert.True(false, "Expected JsonException was not thrown for incomplete/invalid JSON payload reading.");
             }
             catch (JsonException ex)
             {
-                Assert.Equal(0, ex.LineNumber);
+                Assert.Equal(expectedLineNumber, ex.LineNumber);
                 Assert.Equal(expectedBytePositionInLine, ex.BytePositionInLine);
                 Assert.Equal(expectedConsumed, jsonReader.BytesConsumed);
             }
