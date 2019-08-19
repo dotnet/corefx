@@ -366,7 +366,7 @@ namespace HttpStress
                     using HttpResponseMessage m = await ctx.SendAsync(req, HttpCompletionOption.ResponseHeadersRead);
 
                     ValidateStatusCode(m);
-                    HttpResponseMessage response = await m.Content.ReadAsStringAsync();
+                    string response = await m.Content.ReadAsStringAsync();
 
                     // trailing headers not supported for all servers, so do not require checksums
                     bool isValidChecksum = ValidateServerChecksum(m.TrailingHeaders, checksum, required: false);
