@@ -1,8 +1,5 @@
 <Project DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
-  <PropertyGroup>
-    <HarvestVersion>4.6.0-preview8.19405.3</HarvestVersion>
-  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\ref\System.Runtime.WindowsRuntime.csproj">
       <SupportedFramework>net461;netcoreapp2.0;uap10.0.16299;$(AllXamarinFrameworks)</SupportedFramework>
@@ -30,14 +27,11 @@
       <TargetFramework>netcoreapp1.0</TargetFramework>
     </File>  -->
     
-    <HarvestIncludePaths Include="runtimes/win/lib/netcore50">
+    <HarvestIncludePaths Include="runtimes/win8/lib/netstandard1.3">
       <TargetPath>runtimes/win/lib/netcore50</TargetPath>
     </HarvestIncludePaths>
-    <HarvestIncludePaths Include="runtimes/win-aot/lib/netcore50">
+    <HarvestIncludePaths Include="runtimes/win8-aot/lib/netcore50">
       <TargetPath>runtimes/win-aot/lib/netcore50</TargetPath>
-    </HarvestIncludePaths>
-    <HarvestIncludePaths Include="runtimes\win\lib\netcoreapp3.0">
-      <TargetPath>runtimes\win\lib\netcoreapp3.0</TargetPath>
     </HarvestIncludePaths>
 
     <File Include="$(PlaceHolderFile)">

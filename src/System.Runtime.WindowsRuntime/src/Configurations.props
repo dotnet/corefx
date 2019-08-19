@@ -4,6 +4,7 @@
       netstandard1.0;
       netstandard1.2;
       netstandard;
+      netcoreapp3.0-Windows_NT;
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations);
