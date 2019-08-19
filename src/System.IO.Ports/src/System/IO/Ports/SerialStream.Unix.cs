@@ -655,7 +655,7 @@ namespace System.IO.Ports
             }
         }
 
-        private void RaisePingChanged(SerialPinChange pinChanged)
+        private void RaisePinChanged(SerialPinChange pinChanged)
         {
             if (_pinChanged != null)
             {
@@ -893,7 +893,7 @@ namespace System.IO.Ports
                         if (changed != Signals.None)
                         {
                             SerialPinChange pinChanged = SignalsToPinChanges(changed);
-                            RaisePingChanged(pinChanged);
+                            RaisePinChanged(pinChanged);
                         }
                     }
 
