@@ -2,11 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using Newtonsoft.Json;
 using Xunit;
 
@@ -3745,6 +3743,20 @@ namespace System.Text.Json.Tests
             }
         }
 
+        [Theory]
+        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, true)]
+        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, false)]
+        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, true)]
+        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, false)]
+        public static void TestBOMWithSingleJsonValue(byte[] utf8BomAndValue, bool isFinalBlock)
+        {
+            Assert.ThrowsAny<JsonException>(() =>
+            {
+                var json = new Utf8JsonReader(utf8BomAndValue, isFinalBlock: isFinalBlock, state: default);
+                json.Read();
+            });
+        }
+
         public static IEnumerable<object[]> TestCases
         {
             get
@@ -4030,29 +4042,6 @@ namespace System.Text.Json.Tests
                     new object[] {"[1,/*comment*/]"},
                 };
             }
-        }
-
-        [Theory]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, true, 1)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, true, 2)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, true, 3)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, false, 1)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, false, 2)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, false, 3)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, true, 1)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, true, 2)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, true, 3)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, false, 1)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, false, 2)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, false, 3)]
-        public static void TestBOMWithSingleJsonValueMultiSegment(byte[] utf8BomAndValue, bool isFinalBlock, int segmentSize)
-        {
-            Assert.ThrowsAny<JsonException>(() =>
-            {
-                ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(utf8BomAndValue, segmentSize);
-                var json = new Utf8JsonReader(sequence, isFinalBlock: isFinalBlock, state: default);
-                json.Read();
-            });
         }
 
         public static IEnumerable<object[]> JsonWithInvalidTrailingCommas
