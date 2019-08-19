@@ -780,12 +780,6 @@ namespace Internal.Cryptography.Pal.Native
         CERT_CHAIN_DISABLE_AIA = 0x00002000,
     }
 
-    [Flags]
-    internal enum ChainEngineExclusiveEnableFlag : int
-    {
-        CERT_CHAIN_EXCLUSIVE_ENABLE_CA_FLAG = 0x00000001,
-    }
-
     [StructLayout(LayoutKind.Sequential)]
     internal struct CERT_CHAIN_ENGINE_CONFIG
     {
@@ -801,6 +795,5 @@ namespace Internal.Cryptography.Pal.Native
         public int CycleDetectionModulus;
         public IntPtr hExclusiveRoot;
         public IntPtr hExclusiveTrustedPeople;
-        public ChainEngineExclusiveEnableFlag dwExclusiveFlags;
     }
 }
