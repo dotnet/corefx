@@ -653,5 +653,11 @@ namespace System.Text.Json
         /// </summary>
         /// <returns>An enumerator structure for the <see cref="JsonArray"/>.</returns>
         public IEnumerator<JsonNode> GetEnumerator() => _list.GetEnumerator();
+
+        /// <summary>
+        ///   Creates a new JSON array that is a copy of the current instance.
+        /// </summary>
+        /// <returns>A new JSON array that is a copy of this instance.</returns>
+        public override JsonNode Clone() => new JsonArray(_list);
     }
 }

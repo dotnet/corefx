@@ -556,5 +556,21 @@ namespace System.Text.Json
         /// </summary>
         /// <returns>An enumerator structure for the <see cref="JsonObject"/>.</returns>
         IEnumerator IEnumerable.GetEnumerator() => new JsonObjectEnumerator(this);
+
+        /// <summary>
+        ///   Creates a new JSON object that is a copy of the current instance.
+        /// </summary>
+        /// <returns>A new JSON object that is a copy of this instance.</returns>
+        public override JsonNode Clone()
+        {
+            var jsonObject = new JsonObject(_duplicatePropertyNameHandling);
+
+            foreach (KeyValuePair<string, JsonNode> property in _dictionary)
+            {
+                jsonObject.Add(property.Key, property.Value.Clone());
+            }
+
+            return jsonObject;
+        }
     }
 }

@@ -131,5 +131,11 @@ namespace System.Text.Json
         ///   <see langword="false"/> otherwise.
         /// </returns>
         public static bool operator !=(JsonString left, JsonString right) => !(left == right);
+
+        /// <summary>
+        ///   Creates a new JSON string that is a copy of the current instance.
+        /// </summary>
+        /// <returns>A new JSON string that is a copy of this instance.</returns>
+        public override JsonNode Clone() => new JsonString(Value);
     }
 }

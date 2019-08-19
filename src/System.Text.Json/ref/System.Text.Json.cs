@@ -56,6 +56,7 @@ namespace System.Text.Json
         [System.CLSCompliantAttribute(false)]
         public void Add(ulong value) { }
         public void Clear() { }
+        public override System.Text.Json.JsonNode Clone() { throw null; }
         public bool Contains(bool value) { throw null; }
         public bool Contains(byte value) { throw null; }
         public bool Contains(decimal value) { throw null; }
@@ -106,6 +107,7 @@ namespace System.Text.Json
         public JsonBoolean() { }
         public JsonBoolean(bool value) { }
         public bool Value { get { throw null; } set { } }
+        public override System.Text.Json.JsonNode Clone() { throw null; }
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.Text.Json.JsonBoolean other) { throw null; }
         public override int GetHashCode() { throw null; }
@@ -266,6 +268,18 @@ namespace System.Text.Json
     public abstract partial class JsonNode
     {
         internal JsonNode() { }
+        public System.Text.Json.JsonElement AsJsonElement() { throw null; }
+        public abstract System.Text.Json.JsonNode Clone();
+        public static System.Text.Json.JsonNode DeepCopy(System.Text.Json.JsonDocument jsonDocument) { throw null; }
+        public static System.Text.Json.JsonNode DeepCopy(System.Text.Json.JsonElement jsonElement) { throw null; }
+        public static System.Text.Json.JsonNode DeepCopy(System.Text.Json.JsonNode jsonNode) { throw null; }
+        public static System.Text.Json.JsonNode GetNode(System.Text.Json.JsonElement jsonElement) { throw null; }
+        public static System.Text.Json.JsonNode Parse(System.Buffers.ReadOnlySequence<byte> utf8Json) { throw null; }
+        public static System.Text.Json.JsonNode Parse(System.IO.Stream utf8Json) { throw null; }
+        public static System.Text.Json.JsonNode Parse(System.ReadOnlyMemory<byte> utf8Json) { throw null; }
+        public static System.Text.Json.JsonNode Parse(System.ReadOnlyMemory<char> json) { throw null; }
+        public static System.Text.Json.JsonNode Parse(string json) { throw null; }
+        public static bool TryGetNode(System.Text.Json.JsonElement jsonElement, out System.Text.Json.JsonNode jsonNode) { throw null; }
     }
     public sealed partial class JsonNumber : System.Text.Json.JsonNode, System.IEquatable<System.Text.Json.JsonNumber>
     {
@@ -286,6 +300,7 @@ namespace System.Text.Json
         public JsonNumber(uint value) { }
         [System.CLSCompliantAttribute(false)]
         public JsonNumber(ulong value) { }
+        public override System.Text.Json.JsonNode Clone() { throw null; }
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.Text.Json.JsonNumber other) { throw null; }
         public byte GetByte() { throw null; }
@@ -386,6 +401,7 @@ namespace System.Text.Json
         [System.CLSCompliantAttribute(false)]
         public void Add(string propertyName, ulong propertyValue) { }
         public void AddRange(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>> jsonProperties) { }
+        public override System.Text.Json.JsonNode Clone() { throw null; }
         public bool ContainsProperty(string propertyName) { throw null; }
         public System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>> GetEnumerator() { throw null; }
         public System.Text.Json.JsonArray GetJsonArrayProperty(string propertyName) { throw null; }
@@ -477,6 +493,7 @@ namespace System.Text.Json
         public JsonString(System.ReadOnlySpan<char> value) { }
         public JsonString(string value) { }
         public string Value { get { throw null; } set { } }
+        public override System.Text.Json.JsonNode Clone() { throw null; }
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.Text.Json.JsonString other) { throw null; }
         public override int GetHashCode() { throw null; }

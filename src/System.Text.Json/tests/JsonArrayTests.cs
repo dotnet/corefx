@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Text.Json.Tests
 {
-    public static partial class JsonArrayTests
+    public static class JsonArrayTests
     {
         [Fact]
         public static void TestAdd()

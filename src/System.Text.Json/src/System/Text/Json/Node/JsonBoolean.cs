@@ -94,5 +94,11 @@ namespace System.Text.Json
         ///   <see langword="false"/> otherwise.
         /// </returns>
         public static bool operator !=(JsonBoolean left, JsonBoolean right) => !(left == right);
+
+        /// <summary>
+        ///   Creates a new JSON boolean that is a copy of the current instance.
+        /// </summary>
+        /// <returns>A new JSON boolean that is a copy of this instance.</returns>
+        public override JsonNode Clone() => new JsonBoolean(Value);
     }
 }

@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.Text.Json.Tests
 {
-    public static partial class JsonObjectTests
+    public static class JsonObjectTests
     {
         [Fact]
         public static void TestDefaultConstructor()
