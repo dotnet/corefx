@@ -1158,23 +1158,7 @@ namespace System.Text.Json
             return true;
         }
 
-        private readonly struct PartialStateForRollback
-        {
-            public readonly long _prevTotalConsumed;
-            public readonly long _prevBytePositionInLine;
-            public readonly int _prevConsumed;
-            public readonly SequencePosition _prevCurrentPosition;
-
-            public PartialStateForRollback(long totalConsumed, long bytePositionInLine, int consumed, SequencePosition currentPosition)
-            {
-                _prevTotalConsumed = totalConsumed;
-                _prevBytePositionInLine = bytePositionInLine;
-                _prevConsumed = consumed;
-                _prevCurrentPosition = currentPosition;
-            }
-        }
-
-        private void RollBackStateWhenParsingNumber(ref PartialStateForRollback state, bool isError = false)
+        private void RollBackStateWhenParsingNumber(in PartialStateForRollback state, bool isError = false)
         {
             _totalConsumed = state._prevTotalConsumed;
 
@@ -1202,10 +1186,10 @@ namespace System.Text.Json
             consumed = 0;
             int i = 0;
 
-            ConsumeNumberResult signResult = ConsumeNegativeSignMultiSegment(ref data, ref i, ref rollBackState);
+            ConsumeNumberResult signResult = ConsumeNegativeSignMultiSegment(ref data, ref i, rollBackState);
             if (signResult == ConsumeNumberResult.NeedMoreData)
             {
-                RollBackStateWhenParsingNumber(ref rollBackState);
+                RollBackStateWhenParsingNumber(rollBackState);
                 return false;
             }
 
@@ -1216,10 +1200,10 @@ namespace System.Text.Json
 
             if (nextByte == '0')
             {
-                ConsumeNumberResult result = ConsumeZeroMultiSegment(ref data, ref i, ref rollBackState);
+                ConsumeNumberResult result = ConsumeZeroMultiSegment(ref data, ref i, rollBackState);
                 if (result == ConsumeNumberResult.NeedMoreData)
                 {
-                    RollBackStateWhenParsingNumber(ref rollBackState);
+                    RollBackStateWhenParsingNumber(rollBackState);
                     return false;
                 }
                 if (result == ConsumeNumberResult.Success)
@@ -1235,7 +1219,7 @@ namespace System.Text.Json
                 ConsumeNumberResult result = ConsumeIntegerDigitsMultiSegment(ref data, ref i);
                 if (result == ConsumeNumberResult.NeedMoreData)
                 {
-                    RollBackStateWhenParsingNumber(ref rollBackState);
+                    RollBackStateWhenParsingNumber(rollBackState);
                     return false;
                 }
                 if (result == ConsumeNumberResult.Success)
@@ -1247,7 +1231,7 @@ namespace System.Text.Json
                 nextByte = data[i];
                 if (nextByte != '.' && nextByte != 'E' && nextByte != 'e')
                 {
-                    RollBackStateWhenParsingNumber(ref rollBackState, isError: true);
+                    RollBackStateWhenParsingNumber(rollBackState, isError: true);
                     ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, nextByte);
                 }
             }
@@ -1258,10 +1242,10 @@ namespace System.Text.Json
             {
                 i++;
                 _bytePositionInLine++;
-                ConsumeNumberResult result = ConsumeDecimalDigitsMultiSegment(ref data, ref i, ref rollBackState);
+                ConsumeNumberResult result = ConsumeDecimalDigitsMultiSegment(ref data, ref i, rollBackState);
                 if (result == ConsumeNumberResult.NeedMoreData)
                 {
-                    RollBackStateWhenParsingNumber(ref rollBackState);
+                    RollBackStateWhenParsingNumber(rollBackState);
                     return false;
                 }
                 if (result == ConsumeNumberResult.Success)
@@ -1273,7 +1257,7 @@ namespace System.Text.Json
                 nextByte = data[i];
                 if (nextByte != 'E' && nextByte != 'e')
                 {
-                    RollBackStateWhenParsingNumber(ref rollBackState, isError: true);
+                    RollBackStateWhenParsingNumber(rollBackState, isError: true);
                     ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedNextDigitEValueNotFound, nextByte);
                 }
             }
@@ -1283,10 +1267,10 @@ namespace System.Text.Json
             _numberFormat = JsonConstants.ScientificNotationFormat;
             _bytePositionInLine++;
 
-            signResult = ConsumeSignMultiSegment(ref data, ref i, ref rollBackState);
+            signResult = ConsumeSignMultiSegment(ref data, ref i, rollBackState);
             if (signResult == ConsumeNumberResult.NeedMoreData)
             {
-                RollBackStateWhenParsingNumber(ref rollBackState);
+                RollBackStateWhenParsingNumber(rollBackState);
                 return false;
             }
 
@@ -1297,7 +1281,7 @@ namespace System.Text.Json
             ConsumeNumberResult resultExponent = ConsumeIntegerDigitsMultiSegment(ref data, ref i);
             if (resultExponent == ConsumeNumberResult.NeedMoreData)
             {
-                RollBackStateWhenParsingNumber(ref rollBackState);
+                RollBackStateWhenParsingNumber(rollBackState);
                 return false;
             }
             if (resultExponent == ConsumeNumberResult.Success)
@@ -1307,7 +1291,7 @@ namespace System.Text.Json
 
             Debug.Assert(resultExponent == ConsumeNumberResult.OperationIncomplete);
 
-            RollBackStateWhenParsingNumber(ref rollBackState, isError: true);
+            RollBackStateWhenParsingNumber(rollBackState, isError: true);
             ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, data[i]);
 
         Done:
@@ -1327,7 +1311,7 @@ namespace System.Text.Json
             return true;
         }
 
-        private ConsumeNumberResult ConsumeNegativeSignMultiSegment(ref ReadOnlySpan<byte> data, ref int i, ref PartialStateForRollback rollBackState)
+        private ConsumeNumberResult ConsumeNegativeSignMultiSegment(ref ReadOnlySpan<byte> data, ref int i, in PartialStateForRollback rollBackState)
         {
             Debug.Assert(i == 0);
             byte nextByte = data[i];
@@ -1340,14 +1324,14 @@ namespace System.Text.Json
                 {
                     if (IsLastSpan)
                     {
-                        RollBackStateWhenParsingNumber(ref rollBackState, isError: true);
+                        RollBackStateWhenParsingNumber(rollBackState, isError: true);
                         ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
                     }
                     if (!GetNextSpan())
                     {
                         if (IsLastSpan)
                         {
-                            RollBackStateWhenParsingNumber(ref rollBackState, isError: true);
+                            RollBackStateWhenParsingNumber(rollBackState, isError: true);
                             ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
                         }
                         return ConsumeNumberResult.NeedMoreData;
@@ -1362,14 +1346,14 @@ namespace System.Text.Json
                 nextByte = data[i];
                 if (!JsonHelpers.IsDigit(nextByte))
                 {
-                    RollBackStateWhenParsingNumber(ref rollBackState, isError: true);
+                    RollBackStateWhenParsingNumber(rollBackState, isError: true);
                     ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundAfterSign, nextByte);
                 }
             }
             return ConsumeNumberResult.OperationIncomplete;
         }
 
-        private ConsumeNumberResult ConsumeZeroMultiSegment(ref ReadOnlySpan<byte> data, ref int i, ref PartialStateForRollback rollBackState)
+        private ConsumeNumberResult ConsumeZeroMultiSegment(ref ReadOnlySpan<byte> data, ref int i, in PartialStateForRollback rollBackState)
         {
             Debug.Assert(data[i] == (byte)'0');
             Debug.Assert(i == 0 || i == 1);
@@ -1416,7 +1400,7 @@ namespace System.Text.Json
             nextByte = data[i];
             if (nextByte != '.' && nextByte != 'E' && nextByte != 'e')
             {
-                RollBackStateWhenParsingNumber(ref rollBackState, isError: true);
+                RollBackStateWhenParsingNumber(rollBackState, isError: true);
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, nextByte);
             }
 
@@ -1501,20 +1485,20 @@ namespace System.Text.Json
             return ConsumeNumberResult.OperationIncomplete;
         }
 
-        private ConsumeNumberResult ConsumeDecimalDigitsMultiSegment(ref ReadOnlySpan<byte> data, ref int i, ref PartialStateForRollback rollBackState)
+        private ConsumeNumberResult ConsumeDecimalDigitsMultiSegment(ref ReadOnlySpan<byte> data, ref int i, in PartialStateForRollback rollBackState)
         {
             if (i >= data.Length)
             {
                 if (IsLastSpan)
                 {
-                    RollBackStateWhenParsingNumber(ref rollBackState, isError: true);
+                    RollBackStateWhenParsingNumber(rollBackState, isError: true);
                     ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
                 }
                 if (!GetNextSpan())
                 {
                     if (IsLastSpan)
                     {
-                        RollBackStateWhenParsingNumber(ref rollBackState, isError: true);
+                        RollBackStateWhenParsingNumber(rollBackState, isError: true);
                         ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
                     }
                     return ConsumeNumberResult.NeedMoreData;
@@ -1527,7 +1511,7 @@ namespace System.Text.Json
             byte nextByte = data[i];
             if (!JsonHelpers.IsDigit(nextByte))
             {
-                RollBackStateWhenParsingNumber(ref rollBackState, isError: true);
+                RollBackStateWhenParsingNumber(rollBackState, isError: true);
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundAfterDecimal, nextByte);
             }
             i++;
@@ -1535,13 +1519,13 @@ namespace System.Text.Json
             return ConsumeIntegerDigitsMultiSegment(ref data, ref i);
         }
 
-        private ConsumeNumberResult ConsumeSignMultiSegment(ref ReadOnlySpan<byte> data, ref int i, ref PartialStateForRollback rollBackState)
+        private ConsumeNumberResult ConsumeSignMultiSegment(ref ReadOnlySpan<byte> data, ref int i, in PartialStateForRollback rollBackState)
         {
             if (i >= data.Length)
             {
                 if (IsLastSpan)
                 {
-                    RollBackStateWhenParsingNumber(ref rollBackState, isError: true);
+                    RollBackStateWhenParsingNumber(rollBackState, isError: true);
                     ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
                 }
 
@@ -1549,7 +1533,7 @@ namespace System.Text.Json
                 {
                     if (IsLastSpan)
                     {
-                        RollBackStateWhenParsingNumber(ref rollBackState, isError: true);
+                        RollBackStateWhenParsingNumber(rollBackState, isError: true);
                         ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
                     }
                     return ConsumeNumberResult.NeedMoreData;
@@ -1569,7 +1553,7 @@ namespace System.Text.Json
                 {
                     if (IsLastSpan)
                     {
-                        RollBackStateWhenParsingNumber(ref rollBackState, isError: true);
+                        RollBackStateWhenParsingNumber(rollBackState, isError: true);
                         ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
                     }
 
@@ -1577,7 +1561,7 @@ namespace System.Text.Json
                     {
                         if (IsLastSpan)
                         {
-                            RollBackStateWhenParsingNumber(ref rollBackState, isError: true);
+                            RollBackStateWhenParsingNumber(rollBackState, isError: true);
                             ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
                         }
                         return ConsumeNumberResult.NeedMoreData;
@@ -1592,7 +1576,7 @@ namespace System.Text.Json
 
             if (!JsonHelpers.IsDigit(nextByte))
             {
-                RollBackStateWhenParsingNumber(ref rollBackState, isError: true);
+                RollBackStateWhenParsingNumber(rollBackState, isError: true);
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundAfterSign, nextByte);
             }
 
@@ -2638,6 +2622,22 @@ namespace System.Text.Json
                     localBuffer = _buffer;
                     Debug.Assert(!localBuffer.IsEmpty);
                 }
+            }
+        }
+
+        private readonly struct PartialStateForRollback
+        {
+            public readonly long _prevTotalConsumed;
+            public readonly long _prevBytePositionInLine;
+            public readonly int _prevConsumed;
+            public readonly SequencePosition _prevCurrentPosition;
+
+            public PartialStateForRollback(long totalConsumed, long bytePositionInLine, int consumed, SequencePosition currentPosition)
+            {
+                _prevTotalConsumed = totalConsumed;
+                _prevBytePositionInLine = bytePositionInLine;
+                _prevConsumed = consumed;
+                _prevCurrentPosition = currentPosition;
             }
         }
     }
