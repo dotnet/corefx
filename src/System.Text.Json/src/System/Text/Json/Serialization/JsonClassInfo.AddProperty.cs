@@ -28,8 +28,9 @@ namespace System.Text.Json
             JsonPropertyInfo jsonInfo;
 
             // Get implemented type, if applicable.
-            // Will return the propertyType itself if it's a non-enumerable, string, or natively supported collection.
-            Type implementedType = GetImplementedCollectionType(propertyType);
+            // Will return the propertyType itself if it's a non-enumerable, string, natively supported collection,
+            // or if a custom converter has been provided for the type.
+            Type implementedType = GetImplementedCollectionType(classType, propertyType, propertyInfo, options);
 
             if (implementedType != propertyType)
             {

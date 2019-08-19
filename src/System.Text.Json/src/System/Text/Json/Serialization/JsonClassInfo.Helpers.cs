@@ -126,7 +126,11 @@ namespace System.Text.Json
             SortedListTypeName,
         };
 
-        public static Type GetImplementedCollectionType(Type queryType)
+        public static Type GetImplementedCollectionType(
+            Type parentClassType,
+            Type queryType,
+            PropertyInfo propertyInfo,
+            JsonSerializerOptions options)
         {
             Debug.Assert(queryType != null);
 
@@ -135,7 +139,8 @@ namespace System.Text.Json
                 queryType.IsAbstract ||
                 queryType.IsInterface ||
                 queryType.IsArray ||
-                IsNativelySupportedCollection(queryType))
+                IsNativelySupportedCollection(queryType) ||
+                options.DetermineConverterForProperty(parentClassType, queryType, propertyInfo) != null)
             {
                 return queryType;
             }
