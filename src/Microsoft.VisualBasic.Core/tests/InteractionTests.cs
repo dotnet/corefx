@@ -13,16 +13,16 @@ namespace Microsoft.VisualBasic.Tests
     {
         private static readonly bool s_SupportRegistry = !PlatformDetection.IsUap;
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNetCore))]
         public void AppActivate_ProcessId()
         {
-            InvokeMethod(() => Interaction.AppActivate(42));
+            InvokeMissingMethod(() => Interaction.AppActivate(42));
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNetCore))]
         public void AppActivate_Title()
         {
-            InvokeMethod(() => Interaction.AppActivate("MyProcess"));
+            InvokeMissingMethod(() => Interaction.AppActivate("MyProcess"));
         }
 
         [Theory]
@@ -245,16 +245,16 @@ namespace Microsoft.VisualBasic.Tests
             // Not tested: valid arguments.
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNetCore))]
         public void InputBox()
         {
-            InvokeMethod(() => Interaction.InputBox("Prompt", Title: "", DefaultResponse: "", XPos: -1, YPos: -1));
+            InvokeMissingMethod(() => Interaction.InputBox("Prompt", Title: "", DefaultResponse: "", XPos: -1, YPos: -1));
         }
-        
-        [Fact]
+
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNetCore))]
         public void MsgBox()
         {
-            InvokeMethod(() => Interaction.MsgBox("Prompt", Buttons: MsgBoxStyle.ApplicationModal, Title: null));
+            InvokeMissingMethod(() => Interaction.MsgBox("Prompt", Buttons: MsgBoxStyle.ApplicationModal, Title: null));
         }
 
         [Theory]
@@ -318,10 +318,10 @@ namespace Microsoft.VisualBasic.Tests
             // Not tested: valid arguments.
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNetCore))]
         public void Shell()
         {
-            InvokeMethod(() => Interaction.Shell("MyPath", Style: AppWinStyle.NormalFocus, Wait: false, Timeout: -1));
+            InvokeMissingMethod(() => Interaction.Shell("MyPath", Style: AppWinStyle.NormalFocus, Wait: false, Timeout: -1));
         }
 
         [Theory]
@@ -343,7 +343,7 @@ namespace Microsoft.VisualBasic.Tests
         }
 
         // Methods that rely on reflection of missing assembly.
-        private static void InvokeMethod(Action action)
+        private static void InvokeMissingMethod(Action action)
         {
             var e = Assert.Throws<TypeLoadException>(action);
             Assert.Equal("Microsoft.VisualBasic._Interaction", e.TypeName);
