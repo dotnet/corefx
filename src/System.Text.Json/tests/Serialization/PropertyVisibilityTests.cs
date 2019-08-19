@@ -127,8 +127,32 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void JsonIgnoreAttribute_UnsupportedCollection()
         {
-            string json = @"{""MyDict"":{""key"":""value""}}";
-            string wrapperJson = @"{""MyClass"":{""MyDict"":{""key"":""value""}}}";
+            string json =
+                    @"{
+                        ""MyConcurrentDict"":{
+                            ""key"":""value""
+                        },
+                        ""MyIDict"":{
+                            ""key"":""value""
+                        },
+                        ""MyDict"":{
+                            ""key"":""value""
+                        }
+                    }";
+            string wrapperJson =
+                    @"{
+                        ""MyClass"":{
+                            ""MyConcurrentDict"":{
+                                ""key"":""value""
+                            },
+                            ""MyIDict"":{
+                                ""key"":""value""
+                            },
+                            ""MyDict"":{
+                                ""key"":""value""
+                            }
+                        }
+                    }";
 
             // Unsupported collections will throw by default.
             Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ClassWithUnsupportedDictionary>(json));
@@ -172,9 +196,13 @@ namespace System.Text.Json.Serialization.Tests
             })); ;
         }
 
+        public class ObjectDictWrapper : Dictionary<int, string> { }
+
         public class ClassWithUnsupportedDictionary
         {
-            public ConcurrentDictionary<object, object> MyDict { get; set; }
+            public ConcurrentDictionary<object, object> MyConcurrentDict { get; set; }
+            public IDictionary<object, object> MyIDict { get; set; }
+            public ObjectDictWrapper MyDict { get; set; }
         }
 
         public class WrapperForClassWithUnsupportedDictionary
@@ -185,7 +213,11 @@ namespace System.Text.Json.Serialization.Tests
         public class ClassWithIgnoredUnsupportedDictionary
         {
             [JsonIgnore]
-            public ConcurrentDictionary<object, object> MyDict { get; set; }
+            public ConcurrentDictionary<object, object> MyConcurrentDict { get; set; }
+            [JsonIgnore]
+            public IDictionary<object, object> MyIDict { get; set; }
+            [JsonIgnore]
+            public ObjectDictWrapper MyDict { get; set; }
         }
 
         public class WrapperForClassWithIgnoredUnsupportedDictionary
