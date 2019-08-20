@@ -270,6 +270,10 @@ Mailbox.SendAllEmployeesData(employees.AsJsonElement());
 * Is it OK that `JsonElement.GetRawText` does not return the raw text for `JsonNode` parent?
 * Should we support `JsonElement.WriteTo` for `JsonNode` parent?
 * Private property `JsonElement.TokenType` is currently throwing an `InvalidCast` exception for `JsonNode` parent in debugger. Is it OK?
+* Do we want both `Clone` and `DeepCopy` methods for `JsonNode`? 
+* Are we OK with needing to cast `JsonArray` to `JsonNode` in order to add it to `JsonObject`? (there's an ambiguous call between `JsonArray` and `IEnumerable<JsonNode>` right now)
+* Do we want `IsImmutable` property for `JsonElement`?
+* Is `DateTime` for `JsonString` handled correctly?
 
 ## Useful links
 
