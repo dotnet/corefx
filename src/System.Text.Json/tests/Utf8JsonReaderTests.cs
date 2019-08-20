@@ -1990,14 +1990,14 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false \"in\u6F22\u5B57valid\"\r\n}", 30, 30, 2, 21)]
-        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false \"in\u6F22\u5B57valid\"\r\n}", 31, 31, 2, 21)]
-        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, \"in\u6F22\u5B57valid\"\r\n}", 30, 30, 3, 0)]
-        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, \"in\u6F22\u5B57valid\"\r\n}", 31, 30, 3, 0)]
-        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, \"in\u6F22\u5B57valid\"\r\n}", 32, 30, 3, 0)]
-        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, 5\r\n}", 30, 30, 2, 22)]
-        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, 5\r\n}", 31, 30, 2, 22)]
-        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, 5\r\n}", 32, 30, 2, 22)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false \"in\u6F22\u5B57valid\"\r\n}", 30, 30, 1, 28)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false \"in\u6F22\u5B57valid\"\r\n}", 31, 31, 1, 28)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, \"in\u6F22\u5B57valid\"\r\n}", 30, 30, 2, 0)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, \"in\u6F22\u5B57valid\"\r\n}", 31, 30, 2, 0)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, \"in\u6F22\u5B57valid\"\r\n}", 32, 30, 2, 0)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, 5\r\n}", 30, 30, 1, 29)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, 5\r\n}", 31, 30, 1, 29)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, 5\r\n}", 32, 30, 1, 29)]
         public static void InvalidJsonSplitRemainsInvalid(string jsonString, int splitLocation, int consumed, int expectedlineNumber, int expectedBytePosition)
         {
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
@@ -2050,7 +2050,7 @@ namespace System.Text.Json.Tests
         [InlineData("[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2\":[}]]]]}]]]]", 1, 28, 64)]
         [InlineData("[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2\":[]},[}]]]]}]]]]", 1, 32, 64)]
         [InlineData("{\r\n\t\"isActive\": false,\r\n\t\"array\": [\r\n\t\t[{\r\n\t\t\t\"id\": 1\r\n\t\t}]\r\n\t]\r\n}", 3, 3, 3)]
-        [InlineData("{\"Here is a \u6F22\u5B57string: \\\"\\\"\":\"Here is \u6F22\u5B57a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str:\"\\\"\\\"\"}", 4, 35, 64)]
+        [InlineData("{\"Here is a \u6F22\u5B57string: \\\"\\\"\":\"Here is \u6F22\u5B57a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str:\"\\\"\\\"\"}", 0, 190, 64)]
         public static void InvalidJsonWhenPartial(string jsonString, int expectedlineNumber, int expectedBytePosition, int maxDepth)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
@@ -2093,7 +2093,7 @@ namespace System.Text.Json.Tests
 
         [Theory]
         [InlineData("{\"text\": \"\u0E4F\u0020\u0E2A\u0E27\u0E31\u0E2A\u0E14\u0E35\\uABCZ \u0E42\u0E25\u0E01\"}", 0, 37)]   // * Hello\\uABCZ World in thai
-        [InlineData("{\"text\": \"\u0E4F\u0020\u0E2A\u0E39\u0E07\\n\u0E15\u0E48\u0E33\\uABCZ \u0E42\u0E25\u0E01\"}", 1, 14)]    // * High\\nlow\\uABCZ World in thai
+        [InlineData("{\"text\": \"\u0E4F\u0020\u0E2A\u0E39\u0E07\\n\u0E15\u0E48\u0E33\\uABCZ \u0E42\u0E25\u0E01\"}", 0, 39)]    // * High\\nlow\\uABCZ World in thai
         public static void PositionInCodeUnits(string jsonString, int expectedlineNumber, int expectedBytePosition)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
@@ -4354,7 +4354,7 @@ namespace System.Text.Json.Tests
                     new object[] {"\"a\u6F22\u5B57ge\":", 0, 11},
                     new object[] {"{\"a\u6F22\u5B57ge\":", 0, 13},
                     new object[] {"{\"name\":\"A\u6F22\u5B57hso", 0, 19},
-                    new object[] {"{\"name\":\"A\u6F22\u5B57h\\nso", 1, 2},
+                    new object[] {"{\"name\":\"A\u6F22\u5B57h\\nso", 0, 21},
                     new object[] {"12345.1.", 0, 7},
                     new object[] {"-", 0, 1},
                     new object[] {"-f", 0, 1},
@@ -4402,7 +4402,7 @@ namespace System.Text.Json.Tests
                     new object[] {"[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2:[]}]]]]}]]]]", 1, 38},
                     new object[] {"[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2\":[]},[}]]]]}]]]]", 1, 32},
                     new object[] {"{\r\n\t\"isActive\": false,\r\n\t\"array\": [\r\n\t\t[{\r\n\t\t\t\"id\": 1\r\n\t\t}]\r\n\t]\r\n}", 3, 3, 3},
-                    new object[] {"{\"Here is a \u6F22\u5B57string: \\\"\\\"\":\"Here is \u6F22\u5B57a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str:\"\\\"\\\"\"}", 4, 35},
+                    new object[] {"{\"Here is a \u6F22\u5B57string: \\\"\\\"\":\"Here is \u6F22\u5B57a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str:\"\\\"\\\"\"}", 0, 190},
                     new object[] {"\"hel\rlo\"", 0, 4},
                     new object[] {"\"hel\nlo\"", 0, 4},
                     new object[] {"\"hel\\uABCXlo\"", 0, 9},
@@ -4411,14 +4411,14 @@ namespace System.Text.Json.Tests
                     new object[] {"\"hel\nlo\\\"\"", 0, 4},
                     new object[] {"\"hel\\uABCXlo\\\"\"", 0, 9},
                     new object[] {"\"hel\\\tlo\\\"\"", 0, 5},
-                    new object[] {"\"he\\nl\rlo\\\"\"", 1, 1},
-                    new object[] {"\"he\\nl\nlo\\\"\"", 1, 1},
-                    new object[] {"\"he\\nl\\uABCXlo\\\"\"", 1, 6},
-                    new object[] {"\"he\\nl\\\tlo\\\"\"", 1, 2},
-                    new object[] {"\"he\\nl\rlo", 1, 1},
-                    new object[] {"\"he\\nl\nlo", 1, 1},
-                    new object[] {"\"he\\nl\\uABCXlo", 1, 6},
-                    new object[] {"\"he\\nl\\\tlo", 1, 2},
+                    new object[] {"\"he\\nl\rlo\\\"\"", 0, 6},
+                    new object[] {"\"he\\nl\nlo\\\"\"", 0, 6},
+                    new object[] {"\"he\\nl\\uABCXlo\\\"\"", 0, 11},
+                    new object[] {"\"he\\nl\\\tlo\\\"\"", 0, 7},
+                    new object[] {"\"he\\nl\rlo", 0, 6},
+                    new object[] {"\"he\\nl\nlo", 0, 6},
+                    new object[] {"\"he\\nl\\uABCXlo", 0, 11},
+                    new object[] {"\"he\\nl\\\tlo", 0, 7},
                 };
             }
         }
