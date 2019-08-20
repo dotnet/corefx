@@ -1152,8 +1152,6 @@ Namespace Microsoft.VisualBasic.FileIO
                         Catch
                             Throw
                         End Try
-#Else
-                        Throw New PlatformNotSupportedException()
 #End If
                     Else ' Non Windows
                         ' IO.File.Delete will not throw if destinationFileFullPath does not exist
