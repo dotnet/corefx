@@ -2,7 +2,6 @@
   <Import Project="..\..\Directory.Build.targets" />
 
   <PropertyGroup>
-    <NETCoreAppMaximumVersion>5.0</NETCoreAppMaximumVersion>
     <PrereleaseResolveNuGetPackages>true</PrereleaseResolveNuGetPackages>
   </PropertyGroup>
 
