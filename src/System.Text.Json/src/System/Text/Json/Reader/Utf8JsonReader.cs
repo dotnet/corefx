@@ -2031,7 +2031,53 @@ namespace System.Text.Json
             }
             else
             {
-                goto RollBack;
+                Debug.Assert(_tokenType == JsonTokenType.EndArray || _tokenType == JsonTokenType.EndObject);
+                if (_inObject)
+                {
+                    if (first != JsonConstants.Quote)
+                    {
+                        if (first == JsonConstants.CloseBrace)
+                        {
+                            if (_readerOptions.AllowTrailingCommas)
+                            {
+                                EndObject();
+                                goto Done;
+                            }
+                            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.TrailingCommaNotAllowedBeforeObjectEnd);
+                        }
+
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, first);
+                    }
+                    if (ConsumePropertyName())
+                    {
+                        goto Done;
+                    }
+                    else
+                    {
+                        goto RollBack;
+                    }
+                }
+                else
+                {
+                    if (first == JsonConstants.CloseBracket)
+                    {
+                        if (_readerOptions.AllowTrailingCommas)
+                        {
+                            EndArray();
+                            goto Done;
+                        }
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.TrailingCommaNotAllowedBeforeArrayEnd);
+                    }
+
+                    if (ConsumeValue(first))
+                    {
+                        goto Done;
+                    }
+                    else
+                    {
+                        goto RollBack;
+                    }
+                }
             }
 
         Done:
