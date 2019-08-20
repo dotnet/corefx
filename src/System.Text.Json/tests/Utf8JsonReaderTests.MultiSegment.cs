@@ -1728,9 +1728,100 @@ namespace System.Text.Json.Tests
             }
         }
 
+        [Theory]
+        [InlineData("{,}")]
+        [InlineData("[,]")]
+        [InlineData("{// comment\n,}")]
+        [InlineData("[// comment\n,]")]
+        [InlineData("123, ")]
+        [InlineData("\"abc\", ")]
+        [InlineData("123, // comment\n")]
+        [InlineData("\"abc\", // comment\n")]
+        [InlineData("123 // comment\n,")]
+        [InlineData("\"abc\" // comment\n,")]
+        [InlineData("{\"Property1\": [ 42], 5}")]
+        [InlineData("{\"Property1\": [ 42], // comment\n5}")]
+        [InlineData("{\"Property1\": [ 42], // comment\r5}")]
+        [InlineData("{\"Property1\": [ 42], // comment\r\n5}")]
+        [InlineData("{\"Property1\": [ 42], /*comment*/5}")]
+        [InlineData("{\"Property1\": [ 42] // comment\n,5}")]
+        [InlineData("{\"Property1\": [ 42], // comment\n // comment\n5}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42}, 5}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42}, // comment\n5}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42}, // comment\r5}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42}, // comment\r\n5}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42}, /*comment*/5}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42} // comment\n,5}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42}, // comment\n // comment\n5}")]
+        [InlineData("{// comment\n5}")]
+        public static void ReadInvalidJsonStringsWithComments(string jsonString)
+        {
+            byte[] input = Encoding.UTF8.GetBytes(jsonString);
 
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                if (commentHandling == JsonCommentHandling.Disallow)
+                {
+                    continue;
+                }
+
+                var options = new JsonReaderOptions() { CommentHandling = commentHandling };
+                var optionsWithTrailing = new JsonReaderOptions() { CommentHandling = commentHandling, AllowTrailingCommas = true };
+
+                var reader = new Utf8JsonReader(input, options);
+                ValidateThrows(ref reader);
+
+                reader = new Utf8JsonReader(input, optionsWithTrailing);
+                ValidateThrows(ref reader);
+
+                ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(input, 1);
+                reader = new Utf8JsonReader(sequence, options);
+                ValidateThrows(ref reader);
+
+                reader = new Utf8JsonReader(sequence, optionsWithTrailing);
+                ValidateThrows(ref reader);
+
+                for (int splitLocation = 0; splitLocation < input.Length; splitLocation++)
+                {
+                    sequence = JsonTestHelper.CreateSegments(input, splitLocation);
+                    reader = new Utf8JsonReader(sequence, options);
+                    ValidateThrows(ref reader);
+
+                    reader = new Utf8JsonReader(sequence, optionsWithTrailing);
+                    ValidateThrows(ref reader);
+                }
+
+                for (int firstSplit = 0; firstSplit < input.Length; firstSplit++)
+                {
+                    for (int secondSplit = firstSplit; secondSplit < input.Length; secondSplit++)
+                    {
+                        sequence = JsonTestHelper.CreateSegments(input, firstSplit, secondSplit);
+                        reader = new Utf8JsonReader(sequence, options);
+                        ValidateThrows(ref reader);
+
+                        reader = new Utf8JsonReader(sequence, optionsWithTrailing);
+                        ValidateThrows(ref reader);
+                    }
+                }
+            }
+        }
+
+        private static void ValidateThrows(ref Utf8JsonReader reader)
+        {
+            JsonTestHelper.AssertThrows<JsonException>(reader, (jsonReader) =>
+            {
+                while (jsonReader.Read())
+                    ;
+            });
+        }
 
         [Theory]
+        [InlineData("123 ")]
+        [InlineData("\"abc\" ")]
+        [InlineData("123 // comment\n")]
+        [InlineData("\"abc\" // comment\n")]
+        [InlineData("{// comment\n}")]
+        [InlineData("[// comment\n]")]
         [InlineData("{\"Property1\": [ 42], \"Property2\": 42}")]
         [InlineData("{\"Property1\": [ 42], // comment\n\"Property2\": 42}")]
         [InlineData("{\"Property1\": [ 42], // comment\r\"Property2\": 42}")]
@@ -1739,6 +1830,7 @@ namespace System.Text.Json.Tests
         [InlineData("{\"Property1\": [ 42] // comment\n,\"Property2\": 42}")]
         [InlineData("{\"Property1\": [ 42], // comment\n // comment\n\"Property2\": 42}")]
         [InlineData("[[ 42], // comment\n 42]")]
+        [InlineData("[[ 42] // comment\n, 42]")]
         [InlineData("[[ 42, // comment\n 43], // comment\n 42]")]
         [InlineData("[[ \"42\", // comment\n 43], // comment\n 42]")]
         [InlineData("[[ true, // comment\n 43], // comment\n 42]")]
@@ -1752,6 +1844,7 @@ namespace System.Text.Json.Tests
         [InlineData("{\"Property1\": {\"Property1.1\": 42} // comment\n,\"Property2\": 42}")]
         [InlineData("{\"Property1\": {\"Property1.1\": 42}, // comment\n // comment\n\"Property2\": 42}")]
         [InlineData("[{\"Property1\": 42}, // comment\n 42]")]
+        [InlineData("[{\"Property1\": 42} // comment\n, 42]")]
         [InlineData("[{\"Property1\": 42, // comment\n \"prop\": 43 }, // comment\n 42]")]
         [InlineData("[{\"Property1\": \"42\", // comment\n \"prop\": 43 }, // comment\n 42]")]
         [InlineData("[{\"Property1\": true, // comment\n \"prop\": 43 }, // comment\n 42]")]
@@ -1818,6 +1911,7 @@ namespace System.Text.Json.Tests
         [InlineData("{\"Property1\": [ 42] // comment\n,}")]
         [InlineData("{\"Property1\": [ 42], // comment\n // comment\n}")]
         [InlineData("[[ 42], // comment\n ]")]
+        [InlineData("[[ 42] // comment\n, ]")]
         [InlineData("[[ 42, // comment\n ], // comment\n ]")]
         [InlineData("[[ \"42\", // comment\n ], // comment\n ]")]
         [InlineData("[[ true, // comment\n ], // comment\n ]")]
@@ -1831,6 +1925,7 @@ namespace System.Text.Json.Tests
         [InlineData("{\"Property1\": {\"Property1.1\": 42} // comment\n,}")]
         [InlineData("{\"Property1\": {\"Property1.1\": 42}, // comment\n // comment\n}")]
         [InlineData("[{\"Property1\": 42}, // comment\n ]")]
+        [InlineData("[{\"Property1\": 42} // comment\n, ]")]
         [InlineData("[{\"Property1\": 42, // comment\n }, // comment\n ]")]
         [InlineData("[{\"Property1\": \"42\", // comment\n }, // comment\n ]")]
         [InlineData("[{\"Property1\": true, // comment\n }, // comment\n ]")]
