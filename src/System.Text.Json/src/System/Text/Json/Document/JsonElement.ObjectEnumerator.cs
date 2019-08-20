@@ -57,6 +57,7 @@ namespace System.Text.Json
                         return new JsonProperty(new JsonElement(document, _curIdx));
                     }
 
+                    Debug.Assert(_jsonObjectEnumerator.HasValue);
                     KeyValuePair<string, JsonNode> propertyPair = _jsonObjectEnumerator.Value.Current;
                     return new JsonProperty(propertyPair.Value.AsJsonElement(), propertyPair.Key);
                 }

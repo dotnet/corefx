@@ -14,10 +14,7 @@ namespace System.Text.Json
         ///   Initializes a new instance of the <see cref="JsonObjectEnumerator"/> class supporting an interation over provided JSON object.
         /// </summary>
         /// <param name="jsonObject">JSON object to iterate over.</param>
-        public JsonObjectEnumerator(JsonObject jsonObject) //=> _enumerator = jsonObject._dictionary.GetEnumerator();
-        {
-            _enumerator = jsonObject._dictionary.GetEnumerator();
-        }
+        public JsonObjectEnumerator(JsonObject jsonObject) => _enumerator = jsonObject._dictionary.GetEnumerator();
 
         /// <summary>
         ///   Gets the property in the JSON object at the current position of the enumerator.

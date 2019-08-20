@@ -19,20 +19,48 @@ namespace System.Text.Json
             private readonly JsonElement _target;
             private int _curIdx;
             private readonly int _endIdx;
+            private readonly JsonArrayEnumerator? _jsonArrayEnumerator;
 
             internal ArrayEnumerator(JsonElement target)
             {
-                Debug.Assert(target.TokenType == JsonTokenType.StartArray);
+                if (target._parent is JsonDocument document)
+                {
+                    Debug.Assert(target.TokenType == JsonTokenType.StartArray);
 
-                _target = target;
-                _curIdx = -1;
-                JsonDocument document = (JsonDocument)_target._parent;
-                _endIdx = document.GetEndIndex(_target._idx, includeEndElement: false);
+                    _target = target;
+                    _curIdx = -1;
+                    _endIdx = document.GetEndIndex(_target._idx, includeEndElement: false);
+                    _jsonArrayEnumerator = null;
+                }
+                else
+                {
+                    _target = target;
+                    _curIdx = -1;
+                    _endIdx = -1;
+
+                    var jsonArray = (JsonArray)target._parent;
+                    _jsonArrayEnumerator = new JsonArrayEnumerator(jsonArray);
+                }
             }
 
             /// <inheritdoc />
-            public JsonElement Current =>
-                _curIdx < 0 ? default : new JsonElement((JsonDocument)_target._parent, _curIdx);
+            public JsonElement Current
+            {
+                get
+                {
+                    if (_target._parent is JsonDocument document)
+                    {
+                        if (_curIdx < 0)
+                        {
+                            return default;
+                        }
+                        return new JsonElement(document, _curIdx);
+                    }
+
+                    Debug.Assert(_jsonArrayEnumerator.HasValue);
+                    return _jsonArrayEnumerator.Value.Current.AsJsonElement();
+                }
+            }
 
             /// <summary>
             ///   Returns an enumerator that iterates through a collection.
@@ -58,12 +86,20 @@ namespace System.Text.Json
             public void Dispose()
             {
                 _curIdx = _endIdx;
+                if (_jsonArrayEnumerator.HasValue)
+                {
+                    _jsonArrayEnumerator.Value.Dispose();
+                }
             }
 
             /// <inheritdoc />
             public void Reset()
             {
                 _curIdx = -1;
+                if (_jsonArrayEnumerator.HasValue)
+                {
+                    _jsonArrayEnumerator.Value.Reset();
+                }
             }
 
             /// <inheritdoc />
@@ -72,22 +108,27 @@ namespace System.Text.Json
             /// <inheritdoc />
             public bool MoveNext()
             {
-                if (_curIdx >= _endIdx)
+                if (_target._parent is JsonDocument document)
                 {
-                    return false;
+                    if (_curIdx >= _endIdx)
+                    {
+                        return false;
+                    }
+
+                    if (_curIdx < 0)
+                    {
+                        _curIdx = _target._idx + JsonDocument.DbRow.Size;
+                    }
+                    else
+                    {
+                        _curIdx = document.GetEndIndex(_curIdx, includeEndElement: true);
+                    }
+
+                    return _curIdx < _endIdx;
                 }
 
-                if (_curIdx < 0)
-                {
-                    _curIdx = _target._idx + JsonDocument.DbRow.Size;
-                }
-                else
-                {
-                    JsonDocument document = (JsonDocument)_target._parent;
-                    _curIdx = document.GetEndIndex(_curIdx, includeEndElement: true);
-                }
-
-                return _curIdx < _endIdx;
+                Debug.Assert(_jsonArrayEnumerator.HasValue);
+                return _jsonArrayEnumerator.Value.MoveNext();
             }
         }
     }

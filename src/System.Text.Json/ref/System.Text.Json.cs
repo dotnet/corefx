@@ -103,6 +103,16 @@ namespace System.Text.Json
         void System.Collections.Generic.ICollection<System.Text.Json.JsonNode>.CopyTo(System.Text.Json.JsonNode[] array, int arrayIndex) { }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
     }
+    public partial struct JsonArrayEnumerator : System.Collections.Generic.IEnumerator<System.Text.Json.JsonNode>, System.Collections.IEnumerator, System.IDisposable
+    {
+        private object _dummy;
+        public JsonArrayEnumerator(System.Text.Json.JsonArray jsonArray) { throw null; }
+        public System.Text.Json.JsonNode Current { get { throw null; } }
+        object System.Collections.IEnumerator.Current { get { throw null; } }
+        public void Dispose() { }
+        public bool MoveNext() { throw null; }
+        public void Reset() { }
+    }
     public sealed partial class JsonBoolean : System.Text.Json.JsonNode, System.IEquatable<System.Text.Json.JsonBoolean>
     {
         public JsonBoolean() { }

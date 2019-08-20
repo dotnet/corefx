@@ -12,7 +12,7 @@ namespace System.Text.Json
     /// </summary>
     public partial class JsonArray : JsonNode, IList<JsonNode>, IReadOnlyList<JsonNode>
     {
-        private readonly List<JsonNode> _list;
+        internal readonly List<JsonNode> _list;
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="JsonArray"/> class representing the empty array.
