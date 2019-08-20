@@ -945,8 +945,7 @@ namespace System.Text.Json
                 _bytePositionInLine += localBuffer.Length;
             }
 
-            SequencePosition originalPosition = rollBackState._prevCurrentPosition;
-            SequencePosition start = new SequencePosition(originalPosition.GetObject(), originalPosition.GetInteger() + rollBackState._prevConsumed + 1);
+            SequencePosition start = rollBackState.GetStartPosition(offset: 1); // Offset for the starting quote
             ValueSequence = _sequence.Slice(start, end);
             _tokenType = JsonTokenType.String;
             return true;
@@ -1088,8 +1087,7 @@ namespace System.Text.Json
                 _consumed = idx + 1;    // Add 1 for the end quote of the string.
                 _totalConsumed += leftOverFromConsumed;
                 end = new SequencePosition(_currentPosition.GetObject(), _currentPosition.GetInteger() + idx);
-                SequencePosition originalPosition = rollBackState._prevCurrentPosition;
-                SequencePosition start = new SequencePosition(originalPosition.GetObject(), originalPosition.GetInteger() + rollBackState._prevConsumed + 1);
+                SequencePosition start = rollBackState.GetStartPosition(offset: 1); // Offset for the starting quote
                 ValueSequence = _sequence.Slice(start, end);
             }
             else
@@ -1243,8 +1241,7 @@ namespace System.Text.Json
         Done:
             if (HasValueSequence)
             {
-                SequencePosition originalPosition = rollBackState._prevCurrentPosition;
-                SequencePosition start = new SequencePosition(originalPosition.GetObject(), originalPosition.GetInteger() + rollBackState._prevConsumed);
+                SequencePosition start = rollBackState.GetStartPosition();
                 SequencePosition end = new SequencePosition(_currentPosition.GetObject(), _currentPosition.GetInteger() + i);
                 ValueSequence = _sequence.Slice(start, end);
                 consumed = i;
@@ -2589,6 +2586,11 @@ namespace System.Text.Json
                 _prevBytePositionInLine = bytePositionInLine;
                 _prevConsumed = consumed;
                 _prevCurrentPosition = currentPosition;
+            }
+
+            public SequencePosition GetStartPosition(int offset = 0)
+            {
+                return new SequencePosition(_prevCurrentPosition.GetObject(), _prevCurrentPosition.GetInteger() + _prevConsumed + offset);
             }
         }
     }
