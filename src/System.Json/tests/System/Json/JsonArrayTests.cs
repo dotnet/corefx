@@ -192,8 +192,8 @@ namespace System.Json.Tests
             JsonValue[] items = new JsonValue[] { new JsonPrimitive(true) };
             JsonArray array = new JsonArray((IEnumerable<JsonValue>)items);
 
-            Assert.True(array.Contains(items[0]));
-            Assert.False(array.Contains(new JsonPrimitive(false)));
+            Assert.Contains(items[0], array);
+            Assert.DoesNotContain<JsonValue>(new JsonPrimitive(false), array);
         }
 
         [Theory]

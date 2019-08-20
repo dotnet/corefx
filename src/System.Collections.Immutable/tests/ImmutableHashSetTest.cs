@@ -40,11 +40,11 @@ namespace System.Collections.Immutable.Tests
                 .Add("apple")
                 .Add("APPLE");
             Assert.Equal(2, ordinalSet.Count); // claimed count
-            Assert.False(ordinalSet.Contains("aPpLe"));
+            Assert.DoesNotContain("aPpLe", ordinalSet);
 
             var ignoreCaseSet = ordinalSet.WithComparer(StringComparer.OrdinalIgnoreCase);
             Assert.Equal(1, ignoreCaseSet.Count);
-            Assert.True(ignoreCaseSet.Contains("aPpLe"));
+            Assert.Contains("aPpLe", ignoreCaseSet);
         }
 
         [Fact]

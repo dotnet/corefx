@@ -175,7 +175,7 @@ namespace System.Net.Tests
             listener.Prefixes.Add(uriPrefix);
 
             Assert.Equal(1, listener.Prefixes.Count);
-            Assert.True(listener.Prefixes.Contains(uriPrefix));
+            Assert.Contains(uriPrefix, listener.Prefixes);
 
             Assert.All(listener.DefaultServiceNames.Cast<string>(), serviceNames => Assert.StartsWith("HTTP/", serviceNames));
         }
@@ -195,7 +195,7 @@ namespace System.Net.Tests
                     try
                     {
                         listener.Prefixes.Add(uriPrefix);
-                        Assert.True(listener.Prefixes.Contains(uriPrefix));
+                        Assert.Contains(uriPrefix, listener.Prefixes);
                         Assert.Equal(2, listener.Prefixes.Count);
 
                         break;
@@ -366,7 +366,7 @@ namespace System.Net.Tests
             listener.Prefixes.Add(uriPrefix);
 
             Assert.Equal(1, listener.Prefixes.Count);
-            Assert.True(listener.Prefixes.Contains(uriPrefix));
+            Assert.Contains(uriPrefix, listener.Prefixes);
             Assert.Throws<HttpListenerException>(() => listener.Start());
         }
 
@@ -421,7 +421,7 @@ namespace System.Net.Tests
 
             // Ouch: even though adding the prefix threw an exception, the prefix was still added.
             Assert.Equal(1, listener.Prefixes.Count);
-            Assert.True(listener.Prefixes.Contains(longPrefix));
+            Assert.Contains(longPrefix, listener.Prefixes);
             Assert.Empty(listener.DefaultServiceNames);
 
             Assert.Throws<HttpListenerException>(() => listener.Start());
@@ -448,7 +448,7 @@ namespace System.Net.Tests
         {
             var listener = new HttpListener();
             listener.Prefixes.Add("http://localhost:9200/");
-            Assert.False(listener.Prefixes.Contains(uriPrefix));
+            Assert.DoesNotContain(uriPrefix, listener.Prefixes);
         }
 
         [Fact]
@@ -465,7 +465,7 @@ namespace System.Net.Tests
             listener.Prefixes.Add("http://localhost:9200/");
 
             Assert.True(listener.Prefixes.Remove("http://localhost:9200/"));
-            Assert.False(listener.Prefixes.Contains("http://localhost:9200/"));
+            Assert.DoesNotContain("http://localhost:9200/", listener.Prefixes);
             Assert.Equal(0, listener.Prefixes.Count);
         }
 
@@ -478,7 +478,7 @@ namespace System.Net.Tests
                 string uriPrefix = Assert.Single(listener.Prefixes);
 
                 Assert.True(listener.Prefixes.Remove(uriPrefix));
-                Assert.False(listener.Prefixes.Contains(uriPrefix));
+                Assert.DoesNotContain(uriPrefix, listener.Prefixes);
                 Assert.Equal(0, listener.Prefixes.Count);
 
                 // Even though the listener has no prefixes, it should still be listening.
@@ -523,7 +523,7 @@ namespace System.Net.Tests
             listener.Prefixes.Add("http://localhost:9200/");
 
             listener.Prefixes.Clear();
-            Assert.False(listener.Prefixes.Contains("http://localhost:9200/"));
+            Assert.DoesNotContain("http://localhost:9200/", listener.Prefixes);
             Assert.Equal(0, listener.Prefixes.Count);
         }
 

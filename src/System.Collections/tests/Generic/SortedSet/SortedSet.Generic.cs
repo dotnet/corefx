@@ -35,17 +35,17 @@ namespace System.Collections.Tests
             var set = (SortedSet<int>)CreateSortedSet(new[] { 1, 3, 5, 7, 9 }, 5, 5);
             SortedSet<int> view = set.GetViewBetween(4, 8);
 
-            Assert.True(set.Contains(1));
-            Assert.True(set.Contains(3));
-            Assert.True(set.Contains(5));
-            Assert.True(set.Contains(7));
-            Assert.True(set.Contains(9));
+            Assert.Contains(1, set);
+            Assert.Contains(3, set);
+            Assert.Contains(5, set);
+            Assert.Contains(7, set);
+            Assert.Contains(9, set);
 
-            Assert.False(view.Contains(1));
-            Assert.False(view.Contains(3));
-            Assert.True(view.Contains(5));
-            Assert.True(view.Contains(7));
-            Assert.False(view.Contains(9));
+            Assert.DoesNotContain(1, view);
+            Assert.DoesNotContain(3, view);
+            Assert.Contains(5, view);
+            Assert.Contains(7, view);
+            Assert.DoesNotContain(9, view);
 
             Assert.Equal(1, set.Min);
             Assert.Equal(9, set.Max);

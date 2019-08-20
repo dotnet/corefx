@@ -38,7 +38,7 @@ namespace System.Collections.Tests
                     list.Insert(index, item);
                 }
 
-                Assert.True(list.Contains(item)); //"Expect it to contain the item."
+                Assert.Contains(item, list); //"Expect it to contain the item."
                 Assert.Equal(list.Count, items.Length + repeat); //"Expect to be the same."
 
 
@@ -79,7 +79,7 @@ namespace System.Collections.Tests
                     _ilist.Insert(index, item);
                 }
 
-                Assert.True(list.Contains(item)); //"Expected it to be true."
+                Assert.Contains(item, list); //"Expected it to be true."
                 Assert.Equal(list.Count, items.Length + repeat); //"Expected them to be equal."
 
                 for (int i = 0; i < index; i++)
@@ -127,7 +127,7 @@ namespace System.Collections.Tests
 
                 foreach (T item in itemsY)
                 {
-                    Assert.True(list.Contains(item)); //"Should contain the item."
+                    Assert.Contains(item, list); //"Should contain the item."
                 }
                 Assert.Equal(list.Count, itemsX.Length + (itemsY.Length * repeat)); //"Should have the same result."
 
@@ -152,7 +152,7 @@ namespace System.Collections.Tests
 
                 foreach (T item in itemsX)
                 {
-                    Assert.True(list.Contains(item)); //"Should contain the item."
+                    Assert.Contains(item, list); //"Should contain the item."
                 }
                 Assert.Equal(list.Count, itemsX.Length + (itemsX.Length)); //"Should have the same result."
 
@@ -403,7 +403,7 @@ namespace System.Collections.Tests
 
                 for (int i = 0; i < items.Length; i++)
                 {
-                    Assert.True(list.Contains(items[i])); //"Should contain item."
+                    Assert.Contains(items[i], list); //"Should contain item."
                 }
             }
 
@@ -413,7 +413,7 @@ namespace System.Collections.Tests
 
                 for (int i = 0; i < itemsY.Length; i++)
                 {
-                    Assert.False(list.Contains(itemsY[i])); //"Should not contain item"
+                    Assert.DoesNotContain(itemsY[i], list); //"Should not contain item"
                 }
             }
 
@@ -423,7 +423,7 @@ namespace System.Collections.Tests
                 for (int i = 0; i < items.Length; i++)
                 {
                     list.Remove(items[i]);
-                    Assert.False(list.Contains(items[i])); //"Should not contain item"
+                    Assert.DoesNotContain(items[i], list); //"Should not contain item"
                 }
             }
 
@@ -435,7 +435,7 @@ namespace System.Collections.Tests
                     list.Add(items[i]);
                     list.Remove(items[i]);
                     list.Add(items[i]);
-                    Assert.True(list.Contains(items[i])); //"Should contain item."
+                    Assert.Contains(items[i], list); //"Should contain item."
                 }
             }
 
@@ -450,10 +450,10 @@ namespace System.Collections.Tests
 
                 for (int i = 0; i < times + 1; i++)
                 {
-                    Assert.True(list.Contains(items[items.Length / 2])); //"Should contain item."
+                    Assert.Contains(items[items.Length / 2], list); //"Should contain item."
                     list.Remove(items[items.Length / 2]);
                 }
-                Assert.False(list.Contains(items[items.Length / 2])); //"Should not contain item"
+                Assert.DoesNotContain(items[items.Length / 2], list); //"Should not contain item"
             }
             public void ContainsNullWhenReference(T[] items, T value)
             {
@@ -464,7 +464,7 @@ namespace System.Collections.Tests
 
                 List<T> list = new List<T>(items);
                 list.Add(value);
-                Assert.True(list.Contains(value)); //"Should contain item."
+                Assert.Contains(value, list); //"Should contain item."
             }
 
             public void NonGenericIListBasicContains(T[] items)

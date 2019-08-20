@@ -673,12 +673,12 @@ namespace System.Collections.Immutable.Tests
             if (source.Any(i => i >= 0))
             {
                 int contained = Enumerable.Range(0, int.MaxValue).First(i => source.Contains(i));
-                Assert.True(array.Contains(contained));
+                Assert.Contains(contained, array);
                 Assert.True(((ICollection<int>)array).Contains(contained));
             }
 
             int notContained = Enumerable.Range(0, int.MaxValue).First(i => !source.Contains(i));
-            Assert.False(array.Contains(notContained));
+            Assert.DoesNotContain(notContained, array);
             Assert.False(((ICollection<int>)array).Contains(notContained));
         }
 

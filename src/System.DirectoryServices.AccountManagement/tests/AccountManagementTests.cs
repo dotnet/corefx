@@ -160,25 +160,25 @@ namespace System.DirectoryServices.AccountManagement.Tests
 
                     // First, check the user is not in the group
 
-                    Assert.False(user.GetGroups().Contains(group));
+                    Assert.DoesNotContain(group, user.GetGroups());
                     Assert.False(user.IsMemberOf(group));
-                    Assert.False(group.Members.Contains(user));
+                    Assert.DoesNotContain(user, group.Members);
 
                     // second, add user and validate it is member of the group
 
                     group.Members.Add(context, IdentityType.Name, user.Name);
                     group.Save();
 
-                    Assert.True(user.GetGroups().Contains(group));
+                    Assert.Contains(group, user.GetGroups());
                     Assert.True(user.IsMemberOf(group));
-                    Assert.True(group.Members.Contains(user));
+                    Assert.Contains(user, group.Members);
 
                     // Third, remove the user from the group and check again
                     group.Members.Remove(context, IdentityType.Name, user.Name);
                     group.Save();
-                    Assert.False(user.GetGroups().Contains(group));
+                    Assert.DoesNotContain(group, user.GetGroups());
                     Assert.False(user.IsMemberOf(group));
-                    Assert.False(group.Members.Contains(user));
+                    Assert.DoesNotContain(user, group.Members);
                 }
             }
             finally

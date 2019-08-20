@@ -319,7 +319,7 @@ namespace System.Net.Http.Tests
         {
             HttpRequestHeaders headers = new HttpRequestHeaders();
 
-            Assert.False(headers.TransferEncoding.Contains(specialChunked));
+            Assert.DoesNotContain(specialChunked, headers.TransferEncoding);
         }
 
         [Fact]
@@ -328,10 +328,10 @@ namespace System.Net.Http.Tests
             HttpRequestHeaders headers = new HttpRequestHeaders();
 
             headers.TransferEncodingChunked = true;
-            Assert.True(headers.TransferEncoding.Contains(specialChunked));
+            Assert.Contains(specialChunked, headers.TransferEncoding);
 
             headers.TransferEncodingChunked = false;
-            Assert.False(headers.TransferEncoding.Contains(specialChunked));
+            Assert.DoesNotContain(specialChunked, headers.TransferEncoding);
         }
 
         [Fact]
@@ -340,10 +340,10 @@ namespace System.Net.Http.Tests
             HttpRequestHeaders headers = new HttpRequestHeaders();
 
             headers.TransferEncoding.Add(specialChunked);
-            Assert.True(headers.TransferEncoding.Contains(specialChunked));
+            Assert.Contains(specialChunked, headers.TransferEncoding);
 
             headers.TransferEncoding.Remove(specialChunked);
-            Assert.False(headers.TransferEncoding.Contains(specialChunked));
+            Assert.DoesNotContain(specialChunked, headers.TransferEncoding);
         }
 
         [Fact]
@@ -576,13 +576,13 @@ namespace System.Net.Http.Tests
             headers.TransferEncodingChunked = true;
             Assert.True((bool)headers.TransferEncodingChunked);
             Assert.Equal(1, headers.TransferEncoding.Count);
-            Assert.True(headers.TransferEncoding.Contains(specialChunked));
+            Assert.Contains(specialChunked, headers.TransferEncoding);
 
             Assert.True(headers.TransferEncoding.Remove(specialChunked));
 
             Assert.False((bool)headers.TransferEncodingChunked);
             Assert.Equal(0, headers.TransferEncoding.Count);
-            Assert.False(headers.TransferEncoding.Contains(specialChunked));
+            Assert.DoesNotContain(specialChunked, headers.TransferEncoding);
         }
 
         [Fact]
@@ -592,13 +592,13 @@ namespace System.Net.Http.Tests
             headers.TransferEncoding.Add(specialChunked);
             Assert.True((bool)headers.TransferEncodingChunked);
             Assert.Equal(1, headers.TransferEncoding.Count);
-            Assert.True(headers.TransferEncoding.Contains(specialChunked));
+            Assert.Contains(specialChunked, headers.TransferEncoding);
 
             Assert.True(headers.TransferEncoding.Remove(specialChunked));
 
             Assert.Null(headers.TransferEncodingChunked);
             Assert.Equal(0, headers.TransferEncoding.Count);
-            Assert.False(headers.TransferEncoding.Contains(specialChunked));
+            Assert.DoesNotContain(specialChunked, headers.TransferEncoding);
         }
 
         [Fact]

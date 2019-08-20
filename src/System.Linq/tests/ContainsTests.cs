@@ -119,28 +119,28 @@ namespace System.Linq.Tests
         public void ExplicitNullComparerDoesNotDeferToCollection()
         {
             IEnumerable<string> source = new HashSet<string>(new AnagramEqualityComparer()) {"ABC"};
-            Assert.False(source.Contains("BAC", null));
+            Assert.DoesNotContain("BAC", source, null);
         }
 
         [Fact]
         public void ExplicitComparerDoesNotDeferToCollection()
         {
             IEnumerable<string> source = new HashSet<string> {"ABC"};
-            Assert.True(source.Contains("abc", StringComparer.OrdinalIgnoreCase));
+            Assert.Contains("abc", source, StringComparer.OrdinalIgnoreCase);
         }
 
         [Fact]
         public void ExplicitComparerDoestNotDeferToCollectionWithComparer()
         {
             IEnumerable<string> source = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {"ABC"};
-            Assert.True(source.Contains("BAC", new AnagramEqualityComparer()));
+            Assert.Contains("BAC", source, new AnagramEqualityComparer());
         }
 
         [Fact]
         public void NoComparerDoesDeferToCollection()
         {
             IEnumerable<string> source = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {"ABC"};
-            Assert.True(source.Contains("abc"));
+            Assert.Contains("abc", source);
         }
     }
 }

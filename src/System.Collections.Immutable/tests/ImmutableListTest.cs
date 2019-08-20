@@ -315,19 +315,19 @@ namespace System.Collections.Immutable.Tests
         public void NullHandlingTest()
         {
             var list = ImmutableList<GenericParameterHelper>.Empty;
-            Assert.False(list.Contains(null));
+            Assert.DoesNotContain(null, list);
             Assert.Equal(-1, list.IndexOf(null));
 
             list = list.Add((GenericParameterHelper)null);
             Assert.Equal(1, list.Count);
             Assert.Null(list[0]);
-            Assert.True(list.Contains(null));
+            Assert.Contains(null, list);
             Assert.Equal(0, list.IndexOf(null));
 
             list = list.Remove((GenericParameterHelper)null);
             Assert.Equal(0, list.Count);
             Assert.True(list.IsEmpty);
-            Assert.False(list.Contains(null));
+            Assert.DoesNotContain(null, list);
             Assert.Equal(-1, list.IndexOf(null));
         }
 
@@ -355,21 +355,21 @@ namespace System.Collections.Immutable.Tests
 
             list = list.Remove(30);
             Assert.Equal(9, list.Count);
-            Assert.False(list.Contains(30));
+            Assert.DoesNotContain(30, list);
 
             list = list.Remove(100);
             Assert.Equal(8, list.Count);
-            Assert.False(list.Contains(100));
+            Assert.DoesNotContain(100, list);
 
             list = list.Remove(10);
             Assert.Equal(7, list.Count);
-            Assert.False(list.Contains(10));
+            Assert.DoesNotContain(10, list);
 
             var removeList = new int[] { 20, 70 };
             list = list.RemoveAll(removeList.Contains);
             Assert.Equal(5, list.Count);
-            Assert.False(list.Contains(20));
-            Assert.False(list.Contains(70));
+            Assert.DoesNotContain(20, list);
+            Assert.DoesNotContain(70, list);
 
             IImmutableList<int> list2 = ImmutableList<int>.Empty;
             for (int i = 1; i <= 10; i++)
@@ -379,20 +379,20 @@ namespace System.Collections.Immutable.Tests
 
             list2 = list2.Remove(30);
             Assert.Equal(9, list2.Count);
-            Assert.False(list2.Contains(30));
+            Assert.DoesNotContain(30, list2);
 
             list2 = list2.Remove(100);
             Assert.Equal(8, list2.Count);
-            Assert.False(list2.Contains(100));
+            Assert.DoesNotContain(100, list2);
 
             list2 = list2.Remove(10);
             Assert.Equal(7, list2.Count);
-            Assert.False(list2.Contains(10));
+            Assert.DoesNotContain(10, list2);
 
             list2 = list2.RemoveAll(removeList.Contains);
             Assert.Equal(5, list2.Count);
-            Assert.False(list2.Contains(20));
-            Assert.False(list2.Contains(70));
+            Assert.DoesNotContain(20, list2);
+            Assert.DoesNotContain(70, list2);
         }
 
         [Fact]
@@ -436,15 +436,15 @@ namespace System.Collections.Immutable.Tests
 
             list = list.RemoveAt(2);
             Assert.Equal(9, list.Count);
-            Assert.False(list.Contains(30));
+            Assert.DoesNotContain(30, list);
 
             list = list.RemoveAt(8);
             Assert.Equal(8, list.Count);
-            Assert.False(list.Contains(100));
+            Assert.DoesNotContain(100, list);
 
             list = list.RemoveAt(0);
             Assert.Equal(7, list.Count);
-            Assert.False(list.Contains(10));
+            Assert.DoesNotContain(10, list);
         }
 
         [Fact]
@@ -455,16 +455,16 @@ namespace System.Collections.Immutable.Tests
             var list = ImmutableList<string>.Empty;
             foreach (string newElement in expectedList)
             {
-                Assert.False(list.Contains(newElement));
+                Assert.DoesNotContain(newElement, list);
                 list = list.Add(newElement);
-                Assert.True(list.Contains(newElement));
+                Assert.Contains(newElement, list);
                 Assert.Equal(expectedList.IndexOf(newElement), list.IndexOf(newElement));
                 Assert.Equal(expectedList.IndexOf(newElement), list.IndexOf(newElement.ToUpperInvariant(), StringComparer.OrdinalIgnoreCase));
                 Assert.Equal(-1, list.IndexOf(newElement.ToUpperInvariant()));
 
                 foreach (string existingElement in expectedList.TakeWhile(v => v != newElement))
                 {
-                    Assert.True(list.Contains(existingElement));
+                    Assert.Contains(existingElement, list);
                     Assert.Equal(expectedList.IndexOf(existingElement), list.IndexOf(existingElement));
                     Assert.Equal(expectedList.IndexOf(existingElement), list.IndexOf(existingElement.ToUpperInvariant(), StringComparer.OrdinalIgnoreCase));
                     Assert.Equal(-1, list.IndexOf(existingElement.ToUpperInvariant()));

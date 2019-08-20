@@ -49,7 +49,7 @@ namespace System.Linq.Tests
 
             private void AssertIndex(int index)
             {
-                Assert.False(_called.Contains(-1));
+                Assert.DoesNotContain(-1, _called);
                 Assert.True(_called.Add(index));
             }
 
