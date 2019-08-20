@@ -38,7 +38,6 @@ namespace System.Text.Json
         /// </summary>
         public bool IsImmutable => _idx != -1;
 
-
         private JsonTokenType TokenType
         {
             get
@@ -57,12 +56,18 @@ namespace System.Text.Json
         {
             get
             {
-                if (_parent is JsonDocument)
+                if (IsImmutable)
                 {
                     return TokenType.ToValueKind();
                 }
 
                 var jsonNode = (JsonNode)_parent;
+
+                if (jsonNode == null)
+                {
+                    return JsonValueKind.Null;
+
+                }
                 return jsonNode.ValueKind;
             }
         }

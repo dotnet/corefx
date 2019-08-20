@@ -139,6 +139,7 @@ namespace System.Text.Json.Tests
                 { "text", "property value" },
                 { "boolean", true },
                 { "number", 15 },
+                { "null node", (JsonNode) null },
                 { "array", new JsonString[] { "value1", "value2"} }
             };
 
@@ -161,7 +162,11 @@ namespace System.Text.Json.Tests
             Assert.Equal("number", enumerator.Current.Name);
             Assert.Equal(15, enumerator.Current.Value.GetInt32());
             Assert.Equal(JsonValueKind.Number, enumerator.Current.Value.ValueKind);
-            
+
+            enumerator.MoveNext();
+            Assert.Equal("null node", enumerator.Current.Name);
+            Assert.Equal(JsonValueKind.Null, enumerator.Current.Value.ValueKind);
+
             enumerator.MoveNext();
             Assert.Equal("array", enumerator.Current.Name);
             Assert.Equal(2, enumerator.Current.Value.GetArrayLength());

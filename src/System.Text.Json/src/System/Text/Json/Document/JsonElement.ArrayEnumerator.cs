@@ -48,8 +48,9 @@ namespace System.Text.Json
             {
                 get
                 {
-                    if (_target._parent is JsonDocument document)
+                    if (_target._parent == null || _target._parent is JsonDocument)
                     {
+                        var document = _target._parent as JsonDocument;
                         if (_curIdx < 0)
                         {
                             return default;
@@ -108,8 +109,10 @@ namespace System.Text.Json
             /// <inheritdoc />
             public bool MoveNext()
             {
-                if (_target._parent is JsonDocument document)
+                if (_target._parent == null || _target._parent is JsonDocument)
                 {
+                    var document = _target._parent as JsonDocument;
+
                     if (_curIdx >= _endIdx)
                     {
                         return false;
