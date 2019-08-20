@@ -4,7 +4,11 @@
 
 using System.Net.Http;
 using System.Threading.Tasks;
+
+using Microsoft.DotNet.XUnitExtensions;
+
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Tests
 {
@@ -13,11 +17,13 @@ namespace System.Net.Tests
     {
         private HttpListenerFactory _factory;
         private HttpListener _listener;
+        private readonly ITestOutputHelper _output;
 
-        public SimpleHttpTests()
+        public SimpleHttpTests(ITestOutputHelper output)
         {
             _factory = new HttpListenerFactory();
             _listener = _factory.GetListener();
+            _output = output;
         }
 
         public void Dispose() => _factory.Dispose();
@@ -157,6 +163,67 @@ namespace System.Net.Tests
                 {
                     Assert.Equal(200, (int)response.StatusCode);
                 }
+            }
+        }
+
+        [Fact]
+        public void ListenerRestart_BeginGetContext_Success()
+        {
+            using (HttpListenerFactory factory = new HttpListenerFactory())
+            {
+                HttpListener  listener = factory.GetListener();
+                listener.BeginGetContext((f) => { }, null);
+                listener.Stop();
+                listener.Start();
+                listener.BeginGetContext((f) => { }, null);
+            }
+        }
+
+        [ConditionalFact]
+        public async Task ListenerRestart_GetContext_Success()
+        {
+            string content = "ListenerRestart_GetContext_Success";
+            using (HttpListenerFactory factory = new HttpListenerFactory())
+            using (HttpClient client = new HttpClient())
+            {
+                HttpListener  listener = factory.GetListener();
+
+                _output.WriteLine("Connecting to {0}", factory.ListeningUrl);
+                Task<string> clientTask = client.GetStringAsync(factory.ListeningUrl);
+
+                HttpListenerContext context = listener.GetContext();
+                HttpListenerResponse response = context.Response;
+                response.OutputStream.Write(System.Text.Encoding.UTF8.GetBytes(content));
+                response.OutputStream.Close();
+
+                string body = await clientTask;
+                Assert.Equal(content, body);
+
+                // Stop and start listener again.
+                listener.Stop();
+                try
+                {
+                    // This may fail if something else took our port while restarting.
+                    listener.Start();
+                }
+                catch (Exception e)
+                {
+                    _output.WriteLine(e.Message);
+                    // Skip test if we lost race and we are unable to bind on same port again.
+                    throw new SkipTestException("Unable to restart listener");
+                }
+
+                _output.WriteLine("Connecting to {0} after restart", factory.ListeningUrl);
+
+                // Repeat request to be sure listener is working.
+                clientTask = client.GetStringAsync(factory.ListeningUrl);
+                context = listener.GetContext();
+                response = context.Response;
+                response.OutputStream.Write(System.Text.Encoding.UTF8.GetBytes(content));
+                response.OutputStream.Close();
+
+                body = await clientTask;
+                Assert.Equal(content, body);
             }
         }
     }
