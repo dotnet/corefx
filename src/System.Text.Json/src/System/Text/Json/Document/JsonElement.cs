@@ -79,9 +79,7 @@ namespace System.Text.Json
                     return document.GetArrayIndexElement(_idx, index);
                 }
 
-                var node = (JsonNode)_parent;
-
-                if (node is JsonArray jsonArray)
+                if (_parent is JsonArray jsonArray)
                 {
                     return jsonArray[index].AsJsonElement();
                 }
@@ -109,9 +107,7 @@ namespace System.Text.Json
                 return document.GetArrayLength(_idx);
             }
 
-            var node = (JsonNode)_parent;
-
-            if (node is JsonArray jsonArray)
+            if (_parent is JsonArray jsonArray)
             {
                 return jsonArray.Count;
             }
@@ -270,7 +266,9 @@ namespace System.Text.Json
         public bool TryGetProperty(string propertyName, out JsonElement value)
         {
             if (propertyName == null)
+            {
                 throw new ArgumentNullException(nameof(propertyName));
+            }
 
             return TryGetProperty(propertyName.AsSpan(), out value);
         }
@@ -311,9 +309,7 @@ namespace System.Text.Json
                 return document.TryGetNamedPropertyValue(_idx, propertyName, out value);
             }
 
-            var node = (JsonNode)_parent;
-
-            if (node is JsonObject jsonObject)
+            if (_parent is JsonObject jsonObject)
             {
                 if (jsonObject.TryGetPropertyValue(propertyName.ToString(), out JsonNode nodeValue))
                 {
@@ -366,9 +362,7 @@ namespace System.Text.Json
                 return document.TryGetNamedPropertyValue(_idx, utf8PropertyName, out value);
             }
 
-            var node = (JsonNode)_parent;
-
-            if (node is JsonObject jsonObject)
+            if (_parent is JsonObject jsonObject)
             {
                 if (jsonObject.TryGetPropertyValue(utf8PropertyName.ToString(), out JsonNode nodeValue))
                 {
@@ -433,9 +427,7 @@ namespace System.Text.Json
                 return document.GetString(_idx, JsonTokenType.String);
             }
 
-            var node = (JsonNode)_parent;
-
-            if (node is JsonString jsonString)
+            if (_parent is JsonString jsonString)
             {
                 return jsonString.Value;
             }
@@ -517,7 +509,17 @@ namespace System.Text.Json
         {
             CheckValidInstance();
 
-            return _parent.TryGetValue(_idx, out value);
+            if (_parent is JsonDocument document)
+            {
+                return document.TryGetValue(_idx, out value);
+            }
+
+            if (_parent is JsonNumber jsonNumber)
+            {
+                return jsonNumber.TryGetSByte(out value);
+            }
+
+            throw new InvalidOperationException();
         }
 
         /// <summary>
@@ -565,7 +567,17 @@ namespace System.Text.Json
         {
             CheckValidInstance();
 
-            return _parent.TryGetValue(_idx, out value);
+            if (_parent is JsonDocument document)
+            {
+                return document.TryGetValue(_idx, out value);
+            }
+
+            if (_parent is JsonNumber jsonNumber)
+            {
+                return jsonNumber.TryGetByte(out value);
+            }
+
+            throw new InvalidOperationException();
         }
 
         /// <summary>
@@ -615,7 +627,17 @@ namespace System.Text.Json
         {
             CheckValidInstance();
 
-            return _parent.TryGetValue(_idx, out value);
+            if (_parent is JsonDocument document)
+            {
+                return document.TryGetValue(_idx, out value);
+            }
+
+            if (_parent is JsonNumber jsonNumber)
+            {
+                return jsonNumber.TryGetInt16(out value);
+            }
+
+            throw new InvalidOperationException();
         }
 
         /// <summary>
@@ -663,7 +685,17 @@ namespace System.Text.Json
         {
             CheckValidInstance();
 
-            return _parent.TryGetValue(_idx, out value);
+            if (_parent is JsonDocument document)
+            {
+                return document.TryGetValue(_idx, out value);
+            }
+
+            if (_parent is JsonNumber jsonNumber)
+            {
+                return jsonNumber.TryGetUInt16(out value);
+            }
+
+            throw new InvalidOperationException();
         }
 
         /// <summary>
@@ -714,7 +746,17 @@ namespace System.Text.Json
         {
             CheckValidInstance();
 
-            return _parent.TryGetValue(_idx, out value);
+            if (_parent is JsonDocument document)
+            {
+                return document.TryGetValue(_idx, out value);
+            }
+
+            if (_parent is JsonNumber jsonNumber)
+            {
+                return jsonNumber.TryGetInt32(out value);
+            }
+
+            throw new InvalidOperationException();
         }
 
         /// <summary>
@@ -762,7 +804,17 @@ namespace System.Text.Json
         {
             CheckValidInstance();
 
-            return _parent.TryGetValue(_idx, out value);
+            if (_parent is JsonDocument document)
+            {
+                return document.TryGetValue(_idx, out value);
+            }
+
+            if (_parent is JsonNumber jsonNumber)
+            {
+                return jsonNumber.TryGetUInt32(out value);
+            }
+
+            throw new InvalidOperationException();
         }
 
         /// <summary>
@@ -813,7 +865,17 @@ namespace System.Text.Json
         {
             CheckValidInstance();
 
-            return _parent.TryGetValue(_idx, out value);
+            if (_parent is JsonDocument document)
+            {
+                return document.TryGetValue(_idx, out value);
+            }
+
+            if (_parent is JsonNumber jsonNumber)
+            {
+                return jsonNumber.TryGetInt64(out value);
+            }
+
+            throw new InvalidOperationException();
         }
 
         /// <summary>
@@ -864,7 +926,17 @@ namespace System.Text.Json
         {
             CheckValidInstance();
 
-            return _parent.TryGetValue(_idx, out value);
+            if (_parent is JsonDocument document)
+            {
+                return document.TryGetValue(_idx, out value);
+            }
+
+            if (_parent is JsonNumber jsonNumber)
+            {
+                return jsonNumber.TryGetUInt64(out value);
+            }
+
+            throw new InvalidOperationException();
         }
 
         /// <summary>
@@ -924,7 +996,17 @@ namespace System.Text.Json
         {
             CheckValidInstance();
 
-            return _parent.TryGetValue(_idx, out value);
+            if (_parent is JsonDocument document)
+            {
+                return document.TryGetValue(_idx, out value);
+            }
+
+            if (_parent is JsonNumber jsonNumber)
+            {
+                return jsonNumber.TryGetDouble(out value);
+            }
+
+            throw new InvalidOperationException();
         }
 
         /// <summary>
@@ -991,7 +1073,17 @@ namespace System.Text.Json
         {
             CheckValidInstance();
 
-            return _parent.TryGetValue(_idx, out value);
+            if (_parent is JsonDocument document)
+            {
+                return document.TryGetValue(_idx, out value);
+            }
+
+            if (_parent is JsonNumber jsonNumber)
+            {
+                return jsonNumber.TryGetSingle(out value);
+            }
+
+            throw new InvalidOperationException();
         }
 
         /// <summary>
@@ -1050,7 +1142,17 @@ namespace System.Text.Json
         {
             CheckValidInstance();
 
-            return _parent.TryGetValue(_idx, out value);
+            if (_parent is JsonDocument document)
+            {
+                return document.TryGetValue(_idx, out value);
+            }
+
+            if (_parent is JsonNumber jsonNumber)
+            {
+                return jsonNumber.TryGetDecimal(out value);
+            }
+
+            throw new InvalidOperationException();
         }
 
         /// <summary>
@@ -1101,7 +1203,17 @@ namespace System.Text.Json
         {
             CheckValidInstance();
 
-            return _parent.TryGetValue(_idx, out value);
+            if (_parent is JsonDocument document)
+            {
+                return document.TryGetValue(_idx, out value);
+            }
+
+            if (_parent is JsonString jsonString)
+            {
+                return jsonString.TryGetDateTime(out value);
+            }
+
+            throw new InvalidOperationException();
         }
 
         /// <summary>
@@ -1152,7 +1264,17 @@ namespace System.Text.Json
         {
             CheckValidInstance();
 
-            return _parent.TryGetValue(_idx, out value);
+            if (_parent is JsonDocument document)
+            {
+                return document.TryGetValue(_idx, out value);
+            }
+
+            if (_parent is JsonString jsonString)
+            {
+                return jsonString.TryGetDateTimeOffset(out value);
+            }
+
+            throw new InvalidOperationException();
         }
 
         /// <summary>
@@ -1203,7 +1325,17 @@ namespace System.Text.Json
         {
             CheckValidInstance();
 
-            return _parent.TryGetValue(_idx, out value);
+            if (_parent is JsonDocument document)
+            {
+                return document.TryGetValue(_idx, out value);
+            }
+
+            if (_parent is JsonString jsonString)
+            {
+                return jsonString.TryGetGuid(out value);
+            }
+
+            throw new InvalidOperationException();
         }
 
         /// <summary>
@@ -1237,7 +1369,8 @@ namespace System.Text.Json
         {
             CheckValidInstance();
 
-            return _parent.GetNameOfPropertyValue(_idx);
+            var document = (JsonDocument)_parent;
+            return document.GetNameOfPropertyValue(_idx);
         }
 
         /// <summary>
@@ -1253,14 +1386,21 @@ namespace System.Text.Json
         {
             CheckValidInstance();
 
-            return _parent.GetRawValueAsString(_idx);
+            if (_parent is JsonDocument document)
+            {
+                return document.GetRawValueAsString(_idx);
+            }
+
+            var jsonNode = (JsonNode)_parent;
+            return jsonNode.ToString();
         }
 
         internal string GetPropertyRawText()
         {
             CheckValidInstance();
 
-            return _parent.GetPropertyRawValueAsString(_idx);
+            var document = (JsonDocument)_parent;
+            return document.GetPropertyRawValueAsString(_idx);
         }
 
         /// <summary>
@@ -1351,14 +1491,16 @@ namespace System.Text.Json
         {
             CheckValidInstance();
 
-            return _parent.TextEquals(_idx, utf8Text, isPropertyName);
+            var document = (JsonDocument)_parent;
+            return document.TextEquals(_idx, utf8Text, isPropertyName);
         }
 
         internal bool TextEqualsHelper(ReadOnlySpan<char> text, bool isPropertyName)
         {
             CheckValidInstance();
 
-            return _parent.TextEquals(_idx, text, isPropertyName);
+            var document = (JsonDocument)_parent;
+            return document.TextEquals(_idx, text, isPropertyName);
         }
 
         /// <summary>
@@ -1383,7 +1525,8 @@ namespace System.Text.Json
 
             CheckValidInstance();
 
-            _parent.WriteElementTo(_idx, writer);
+            var document = (JsonDocument)_parent;
+            document.WriteElementTo(_idx, writer);
         }
 
         /// <summary>
@@ -1485,7 +1628,13 @@ namespace System.Text.Json
                     {
                         // null parent should have hit the None case
                         Debug.Assert(_parent != null);
-                        return _parent.GetRawValueAsString(_idx);
+                        if (_parent is JsonDocument document)
+                        {
+                            return document.GetRawValueAsString(_idx);
+                        }
+
+                        var jsonNode = (JsonNode)_parent;
+                        return jsonNode.ToString();
                     }
                 case JsonTokenType.String:
                     return GetString();
@@ -1515,12 +1664,18 @@ namespace System.Text.Json
         {
             CheckValidInstance();
 
-            if (!_parent.IsDisposable)
+            if (_parent is JsonDocument docuemnt)
             {
-                return this;
+                if (!docuemnt.IsDisposable)
+                {
+                    return this;
+                }
+
+                return docuemnt.CloneElement(_idx);
             }
 
-            return _parent.CloneElement(_idx);
+            var jsonNode = (JsonNode)_parent;
+            return jsonNode.Clone().AsJsonElement();
         }
 
         private void CheckValidInstance()
@@ -1530,7 +1685,10 @@ namespace System.Text.Json
                 throw new InvalidOperationException();
             }
 
-            Debug.Assert(_parent is JsonDocument || _parent is JsonNode, "JsonElement can be backed only by JsonDocument or JsonNode");
+            if (!(_parent is JsonDocument) && !(_parent is JsonNode))
+            {
+                throw new NotSupportedException("JsonElement can be backed only by JsonDocument or JsonNode");
+            }
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]

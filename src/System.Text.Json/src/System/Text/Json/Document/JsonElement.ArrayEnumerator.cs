@@ -26,12 +26,13 @@ namespace System.Text.Json
 
                 _target = target;
                 _curIdx = -1;
-                _endIdx = _target._parent.GetEndIndex(_target._idx, includeEndElement: false);
+                JsonDocument document = (JsonDocument)_target._parent;
+                _endIdx = document.GetEndIndex(_target._idx, includeEndElement: false);
             }
 
             /// <inheritdoc />
             public JsonElement Current =>
-                _curIdx < 0 ? default : new JsonElement(_target._parent, _curIdx);
+                _curIdx < 0 ? default : new JsonElement((JsonDocument)_target._parent, _curIdx);
 
             /// <summary>
             ///   Returns an enumerator that iterates through a collection.
@@ -82,7 +83,8 @@ namespace System.Text.Json
                 }
                 else
                 {
-                    _curIdx = _target._parent.GetEndIndex(_curIdx, includeEndElement: true);
+                    JsonDocument document = (JsonDocument)_target._parent;
+                    _curIdx = document.GetEndIndex(_curIdx, includeEndElement: true);
                 }
 
                 return _curIdx < _endIdx;

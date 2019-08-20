@@ -26,14 +26,15 @@ namespace System.Text.Json
 
                 _target = target;
                 _curIdx = -1;
-                _endIdx = _target._parent.GetEndIndex(_target._idx, includeEndElement: false);
+                JsonDocument document = (JsonDocument)_target._parent;
+                _endIdx = document.GetEndIndex(_target._idx, includeEndElement: false);
             }
 
             /// <inheritdoc />
             public JsonProperty Current =>
                 _curIdx < 0 ?
                     default :
-                    new JsonProperty(new JsonElement(_target._parent, _curIdx));
+                    new JsonProperty(new JsonElement((JsonDocument)_target._parent, _curIdx));
 
             /// <summary>
             ///   Returns an enumerator that iterates the properties of an object.
@@ -90,7 +91,8 @@ namespace System.Text.Json
                 }
                 else
                 {
-                    _curIdx = _target._parent.GetEndIndex(_curIdx, includeEndElement: true);
+                    JsonDocument document = (JsonDocument)_target._parent;
+                    _curIdx = document.GetEndIndex(_curIdx, includeEndElement: true);
                 }
 
                 // _curIdx is now pointing at a property name, move one more to get the value
