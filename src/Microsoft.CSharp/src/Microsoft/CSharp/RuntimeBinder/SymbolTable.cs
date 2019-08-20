@@ -717,7 +717,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 return TypeManager.GetArray(
                     GetCTypeFromType(t.GetElementType()), 
                     t.GetArrayRank(),
-#if netcoreapp
+#if netcoreapp || netcoreapp30
                     t.IsSZArray
 #else
                     t.GetElementType().MakeArrayType() == t
