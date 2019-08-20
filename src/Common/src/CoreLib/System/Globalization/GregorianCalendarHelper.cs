@@ -2,9 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Threading;
-
 namespace System.Globalization
 {
     // Gregorian Calendars use Era Info
@@ -88,13 +85,7 @@ namespace System.Globalization
         // This is the max Gregorian year can be represented by DateTime class.  The limitation
         // is derived from DateTime class.
         //
-        internal int MaxYear
-        {
-            get
-            {
-                return (m_maxYear);
-            }
-        }
+        internal int MaxYear => m_maxYear;
 
         internal static readonly int[] DaysToMonth365 =
         {
@@ -385,12 +376,12 @@ namespace System.Globalization
             if (i >= 0)
             {
                 m = i % 12 + 1;
-                y = y + i / 12;
+                y += i / 12;
             }
             else
             {
                 m = 12 + (i + 1) % 12;
-                y = y + (i - 11) / 12;
+                y += (i - 11) / 12;
             }
             int[] daysArray = (y % 4 == 0 && (y % 100 != 0 || y % 400 == 0)) ? DaysToMonth366 : DaysToMonth365;
             int days = (daysArray[m] - daysArray[m - 1]);
@@ -516,8 +507,8 @@ namespace System.Globalization
         // Returns the number of months in the specified year and era.
         public int GetMonthsInYear(int year, int era)
         {
-            year = GetGregorianYear(year, era);
-            return (12);
+            GetGregorianYear(year, era);
+            return 12;
         }
 
         // Returns the year part of the specified DateTime. The returned value is an
@@ -592,8 +583,8 @@ namespace System.Globalization
         //
         public int GetLeapMonth(int year, int era)
         {
-            year = GetGregorianYear(year, era);
-            return (0);
+            GetGregorianYear(year, era);
+            return 0;
         }
 
         // Checks whether a given month in the specified era is a leap month. This method returns true if

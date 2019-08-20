@@ -86,10 +86,7 @@ namespace System.Threading
         /// Gets the current count of the <see cref="SemaphoreSlim"/>.
         /// </summary>
         /// <value>The current count of the <see cref="SemaphoreSlim"/>.</value>
-        public int CurrentCount
-        {
-            get { return m_currentCount; }
-        }
+        public int CurrentCount => m_currentCount;
 
         /// <summary>
         /// Returns a <see cref="System.Threading.WaitHandle"/> that can be used to wait on the semaphore.
@@ -643,7 +640,7 @@ namespace System.Threading
                 else
                 {
                     Debug.Assert(m_currentCount == 0, "m_currentCount should never be negative");
-                    var asyncWaiter = CreateAndAddAsyncWaiter();
+                    TaskNode asyncWaiter = CreateAndAddAsyncWaiter();
                     return (millisecondsTimeout == Timeout.Infinite && !cancellationToken.CanBeCanceled) ?
                         asyncWaiter :
                         WaitUntilCountOrTimeoutAsync(asyncWaiter, millisecondsTimeout, cancellationToken);
@@ -851,7 +848,7 @@ namespace System.Threading
                         --maxAsyncToRelease;
 
                         // Get the next async waiter to release and queue it to be completed
-                        var waiterTask = m_asyncHead;
+                        TaskNode waiterTask = m_asyncHead;
                         RemoveAsyncWaiter(waiterTask); // ensures waiterTask.Next/Prev are null
                         waiterTask.TrySetResult(result: true);
                     }

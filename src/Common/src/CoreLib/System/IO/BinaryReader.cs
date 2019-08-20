@@ -85,13 +85,7 @@ namespace System.IO
             Debug.Assert(_decoder != null, "[BinaryReader.ctor]_decoder!=null");
         }
 
-        public virtual Stream BaseStream
-        {
-            get
-            {
-                return _stream;
-            }
-        }
+        public virtual Stream BaseStream => _stream;
 
         protected virtual void Dispose(bool disposing)
         {
@@ -558,11 +552,9 @@ namespace System.IO
                 ThrowIfDisposed();
 
                 int bytesRead = 0;
-                int n = 0;
-
                 do
                 {
-                    n = _stream.Read(_buffer, bytesRead, numBytes - bytesRead);
+                    int n = _stream.Read(_buffer, bytesRead, numBytes - bytesRead);
                     if (n == 0)
                     {
                         throw Error.GetEndOfFile();

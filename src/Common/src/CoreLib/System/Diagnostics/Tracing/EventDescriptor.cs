@@ -2,18 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Runtime.InteropServices;
-
 #if ES_BUILD_STANDALONE
+using System;
 using Environment = Microsoft.Diagnostics.Tracing.Internal.Environment;
 #endif
-
-#if !ES_BUILD_AGAINST_DOTNET_V35
-using Contract = System.Diagnostics.Contracts.Contract;
-#else
-using Contract = Microsoft.Diagnostics.Contracts.Internal.Contract;
-#endif
+using System.Runtime.InteropServices;
 
 #if ES_BUILD_STANDALONE
 namespace Microsoft.Diagnostics.Tracing
@@ -118,63 +111,15 @@ namespace System.Diagnostics.Tracing
             m_task = (ushort)task;
         }
 
-        public int EventId
-        {
-            get
-            {
-                return m_id;
-            }
-        }
-        public byte Version
-        {
-            get
-            {
-                return m_version;
-            }
-        }
-        public byte Channel
-        {
-            get
-            {
-                return m_channel;
-            }
-        }
-        public byte Level
-        {
-            get
-            {
-                return m_level;
-            }
-        }
-        public byte Opcode
-        {
-            get
-            {
-                return m_opcode;
-            }
-        }
-        public int Task
-        {
-            get
-            {
-                return m_task;
-            }
-        }
-        public long Keywords
-        {
-            get
-            {
-                return m_keywords;
-            }
-        }
+        public int EventId => m_id;
+        public byte Version => m_version;
+        public byte Channel => m_channel;
+        public byte Level => m_level;
+        public byte Opcode => m_opcode;
+        public int Task => m_task;
+        public long Keywords => m_keywords;
 
-        internal int TraceLoggingId
-        {
-            get
-            {
-                return m_traceloggingId;
-            }
-        }
+        internal int TraceLoggingId => m_traceloggingId;
 
         public override bool Equals(object? obj)
         {

@@ -20,6 +20,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace System.Diagnostics.Contracts
 {
@@ -49,10 +50,7 @@ namespace System.Diagnostics.Contracts
             _typeWithContracts = typeContainingContracts;
         }
 
-        public Type TypeContainingContracts
-        {
-            get { return _typeWithContracts; }
-        }
+        public Type TypeContainingContracts => _typeWithContracts;
     }
 
     /// <summary>
@@ -69,10 +67,7 @@ namespace System.Diagnostics.Contracts
             _typeIAmAContractFor = typeContractsAreFor;
         }
 
-        public Type TypeContractsAreFor
-        {
-            get { return _typeIAmAContractFor; }
-        }
+        public Type TypeContractsAreFor => _typeIAmAContractFor;
     }
 
     /// <summary>
@@ -125,10 +120,7 @@ namespace System.Diagnostics.Contracts
 
         public ContractVerificationAttribute(bool value) { _value = value; }
 
-        public bool Value
-        {
-            get { return _value; }
-        }
+        public bool Value => _value;
     }
 
     /// <summary>
@@ -146,10 +138,7 @@ namespace System.Diagnostics.Contracts
             _publicName = name;
         }
 
-        public string Name
-        {
-            get { return _publicName; }
-        }
+        public string Name => _publicName;
     }
 
     /// <summary>
@@ -197,25 +186,13 @@ namespace System.Diagnostics.Contracts
             _value = value;
         }
 
-        public string Category
-        {
-            get { return _category; }
-        }
+        public string Category => _category;
 
-        public string Setting
-        {
-            get { return _setting; }
-        }
+        public string Setting => _setting;
 
-        public bool Enabled
-        {
-            get { return _enabled; }
-        }
+        public bool Enabled => _enabled;
 
-        public string? Value
-        {
-            get { return _value; }
-        }
+        public string? Value => _value;
     }
 
     #endregion Attributes
@@ -666,7 +643,7 @@ namespace System.Diagnostics.Contracts
             if (probablyNotRewritten == null)
                 probablyNotRewritten = thisAssembly;
             string? simpleName = probablyNotRewritten.GetName().Name;
-            System.Runtime.CompilerServices.ContractHelper.TriggerFailure(kind, SR.Format(SR.MustUseCCRewrite, contractKind, simpleName), null, null, null);
+            ContractHelper.TriggerFailure(kind, SR.Format(SR.MustUseCCRewrite, contractKind, simpleName), null, null, null);
         }
 
         #endregion Private Methods
@@ -676,8 +653,7 @@ namespace System.Diagnostics.Contracts
         /// <summary>
         /// Without contract rewriting, failing Assert/Assumes end up calling this method.
         /// Code going through the contract rewriter never calls this method. Instead, the rewriter produced failures call
-        /// System.Runtime.CompilerServices.ContractHelper.RaiseContractFailedEvent, followed by
-        /// System.Runtime.CompilerServices.ContractHelper.TriggerFailure.
+        /// ContractHelper.RaiseContractFailedEvent, followed by ContractHelper.TriggerFailure.
         /// </summary>
         [System.Diagnostics.DebuggerNonUserCode]
         private static void ReportFailure(ContractFailureKind failureKind, string? userMessage, string? conditionText, Exception? innerException)
@@ -686,12 +662,11 @@ namespace System.Diagnostics.Contracts
                 throw new ArgumentException(SR.Format(SR.Arg_EnumIllegalVal, failureKind), nameof(failureKind));
 
             // displayMessage == null means: yes we handled it. Otherwise it is the localized failure message
-            var displayMessage = System.Runtime.CompilerServices.ContractHelper.RaiseContractFailedEvent(failureKind, userMessage, conditionText, innerException);
-
+            string? displayMessage = ContractHelper.RaiseContractFailedEvent(failureKind, userMessage, conditionText, innerException);
             if (displayMessage == null)
                 return;
 
-            System.Runtime.CompilerServices.ContractHelper.TriggerFailure(failureKind, displayMessage, userMessage, conditionText, innerException);
+            ContractHelper.TriggerFailure(failureKind, displayMessage, userMessage, conditionText, innerException);
         }
 
         /// <summary>
@@ -707,11 +682,11 @@ namespace System.Diagnostics.Contracts
         {
             add
             {
-                System.Runtime.CompilerServices.ContractHelper.InternalContractFailed += value;
+                ContractHelper.InternalContractFailed += value;
             }
             remove
             {
-                System.Runtime.CompilerServices.ContractHelper.InternalContractFailed -= value;
+                ContractHelper.InternalContractFailed -= value;
             }
         }
 

@@ -6,7 +6,7 @@ schedules:
   branches:
     include:
     - master
-    - releases/3.0
+    - release/3.0
 
 resources:
   containers:

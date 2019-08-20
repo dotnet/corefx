@@ -2,33 +2,21 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if ES_BUILD_STANDALONE
 using Microsoft.Win32;
-using System.Collections.Generic;
+using System;
 using System.Diagnostics;
+using System.Security.Permissions;
+using BitOperations = Microsoft.Diagnostics.Tracing.Internal.BitOperations;
+#endif
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using System.Security;
-#if ES_BUILD_STANDALONE
-using System.Security.Permissions;
-#endif
 #if CORECLR && PLATFORM_WINDOWS
 using Internal.Win32;
 #endif
-using System.Threading;
-using System;
-
-#if ES_BUILD_STANDALONE
-using BitOperations = Microsoft.Diagnostics.Tracing.Internal.BitOperations;
-#endif
-
-#if !ES_BUILD_AGAINST_DOTNET_V35
-using Contract = System.Diagnostics.Contracts.Contract;
-#else
-using Contract = Microsoft.Diagnostics.Contracts.Internal.Contract;
-#endif
-
 #if ES_BUILD_AGAINST_DOTNET_V35
 using Microsoft.Internal;       // for Tuple (can't define alias for open generic types so we "use" the whole namespace)
 #endif
@@ -289,7 +277,7 @@ namespace System.Diagnostics.Tracing
                     if (sessionsChanged.Count == 0)
                         sessionsChanged.Add(new Tuple<SessionInfo, bool>(new SessionInfo(0, 0), true));
 
-                    foreach (var session in sessionsChanged)
+                    foreach (Tuple<SessionInfo, bool> session in sessionsChanged)
                     {
                         int sessionChanged = session.Item1.sessionIdBit;
                         int etwSessionId = session.Item1.etwSessionId;
@@ -473,9 +461,9 @@ namespace System.Diagnostics.Tracing
             byte* buffer;
             for (; ; )
             {
-                var space = stackalloc byte[buffSize];
+                byte* space = stackalloc byte[buffSize];
                 buffer = space;
-                var hr = 0;
+                int hr = 0;
 
                 fixed (Guid* provider = &m_providerId)
                 {
@@ -504,7 +492,7 @@ namespace System.Diagnostics.Tracing
                 if (providerInstance->NextOffset == 0)
                     break;
                 Debug.Assert(0 <= providerInstance->NextOffset && providerInstance->NextOffset < buffSize);
-                var structBase = (byte*)providerInstance;
+                byte* structBase = (byte*)providerInstance;
                 providerInstance = (Interop.Advapi32.TRACE_PROVIDER_INSTANCE_INFO*)&structBase[providerInstance->NextOffset];
             }
 #else
@@ -609,7 +597,7 @@ namespace System.Diagnostics.Tracing
 #if ES_BUILD_STANDALONE
                 (new RegistryPermission(RegistryPermissionAccess.Read, regKey)).Assert();
 #endif
-                using (var key = Registry.LocalMachine.OpenSubKey(regKey))
+                using (RegistryKey? key = Registry.LocalMachine.OpenSubKey(regKey))
                 {
                     data = key?.GetValue(valueName, null) as byte[];
                     if (data != null)

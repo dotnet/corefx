@@ -2,16 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
-using System.Threading;
 using System.Globalization;
-using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
-using System.Runtime.Versioning;
-using System.Security;
 using CultureInfo = System.Globalization.CultureInfo;
 using Calendar = System.Globalization.Calendar;
 
@@ -427,21 +422,9 @@ namespace System
             }
         }
 
-        internal long InternalTicks
-        {
-            get
-            {
-                return (long)(_dateData & TicksMask);
-            }
-        }
+        internal long InternalTicks => (long)(_dateData & TicksMask);
 
-        private ulong InternalKind
-        {
-            get
-            {
-                return (_dateData & FlagsMask);
-            }
-        }
+        private ulong InternalKind => (_dateData & FlagsMask);
 
         // Returns the DateTime resulting from adding the given
         // TimeSpan to this DateTime.
@@ -532,12 +515,12 @@ namespace System
             if (i >= 0)
             {
                 m = i % 12 + 1;
-                y = y + i / 12;
+                y += i / 12;
             }
             else
             {
                 m = 12 + (i + 1) % 12;
-                y = y + (i - 11) / 12;
+                y += (i - 11) / 12;
             }
             if (y < 1 || y > 9999)
             {
@@ -750,7 +733,7 @@ namespace System
                 // Negative ticks are stored in the top part of the range and should be converted back into a negative number
                 if (ticks > TicksCeiling - TicksPerDay)
                 {
-                    ticks = ticks - TicksCeiling;
+                    ticks -= TicksCeiling;
                 }
                 // Convert the ticks back to local. If the UTC ticks are out of range, we need to default to
                 // the UTC offset from MinValue and MaxValue to be consistent with Parse.
@@ -1001,37 +984,19 @@ namespace System
         // Returns the day-of-month part of this DateTime. The returned
         // value is an integer between 1 and 31.
         //
-        public int Day
-        {
-            get
-            {
-                return GetDatePart(DatePartDay);
-            }
-        }
+        public int Day => GetDatePart(DatePartDay);
 
         // Returns the day-of-week part of this DateTime. The returned value
         // is an integer between 0 and 6, where 0 indicates Sunday, 1 indicates
         // Monday, 2 indicates Tuesday, 3 indicates Wednesday, 4 indicates
         // Thursday, 5 indicates Friday, and 6 indicates Saturday.
         //
-        public DayOfWeek DayOfWeek
-        {
-            get
-            {
-                return (DayOfWeek)((InternalTicks / TicksPerDay + 1) % 7);
-            }
-        }
+        public DayOfWeek DayOfWeek => (DayOfWeek)((InternalTicks / TicksPerDay + 1) % 7);
 
         // Returns the day-of-year part of this DateTime. The returned value
         // is an integer between 1 and 366.
         //
-        public int DayOfYear
-        {
-            get
-            {
-                return GetDatePart(DatePartDayOfYear);
-            }
-        }
+        public int DayOfYear => GetDatePart(DatePartDayOfYear);
 
         // Returns the hash code for this DateTime.
         //
@@ -1044,64 +1009,33 @@ namespace System
         // Returns the hour part of this DateTime. The returned value is an
         // integer between 0 and 23.
         //
-        public int Hour
-        {
-            get
-            {
-                return (int)((InternalTicks / TicksPerHour) % 24);
-            }
-        }
+        public int Hour => (int)((InternalTicks / TicksPerHour) % 24);
 
-        internal bool IsAmbiguousDaylightSavingTime()
-        {
-            return (InternalKind == KindLocalAmbiguousDst);
-        }
+        internal bool IsAmbiguousDaylightSavingTime() =>
+            InternalKind == KindLocalAmbiguousDst;
 
-        public DateTimeKind Kind
-        {
-            get
+        public DateTimeKind Kind =>
+            InternalKind switch
             {
-                return InternalKind switch
-                {
-                    KindUnspecified => DateTimeKind.Unspecified,
-                    KindUtc => DateTimeKind.Utc,
-                    _ => DateTimeKind.Local,
-                };
-            }
-        }
+                KindUnspecified => DateTimeKind.Unspecified,
+                KindUtc => DateTimeKind.Utc,
+                _ => DateTimeKind.Local,
+            };
 
         // Returns the millisecond part of this DateTime. The returned value
         // is an integer between 0 and 999.
         //
-        public int Millisecond
-        {
-            get
-            {
-                return (int)((InternalTicks / TicksPerMillisecond) % 1000);
-            }
-        }
+        public int Millisecond => (int)((InternalTicks / TicksPerMillisecond) % 1000);
 
         // Returns the minute part of this DateTime. The returned value is
         // an integer between 0 and 59.
         //
-        public int Minute
-        {
-            get
-            {
-                return (int)((InternalTicks / TicksPerMinute) % 60);
-            }
-        }
+        public int Minute => (int)((InternalTicks / TicksPerMinute) % 60);
 
         // Returns the month part of this DateTime. The returned value is an
         // integer between 1 and 12.
         //
-        public int Month
-        {
-            get
-            {
-                return GetDatePart(DatePartMonth);
-            }
-        }
+        public int Month => GetDatePart(DatePartMonth);
 
         // Returns a DateTime representing the current date and time. The
         // resolution of the returned value depends on the system timer.
@@ -1128,59 +1062,29 @@ namespace System
         // Returns the second part of this DateTime. The returned value is
         // an integer between 0 and 59.
         //
-        public int Second
-        {
-            get
-            {
-                return (int)((InternalTicks / TicksPerSecond) % 60);
-            }
-        }
+        public int Second => (int)((InternalTicks / TicksPerSecond) % 60);
 
         // Returns the tick count for this DateTime. The returned value is
         // the number of 100-nanosecond intervals that have elapsed since 1/1/0001
         // 12:00am.
         //
-        public long Ticks
-        {
-            get
-            {
-                return InternalTicks;
-            }
-        }
+        public long Ticks => InternalTicks;
 
         // Returns the time-of-day part of this DateTime. The returned value
         // is a TimeSpan that indicates the time elapsed since midnight.
         //
-        public TimeSpan TimeOfDay
-        {
-            get
-            {
-                return new TimeSpan(InternalTicks % TicksPerDay);
-            }
-        }
+        public TimeSpan TimeOfDay => new TimeSpan(InternalTicks % TicksPerDay);
 
         // Returns a DateTime representing the current date. The date part
         // of the returned value is the current date, and the time-of-day part of
         // the returned value is zero (midnight).
         //
-        public static DateTime Today
-        {
-            get
-            {
-                return DateTime.Now.Date;
-            }
-        }
+        public static DateTime Today => DateTime.Now.Date;
 
         // Returns the year part of this DateTime. The returned value is an
         // integer between 1 and 9999.
         //
-        public int Year
-        {
-            get
-            {
-                return GetDatePart(DatePartYear);
-            }
-        }
+        public int Year => GetDatePart(DatePartYear);
 
         // Checks whether a given year is a leap year. This method returns true if
         // year is a leap year, or false if not.

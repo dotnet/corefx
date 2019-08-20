@@ -13,10 +13,8 @@ using Internal.Runtime.CompilerServices;
 #pragma warning disable SA1121 // explicitly using type aliases instead of built-in types
 #if BIT64
 using nuint = System.UInt64;
-using nint = System.Int64;
 #else // BIT64
 using nuint = System.UInt32;
-using nint = System.Int32;
 #endif // BIT64
 
 namespace System.Globalization
@@ -47,10 +45,7 @@ namespace System.Globalization
         private Tristate _isAsciiCasingSameAsInvariant = Tristate.NotInitialized;
 
         // Invariant text info
-        internal static TextInfo Invariant
-        {
-            get => s_invariant ?? (s_invariant = new TextInfo(CultureData.Invariant));
-        }
+        internal static TextInfo Invariant => s_invariant ??= new TextInfo(CultureData.Invariant);
 
         private static volatile TextInfo? s_invariant;
 

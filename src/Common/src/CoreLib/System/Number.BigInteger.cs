@@ -323,8 +323,8 @@ namespace System
 
             public BigInteger(ulong value)
             {
-                var lower = (uint)(value);
-                var upper = (uint)(value >> 32);
+                uint lower = (uint)(value);
+                uint upper = (uint)(value >> 32);
 
                 _blocks[0] = lower;
                 _blocks[1] = upper;
@@ -885,7 +885,7 @@ namespace System
 
                 // Validate that `s_Pow10BigNumTable` has exactly enough trailing elements to fill a BigInteger (which contains MaxBlockCount + 1 elements)
                 // We validate here, since this is the only current consumer of the array
-                Debug.Assert((s_Pow10BigNumTableIndices[s_Pow10BigNumTableIndices.Length - 1] + MaxBlockCount + 2) == s_Pow10BigNumTable.Length);
+                Debug.Assert((s_Pow10BigNumTableIndices[^1] + MaxBlockCount + 2) == s_Pow10BigNumTable.Length);
 
                 BigInteger temp1 = new BigInteger(s_Pow10UInt32Table[exponent & 0x7]);
                 ref BigInteger lhs = ref temp1;
@@ -1011,8 +1011,8 @@ namespace System
                 ulong chkHi = divHi * q;
                 ulong chkLo = divLo * q;
 
-                chkHi = chkHi + (chkLo >> 32);
-                chkLo = chkLo & uint.MaxValue;
+                chkHi += (chkLo >> 32);
+                chkLo &= uint.MaxValue;
 
                 if (chkHi < valHi)
                     return false;
@@ -1048,7 +1048,7 @@ namespace System
                 {
                     carry += rhs._blocks[i] * q;
                     uint digit = unchecked((uint)carry);
-                    carry = carry >> 32;
+                    carry >>= 32;
 
                     ref uint lhsValue = ref lhs._blocks[lhsStartIndex + i];
 
@@ -1139,7 +1139,7 @@ namespace System
 
                 while (index < length)
                 {
-                    var block = (ulong)(_blocks[index]);
+                    ulong block = (ulong)(_blocks[index]);
                     ulong product = (block << 3) + (block << 1) + carry;
                     carry = product >> 32;
                     _blocks[index] = (uint)(product);
@@ -1177,8 +1177,8 @@ namespace System
 
             public void SetUInt64(ulong value)
             {
-                var lower = (uint)(value);
-                var upper = (uint)(value >> 32);
+                uint lower = (uint)(value);
+                uint upper = (uint)(value >> 32);
 
                 _blocks[0] = lower;
                 _blocks[1] = upper;
@@ -1201,7 +1201,7 @@ namespace System
             public void ShiftLeft(uint shift)
             {
                 // Process blocks high to low so that we can safely process in place
-                var length = _length;
+                int length = _length;
 
                 if ((length == 0) || (shift == 0))
                 {

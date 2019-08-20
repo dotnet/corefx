@@ -12,11 +12,7 @@
 //
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-using System;
 using System.Collections.Generic;
-using System.Security;
-using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Diagnostics;
 
 namespace System.Threading.Tasks
@@ -227,7 +223,7 @@ namespace System.Threading.Tasks
         /// tasks created by this factory unless another CancellationToken value is explicitly specified
         /// during the call to the factory methods.
         /// </remarks>
-        public CancellationToken CancellationToken { get { return m_defaultCancellationToken; } }
+        public CancellationToken CancellationToken => m_defaultCancellationToken;
 
         /// <summary>
         /// Gets the <see cref="System.Threading.Tasks.TaskScheduler">TaskScheduler</see> of this
@@ -239,7 +235,7 @@ namespace System.Threading.Tasks
         /// If null, <see cref="System.Threading.Tasks.TaskScheduler.Current">TaskScheduler.Current</see>
         /// will be used.
         /// </remarks>
-        public TaskScheduler? Scheduler { get { return m_defaultScheduler; } }
+        public TaskScheduler? Scheduler => m_defaultScheduler;
 
         /// <summary>
         /// Gets the <see cref="System.Threading.Tasks.TaskCreationOptions">TaskCreationOptions
@@ -249,7 +245,7 @@ namespace System.Threading.Tasks
         /// This property returns the default creation options for this factory.  They will be used to create all
         /// tasks unless other options are explicitly specified during calls to this factory's methods.
         /// </remarks>
-        public TaskCreationOptions CreationOptions { get { return m_defaultCreationOptions; } }
+        public TaskCreationOptions CreationOptions => m_defaultCreationOptions;
 
         /// <summary>
         /// Gets the <see cref="System.Threading.Tasks.TaskCreationOptions">TaskContinuationOptions
@@ -259,7 +255,7 @@ namespace System.Threading.Tasks
         /// This property returns the default continuation options for this factory.  They will be used to create
         /// all continuation tasks unless other options are explicitly specified during calls to this factory's methods.
         /// </remarks>
-        public TaskContinuationOptions ContinuationOptions { get { return m_defaultContinuationOptions; } }
+        public TaskContinuationOptions ContinuationOptions => m_defaultContinuationOptions;
 
         //
         // StartNew methods
@@ -1587,21 +1583,15 @@ namespace System.Threading.Tasks
                 Debug.Assert(_count >= 0, "Count should never go below 0");
             }
 
-            public bool InvokeMayRunArbitraryCode { get { return true; } }
+            public bool InvokeMayRunArbitraryCode => true;
 
             /// <summary>
             /// Returns whether we should notify the debugger of a wait completion.  This returns
             /// true iff at least one constituent task has its bit set.
             /// </summary>
-            internal override bool ShouldNotifyDebuggerOfWaitCompletion
-            {
-                get
-                {
-                    return
-                        base.ShouldNotifyDebuggerOfWaitCompletion &&
-                        Task.AnyTaskRequiresNotifyDebuggerOfWaitCompletion(_tasks);
-                }
-            }
+            internal override bool ShouldNotifyDebuggerOfWaitCompletion =>
+                base.ShouldNotifyDebuggerOfWaitCompletion &&
+                AnyTaskRequiresNotifyDebuggerOfWaitCompletion(_tasks);
         }
 
         // Performs some logic common to all ContinueWhenAll() overloads
@@ -1663,21 +1653,15 @@ namespace System.Threading.Tasks
                 Debug.Assert(_count >= 0, "Count should never go below 0");
             }
 
-            public bool InvokeMayRunArbitraryCode { get { return true; } }
+            public bool InvokeMayRunArbitraryCode => true;
 
             /// <summary>
             /// Returns whether we should notify the debugger of a wait completion.  This returns
             /// true iff at least one constituent task has its bit set.
             /// </summary>
-            internal override bool ShouldNotifyDebuggerOfWaitCompletion
-            {
-                get
-                {
-                    return
-                        base.ShouldNotifyDebuggerOfWaitCompletion &&
-                        Task.AnyTaskRequiresNotifyDebuggerOfWaitCompletion(_tasks);
-                }
-            }
+            internal override bool ShouldNotifyDebuggerOfWaitCompletion =>
+                base.ShouldNotifyDebuggerOfWaitCompletion &&
+                AnyTaskRequiresNotifyDebuggerOfWaitCompletion(_tasks);
         }
 
 
@@ -2336,7 +2320,7 @@ namespace System.Threading.Tasks
                     int numTasks = tasks.Count;
                     for (int i = 0; i < numTasks; i++)
                     {
-                        var task = tasks[i];
+                        Task task = tasks[i];
                         if (task != null && // if an element was erroneously nulled out concurrently, just skip it; worst case is we don't remove a continuation
                             !task.IsCompleted) task.RemoveContinuation(this);
                     }
@@ -2365,7 +2349,7 @@ namespace System.Threading.Tasks
             int numTasks = tasks.Count;
             for (int i = 0; i < numTasks; i++)
             {
-                var task = tasks[i];
+                Task task = tasks[i];
                 if (task == null) throw new ArgumentException(SR.Task_MultiTaskContinuation_NullTask, nameof(tasks));
 
                 if (checkArgsOnly) continue;

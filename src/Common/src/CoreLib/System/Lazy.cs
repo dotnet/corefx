@@ -143,7 +143,9 @@ namespace System
 
                 case LazyThreadSafetyMode.ExecutionAndPublication:
                     // we need to create an object for ExecutionAndPublication because we use Monitor-based locking
-                    var state = useDefaultConstructor ? LazyState.ExecutionAndPublicationViaConstructor : LazyState.ExecutionAndPublicationViaFactory;
+                    LazyState state = useDefaultConstructor ?
+                        LazyState.ExecutionAndPublicationViaConstructor :
+                        LazyState.ExecutionAndPublicationViaFactory;
                     return new LazyHelper(state);
 
                 default:
@@ -520,27 +522,15 @@ namespace System
         }
 
         /// <summary>Returns whether the Lazy object is initialized or not.</summary>
-        public bool IsValueCreated
-        {
-            get { return _lazy.IsValueCreated; }
-        }
+        public bool IsValueCreated => _lazy.IsValueCreated;
 
         /// <summary>Returns the value of the Lazy object.</summary>
-        public T Value
-        {
-            get { return _lazy.ValueForDebugDisplay; }
-        }
+        public T Value => _lazy.ValueForDebugDisplay;
 
         /// <summary>Returns the execution mode of the Lazy object</summary>
-        public LazyThreadSafetyMode? Mode
-        {
-            get { return _lazy.Mode; }
-        }
+        public LazyThreadSafetyMode? Mode => _lazy.Mode;
 
         /// <summary>Returns the execution mode of the Lazy object</summary>
-        public bool IsValueFaulted
-        {
-            get { return _lazy.IsValueFaulted; }
-        }
+        public bool IsValueFaulted => _lazy.IsValueFaulted;
     }
 }

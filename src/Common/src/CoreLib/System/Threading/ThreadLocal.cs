@@ -447,7 +447,7 @@ namespace System.Threading
                     throw new InvalidOperationException(SR.ThreadLocal_ValuesNotAvailable);
                 }
 
-                var list = GetValuesAsList(); // returns null if disposed
+                List<T>? list = GetValuesAsList(); // returns null if disposed
                 if (list == null) throw new ObjectDisposedException(SR.ThreadLocal_Disposed);
                 return list;
             }
@@ -555,10 +555,8 @@ namespace System.Threading
         }
 
         /// <summary>Gets the values of all threads that accessed the ThreadLocal&lt;T&gt;.</summary>
-        internal List<T>? ValuesForDebugDisplay // same as Values property, but doesn't throw if disposed
-        {
-            get { return GetValuesAsList(); }
-        }
+        internal List<T>? ValuesForDebugDisplay => // same as Values property, but doesn't throw if disposed
+            GetValuesAsList();
 
         /// <summary>
         /// Resizes a table to a certain length (or larger).

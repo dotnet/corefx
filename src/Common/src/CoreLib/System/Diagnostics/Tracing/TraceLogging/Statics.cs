@@ -2,18 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if ES_BUILD_STANDALONE
 using System;
+using Environment = Microsoft.Diagnostics.Tracing.Internal.Environment;
+#endif
 using System.Collections.Generic;
 using System.Reflection;
-using System.Resources;
 using System.Runtime.CompilerServices;
-using Encoding = System.Text.Encoding;
-
+using System.Text;
 using Microsoft.Reflection;
-using System.Diagnostics.CodeAnalysis;
 
 #if ES_BUILD_STANDALONE
-using Environment = Microsoft.Diagnostics.Tracing.Internal.Environment;
 namespace Microsoft.Diagnostics.Tracing
 #else
 namespace System.Diagnostics.Tracing
@@ -116,14 +115,14 @@ namespace System.Diagnostics.Tracing
         public static void EncodeTags(int tags, ref int pos, byte[]? metadata)
         {
             // We transmit the low 28 bits of tags, high bits first, 7 bits at a time.
-            var tagsLeft = tags & 0xfffffff;
+            int tagsLeft = tags & 0xfffffff;
             bool more;
             do
             {
                 byte current = (byte)((tagsLeft >> 21) & 0x7f);
                 more = (tagsLeft & 0x1fffff) != 0;
                 current |= (byte)(more ? 0x80 : 0x00);
-                tagsLeft = tagsLeft << 7;
+                tagsLeft <<= 7;
 
                 if (metadata != null)
                 {
@@ -379,7 +378,7 @@ namespace System.Diagnostics.Tracing
 #if (ES_BUILD_PCL || ES_BUILD_PN)
             result = propInfo.IsDefined(attributeType);
 #else
-            var attributes = propInfo.GetCustomAttributes(
+            object[] attributes = propInfo.GetCustomAttributes(
                 attributeType,
                 false);
             result = attributes.Length != 0;
@@ -398,7 +397,7 @@ namespace System.Diagnostics.Tracing
                 break;
             }
 #else
-            var attributes = propInfo.GetCustomAttributes(typeof(AttributeType), false);
+            object[] attributes = propInfo.GetCustomAttributes(typeof(AttributeType), false);
             if (attributes.Length != 0)
             {
                 result = (AttributeType)attributes[0];
@@ -418,7 +417,7 @@ namespace System.Diagnostics.Tracing
                 break;
             }
 #else
-            var attributes = type.GetCustomAttributes(typeof(AttributeType), false);
+            object[] attributes = type.GetCustomAttributes(typeof(AttributeType), false);
             if (attributes.Length != 0)
             {
                 result = (AttributeType)attributes[0];
@@ -443,12 +442,12 @@ namespace System.Diagnostics.Tracing
             else
             {
 #if (ES_BUILD_PCL || ES_BUILD_PN)
-                var ifaceTypes = type.GetTypeInfo().ImplementedInterfaces;
+                IEnumerable<Type> ifaceTypes = type.GetTypeInfo().ImplementedInterfaces;
 #else
-                var ifaceTypes = type.FindInterfaces(IsGenericMatch, typeof(IEnumerable<>));
+                Type[] ifaceTypes = type.FindInterfaces(IsGenericMatch, typeof(IEnumerable<>));
 #endif
 
-                foreach (var ifaceType in ifaceTypes)
+                foreach (Type ifaceType in ifaceTypes)
                 {
 #if (ES_BUILD_PCL || ES_BUILD_PN)
                     if (!IsGenericMatch(ifaceType, typeof(IEnumerable<>)))
@@ -503,7 +502,7 @@ namespace System.Diagnostics.Tracing
 
             recursionCheck.Add(dataType);
 
-            var eventAttrib = Statics.GetCustomAttribute<EventDataAttribute>(dataType);
+            EventDataAttribute? eventAttrib = Statics.GetCustomAttribute<EventDataAttribute>(dataType);
             if (eventAttrib != null ||
                 Statics.GetCustomAttribute<CompilerGeneratedAttribute>(dataType) != null ||
                 IsGenericMatch(dataType, typeof(KeyValuePair<,>)))
@@ -674,7 +673,7 @@ namespace System.Diagnostics.Tracing
                 }
                 else
                 {
-                    var elementType = FindEnumerableElementType(dataType);
+                    Type? elementType = FindEnumerableElementType(dataType);
                     if (elementType != null)
                     {
                         result = new EnumerableTypeInfo(dataType, TraceLoggingTypeInfo.GetInstance(elementType, recursionCheck));

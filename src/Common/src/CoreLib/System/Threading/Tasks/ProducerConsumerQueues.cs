@@ -71,10 +71,10 @@ namespace System.Threading.Tasks
         bool IProducerConsumerQueue<T>.TryDequeue([MaybeNullWhen(false)] out T result) { return base.TryDequeue(out result); }
 
         /// <summary>Gets whether the collection is currently empty.</summary>
-        bool IProducerConsumerQueue<T>.IsEmpty { get { return base.IsEmpty; } }
+        bool IProducerConsumerQueue<T>.IsEmpty => base.IsEmpty;
 
         /// <summary>Gets the number of items in the collection.</summary>
-        int IProducerConsumerQueue<T>.Count { get { return base.Count; } }
+        int IProducerConsumerQueue<T>.Count => base.Count;
     }
 
     /// <summary>
@@ -145,7 +145,7 @@ namespace System.Threading.Tasks
         public void Enqueue(T item)
         {
             Segment segment = m_tail;
-            var array = segment.m_array;
+            T[] array = segment.m_array;
             int last = segment.m_state.m_last; // local copy to avoid multiple volatile reads
 
             // Fast path: there's obviously room in the current segment
@@ -198,7 +198,7 @@ namespace System.Threading.Tasks
         public bool TryDequeue([MaybeNullWhen(false)] out T result)
         {
             Segment segment = m_head;
-            var array = segment.m_array;
+            T[] array = segment.m_array;
             int first = segment.m_state.m_first; // local copy to avoid multiple volatile reads
 
             // Fast path: there's obviously data available in the current segment
@@ -236,7 +236,7 @@ namespace System.Threading.Tasks
                 m_head = segment;
             }
 
-            var first = segment.m_state.m_first; // local copy to avoid extraneous volatile reads
+            int first = segment.m_state.m_first; // local copy to avoid extraneous volatile reads
 
             if (first == segment.m_state.m_last)
             {
@@ -259,7 +259,7 @@ namespace System.Threading.Tasks
             // This implementation is optimized for calls from the consumer.
             get
             {
-                var head = m_head;
+                Segment head = m_head;
                 if (head.m_state.m_first != head.m_state.m_lastCopy) return false; // m_first is volatile, so the read of m_lastCopy cannot get reordered
                 if (head.m_state.m_first != head.m_state.m_last) return false;
                 return head.m_next == null;

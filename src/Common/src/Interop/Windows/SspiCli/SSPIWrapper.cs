@@ -140,7 +140,7 @@ namespace System.Net
             return outCredential;
         }
 
-        internal static int InitializeSecurityContext(ISSPIInterface secModule, ref SafeFreeCredentials credential, ref SafeDeleteContext context, string targetName, Interop.SspiCli.ContextFlags inFlags, Interop.SspiCli.Endianness datarep, ReadOnlySpan<SecurityBuffer> inputBuffers, ref SecurityBuffer outputBuffer, ref Interop.SspiCli.ContextFlags outFlags)
+        internal static int InitializeSecurityContext(ISSPIInterface secModule, ref SafeFreeCredentials credential, ref SafeDeleteSslContext context, string targetName, Interop.SspiCli.ContextFlags inFlags, Interop.SspiCli.Endianness datarep, ReadOnlySpan<SecurityBuffer> inputBuffers, ref SecurityBuffer outputBuffer, ref Interop.SspiCli.ContextFlags outFlags)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Log.InitializeSecurityContext(credential, context, targetName, inFlags);
 
@@ -151,7 +151,7 @@ namespace System.Net
             return errorCode;
         }
 
-        internal static int AcceptSecurityContext(ISSPIInterface secModule, SafeFreeCredentials credential, ref SafeDeleteContext context, Interop.SspiCli.ContextFlags inFlags, Interop.SspiCli.Endianness datarep, ReadOnlySpan<SecurityBuffer> inputBuffers, ref SecurityBuffer outputBuffer, ref Interop.SspiCli.ContextFlags outFlags)
+        internal static int AcceptSecurityContext(ISSPIInterface secModule, SafeFreeCredentials credential, ref SafeDeleteSslContext context, Interop.SspiCli.ContextFlags inFlags, Interop.SspiCli.Endianness datarep, ReadOnlySpan<SecurityBuffer> inputBuffers, ref SecurityBuffer outputBuffer, ref Interop.SspiCli.ContextFlags outFlags)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Log.AcceptSecurityContext(credential, context, inFlags);
 
@@ -162,7 +162,7 @@ namespace System.Net
             return errorCode;
         }
 
-        internal static int CompleteAuthToken(ISSPIInterface secModule, ref SafeDeleteContext context, in SecurityBuffer inputBuffer)
+        internal static int CompleteAuthToken(ISSPIInterface secModule, ref SafeDeleteSslContext context, in SecurityBuffer inputBuffer)
         {
             int errorCode = secModule.CompleteAuthToken(ref context, in inputBuffer);
 
@@ -520,31 +520,20 @@ namespace System.Net
                 return "An exception when invoking Win32 API";
             }
 
-            switch ((Interop.SECURITY_STATUS)errorCode)
+            return (Interop.SECURITY_STATUS)errorCode switch
             {
-                case Interop.SECURITY_STATUS.InvalidHandle:
-                    return "Invalid handle";
-                case Interop.SECURITY_STATUS.InvalidToken:
-                    return "Invalid token";
-                case Interop.SECURITY_STATUS.ContinueNeeded:
-                    return "Continue needed";
-                case Interop.SECURITY_STATUS.IncompleteMessage:
-                    return "Message incomplete";
-                case Interop.SECURITY_STATUS.WrongPrincipal:
-                    return "Wrong principal";
-                case Interop.SECURITY_STATUS.TargetUnknown:
-                    return "Target unknown";
-                case Interop.SECURITY_STATUS.PackageNotFound:
-                    return "Package not found";
-                case Interop.SECURITY_STATUS.BufferNotEnough:
-                    return "Buffer not enough";
-                case Interop.SECURITY_STATUS.MessageAltered:
-                    return "Message altered";
-                case Interop.SECURITY_STATUS.UntrustedRoot:
-                    return "Untrusted root";
-                default:
-                    return "0x" + errorCode.ToString("x", NumberFormatInfo.InvariantInfo);
-            }
+                Interop.SECURITY_STATUS.InvalidHandle => "Invalid handle",
+                Interop.SECURITY_STATUS.InvalidToken => "Invalid token",
+                Interop.SECURITY_STATUS.ContinueNeeded => "Continue needed",
+                Interop.SECURITY_STATUS.IncompleteMessage => "Message incomplete",
+                Interop.SECURITY_STATUS.WrongPrincipal => "Wrong principal",
+                Interop.SECURITY_STATUS.TargetUnknown => "Target unknown",
+                Interop.SECURITY_STATUS.PackageNotFound => "Package not found",
+                Interop.SECURITY_STATUS.BufferNotEnough => "Buffer not enough",
+                Interop.SECURITY_STATUS.MessageAltered => "Message altered",
+                Interop.SECURITY_STATUS.UntrustedRoot => "Untrusted root",
+                _ => "0x" + errorCode.ToString("x", NumberFormatInfo.InvariantInfo),
+            };
         }
     } // class SSPIWrapper
 }

@@ -1768,13 +1768,7 @@ namespace System.Globalization
         /// DateTimeFormatInfo dtfi = new CultureInfo("ja-JP", false).DateTimeFormat.Calendar = new GregorianCalendar(GregorianCalendarTypes.Localized);
         /// String nativeName = dtfi.NativeCalendarName; // Get the Japanese name for the Gregorian calendar.
         /// </summary>
-        public string NativeCalendarName
-        {
-            get
-            {
-                return _cultureData.CalendarName(Calendar.ID);
-            }
-        }
+        public string NativeCalendarName => _cultureData.CalendarName(Calendar.ID);
 
         /// <summary>
         /// Used by custom cultures and others to set the list of available formats. Note that none of them are
@@ -2029,10 +2023,7 @@ namespace System.Globalization
         /// <summary>
         /// Returns whether the YearMonthAdjustment function has any fix-up work to do for this culture/calendar.
         /// </summary>
-        internal bool HasYearMonthAdjustment
-        {
-            get => (FormatFlags & DateTimeFormatFlags.UseHebrewRule) != 0;
-        }
+        internal bool HasYearMonthAdjustment => (FormatFlags & DateTimeFormatFlags.UseHebrewRule) != 0;
 
         /// <summary>
         /// This is a callback that the parser can make back into the DTFI to let it fiddle with special
@@ -2682,7 +2673,7 @@ namespace System.Globalization
             int i = 0;
             // If there is whitespace characters in the beginning and end of the string, trim them since whitespaces are skipped by
             // DateTime.Parse().
-            if (char.IsWhiteSpace(str[0]) || char.IsWhiteSpace(str[str.Length - 1]))
+            if (char.IsWhiteSpace(str[0]) || char.IsWhiteSpace(str[^1]))
             {
                 str = str.Trim(null);   // Trim white space characters.
                 // Could have space for separators

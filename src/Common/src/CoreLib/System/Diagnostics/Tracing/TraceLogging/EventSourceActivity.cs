@@ -2,13 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if ES_BUILD_STANDALONE
 using System;
 using System.Diagnostics;
-
-#if !ES_BUILD_AGAINST_DOTNET_V35
-using Contract = System.Diagnostics.Contracts.Contract;
-#else
-using Contract = Microsoft.Diagnostics.Contracts.Internal.Contract;
 #endif
 
 #if ES_BUILD_STANDALONE
@@ -50,19 +46,13 @@ namespace System.Diagnostics.Tracing
         /// <summary>
         /// Gets the event source to which this activity writes events.
         /// </summary>
-        public EventSource EventSource
-        {
-            get { return this.eventSource; }
-        }
+        public EventSource EventSource => this.eventSource;
 
         /// <summary>
         /// Gets this activity's unique identifier, or the default Guid if the
         /// event source was disabled when the activity was initialized.
         /// </summary>
-        public Guid Id
-        {
-            get { return this.activityId; }
-        }
+        public Guid Id => this.activityId;
 
 #if false // don't expose RelatedActivityId unless there is a need.
         /// <summary>
@@ -236,7 +226,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        #region private
+#region private
         private EventSourceActivity Start<T>(string? eventName, ref EventSourceOptions options, ref T data)
         {
             if (this.state != State.Started)
@@ -293,7 +283,7 @@ namespace System.Diagnostics.Tracing
                 eventName = this.eventName;
                 if (eventName.EndsWith("Start"))
                     eventName = eventName.Substring(0, eventName.Length - 5);
-                eventName = eventName + "Stop";
+                eventName += "Stop";
             }
             this.startStopOptions.Opcode = EventOpcode.Stop;
             this.eventSource.Write(eventName, ref this.startStopOptions, ref this.activityId, ref s_empty, ref data);
@@ -308,7 +298,7 @@ namespace System.Diagnostics.Tracing
         /// <summary>
         /// If eventName is non-null then we logged a start event
         /// </summary>
-        private bool StartEventWasFired { get { return eventName != null; } }
+        private bool StartEventWasFired => eventName != null;
 
         private readonly EventSource eventSource;
         private EventSourceOptions startStopOptions;
@@ -318,6 +308,6 @@ namespace System.Diagnostics.Tracing
         private string? eventName;
 
         internal static Guid s_empty;
-        #endregion
+#endregion
     }
 }

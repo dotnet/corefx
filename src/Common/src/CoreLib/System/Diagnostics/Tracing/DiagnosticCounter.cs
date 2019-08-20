@@ -2,15 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if ES_BUILD_STANDALONE
 using System;
 using System.Diagnostics;
-using System.Collections;
+#endif
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-#if ES_BUILD_PCL
-    using System.Threading.Tasks;
-#endif
 
 #if ES_BUILD_STANDALONE
 namespace Microsoft.Diagnostics.Tracing
@@ -42,11 +40,23 @@ namespace System.Diagnostics.Tracing
                 throw new ArgumentNullException(nameof(EventSource));
             }
 
-            _group = CounterGroup.GetCounterGroup(eventSource);
-            _group.Add(this);
             Name = name;
-            DisplayUnits = string.Empty;
             EventSource = eventSource;
+        }
+
+        /// <summary>Adds the counter to the set that the EventSource will report on.</summary>
+        /// <remarks>
+        /// Must only be invoked once, and only after the instance has been fully initialized.
+        /// This should be invoked by a derived type's ctor as the last thing it does.
+        /// </remarks>
+        private protected void Publish()
+        {
+            Debug.Assert(_group is null);
+            Debug.Assert(Name != null);
+            Debug.Assert(EventSource != null);
+
+            _group = CounterGroup.GetCounterGroup(EventSource);
+            _group.Add(this);
         }
 
         /// <summary>
@@ -60,7 +70,7 @@ namespace System.Diagnostics.Tracing
             if (_group != null)
             {
                 _group.Remove(this);
-                _group = null!; // TODO-NULLABLE: Avoid nulling out in Dispose
+                _group = null;
             }
         }
 
@@ -106,7 +116,7 @@ namespace System.Diagnostics.Tracing
 
         #region private implementation
 
-        private CounterGroup _group;
+        private CounterGroup? _group;
         private Dictionary<string, string?>? _metadata;
 
         internal abstract void WritePayload(float intervalSec, int pollingIntervalMillisec);
@@ -141,7 +151,7 @@ namespace System.Diagnostics.Tracing
 
             // Otherwise, append it, then append the element we moved to, and then
             // iterate through the remainder of the elements, appending each.
-            var sb = new StringBuilder().Append(current.Key).Append(':').Append(current.Value);
+            StringBuilder sb = new StringBuilder().Append(current.Key).Append(':').Append(current.Value);
             do
             {
                 current = enumerator.Current;

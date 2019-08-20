@@ -11,7 +11,6 @@
 **
 =============================================================================*/
 
-using System.Globalization;
 using System.Runtime.Serialization;
 
 namespace System
@@ -98,9 +97,6 @@ namespace System
             }
         }
 
-        public virtual string? ParamName
-        {
-            get { return _paramName; }
-        }
+        public virtual string? ParamName => _paramName;
     }
 }

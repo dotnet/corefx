@@ -3,8 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Runtime.CompilerServices; // Do not remove. This is necessary for netstandard, since this file is mirrored into corefx
-
 #if !netstandard
 using Internal.Runtime.CompilerServices;
 #endif
@@ -442,7 +440,7 @@ namespace System
             int index = -1;
             for (int i = 0; i < valueLength; i++)
             {
-                var tempIndex = IndexOf(ref searchSpace, Unsafe.Add(ref value, i), searchSpaceLength);
+                int tempIndex = IndexOf(ref searchSpace, Unsafe.Add(ref value, i), searchSpaceLength);
                 if ((uint)tempIndex < (uint)index)
                 {
                     index = tempIndex;
@@ -803,7 +801,7 @@ namespace System
             int index = -1;
             for (int i = 0; i < valueLength; i++)
             {
-                var tempIndex = LastIndexOf(ref searchSpace, Unsafe.Add(ref value, i), searchSpaceLength);
+                int tempIndex = LastIndexOf(ref searchSpace, Unsafe.Add(ref value, i), searchSpaceLength);
                 if (tempIndex > index)
                     index = tempIndex;
             }
@@ -910,7 +908,7 @@ namespace System
             Debug.Assert(firstLength >= 0);
             Debug.Assert(secondLength >= 0);
 
-            var minLength = firstLength;
+            int minLength = firstLength;
             if (minLength > secondLength)
                 minLength = secondLength;
             for (int i = 0; i < minLength; i++)

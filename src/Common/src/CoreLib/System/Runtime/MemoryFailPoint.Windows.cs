@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
-using System.Runtime.InteropServices;
 
 namespace System.Runtime
 {
@@ -11,8 +10,7 @@ namespace System.Runtime
     {
         private static ulong GetTopOfMemory()
         {
-            Interop.Kernel32.SYSTEM_INFO info = new Interop.Kernel32.SYSTEM_INFO();
-            Interop.Kernel32.GetSystemInfo(out info);
+            Interop.Kernel32.GetSystemInfo(out Interop.Kernel32.SYSTEM_INFO info);
             return (ulong)info.lpMaximumApplicationAddress;
         }
 

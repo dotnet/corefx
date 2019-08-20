@@ -74,15 +74,10 @@ namespace System.Globalization
 
         internal override CalendarId ID => CalendarId.HIJRI;
 
-        protected override int DaysInYearBeforeMinSupportedYear
-        {
-            get
-            {
-                // the year before the 1st year of the cycle would have been the 30th year
-                // of the previous cycle which is not a leap year. Common years have 354 days.
-                return 354;
-            }
-        }
+        protected override int DaysInYearBeforeMinSupportedYear =>
+            // the year before the 1st year of the cycle would have been the 30th year
+            // of the previous cycle which is not a leap year. Common years have 354 days.
+            354;
 
         private long GetAbsoluteDateHijri(int y, int m, int d)
         {
@@ -288,12 +283,12 @@ namespace System.Globalization
             if (i >= 0)
             {
                 m = i % 12 + 1;
-                y = y + i / 12;
+                y += i / 12;
             }
             else
             {
                 m = 12 + (i + 1) % 12;
-                y = y + (i - 11) / 12;
+                y += (i - 11) / 12;
             }
 
             int days = GetDaysInMonth(y, m);

@@ -258,15 +258,10 @@ namespace System.Globalization
 
         internal override CalendarId ID => CalendarId.UMALQURA;
 
-        protected override int DaysInYearBeforeMinSupportedYear
-        {
-            get
-            {
-                // HijriCalendar has same number of days as UmAlQuraCalendar for any given year
-                // HijriCalendar says year 1317 has 355 days.
-                return 355;
-            }
-        }
+        protected override int DaysInYearBeforeMinSupportedYear =>
+            // HijriCalendar has same number of days as UmAlQuraCalendar for any given year
+            // HijriCalendar says year 1317 has 355 days.
+            355;
 
         private static void ConvertHijriToGregorian(int HijriYear, int HijriMonth, int HijriDay, out int yg, out int mg, out int dg)
         {
@@ -283,7 +278,7 @@ namespace System.Globalization
             {
                 // Add the months lengths before mh
                 nDays = nDays + 29 + (b & 1);
-                b = b >> 1;
+                b >>= 1;
             }
 
             dt = dt.AddDays(nDays);
@@ -368,7 +363,7 @@ namespace System.Globalization
             while (nDays >= daysPerThisMonth)
             {
                 nDays -= daysPerThisMonth;
-                b = b >> 1;
+                b >>= 1;
                 daysPerThisMonth = 29 + (b & 1);
                 mh1++;
             }
@@ -432,12 +427,12 @@ namespace System.Globalization
             if (i >= 0)
             {
                 m = i % 12 + 1;
-                y = y + i / 12;
+                y += i / 12;
             }
             else
             {
                 m = 12 + (i + 1) % 12;
-                y = y + (i - 11) / 12;
+                y += (i - 11) / 12;
             }
 
             if (d > 29)
@@ -500,7 +495,7 @@ namespace System.Globalization
             for (int m = 1; m <= 12; m++)
             {
                 days = days + 29 + (b & 1);   /* Add the months lengths before mh */
-                b = b >> 1;
+                b >>= 1;
             }
 
             Debug.Assert((days == 354) || (days == 355), "Hijri year has to be 354 or 355 days.");

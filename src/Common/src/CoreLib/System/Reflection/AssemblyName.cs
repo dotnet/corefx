@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Configuration.Assemblies;
-using System.IO;
 using System.Runtime.Serialization;
 using System.Text;
 using CultureInfo = System.Globalization.CultureInfo;
@@ -59,7 +58,7 @@ namespace System.Reflection
         {
             get
             {
-                return (_cultureInfo == null) ? null : _cultureInfo.Name;
+                return _cultureInfo?.Name;
             }
             set
             {

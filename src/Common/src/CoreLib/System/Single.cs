@@ -68,7 +68,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsFinite(float f)
         {
-            var bits = BitConverter.SingleToInt32Bits(f);
+            int bits = BitConverter.SingleToInt32Bits(f);
             return (bits & 0x7FFFFFFF) < 0x7F800000;
         }
 
@@ -77,7 +77,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe bool IsInfinity(float f)
         {
-            var bits = BitConverter.SingleToInt32Bits(f);
+            int bits = BitConverter.SingleToInt32Bits(f);
             return (bits & 0x7FFFFFFF) == 0x7F800000;
         }
 
@@ -86,7 +86,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe bool IsNaN(float f)
         {
-            var bits = BitConverter.SingleToInt32Bits(f);
+            int bits = BitConverter.SingleToInt32Bits(f);
             return (bits & 0x7FFFFFFF) > 0x7F800000;
         }
 
@@ -111,7 +111,7 @@ namespace System
         // This is probably not worth inlining, it has branches and should be rarely called
         public static unsafe bool IsNormal(float f)
         {
-            var bits = BitConverter.SingleToInt32Bits(f);
+            int bits = BitConverter.SingleToInt32Bits(f);
             bits &= 0x7FFFFFFF;
             return (bits < 0x7F800000) && (bits != 0) && ((bits & 0x7F800000) != 0);
         }
@@ -129,7 +129,7 @@ namespace System
         // This is probably not worth inlining, it has branches and should be rarely called
         public static unsafe bool IsSubnormal(float f)
         {
-            var bits = BitConverter.SingleToInt32Bits(f);
+            int bits = BitConverter.SingleToInt32Bits(f);
             bits &= 0x7FFFFFFF;
             return (bits < 0x7F800000) && (bits != 0) && ((bits & 0x7F800000) == 0);
         }
@@ -156,9 +156,9 @@ namespace System
             {
                 return 1;
             }
-            if (value is float)
+
+            if (value is float f)
             {
-                float f = (float)value;
                 if (m_value < f) return -1;
                 if (m_value > f) return 1;
                 if (m_value == f) return 0;
@@ -169,6 +169,7 @@ namespace System
                 else // f is NaN.
                     return 1;
             }
+
             throw new ArgumentException(SR.Arg_MustBeSingle);
         }
 
@@ -250,7 +251,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
         {
-            var bits = Unsafe.As<float, int>(ref Unsafe.AsRef(in m_value));
+            int bits = Unsafe.As<float, int>(ref Unsafe.AsRef(in m_value));
 
             // Optimized check for IsNan() || IsZero()
             if (((bits - 1) & 0x7FFFFFFF) >= 0x7F800000)

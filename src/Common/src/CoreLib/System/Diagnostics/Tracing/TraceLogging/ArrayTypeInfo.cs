@@ -2,9 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if ES_BUILD_STANDALONE
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
+#endif
 
 #if ES_BUILD_STANDALONE
 namespace Microsoft.Diagnostics.Tracing
@@ -34,9 +35,9 @@ namespace System.Diagnostics.Tracing
 
         public override void WriteData(TraceLoggingDataCollector collector, PropertyValue value)
         {
-            var bookmark = collector.BeginBufferedArray();
+            int bookmark = collector.BeginBufferedArray();
 
-            var count = 0;
+            int count = 0;
             Array? array = (Array?)value.ReferenceValue;
             if (array != null)
             {

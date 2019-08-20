@@ -2,9 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if ES_BUILD_STANDALONE
 using System;
 using System.Diagnostics;
-using Interlocked = System.Threading.Interlocked;
+#endif
+using System.Threading;
 
 #if ES_BUILD_STANDALONE
 namespace Microsoft.Diagnostics.Tracing
@@ -24,10 +26,7 @@ namespace System.Diagnostics.Tracing
     {
         private static TraceLoggingEventTypes? instance;
 
-        public static TraceLoggingEventTypes Instance
-        {
-            get { return instance ?? InitInstance(); }
-        }
+        public static TraceLoggingEventTypes Instance => instance ?? InitInstance();
 
         private static TraceLoggingEventTypes InitInstance()
         {
