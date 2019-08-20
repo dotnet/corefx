@@ -19,6 +19,7 @@ namespace System.Text.Json
             private readonly JsonElement _target;
             private int _curIdx;
             private readonly int _endIdx;
+            private JsonObjectEnumerator jsonObjectEnumerator;
 
             internal ObjectEnumerator(JsonElement target)
             {
@@ -26,6 +27,7 @@ namespace System.Text.Json
 
                 _target = target;
                 _curIdx = -1;
+
                 JsonDocument document = (JsonDocument)_target._parent;
                 _endIdx = document.GetEndIndex(_target._idx, includeEndElement: false);
             }

@@ -130,5 +130,51 @@ namespace System.Text.Json.Tests
             jsonObject.Add("new one", 123);
             Assert.Equal(4, jsonObjectCopy.PropertyNames.Count);
         }
+
+        [Fact]
+        public static void TestAsJsonElement()
+        {
+            var jsonObject = new JsonObject
+            {
+                { "text", "property value" },
+                { "boolean", true },
+                { "number", 15 },
+                { "array", new JsonString[] { "value1", "value2"} }
+            };
+
+            JsonElement jsonElement = jsonObject.AsJsonElement();
+            Assert.False(jsonElement.IsImmutable);
+
+            JsonElement.ObjectEnumerator enumerator = jsonElement.EnumerateObject();
+            
+            Assert.Equal("text", enumerator.Current.Name);
+            Assert.Equal(JsonValueKind.String, enumerator.Current.Value.ValueKind);
+            Assert.Equal("property value", enumerator.Current.Value.GetString());
+            enumerator.MoveNext();
+            
+            Assert.Equal("boolean", enumerator.Current.Name);
+            Assert.Equal(JsonValueKind.String, enumerator.Current.Value.ValueKind);
+            Assert.True( enumerator.Current.Value.GetBoolean());
+            enumerator.MoveNext();
+
+            Assert.Equal("number", enumerator.Current.Name);
+            Assert.Equal(15, enumerator.Current.Value.GetInt32());
+            Assert.Equal(JsonValueKind.Number, enumerator.Current.Value.ValueKind);
+            enumerator.MoveNext();
+
+            Assert.Equal("array", enumerator.Current.Name);
+            Assert.Equal(2, enumerator.Current.Value.GetArrayLength());
+            Assert.Equal(JsonValueKind.Array, enumerator.Current.Value.ValueKind);
+            JsonElement.ArrayEnumerator innerEnumerator = enumerator.Current.Value.EnumerateArray();
+
+            Assert.Equal(JsonValueKind.String, innerEnumerator.Current.ValueKind);
+            Assert.Equal("value1", innerEnumerator.Current.GetString());
+            innerEnumerator.MoveNext();
+
+            Assert.Equal(JsonValueKind.String, innerEnumerator.Current.ValueKind);
+            Assert.Equal("value2", innerEnumerator.Current.GetString());
+            innerEnumerator.Dispose();
+            enumerator.Dispose();
+        }
     }
 }

@@ -85,14 +85,14 @@ namespace System.Text.Json
             {
                 case JsonValueKind.Object:
                     JsonObject jsonObject = new JsonObject();
-                    foreach (JsonProperty property in jsonElement.EnumerateObject())
+                    foreach (JsonProperty property in jsonElement.EnumerateJsonObject())
                     {
                         jsonObject.Add(property.Name, DeepCopy(property.Value));
                     }
                     return jsonObject;
                 case JsonValueKind.Array:
                     JsonArray jsonArray = new JsonArray();
-                    foreach (JsonElement element in jsonElement.EnumerateArray())
+                    foreach (JsonElement element in jsonElement.EnumerateJsonDocumentArray())
                     {
                         jsonArray.Add(DeepCopy(element));
                     }

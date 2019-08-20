@@ -129,7 +129,7 @@ namespace System.Text.Json
         /// <returns>
         ///   A <see cref="JsonElement"/> representing the value of the requested property.
         /// </returns>
-        /// <seealso cref="EnumerateObject"/>
+        /// <seealso cref="EnumerateJsonObject"/>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Object"/>.
         /// </exception>
@@ -173,7 +173,7 @@ namespace System.Text.Json
         /// <returns>
         ///   A <see cref="JsonElement"/> representing the value of the requested property.
         /// </returns>
-        /// <seealso cref="EnumerateObject"/>
+        /// <seealso cref="EnumerateJsonObject"/>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Object"/>.
         /// </exception>
@@ -222,7 +222,7 @@ namespace System.Text.Json
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        /// <seealso cref="EnumerateObject"/>
+        /// <seealso cref="EnumerateJsonObject"/>
         public JsonElement GetProperty(ReadOnlySpan<byte> utf8PropertyName)
         {
             if (TryGetProperty(utf8PropertyName, out JsonElement property))
@@ -262,7 +262,7 @@ namespace System.Text.Json
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        /// <seealso cref="EnumerateObject"/>
+        /// <seealso cref="EnumerateJsonObject"/>
         public bool TryGetProperty(string propertyName, out JsonElement value)
         {
             if (propertyName == null)
@@ -293,7 +293,7 @@ namespace System.Text.Json
         /// <returns>
         ///   <see langword="true"/> if the property was found, <see langword="false"/> otherwise.
         /// </returns>
-        /// <seealso cref="EnumerateObject"/>
+        /// <seealso cref="EnumerateJsonObject"/>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Object"/>.
         /// </exception>
@@ -346,7 +346,7 @@ namespace System.Text.Json
         /// <returns>
         ///   <see langword="true"/> if the property was found, <see langword="false"/> otherwise.
         /// </returns>
-        /// <seealso cref="EnumerateObject"/>
+        /// <seealso cref="EnumerateJsonObject"/>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Object"/>.
         /// </exception>
@@ -1541,7 +1541,7 @@ namespace System.Text.Json
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        public ArrayEnumerator EnumerateArray()
+        public ArrayEnumerator EnumerateJsonDocumentArray()
         {
             CheckValidInstance();
 
@@ -1567,9 +1567,12 @@ namespace System.Text.Json
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        public ObjectEnumerator EnumerateObject()
+        public ObjectEnumerator EnumerateJsonObject()
         {
-            CheckValidInstance();
+            if (!(_parent is JsonDocument))
+            {
+                throw new InvalidOperationException();
+            }
 
             JsonTokenType tokenType = TokenType;
 
