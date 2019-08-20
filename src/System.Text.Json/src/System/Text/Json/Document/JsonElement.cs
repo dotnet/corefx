@@ -53,7 +53,19 @@ namespace System.Text.Json
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        public JsonValueKind ValueKind => TokenType.ToValueKind();
+        public JsonValueKind ValueKind
+        {
+            get
+            {
+                if (_parent is JsonDocument)
+                {
+                    return TokenType.ToValueKind();
+                }
+
+                var jsonNode = (JsonNode)_parent;
+                return jsonNode.ValueKind;
+            }
+        }
 
         /// <summary>
         ///   Get the value at a specified index when the current value is a
@@ -129,7 +141,7 @@ namespace System.Text.Json
         /// <returns>
         ///   A <see cref="JsonElement"/> representing the value of the requested property.
         /// </returns>
-        /// <seealso cref="EnumerateJsonObject"/>
+        /// <seealso cref="EnumerateObject"/>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Object"/>.
         /// </exception>
@@ -173,7 +185,7 @@ namespace System.Text.Json
         /// <returns>
         ///   A <see cref="JsonElement"/> representing the value of the requested property.
         /// </returns>
-        /// <seealso cref="EnumerateJsonObject"/>
+        /// <seealso cref="EnumerateObject"/>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Object"/>.
         /// </exception>
@@ -222,7 +234,7 @@ namespace System.Text.Json
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        /// <seealso cref="EnumerateJsonObject"/>
+        /// <seealso cref="EnumerateObject"/>
         public JsonElement GetProperty(ReadOnlySpan<byte> utf8PropertyName)
         {
             if (TryGetProperty(utf8PropertyName, out JsonElement property))
@@ -262,7 +274,7 @@ namespace System.Text.Json
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        /// <seealso cref="EnumerateJsonObject"/>
+        /// <seealso cref="EnumerateObject"/>
         public bool TryGetProperty(string propertyName, out JsonElement value)
         {
             if (propertyName == null)
@@ -293,7 +305,7 @@ namespace System.Text.Json
         /// <returns>
         ///   <see langword="true"/> if the property was found, <see langword="false"/> otherwise.
         /// </returns>
-        /// <seealso cref="EnumerateJsonObject"/>
+        /// <seealso cref="EnumerateObject"/>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Object"/>.
         /// </exception>
@@ -346,7 +358,7 @@ namespace System.Text.Json
         /// <returns>
         ///   <see langword="true"/> if the property was found, <see langword="false"/> otherwise.
         /// </returns>
-        /// <seealso cref="EnumerateJsonObject"/>
+        /// <seealso cref="EnumerateObject"/>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Object"/>.
         /// </exception>
@@ -396,12 +408,22 @@ namespace System.Text.Json
             // CheckValidInstance is redundant.  Asking for the type will
             // return None, which then throws the same exception in the return statement.
 
-            JsonTokenType type = TokenType;
+            if (_parent is JsonDocument document)
+            {
+                JsonTokenType type = TokenType;
 
-            return
-                type == JsonTokenType.True ? true :
-                type == JsonTokenType.False ? false :
-                throw ThrowHelper.GetJsonElementWrongTypeException(nameof(Boolean), type);
+                return
+                    type == JsonTokenType.True ? true :
+                    type == JsonTokenType.False ? false :
+                    throw ThrowHelper.GetJsonElementWrongTypeException(nameof(Boolean), type);
+            }
+
+            if (_parent is JsonBoolean jsonBoolean)
+            {
+                return jsonBoolean.Value;
+            }
+
+            throw new InvalidOperationException();
         }
 
         /// <summary>
@@ -1541,15 +1563,25 @@ namespace System.Text.Json
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        public ArrayEnumerator EnumerateJsonDocumentArray()
+        public ArrayEnumerator EnumerateArray()
         {
             CheckValidInstance();
 
-            JsonTokenType tokenType = TokenType;
-
-            if (tokenType != JsonTokenType.StartArray)
+            if (_parent is JsonDocument)
             {
-                throw ThrowHelper.GetJsonElementWrongTypeException(JsonTokenType.StartArray, tokenType);
+                JsonTokenType tokenType = TokenType;
+
+                if (tokenType != JsonTokenType.StartArray)
+                {
+                    throw ThrowHelper.GetJsonElementWrongTypeException(JsonTokenType.StartArray, tokenType);
+                }
+            }
+            else if (_parent is JsonNode node)
+            {
+                if (node.ValueKind != JsonValueKind.Array)
+                {
+                    throw new InvalidOperationException();
+                }
             }
 
             return new ArrayEnumerator(this);
@@ -1567,18 +1599,25 @@ namespace System.Text.Json
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        public ObjectEnumerator EnumerateJsonObject()
+        public ObjectEnumerator EnumerateObject()
         {
-            if (!(_parent is JsonDocument))
+            CheckValidInstance();
+
+            if (_parent is JsonDocument)
             {
-                throw new InvalidOperationException();
+                JsonTokenType tokenType = TokenType;
+
+                if (tokenType != JsonTokenType.StartObject)
+                {
+                    throw ThrowHelper.GetJsonElementWrongTypeException(JsonTokenType.StartObject, tokenType);
+                }
             }
-
-            JsonTokenType tokenType = TokenType;
-
-            if (tokenType != JsonTokenType.StartObject)
+            else if (_parent is JsonNode node)
             {
-                throw ThrowHelper.GetJsonElementWrongTypeException(JsonTokenType.StartObject, tokenType);
+                if (node.ValueKind != JsonValueKind.Object)
+                {
+                    throw new InvalidOperationException();
+                }
             }
 
             return new ObjectEnumerator(this);

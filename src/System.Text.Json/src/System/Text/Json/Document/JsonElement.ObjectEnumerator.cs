@@ -19,24 +19,48 @@ namespace System.Text.Json
             private readonly JsonElement _target;
             private int _curIdx;
             private readonly int _endIdx;
-            private JsonObjectEnumerator jsonObjectEnumerator;
+            private JsonObjectEnumerator? _jsonObjectEnumerator;
 
             internal ObjectEnumerator(JsonElement target)
             {
-                Debug.Assert(target.TokenType == JsonTokenType.StartObject);
+                if (target._parent is JsonDocument document)
+                {
+                    Debug.Assert(target.TokenType == JsonTokenType.StartObject);
 
-                _target = target;
-                _curIdx = -1;
+                    _target = target;
+                    _curIdx = -1;
+                    _endIdx = document.GetEndIndex(_target._idx, includeEndElement: false);
+                    _jsonObjectEnumerator = null;
+                }
+                else
+                {
+                    _target = target;
+                    _curIdx = -1;
+                    _endIdx = -1;
 
-                JsonDocument document = (JsonDocument)_target._parent;
-                _endIdx = document.GetEndIndex(_target._idx, includeEndElement: false);
+                    var jsonObject = (JsonObject)target._parent;
+                    _jsonObjectEnumerator = new JsonObjectEnumerator(jsonObject);
+                }
             }
 
             /// <inheritdoc />
-            public JsonProperty Current =>
-                _curIdx < 0 ?
-                    default :
-                    new JsonProperty(new JsonElement((JsonDocument)_target._parent, _curIdx));
+            public JsonProperty Current
+            {
+                get
+                {
+                    if (_target._parent is JsonDocument document)
+                    {
+                        if (_curIdx < 0)
+                        {
+                            return default;
+                        }
+                        return new JsonProperty(new JsonElement(document, _curIdx));
+                    }
+
+                    KeyValuePair<string, JsonNode> propertyPair = _jsonObjectEnumerator.Value.Current;
+                    return new JsonProperty(propertyPair.Value.AsJsonElement(), propertyPair.Key);
+                }
+            }
 
             /// <summary>
             ///   Returns an enumerator that iterates the properties of an object.
@@ -68,12 +92,20 @@ namespace System.Text.Json
             public void Dispose()
             {
                 _curIdx = _endIdx;
+                if (_jsonObjectEnumerator.HasValue)
+                {
+                    _jsonObjectEnumerator.Value.Dispose();
+                }
             }
 
             /// <inheritdoc />
             public void Reset()
             {
                 _curIdx = -1;
+                if (_jsonObjectEnumerator.HasValue)
+                {
+                    _jsonObjectEnumerator.Value.Reset();
+                }
             }
 
             /// <inheritdoc />
@@ -82,25 +114,30 @@ namespace System.Text.Json
             /// <inheritdoc />
             public bool MoveNext()
             {
-                if (_curIdx >= _endIdx)
+                if (_target._parent is JsonDocument document)
                 {
-                    return false;
+                    if (_curIdx >= _endIdx)
+                    {
+                        return false;
+                    }
+
+                    if (_curIdx < 0)
+                    {
+                        _curIdx = _target._idx + JsonDocument.DbRow.Size;
+                    }
+                    else
+                    {
+                        _curIdx = document.GetEndIndex(_curIdx, includeEndElement: true);
+                    }
+
+                    // _curIdx is now pointing at a property name, move one more to get the value
+                    _curIdx += JsonDocument.DbRow.Size;
+
+                    return _curIdx < _endIdx;
                 }
 
-                if (_curIdx < 0)
-                {
-                    _curIdx = _target._idx + JsonDocument.DbRow.Size;
-                }
-                else
-                {
-                    JsonDocument document = (JsonDocument)_target._parent;
-                    _curIdx = document.GetEndIndex(_curIdx, includeEndElement: true);
-                }
-
-                // _curIdx is now pointing at a property name, move one more to get the value
-                _curIdx += JsonDocument.DbRow.Size;
-
-                return _curIdx < _endIdx;
+                Debug.Assert(_jsonObjectEnumerator.HasValue);
+                return _jsonObjectEnumerator.Value.MoveNext();
             }
         }
     }

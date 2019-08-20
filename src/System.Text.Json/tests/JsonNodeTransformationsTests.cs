@@ -146,31 +146,33 @@ namespace System.Text.Json.Tests
             Assert.False(jsonElement.IsImmutable);
 
             JsonElement.ObjectEnumerator enumerator = jsonElement.EnumerateObject();
-            
+
+            enumerator.MoveNext();
             Assert.Equal("text", enumerator.Current.Name);
             Assert.Equal(JsonValueKind.String, enumerator.Current.Value.ValueKind);
             Assert.Equal("property value", enumerator.Current.Value.GetString());
+           
             enumerator.MoveNext();
-            
             Assert.Equal("boolean", enumerator.Current.Name);
-            Assert.Equal(JsonValueKind.String, enumerator.Current.Value.ValueKind);
-            Assert.True( enumerator.Current.Value.GetBoolean());
+            Assert.Equal(JsonValueKind.True, enumerator.Current.Value.ValueKind);
+            Assert.True(enumerator.Current.Value.GetBoolean());
+            
             enumerator.MoveNext();
-
             Assert.Equal("number", enumerator.Current.Name);
             Assert.Equal(15, enumerator.Current.Value.GetInt32());
             Assert.Equal(JsonValueKind.Number, enumerator.Current.Value.ValueKind);
+            
             enumerator.MoveNext();
-
             Assert.Equal("array", enumerator.Current.Name);
             Assert.Equal(2, enumerator.Current.Value.GetArrayLength());
             Assert.Equal(JsonValueKind.Array, enumerator.Current.Value.ValueKind);
             JsonElement.ArrayEnumerator innerEnumerator = enumerator.Current.Value.EnumerateArray();
 
+            innerEnumerator.MoveNext();
             Assert.Equal(JsonValueKind.String, innerEnumerator.Current.ValueKind);
             Assert.Equal("value1", innerEnumerator.Current.GetString());
+            
             innerEnumerator.MoveNext();
-
             Assert.Equal(JsonValueKind.String, innerEnumerator.Current.ValueKind);
             Assert.Equal("value2", innerEnumerator.Current.GetString());
             innerEnumerator.Dispose();
