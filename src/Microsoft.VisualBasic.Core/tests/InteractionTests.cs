@@ -345,8 +345,7 @@ namespace Microsoft.VisualBasic.Tests
         // Methods that rely on reflection of missing assembly.
         private static void InvokeMissingMethod(Action action)
         {
-            var e = Assert.Throws<TypeLoadException>(action);
-            Assert.Equal("Microsoft.VisualBasic._Interaction", e.TypeName);
+            Assert.Throws<PlatformNotSupportedException>(action);
         }
     }
 }
