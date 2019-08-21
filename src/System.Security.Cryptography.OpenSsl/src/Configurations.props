@@ -6,6 +6,7 @@
       netstandard;
     </PackageConfigurations>
     <BuildConfigurations>
+      $(PackageConfigurations);
       netcoreapp-Unix;
       netcoreapp;
     </BuildConfigurations>

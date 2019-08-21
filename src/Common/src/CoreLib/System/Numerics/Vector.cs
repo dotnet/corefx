@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 #nullable enable
-#if netcoreapp || netcoreapp30
+#if netcoreapp
 using Internal.Runtime.CompilerServices;
 #endif
 using System.Diagnostics.CodeAnalysis;
@@ -713,7 +713,7 @@ namespace System.Numerics
             this.register = existingRegister;
         }
 
-#if netcoreapp || netcoreapp30
+#if netcoreapp
         /// <summary>
         /// Constructs a vector from the given <see cref="ReadOnlySpan{Byte}"/>. The span must contain at least <see cref="Vector{Byte}.Count"/> elements.
         /// </summary>
