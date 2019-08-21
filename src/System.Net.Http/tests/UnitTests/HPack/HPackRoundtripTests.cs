@@ -17,19 +17,18 @@ namespace System.Net.Http.Unit.Tests.HPack
     {
 
         public static IEnumerable<object[]> TestHeaders =>
-            new HttpHeaders[]
+            new (string, string[])[]
             {
-                BuildHttpHeaders(("header", new[] { "value" })),
+                ("header", new[] { "value" }),
 
-                BuildHttpHeaders(("header", new[] { "value1", "value2" })),
+                ("header", new[] { "value1", "value2" }),
 
-                BuildHttpHeaders(
-                    ("header-0", new[] { "value1", "value2" }),
-                    ("header-0", new[] { "value3" }),
-                    ("header-1", new[] { "value1" }),
-                    ("header-2", new[] { "value1", "value2" }))
+                (("header-0", new[] { "value1", "value2" }),
+                 ("header-0", new[] { "value3" }),
+                 ("header-1", new[] { "value1" }),
+                 ("header-2", new[] { "value1", "value2" }))
 
-            }.Select(h => new[] { h });
+            }.Select(h => new[] { BuildHttpHeaders(h) });
 
         [Theory, MemberData(nameof(TestHeaders))]
         public void HPack_Roundtrip_Headers(HttpHeaders headers)
