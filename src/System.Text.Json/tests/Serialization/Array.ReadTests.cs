@@ -427,14 +427,16 @@ namespace System.Text.Json.Serialization.Tests
 
         public class ClassWithPopulatedListAndSetter
         {
-            public List<int> MyList { get; set;  } = new List<int>() { 1 };
+            public List<int> MySkippedList { get; }
+
+            public List<int> MyList { get; set; } = new List<int>() { 1 };
         }
 
         [Fact]
         public static void ClassWithPopulatedList()
         {
             // We replace the contents of this collection; we don't attempt to add items to the existing collection instance.
-            string json = @"{""MyList"":[2,3]}";
+            string json = @"{""MySkippedList"":[1,2],""MyList"":[2,3]}";
             ClassWithPopulatedListAndSetter obj = JsonSerializer.Deserialize<ClassWithPopulatedListAndSetter>(json);
             Assert.Equal(2, obj.MyList.Count);
         }

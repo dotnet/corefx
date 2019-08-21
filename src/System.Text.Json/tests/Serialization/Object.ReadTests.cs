@@ -356,5 +356,22 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(1, parsedObject.MySimpleTestClass.MyInt32Array[0]);
             Assert.Equal(2, parsedObject.MyInt32Array[0]);
         }
+
+        public class ClassWithNoSetter
+        {
+            public SimpleTestClass SkippedChild { get; }
+
+            public SimpleTestClass ParsedChild { get; set; }
+        }
+
+        [Fact]
+        public static void ClassWithNoSetterAndValidProperty()
+        {
+            string json = "{\"SkippedChild\":{\"MyInt16\":1},\"ParsedChild\":{\"MyInt16\":18}}";
+            ClassWithNoSetter parsedObject = JsonSerializer.Deserialize<ClassWithNoSetter>(json);
+
+            Assert.NotNull(parsedObject.ParsedChild);
+            Assert.Equal(18, parsedObject.ParsedChild.MyInt16);
+        }
     }
 }

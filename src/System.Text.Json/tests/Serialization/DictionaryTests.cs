@@ -916,15 +916,19 @@ namespace System.Text.Json.Serialization.Tests
 
             public Dictionary<string, string> MyDictionary { get; } = new Dictionary<string, string>() { { "Key", "Value" } };
             public ImmutableDictionary<string, string> MyImmutableDictionary { get; } = ImmutableDictionary.Create<string, string>();
+
+            public IDictionary<string, string> MyDictionaryWithSetter { get; set; }
         }
 
         [Fact]
         public static void ClassWithNoSetterAndDictionary()
         {
             // We don't attempt to deserialize into dictionaries without a setter.
-            string json = @"{""MyDictionary"":{""Key1"":""Value1"", ""Key2"":""Value2""}}";
+            string json = @"{""MyDictionary"":{""Key1"":""Value1"", ""Key2"":""Value2""},""MyDictionaryWithSetter"":{""Key1"":""Value1""}}";
             ClassWithPopulatedDictionaryAndNoSetter obj = JsonSerializer.Deserialize<ClassWithPopulatedDictionaryAndNoSetter>(json);
             Assert.Equal(1, obj.MyDictionary.Count);
+            Assert.NotNull(obj.MyDictionaryWithSetter);
+            Assert.Equal(1, obj.MyDictionaryWithSetter.Count);
         }
 
         [Fact]
