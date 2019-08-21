@@ -24,7 +24,7 @@
     <Reference Include="Windows" />
     <ProjectReference Include="..\..\..\external\winrt\winrt.depproj" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp3.0'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
     <!-- Needed for the compiler to resolve IObservableMap.MapChanged. -->
     <ReferenceFromRuntime Include="System.Runtime" />
     <ReferenceFromRuntime Include="System.Runtime.Extensions">

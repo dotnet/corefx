@@ -306,7 +306,7 @@ namespace System.Data.Common
         internal const string MaxPoolSize = "Max Pool Size";
         internal const string Pooling = "Pooling";
         internal const string MinPoolSize = "Min Pool Size";
-#if netcoreapp || netcoreapp30
+#if netcoreapp
         internal const string PoolBlockingPeriod = "PoolBlockingPeriod";
 #endif
     }
