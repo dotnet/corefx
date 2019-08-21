@@ -16,66 +16,31 @@ namespace System.Net.Http.Unit.Tests.HPack
     public class HPackRoundtripTests
     {
 
-        #region "tests"
+        public static IEnumerable<object[]> TestHeaders =>
+            new HttpHeaders[]
+            {
+                BuildHttpHeaders(("header", new[] { "value" })),
 
-        // TODO: Extend to Property-Based Test using FsCheck 
+                BuildHttpHeaders(("header", new[] { "value1", "value2" })),
 
-        [Fact]
-        public void HPack_Roundtrip_Single_Header_With_Single_Value()
-        {
-            HttpHeaders headers =
                 BuildHttpHeaders(
-                    new[] {
-                        ("header", new[] { "value" })
-                    }
-                );
+                    ("header-0", new[] { "value1", "value2" }),
+                    ("header-0", new[] { "value3" }),
+                    ("header-1", new[] { "value1" }),
+                    ("header-2", new[] { "value1", "value2" }))
 
+            }.Select(h => new[] { h });
+
+        [Theory, MemberData(nameof(TestHeaders))]
+        public void HPack_Roundtrip_Headers(HttpHeaders headers)
+        {
             Memory<byte> encoding = HPackEncode(headers);
             HttpHeaders decodedHeaders = HPackDecode(encoding);
 
             CompareHttpHeaders(headers, decodedHeaders);
         }
 
-        [Fact]
-        public void HPack_Roundtrip_Single_Header_With_Two_Values()
-        {
-            HttpHeaders headers =
-                BuildHttpHeaders(
-                    new[] {
-                        ("header", new[] { "value1", "value2" })
-                    }
-                );
-
-            Memory<byte> encoding = HPackEncode(headers);
-            HttpHeaders decodedHeaders = HPackDecode(encoding);
-
-            CompareHttpHeaders(headers, decodedHeaders);
-        }
-
-        [Fact]
-        public void HPack_Roundtrip_Multiple_Headers()
-        {
-            HttpHeaders headers =
-                BuildHttpHeaders(
-                    new[] {
-                        ("header-0", new[] { "value1", "value2" }),
-                        ("header-0", new[] { "value3" }),
-                        ("header-1", new[] { "value1" }),
-                        ("header-2", new[] { "value1", "value2" })
-                    }
-                );
-
-            Memory<byte> encoding = HPackEncode(headers);
-            HttpHeaders decodedHeaders = HPackDecode(encoding);
-
-            CompareHttpHeaders(headers, decodedHeaders);
-        }
-
-        #endregion
-
-        #region "helpers"
-
-        private HttpHeaders BuildHttpHeaders((string key, string[] values)[] seedValues)
+        private static HttpHeaders BuildHttpHeaders(params (string key, string[] values)[] seedValues)
         {
             var headers = new HttpRequestHeaders();
 
@@ -87,14 +52,13 @@ namespace System.Net.Http.Unit.Tests.HPack
             return headers;
         }
 
-        private void CompareHttpHeaders(HttpHeaders expected, HttpHeaders actual)
+        private static void CompareHttpHeaders(HttpHeaders expected, HttpHeaders actual)
         {
             Assert.Equal(expected.Count(), actual.Count());
 
             expected
                 .Zip(actual)
-                .ToList()
-                .ForEach(x => CompareHttpHeader(x.First, x.Second));
+                .AssertForall(x => CompareHttpHeader(x.First, x.Second));
 
             void CompareHttpHeader(KeyValuePair<string, IEnumerable<string>> expected, KeyValuePair<string, IEnumerable<string>> actual)
             {
@@ -103,8 +67,7 @@ namespace System.Net.Http.Unit.Tests.HPack
 
                 expected.Value
                     .Zip(actual.Value)
-                    .ToList()
-                    .ForEach(x => Assert.Equal(x.First, x.Second));
+                    .AssertForall(x => Assert.Equal(x.First, x.Second));
             }
         }
 
@@ -210,5 +173,8 @@ namespace System.Net.Http.Unit.Tests.HPack
         }
     }
 
-    #endregion
+    public static class AssertExtensions
+    {
+        public static void AssertForall<T>(this IEnumerable<T> collection, Action<T> body) => Assert.All(collection, body);
+    }
 }
