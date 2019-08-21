@@ -98,7 +98,7 @@ stages:
         enableSymbolValidation: false # https://github.com/dotnet/arcade/issues/2871
         enableSourceLinkValidation: false # https://github.com/dotnet/arcade/issues/3603
         SDLValidationParameters:
-          enable: true
+          enable: false
           params: ' -SourceToolsList @("policheck","credscan")
           -TsaInstanceURL "https://devdiv.visualstudio.com/"
           -TsaProjectName "DEVDIV"
