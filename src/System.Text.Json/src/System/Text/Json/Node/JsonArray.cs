@@ -203,7 +203,14 @@ namespace System.Text.Json
         /// </exception>
         public JsonNode this[int idx]
         {
-            get => 0 <= idx && idx < _list.Count ? _list[idx] : throw new ArgumentOutOfRangeException();
+            get
+            {
+                if (idx < 0 || idx >= _list.Count)
+                {
+                    throw new ArgumentOutOfRangeException();
+                }
+                return _list[idx];
+            }
             set
             {
                 if (idx < 0 || idx >= _list.Count)
@@ -646,13 +653,13 @@ namespace System.Text.Json
         ///   Returns an enumerator that iterates through the JSON array values.
         /// </summary>
         /// <returns>An enumerator structure for the <see cref="JsonArray"/>.</returns>
-        IEnumerator IEnumerable.GetEnumerator() => _list.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
         ///   Returns an enumerator that iterates through the JSON array values.
         /// </summary>
         /// <returns>An enumerator structure for the <see cref="JsonArray"/>.</returns>
-        public IEnumerator<JsonNode> GetEnumerator() => _list.GetEnumerator();
+        public IEnumerator<JsonNode> GetEnumerator() => new JsonArrayEnumerator(this);
 
         /// <summary>
         ///   Creates a new JSON array that is a copy of the current instance.

@@ -123,9 +123,9 @@ namespace System.Text.Json.Tests
             ((JsonBoolean)jsonObject["boolean"]).Value = false;
             Assert.True(((JsonBoolean)jsonObjectCopy["boolean"]).Value);
 
-            Assert.Equal(2, jsonObjectCopy.GetJsonArrayProperty("array").Count);
-            jsonObject.GetJsonArrayProperty("array").Add("value3");
-            Assert.Equal(2, jsonObjectCopy.GetJsonArrayProperty("array").Count);
+            Assert.Equal(2, jsonObjectCopy.GetJsonArrayPropertyValue("array").Count);
+            jsonObject.GetJsonArrayPropertyValue("array").Add("value3");
+            Assert.Equal(2, jsonObjectCopy.GetJsonArrayPropertyValue("array").Count);
 
             jsonObject.Add("new one", 123);
             Assert.Equal(4, jsonObjectCopy.PropertyNames.Count);
@@ -180,8 +180,42 @@ namespace System.Text.Json.Tests
             innerEnumerator.MoveNext();
             Assert.Equal(JsonValueKind.String, innerEnumerator.Current.ValueKind);
             Assert.Equal("value2", innerEnumerator.Current.GetString());
+
             innerEnumerator.Dispose();
             enumerator.Dispose();
+
+            // Modifying JsonObject will change JsonElement:
+
+            jsonObject["text"] = new JsonNumber("123");
+            Assert.Equal(123, jsonElement.GetProperty("text").GetInt32());
+        }
+
+        [Fact]
+        public static void TestGetNode()
+        {
+            var jsonObject = new JsonObject
+            {
+                { "text", "property value" },
+                { "boolean", true },
+                { "number", 15 },
+                { "null node", (JsonNode) null },
+                { "array", new JsonString[] { "value1", "value2"} }
+            };
+
+            JsonElement jsonElement = jsonObject.AsJsonElement();
+            JsonObject jsonObjectFromElement = (JsonObject)JsonNode.GetNode(jsonElement);
+
+            Assert.Equal("property value", (JsonString)jsonObjectFromElement["text"]);
+
+            // Modifying JsonObject will change JsonObjectFromElement:
+
+            jsonObject["text"] = new JsonString("something different");
+            Assert.Equal("something different", (JsonString)jsonObjectFromElement["text"]);
+
+            // Modifying JsonObjectFromElement will change JsonObject:
+
+            ((JsonBoolean)jsonObjectFromElement["boolean"]).Value = false;
+            Assert.False(((JsonBoolean)jsonObject["boolean"]).Value);
         }
     }
 }

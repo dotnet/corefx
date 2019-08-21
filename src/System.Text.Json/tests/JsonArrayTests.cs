@@ -10,101 +10,175 @@ namespace System.Text.Json.Tests
 {
     public static class JsonArrayTests
     {
-        [Fact]
-        public static void TestAdd()
+
+        private static void TestArray<T>(T value1, T value2, Func<JsonArray, T> getter, Func<T, JsonNode> nodeCtor)
         {
-            var jsonArray = new JsonArray();
-            int idx = 0;
+            var value1Casted = value1 as dynamic;
+            var value2Casted = value2 as dynamic;
 
-            jsonArray.Add("value");
-            Assert.Equal("value", (JsonString)jsonArray[idx++]);
-            Assert.True(jsonArray.Contains("value"));
+            var list = new List<T>() { value1 };
+            JsonArray jsonArray = new JsonArray(list as dynamic);
+            Assert.Equal(1, jsonArray.Count);
 
-            jsonArray.Add(true);
-            Assert.True(((JsonBoolean)jsonArray[idx++]).Value);
-            Assert.True(jsonArray.Contains(true));
+            Assert.True(jsonArray.Contains(value1Casted));
+            Assert.Equal(value1, getter(jsonArray));
 
-            jsonArray.Add(byte.MaxValue);
-            Assert.Equal(byte.MaxValue, ((JsonNumber)jsonArray[idx++]).GetByte());
-            Assert.True(jsonArray.Contains(byte.MaxValue));
+            jsonArray.Insert(0, value2 as dynamic);
+            Assert.Equal(2, jsonArray.Count);
+            Assert.True(jsonArray.Contains(value2Casted));
+            Assert.Equal(value2, getter(jsonArray));
 
-            jsonArray.Add(short.MaxValue);
-            Assert.Equal(short.MaxValue, ((JsonNumber)jsonArray[idx++]).GetInt16());
-            Assert.True(jsonArray.Contains(short.MaxValue));
+            JsonNode value1Node = nodeCtor(value1);
+            Assert.Equal(1, jsonArray.IndexOf(value1Node));
+            Assert.Equal(1, jsonArray.LastIndexOf(value1Node));
 
-            jsonArray.Add(int.MaxValue);
-            Assert.Equal(int.MaxValue, ((JsonNumber)jsonArray[idx++]).GetInt32());
-            Assert.True(jsonArray.Contains(int.MaxValue));
+            jsonArray.RemoveAt(0);
+            Assert.False(jsonArray.Contains(value2Casted));
 
-            jsonArray.Add(long.MaxValue);
-            Assert.Equal(long.MaxValue, ((JsonNumber)jsonArray[idx++]).GetInt64());
-            Assert.True(jsonArray.Contains(long.MaxValue));
+            jsonArray.Remove(value1Node);
+            Assert.False(jsonArray.Contains(value1Casted));
 
-            jsonArray.Add(3.14f);
-            Assert.Equal(3.14f, ((JsonNumber)jsonArray[idx++]).GetSingle());
+            Assert.Equal(0, jsonArray.Count);
 
-            jsonArray.Add(3.14);
-            Assert.Equal(3.14, ((JsonNumber)jsonArray[idx++]).GetDouble());
+            jsonArray.Add(value2Casted);
+            Assert.Equal(1, jsonArray.Count);
+            Assert.True(jsonArray.Contains(value2Casted));
+            Assert.Equal(value2, getter(jsonArray));
 
-            jsonArray.Add(sbyte.MaxValue);
-            Assert.Equal(sbyte.MaxValue, ((JsonNumber)jsonArray[idx++]).GetSByte());
-
-            jsonArray.Add(ushort.MaxValue);
-            Assert.Equal(ushort.MaxValue, ((JsonNumber)jsonArray[idx++]).GetUInt16());
-
-            jsonArray.Add(uint.MaxValue);
-            Assert.Equal(uint.MaxValue, ((JsonNumber)jsonArray[idx++]).GetUInt32());
-
-            jsonArray.Add(ulong.MaxValue);
-            Assert.Equal(ulong.MaxValue, ((JsonNumber)jsonArray[idx++]).GetUInt64());
-
-            jsonArray.Add(decimal.One);
-            Assert.Equal(decimal.One, ((JsonNumber)jsonArray[idx++]).GetDecimal());
+            jsonArray[0] = value1Node;
+            Assert.Equal(1, jsonArray.Count);
+            Assert.True(jsonArray.Contains(value1Casted));
+            Assert.Equal(value1, getter(jsonArray));
         }
 
         [Fact]
-        public static void TestInsert()
+        public static void TestStringArray()
         {
-            var jsonArray = new JsonArray();
+            TestArray(
+                "value1", "value2",
+                jsonArray => ((JsonString)jsonArray[0]).Value,
+                v => new JsonString(v)
+            );
+        }
 
-            jsonArray.Insert(0, "value");
-            Assert.Equal("value", (JsonString)jsonArray[0]);
+        [Fact]
+        public static void TestBooleanArray()
+        {
+            TestArray(
+                true, false,
+                jsonArray => ((JsonBoolean)jsonArray[0]).Value,
+                v => new JsonBoolean(v)
+            );
+        }
 
-            jsonArray.Insert(0, true);
-            Assert.True(((JsonBoolean)jsonArray[0]).Value);
+        [Fact]
+        public static void TestByteArray()
+        {
+            TestArray<byte>(
+                byte.MaxValue, byte.MaxValue - 1,
+                jsonArray => ((JsonNumber)jsonArray[0]).GetByte(),
+                v => new JsonNumber(v)
+            );
+        }
 
-            jsonArray.Insert(0, byte.MaxValue);
-            Assert.Equal(byte.MaxValue, ((JsonNumber)jsonArray[0]).GetByte());
+        [Fact]
+        public static void TestInt16Array()
+        {
+            TestArray<short>(
+                short.MaxValue, short.MaxValue - 1,
+                jsonArray => ((JsonNumber)jsonArray[0]).GetInt16(),
+                v => new JsonNumber(v)
+            );
+        }
 
-            jsonArray.Insert(0, short.MaxValue);
-            Assert.Equal(short.MaxValue, ((JsonNumber)jsonArray[0]).GetInt16());
+        [Fact]
+        public static void TestInt32rray()
+        {
+            TestArray(
+                int.MaxValue, int.MaxValue - 1,
+                jsonArray => ((JsonNumber)jsonArray[0]).GetInt32(),
+                v => new JsonNumber(v)
+            );
+        }
 
-            jsonArray.Insert(0, int.MaxValue);
-            Assert.Equal(int.MaxValue, ((JsonNumber)jsonArray[0]).GetInt32());
+        [Fact]
+        public static void TestInt64rray()
+        {
+            TestArray(
+                long.MaxValue, long.MaxValue - 1,
+                jsonArray => ((JsonNumber)jsonArray[0]).GetInt64(),
+                v => new JsonNumber(v)
+            );
+        }
 
-            jsonArray.Insert(0, long.MaxValue);
-            Assert.Equal(long.MaxValue, ((JsonNumber)jsonArray[0]).GetInt64());
+        [Fact]
+        public static void TestSingleArray()
+        {
+            TestArray(
+                3.14f, 1.41f,
+                jsonArray => ((JsonNumber)jsonArray[0]).GetSingle(),
+                v => new JsonNumber(v)
+            );
+        }
 
-            jsonArray.Insert(0, 3.14f);
-            Assert.Equal(3.14f, ((JsonNumber)jsonArray[0]).GetSingle());
+        [Fact]
+        public static void TestDoubleArray()
+        {
+            TestArray(
+                3.14, 1.41,
+                jsonArray => ((JsonNumber)jsonArray[0]).GetDouble(),
+                v => new JsonNumber(v)
+            );
+        }
 
-            jsonArray.Insert(0, 3.14);
-            Assert.Equal(3.14, ((JsonNumber)jsonArray[0]).GetDouble());
+        [Fact]
+        public static void TestSByteArray()
+        {
+            TestArray<sbyte>(
+                sbyte.MaxValue, sbyte.MaxValue - 1,
+                jsonArray => ((JsonNumber)jsonArray[0]).GetSByte(),
+                v => new JsonNumber(v)
+            );
+        }
 
-            jsonArray.Insert(0, sbyte.MaxValue);
-            Assert.Equal(sbyte.MaxValue, ((JsonNumber)jsonArray[0]).GetSByte());
+        [Fact]
+        public static void TestUInt16Array()
+        {
+            TestArray<ushort>(
+                ushort.MaxValue, ushort.MaxValue - 1,
+                jsonArray => ((JsonNumber)jsonArray[0]).GetUInt16(),
+                v => new JsonNumber(v)
+            );
+        }
 
-            jsonArray.Insert(0, ushort.MaxValue);
-            Assert.Equal(ushort.MaxValue, ((JsonNumber)jsonArray[0]).GetUInt16());
+        [Fact]
+        public static void TestUInt32Array()
+        {
+            TestArray(
+                uint.MaxValue, uint.MaxValue - 1,
+                jsonArray => ((JsonNumber)jsonArray[0]).GetUInt32(),
+                v => new JsonNumber(v)
+            );
+        }
 
-            jsonArray.Insert(0, uint.MaxValue);
-            Assert.Equal(uint.MaxValue, ((JsonNumber)jsonArray[0]).GetUInt32());
+        [Fact]
+        public static void TestUInt64Array()
+        {
+            TestArray(
+                ulong.MaxValue, ulong.MaxValue - 1,
+                jsonArray => ((JsonNumber)jsonArray[0]).GetUInt64(),
+                v => new JsonNumber(v)
+            );
+        }
 
-            jsonArray.Insert(0, ulong.MaxValue);
-            Assert.Equal(ulong.MaxValue, ((JsonNumber)jsonArray[0]).GetUInt64());
-
-            jsonArray.Insert(0, decimal.One);
-            Assert.Equal(decimal.One, ((JsonNumber)jsonArray[0]).GetDecimal());
+        [Fact]
+        public static void TestDecimalArray()
+        {
+            TestArray(
+                decimal.One, decimal.Zero,
+                jsonArray => ((JsonNumber)jsonArray[0]).GetDecimal(),
+                v => new JsonNumber(v)
+            );
         }
 
         [Fact]
@@ -332,13 +406,81 @@ namespace System.Text.Json.Tests
                 { "tests", new JsonString [] { "code coverage" } },
             };
 
-            issues.GetJsonArrayProperty("bugs").Add("bug 12356");
-            ((JsonString)issues.GetJsonArrayProperty("features")[0]).Value = "feature 1569";
-            ((JsonString)issues.GetJsonArrayProperty("features")[1]).Value = "feature 56134";
+            issues.GetJsonArrayPropertyValue("bugs").Add("bug 12356");
+            ((JsonString)issues.GetJsonArrayPropertyValue("features")[0]).Value = "feature 1569";
+            ((JsonString)issues.GetJsonArrayPropertyValue("features")[1]).Value = "feature 56134";
 
             Assert.True(((JsonArray)issues["bugs"]).Contains("bug 12356"));
             Assert.Equal("feature 1569", (JsonString)((JsonArray)issues["features"])[0]);
             Assert.Equal("feature 56134", (JsonString)((JsonArray)issues["features"])[1]);
         }
+
+        [Fact]
+        public static void TestAccesingNestedJsonArrayTryGetPropertyMethod()
+        {
+            var issues = new JsonObject()
+            {
+                { "features", new JsonString [] { "new functionality 1", "new functionality 2" } },
+            };
+
+            Assert.True(issues.TryGetJsonArrayPropertyValue("features", out JsonArray featuresArray));
+            Assert.Equal("new functionality 1", (JsonString)featuresArray[0]);
+            Assert.Equal("new functionality 2", (JsonString)featuresArray[1]);
+        }
+
+        [Fact]
+        public static void TestOutOfRangeException()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => new JsonArray()[-1]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => new JsonArray()[-1] = new JsonString());
+            Assert.Throws<ArgumentOutOfRangeException>(() => new JsonArray()[0]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => new JsonArray()[0] = new JsonString());
+            Assert.Throws<ArgumentOutOfRangeException>(() => new JsonArray()[1]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => new JsonArray()[1] = new JsonString());
+        }
+
+        [Fact]
+        public static void TestIsReadOnly()
+        {
+            Assert.False(new JsonArray().IsReadOnly);
+        }
+
+        [Fact]
+        public static void TestClean()
+        {
+            var jsonArray = new JsonArray { 1, 2, 3 };
+            
+            Assert.Equal(3, jsonArray.Count);
+            Assert.True(jsonArray.Contains(1));
+            Assert.True(jsonArray.Contains(2));
+            Assert.True(jsonArray.Contains(3));
+
+            jsonArray.Clear();
+            
+            Assert.Equal(0, jsonArray.Count);
+            Assert.False(jsonArray.Contains(1));
+            Assert.False(jsonArray.Contains(2));
+            Assert.False(jsonArray.Contains(3));
+        }
+
+        [Fact]
+        public static void TestRemoveAll()
+        {
+            var jsonArray = new JsonArray { 1, 2, 3 };
+
+            Assert.Equal(3, jsonArray.Count);
+            Assert.True(jsonArray.Contains(1));
+            Assert.True(jsonArray.Contains(2));
+            Assert.True(jsonArray.Contains(3));
+
+            jsonArray.RemoveAll(v => ((JsonNumber)v).GetInt32() <= 2);
+
+            Assert.Equal(1, jsonArray.Count);
+            Assert.False(jsonArray.Contains(1));
+            Assert.False(jsonArray.Contains(2));
+            Assert.True(jsonArray.Contains(3));
+        }
+
+       
     }
 }

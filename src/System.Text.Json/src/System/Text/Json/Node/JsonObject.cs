@@ -507,7 +507,7 @@ namespace System.Text.Json
         /// <exception cref="InvalidCastException">
         ///   Property with specified name is not a JSON array.
         /// </exception>
-        public JsonArray GetJsonArrayProperty(string propertyName)
+        public JsonArray GetJsonArrayPropertyValue(string propertyName)
         {
             if (GetPropertyValue(propertyName) is JsonArray jsonArray)
             {
@@ -526,7 +526,7 @@ namespace System.Text.Json
         ///  <see langword="true"/> if JSON array property with specified name was found;
         ///  otherwise, <see langword="false"/>
         /// </returns>
-        public bool TryGetArrayProperty(string propertyName, out JsonArray jsonArray)
+        public bool TryGetJsonArrayPropertyValue(string propertyName, out JsonArray jsonArray)
         {
             if (TryGetPropertyValue(propertyName, out JsonNode jsonNode))
             {
@@ -555,7 +555,7 @@ namespace System.Text.Json
         ///   Returns an enumerator that iterates through the JSON object properties.
         /// </summary>
         /// <returns>An enumerator structure for the <see cref="JsonObject"/>.</returns>
-        IEnumerator IEnumerable.GetEnumerator() => new JsonObjectEnumerator(this);
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
         ///   Creates a new JSON object that is a copy of the current instance.

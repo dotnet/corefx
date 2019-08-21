@@ -420,12 +420,12 @@ namespace System.Text.Json
         public override System.Text.Json.JsonNode Clone() { throw null; }
         public bool ContainsProperty(string propertyName) { throw null; }
         public System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>> GetEnumerator() { throw null; }
-        public System.Text.Json.JsonArray GetJsonArrayProperty(string propertyName) { throw null; }
+        public System.Text.Json.JsonArray GetJsonArrayPropertyValue(string propertyName) { throw null; }
         public System.Text.Json.JsonObject GetJsonObjectPropertyValue(string propertyName) { throw null; }
         public System.Text.Json.JsonNode GetPropertyValue(string propertyName) { throw null; }
         public bool Remove(string propertyName) { throw null; }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
-        public bool TryGetArrayProperty(string propertyName, out System.Text.Json.JsonArray jsonArray) { throw null; }
+        public bool TryGetJsonArrayPropertyValue(string propertyName, out System.Text.Json.JsonArray jsonArray) { throw null; }
         public bool TryGetJsonObjectPropertyValue(string propertyName, out System.Text.Json.JsonObject jsonObject) { throw null; }
         public bool TryGetPropertyValue(string propertyName, out System.Text.Json.JsonNode jsonNode) { throw null; }
     }

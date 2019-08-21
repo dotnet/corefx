@@ -544,6 +544,35 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
+        public static void TestGetJsonArrayPropertyThrows()
+        {
+            Assert.Throws<InvalidCastException>(() =>
+            {
+                var jsonObject = new JsonObject()
+                {
+                    { "name", "value" }
+                };
+
+                jsonObject.GetJsonArrayPropertyValue("name");
+            });
+        }
+
+        [Fact]
+        public static void TestTryGetArrayPropertyFails()
+        {
+            var jsonObject = new JsonObject()
+            {
+                { "name", "value" }
+            };
+
+            Assert.False(jsonObject.TryGetJsonArrayPropertyValue("name", out JsonArray property));
+            Assert.Null(property);
+
+            Assert.False(jsonObject.TryGetJsonArrayPropertyValue("other", out property));
+            Assert.Null(property);
+        }
+
+        [Fact]
         public static void TestArgumentNullValidation()
         {
             Assert.Throws<ArgumentNullException>(() => new JsonObject().Add(null, ""));
