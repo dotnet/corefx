@@ -190,12 +190,12 @@ namespace System.Collections.ObjectModel.Tests
             var collection = new Collection<int>(s_intArray);
             for (int i = 0; i < s_intArray.Length; i++)
             {
-                Assert.Contains(s_intArray[i], collection);
+                Assert.True(collection.Contains(s_intArray[i]));
             }
 
             for (int i = 0; i < s_excludedFromIntArray.Length; i++)
             {
-                Assert.DoesNotContain(s_excludedFromIntArray[i], collection);
+                Assert.False(collection.Contains(s_excludedFromIntArray[i]));
             }
         }
 

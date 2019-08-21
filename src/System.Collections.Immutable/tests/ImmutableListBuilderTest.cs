@@ -28,17 +28,17 @@ namespace System.Collections.Immutable.Tests
             builder.Add(5);
             builder.Add(5);
             Assert.Equal(3, builder.Count);
-            Assert.Contains(3, builder);
-            Assert.Contains(5, builder);
-            Assert.DoesNotContain(7, builder);
+            Assert.True(builder.Contains(3));
+            Assert.True(builder.Contains(5));
+            Assert.False(builder.Contains(7));
 
             var list = builder.ToImmutable();
             Assert.Equal(builder.Count, list.Count);
             builder.Add(8);
             Assert.Equal(4, builder.Count);
             Assert.Equal(3, list.Count);
-            Assert.Contains(8, builder);
-            Assert.DoesNotContain(8, list);
+            Assert.True(builder.Contains(8));
+            Assert.False(list.Contains(8));
         }
 
         [Fact]
@@ -46,25 +46,25 @@ namespace System.Collections.Immutable.Tests
         {
             var list = ImmutableList<int>.Empty.Add(1);
             var builder = list.ToBuilder();
-            Assert.Contains(1, builder);
+            Assert.True(builder.Contains(1));
             builder.Add(3);
             builder.Add(5);
             builder.Add(5);
             Assert.Equal(4, builder.Count);
-            Assert.Contains(3, builder);
-            Assert.Contains(5, builder);
-            Assert.DoesNotContain(7, builder);
+            Assert.True(builder.Contains(3));
+            Assert.True(builder.Contains(5));
+            Assert.False(builder.Contains(7));
 
             var list2 = builder.ToImmutable();
             Assert.Equal(builder.Count, list2.Count);
-            Assert.Contains(1, list2);
+            Assert.True(list2.Contains(1));
             builder.Add(8);
             Assert.Equal(5, builder.Count);
             Assert.Equal(4, list2.Count);
-            Assert.Contains(8, builder);
+            Assert.True(builder.Contains(8));
 
-            Assert.DoesNotContain(8, list);
-            Assert.DoesNotContain(8, list2);
+            Assert.False(list.Contains(8));
+            Assert.False(list2.Contains(8));
         }
 
         [Fact]

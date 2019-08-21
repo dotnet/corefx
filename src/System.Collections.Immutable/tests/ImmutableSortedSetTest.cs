@@ -101,18 +101,18 @@ namespace System.Collections.Immutable.Tests
                 .Add("apple")
                 .Add("APPLE");
             Assert.Equal(2, ordinalSet.Count); // claimed count
-            Assert.DoesNotContain("aPpLe", ordinalSet);
+            Assert.False(ordinalSet.Contains("aPpLe"));
 
             var ignoreCaseSet = ordinalSet.WithComparer(StringComparer.OrdinalIgnoreCase);
             Assert.Equal(1, ignoreCaseSet.Count);
-            Assert.Contains("aPpLe", ignoreCaseSet);
+            Assert.True(ignoreCaseSet.Contains("aPpLe"));
         }
 
         [Fact]
         public void ToUnorderedTest()
         {
             var result = ImmutableSortedSet<int>.Empty.Add(3).ToImmutableHashSet();
-            Assert.Contains(3, result);
+            Assert.True(result.Contains(3));
         }
 
         [Fact]

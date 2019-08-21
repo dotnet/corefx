@@ -524,11 +524,11 @@ namespace System.Linq.Expressions.Tests
         {
             var rocb = new ReadOnlyCollectionBuilder<int>(new[] { 1, 2, 2, 3 });
 
-            Assert.Contains(1, rocb);
-            Assert.Contains(2, rocb);
-            Assert.Contains(3, rocb);
+            Assert.True(rocb.Contains(1));
+            Assert.True(rocb.Contains(2));
+            Assert.True(rocb.Contains(3));
 
-            Assert.DoesNotContain(-1, rocb);
+            Assert.False(rocb.Contains(-1));
         }
 
         [Fact]
@@ -536,12 +536,12 @@ namespace System.Linq.Expressions.Tests
         {
             var rocb = new ReadOnlyCollectionBuilder<string>(new[] { "bar", "foo", "qux" });
 
-            Assert.Contains("bar", rocb);
-            Assert.Contains("foo", rocb);
-            Assert.Contains("qux", rocb);
+            Assert.True(rocb.Contains("bar"));
+            Assert.True(rocb.Contains("foo"));
+            Assert.True(rocb.Contains("qux"));
 
-            Assert.DoesNotContain(null, rocb);
-            Assert.DoesNotContain("baz", rocb);
+            Assert.False(rocb.Contains(null));
+            Assert.False(rocb.Contains("baz"));
         }
 
         [Fact]
@@ -549,12 +549,12 @@ namespace System.Linq.Expressions.Tests
         {
             var rocb = new ReadOnlyCollectionBuilder<string>(new[] { "bar", "foo", "qux", null });
 
-            Assert.Contains("bar", rocb);
-            Assert.Contains("foo", rocb);
-            Assert.Contains("qux", rocb);
-            Assert.Contains(null, rocb);
+            Assert.True(rocb.Contains("bar"));
+            Assert.True(rocb.Contains("foo"));
+            Assert.True(rocb.Contains("qux"));
+            Assert.True(rocb.Contains(null));
 
-            Assert.DoesNotContain("baz", rocb);
+            Assert.False(rocb.Contains("baz"));
         }
 
         [Fact]
@@ -866,7 +866,7 @@ namespace System.Linq.Expressions.Tests
         {
             Assert.Equal(0, rocb.Count);
 
-            Assert.DoesNotContain(default(T), rocb);
+            Assert.False(rocb.Contains(default(T)));
             Assert.False(rocb.Remove(default(T)));
             Assert.InRange(rocb.IndexOf(default(T)), int.MinValue, -1);
 

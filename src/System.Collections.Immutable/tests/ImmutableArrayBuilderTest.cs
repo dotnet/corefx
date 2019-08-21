@@ -183,9 +183,9 @@ namespace System.Collections.Immutable.Tests
         public void Contains()
         {
             var builder = new ImmutableArray<int>.Builder();
-            Assert.DoesNotContain(1, builder);
+            Assert.False(builder.Contains(1));
             builder.Add(1);
-            Assert.Contains(1, builder);
+            Assert.True(builder.Contains(1));
         }
 
         [Fact]

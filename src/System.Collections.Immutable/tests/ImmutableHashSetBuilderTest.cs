@@ -29,17 +29,17 @@ namespace System.Collections.Immutable.Tests
             Assert.True(builder.Add(5));
             Assert.False(builder.Add(5));
             Assert.Equal(2, builder.Count);
-            Assert.Contains(3, builder);
-            Assert.Contains(5, builder);
-            Assert.DoesNotContain(7, builder);
+            Assert.True(builder.Contains(3));
+            Assert.True(builder.Contains(5));
+            Assert.False(builder.Contains(7));
 
             var set = builder.ToImmutable();
             Assert.Equal(builder.Count, set.Count);
             Assert.True(builder.Add(8));
             Assert.Equal(3, builder.Count);
             Assert.Equal(2, set.Count);
-            Assert.Contains(8, builder);
-            Assert.DoesNotContain(8, set);
+            Assert.True(builder.Contains(8));
+            Assert.False(set.Contains(8));
         }
 
         [Fact]
@@ -47,25 +47,25 @@ namespace System.Collections.Immutable.Tests
         {
             var set = ImmutableHashSet<int>.Empty.Add(1);
             var builder = set.ToBuilder();
-            Assert.Contains(1, builder);
+            Assert.True(builder.Contains(1));
             Assert.True(builder.Add(3));
             Assert.True(builder.Add(5));
             Assert.False(builder.Add(5));
             Assert.Equal(3, builder.Count);
-            Assert.Contains(3, builder);
-            Assert.Contains(5, builder);
-            Assert.DoesNotContain(7, builder);
+            Assert.True(builder.Contains(3));
+            Assert.True(builder.Contains(5));
+            Assert.False(builder.Contains(7));
 
             var set2 = builder.ToImmutable();
             Assert.Equal(builder.Count, set2.Count);
-            Assert.Contains(1, set2);
+            Assert.True(set2.Contains(1));
             Assert.True(builder.Add(8));
             Assert.Equal(4, builder.Count);
             Assert.Equal(3, set2.Count);
-            Assert.Contains(8, builder);
+            Assert.True(builder.Contains(8));
 
-            Assert.DoesNotContain(8, set);
-            Assert.DoesNotContain(8, set2);
+            Assert.False(set.Contains(8));
+            Assert.False(set2.Contains(8));
         }
 
         [Fact]
@@ -124,14 +124,14 @@ namespace System.Collections.Immutable.Tests
         {
             var builder = ImmutableHashSet.Create("a", "B").ToBuilder();
             Assert.Same(EqualityComparer<string>.Default, builder.KeyComparer);
-            Assert.Contains("a", builder);
-            Assert.DoesNotContain("A", builder);
+            Assert.True(builder.Contains("a"));
+            Assert.False(builder.Contains("A"));
 
             builder.KeyComparer = StringComparer.OrdinalIgnoreCase;
             Assert.Same(StringComparer.OrdinalIgnoreCase, builder.KeyComparer);
             Assert.Equal(2, builder.Count);
-            Assert.Contains("a", builder);
-            Assert.Contains("A", builder);
+            Assert.True(builder.Contains("a"));
+            Assert.True(builder.Contains("A"));
 
             var set = builder.ToImmutable();
             Assert.Same(StringComparer.OrdinalIgnoreCase, set.KeyComparer);
@@ -143,12 +143,12 @@ namespace System.Collections.Immutable.Tests
             var builder = ImmutableHashSet.Create("a", "A").ToBuilder();
             builder.KeyComparer = StringComparer.OrdinalIgnoreCase;
             Assert.Equal(1, builder.Count);
-            Assert.Contains("a", builder);
+            Assert.True(builder.Contains("a"));
 
             var set = builder.ToImmutable();
             Assert.Same(StringComparer.OrdinalIgnoreCase, set.KeyComparer);
             Assert.Equal(1, set.Count);
-            Assert.Contains("a", set);
+            Assert.True(set.Contains("a"));
         }
 
         [Fact]
@@ -286,7 +286,7 @@ namespace System.Collections.Immutable.Tests
             var builder = ImmutableHashSet<string>.Empty.ToBuilder();
             Assert.True(builder.Add(null));
             Assert.False(builder.Add(null));
-            Assert.Contains(null, builder);
+            Assert.True(builder.Contains(null));
             Assert.True(builder.Remove(null));
 
             builder.UnionWith(new[] { null, "a" });
@@ -317,13 +317,13 @@ namespace System.Collections.Immutable.Tests
             builder.Add(3);
 
             var set = builder.ToImmutableSortedSet();
-            Assert.Contains(1, builder);
-            Assert.Contains(2, builder);
-            Assert.Contains(3, builder);
+            Assert.True(builder.Contains(1));
+            Assert.True(builder.Contains(2));
+            Assert.True(builder.Contains(3));
 
             builder.Remove(3);
-            Assert.DoesNotContain(3, builder);
-            Assert.Contains(3, set);
+            Assert.False(builder.Contains(3));
+            Assert.True(set.Contains(3));
 
             builder.Clear();
             Assert.True(builder.ToImmutableHashSet().IsEmpty);

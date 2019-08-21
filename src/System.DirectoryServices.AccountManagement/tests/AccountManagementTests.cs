@@ -162,7 +162,7 @@ namespace System.DirectoryServices.AccountManagement.Tests
 
                     Assert.DoesNotContain(group, user.GetGroups());
                     Assert.False(user.IsMemberOf(group));
-                    Assert.DoesNotContain(user, group.Members);
+                    Assert.False(group.Members.Contains(user));
 
                     // second, add user and validate it is member of the group
 
@@ -171,14 +171,14 @@ namespace System.DirectoryServices.AccountManagement.Tests
 
                     Assert.Contains(group, user.GetGroups());
                     Assert.True(user.IsMemberOf(group));
-                    Assert.Contains(user, group.Members);
+                    Assert.True(group.Members.Contains(user));
 
                     // Third, remove the user from the group and check again
                     group.Members.Remove(context, IdentityType.Name, user.Name);
                     group.Save();
                     Assert.DoesNotContain(group, user.GetGroups());
                     Assert.False(user.IsMemberOf(group));
-                    Assert.DoesNotContain(user, group.Members);
+                    Assert.False(group.Members.Contains(user));
                 }
             }
             finally

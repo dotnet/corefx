@@ -130,7 +130,7 @@ namespace System.Collections.Immutable.Tests
                                     Assert.True(s.IsEmpty);
                                     break;
                                 case 2:
-                                    Assert.Contains(1, s);
+                                    Assert.True(s.Contains(1));
                                     Assert.Equal(1, s.Count);
                                     break;
                             }
@@ -145,8 +145,8 @@ namespace System.Collections.Immutable.Tests
                 // Wait for all tasks and rethrow any exceptions.
                 Task.WaitAll(task1, task2);
                 Assert.Equal(2, set.Count);
-                Assert.Contains(1, set);
-                Assert.Contains(2, set);
+                Assert.True(set.Contains(1));
+                Assert.True(set.Contains(2));
             });
         }
 
