@@ -334,7 +334,8 @@ namespace System.Net.Http.Functional.Tests
         {
             if (!UseSocketsHttpHandler || !PlatformDetection.IsWindows)
             {
-                throw new SkipTestException("PAC-based failover is only supported on Windows/SocketsHttpHandler");
+                // PAC-based failover is only supported on Windows/SocketsHttpHandler
+                return;
             }
 
             // Create our failing proxy server.

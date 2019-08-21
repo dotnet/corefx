@@ -286,7 +286,7 @@ namespace System.Net.Http
                     {
                         MultiProxy multiProxy = multiWebProxy.GetMultiProxy(request.RequestUri);
 
-                        if(multiProxy.ReadNext(out proxyUri, out bool isFinalProxy) && !isFinalProxy)
+                        if (multiProxy.ReadNext(out proxyUri, out bool isFinalProxy) && !isFinalProxy)
                         {
                             return SendAsyncMultiProxy(request, doRequestAuth, multiProxy, proxyUri, cancellationToken);
                         }
@@ -328,7 +328,7 @@ namespace System.Net.Http
                 }
             }
             while (multiProxy.ReadNext(out firstProxy, out _));
-            
+
             ExceptionDispatchInfo.Throw(rethrowException);
             return null; // should never be reached: VS doesn't realize Throw() never returns.
         }
