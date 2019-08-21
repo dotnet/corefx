@@ -79,7 +79,6 @@ namespace System.Net.Http.Unit.Tests.HPack
         {
             var headers = new HttpRequestHeaders();
 
-
             foreach ((string key, string[] value) header in seedValues)
             {
                 headers.Add(header.key, header.value);
