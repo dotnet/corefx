@@ -1527,7 +1527,7 @@ namespace System.Net.WebSockets
                 return EnsureBufferContains();
             }
 
-            private ValueTask EnsureBufferContains()
+            private ValueTask EnsureBufferContains(bool completeSourceIfComplete = false)
             {
                 // While we don't have enough data, read more.
                 while (_webSocket._receiveBufferCount < _minimumRequiredBytes)
@@ -1551,6 +1551,12 @@ namespace System.Net.WebSockets
                 }
 
                 // Completed sync
+                if (completeSourceIfComplete)
+                {
+                    // SetResult if this was called from OnComplete
+                    _valueTaskSource.SetResult(default);
+                }
+
                 return default;
             }
 
@@ -1570,11 +1576,8 @@ namespace System.Net.WebSockets
 
                     if (_webSocket._receiveBufferCount < _minimumRequiredBytes)
                     {
-                        ValueTask vt = EnsureBufferContains();
-                        if (vt.IsCompletedSuccessfully)
-                        {
-                            _valueTaskSource.SetResult(default);
-                        }
+                        EnsureBufferContains(completeSourceIfComplete: true);
+                        return;
                     }
                     else
                     {
