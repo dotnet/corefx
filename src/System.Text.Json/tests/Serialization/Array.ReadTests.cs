@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -414,20 +416,43 @@ namespace System.Text.Json.Serialization.Tests
         public class ClassWithPopulatedListAndNoSetter
         {
             public List<int> MyList { get; } = new List<int>() { 1 };
+
+            [JsonDeserialize]
+            public IEnumerable<int> MyEnumerable { get; } = new Collection<int>() { 2 };
+
+            [JsonDeserialize]
+            public IEnumerable<int> InvalidNullProperty { get; }
+
+            [JsonDeserialize]
+            public IEnumerable<int> InvalidFixedSizeProperty { get; } = new int[] { 0 };
+
+            [JsonDeserialize]
+            public IEnumerable<int> InvalidNonListProperty { get; } = new Stack<int>();
         }
 
         [Fact]
         public static void ClassWithNoSetter()
         {
             // We replace the contents of this collection; we don't attempt to add items to the existing collection instance.
-            string json = @"{""MyList"":[1,2]}";
+            string json = @"{""MyList"":[1,2],""MyEnumerable"":[18,19]}";
             ClassWithPopulatedListAndNoSetter obj = JsonSerializer.Deserialize<ClassWithPopulatedListAndNoSetter>(json);
-            Assert.Equal(1, obj.MyList.Count);
+            Assert.Equal(1, obj.MyList.Count); // Changes ignored
+            Assert.Equal(2, obj.MyEnumerable.Count()); // Changes respected due to [JsonDeserialize]
+            Assert.True(obj.MyEnumerable.SequenceEqual(new int[] { 18, 19 }));
+        }
+
+        [Theory]
+        [InlineData(@"{""InvalidNullProperty"":[1,2]}")]
+        [InlineData(@"{""InvalidFixedSizeProperty"":[1,2]}")]
+        [InlineData(@"{""InvalidNonListProperty"":[1,2]}")]
+        public static void ClassWithNoSetterInvalidTests(string json)
+        {
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<ClassWithPopulatedListAndNoSetter>(json));
         }
 
         public class ClassWithPopulatedListAndSetter
         {
-            public List<int> MyList { get; set;  } = new List<int>() { 1 };
+            public List<int> MyList { get; set; } = new List<int>() { 1 };
         }
 
         [Fact]

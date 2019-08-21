@@ -61,6 +61,17 @@ namespace System.Text.Json
             }
             else
             {
+                if (!state.Current.JsonPropertyInfo.HasSetter && state.Current.JsonPropertyInfo.DeserializeUsingGetter)
+                {
+                    // Look for existing value and clear if found
+                    object existingValue = state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
+                    if (existingValue == null)
+                        ThrowHelper.ThrowJsonException_DeserializeGetterReturnedNull(jsonPropertyInfo.NameAsString);
+
+                    ReadStackFrame.ClearEnumerableValue(ref state, existingValue);
+                    return;
+                }
+
                 // Set or replace the existing enumerable value.
                 object value = ReadStackFrame.CreateEnumerableValue(ref reader, ref state);
 

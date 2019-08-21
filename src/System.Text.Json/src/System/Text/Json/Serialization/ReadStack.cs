@@ -89,7 +89,7 @@ namespace System.Text.Json
                     IList list = frame.TempEnumerableValues;
                     if (list == null && frame.ReturnValue != null)
                     {
-                        list = (IList)frame.JsonPropertyInfo?.GetValueAsObject(frame.ReturnValue);
+                        list = frame.JsonPropertyInfo?.GetValueAsObject(frame.ReturnValue) as IList;
                     }
 
                     if (list != null)

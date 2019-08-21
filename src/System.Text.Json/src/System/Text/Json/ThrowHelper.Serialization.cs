@@ -47,6 +47,24 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void ThrowJsonException_DeserializeGetterReturnedNull(string propertyName)
+        {
+            throw new JsonException(SR.Format(SR.DeserializeGetterReturnedNull, propertyName));
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void ThrowJsonException_DeserializeUnableToClearEnumerable(Type propertyType, string propertyName)
+        {
+            throw new JsonException(SR.Format(SR.DeserializeUnableToClearEnumerable, propertyType, propertyName));
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void ThrowJsonException_DeserializeUnableToReuseEnumerable(Type propertyType, string propertyName)
+        {
+            throw new JsonException(SR.Format(SR.DeserializeUnableToReuseEnumerable, propertyType, propertyName));
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ThrowJsonException_DepthTooLarge(int currentDepth, in WriteStack writeStack, JsonSerializerOptions options)
         {
             var ex = new JsonException(SR.Format(SR.DepthTooLarge, currentDepth, options.EffectiveMaxDepth));

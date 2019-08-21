@@ -441,4 +441,13 @@
   <data name="InvalidDuplicatePropertyNameHandling" xml:space="preserve">
     <value>The DuplicatePropertyNameHandling enum must be set to one of the supported values.</value>
   </data>
+  <data name="DeserializeUnableToClearEnumerable" xml:space="preserve">
+    <value>The type '{0}' cannot store deserialized values because it is fixed size or read only. Consider using a mutable backing type or adding a public setter for property '{1}'.</value>
+  </data>
+  <data name="DeserializeGetterReturnedNull" xml:space="preserve">
+    <value>The public getter for property '{0}' returned null. Consider initializing the backing type or adding a public setter for the property.</value>
+  </data>
+  <data name="DeserializeUnableToReuseEnumerable" xml:space="preserve">
+    <value>The type '{0}' cannot store deserialized values because it does not implement IList or IDictionary. Consider using a different backing type or adding a public setter for property '{1}'.</value>
+  </data>
 </root>

@@ -136,6 +136,37 @@ namespace System.Text.Json
             KeyName = null;
         }
 
+        public static void ClearEnumerableValue(ref ReadStack state, object value)
+        {
+            JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
+
+            if (value is IList collection)
+            {
+                if (collection.IsFixedSize || collection.IsReadOnly)
+                {
+                    ThrowHelper.ThrowJsonException_DeserializeUnableToClearEnumerable(value.GetType(), jsonPropertyInfo.NameAsString);
+                    return;
+                }
+
+                collection.Clear();
+                return;
+            }
+
+            if (value is IDictionary dictionary)
+            {
+                if (dictionary.IsFixedSize || dictionary.IsReadOnly)
+                {
+                    ThrowHelper.ThrowJsonException_DeserializeUnableToClearEnumerable(value.GetType(), jsonPropertyInfo.NameAsString);
+                    return;
+                }
+
+                dictionary.Clear();
+                return;
+            }
+
+            ThrowHelper.ThrowJsonException_DeserializeUnableToReuseEnumerable(value.GetType(), jsonPropertyInfo.NameAsString);
+        }
+
         public static object CreateEnumerableValue(ref Utf8JsonReader reader, ref ReadStack state)
         {
             JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
