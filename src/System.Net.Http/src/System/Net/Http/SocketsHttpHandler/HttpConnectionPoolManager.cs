@@ -312,7 +312,7 @@ namespace System.Net.Http
             return SendAsyncCore(request, proxyUri, doRequestAuth, isProxyConnect:false, cancellationToken);
         }
 
-        public async Task<HttpResponseMessage> SendAsyncMultiProxy(HttpRequestMessage request, bool doRequestAuth, MultiProxy multiProxy, Uri firstProxy, CancellationToken cancellationToken)
+        private async Task<HttpResponseMessage> SendAsyncMultiProxy(HttpRequestMessage request, bool doRequestAuth, MultiProxy multiProxy, Uri firstProxy, CancellationToken cancellationToken)
         {
             HttpRequestException rethrowException = null;
 

@@ -10,7 +10,7 @@ namespace System.Net.Http
     [SuppressMessage("Microsoft.Serialization", "CA2229")]
     public class HttpRequestException : Exception
     {
-        internal RequestRetryType AllowRetry { get; }
+        internal RequestRetryType AllowRetry { get; } = RequestRetryType.NoRetry;
 
         public HttpRequestException()
             : this(null, null)
