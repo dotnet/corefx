@@ -9,7 +9,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.WinHttpHandlerUnitTests;
 using Microsoft.DotNet.RemoteExecutor;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using Xunit;
 using Xunit.Abstractions;
 
