@@ -171,7 +171,7 @@ namespace System.Net.Tests
         {
             using (HttpListenerFactory factory = new HttpListenerFactory())
             {
-                HttpListener  listener = factory.GetListener();
+                HttpListener listener = factory.GetListener();
                 listener.BeginGetContext((f) => { }, null);
                 listener.Stop();
                 listener.Start();
@@ -186,7 +186,7 @@ namespace System.Net.Tests
             using (HttpListenerFactory factory = new HttpListenerFactory())
             using (HttpClient client = new HttpClient())
             {
-                HttpListener  listener = factory.GetListener();
+                HttpListener listener = factory.GetListener();
 
                 _output.WriteLine("Connecting to {0}", factory.ListeningUrl);
                 Task<string> clientTask = client.GetStringAsync(factory.ListeningUrl);
