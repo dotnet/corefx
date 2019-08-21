@@ -15,6 +15,8 @@ namespace System.Text.Json
     /// </summary>
     internal abstract class JsonPropertyInfoCommon<TClass, TDeclaredProperty, TRuntimeProperty, TConverter> : JsonPropertyInfo
     {
+        private TDeclaredProperty _setValue;
+
         public Func<object, TDeclaredProperty> Get { get; private set; }
         public Action<object, TDeclaredProperty> Set { get; private set; }
 
@@ -82,7 +84,9 @@ namespace System.Text.Json
                 return obj;
             }
 
-            Debug.Assert(HasGetter);
+            if (!HasGetter)
+                return _setValue; // Return value that was previously passed to SetValueAsObject for set-only properties.
+
             return Get(obj);
         }
 
@@ -94,6 +98,8 @@ namespace System.Text.Json
             if (typedValue != null || !IgnoreNullValues)
             {
                 Set(obj, typedValue);
+
+                _setValue = typedValue;
             }
         }
 

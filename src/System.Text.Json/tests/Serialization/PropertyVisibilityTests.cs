@@ -4,8 +4,10 @@
 
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using Xunit;
+using System.Linq;
+using System.Collections.Immutable;
 using System.Numerics;
+using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
 {
@@ -35,21 +37,23 @@ namespace System.Text.Json.Serialization.Tests
 
             string json = JsonSerializer.Serialize(obj, options);
 
-            // Collections are always serialized unless they have [JsonIgnore].
-            Assert.Equal(@"{""MyInts"":[1,2]}", json);
+            Assert.Equal(@"{}", json);
         }
 
         [Fact]
         public static void NoGetter()
         {
             ClassWithNoGetter objWithNoGetter = JsonSerializer.Deserialize<ClassWithNoGetter>(
-                @"{""MyString"":""Hello"",""MyIntArray"":[0],""MyIntList"":[0]}");
+                @"{""MyString"":""Hello"",""MyIntArray"":[0],""MyIntList"":[0],""MyStringList"":[""Hello""],""MyDictionary"":{""V"":0},""MyEnumerableProp"":[0],""MyImmutableProp"":[0],""MyReadOnlyDictionaryProp"":{""V"":0}}");
 
             Assert.Equal("Hello", objWithNoGetter.GetMyString());
-
-            // Currently we don't support setters without getters.
-            Assert.Equal(0, objWithNoGetter.GetMyIntArray().Length);
+            Assert.Equal(1, objWithNoGetter.GetMyIntArray().Length);
             Assert.Equal(0, objWithNoGetter.GetMyIntList().Count);
+            Assert.Equal(1, objWithNoGetter.GetMyStringList().Count);
+            Assert.Equal(1, objWithNoGetter.GetMyDictionary().Count);
+            Assert.Equal(1, objWithNoGetter.MyEnumerableProp.Count());
+            Assert.Equal(1, objWithNoGetter.MyImmutableProp.Length);
+            Assert.Equal(1, objWithNoGetter.MyReadOnlyDictionaryProp.Count);
         }
 
         [Fact]
@@ -298,6 +302,8 @@ namespace System.Text.Json.Serialization.Tests
             string _myString = "";
             int[] _myIntArray = new int[] { };
             List<int> _myIntList = new List<int> { };
+            List<string> _myStringList = new List<string> { };
+            Dictionary<string, int> _myDictionary = new Dictionary<string, int> { };
 
             public string MyString
             {
@@ -323,6 +329,28 @@ namespace System.Text.Json.Serialization.Tests
                 }
             }
 
+            public List<string> MyStringList
+            {
+                set
+                {
+                    _myStringList = value;
+                }
+            }
+
+            public Dictionary<string, int> MyDictionary
+            {
+                set
+                {
+                    _myDictionary = value;
+                }
+            }
+
+            public IEnumerable<int> MyEnumerableProp { internal get; set; }
+
+            public ImmutableArray<int> MyImmutableProp { internal get; set; }
+
+            public IReadOnlyDictionary<string, int> MyReadOnlyDictionaryProp { internal get; set; }
+
             public string GetMyString()
             {
                 return _myString;
@@ -336,6 +364,16 @@ namespace System.Text.Json.Serialization.Tests
             public List<int> GetMyIntList()
             {
                 return _myIntList;
+            }
+
+            public List<string> GetMyStringList()
+            {
+                return _myStringList;
+            }
+
+            public Dictionary<string, int> GetMyDictionary()
+            {
+                return _myDictionary;
             }
         }
 

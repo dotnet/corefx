@@ -96,6 +96,8 @@ namespace System.Text.Json
 
             IEnumerable value = ReadStackFrame.GetEnumerableValue(ref state.Current);
 
+            bool setPropertyDirectly = false;
+
             if (state.Current.TempEnumerableValues != null)
             {
                 // We have a converter; possibilities:
@@ -108,6 +110,7 @@ namespace System.Text.Json
                 Debug.Assert(converter != null);
 
                 value = converter.CreateFromList(ref state, (IList)value, options);
+                setPropertyDirectly = true;
                 state.Current.TempEnumerableValues = null;
             }
             else if (state.Current.IsEnumerableProperty)
@@ -138,7 +141,7 @@ namespace System.Text.Json
                 state.Pop();
             }
 
-            ApplyObjectToEnumerable(value, ref state, ref reader);
+            ApplyObjectToEnumerable(value, ref state, ref reader, setPropertyDirectly: setPropertyDirectly && state.Current.TempEnumerableValues == null);
 
             return false;
         }

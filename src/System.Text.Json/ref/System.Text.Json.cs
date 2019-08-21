@@ -666,6 +666,11 @@ namespace System.Text.Json.Serialization
     {
         public JsonIgnoreAttribute() { }
     }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Property, AllowMultiple = false)]
+    public sealed partial class JsonDeserializeAttribute : System.Text.Json.Serialization.JsonAttribute
+    {
+        public JsonDeserializeAttribute() { }
+    }
     [System.AttributeUsageAttribute(System.AttributeTargets.Property, AllowMultiple=false)]
     public sealed partial class JsonPropertyNameAttribute : System.Text.Json.Serialization.JsonAttribute
     {
