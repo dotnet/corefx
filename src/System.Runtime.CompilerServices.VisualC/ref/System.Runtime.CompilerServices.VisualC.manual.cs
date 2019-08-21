@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+// We need to add an InternalsVisibleToAttribute here to mscorlib since we need to expose these types via type forwards in mscorlib
+// since tooling expects these types to live there and not in System.Runtime.CompilerServices.VisualC, but we don't want to expose
+// these types publicly.
 [assembly:System.Runtime.CompilerServices.InternalsVisibleTo("mscorlib, PublicKey=00000000000000000400000000000000")]
 
 namespace System.Runtime.CompilerServices
