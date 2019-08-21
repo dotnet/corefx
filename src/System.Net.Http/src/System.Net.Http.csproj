@@ -44,9 +44,6 @@
     <Compile Include="System\Net\Http\MultipartFormDataContent.cs" />
     <Compile Include="System\Net\Http\NetEventSource.Http.cs" />
     <Compile Include="System\Net\Http\ReadOnlyMemoryContent.cs" />
-    <Compile Include="System\Net\Http\SocketsHttpHandler\FailedProxyCollection.cs" />
-    <Compile Include="System\Net\Http\SocketsHttpHandler\IMultiWebProxy.cs" />
-    <Compile Include="System\Net\Http\SocketsHttpHandler\MultiProxy.cs" />
     <Compile Include="System\Net\Http\StreamContent.cs" />
     <Compile Include="System\Net\Http\StreamToStreamCopy.cs" />
     <Compile Include="System\Net\Http\StringContent.cs" />
@@ -93,8 +90,6 @@
     <Compile Include="System\Net\Http\Headers\ViaHeaderValue.cs" />
     <Compile Include="System\Net\Http\Headers\WarningHeaderValue.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\HeaderField.cs" />
-    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\HPackEncoder.cs" />
-    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\IntegerEncoder.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\StaticTable.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\SystemProxyInfo.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\IO\StreamHelpers.CopyValidation.cs">
@@ -121,6 +116,8 @@
   </ItemGroup>
   <!-- SocketsHttpHandler implementation -->
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\HPackEncoder.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\IntegerEncoder.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\DynamicTable.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\HPackDecoder.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\HPackDecodingException.cs" />
@@ -167,6 +164,9 @@
     <Compile Include="System\Net\Http\SocketsHttpHandler\RawConnectionStream.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\RedirectHandler.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\TaskCompletionSourceWithCancellation.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\FailedProxyCollection.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\IMultiWebProxy.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\MultiProxy.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\Collections\Concurrent\ConcurrentQueueSegment.cs">
       <Link>Common\CoreLib\System\Collections\Concurrent\ConcurrentQueueSegment.cs</Link>
     </Compile>
