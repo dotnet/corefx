@@ -282,20 +282,13 @@ namespace System.Net.Http
             {
                 if (!_proxy.IsBypassed(request.RequestUri))
                 {
-                    if (_proxy is HttpWindowsProxy windowsProxy)
+                    if (_proxy is IMultiWebProxy multiWebProxy)
                     {
-                        MultiProxy multiProxy = windowsProxy.GetMultiProxy(request.RequestUri);
+                        MultiProxy multiProxy = multiWebProxy.GetMultiProxy(request.RequestUri);
 
-                        if (multiProxy != null)
+                        if(multiProxy.ReadNext(out proxyUri, out bool isFinalProxy) && !isFinalProxy)
                         {
-                            if (multiProxy.ProxyCount == 1)
-                            {
-                                proxyUri = multiProxy.GetNextProxy();
-                            }
-                            else
-                            {
-                                return SendAsyncMultiProxy(request, doRequestAuth, multiProxy, cancellationToken);
-                            }
+                            return SendAsyncMultiProxy(request, doRequestAuth, multiProxy, proxyUri, cancellationToken);
                         }
                     }
                     else
@@ -319,24 +312,25 @@ namespace System.Net.Http
             return SendAsyncCore(request, proxyUri, doRequestAuth, isProxyConnect:false, cancellationToken);
         }
 
-        public async Task<HttpResponseMessage> SendAsyncMultiProxy(HttpRequestMessage request, bool doRequestAuth, MultiProxy multiProxy, CancellationToken cancellationToken)
+        public async Task<HttpResponseMessage> SendAsyncMultiProxy(HttpRequestMessage request, bool doRequestAuth, MultiProxy multiProxy, Uri firstProxy, CancellationToken cancellationToken)
         {
             HttpRequestException rethrowException = null;
 
-            foreach (Uri proxyUri in multiProxy)
+            do
             {
                 try
                 {
-                    return await SendAsyncCore(request, proxyUri, doRequestAuth, isProxyConnect: false, cancellationToken).ConfigureAwait(false);
+                    return await SendAsyncCore(request, firstProxy, doRequestAuth, isProxyConnect: false, cancellationToken).ConfigureAwait(false);
                 }
                 catch (HttpRequestException ex) when (ex.AllowRetry != RequestRetryType.NoRetry)
                 {
                     rethrowException = ex;
                 }
             }
+            while (multiProxy.ReadNext(out firstProxy, out _));
             
             ExceptionDispatchInfo.Throw(rethrowException);
-            return null; // should never be reached.
+            return null; // should never be reached: VS doesn't realize Throw() never returns.
         }
 
         /// <summary>Disposes of the pools, disposing of each individual pool.</summary>

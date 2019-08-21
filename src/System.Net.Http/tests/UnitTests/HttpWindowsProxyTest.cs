@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.WinHttpHandlerUnitTests;
 using Microsoft.DotNet.RemoteExecutor;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -251,7 +252,7 @@ namespace System.Net.Http.Tests
             {
                 bool manual = bool.Parse(manualConfigValue);
                 Uri requestUri = new Uri(urlValue);
-                string[] expectedUris = expectedValue.Split(';');
+                string[] expectedUris = expectedValue.Split(';', StringSplitOptions.RemoveEmptyEntries);
 
                 TestControl.ResetAll();
 
@@ -276,28 +277,15 @@ namespace System.Net.Http.Tests
 
                 MultiProxy multi = wp.GetMultiProxy(requestUri);
 
-                if (expectedValue.Length == 0)
+                for (int i = 0; i < expectedUris.Length; ++i)
                 {
-                    Assert.Null(multi);
+                    // Both the current enumerator and the proxy globally should move to the next proxy.
+                    Assert.True(multi.ReadNext(out Uri uri, out _));
+                    Assert.Equal(new Uri(expectedUris[i]), uri);
+                    Assert.Equal(new Uri(expectedUris[i]), p.GetProxy(requestUri));
                 }
-                else
-                {
-                    Assert.NotNull(multi);
-                    Assert.Equal(expectedUris.Length, multi.ProxyCount);
 
-                    MultiProxy.MultiProxyEnumerator e = multi.GetEnumerator();
-
-                    for (int i = 0; i < expectedUris.Length; ++i)
-                    {
-                        // Both the current enumerator and the proxy globally should move to the next proxy.
-                        Assert.True(e.MoveNext());
-                        Assert.Equal(new Uri(expectedUris[i]), e.Current);
-                        Assert.Equal(new Uri(expectedUris[i]), multi.GetNextProxy());
-                        Assert.Equal(new Uri(expectedUris[i]), p.GetProxy(requestUri));
-                    }
-
-                    Assert.False(e.MoveNext());
-                }
+                Assert.False(multi.ReadNext(out _, out _));
 
                 return RemoteExecutor.SuccessExitCode;
             }, manualConfig.ToString(), proxyConfig, url, expected).Dispose();
@@ -320,7 +308,7 @@ namespace System.Net.Http.Tests
         [InlineData(true)]
         public void HttpProxy_Multi_ConcurrentUse_Success(bool manualConfig)
         {
-            const string MultiProxyConfig = "http://proxy-a.com http://proxy-b.com";
+            const string MultiProxyConfig = "http://proxy-a.com http://proxy-b.com http://proxy-c.com";
 
             RemoteExecutor.Invoke(manualValue =>
             {
@@ -329,6 +317,7 @@ namespace System.Net.Http.Tests
                 Uri requestUri = new Uri("http://request.com");
                 Uri firstProxy = new Uri("http://proxy-a.com");
                 Uri secondProxy = new Uri("http://proxy-b.com");
+                Uri thirdProxy = new Uri("http://proxy-c.com");
 
                 TestControl.ResetAll();
 
@@ -354,43 +343,39 @@ namespace System.Net.Http.Tests
                 MultiProxy multiA = wp.GetMultiProxy(requestUri);
                 MultiProxy multiB = wp.GetMultiProxy(requestUri);
 
-                Assert.NotNull(multiA);
-                Assert.Same(multiA, multiB); // The second request should give us a cached value.
-                Assert.Equal(2, multiA.ProxyCount);
-
-                MultiProxy.MultiProxyEnumerator enumA = multiA.GetEnumerator();
-                MultiProxy.MultiProxyEnumerator enumB = multiB.GetEnumerator();
-
-                // Assert first proxy is returned and no index is moved upon enumerating.
-                Assert.True(enumA.MoveNext());
-                Assert.True(enumB.MoveNext());
-                Assert.Equal(firstProxy, enumA.Current);
-                Assert.Equal(firstProxy, enumB.Current);
-                Assert.Equal(firstProxy, multiA.GetNextProxy());
+                // Assert first proxy is returned across all three methods.
+                Assert.True(multiA.ReadNext(out Uri proxyA, out _));
+                Assert.True(multiB.ReadNext(out Uri proxyB, out _));
+                Assert.Equal(firstProxy, proxyA);
+                Assert.Equal(firstProxy, proxyB);
                 Assert.Equal(firstProxy, p.GetProxy(requestUri));
 
-                // Assert global index is moved upon enumerating.
-                Assert.True(enumA.MoveNext());
-                Assert.Equal(secondProxy, multiA.GetNextProxy());
+                // Assert second proxy is returned across all three methods.
+                Assert.True(multiA.ReadNext(out proxyA, out _));
+                Assert.True(multiB.ReadNext(out proxyB, out _));
+                Assert.Equal(secondProxy, proxyA);
+                Assert.Equal(secondProxy, proxyB);
                 Assert.Equal(secondProxy, p.GetProxy(requestUri));
 
-                // But, enumerators already created should not track the global index.
-                // Additionally, the global index shouldn't move when moving enumB forward, because enumA already moved it.
-                Assert.True(enumB.MoveNext());
-                Assert.Equal(secondProxy, enumB.Current);
-                Assert.Equal(secondProxy, multiA.GetNextProxy());
-                Assert.Equal(secondProxy, p.GetProxy(requestUri));
+                // Assert third proxy is returned from multiA.
+                Assert.True(multiA.ReadNext(out proxyA, out _));
+                Assert.Equal(thirdProxy, proxyA);
+                Assert.Equal(thirdProxy, p.GetProxy(requestUri));
 
-                // When enumA returns false, the global proxy should be moved back to the original.
-                Assert.False(enumA.MoveNext());
-                Assert.Equal(firstProxy, multiA.GetNextProxy());
+                // Enumerating multiA once more should exhaust all of our proxies.
+                // So, multiB, still on secondProxy, should now also be exhausted because
+                // when it tries thirdProxy it will see it marked as failed.
+                Assert.False(multiA.ReadNext(out proxyA, out _));
+                Assert.False(multiB.ReadNext(out proxyB, out _));
+
+                // GetProxy should now return the proxy closest to being turned back on, which should be firstProxy.
                 Assert.Equal(firstProxy, p.GetProxy(requestUri));
 
-                // When enumB returns false, the global proxy shouldn't change because enumA already changed it.
-                Assert.False(enumB.MoveNext());
-                Assert.Equal(firstProxy, multiA.GetNextProxy());
-                Assert.Equal(firstProxy, p.GetProxy(requestUri));
-
+                // Enumerating a new MultiProxy should again return the proxy closed to being turned back on, and no others.
+                MultiProxy multiC = wp.GetMultiProxy(requestUri);
+                Assert.True(multiC.ReadNext(out Uri proxyC, out _));
+                Assert.Equal(firstProxy, proxyC);
+                Assert.False(multiC.ReadNext(out proxyC, out _));
                return RemoteExecutor.SuccessExitCode;
             }, manualConfig.ToString()).Dispose();
         }

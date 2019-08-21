@@ -15,14 +15,11 @@ using SafeWinHttpHandle = Interop.WinHttp.SafeWinHttpHandle;
 
 namespace System.Net.Http
 {
-    internal sealed class HttpWindowsProxy : IWebProxy, IDisposable
+    internal sealed class HttpWindowsProxy : IMultiWebProxy, IDisposable
     {
-        const int CacheCleanupFrequencyMilliseconds = 30 * 1000;
-        const int CacheCleanupAgeMilliseconds = 30 * 1000;
-
         private readonly MultiProxy _insecureProxy;    // URI of the http system proxy if set
         private readonly MultiProxy _secureProxy;      // URI of the https system proxy if set
-        private readonly FailedProxyCache _failedProxyCache = new FailedProxyCache();
+        private readonly FailedProxyCollection _failedProxies = new FailedProxyCollection();
         private readonly List<Regex> _bypass;          // list of domains not to proxy
         private readonly bool _bypassLocal = false;    // we should bypass domain considered local
         private readonly List<IPAddress> _localIp;
@@ -30,7 +27,6 @@ namespace System.Net.Http
         private readonly WinInetProxyHelper _proxyHelper;
         private SafeWinHttpHandle _sessionHandle;
         private bool _disposed;
-        private static readonly char[] s_proxyDelimiters = {';', ' ', '\n', '\r', '\t'};
 
         public static bool TryCreate(out IWebProxy proxy)
         {
@@ -76,8 +72,8 @@ namespace System.Net.Http
             {
                 if (NetEventSource.IsEnabled) NetEventSource.Info(proxyHelper, $"ManualSettingsUsed, {proxyHelper.Proxy}");
 
-                _secureProxy = MultiProxy.Parse(proxyHelper.Proxy, true);
-                _insecureProxy = MultiProxy.Parse(proxyHelper.Proxy, false);
+                _secureProxy = MultiProxy.Parse(_failedProxies, proxyHelper.Proxy, true);
+                _insecureProxy = MultiProxy.Parse(_failedProxies, proxyHelper.Proxy, false);
 
                 if (!string.IsNullOrWhiteSpace(proxyHelper.ProxyBypass))
                 {
@@ -196,7 +192,8 @@ namespace System.Net.Http
         /// </summary>
         public Uri GetProxy(Uri uri)
         {
-            return GetMultiProxy(uri)?.GetNextProxy();
+            GetMultiProxy(uri).ReadNext(out Uri proxyUri, out _);
+            return proxyUri;
         }
 
         /// <summary>
@@ -227,31 +224,11 @@ namespace System.Net.Http
                             {
                                 string proxyStr = Marshal.PtrToStringUni(proxyInfo.Proxy);
 
-                                MultiProxy secureProxy, insecureProxy;
-
-                                if (_cachedProxies.TryGetValue(proxyStr, out CachedProxy cached))
-                                {
-                                    cached.LastAccessTicks = Environment.TickCount;
-                                    secureProxy = cached.SecureProxy;
-                                    insecureProxy = cached.InsecureProxy;
-                                }
-                                else
-                                {
-                                    ParseProxyConfig(proxyStr, out secureProxy, out insecureProxy);
-
-                                    cached = new CachedProxy(insecureProxy, secureProxy);
-                                    cached.LastAccessTicks = Environment.TickCount;
-
-                                    // Don't worry about updating LastAccessTicks if we get a different
-                                    // CachedProxy. It should be roughly the same value as our tickCount.
-                                    cached = _cachedProxies.GetOrAdd(proxyStr, cached);
-                                }
-
-                                return IsSecureUri(uri) ? secureProxy : insecureProxy;
+                                return MultiProxy.CreateLazy(_failedProxies, proxyStr, IsSecureUri(uri));
                             }
                             else
                             {
-                                return null;
+                                return MultiProxy.Empty;
                             }
                         }
 
@@ -263,7 +240,7 @@ namespace System.Net.Http
                     }
                     else
                     {
-                        return null;
+                        return MultiProxy.Empty;
                     }
                 }
                 finally
@@ -284,7 +261,7 @@ namespace System.Net.Http
                     {
                         // This is optimization for loopback addresses.
                         // Unfortunately this does not work for all local addresses.
-                        return null;
+                        return MultiProxy.Empty;
                     }
 
                     // Pre-Check if host may be IP address to avoid parsing.
@@ -301,7 +278,7 @@ namespace System.Net.Http
                             {
                                 if (a.Equals(address))
                                 {
-                                    return null;
+                                    return MultiProxy.Empty;
                                 }
                             }
                         }
@@ -310,7 +287,7 @@ namespace System.Net.Http
                     {
                         // Not address and does not have a dot.
                         // Hosts without FQDN are considered local.
-                        return null;
+                        return MultiProxy.Empty;
                     }
                 }
 
@@ -322,7 +299,7 @@ namespace System.Net.Http
                         // IdnHost does not have [].
                         if (entry.IsMatch(uri.IdnHost))
                         {
-                            return null;
+                            return MultiProxy.Empty;
                         }
                     }
                 }
@@ -331,7 +308,7 @@ namespace System.Net.Http
                 return IsSecureUri(uri) ? _secureProxy : _insecureProxy;
             }
 
-            return null;
+            return MultiProxy.Empty;
         }
 
         private static bool IsSecureUri(Uri uri)
@@ -367,19 +344,5 @@ namespace System.Net.Http
 
         // Access function for unit tests.
         internal List<Regex> BypassList => _bypass;
-
-        sealed class CachedProxy
-        {
-            public MultiProxy InsecureProxy { get; }
-            public MultiProxy SecureProxy { get; }
-
-            public int LastAccessTicks { get; set; }
-
-            public CachedProxy(MultiProxy insecureProxy, MultiProxy secureProxy)
-            {
-                InsecureProxy = insecureProxy;
-                SecureProxy = secureProxy;
-            }
-        }
     }
 }

@@ -330,12 +330,11 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
-        public async Task MultiProxy_Failover_Succeeds()
+        public async Task MultiProxy_PAC_Failover_Succeeds()
         {
             if (!UseSocketsHttpHandler || !PlatformDetection.IsWindows)
             {
-                // MultiProxy-based failover is only supported on Windows/SocketsHttpHandler.
-                return;
+                throw new SkipTestException("PAC-based failover is only supported on Windows/SocketsHttpHandler");
             }
 
             // Create our failing proxy server.
@@ -370,7 +369,7 @@ namespace System.Net.Http.Functional.Tests
                     // First request is expected to hit the failing proxy server, then failover to the succeeding proxy server.
                     Assert.Equal("foo", await client.GetStringAsync(uri));
 
-                    // Second request should use cached MultiProxy and start directly at the succeeding proxy server.
+                    // Second request should start directly at the succeeding proxy server.
                     // So, start listening on our failing proxy server to catch if it tries to connect.
                     failingProxyServer.Listen(1);
                     nextFailedConnection = WaitForNextFailedConnection();

@@ -2,37 +2,25 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
-using System.Threading;
 
 namespace System.Net.Http
 {
     internal struct MultiProxy
     {
         private static readonly char[] s_proxyDelimiters = { ';', ' ', '\n', '\r', '\t' };
+        private readonly FailedProxyCollection _failedProxyCollection;
         private readonly Uri[] _uris;
         private readonly string _proxyConfig;
         private readonly bool _secure;
         private int _currentIndex;
         private Uri _currentUri;
 
-        public Uri Current
-        {
-            get
-            {
-                Debug.Assert(_currentUri != null, $"{nameof(MoveNext)} must be called and return true prior to {nameof(Current)} being used.");
-                return _currentUri;
-            }
-        }
+        public static MultiProxy Empty => new MultiProxy(null, Array.Empty<Uri>());
 
-        private MultiProxy(Uri[] uris)
+        private MultiProxy(FailedProxyCollection failedProxyCollection, Uri[] uris)
         {
-            Debug.Assert(uris != null);
-
+            _failedProxyCollection = failedProxyCollection;
             _uris = uris;
             _proxyConfig = null;
             _secure = default;
@@ -40,10 +28,9 @@ namespace System.Net.Http
             _currentUri = null;
         }
 
-        private MultiProxy(string proxyConfig, bool secure)
+        private MultiProxy(FailedProxyCollection failedProxyCollection, string proxyConfig, bool secure)
         {
-            Debug.Assert(proxyConfig != null);
-
+            _failedProxyCollection = failedProxyCollection;
             _uris = null;
             _proxyConfig = proxyConfig;
             _secure = secure;
@@ -52,11 +39,11 @@ namespace System.Net.Http
         }
 
         /// <summary>
-        /// Parses a proxy config into insecure and secure MultiProxy instances.
+        /// Parses a WinHTTP proxy config into a MultiProxy instance.
         /// </summary>
         /// <param name="proxyConfig">The WinHTTP proxy config to parse.</param>
         /// <param name="secure">If true, return proxies suitable for use with a secure connection. If false, return proxies suitable for an insecure connection.</param>
-        public static MultiProxy Parse(string proxyConfig, bool secure)
+        public static MultiProxy Parse(FailedProxyCollection failedProxyCollection, string proxyConfig, bool secure)
         {
             Uri[] uris = Array.Empty<Uri>();
 
@@ -74,56 +61,108 @@ namespace System.Net.Http
                 span = span.Slice(charactersConsumed);
             }
 
-            return new MultiProxy(uris);
+            return new MultiProxy(failedProxyCollection, uris);
         }
 
         /// <summary>
-        /// Initializes a MultiProxy instance that lazily parses a given configuration string.
+        /// Initializes a MultiProxy instance that lazily parses a given WinHTTP configuration string.
         /// </summary>
         /// <param name="proxyConfig">The WinHTTP proxy config to parse.</param>
         /// <param name="secure">If true, return proxies suitable for use with a secure connection. If false, return proxies suitable for an insecure connection.</param>
-        public static MultiProxy CreateLazy(string proxyConfig, bool secure)
+        public static MultiProxy CreateLazy(FailedProxyCollection failedProxyCollection, string proxyConfig, bool secure)
         {
             return string.IsNullOrEmpty(proxyConfig) == false ?
-                new MultiProxy(proxyConfig, secure) :
-                new MultiProxy(Array.Empty<Uri>());
+                new MultiProxy(failedProxyCollection, proxyConfig, secure) :
+                MultiProxy.Empty;
         }
 
         /// <summary>
         /// Reads the next proxy URI from the MultiProxy.
         /// </summary>
+        /// <param name="uri">The next proxy to use for the request.</param>
+        /// <param name="isFinalProxy">If true, indicates there are no further proxies to read from the config.</param>
         /// <returns>If there is a proxy available, true. Otherwise, false.</returns>
-        public bool MoveNext()
+        public bool ReadNext(out Uri uri, out bool isFinalProxy)
         {
-            Debug.Assert(_uris != null || _proxyConfig != null, $"{nameof(MoveNext)} must not be called on a default-initialized {nameof(MultiProxy)}.");
-
-            if (_uris != null)
+            // Enumerating indicates the previous proxy has failed; mark it as such.
+            if (_currentUri != null)
             {
-                if (_currentIndex == _uris.Length || ++_currentIndex == _uris.Length)
-                {
-                    return false;
-                }
-
-                _currentUri = _uris[_currentIndex];
-                return true;
+                _failedProxyCollection.SetProxyFailed(_currentUri);
             }
 
-            if (_currentIndex < _proxyConfig.Length)
+            // If no more proxies to read, return out quickly.
+            if (!ReadNextImpl(out uri, out isFinalProxy))
             {
-                bool hasProxy = TryParseProxyConfigPart(_proxyConfig.AsSpan(_currentIndex), _secure, out _currentUri, out int charactersConsumed);
+                _currentUri = null;
+                return false;
+            }
 
-                _currentIndex += charactersConsumed;
-                Debug.Assert(_currentIndex <= _proxyConfig.Length);
+            // If this is the first ReadNext() and all proxies are marked as failed, return the proxy that is closest to renewal.
+            Uri oldestFailedProxyUri = null;
+            long oldestFailedProxyTicks = long.MaxValue;
 
-                return hasProxy;
+            do
+            {
+                long renewTicks = _failedProxyCollection.GetProxyRenewTicks(uri);
+
+                // Proxy hasn't failed recently, return for use.
+                if (renewTicks == FailedProxyCollection.Immediate)
+                {
+                    _currentUri = uri;
+                    return true;
+                }
+
+                if (renewTicks < oldestFailedProxyTicks)
+                {
+                    oldestFailedProxyUri = uri;
+                    oldestFailedProxyTicks = renewTicks;
+                }
+            }
+            while (ReadNextImpl(out uri, out isFinalProxy));
+
+            // All the proxies in the config have failed; in this case, return the oldest failing proxy.
+            if (_currentUri == null)
+            {
+                uri = oldestFailedProxyUri;
+                _currentUri = oldestFailedProxyUri;
+                return oldestFailedProxyUri != null;
             }
 
             return false;
         }
 
-        public void Reset()
+        private bool ReadNextImpl(out Uri uri, out bool isFinalProxy)
         {
-            _currentIndex = 0;
+            Debug.Assert(_uris != null || _proxyConfig != null, $"{nameof(ReadNext)} must not be called on a default-initialized {nameof(MultiProxy)}.");
+
+            if (_uris != null)
+            {
+                if (_currentIndex == _uris.Length)
+                {
+                    uri = default;
+                    isFinalProxy = default;
+                    return false;
+                }
+
+                uri = _uris[_currentIndex++];
+                isFinalProxy = _currentIndex == _uris.Length;
+                return true;
+            }
+
+            if (_currentIndex < _proxyConfig.Length)
+            {
+                bool hasProxy = TryParseProxyConfigPart(_proxyConfig.AsSpan(_currentIndex), _secure, out uri, out int charactersConsumed);
+
+                _currentIndex += charactersConsumed;
+                Debug.Assert(_currentIndex <= _proxyConfig.Length);
+
+                isFinalProxy = _currentIndex == _proxyConfig.Length;
+                return hasProxy;
+            }
+
+            uri = default;
+            isFinalProxy = default;
+            return false;
         }
 
         /// <summary>
