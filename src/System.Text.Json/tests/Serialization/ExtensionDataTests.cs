@@ -55,6 +55,14 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void ExtensionPropertyIgnoredWhenNull()
+        {
+            string expected = @"{}";
+            string actual = JsonSerializer.Serialize(new ClassWithExtensionPropertyAsObject());
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
         public static void ExtensionPropertyAlreadyInstantiated()
         {
             Assert.NotNull(new ClassWithExtensionPropertyAlreadyInstantiated().MyOverflow);
