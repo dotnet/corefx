@@ -16,20 +16,18 @@ namespace System.Net.Http.Unit.Tests.HPack
     public class HPackRoundtripTests
     {
 
-        public static IEnumerable<object[]> TestHeaders =>
-            new HttpHeaders[]
+        public static IEnumerable<object[]> TestHeaders()
+        {
+            yield return new object[] { new HttpRequestHeaders() { { "header", "value" } } };
+            yield return new object[] { new HttpRequestHeaders() { { "header", new[] { "value1", "value2" } } } };
+            yield return new object[] { new HttpRequestHeaders()
             {
-                BuildHttpHeaders(("header", new[] { "value" })),
-
-                BuildHttpHeaders(("header", new[] { "value1", "value2" })),
-
-                BuildHttpHeaders(
-                    ("header-0", new[] { "value1", "value2" }),
-                    ("header-0", new[] { "value3" }),
-                    ("header-1", new[] { "value1" }),
-                    ("header-2", new[] { "value1", "value2" }))
-
-            }.Select(h => new[] { h });
+                { "header-0", new[] { "value1", "value2" } },
+                { "header-0", "value3" },
+                { "header-1", "value1" },
+                { "header-2", new[] { "value1", "value2" } },
+            } };
+        }
 
         [Theory, MemberData(nameof(TestHeaders))]
         public void HPack_HeaderEncodeDecodeRoundtrip_ShouldMatchOriginalInput(HttpHeaders headers)
@@ -37,32 +35,13 @@ namespace System.Net.Http.Unit.Tests.HPack
             Memory<byte> encoding = HPackEncode(headers);
             HttpHeaders decodedHeaders = HPackDecode(encoding);
 
-            CompareHttpHeaders(headers, decodedHeaders);
-        }
-
-        private static HttpHeaders BuildHttpHeaders(params (string key, string[] values)[] seedValues)
-        {
-            var headers = new HttpRequestHeaders();
-
-            foreach ((string key, string[] value) header in seedValues)
+            // Assert: decoded headers are structurally equal to original headers
+            Assert.Equal(headers.Count(), decodedHeaders.Count());
+            Assert.All(headers.Zip(decodedHeaders), pair =>
             {
-                headers.Add(header.key, header.value);
-            }
-
-            return headers;
-        }
-
-        private static void CompareHttpHeaders(HttpHeaders expected, HttpHeaders actual)
-        {
-            Assert.Equal(expected.Count(), actual.Count());
-            Assert.All(expected.Zip(actual), x => CompareHttpHeader(x.First, x.Second));
-
-            void CompareHttpHeader(KeyValuePair<string, IEnumerable<string>> expected, KeyValuePair<string, IEnumerable<string>> actual)
-            {
-                Assert.Equal(expected.Key, actual.Key);
-                Assert.Equal(expected.Value.Count(), actual.Value.Count());
-                Assert.All(expected.Value.Zip(actual.Value), x => Assert.Equal(x.First, x.Second));
-            }
+                Assert.Equal(pair.First.Key, pair.Second.Key);
+                Assert.Equal(pair.First.Value, pair.Second.Value);
+            });
         }
 
         // adapted from Header serialization code in Http2Connection.cs
