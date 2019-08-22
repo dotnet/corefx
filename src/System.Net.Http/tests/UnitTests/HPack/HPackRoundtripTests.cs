@@ -32,7 +32,7 @@ namespace System.Net.Http.Unit.Tests.HPack
             }.Select(h => new[] { h });
 
         [Theory, MemberData(nameof(TestHeaders))]
-        public void HPack_Roundtrip_Headers(HttpHeaders headers)
+        public void HPack_HeaderEncodeDecodeRoundtrip_ShouldMatchOriginalInput(HttpHeaders headers)
         {
             Memory<byte> encoding = HPackEncode(headers);
             HttpHeaders decodedHeaders = HPackDecode(encoding);
