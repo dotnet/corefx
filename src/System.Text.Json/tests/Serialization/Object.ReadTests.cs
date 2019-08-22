@@ -356,5 +356,30 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(1, parsedObject.MySimpleTestClass.MyInt32Array[0]);
             Assert.Equal(2, parsedObject.MyInt32Array[0]);
         }
+
+        public class SimpleTestClassUsingJsonDeserialize
+        {
+            [JsonDeserialize]
+            public SimpleTestClass MyClass { get; } = new SimpleTestClass();
+
+            [JsonDeserialize]
+            public SimpleTestClass InvalidNullProperty { get; }
+        }
+
+        [Fact]
+        public static void ReadClassUsingJsonDeserialize()
+        {
+            string json = "{\"MyClass\":{\"MyInt32\":18}}";
+            SimpleTestClassUsingJsonDeserialize obj = JsonSerializer.Deserialize<SimpleTestClassUsingJsonDeserialize>(json);
+            Assert.NotNull(obj.MyClass);
+            Assert.Equal(18, obj.MyClass.MyInt32);
+        }
+
+        [Theory]
+        [InlineData(@"{""InvalidNullProperty"":{""MyInt32"":18}}")]
+        public static void ClassWithNoSetterInvalidTests(string json)
+        {
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<SimpleTestClassUsingJsonDeserialize>(json));
+        }
     }
 }

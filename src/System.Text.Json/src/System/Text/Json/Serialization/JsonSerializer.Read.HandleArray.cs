@@ -227,7 +227,8 @@ namespace System.Text.Json
             else
             {
                 Debug.Assert(state.Current.JsonPropertyInfo != null);
-                state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
+                if (!state.Current.JsonPropertyInfo.DeserializeUsingGetter)
+                    state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
             }
         }
 

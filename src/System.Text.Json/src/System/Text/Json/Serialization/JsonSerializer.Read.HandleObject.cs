@@ -13,6 +13,8 @@ namespace System.Text.Json
         {
             Debug.Assert(!state.Current.IsProcessingDictionary && !state.Current.IsProcessingIDictionaryConstructible);
 
+            ReadStackFrame? parentStackFrame = null;
+
             if (state.Current.IsProcessingEnumerable)
             {
                 // A nested object within an enumerable.
@@ -22,10 +24,10 @@ namespace System.Text.Json
             }
             else if (state.Current.JsonPropertyInfo != null)
             {
+                parentStackFrame = state.Current;
                 // Nested object.
-                Type objType = state.Current.JsonPropertyInfo.RuntimePropertyType;
                 state.Push();
-                state.Current.Initialize(objType, options);
+                state.Current.Initialize(parentStackFrame.Value.JsonPropertyInfo.RuntimePropertyType, options);
             }
 
             JsonClassInfo classInfo = state.Current.JsonClassInfo;
@@ -45,6 +47,15 @@ namespace System.Text.Json
             if (state.Current.IsProcessingIDictionaryConstructible)
             {
                 state.Current.TempDictionaryValues = (IDictionary)classInfo.CreateConcreteDictionary();
+            }
+            else if (parentStackFrame.HasValue && !parentStackFrame.Value.JsonPropertyInfo.HasSetter && parentStackFrame.Value.JsonPropertyInfo.DeserializeUsingGetter)
+            {
+                // Look for existing value and clear if found
+                object existingValue = parentStackFrame.Value.JsonPropertyInfo.GetValueAsObject(parentStackFrame.Value.ReturnValue);
+                if (existingValue == null)
+                    ThrowHelper.ThrowJsonException_DeserializeGetterReturnedNull(parentStackFrame.Value.JsonPropertyInfo.NameAsString);
+
+                state.Current.ReturnValue = existingValue;
             }
             else
             {
