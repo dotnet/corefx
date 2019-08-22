@@ -380,6 +380,9 @@ namespace System.Text.Json
                 case ExceptionResource.UnexpectedEndOfLineSeparator:
                     message = SR.Format(SR.UnexpectedEndOfLineSeparator);
                     break;
+                case ExceptionResource.InvalidLeadingZerosInNumber:
+                    message = SR.Format(SR.InvalidLeadingZerosInNumber, characters);
+                    break;
                 default:
                     Debug.Fail($"The ExceptionResource enum value: {resource} is not part of the switch. Add the appropriate case and exception message.");
                     break;
@@ -633,6 +636,7 @@ namespace System.Text.Json
         UnexpectedEndOfLineSeparator,
         ExpectedOneCompleteToken,
         NotEnoughData,
+        InvalidLeadingZerosInNumber,
     }
 
     internal enum NumericType
