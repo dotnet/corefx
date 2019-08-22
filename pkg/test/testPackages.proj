@@ -19,6 +19,8 @@
     <TargetFrameworksToExclude Include="net463" />
     <TargetFrameworksToExclude Include="net47" />
     <TargetFrameworksToExclude Include="netcoreapp2.2" />
+    <!-- We need to enable this after we start publishing the packages for netcoreapp3.1 -->
+    <TargetFrameworksToExclude Include="netcoreapp3.1" />
 
     <!-- CI machines doesn't have net472 targeting pack installed yet and we hit: https://github.com/dotnet/corefx/issues/29906 -->
     <TargetFrameworksToExclude Include="net472" />

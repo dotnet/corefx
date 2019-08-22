@@ -1,9 +1,9 @@
-﻿<Project DefaultTargets="Build">
+<Project DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
   <PropertyGroup>
-      <!-- We use the PackageVersion property defined in Packaging.props for the Prerelease packages which are using it to be built -->
-    <_PreReleasePackageVersion>$(PackageVersion)</_PreReleasePackageVersion>
-    <PackageVersion>3.0.0</PackageVersion>
+    <!-- We use the PackageVersion property defined in Packaging.props for the Prerelease packages which are using it to be built --> 
+    <_PreReleasePackageVersion>$(PackageVersion)</_PreReleasePackageVersion> 
+    <PackageVersion>3.1.0</PackageVersion>
     <ServiceModelVersion>4.5.3</ServiceModelVersion>
     <!-- We don't need to harvest the stable packages to build this -->
     <HarvestStablePackage>false</HarvestStablePackage>
@@ -28,8 +28,8 @@
     <PrereleaseLibraryPackage Include="System.Configuration.ConfigurationManager" />
     <PrereleaseLibraryPackage Include="System.Data.Odbc" />
     <PrereleaseLibraryPackage Include="System.Data.OleDb" />
-    <PrereleaseLibraryPackage Include="System.Data.SqlClient">
-      <!-- SQL client defines its own version, higher than rest of master -->
+    <PrereleaseLibraryPackage Include="System.Data.SqlClient"> 
+      <!-- SQL client defines its own version, higher than rest of master --> 
       <Version>4.7.0</Version>
     </PrereleaseLibraryPackage>
     <PrereleaseLibraryPackage Include="System.Drawing.Common" />
