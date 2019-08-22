@@ -4,6 +4,7 @@
 
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Text;
 
 using Microsoft.DotNet.XUnitExtensions;
 
@@ -182,7 +183,7 @@ namespace System.Net.Tests
         [ConditionalFact]
         public async Task ListenerRestart_GetContext_Success()
         {
-            string content = "ListenerRestart_GetContext_Success";
+            const string Content = "ListenerRestart_GetContext_Success";
             using (HttpListenerFactory factory = new HttpListenerFactory())
             using (HttpClient client = new HttpClient())
             {
@@ -193,11 +194,11 @@ namespace System.Net.Tests
 
                 HttpListenerContext context = listener.GetContext();
                 HttpListenerResponse response = context.Response;
-                response.OutputStream.Write(System.Text.Encoding.UTF8.GetBytes(content));
+                response.OutputStream.Write(Encoding.UTF8.GetBytes(Content));
                 response.OutputStream.Close();
 
                 string body = await clientTask;
-                Assert.Equal(content, body);
+                Assert.Equal(Content, body);
 
                 // Stop and start listener again.
                 listener.Stop();
@@ -219,11 +220,11 @@ namespace System.Net.Tests
                 clientTask = client.GetStringAsync(factory.ListeningUrl);
                 context = listener.GetContext();
                 response = context.Response;
-                response.OutputStream.Write(System.Text.Encoding.UTF8.GetBytes(content));
+                response.OutputStream.Write(Encoding.UTF8.GetBytes(Content));
                 response.OutputStream.Close();
 
                 body = await clientTask;
-                Assert.Equal(content, body);
+                Assert.Equal(Content, body);
             }
         }
     }
