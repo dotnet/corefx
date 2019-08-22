@@ -55,19 +55,13 @@ namespace System.Net.Http.Unit.Tests.HPack
         private static void CompareHttpHeaders(HttpHeaders expected, HttpHeaders actual)
         {
             Assert.Equal(expected.Count(), actual.Count());
-
-            expected
-                .Zip(actual)
-                .AssertForall(x => CompareHttpHeader(x.First, x.Second));
+            Assert.All(expected.Zip(actual), x => CompareHttpHeader(x.First, x.Second));
 
             void CompareHttpHeader(KeyValuePair<string, IEnumerable<string>> expected, KeyValuePair<string, IEnumerable<string>> actual)
             {
                 Assert.Equal(expected.Key, actual.Key);
                 Assert.Equal(expected.Value.Count(), actual.Value.Count());
-
-                expected.Value
-                    .Zip(actual.Value)
-                    .AssertForall(x => Assert.Equal(x.First, x.Second));
+                Assert.All(expected.Value.Zip(actual.Value), x => Assert.Equal(x.First, x.Second));
             }
         }
 
@@ -171,10 +165,5 @@ namespace System.Net.Http.Unit.Tests.HPack
                 header.TryAddWithoutValidation(descriptor, headerValue.Split(',').Select(x => x.Trim()));
             }
         }
-    }
-
-    public static class AssertExtensions
-    {
-        public static void AssertForall<T>(this IEnumerable<T> collection, Action<T> body) => Assert.All(collection, body);
     }
 }
