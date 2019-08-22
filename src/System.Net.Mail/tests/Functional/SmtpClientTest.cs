@@ -9,6 +9,7 @@
 // (C) 2006 John Luke
 //
 
+using System.Collections.Generic;
 using System.IO;
 using System.Net.NetworkInformation;
 using System.Threading;
@@ -214,6 +215,28 @@ namespace System.Net.Mail.Tests
             string[] files = Directory.GetFiles(TempFolder, "*");
             Assert.Equal(1, files.Length);
             Assert.Equal(".eml", Path.GetExtension(files[0]));
+        }
+
+        [Theory]
+        [MemberData(nameof(MessageBodyData))]
+        public void Send_SpecifiedPickupDirectory_MessageBodyDoesNotEncodeForTransport(string messageBody)
+        {
+            Smtp.DeliveryMethod = SmtpDeliveryMethod.SpecifiedPickupDirectory;
+            Smtp.PickupDirectoryLocation = TempFolder;
+            Smtp.Send("mono@novell.com", "everyone@novell.com", "introduction", messageBody);
+
+            string[] files = Directory.GetFiles(TempFolder, "*");
+            Assert.Equal(1, files.Length);
+            Assert.Equal(".eml", Path.GetExtension(files[0]));
+
+            string message = File.ReadAllText(files[0]).Replace("=\r\n","");  // strip out folding
+            Assert.EndsWith($"{messageBody}\r\n", message);
+        }
+
+        public static IEnumerable<object[]> MessageBodyData()
+        {
+            for (int i = 0; i < 100; i++)
+                yield return new object[] { new string('a', i) + '.' };
         }
 
         [Theory]
