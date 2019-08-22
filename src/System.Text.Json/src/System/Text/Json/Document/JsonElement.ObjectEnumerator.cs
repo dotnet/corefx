@@ -113,7 +113,7 @@ namespace System.Text.Json
                 _curIdx = -1;
                 if (_jsonObjectEnumerator.HasValue)
                 {
-                    _jsonObjectEnumerator.Value.Reset();
+                    ((IEnumerator)_jsonObjectEnumerator.Value).Reset();
                 }
             }
 

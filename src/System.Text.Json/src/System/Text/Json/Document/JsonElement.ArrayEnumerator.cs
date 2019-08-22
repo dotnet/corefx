@@ -101,7 +101,7 @@ namespace System.Text.Json
 
                 if (_jsonArrayEnumerator.HasValue)
                 {
-                    _jsonArrayEnumerator.Value.Reset();
+                    ((IEnumerator)_jsonArrayEnumerator.Value).Reset();
                 }
             }
 

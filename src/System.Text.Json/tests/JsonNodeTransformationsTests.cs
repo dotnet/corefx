@@ -52,14 +52,6 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void TestJsonDocumentToJsonNode()
-        {
-            JsonDocument jsonDocument = JsonDocument.Parse(jsonSampleString);
-            JsonNode node = JsonNode.DeepCopy(jsonDocument);
-            CheckNodeFromSampleString(node);
-        }
-
-        [Fact]
         public static void TestParseStringToJsonNode()
         {
             JsonNode node = JsonNode.Parse(jsonSampleString);
@@ -67,38 +59,10 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void TestParseBytesToJsonNode()
-        {
-            JsonNode node = JsonNode.Parse(new ReadOnlySequence<byte>(Encoding.UTF8.GetBytes(jsonSampleString).AsMemory())); 
-            CheckNodeFromSampleString(node);
-        }
-
-        [Fact]
-        public static void TestParseByteMemoryToJsonNode()
-        {
-            JsonNode node = JsonNode.Parse(Encoding.UTF8.GetBytes(jsonSampleString).AsMemory());
-            CheckNodeFromSampleString(node);
-        }
-
-        [Fact]
-        public static void TestParseCharMemoryToJsonNode()
-        {
-            JsonNode node = JsonNode.Parse(jsonSampleString.AsMemory());
-            CheckNodeFromSampleString(node);
-        }
-
-        [Fact]
-        public static void TestParseStreamToJsonNode()
-        {
-            JsonNode node = JsonNode.Parse(new MemoryStream(Encoding.UTF8.GetBytes(jsonSampleString)));
-            CheckNodeFromSampleString(node);
-        }
-
-        [Fact]
         public static void TestCloneJsonArray()
         {
             var jsonArray = new JsonArray { "value1", "value2" };
-            var jsonArrayCopy = JsonNode.DeepCopy(jsonArray) as JsonArray;
+            var jsonArrayCopy = jsonArray.Clone() as JsonArray;
             Assert.Equal(2, jsonArrayCopy.Count);
             jsonArray.Add("value3");
             Assert.Equal(2, jsonArrayCopy.Count);
@@ -115,7 +79,7 @@ namespace System.Text.Json.Tests
                 { "array", new JsonString[] { "value1", "value2"} }
             };
 
-            var jsonObjectCopy = (JsonObject)JsonNode.DeepCopy(jsonObject);
+            var jsonObjectCopy = (JsonObject)jsonObject.Clone();
 
             jsonObject["text"] = (JsonString)"something different";
             Assert.Equal("property value", (JsonString)jsonObjectCopy["text"]);

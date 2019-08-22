@@ -410,7 +410,7 @@ namespace System.Text.Json.Tests
             ((JsonString)issues.GetJsonArrayPropertyValue("features")[0]).Value = "feature 1569";
             ((JsonString)issues.GetJsonArrayPropertyValue("features")[1]).Value = "feature 56134";
 
-            Assert.True(((JsonArray)issues["bugs"]).Contains("bug 12356"));
+            Assert.Equal((JsonString)"bug 12356", ((JsonArray)issues["bugs"])[3]);
             Assert.Equal("feature 1569", (JsonString)((JsonArray)issues["features"])[0]);
             Assert.Equal("feature 56134", (JsonString)((JsonArray)issues["features"])[1]);
         }
@@ -451,16 +451,13 @@ namespace System.Text.Json.Tests
             var jsonArray = new JsonArray { 1, 2, 3 };
             
             Assert.Equal(3, jsonArray.Count);
-            Assert.True(jsonArray.Contains(1));
-            Assert.True(jsonArray.Contains(2));
-            Assert.True(jsonArray.Contains(3));
+            Assert.Equal((JsonNumber)1, jsonArray[0]);
+            Assert.Equal((JsonNumber)2, jsonArray[1]);
+            Assert.Equal((JsonNumber)3, jsonArray[2]);
 
             jsonArray.Clear();
             
             Assert.Equal(0, jsonArray.Count);
-            Assert.False(jsonArray.Contains(1));
-            Assert.False(jsonArray.Contains(2));
-            Assert.False(jsonArray.Contains(3));
         }
 
         [Fact]
@@ -469,16 +466,14 @@ namespace System.Text.Json.Tests
             var jsonArray = new JsonArray { 1, 2, 3 };
 
             Assert.Equal(3, jsonArray.Count);
-            Assert.True(jsonArray.Contains(1));
-            Assert.True(jsonArray.Contains(2));
-            Assert.True(jsonArray.Contains(3));
+            Assert.Equal((JsonNumber)1, jsonArray[0]);
+            Assert.Equal((JsonNumber)2, jsonArray[1]);
+            Assert.Equal((JsonNumber)3, jsonArray[2]);
 
             jsonArray.RemoveAll(v => ((JsonNumber)v).GetInt32() <= 2);
 
             Assert.Equal(1, jsonArray.Count);
-            Assert.False(jsonArray.Contains(1));
-            Assert.False(jsonArray.Contains(2));
-            Assert.True(jsonArray.Contains(3));
+            Assert.Equal((JsonNumber)3, jsonArray[0]);
         }
 
        
