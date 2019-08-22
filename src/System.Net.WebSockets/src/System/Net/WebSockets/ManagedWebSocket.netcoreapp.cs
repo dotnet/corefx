@@ -34,7 +34,7 @@ namespace System.Net.WebSockets
                     }
 
                     // We need to both store the last receive task and return it, but we can't do that with a ValueTask,
-                    // as that could result in consuming it multiple times.  Instead, we use AsTask to consume it just one,
+                    // as that could result in consuming it multiple times.  Instead, we use AsTask to consume it just once,
                     // and then store that Task and return a new ValueTask that wraps it. (It would be nice in the future
                     // to avoid this AsTask as well; currently it's used both for error detection and as part of close tracking.)
                     Task<ValueWebSocketReceiveResult> receiveTask = receiveValueTask.AsTask();
