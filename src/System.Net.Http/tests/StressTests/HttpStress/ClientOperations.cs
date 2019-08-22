@@ -213,7 +213,7 @@ namespace HttpStress
                 {
                     using var req = new HttpRequestMessage(HttpMethod.Get, "/headers");
                     ctx.PopulateWithRandomHeaders(req.Headers);
-                    uint expectedChecksum = ChecksumHelpers.ComputeHeaderChecksum(req.Headers.Select(x => (x.Key, x.Value)));
+                    ulong expectedChecksum = CRC.CalculateHeaderCrc(req.Headers.Select(x => (x.Key, x.Value)));
 
                     using HttpResponseMessage res = await ctx.SendAsync(req);
 
@@ -360,7 +360,7 @@ namespace HttpStress
                 {
                     string content = ctx.GetRandomString(0, ctx.MaxContentLength);
                     byte[] byteContent = Encoding.ASCII.GetBytes(content);
-                    uint checksum = ChecksumHelpers.Compute(byteContent);
+                    ulong checksum = CRC.CalculateCRC(byteContent);
 
                     using var req = new HttpRequestMessage(HttpMethod.Post, "/duplexSlow") { Content = new ByteAtATimeNoLengthContent(byteContent) };
                     using HttpResponseMessage m = await ctx.SendAsync(req, HttpCompletionOption.ResponseHeadersRead);
@@ -561,7 +561,7 @@ namespace HttpStress
             return (sb.ToString(), multipartContent);
         }
 
-        private static bool ValidateServerChecksum(HttpResponseHeaders headers, uint expectedChecksum, bool required = true)
+        private static bool ValidateServerChecksum(HttpResponseHeaders headers, ulong expectedChecksum, bool required = true)
         {
             if (headers.TryGetValues("crc32", out IEnumerable<string> values) &&
                 uint.TryParse(values.First(), out uint serverChecksum))

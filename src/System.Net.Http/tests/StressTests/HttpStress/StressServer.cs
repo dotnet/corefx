@@ -163,7 +163,7 @@ namespace HttpStress
                 }
 
                 // send back a checksum of all the echoed headers
-                uint checksum = ChecksumHelpers.ComputeHeaderChecksum(headersToEcho);
+                ulong checksum = CRC.CalculateHeaderCrc(headersToEcho);
                 context.Response.Headers.Add("crc32", checksum.ToString());
 
                 await context.Response.WriteAsync("ok");
@@ -215,12 +215,14 @@ namespace HttpStress
             {
                 // Echos back the requested content in a full duplex manner, but one byte at a time.
                 var buffer = new byte[1];
-                uint hashAcc = 0;
+                ulong hashAcc = CRC.InitialCrc;
                 while ((await context.Request.Body.ReadAsync(buffer)) != 0)
                 {
-                    ChecksumHelpers.Append(buffer, ref hashAcc);
+                    hashAcc = CRC.update_crc(hashAcc, buffer, buffer.Length);
                     await context.Response.Body.WriteAsync(buffer);
                 }
+
+                hashAcc = CRC.InitialCrc ^ hashAcc;
 
                 if (context.Response.SupportsTrailers())
                 {
