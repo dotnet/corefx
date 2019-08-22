@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
-    <!-- These needs to be replaced once we have an official build -->
+    <!-- These needs to be replaced once we have an stable build of 3.0 -->
     <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.0.0-preview9-19407-2</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <MicrosoftPrivateCorefxNETCoreAppVersion>4.6.0-preview9.19419.3</MicrosoftPrivateCorefxNETCoreAppVersion>
   </PropertyGroup>

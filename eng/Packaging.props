@@ -29,6 +29,9 @@
     <PlatformPackageVersion>$(ProductVersion)</PlatformPackageVersion>
     <SkipValidatePackageTargetFramework>true</SkipValidatePackageTargetFramework>
     <SkipGenerationCheck>true</SkipGenerationCheck>
+    <!-- This is currently set to avoid errors that would result from having the 3.0 release packages not yet stable. 
+          Once 3.0 ships we can add those packages to the index and re-enable this-->
+    <SkipIndexCheck>true</SkipIndexCheck>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(DotNetBuildFromSource)' == 'true'">

@@ -127,14 +127,12 @@
       <CompatibleWith>netstandard2.1</CompatibleWith>
     </TargetGroups>
     <TargetGroups Include="netcoreapp3.1">
-      <NETCoreAppMaximumVersion>3.1</NETCoreAppMaximumVersion>
       <TargetFramework>netcoreapp3.1</TargetFramework>
       <Imports>netcoreapp3.0</Imports>
       <CompatibleWith>netstandard2.1</CompatibleWith>
     </TargetGroups>
     <!-- netcoreapp is an alias for netcoreapp3.1 -->
     <TargetGroups Include="netcoreapp">
-      <NETCoreAppMaximumVersion>3.1</NETCoreAppMaximumVersion>
       <TargetFramework>netcoreapp3.1</TargetFramework>
       <Imports>netcoreapp3.1</Imports>
       <CompatibleWith>netstandard2.1</CompatibleWith>
