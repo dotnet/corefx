@@ -217,28 +217,26 @@ namespace System.Net.Mail.Tests
             Assert.Equal(".eml", Path.GetExtension(files[0]));
         }
 
-        [Theory]
-        [MemberData(nameof(MessageBodyData))]
-        public void Send_SpecifiedPickupDirectory_MessageBodyDoesNotEncodeForTransport(string messageBody)
+        [Fact]
+        public void Send_SpecifiedPickupDirectory_MessageBodyDoesNotEncodeForTransport()
         {
+            // This test verifies that a line fold which results in a dot appearing as the first character of
+            // a new line does not get dot-stuffed when the delivery method is pickup. To do so, it relies on
+            // folding happening at a precise location. If folding implementation details change, this test will
+            // likely fail and need to be updated accordingly.
+
+            string padding = new string('a', 65);
+
             Smtp.DeliveryMethod = SmtpDeliveryMethod.SpecifiedPickupDirectory;
             Smtp.PickupDirectoryLocation = TempFolder;
-            Smtp.Send("mono@novell.com", "everyone@novell.com", "introduction", messageBody);
+            Smtp.Send("mono@novell.com", "everyone@novell.com", "introduction", padding + ".");
 
             string[] files = Directory.GetFiles(TempFolder, "*");
             Assert.Equal(1, files.Length);
             Assert.Equal(".eml", Path.GetExtension(files[0]));
 
-            string message = File.ReadAllText(files[0]).Replace("=\r\n","");  // strip out folding
-            Assert.EndsWith($"{messageBody}\r\n", message);
-        }
-
-        public static IEnumerable<object[]> MessageBodyData()
-        {
-            // Current max line length folds at i==65. Bracketing that value to ensure potential
-            // future minor changes to max legnth do not render test ineffective
-            for (int i = 60; i < 71; i++)
-                yield return new object[] { new string('a', i) + '.' };
+            string message = File.ReadAllText(files[0]);
+            Assert.EndsWith($"{padding}=\r\n.\r\n", message);
         }
 
         [Theory]
