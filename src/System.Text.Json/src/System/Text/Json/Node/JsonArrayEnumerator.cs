@@ -8,7 +8,7 @@ namespace System.Text.Json
     /// </summary>
     public struct JsonArrayEnumerator : IEnumerator<JsonNode>
     {
-        private readonly List<JsonNode>.Enumerator _enumerator;
+        private List<JsonNode>.Enumerator _enumerator;
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="JsonArrayEnumerator"/> class supporting an interation over provided JSON array.

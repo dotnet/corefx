@@ -69,6 +69,17 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
+        public static void TestDeepCloneJsonArray()
+        {
+            JsonArray inner = new JsonArray { 1, 2, 3 };
+            JsonArray outer = new JsonArray { inner };
+            JsonArray outerClone = (JsonArray)outer.Clone();
+            ((JsonArray) outerClone[0]).Add(4);
+
+            Assert.Equal(3, inner.Count);
+        }
+
+        [Fact]
         public static void TestCloneJsonNode()
         {
             var jsonObject = new JsonObject

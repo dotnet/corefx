@@ -517,7 +517,7 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void TestGetJsonObjectPropertyThrows()
         {
-            Assert.Throws<InvalidCastException>(() =>
+            Assert.Throws<ArgumentException>(() =>
             {
                 var jsonObject = new JsonObject()
                 {
@@ -546,7 +546,7 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void TestGetJsonArrayPropertyThrows()
         {
-            Assert.Throws<InvalidCastException>(() =>
+            Assert.Throws<ArgumentException>(() =>
             {
                 var jsonObject = new JsonObject()
                 {
