@@ -68,15 +68,6 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        ///   Returns an enumerator that iterates through the JSON object properties.
-        /// </summary>
-        /// <returns>An enumerator structure for the JSON object.</returns>
-        /// <exception cref="ArgumentException">
-        ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
-        /// </exception>
-        public IEnumerator<KeyValuePair<string, JsonNode>> GetEnumerator() => new JsonObjectEnumerator(this);
-
-        /// <summary>
         ///   Adds the specified property to the JSON object.
         /// </summary>
         /// <param name="jsonProperty">The property to add.</param>
@@ -555,7 +546,28 @@ namespace System.Text.Json
         ///   Returns an enumerator that iterates through the JSON object properties.
         /// </summary>
         /// <returns>An enumerator structure for the <see cref="JsonObject"/>.</returns>
+        /// <exception cref="ArgumentException">
+        ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
+        /// </exception>
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <summary>
+        ///   Returns an enumerator that iterates through the JSON object properties.
+        /// </summary>
+        /// <returns>An enumerator structure for the JSON object.</returns>
+        /// <exception cref="ArgumentException">
+        ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
+        /// </exception>
+        IEnumerator<KeyValuePair<string, JsonNode>> IEnumerable<KeyValuePair<string, JsonNode>>.GetEnumerator() => new JsonObjectEnumerator(this);
+
+        /// <summary>
+        ///   Returns an enumerator that iterates through the JSON object properties.
+        /// </summary>
+        /// <returns>An enumerator structure for the JSON object.</returns>
+        /// <exception cref="ArgumentException">
+        ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
+        /// </exception>
+        public JsonObjectEnumerator GetEnumerator() => new JsonObjectEnumerator(this);
 
         /// <summary>
         ///   Creates a new JSON object that is a copy of the current instance.
