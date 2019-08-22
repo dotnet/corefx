@@ -381,7 +381,7 @@ namespace System.Text.Json
                     message = SR.Format(SR.UnexpectedEndOfLineSeparator);
                     break;
                 case ExceptionResource.InvalidLeadingZerosInNumber:
-                    message = SR.Format(SR.InvalidLeadingZerosInNumber, characters);
+                    message = SR.Format(SR.InvalidLeadingZerosInNumber, character);
                     break;
                 default:
                     Debug.Fail($"The ExceptionResource enum value: {resource} is not part of the switch. Add the appropriate case and exception message.");

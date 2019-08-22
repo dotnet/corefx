@@ -442,6 +442,6 @@
     <value>The DuplicatePropertyNameHandling enum must be set to one of the supported values.</value>
   </data>
   <data name="InvalidLeadingZerosInNumber" xml:space="preserve">
-    <value>Invalid leading zeros in '{0}'. Expected '.', 'e', 'E' or a delimiter after the zero.</value>
+    <value>Invalid leading zeros before '{0}'. Expected '.', 'e', 'E' or a delimiter after the zero.</value>
   </data>
 </root>

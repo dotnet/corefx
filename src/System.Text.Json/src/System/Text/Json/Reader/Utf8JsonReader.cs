@@ -1584,7 +1584,11 @@ namespace System.Text.Json
             if (nextByte != '.' && nextByte != 'E' && nextByte != 'e')
             {
                 _bytePositionInLine += i;
-                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidLeadingZerosInNumber, bytes: data.Slice(i - 1, 2));
+
+                if (nextByte >= '0' && nextByte <= '9')
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidLeadingZerosInNumber, nextByte);
+                else
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, nextByte);
             }
 
             return ConsumeNumberResult.OperationIncomplete;
