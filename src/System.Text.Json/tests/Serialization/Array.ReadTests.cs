@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -427,8 +428,6 @@ namespace System.Text.Json.Serialization.Tests
 
         public class ClassWithPopulatedListAndSetter
         {
-            public List<int> MySkippedList { get; }
-
             public List<int> MyList { get; set; } = new List<int>() { 1 };
         }
 
@@ -436,9 +435,44 @@ namespace System.Text.Json.Serialization.Tests
         public static void ClassWithPopulatedList()
         {
             // We replace the contents of this collection; we don't attempt to add items to the existing collection instance.
-            string json = @"{""MySkippedList"":[1,2],""MyList"":[2,3]}";
+            string json = @"{""MyList"":[2,3]}";
             ClassWithPopulatedListAndSetter obj = JsonSerializer.Deserialize<ClassWithPopulatedListAndSetter>(json);
             Assert.Equal(2, obj.MyList.Count);
+        }
+
+        public class ClassWithMixedSetters
+        {
+            public List<int> SkippedChild { get; }
+            public List<int> ParsedChild { get; set; }
+            public IEnumerable<int> AnotherSkippedChild { get; }
+            public IEnumerable<int> AnotherParsedChild { get; set; }
+        }
+
+        [Fact]
+        public static void ClassWithMixedSettersIsParsed()
+        {
+            // Tests that the parser picks back up after skipping/draining ignored elements.
+            string json = @"{
+                ""SkippedChild"": {},
+                ""ParsedChild"": [18],
+                ""UnmatchedProp"": null,
+                ""AnotherSkippedChild"": [{""DrainProp1"":{}, ""DrainProp2"":{""SubProp"":0}}],
+                ""AnotherSkippedChild"": {},
+                ""AnotherParsedChild"": [18,20]
+            }";
+
+            ClassWithMixedSetters parsedObject = JsonSerializer.Deserialize<ClassWithMixedSetters>(json);
+
+            Assert.Null(parsedObject.SkippedChild);
+
+            Assert.NotNull(parsedObject.ParsedChild);
+            Assert.Equal(1, parsedObject.ParsedChild.Count);
+            Assert.Equal(18, parsedObject.ParsedChild[0]);
+
+            Assert.Null(parsedObject.AnotherSkippedChild);
+
+            Assert.NotNull(parsedObject.AnotherParsedChild);
+            Assert.True(parsedObject.AnotherParsedChild.SequenceEqual(new int[] { 18, 20 }));
         }
     }
 }
