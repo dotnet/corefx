@@ -18,9 +18,9 @@ namespace System.Text.Json
             // dictionaries. Typically it would represent a CLR type such as System.String.
             PolicyProperty = AddProperty(
                 propertyType,
-                propertyInfo : null,        // Not a real property so this is null.
-                classType : typeof(object), // A dummy type (not used).
-                options : options);
+                propertyInfo: null,        // Not a real property so this is null.
+                classType: typeof(object), // A dummy type (not used).
+                options: options);
         }
 
         private JsonPropertyInfo AddProperty(Type propertyType, PropertyInfo propertyInfo, Type classType, JsonSerializerOptions options)
@@ -91,8 +91,8 @@ namespace System.Text.Json
             JsonConverter converter,
             JsonSerializerOptions options)
         {
-            bool hasIgnoreAttribute = (JsonPropertyInfo.GetAttribute<JsonIgnoreAttribute>(propertyInfo) != null);
-            if (hasIgnoreAttribute)
+            JsonIgnoreAttribute JsonIgnoreAttribute = JsonPropertyInfo.GetAttribute<JsonIgnoreAttribute>(propertyInfo);
+            if (JsonIgnoreAttribute?.Condition == JsonIgnoreCondition.Always)
             {
                 return JsonPropertyInfo.CreateIgnoredPropertyPlaceholder(propertyInfo, options);
             }
@@ -183,7 +183,16 @@ namespace System.Text.Json
                 args: null,
                 culture: null);
 
-            jsonInfo.Initialize(parentClassType, declaredPropertyType, runtimePropertyType, implementedPropertyType, propertyInfo, collectionElementType, converter, options);
+            jsonInfo.Initialize(
+                parentClassType,
+                declaredPropertyType,
+                runtimePropertyType,
+                implementedPropertyType,
+                propertyInfo,
+                collectionElementType,
+                converter,
+                options,
+                ignoreCondition: JsonIgnoreAttribute?.Condition);
 
             return jsonInfo;
         }

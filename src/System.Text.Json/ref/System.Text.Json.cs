@@ -661,9 +661,15 @@ namespace System.Text.Json.Serialization
     {
         public JsonExtensionDataAttribute() { }
     }
+    public enum JsonIgnoreCondition
+    {
+        Always = 0,
+        WhenNull = 1
+    }
     [System.AttributeUsageAttribute(System.AttributeTargets.Property, AllowMultiple=false)]
     public sealed partial class JsonIgnoreAttribute : System.Text.Json.Serialization.JsonAttribute
     {
+        public JsonIgnoreCondition Condition { get; set; } = JsonIgnoreCondition.Always;
         public JsonIgnoreAttribute() { }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Property, AllowMultiple=false)]

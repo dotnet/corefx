@@ -28,9 +28,10 @@ namespace System.Text.Json
             PropertyInfo propertyInfo,
             Type elementType,
             JsonConverter converter,
-            JsonSerializerOptions options)
+            JsonSerializerOptions options,
+            JsonIgnoreCondition? ignoreCondition = null)
         {
-            base.Initialize(parentClassType, declaredPropertyType, runtimePropertyType, implementedPropertyType, propertyInfo, elementType, converter, options);
+            base.Initialize(parentClassType, declaredPropertyType, runtimePropertyType, implementedPropertyType, propertyInfo, elementType, converter, options, ignoreCondition);
 
             if (propertyInfo != null &&
                 // We only want to get the getter and setter if we are going to use them.

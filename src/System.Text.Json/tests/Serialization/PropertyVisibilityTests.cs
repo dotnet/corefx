@@ -449,5 +449,38 @@ namespace System.Text.Json.Serialization.Tests
             string jsonSerialized = JsonSerializer.Serialize(obj);
             Assert.Equal(json, jsonSerialized);
         }
+
+        public class ClassUsingIgnoreWhenNullAttribute
+        {
+            [JsonIgnore(Condition = JsonIgnoreCondition.WhenNull)]
+            public SimpleTestClass Class { get; set; }
+
+            [JsonIgnore(Condition = JsonIgnoreCondition.WhenNull)]
+            public Dictionary<string, string> Dictionary { get; set; } = new Dictionary<string, string> { ["Key"] = "Value" };
+        }
+
+        [Fact]
+        public static void SerializerSupportsClassUsingIgnoreWhenNullAttribute()
+        {
+            string json = @"{""Class"":{""MyInt16"":18}, ""Dictionary"":null}";
+
+            ClassUsingIgnoreWhenNullAttribute obj = JsonSerializer.Deserialize<ClassUsingIgnoreWhenNullAttribute>(json);
+
+            // Class is deserialized because it is not null in json...
+            Assert.NotNull(obj.Class);
+            Assert.Equal(18, obj.Class.MyInt16);
+
+            // Dictionary is left alone because it is null in json...
+            Assert.NotNull(obj.Dictionary);
+            Assert.Equal(1, obj.Dictionary.Count);
+            Assert.Equal("Value", obj.Dictionary["Key"]);
+
+            obj = new ClassUsingIgnoreWhenNullAttribute();
+
+            json = JsonSerializer.Serialize(obj);
+
+            // Class is not included in json because it was null, Dictionary is included because it is not null...
+            Assert.Equal(@"{""Dictionary"":{""Key"":""Value""}}", json);
+        }
     }
 }

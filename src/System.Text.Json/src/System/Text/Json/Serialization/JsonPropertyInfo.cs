@@ -61,9 +61,11 @@ namespace System.Text.Json
         // prevent issues with unsupported types and helps ensure we don't accidently (de)serialize it.
         public static JsonPropertyInfo CreateIgnoredPropertyPlaceholder(PropertyInfo propertyInfo, JsonSerializerOptions options)
         {
-            JsonPropertyInfo jsonPropertyInfo = new JsonPropertyInfoNotNullable<sbyte, sbyte, sbyte, sbyte>();
-            jsonPropertyInfo.Options = options;
-            jsonPropertyInfo.PropertyInfo = propertyInfo;
+            JsonPropertyInfo jsonPropertyInfo = new JsonPropertyInfoNotNullable<sbyte, sbyte, sbyte, sbyte>
+            {
+                Options = options,
+                PropertyInfo = propertyInfo
+            };
             jsonPropertyInfo.DeterminePropertyName();
 
             Debug.Assert(!jsonPropertyInfo.ShouldDeserialize);
@@ -252,13 +254,15 @@ namespace System.Text.Json
         {
             DetermineSerializationCapabilities();
             DeterminePropertyName();
-            IgnoreNullValues = Options.IgnoreNullValues;
+            IgnoreNullValues = Options.IgnoreNullValues || IgnoreCondition == JsonIgnoreCondition.WhenNull;
         }
 
         public abstract object GetValueAsObject(object obj);
 
         public bool HasGetter { get; set; }
         public bool HasSetter { get; set; }
+
+        public JsonIgnoreCondition? IgnoreCondition { get; private set; }
 
         public virtual void Initialize(
             Type parentClassType,
@@ -268,7 +272,8 @@ namespace System.Text.Json
             PropertyInfo propertyInfo,
             Type elementType,
             JsonConverter converter,
-            JsonSerializerOptions options)
+            JsonSerializerOptions options,
+            JsonIgnoreCondition? ignoreCondition = null)
         {
             ParentClassType = parentClassType;
             DeclaredPropertyType = declaredPropertyType;
@@ -279,6 +284,7 @@ namespace System.Text.Json
             Options = options;
             IsNullableType = runtimePropertyType.IsGenericType && runtimePropertyType.GetGenericTypeDefinition() == typeof(Nullable<>);
             CanBeNull = IsNullableType || !runtimePropertyType.IsValueType;
+            IgnoreCondition = ignoreCondition;
 
             if (converter != null)
             {
