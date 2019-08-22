@@ -238,4 +238,33 @@ namespace Internal.Cryptography.Pal.Native
             return true;
         }
     }
+
+    internal sealed class SafeChainEngineHandle : SafePointerHandle<SafeChainEngineHandle>
+    {
+        private bool releaseHandle = true;
+
+        public SafeChainEngineHandle()
+            : base()
+        {
+        }
+
+        public SafeChainEngineHandle(bool releaseHandle)
+            : base()
+        {
+            this.releaseHandle = releaseHandle;
+        }
+
+        public void SetHandleExtended(IntPtr handle)
+        {
+            this.SetHandle(handle);
+        }
+
+        protected sealed override bool ReleaseHandle()
+        {
+            bool success = true;
+            if (releaseHandle)
+                Interop.crypt32.CertFreeCertificateChainEngine(handle);
+            return success;
+        }
+    }
 }

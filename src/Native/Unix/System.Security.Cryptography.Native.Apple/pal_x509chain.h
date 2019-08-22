@@ -129,4 +129,4 @@ DLLEXPORT int32_t AppleCryptoNative_GetOSStatusForChainStatus(PAL_X509ChainStatu
 /*
 Sets the trusted certificates used when evaluating a chain.
 */
-DLLEXPORT void AppleCryptoNative_X509ChainSetTrustAnchorCertificates(SecTrustRef chain, CFArrayRef anchorCertificates);
+DLLEXPORT int32_t AppleCryptoNative_X509ChainSetTrustAnchorCertificates(SecTrustRef chain, CFArrayRef anchorCertificates);

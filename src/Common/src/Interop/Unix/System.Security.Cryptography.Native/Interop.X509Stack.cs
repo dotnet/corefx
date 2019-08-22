@@ -64,8 +64,14 @@ namespace Microsoft.Win32.SafeHandles
 {
     internal sealed class SafeX509StackHandle : SafeHandle
     {
+        private static readonly SafeX509StackHandle instance = new SafeX509StackHandle();
+
         private SafeX509StackHandle() :
             base(IntPtr.Zero, ownsHandle: true)
+        {
+        }
+
+        static SafeX509StackHandle()
         {
         }
 
@@ -80,6 +86,8 @@ namespace Microsoft.Win32.SafeHandles
         {
             get { return handle == IntPtr.Zero; }
         }
+
+        internal static SafeX509StackHandle Instance => instance;
     }
 
     /// <summary>

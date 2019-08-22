@@ -55,10 +55,22 @@ namespace Internal.Cryptography.Pal
 
             if (trustMode == X509ChainTrustMode.CustomRootTrust)
             {
-                SafeCreateHandle customCertsArray = null;
-                customCertsArray = PrepareCustomCertsArray(customTrustStore);
-                Interop.AppleCrypto.X509ChainSetTrustAnchorCertificates(chain, customCertsArray);
+                SafeCreateHandle customCertsArray = SafeCreateHandle.Instance;
+                if (customTrustStore != null && customTrustStore.Count > 0)
+                {
+                    customCertsArray = PrepareCustomCertsArray(customTrustStore);
+                }
+
+                int error = Interop.AppleCrypto.X509ChainSetTrustAnchorCertificates(chain, customCertsArray);
+                if (error != 0)
+                    throw Interop.AppleCrypto.CreateExceptionForOSStatus(osStatus);
+
+                if (customTrustStore != null && customTrustStore.Count > 0)
+                {
+                    customCertsArray.Dispose();
+                }
             }
+
             if (ret == 1)
             {
                 _chainHandle = chain;
@@ -134,19 +146,16 @@ namespace Internal.Cryptography.Pal
             X509Certificate2Collection customTrustStore,
             X509ChainTrustMode trustMode)
         {
-            int certificateCount = 1 + (extraStore?.Count ?? 0) + (trustMode == X509ChainTrustMode.CustomRootTrust ? customTrustStore?.Count ?? 0 : 0);
-            int certificatesAdded = 1;
-            SafeHandle[] safeHandles = new SafeHandle[certificateCount];
+            List<SafeHandle> safeHandles = new List<SafeHandle>();
             AppleCertificatePal applePal = (AppleCertificatePal)cert;
-            safeHandles[0] = applePal.CertificateHandle;
+            safeHandles.Add(applePal.CertificateHandle);
 
             if (extraStore != null)
             {
-                foreach (X509Certificate2 extraCert in extraStore)
+                for (int i = 0; i < extraStore.Count; i++)
                 {
-                    AppleCertificatePal extraCertPal = (AppleCertificatePal)extraCert.Pal;
-                    safeHandles[certificatesAdded] = extraCertPal.CertificateHandle;
-                    certificatesAdded++;
+                    AppleCertificatePal extraCertPal = (AppleCertificatePal)extraStore[i].Pal;
+                    safeHandles.Add(extraCertPal.CertificateHandle);
                 }
             }
 
@@ -154,8 +163,8 @@ namespace Internal.Cryptography.Pal
             {
                 for (int i = 0; i < customTrustStore.Count; i++)
                 {
-                    AppleCertificatePal extraCertPal = (AppleCertificatePal)customTrustStore[i].Pal;
-                    safeHandles[certificatesAdded + i] = extraCertPal.CertificateHandle;
+                    AppleCertificatePal customCertPal = (AppleCertificatePal)customTrustStore[i].Pal;
+                    safeHandles.Add(customCertPal.CertificateHandle);
                 }
             }
 
@@ -164,65 +173,48 @@ namespace Internal.Cryptography.Pal
 
         private SafeCreateHandle PrepareCustomCertsArray(X509Certificate2Collection customTrustStore)
         {
-            X509Certificate2Collection rootCertificates = new X509Certificate2Collection();
-            SafeHandle[] safeHandles;
-
+            List<SafeHandle> rootCertificates = new List<SafeHandle>();
             foreach (X509Certificate2 cert in customTrustStore)
             {
                 if (cert.SubjectName.RawData.ContentsEqual(cert.IssuerName.RawData))
                 {
-                    rootCertificates.Add(cert);
+                    AppleCertificatePal extraCertPal = (AppleCertificatePal)cert.Pal;
+                    rootCertificates.Add(extraCertPal.CertificateHandle);
                 }
             }
 
-            safeHandles = new SafeHandle[rootCertificates.Count];
-            for (int i = 0; i < rootCertificates.Count; i++)
-            {
-                AppleCertificatePal extraCertPal = (AppleCertificatePal)rootCertificates[i].Pal;
-                safeHandles[i] = extraCertPal.CertificateHandle;
-            }
-
-            return GetCertsArray(safeHandles);
+            return GetCertsArray(rootCertificates);
         }
 
-        private SafeCreateHandle GetCertsArray(SafeHandle[] safeHandles)
+        private SafeCreateHandle GetCertsArray(IList<SafeHandle> safeHandles)
         {
-            IntPtr[] ptrs = new IntPtr[safeHandles.Length];
             int idx = 0;
-            bool addedRef = false;
 
             try
             {
-                for (idx = 0; idx < safeHandles.Length; idx++)
+                int handlesCount = safeHandles.Count;
+                IntPtr[] ptrs = new IntPtr[handlesCount];
+                for (; idx < handlesCount; idx++)
                 {
                     SafeHandle handle = safeHandles[idx];
+                    bool addedRef = false;
                     handle.DangerousAddRef(ref addedRef);
                     ptrs[idx] = handle.DangerousGetHandle();
                 }
+
+                // Creating the array has the effect of calling CFRetain() on all of the pointers, so the native
+                // resource is safe even if we DangerousRelease=>ReleaseHandle them.
+                SafeCreateHandle certsArray = Interop.CoreFoundation.CFArrayCreate(ptrs, (UIntPtr)ptrs.Length);
+                _extraHandles.Push(certsArray);
+                return certsArray;
             }
-            catch
+            finally
             {
-                // If any DangerousAddRef failed, idx will be on the one that failed, so we'll start off
-                // by subtracing one.
                 for (idx--; idx >= 0; idx--)
                 {
                     safeHandles[idx].DangerousRelease();
                 }
-
-                throw;
             }
-
-            // Creating the array has the effect of calling CFRetain() on all of the pointers, so the native
-            // resource is safe even if we DangerousRelease=>ReleaseHandle them.
-            SafeCreateHandle certsArray = Interop.CoreFoundation.CFArrayCreate(ptrs, (UIntPtr)ptrs.Length);
-            _extraHandles.Push(certsArray);
-
-            for (idx = 0; idx < safeHandles.Length; idx++)
-            {
-                safeHandles[idx].DangerousRelease();
-            }
-
-            return certsArray;
         }
 
         internal void Execute(

@@ -780,6 +780,7 @@ namespace Internal.Cryptography.Pal.Native
         CERT_CHAIN_DISABLE_AIA = 0x00002000,
     }
 
+    // Windows 7 definition of the struct
     [StructLayout(LayoutKind.Sequential)]
     internal struct CERT_CHAIN_ENGINE_CONFIG
     {

@@ -39,12 +39,11 @@ namespace Internal.Cryptography.Pal
             TimeSpan timeout)
         {
             CertificatePal certificatePal = (CertificatePal)cert;
-            X509Certificate2Collection additionalStore = extraStore ?? new X509Certificate2Collection();
-            IntPtr chainEngine = GetChainEngine(trustMode, customTrustStore, additionalStore, useMachineContext);
+            SafeChainEngineHandle storeHandle = GetChainEngine(trustMode, customTrustStore, useMachineContext);
 
             unsafe
             {
-                using (SafeCertStoreHandle extraStoreHandle = ConvertStoreToSafeHandle(additionalStore))
+                using (SafeCertStoreHandle extraStoreHandle = ConvertStoreToSafeHandle(extraStore))
                 {
                     CERT_CHAIN_PARA chainPara = new CERT_CHAIN_PARA();
                     chainPara.cbSize = Marshal.SizeOf<CERT_CHAIN_PARA>();
@@ -74,9 +73,8 @@ namespace Internal.Cryptography.Pal
                             FILETIME ft = FILETIME.FromDateTime(verificationTime);
                             CertChainFlags flags = MapRevocationFlags(revocationMode, revocationFlag);
                             SafeX509ChainHandle chain;
-                            if (!Interop.crypt32.CertGetCertificateChain(chainEngine, certificatePal.CertContext, &ft, extraStoreHandle, ref chainPara, flags, IntPtr.Zero, out chain))
+                            if (!Interop.crypt32.CertGetCertificateChain(storeHandle.DangerousGetHandle(), certificatePal.CertContext, &ft, extraStoreHandle, ref chainPara, flags, IntPtr.Zero, out chain))
                                 return null;
-                            Interop.crypt32.CertFreeCertificateChainEngine(chainEngine);
                             return new ChainPal(chain);
                         }
                     }
@@ -84,27 +82,28 @@ namespace Internal.Cryptography.Pal
             }
         }
 
-        private static IntPtr GetChainEngine(
+        private static SafeChainEngineHandle GetChainEngine(
             X509ChainTrustMode trustMode,
             X509Certificate2Collection customTrustStore,
-            X509Certificate2Collection extraStore,
-            bool useMachineContext
-            )
+            bool useMachineContext)
         {
             IntPtr chainEngine;
+            bool releaseChainEngine = false;
             if (trustMode == X509ChainTrustMode.CustomRootTrust)
             {
-                CERT_CHAIN_ENGINE_CONFIG customChainEngine = new CERT_CHAIN_ENGINE_CONFIG();
-                customChainEngine.cbSize = Marshal.SizeOf<CERT_CHAIN_ENGINE_CONFIG>();
-                using (SafeCertStoreHandle customTrustStoreHandle = ConvertStoreToSafeHandle(customTrustStore))
+                // CustomTrustStore needs an empty SafeCertStoreHandle or creating the certificate chain will fail
+                using (SafeCertStoreHandle customTrustStoreHandle = ConvertStoreToSafeHandle(customTrustStore, true))
                 {
+                    CERT_CHAIN_ENGINE_CONFIG customChainEngine = new CERT_CHAIN_ENGINE_CONFIG();
+                    customChainEngine.cbSize = Marshal.SizeOf<CERT_CHAIN_ENGINE_CONFIG>();
+
                     if (!customTrustStoreHandle.IsInvalid)
                     {
                         customChainEngine.hExclusiveRoot = customTrustStoreHandle.DangerousGetHandle();
                     }
 
-                    Interop.crypt32.CertCreateCertificateChainEngine(customChainEngine, out chainEngine);
-                    AddDefaultCertificatesToStore(extraStore, useMachineContext);
+                    chainEngine = Interop.crypt32.CertCreateCertificateChainEngine(ref customChainEngine);
+                    releaseChainEngine = true;
                 }
             }
             else
@@ -112,34 +111,15 @@ namespace Internal.Cryptography.Pal
                 chainEngine = useMachineContext ? (IntPtr)ChainEngine.HCCE_LOCAL_MACHINE : (IntPtr)ChainEngine.HCCE_CURRENT_USER;
             }
 
-            return chainEngine;
+            SafeChainEngineHandle chainEngineHandle = new SafeChainEngineHandle(releaseChainEngine);
+            chainEngineHandle.SetHandleExtended(chainEngine);
+
+            return chainEngineHandle;
         }
 
-        private static void AddDefaultCertificatesToStore(X509Certificate2Collection collectionStore, bool useMachineContext)
+        private static SafeCertStoreHandle ConvertStoreToSafeHandle(X509Certificate2Collection extraStore, bool returnEmptyStore = false)
         {
-            StoreLocation storeLocation = useMachineContext ? StoreLocation.LocalMachine: StoreLocation.CurrentUser;
-            foreach (StoreName storeName in (StoreName[]) Enum.GetValues(typeof(StoreName)))
-            {
-                if (storeName == StoreName.Disallowed)
-                {
-                    continue;
-                }
-
-                X509Store store = new X509Store(storeName, storeLocation);
-                store.Open(OpenFlags.ReadOnly);
-
-                foreach (X509Certificate2 certificate in store.Certificates)
-                {
-                    collectionStore.Add(certificate);
-                }
-
-                store.Close();
-            }
-        }
-
-        private static SafeCertStoreHandle ConvertStoreToSafeHandle(X509Certificate2Collection extraStore)
-        {
-            if (extraStore == null)
+            if ((extraStore == null || extraStore.Count == 0) && !returnEmptyStore)
                 return SafeCertStoreHandle.InvalidHandle;
 
             return ((StorePal)StorePal.LinkFromCertificateCollection(extraStore)).SafeCertStoreHandle;

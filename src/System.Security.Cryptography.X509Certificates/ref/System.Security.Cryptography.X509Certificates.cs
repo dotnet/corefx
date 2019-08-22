@@ -171,12 +171,10 @@ namespace System.Security.Cryptography.X509Certificates
         public virtual string GetExpirationDateString() { throw null; }
         public virtual string GetFormat() { throw null; }
         public override int GetHashCode() { throw null; }
-        [System.ObsoleteAttribute("This method has been deprecated.  Please use the Issuer property instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public virtual string GetIssuerName() { throw null; }
         public virtual string GetKeyAlgorithm() { throw null; }
         public virtual byte[] GetKeyAlgorithmParameters() { throw null; }
         public virtual string GetKeyAlgorithmParametersString() { throw null; }
-        [System.ObsoleteAttribute("This method has been deprecated.  Please use the Subject property instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public virtual string GetName() { throw null; }
         public virtual byte[] GetPublicKey() { throw null; }
         public virtual string GetPublicKeyString() { throw null; }
@@ -360,13 +358,13 @@ namespace System.Security.Cryptography.X509Certificates
         public X509ChainPolicy() { }
         public System.Security.Cryptography.OidCollection ApplicationPolicy { get { throw null; } }
         public System.Security.Cryptography.OidCollection CertificatePolicy { get { throw null; } }
-        public System.Security.Cryptography.X509Certificates.X509Certificate2Collection ExtraStore { get { throw null; } }
         public System.Security.Cryptography.X509Certificates.X509Certificate2Collection CustomTrustStore { get { throw null; } }
+        public System.Security.Cryptography.X509Certificates.X509Certificate2Collection ExtraStore { get { throw null; } }
         public System.Security.Cryptography.X509Certificates.X509RevocationFlag RevocationFlag { get { throw null; } set { } }
         public System.Security.Cryptography.X509Certificates.X509RevocationMode RevocationMode { get { throw null; } set { } }
+        public System.Security.Cryptography.X509Certificates.X509ChainTrustMode TrustMode { get { throw null; } set { } }
         public System.TimeSpan UrlRetrievalTimeout { get { throw null; } set { } }
         public System.Security.Cryptography.X509Certificates.X509VerificationFlags VerificationFlags { get { throw null; } set { } }
-        public System.Security.Cryptography.X509Certificates.X509ChainTrustMode TrustMode { get { throw null; } set { } }
         public System.DateTime VerificationTime { get { throw null; } set { } }
         public void Reset() { }
     }
@@ -374,7 +372,7 @@ namespace System.Security.Cryptography.X509Certificates
     {
         private object _dummy;
         private int _dummyPrimitive;
-        public System.Security.Cryptography.X509Certificates.X509ChainStatusFlags Status { get { throw null; } set { } }
+        public System.Security.Cryptography.X509Certificates.X509ChainStatusFlags Status { readonly get { throw null; } set { } }
         public string StatusInformation { get { throw null; } set { } }
     }
     [System.FlagsAttribute]
@@ -406,6 +404,11 @@ namespace System.Security.Cryptography.X509Certificates
         NoIssuanceChainPolicy = 33554432,
         ExplicitDistrust = 67108864,
         HasNotSupportedCriticalExtension = 134217728,
+    }
+    public enum X509ChainTrustMode
+    {
+        System = 0,
+        CustomRootTrust = 1,
     }
     public enum X509ContentType
     {
@@ -535,11 +538,6 @@ namespace System.Security.Cryptography.X509Certificates
         NoCheck = 0,
         Online = 1,
         Offline = 2,
-    }
-    public enum X509ChainTrustMode
-    {
-        System,
-        CustomRootTrust,
     }
     public abstract partial class X509SignatureGenerator
     {

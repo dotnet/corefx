@@ -15,12 +15,18 @@ namespace Microsoft.Win32.SafeHandles
     /// </summary>
     internal sealed partial class SafeCreateHandle : SafeHandle
     {
+        private static readonly SafeCreateHandle instance = new SafeCreateHandle();
+
         internal SafeCreateHandle() : base(IntPtr.Zero, true) { }
+
+        static SafeCreateHandle() { }
 
         internal SafeCreateHandle(IntPtr ptr) : base(IntPtr.Zero, true)
         {
             this.SetHandle(ptr);
         }
+
+        internal static SafeCreateHandle Instance => instance;
 
         protected override bool ReleaseHandle()
         {

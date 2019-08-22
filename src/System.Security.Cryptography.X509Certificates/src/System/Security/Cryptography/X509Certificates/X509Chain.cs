@@ -116,7 +116,7 @@ namespace System.Security.Cryptography.X509Certificates
                 if (_chainPolicy != null && _chainPolicy.CustomTrustStore != null)
                 {
                     if (_chainPolicy.TrustMode == X509ChainTrustMode.System && _chainPolicy.CustomTrustStore.Count > 0)
-                        throw new ArgumentException(SR.Cryptography_InvalidTrustMode, nameof(_chainPolicy.TrustMode));
+                        throw new CryptographicException(SR.Cryptography_CustomTrustCertsInSystemMode, nameof(_chainPolicy.TrustMode));
 
                     foreach (X509Certificate2 customCertificate in _chainPolicy.CustomTrustStore)
                     {

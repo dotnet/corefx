@@ -268,16 +268,16 @@ int32_t AppleCryptoNative_GetOSStatusForChainStatus(PAL_X509ChainStatusFlags cha
     }
 }
 
-void AppleCryptoNative_X509ChainSetTrustAnchorCertificates(SecTrustRef chain, CFArrayRef anchorCertificates)
+int32_t AppleCryptoNative_X509ChainSetTrustAnchorCertificates(SecTrustRef chain, CFArrayRef anchorCertificates)
 {
     if (chain == NULL)
     {
-        return;
+        return errSecNotAvailable;
     }
     if (anchorCertificates == NULL)
     {
-        return;
+        return errSecNoCertificateModule;
     }
 
-    SecTrustSetAnchorCertificates(chain, anchorCertificates);
+    return SecTrustSetAnchorCertificates(chain, anchorCertificates);
 }

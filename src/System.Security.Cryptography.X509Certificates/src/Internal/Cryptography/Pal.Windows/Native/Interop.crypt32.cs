@@ -237,14 +237,22 @@ internal static partial class Interop
             return encoded;
         }
 
-        [DllImport(Libraries.Crypt32, CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern unsafe bool CertCreateCertificateChainEngine(
-            CERT_CHAIN_ENGINE_CONFIG pConfig,
-            out IntPtr hChainEngine);
+        internal static IntPtr CertCreateCertificateChainEngine(ref CERT_CHAIN_ENGINE_CONFIG config)
+        {
+            if (!CertCreateCertificateChainEngine(ref config, out IntPtr chainEngine))
+            {
+                int errorCode = Marshal.GetLastWin32Error();
+                throw errorCode.ToCryptographicException();
+            }
+
+            return chainEngine;
+        }
 
         [DllImport(Libraries.Crypt32, CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern unsafe void CertFreeCertificateChainEngine(
-            IntPtr hChainEngine);
+        private static extern unsafe bool CertCreateCertificateChainEngine(ref CERT_CHAIN_ENGINE_CONFIG pConfig, out IntPtr hChainEngine);
+
+        [DllImport(Libraries.Crypt32, CharSet = CharSet.Unicode)]
+        public static extern unsafe void CertFreeCertificateChainEngine(IntPtr hChainEngine);
 
         [DllImport(Libraries.Crypt32, CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern unsafe bool CertGetCertificateChain(IntPtr hChainEngine, SafeCertContextHandle pCertContext, FILETIME* pTime, SafeCertStoreHandle hStore, [In] ref CERT_CHAIN_PARA pChainPara, CertChainFlags dwFlags, IntPtr pvReserved, out SafeX509ChainHandle ppChainContext);
