@@ -23,19 +23,18 @@ namespace System.Text.Json
 
             internal ArrayEnumerator(JsonElement target)
             {
+                _target = target;
+                _curIdx = -1;
+
                 if (target._parent is JsonDocument document)
                 {
                     Debug.Assert(target.TokenType == JsonTokenType.StartArray);
 
-                    _target = target;
-                    _curIdx = -1;
                     _endIdx = document.GetEndIndex(_target._idx, includeEndElement: false);
                     _jsonArrayEnumerator = null;
                 }
                 else
                 {
-                    _target = target;
-                    _curIdx = -1;
                     _endIdx = -1;
 
                     var jsonArray = (JsonArray)target._parent;
@@ -48,18 +47,19 @@ namespace System.Text.Json
             {
                 get
                 {
-                    if (_target._parent == null || _target._parent is JsonDocument)
+                    if (_jsonArrayEnumerator.HasValue)
                     {
-                        var document = _target._parent as JsonDocument;
-                        if (_curIdx < 0)
-                        {
-                            return default;
-                        }
-                        return new JsonElement(document, _curIdx);
+                        return _jsonArrayEnumerator.Value.Current.AsJsonElement();
                     }
 
-                    Debug.Assert(_jsonArrayEnumerator.HasValue);
-                    return _jsonArrayEnumerator.Value.Current.AsJsonElement();
+                    var document = _target._parent as JsonDocument;
+
+                    if (_curIdx < 0)
+                    {
+                        return default;
+                    }
+
+                    return new JsonElement(document, _curIdx);
                 }
             }
 
@@ -87,6 +87,7 @@ namespace System.Text.Json
             public void Dispose()
             {
                 _curIdx = _endIdx;
+
                 if (_jsonArrayEnumerator.HasValue)
                 {
                     _jsonArrayEnumerator.Value.Dispose();
@@ -97,6 +98,7 @@ namespace System.Text.Json
             public void Reset()
             {
                 _curIdx = -1;
+
                 if (_jsonArrayEnumerator.HasValue)
                 {
                     _jsonArrayEnumerator.Value.Reset();
@@ -109,29 +111,28 @@ namespace System.Text.Json
             /// <inheritdoc />
             public bool MoveNext()
             {
-                if (_target._parent == null || _target._parent is JsonDocument)
+                if (_jsonArrayEnumerator.HasValue)
                 {
-                    var document = _target._parent as JsonDocument;
-
-                    if (_curIdx >= _endIdx)
-                    {
-                        return false;
-                    }
-
-                    if (_curIdx < 0)
-                    {
-                        _curIdx = _target._idx + JsonDocument.DbRow.Size;
-                    }
-                    else
-                    {
-                        _curIdx = document.GetEndIndex(_curIdx, includeEndElement: true);
-                    }
-
-                    return _curIdx < _endIdx;
+                    return _jsonArrayEnumerator.Value.MoveNext();
                 }
 
-                Debug.Assert(_jsonArrayEnumerator.HasValue);
-                return _jsonArrayEnumerator.Value.MoveNext();
+                var document = _target._parent as JsonDocument;
+
+                if (_curIdx >= _endIdx)
+                {
+                    return false;
+                }
+
+                if (_curIdx < 0)
+                {
+                    _curIdx = _target._idx + JsonDocument.DbRow.Size;
+                }
+                else
+                {
+                    _curIdx = document.GetEndIndex(_curIdx, includeEndElement: true);
+                }
+
+                return _curIdx < _endIdx;
             }
         }
     }

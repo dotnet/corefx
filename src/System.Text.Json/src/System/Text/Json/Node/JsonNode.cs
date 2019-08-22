@@ -39,39 +39,7 @@ namespace System.Text.Json
         {
             using (JsonDocument document = JsonDocument.Parse(json))
             {
-                return DeepCopy(document);
-            }
-        }
-
-        public static JsonNode Parse(ReadOnlySequence<byte> utf8Json)
-        {
-            using (JsonDocument document = JsonDocument.Parse(utf8Json))
-            {
-                return DeepCopy(document);
-            }
-        }
-
-        public static JsonNode Parse(Stream utf8Json)
-        {
-            using (JsonDocument document = JsonDocument.Parse(utf8Json))
-            {
-                return DeepCopy(document);
-            }
-        }
-
-        public static JsonNode Parse(ReadOnlyMemory<byte> utf8Json)
-        {
-            using (JsonDocument document = JsonDocument.Parse(utf8Json))
-            {
-                return DeepCopy(document);
-            }
-        }
-
-        public static JsonNode Parse(ReadOnlyMemory<char> json)
-        {
-            using (JsonDocument document = JsonDocument.Parse(json))
-            {
-                return DeepCopy(document);
+                return DeepCopy(document.RootElement);
             }
         }
 
@@ -112,8 +80,6 @@ namespace System.Text.Json
             }
 
         }
-
-        public static JsonNode DeepCopy(JsonDocument jsonDocument) => DeepCopy(jsonDocument.RootElement);
     }
 }
 

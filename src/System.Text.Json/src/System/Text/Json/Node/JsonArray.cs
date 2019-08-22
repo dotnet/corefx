@@ -10,7 +10,7 @@ namespace System.Text.Json
     /// <summary>
     ///   Represents a JSON array.
     /// </summary>
-    public partial class JsonArray : JsonNode, IList<JsonNode>, IReadOnlyList<JsonNode>
+    public sealed class JsonArray : JsonNode, IList<JsonNode>, IReadOnlyList<JsonNode>
     {
         internal readonly List<JsonNode> _list;
 
@@ -36,6 +36,11 @@ namespace System.Text.Json
         {
             foreach (string value in values)
             {
+                if (value == null)
+                {
+                    _list.Add(null);
+                }
+
                 _list.Add(new JsonString(value));
             }
         }
