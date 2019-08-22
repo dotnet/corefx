@@ -8,7 +8,7 @@ namespace System.Text.Json
     /// </summary>
     public struct JsonArrayEnumerator : IEnumerator<JsonNode>
     {
-        private readonly IEnumerator<JsonNode> _enumerator;
+        private readonly List<JsonNode>.Enumerator _enumerator;
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="JsonArrayEnumerator"/> class supporting an interation over provided JSON array.
@@ -40,6 +40,6 @@ namespace System.Text.Json
         /// <summary>
         ///   Sets the enumerator to its initial position, which is before the first element in the JSON array.
         /// </summary>
-        public void Reset() => _enumerator.Reset();
+        void IEnumerator.Reset() => ((IEnumerator)_enumerator).Reset();
     }
 }

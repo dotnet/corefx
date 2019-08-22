@@ -37,15 +37,12 @@ namespace System.Text.Json
         ///  Initializes a new instance of the <see cref="JsonString"/> with a string representation of the <see cref="Guid"/> structure.
         /// </summary>
         /// <param name="value">The value to represent as a JSON string.</param>
-        public JsonString(Guid value) => Value = value.ToString();
+        public JsonString(Guid value) => Value = value.ToString("D");
 
         /// <summary>
         ///  Initializes a new instance of the <see cref="JsonString"/> with an ISO 8601 representation of the <see cref="DateTime"/> structure.
         /// </summary>
         /// <param name="value">The value to represent as a JSON string.</param>
-        /// <exception cref="FormatException">
-        ///   Text value of this instance is not in an ISO 8601 defined DateTimeOffset format.
-        /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         ///   The date and time is outside the range of dates supported by the calendar used by the invariant culture.
         /// </exception>
@@ -55,9 +52,6 @@ namespace System.Text.Json
         ///  Initializes a new instance of the <see cref="JsonString"/> with an ISO 8601 representation of the <see cref="DateTimeOffset"/> structure.
         /// </summary>
         /// <param name="value">The value to represent as a JSON string.</param>
-        /// <exception cref="FormatException">
-        ///   Text value of this instance is not in an ISO 8601 defined DateTimeOffset format.
-        /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         ///   The date and time is outside the range of dates supported by the calendar used by the invariant culture.
         /// </exception>
@@ -106,7 +100,7 @@ namespace System.Text.Json
         /// <exception cref="FormatException">
         ///   Text value of this instance is not in a GUID recognized format.
         /// </exception>
-        public Guid GetGuid() => Guid.Parse(_value);
+        public Guid GetGuid() => Guid.ParseExact(_value, "D");
 
         /// <summary>
         ///   Converts the ISO 8601 text value of this instance to its ISO 8601 <see cref="DateTime"/> equivalent.

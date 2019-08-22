@@ -450,7 +450,7 @@ namespace System.Text.Json
         /// <exception cref="KeyNotFoundException">
         ///   Property with specified name is not found in JSON object.
         /// </exception>
-        /// <exception cref="InvalidCastException">
+        /// <exception cref="ArgumentException">
         ///   Property with specified name is not a JSON object.
         /// </exception>
         public JsonObject GetJsonObjectPropertyValue(string propertyName)
@@ -460,7 +460,7 @@ namespace System.Text.Json
                 return jsonObject;
             }
 
-            throw new InvalidCastException(SR.Format(SR.PropertyTypeMismatch, propertyName));
+            throw new ArgumentException(SR.Format(SR.PropertyTypeMismatch, propertyName));
         }
 
         /// <summary>
@@ -476,11 +476,8 @@ namespace System.Text.Json
         {
             if (TryGetPropertyValue(propertyName, out JsonNode jsonNode))
             {
-                if (jsonNode is JsonObject jsonNodeCasted)
-                {
-                    jsonObject = jsonNodeCasted;
-                    return true;
-                }
+                jsonObject = jsonNode as JsonObject;
+                return jsonObject != null;
             }
 
             jsonObject = null;
@@ -495,7 +492,7 @@ namespace System.Text.Json
         /// <exception cref="KeyNotFoundException">
         ///   Property with specified name is not found in JSON array.
         /// </exception>
-        /// <exception cref="InvalidCastException">
+        /// <exception cref="ArgumentException">
         ///   Property with specified name is not a JSON array.
         /// </exception>
         public JsonArray GetJsonArrayPropertyValue(string propertyName)
@@ -505,7 +502,7 @@ namespace System.Text.Json
                 return jsonArray;
             }
 
-            throw new InvalidCastException(SR.Format(SR.PropertyTypeMismatch, propertyName));
+            throw new ArgumentException(SR.Format(SR.PropertyTypeMismatch, propertyName));
         }
 
         /// <summary>
@@ -521,11 +518,8 @@ namespace System.Text.Json
         {
             if (TryGetPropertyValue(propertyName, out JsonNode jsonNode))
             {
-                if (jsonNode is JsonArray jsonNodeCasted)
-                {
-                    jsonArray = jsonNodeCasted;
-                    return true;
-                }
+                jsonArray = jsonNode as JsonArray;
+                return jsonArray != null;
             }
 
             jsonArray = null;

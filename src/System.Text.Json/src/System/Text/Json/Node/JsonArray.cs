@@ -527,7 +527,17 @@ namespace System.Text.Json
         ///   Creates a new collection that is a copy of the current instance.
         /// </summary>
         /// <returns>A new collection that is a copy of this instance.</returns>
-        public override JsonNode Clone() => new JsonArray(_list);
+        public override JsonNode Clone()
+        {
+            var jsonArray = new JsonArray();
+
+            foreach (JsonNode jsonNode in _list)
+            {
+                jsonArray.Add(jsonNode.Clone());
+            }
+
+            return jsonArray;
+        }
 
         /// <summary>
         ///   Returns <see cref="JsonValueKind.Array"/>

@@ -6,6 +6,7 @@
 #pragma warning disable CS1591
 
 using System.Buffers;
+using System.Diagnostics;
 using System.IO;
 
 namespace System.Text.Json
@@ -43,12 +44,15 @@ namespace System.Text.Json
             }
         }
 
-        public static JsonNode DeepCopy(JsonNode jsonNode) => jsonNode.Clone();
-
         public abstract JsonNode Clone();
 
         public static JsonNode DeepCopy(JsonElement jsonElement)
         {
+            if (!jsonElement.IsImmutable)
+            {
+                return GetNode(jsonElement).Clone();
+            }
+
             switch (jsonElement.ValueKind)
             {
                 case JsonValueKind.Object:
@@ -76,7 +80,8 @@ namespace System.Text.Json
                 case JsonValueKind.Null:
                     return null;
                 default:
-                    throw new ArgumentException();
+                    Debug.Assert(jsonElement.ValueKind == JsonValueKind.Undefined, "No handler for JsonValueKind.{jsonElement.ValueKind}");
+                    throw ThrowHelper.GetJsonElementWrongTypeException(JsonValueKind.Undefined, jsonElement.ValueKind);
             }
 
         }
