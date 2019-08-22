@@ -235,7 +235,9 @@ namespace System.Net.Mail.Tests
 
         public static IEnumerable<object[]> MessageBodyData()
         {
-            for (int i = 0; i < 100; i++)
+            // Current max line length folds at i==65. Bracketing that value to ensure potential
+            // future minor changes to max legnth do not render test ineffective
+            for (int i = 60; i < 71; i++)
                 yield return new object[] { new string('a', i) + '.' };
         }
 
