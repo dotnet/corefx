@@ -5,6 +5,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -934,6 +935,36 @@ namespace System.Text.Json.Serialization.Tests
             string json = @"{""MyImmutableDictionary"":{""Key1"":""Value1"", ""Key2"":""Value2""}}";
             ClassWithPopulatedDictionaryAndNoSetter obj = JsonSerializer.Deserialize<ClassWithPopulatedDictionaryAndNoSetter>(json);
             Assert.Equal(1, obj.MyImmutableDictionary.Count);
+        }
+
+        public class ClassWithNoSettersUsingJsonDeserialize
+        {
+            [JsonDeserialize]
+            public IDictionary<string, string> MyGenericDictionary { get; } = new Dictionary<string, string>() { { "Key", "Value" } };
+
+            [JsonDeserialize]
+            public IDictionary<string, string> InvalidNullDictionary { get; }
+
+            [JsonDeserialize]
+            public IDictionary<string, string> InvalidReadOnlyDictionary { get; } = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>() { { "Key", "Value" } });
+        }
+
+        [Fact]
+        public static void ClassWithNoSetterUsingJsonDeserialize()
+        {
+            // We don't attempt to deserialize into dictionaries without a setter unless decorated with JsonDeserializeAttribute.
+            string json = @"{""MyGenericDictionary"":{""Key3"":""Value3"",""Key4"":""Value4""}}";
+            ClassWithNoSettersUsingJsonDeserialize obj = JsonSerializer.Deserialize<ClassWithNoSettersUsingJsonDeserialize>(json);
+            Assert.Equal(2, obj.MyGenericDictionary.Count);
+            Assert.Equal("Value3", obj.MyGenericDictionary["Key3"]);
+        }
+
+        [Theory]
+        [InlineData(@"{""InvalidNullDictionary"":{""Key"":""Value""}}")]
+        [InlineData(@"{""InvalidReadOnlyDictionary"":{""Key"":""Value""}}")]
+        public static void ClassWithNoSetterUsingJsonDeserializeInvalidTests(string json)
+        {
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<ClassWithNoSettersUsingJsonDeserialize>(json));
         }
 
         public class ClassWithPopulatedDictionaryAndSetter
