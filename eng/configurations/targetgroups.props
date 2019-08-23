@@ -127,14 +127,12 @@
       <CompatibleWith>netstandard2.1</CompatibleWith>
     </TargetGroups>
     <TargetGroups Include="netcoreapp5.0">
-      <NETCoreAppMaximumVersion>5.0</NETCoreAppMaximumVersion>
       <TargetFramework>netcoreapp5.0</TargetFramework>
       <Imports>netcoreapp3.0</Imports>
       <CompatibleWith>netstandard2.1</CompatibleWith>
     </TargetGroups>
     <!-- netcoreapp is an alias for netcoreapp5.0 -->
     <TargetGroups Include="netcoreapp">
-      <NETCoreAppMaximumVersion>5.0</NETCoreAppMaximumVersion>
       <TargetFramework>netcoreapp5.0</TargetFramework>
       <Imports>netcoreapp5.0</Imports>
       <CompatibleWith>netstandard2.1</CompatibleWith>
