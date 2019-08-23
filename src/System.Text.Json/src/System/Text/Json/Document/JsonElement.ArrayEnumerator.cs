@@ -18,8 +18,7 @@ namespace System.Text.Json
         {
             private readonly JsonElement _target;
             private int _curIdx;
-            private readonly int _endIdx;
-            private readonly JsonArrayEnumerator? _jsonArrayEnumerator;
+            private readonly int _endIdx; // version for JsonArray
 
             internal ArrayEnumerator(JsonElement target)
             {
@@ -31,14 +30,12 @@ namespace System.Text.Json
                     Debug.Assert(target.TokenType == JsonTokenType.StartArray);
 
                     _endIdx = document.GetEndIndex(_target._idx, includeEndElement: false);
-                    _jsonArrayEnumerator = null;
                 }
                 else
                 {
-                    _endIdx = -1;
-
                     var jsonArray = (JsonArray)target._parent;
-                    _jsonArrayEnumerator = new JsonArrayEnumerator(jsonArray);
+
+                    _endIdx = jsonArray._version;
                 }
             }
 
@@ -47,9 +44,11 @@ namespace System.Text.Json
             {
                 get
                 {
-                    if (_jsonArrayEnumerator.HasValue)
+                    if (_target._parent is JsonArray jsonArray)
                     {
-                        return _jsonArrayEnumerator.Value.Current.AsJsonElement();
+                        Debug.Assert(jsonArray._version == _endIdx);
+
+                        return jsonArray[_curIdx].AsJsonElement();
                     }
 
                     var document = _target._parent as JsonDocument;
@@ -87,22 +86,12 @@ namespace System.Text.Json
             public void Dispose()
             {
                 _curIdx = _endIdx;
-
-                if (_jsonArrayEnumerator.HasValue)
-                {
-                    _jsonArrayEnumerator.Value.Dispose();
-                }
             }
 
             /// <inheritdoc />
             public void Reset()
             {
                 _curIdx = -1;
-
-                if (_jsonArrayEnumerator.HasValue)
-                {
-                    ((IEnumerator)_jsonArrayEnumerator.Value).Reset();
-                }
             }
 
             /// <inheritdoc />
@@ -111,9 +100,13 @@ namespace System.Text.Json
             /// <inheritdoc />
             public bool MoveNext()
             {
-                if (_jsonArrayEnumerator.HasValue)
+                if (_target._parent is JsonArray jsonArray)
                 {
-                    return _jsonArrayEnumerator.Value.MoveNext();
+                    Debug.Assert(jsonArray._version == _endIdx);
+
+                    _curIdx++;
+
+                    return _curIdx < jsonArray.Count;
                 }
 
                 var document = _target._parent as JsonDocument;

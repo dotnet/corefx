@@ -13,17 +13,26 @@ namespace System.Text.Json
     public sealed class JsonArray : JsonNode, IList<JsonNode>, IReadOnlyList<JsonNode>
     {
         internal readonly List<JsonNode> _list;
+        internal int _version;
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="JsonArray"/> class representing the empty array.
         /// </summary>
-        public JsonArray() => _list = new List<JsonNode>();
+        public JsonArray()
+        {
+            _list = new List<JsonNode>();
+            _version = 0;
+        }
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="JsonArray"/> class representing the specified collection.
         /// </summary>
         /// <param name="values">Collection to represent.</param>
-        public JsonArray(IEnumerable<JsonNode> values) => _list = new List<JsonNode>(values);
+        public JsonArray(IEnumerable<JsonNode> values)
+        {
+            _list = new List<JsonNode>(values);
+            _version = 0;
+        }
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="JsonArray"/> class representing the specified collection of <see cref="string"/>s.
@@ -209,7 +218,11 @@ namespace System.Text.Json
         public JsonNode this[int idx]
         {
             get => _list[idx];
-            set => _list[idx] = value;
+            set
+            {
+                _list[idx] = value;
+                _version++;
+            }
         }
 
         /// <summary>
@@ -217,7 +230,11 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="value">The value to add.</param>
         /// <remarks>Null value is allowed and represents the JSON null value.</remarks>
-        public void Add(JsonNode value) => _list.Add(value);
+        public void Add(JsonNode value)
+        {
+            _list.Add(value);
+            _version++;
+        }
 
         /// <summary>
         ///   Adds the specified value as a <see cref="JsonString"/> as the last item in this collection.
@@ -324,7 +341,11 @@ namespace System.Text.Json
         /// <param name="index">The zero-based index at which <paramref name="item"/> should be inserted.</param>
         /// <param name="item">The item to add.</param>
         /// <remarks>The <paramref name="item"/> parameter may be <see langword="null" />, which represents the JSON null value.</remarks>
-        public void Insert(int index, JsonNode item) => _list.Insert(index, item);
+        public void Insert(int index, JsonNode item)
+        {
+            _list.Insert(index, item);
+            _version++;
+        }
 
         /// <summary>
         ///   Inserts the specified item as a <see cref="JsonString"/> at the specified index of the collection.
@@ -464,7 +485,11 @@ namespace System.Text.Json
         /// <summary>
         ///   Removes all elements from the JSON array.
         /// </summary>
-        public void Clear() => _list.Clear();
+        public void Clear()
+        {
+            _list.Clear();
+            _version++;
+        }
 
         /// <summary>
         ///   Removes the first occurrence of a specific object from the collection.
@@ -476,7 +501,11 @@ namespace System.Text.Json
         ///   <see langword="true"/> if the item is successfully found in a collection and removed,
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public bool Remove(JsonNode item) => _list.Remove(item);
+        public bool Remove(JsonNode item)
+        {
+            _version++;
+            return _list.Remove(item);
+        }
 
         /// <summary>
         ///   Removes all the elements that match the conditions defined by the specified predicate.
@@ -485,15 +514,22 @@ namespace System.Text.Json
         ///   Thepredicate delegate that defines the conditions of the elements to remove.
         /// </param>
         /// <returns>The number of elements removed from the collection.</returns>
-        public int RemoveAll(Predicate<JsonNode> match) => _list.RemoveAll(match);
-
+        public int RemoveAll(Predicate<JsonNode> match)
+        {
+            _version++;
+            return _list.RemoveAll(match);
+        }
         /// <summary>
         ///   Removes the item at the specified index of the collection.
         /// </summary>
         /// <param name="index">
         ///   The zero-based index of the element to remove.
         /// </param>
-        public void RemoveAt(int index) => _list.RemoveAt(index);
+        public void RemoveAt(int index)
+        {
+            _list.RemoveAt(index);
+            _version++;
+        }
 
         /// <summary>
         ///   Copies the collection or a portion of it to an array.
