@@ -318,7 +318,7 @@ namespace System.Net.Mail.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework has a bug and may not time out for low values")]
-        [PlatformSpecific(TestPlatforms.Windows)] // on Unix platforms, synchronous operations can't be aborted by closing the socket.
+        [PlatformSpecific(~TestPlatforms.OSX)] // on OSX, not all synchronous operations (e.g. connect) can be aborted by closing the socket.
         public void TestZeroTimeout()
         {
             using (Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
