@@ -417,8 +417,7 @@ namespace System.Text.Json
         /// </exception>
         public bool GetBoolean()
         {
-            // CheckValidInstance is redundant.  Asking for the type will
-            // return None, which then throws the same exception in the return statement.
+            CheckValidInstance();
 
             if (_parent is JsonDocument document)
             {
