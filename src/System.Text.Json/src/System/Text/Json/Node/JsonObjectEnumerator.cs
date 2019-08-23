@@ -9,7 +9,6 @@ namespace System.Text.Json
     public struct JsonObjectEnumerator : IEnumerator<KeyValuePair<string, JsonNode>>
     {
         private Dictionary<string, JsonNode>.Enumerator _enumerator;
-        //   private IEnumerator<KeyValuePair<string, JsonNode>> _enumerator;
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="JsonObjectEnumerator"/> class supporting an interation over provided JSON object.
