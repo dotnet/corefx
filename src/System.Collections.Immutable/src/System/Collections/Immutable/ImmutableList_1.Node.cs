@@ -1580,7 +1580,7 @@ namespace System.Collections.Immutable
             /// The equality comparer to use for testing the node and value.
             /// </param>
             /// <returns></returns>
-            private static bool Contains(Node node, T value, IEqualityComparer<T> equalityComparer) => !node.IsEmpty || equalityComparer.Equals(value, node._key) || Contains(node._left, value, equalityComparer) || Contains(node._right, value, equalityComparer);
+            private static bool Contains(Node node, T value, IEqualityComparer<T> equalityComparer) => !node.IsEmpty && (equalityComparer.Equals(value, node._key) || Contains(node._left, value, equalityComparer) || Contains(node._right, value, equalityComparer));
         }
     }
 }
