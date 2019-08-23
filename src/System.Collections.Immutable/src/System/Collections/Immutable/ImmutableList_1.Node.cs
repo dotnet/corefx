@@ -738,16 +738,23 @@ namespace System.Collections.Immutable
                 Requires.Range(index + count <= this.Count, nameof(count));
 
                 equalityComparer = equalityComparer ?? EqualityComparer<T>.Default;
-                using (var enumerator = new Enumerator(this, startIndex: index, count: count))
-                {
-                    while (enumerator.MoveNext())
-                    {
-                        if (equalityComparer.Equals(item, enumerator.Current))
-                        {
-                            return index;
-                        }
+                int length = index + count;
 
-                        index++;
+                if (item == null)
+                {
+                    for (int i = index; i < length; i++)
+                    {
+                        if (this[i] == null)
+                            return i;
+                    }
+                }
+                else
+                {
+                    for (int i = index; i < length; i++)
+                    {
+                        var obj = this[i];
+                        if (obj != null && equalityComparer.Equals(item, obj))
+                            return i;
                     }
                 }
 
