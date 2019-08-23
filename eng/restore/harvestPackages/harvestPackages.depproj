@@ -25,8 +25,18 @@
         LatestPackages="@(_AllPkgProjsToPackageIdentity)"
         PackageIndexes="$(PackageIndexFile)"
         DoNotAllowVersionsFromSameRelease="true">
-        <Output TaskParameter="LastStablePackages" ItemName="PackageReference" />
+        <Output TaskParameter="LastStablePackages" ItemName="_PackageReference" />
     </GetLastStablePackage>
+
+    <!-- Allow to override package reference and versions in case there is already a PackageReference set -->
+    <ItemGroup>
+      <_OverridenPackageReferences Include="@(_PackageReference)" Condition="'@(PackageReference)' == '@(_PackageReference)' and %(Identity) != ''" />
+      <_PackageReference Remove="@(_OverridenPackageReferences)" />
+      <_PackageReference Include="@(PackageReference)" />
+
+      <PackageReference Remove="@(PackageReference)" />
+      <PackageReference Include="@(_PackageReference)" />
+    </ItemGroup>
   </Target>
 
 </Project>
