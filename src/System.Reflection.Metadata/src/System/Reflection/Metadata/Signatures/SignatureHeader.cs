@@ -10,12 +10,12 @@ namespace System.Reflection.Metadata
     /// Represents the signature characteristics specified by the leading byte of signature blobs.
     /// </summary>
     /// <remarks>
-    /// This header byte is present in all method definition, method reference, standalone method, field, 
+    /// This header byte is present in all method definition, method reference, standalone method, field,
     /// property, and local variable signatures, but not in type specification signatures.
     /// </remarks>
     public struct SignatureHeader : IEquatable<SignatureHeader>
     {
-        private byte _rawValue;
+        private readonly byte _rawValue;
         public const byte CallingConventionOrKindMask = 0x0F;
         private const byte maxCallingConvention = (byte)SignatureCallingConvention.VarArgs;
 

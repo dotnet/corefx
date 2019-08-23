@@ -16,13 +16,12 @@ namespace System.Runtime.Caching
 {
     internal struct UsageEntryRef
     {
-        static internal readonly UsageEntryRef INVALID = new UsageEntryRef(0, 0);
+        internal static readonly UsageEntryRef INVALID = new UsageEntryRef(0, 0);
 
         private const uint ENTRY_MASK = 0x000000ffu;
-        private const uint PAGE_MASK = 0xffffff00u;
         private const int PAGE_SHIFT = 8;
 
-        private uint _ref;
+        private readonly uint _ref;
 
         internal UsageEntryRef(int pageIndex, int entryIndex)
         {
@@ -159,8 +158,8 @@ namespace System.Runtime.Caching
         private const int MAX_PAGES_INCREMENT = 340;
         private const double MIN_LOAD_FACTOR = 0.5;
 
-        private CacheUsage _cacheUsage;
-        private byte _bucket;
+        private readonly CacheUsage _cacheUsage;
+        private readonly byte _bucket;
 
         private UsagePage[] _pages;
         private int _cEntriesInUse;
@@ -863,7 +862,6 @@ namespace System.Runtime.Caching
         internal static readonly TimeSpan CORRELATED_REQUEST_TIMEOUT = new TimeSpan(0, 0, 1);
         internal static readonly TimeSpan MIN_LIFETIME_FOR_USAGE = NEWADD_INTERVAL;
         private const byte NUMBUCKETS = 1;
-        private const int MAX_REMOVE = 1024;
 
         private readonly MemoryCacheStore _cacheStore;
         internal readonly UsageBucket[] _buckets;

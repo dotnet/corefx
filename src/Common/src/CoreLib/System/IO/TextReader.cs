@@ -5,7 +5,6 @@
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Buffers;
@@ -17,8 +16,8 @@ namespace System.IO
     // there are methods on the Stream class to read bytes.
     // A subclass must minimally implement the Peek() and Read() methods.
     //
-    // This class is intended for character input, not bytes.  
-    // There are methods on the Stream class for reading bytes. 
+    // This class is intended for character input, not bytes.
+    // There are methods on the Stream class for reading bytes.
     public abstract partial class TextReader : MarshalByRefObject, IDisposable
     {
         public static readonly TextReader Null = new NullTextReader();
@@ -45,7 +44,7 @@ namespace System.IO
         // the input stream. The current position of the TextReader is not changed by
         // this operation. The returned value is -1 if no further characters are
         // available.
-        // 
+        //
         // This default method simply returns -1.
         //
         public virtual int Peek()
@@ -55,7 +54,7 @@ namespace System.IO
 
         // Reads the next character from the input stream. The returned value is
         // -1 if no further characters are available.
-        // 
+        //
         // This default method simply returns -1.
         //
         public virtual int Read()
@@ -94,7 +93,7 @@ namespace System.IO
                 if (ch == -1) break;
                 buffer[index + n] = (char)ch;
             }
-            
+
             return n;
         }
 
@@ -122,7 +121,7 @@ namespace System.IO
             }
         }
 
-        // Reads all characters from the current position to the end of the 
+        // Reads all characters from the current position to the end of the
         // TextReader, and returns them as one string.
         public virtual string ReadToEnd()
         {
@@ -138,7 +137,7 @@ namespace System.IO
 
         // Blocking version of read.  Returns only when count
         // characters have been read or the end of the file was reached.
-        // 
+        //
         public virtual int ReadBlock(char[] buffer, int index, int count)
         {
             int i, n = 0;
@@ -214,7 +213,7 @@ namespace System.IO
             this, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
         }
 
-        public async virtual Task<string> ReadToEndAsync()
+        public virtual async Task<string> ReadToEndAsync()
         {
             var sb = new StringBuilder(4096);
             char[] chars = ArrayPool<char>.Shared.Rent(4096);
@@ -241,7 +240,7 @@ namespace System.IO
             }
             if (index < 0 || count < 0)
             {
-                throw new ArgumentOutOfRangeException((index < 0 ? nameof(index): nameof(count)), SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException((index < 0 ? nameof(index) : nameof(count)), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (buffer.Length - index < count)
             {
@@ -279,7 +278,7 @@ namespace System.IO
             }
             if (index < 0 || count < 0)
             {
-                throw new ArgumentOutOfRangeException((index < 0 ? nameof(index): nameof(count)), SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(index < 0 ? nameof(index) : nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (buffer.Length - index < count)
             {

@@ -90,8 +90,12 @@ namespace System.Net.Http.Functional.Tests
                             catch { }
                         });
 
-                        await Assert.ThrowsAsync<HttpRequestException>(() => getAsync);
+                        Exception e = await Assert.ThrowsAsync<HttpRequestException>(() => getAsync);
                         cts.Cancel();
+                        if (UseSocketsHttpHandler)
+                        {
+                            Assert.Contains((handler.MaxResponseHeadersLength * 1024).ToString(), e.ToString());
+                        }
                         await serverTask;
                     });
                 }
@@ -131,7 +135,11 @@ namespace System.Net.Http.Functional.Tests
                         }
                         else
                         {
-                            await Assert.ThrowsAsync<HttpRequestException>(() => getAsync);
+                            Exception e = await Assert.ThrowsAsync<HttpRequestException>(() => getAsync);
+                            if (UseSocketsHttpHandler)
+                            {
+                                Assert.Contains((handler.MaxResponseHeadersLength * 1024).ToString(), e.ToString());
+                            }
                             try { await serverTask; } catch { }
                         }
                     });
@@ -167,7 +175,7 @@ namespace System.Net.Http.Functional.Tests
             buffer.Append(new string('c', responseHeadersSizeInBytes - (buffer.Length + 4)));
             buffer.Append("\r\n\r\n");
 
-            string response = buffer.ToString();            
+            string response = buffer.ToString();
             Assert.Equal(responseHeadersSizeInBytes, response.Length);
             return response;
         }

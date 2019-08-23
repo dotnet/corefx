@@ -2,18 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Runtime.InteropServices;
-
 #if ES_BUILD_STANDALONE
+using System;
 using Environment = Microsoft.Diagnostics.Tracing.Internal.Environment;
 #endif
-
-#if !ES_BUILD_AGAINST_DOTNET_V35
-using Contract = System.Diagnostics.Contracts.Contract;
-#else
-using Contract = Microsoft.Diagnostics.Contracts.Internal.Contract;
-#endif
+using System.Runtime.InteropServices;
 
 #if ES_BUILD_STANDALONE
 namespace Microsoft.Diagnostics.Tracing
@@ -27,11 +20,11 @@ namespace System.Diagnostics.Tracing
 #endif
 
     /*
-     EventDescriptor was public in the separate System.Diagnostics.Tracing assembly(pre NS2.0), 
+     EventDescriptor was public in the separate System.Diagnostics.Tracing assembly(pre NS2.0),
      now the move to CoreLib marked them as private.
-     While they are technically private (it's a contract used between the library and the ILC toolchain), 
+     While they are technically private (it's a contract used between the library and the ILC toolchain),
      we need them to be rooted and exported from shared library for the system to work.
-     For now I'm simply marking them as public again.A cleaner solution might be to use.rd.xml to 
+     For now I'm simply marking them as public again.A cleaner solution might be to use.rd.xml to
      root them and modify shared library definition to force export them.
      */
 #if ES_BUILD_PN
@@ -41,23 +34,23 @@ namespace System.Diagnostics.Tracing
 #endif
     struct EventDescriptor
     {
-        # region private
+        #region private
         [FieldOffset(0)]
-        private int m_traceloggingId;
+        private readonly int m_traceloggingId;
         [FieldOffset(0)]
-        private ushort m_id;
+        private readonly ushort m_id;
         [FieldOffset(2)]
-        private byte m_version;
+        private readonly byte m_version;
         [FieldOffset(3)]
-        private byte m_channel;
+        private readonly byte m_channel;
         [FieldOffset(4)]
-        private byte m_level;
+        private readonly byte m_level;
         [FieldOffset(5)]
-        private byte m_opcode;
+        private readonly byte m_opcode;
         [FieldOffset(6)]
-        private ushort m_task;
+        private readonly ushort m_task;
         [FieldOffset(8)]
-        private long m_keywords;
+        private readonly long m_keywords;
         #endregion
 
         public EventDescriptor(
@@ -118,70 +111,22 @@ namespace System.Diagnostics.Tracing
             m_task = (ushort)task;
         }
 
-        public int EventId
-        {
-            get
-            {
-                return m_id;
-            }
-        }
-        public byte Version
-        {
-            get
-            {
-                return m_version;
-            }
-        }
-        public byte Channel
-        {
-            get
-            {
-                return m_channel;
-            }
-        }
-        public byte Level
-        {
-            get
-            {
-                return m_level;
-            }
-        }
-        public byte Opcode
-        {
-            get
-            {
-                return m_opcode;
-            }
-        }
-        public int Task
-        {
-            get
-            {
-                return m_task;
-            }
-        }
-        public long Keywords
-        {
-            get
-            {
-                return m_keywords;
-            }
-        }
+        public int EventId => m_id;
+        public byte Version => m_version;
+        public byte Channel => m_channel;
+        public byte Level => m_level;
+        public byte Opcode => m_opcode;
+        public int Task => m_task;
+        public long Keywords => m_keywords;
 
-        internal int TraceLoggingId
-        {
-            get
-            {
-                return m_traceloggingId;
-            }
-        }
+        internal int TraceLoggingId => m_traceloggingId;
 
         public override bool Equals(object? obj)
         {
             if (!(obj is EventDescriptor))
                 return false;
 
-            return Equals((EventDescriptor) obj);
+            return Equals((EventDescriptor)obj);
         }
 
         public override int GetHashCode()

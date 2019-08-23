@@ -14,36 +14,36 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     {
         /*
             These are the predefined binary operator signatures
-         
+
                 (object,    object)     :                   == !=
                 (string,    string)     :                   == !=
                 (string,    string)     :       +
                 (string,    object)     :       +
                 (object,    string)     :       +
-         
+
                 (int,       int)        :  / % + - << >>   == != < > <= >=&| ^
                 (uint,      uint)       :  / % + -         == != < > <= >=&| ^
                 (long,      long)       :  / % + -         == != < > <= >=&| ^
                 (ulong,     ulong)      :  / % + -         == != < > <= >=&| ^
-                (uint,      int)        :           << >>                        
-                (long,      int)        :           << >>                        
-                (ulong,     int)        :           << >>                        
-         
+                (uint,      int)        :           << >>
+                (long,      int)        :           << >>
+                (ulong,     int)        :           << >>
+
                 (float,     float)      :  / % + -         == != < > <= >=
                 (double,    double)     :  / % + -         == != < > <= >=
                 (decimal,   decimal)    :  / % + -         == != < > <= >=
-         
+
                 (bool,      bool)       :                   == !=          &| ^ && ||
-         
+
                 (Sys.Del,   Sys.Del)    :                   == !=
-         
+
                 // Below here the types cannot be represented entirely by a PREDEFTYPE.
                 (delegate,  delegate)   :       + -         == !=
-         
+
                 (enum,      enum)       :         -         == != < > <= >=&| ^
                 (enum,      under)      :       + -
                 (under,     enum)       :       +
-         
+
                 (ptr,       ptr)        :         -     Not callable through dynamic
                 (ptr,       int)        :       + -     Not callable through dynamic
                 (ptr,       uint)       :       + -     Not callable through dynamic
@@ -53,31 +53,31 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 (uint,      ptr)        :       +       Not callable through dynamic
                 (long,      ptr)        :       +       Not callable through dynamic
                 (ulong,     ptr)        :       +       Not callable through dynamic
-         
+
                 (void,     void)      :                   == != < > <= >=
-         
+
             There are the predefined unary operator signatures:
-         
+
                 int     : + -   ~
                 uint    : +     ~
                 long    : + -   ~
                 ulong   : +     ~
-         
-                float   : + -   
-                double  : + - 
-                decimal : + - 
-         
+
+                float   : + -
+                double  : + -
+                decimal : + -
+
                 bool    :     !
-         
+
                 // Below here the types cannot be represented entirely by a PREDEFTYPE.
                 enum    :       ~
-                ptr     :          
-         
+                ptr     :
+
             Note that pointer operators cannot be lifted over nullable and are not callable through dynamic
         */
 
         // BinOpBindMethod and UnaOpBindMethod are method pointer arrays to dispatch the appropriate operator binder.
-        // Method pointers must be in the order of the corresponding enums. We check this when the full signature is set. 
+        // Method pointers must be in the order of the corresponding enums. We check this when the full signature is set.
         // When the binding method is looked up in these arrays we ASSERT
         // if the array is out of bounds of the corresponding array.
         private static readonly BinOpSig[] s_binopSignatures =
@@ -510,7 +510,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 exactMatch = GetStandardAndLiftedBinopSignatures(binopSignatures, info);
             }
 
-            // If we have an exact match in either the special binop signatures or the standard/lifted binop 
+            // If we have an exact match in either the special binop signatures or the standard/lifted binop
             // signatures, then we set our best match. Otherwise, we check if we had any signatures at all.
             // If we didn't, then its possible where we have x == null, where x is nullable, so try to bind
             // the null equality comparison. Otherwise, we had some ambiguity - we have a match, but its not exact.
@@ -530,7 +530,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             else
             {
                 // We had some matches, try to find the best one. FindBestSignatureInList returns < 0 if
-                // we don't have a best one, otherwise it returns the index of the best one in our list that 
+                // we don't have a best one, otherwise it returns the index of the best one in our list that
                 // we give it.
 
                 bestBinopSignature = FindBestSignatureInList(binopSignatures, info);
@@ -879,18 +879,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return false;
         }
 
-        private static bool IsEnumArithmeticBinOp(ExpressionKind ek, BinOpArgInfo info)
-        {
-            switch (ek)
+        private static bool IsEnumArithmeticBinOp(ExpressionKind ek, BinOpArgInfo info) =>
+            ek switch
             {
-                case ExpressionKind.Add:
-                    return info.typeRaw1.IsEnumType ^ info.typeRaw2.IsEnumType;
-                case ExpressionKind.Subtract:
-                    return info.typeRaw1.IsEnumType | info.typeRaw2.IsEnumType;
-            }
-
-            return false;
-        }
+                ExpressionKind.Add => info.typeRaw1.IsEnumType ^ info.typeRaw2.IsEnumType,
+                ExpressionKind.Subtract => info.typeRaw1.IsEnumType | info.typeRaw2.IsEnumType,
+                _ => false,
+            };
 
 
         /*
@@ -1009,12 +1004,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         /*
             Determine which BinOpSig is better for overload resolution.
             Better means: at least as good in all Params, and better in at least one param.
-         
+
             Better w/r to a param means:
             1) same type as argument
             2) implicit conversion from this one's param type to the other's param type
             Because of user defined conversion operators this relation is not transitive.
-         
+
             Returns negative if ibos1 is better, positive if ibos2 is better, 0 if neither.
         */
 
@@ -1035,25 +1030,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 bt2 = WhichTypeIsBetter(bofs1.Type2(), bofs2.Type2(), type2);
             }
 
-            int res;
-
             Debug.Assert(Enum.IsDefined(typeof(BetterType), bt1));
             Debug.Assert(Enum.IsDefined(typeof(BetterType), bt2));
-            switch (bt1)
+            int res = bt1 switch
             {
-                case BetterType.Left:
-                    res = -1;
-                    break;
-
-                case BetterType.Right:
-                    res = 1;
-                    break;
-
-                default:
-                    res = 0;
-                    break;
-            }
-
+                BetterType.Left => -1,
+                BetterType.Right => 1,
+                _ => 0,
+            };
             switch (bt2)
             {
                 case BetterType.Left:
@@ -1161,27 +1145,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 CType nonNub = nub.UnderlyingType;
                 if (nonNub.IsEnumType)
                 {
-                    PredefinedType ptOp;
-                    switch (nonNub.FundamentalType)
+                    PredefinedType ptOp = nonNub.FundamentalType switch
                     {
-                        case FUNDTYPE.FT_U4:
-                            ptOp = PredefinedType.PT_UINT;
-                            break;
-
-                        case FUNDTYPE.FT_I8:
-                            ptOp = PredefinedType.PT_LONG;
-                            break;
-
-                        case FUNDTYPE.FT_U8:
-                            ptOp = PredefinedType.PT_ULONG;
-                            break;
-
-                        default:
-                            // Promote all smaller types to int.
-                            ptOp = PredefinedType.PT_INT;
-                            break;
-                    }
-
+                        FUNDTYPE.FT_U4 => PredefinedType.PT_UINT,
+                        FUNDTYPE.FT_I8 => PredefinedType.PT_LONG,
+                        FUNDTYPE.FT_U8 => PredefinedType.PT_ULONG,
+                        _ => PredefinedType.PT_INT, // Promote all smaller types to int.
+                    };
                     return mustCast(
                         BindStandardUnaryOperator(
                             op, mustCast(pArgument, TypeManager.GetNullable(GetPredefindType(ptOp)))), nub);
@@ -1562,15 +1532,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             Debug.Assert(Enum.IsDefined(typeof(BetterType), bt));
-            switch (bt)
+            return bt switch
             {
-                case BetterType.Left:
-                    return -1;
-                case BetterType.Right:
-                    return +1;
-                default:
-                    return 0;
-            }
+                BetterType.Left => -1,
+                BetterType.Right => +1,
+                _ => 0,
+            };
         }
 
         /*
@@ -1721,7 +1688,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(!(type is NullableType));
 
             // These used to be converts, but we're making them casts now - this is because
-            // we need to remove the ability to call inc(sbyte) etc for all types smaller than int. 
+            // we need to remove the ability to call inc(sbyte) etc for all types smaller than int.
             // Note however, that this will give us different error messages on compile time versus runtime
             // for checked increments.
             //
@@ -1747,7 +1714,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Expr exprVal = exprGet;
             Expr nonLiftedArg = exprVal;
 
-            // We want to give the lifted argument as the binop, but use the non-lifted argument as the 
+            // We want to give the lifted argument as the binop, but use the non-lifted argument as the
             // argument of the call.
             //Debug.Assert(uofs.LiftArg() || type.IsValType());
             nonLiftedArg = mustCast(nonLiftedArg, type.UnderlyingType);
@@ -1934,7 +1901,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(ek == ExpressionKind.Eq || ek == ExpressionKind.NotEq);
             Debug.Assert(arg1.Type.IsPredefType(PredefinedType.PT_STRING) && arg2.Type.IsPredefType(PredefinedType.PT_STRING));
 
-            // Get the predefined method for string comparison, and then stash it in the Expr so we can 
+            // Get the predefined method for string comparison, and then stash it in the Expr so we can
             // transform it later.
 
             PREDEFMETH predefMeth = ek == ExpressionKind.Eq ? PREDEFMETH.PM_STRING_OPEQUALITY : PREDEFMETH.PM_STRING_OPINEQUALITY;
@@ -2006,25 +1973,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             AggregateType typeDst = GetEnumBinOpType(ek, arg1.Type, arg2.Type, out AggregateType typeEnum);
 
             Debug.Assert(typeEnum != null);
-            PredefinedType ptOp;
 
-            switch (typeEnum.FundamentalType)
+            PredefinedType ptOp = typeEnum.FundamentalType switch
             {
-                default:
-                    // Promote all smaller types to int.
-                    ptOp = PredefinedType.PT_INT;
-                    break;
-                case FUNDTYPE.FT_U4:
-                    ptOp = PredefinedType.PT_UINT;
-                    break;
-                case FUNDTYPE.FT_I8:
-                    ptOp = PredefinedType.PT_LONG;
-                    break;
-                case FUNDTYPE.FT_U8:
-                    ptOp = PredefinedType.PT_ULONG;
-                    break;
-            }
-
+                FUNDTYPE.FT_U4 => PredefinedType.PT_UINT,
+                FUNDTYPE.FT_I8 => PredefinedType.PT_LONG,
+                FUNDTYPE.FT_U8 => PredefinedType.PT_ULONG,
+                _ => PredefinedType.PT_INT, // Promote all smaller types to int.
+            };
             CType typeOp = GetPredefindType(ptOp);
             arg1 = binder.mustCast(arg1, typeOp, CONVERTTYPE.NOUDC);
             arg2 = binder.mustCast(arg2, typeOp, CONVERTTYPE.NOUDC);
@@ -2057,25 +2013,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             NullableType typeDst = TypeManager.GetNullable(GetEnumBinOpType(ek, nonNullableType1, nonNullableType2, out AggregateType typeEnum));
 
             Debug.Assert(typeEnum != null);
-            PredefinedType ptOp;
 
-            switch (typeEnum.FundamentalType)
+            PredefinedType ptOp = typeEnum.FundamentalType switch
             {
-                default:
-                    // Promote all smaller types to int.
-                    ptOp = PredefinedType.PT_INT;
-                    break;
-                case FUNDTYPE.FT_U4:
-                    ptOp = PredefinedType.PT_UINT;
-                    break;
-                case FUNDTYPE.FT_I8:
-                    ptOp = PredefinedType.PT_LONG;
-                    break;
-                case FUNDTYPE.FT_U8:
-                    ptOp = PredefinedType.PT_ULONG;
-                    break;
-            }
-
+                FUNDTYPE.FT_U4 => PredefinedType.PT_UINT,
+                FUNDTYPE.FT_I8 => PredefinedType.PT_LONG,
+                FUNDTYPE.FT_U8 => PredefinedType.PT_ULONG,
+                _ => PredefinedType.PT_INT, // Promote all smaller types to int.
+            };
             NullableType typeOp = TypeManager.GetNullable(GetPredefindType(ptOp));
             arg1 = mustCast(arg1, typeOp, CONVERTTYPE.NOUDC);
             arg2 = mustCast(arg2, typeOp, CONVERTTYPE.NOUDC);
@@ -2102,27 +2047,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(ek == ExpressionKind.BitwiseNot);
             Debug.Assert((ExprCast)arg != null);
             Debug.Assert(((ExprCast)arg).Argument.Type.IsEnumType);
-
-            PredefinedType ptOp;
             CType typeEnum = ((ExprCast)arg).Argument.Type;
 
-            switch (typeEnum.FundamentalType)
+            PredefinedType ptOp = typeEnum.FundamentalType switch
             {
-                default:
-                    // Promote all smaller types to int.
-                    ptOp = PredefinedType.PT_INT;
-                    break;
-                case FUNDTYPE.FT_U4:
-                    ptOp = PredefinedType.PT_UINT;
-                    break;
-                case FUNDTYPE.FT_I8:
-                    ptOp = PredefinedType.PT_LONG;
-                    break;
-                case FUNDTYPE.FT_U8:
-                    ptOp = PredefinedType.PT_ULONG;
-                    break;
-            }
-
+                FUNDTYPE.FT_U4 => PredefinedType.PT_UINT,
+                FUNDTYPE.FT_I8 => PredefinedType.PT_LONG,
+                FUNDTYPE.FT_U8 => PredefinedType.PT_ULONG,
+                _ => PredefinedType.PT_INT, // Promote all smaller types to int.
+            };
             CType typeOp = GetPredefindType(ptOp);
             arg = binder.mustCast(arg, typeOp, CONVERTTYPE.NOUDC);
 
@@ -2155,7 +2088,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
                 case ExpressionKind.Divide:
                 case ExpressionKind.Modulo:
-                    // EXPRKIND.EK_DIV and EXPRKIND.EK_MOD need to be treated special for hasSideEffects, 
+                    // EXPRKIND.EK_DIV and EXPRKIND.EK_MOD need to be treated special for hasSideEffects,
                     // hence the EXPRFLAG.EXF_ASSGOP. Yes, this is a hack.
                     flags = EXPRFLAG.EXF_ASSGOP;
                     if (Context.Checked)
@@ -2460,7 +2393,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        // If the operator is applicable in either its regular or lifted forms, 
+        // If the operator is applicable in either its regular or lifted forms,
         // add it to the candidate set and return true, otherwise return false.
         private bool UserDefinedBinaryOperatorIsApplicable(List<CandidateFunctionMember> candidateList,
             ExpressionKind ek, MethodSymbol method, AggregateType ats, Expr arg1, Expr arg2, bool fDontLift)
@@ -2674,21 +2607,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             ExprCall call = ExprFactory.CreateCall(0, typeRet, args, pMemGroup, null);
             call.MethWithInst = new MethWithInst(mpwi);
 
-            switch (ek)
+            call.NullableCallLiftKind = ek switch
             {
-                case ExpressionKind.Eq:
-                    call.NullableCallLiftKind = NullableCallLiftKind.EqualityOperator;
-                    break;
+                ExpressionKind.Eq => NullableCallLiftKind.EqualityOperator,
 
-                case ExpressionKind.NotEq:
-                    call.NullableCallLiftKind = NullableCallLiftKind.InequalityOperator;
-                    break;
+                ExpressionKind.NotEq => NullableCallLiftKind.InequalityOperator,
 
-                default:
-                    call.NullableCallLiftKind = NullableCallLiftKind.Operator;
-                    break;
-            }
-
+                _ => NullableCallLiftKind.Operator,
+            };
             call.CastOfNonLiftedResultToLiftedType = mustCast(nonLiftedResult, typeRet, 0);
             return call;
         }

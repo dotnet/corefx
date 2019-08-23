@@ -6,20 +6,14 @@ namespace System.Configuration
 {
     internal class DateTimeConfigurationElement : ConfigurationElement
     {
-        private static readonly ConfigurationPropertyCollection s_properties;
-
         private static readonly ConfigurationProperty s_propValue =
             new ConfigurationProperty("value", typeof(DateTime), DateTime.MinValue, ConfigurationPropertyOptions.IsKey);
+
+        private static readonly ConfigurationPropertyCollection s_properties = new ConfigurationPropertyCollection { s_propValue };
 
         private readonly DateTime _initValue;
 
         private bool _needsInit;
-
-        static DateTimeConfigurationElement()
-        {
-            // Property initialization
-            s_properties = new ConfigurationPropertyCollection { s_propValue };
-        }
 
         public DateTimeConfigurationElement() { }
 
@@ -43,7 +37,7 @@ namespace System.Configuration
             base.Init();
 
             // We cannot initialize configuration properties in the constructor,
-            // because Properties is an overridable virtual property that 
+            // because Properties is an overridable virtual property that
             // hence may not be available in the constructor.
             if (_needsInit)
             {

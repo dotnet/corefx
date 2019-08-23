@@ -13,18 +13,24 @@ namespace System.Text.Json
     {
         private void ValidateWritingValue()
         {
-            if (!Options.SkipValidation)
+            if (!_options.SkipValidation)
             {
                 if (_inObject)
                 {
-                    Debug.Assert(_tokenType != JsonTokenType.None && _tokenType != JsonTokenType.StartArray);
-                    ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotWriteValueWithinObject, currentDepth: default, token: default, _tokenType);
+                    if (_tokenType != JsonTokenType.PropertyName)
+                    {
+                        Debug.Assert(_tokenType != JsonTokenType.None && _tokenType != JsonTokenType.StartArray);
+                        ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotWriteValueWithinObject, currentDepth: default, token: default, _tokenType);
+                    }
                 }
                 else
                 {
-                    if (!_isNotPrimitive && _tokenType != JsonTokenType.None)
+                    Debug.Assert(_tokenType != JsonTokenType.PropertyName);
+
+                    // It is more likely for CurrentDepth to not equal 0 when writing valid JSON, so check that first to rely on short-circuiting and return quickly.
+                    if (CurrentDepth == 0 && _tokenType != JsonTokenType.None)
                     {
-                        ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotWriteValueAfterPrimitive, currentDepth: default, token: default, _tokenType);
+                        ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotWriteValueAfterPrimitiveOrClose, currentDepth: default, token: default, _tokenType);
                     }
                 }
             }
@@ -46,19 +52,9 @@ namespace System.Text.Json
             encodedBytes = encodedBytes.Slice(0, written);
             Span<byte> destination = output.Slice(BytesPending);
 
-            int firstEscapeIndexVal = encodedBytes.IndexOfAny(JsonConstants.Plus, JsonConstants.Slash);
-            if (firstEscapeIndexVal == -1)
-            {
-                Debug.Assert(destination.Length >= written);
-                encodedBytes.Slice(0, written).CopyTo(destination);
-                BytesPending += written;
-            }
-            else
-            {
-                Debug.Assert(destination.Length >= written * JsonConstants.MaxExpansionFactorWhileEscaping);
-                JsonWriterHelper.EscapeString(encodedBytes, destination, firstEscapeIndexVal, out written);
-                BytesPending += written;
-            }
+            Debug.Assert(destination.Length >= written);
+            encodedBytes.Slice(0, written).CopyTo(destination);
+            BytesPending += written;
 
             if (outputText != null)
             {

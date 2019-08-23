@@ -153,13 +153,13 @@ namespace System.Net.Sockets
                 // Synchronous success.
                 if (_currentSocket.SafeHandle.SkipCompletionPortOnSuccess)
                 {
-                    // The socket handle is configured to skip completion on success, 
+                    // The socket handle is configured to skip completion on success,
                     // so we can set the results right now.
                     FreeNativeOverlapped(overlapped);
                     FinishOperationSyncSuccess(bytesTransferred, SocketFlags.None);
                     return SocketError.Success;
                 }
-                
+
                 // Completed synchronously, but the handle wasn't marked as skip completion port on success,
                 // so we still need to fall through and behave as if the IO was pending.
             }
@@ -199,7 +199,7 @@ namespace System.Net.Sockets
                 // Synchronous success.
                 if (_currentSocket.SafeHandle.SkipCompletionPortOnSuccess)
                 {
-                    // The socket handle is configured to skip completion on success, 
+                    // The socket handle is configured to skip completion on success,
                     // so we can set the results right now.
                     _singleBufferHandleState = SingleBufferHandleState.None;
                     FreeNativeOverlapped(overlapped);
@@ -325,7 +325,7 @@ namespace System.Net.Sockets
             }
         }
 
-        internal SocketError DoOperationReceive(SafeSocketHandle handle, CancellationToken cancellationToken) => _bufferList == null ? 
+        internal SocketError DoOperationReceive(SafeSocketHandle handle, CancellationToken cancellationToken) => _bufferList == null ?
             DoOperationReceiveSingleBuffer(handle, cancellationToken) :
             DoOperationReceiveMultiBuffer(handle);
 
@@ -387,7 +387,7 @@ namespace System.Net.Sockets
 
         internal unsafe SocketError DoOperationReceiveFrom(SafeSocketHandle handle)
         {
-            // WSARecvFrom uses a WSABuffer array describing buffers in which to 
+            // WSARecvFrom uses a WSABuffer array describing buffers in which to
             // receive data and from which to send data respectively. Single and multiple buffers
             // are handled differently so as to optimize performance for the more common single buffer case.
             // WSARecvFrom and WSASendTo also uses a sockaddr buffer in which to store the address from which the data was received.
@@ -463,7 +463,7 @@ namespace System.Net.Sockets
         {
             // WSARecvMsg uses a WSAMsg descriptor.
             // The WSAMsg buffer is pinned with a GCHandle to avoid complicating the use of Overlapped.
-            // WSAMsg contains a pointer to a sockaddr.  
+            // WSAMsg contains a pointer to a sockaddr.
             // The sockaddr is pinned with a GCHandle to avoid complicating the use of Overlapped.
             // WSAMsg contains a pointer to a WSABuffer array describing data buffers.
             // WSAMsg also contains a single WSABuffer describing a control buffer.
@@ -748,7 +748,7 @@ namespace System.Net.Sockets
 
         internal unsafe SocketError DoOperationSendTo(SafeSocketHandle handle)
         {
-            // WSASendTo uses a WSABuffer array describing buffers in which to 
+            // WSASendTo uses a WSABuffer array describing buffers in which to
             // receive data and from which to send data respectively. Single and multiple buffers
             // are handled differently so as to optimize performance for the more common single buffer case.
             //
@@ -1107,8 +1107,13 @@ namespace System.Net.Sockets
             int localAddrLength;
             IntPtr remoteAddr;
 
+            bool refAdded = false;
+            SafeHandle safeHandle = _currentSocket.SafeHandle;
             try
             {
+                safeHandle.DangerousAddRef(ref refAdded);
+                IntPtr handle = safeHandle.DangerousGetHandle();
+
                 Debug.Assert(_singleBufferHandleState == SingleBufferHandleState.Set);
                 bool userBuffer = _count >= _acceptAddressBufferCount;
 
@@ -1123,9 +1128,6 @@ namespace System.Net.Sockets
                     out remoteSocketAddress.InternalSize
                     );
                 Marshal.Copy(remoteAddr, remoteSocketAddress.Buffer, 0, remoteSocketAddress.Size);
-
-                // Set the socket context.
-                IntPtr handle = _currentSocket.SafeHandle.DangerousGetHandle();
 
                 socketError = Interop.Winsock.setsockopt(
                     _acceptSocket.SafeHandle,
@@ -1142,6 +1144,13 @@ namespace System.Net.Sockets
             catch (ObjectDisposedException)
             {
                 socketError = SocketError.OperationAborted;
+            }
+            finally
+            {
+                if (refAdded)
+                {
+                    safeHandle.DangerousRelease();
+                }
             }
 
             return socketError;
@@ -1276,7 +1285,7 @@ namespace System.Net.Sockets
                     {
                         // The Async IO completed with a failure.
                         // here we need to call WSAGetOverlappedResult() just so GetLastSocketError() will return the correct error.
-                        bool success = Interop.Winsock.WSAGetOverlappedResult(
+                        Interop.Winsock.WSAGetOverlappedResult(
                             _currentSocket.SafeHandle,
                             nativeOverlapped,
                             out numBytes,

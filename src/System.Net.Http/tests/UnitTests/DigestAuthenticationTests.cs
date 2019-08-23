@@ -1,9 +1,10 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Net.Http.Tests
@@ -47,7 +48,7 @@ namespace System.Net.Http.Tests
         [InlineData("realm=\"NetCore\", nonce=\"qMRqWgAAAAAQMjIABgAAAFwEiEwAAAAA\"", true)]
         [InlineData("nonce=\"qMRqWgAAAAAQMjIABgAAAFwEiEwAAAAA\", qop=\"auth\", stale=false", false)]
         [InlineData("realm=\"NetCore\", qop=\"auth\", stale=false", false)]
-        public async void DigestResponse_AuthToken_Handling(string response, bool expectedResult)
+        public async Task DigestResponse_AuthToken_Handling(string response, bool expectedResult)
         {
             NetworkCredential credential = new NetworkCredential("foo", "bar");
             AuthenticationHelper.DigestResponse digestResponse = new AuthenticationHelper.DigestResponse(response);
@@ -63,7 +64,7 @@ namespace System.Net.Http.Tests
         [InlineData("test\"example.org", "username=\"test\\\"example.org\"")]
         [InlineData("t\u00E6st", "username*=utf-8''t%C3%A6st")]
         [InlineData("\uD834\uDD1E", "username*=utf-8''%F0%9D%84%9E")]
-        public async void DigestResponse_UserName_Encoding(string username, string encodedUserName)
+        public async Task DigestResponse_UserName_Encoding(string username, string encodedUserName)
         {
             NetworkCredential credential = new NetworkCredential(username, "bar");
             AuthenticationHelper.DigestResponse digestResponse = new AuthenticationHelper.DigestResponse("realm=\"NetCore\", nonce=\"qMRqWgAAAAAQMjIABgAAAFwEiEwAAAAA\"");
@@ -84,18 +85,18 @@ namespace System.Net.Http.Tests
 
         [Theory]
         [MemberData(nameof(DigestResponse_ShouldSendQop_TestData))]
-        public async void DigestResponse_ShouldSendQop(string response, string match, string doesNotMatch, int fieldCount)
+        public async Task DigestResponse_ShouldSendQop(string response, string match, string doesNotMatch, int fieldCount)
         {
             NetworkCredential credential = new NetworkCredential("foo", "bar");
             AuthenticationHelper.DigestResponse digestResponse = new AuthenticationHelper.DigestResponse(response);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://microsoft.com/");
             string parameter = await AuthenticationHelper.GetDigestTokenForCredential(credential, request, digestResponse).ConfigureAwait(false);
             if (match != null)
-            { 
+            {
                 Assert.Matches(match, parameter);
             }
             if (doesNotMatch != null)
-            { 
+            {
                 Assert.DoesNotMatch(doesNotMatch, parameter);
             }
             Assert.Equal(fieldCount, parameter.Split(',').Length);

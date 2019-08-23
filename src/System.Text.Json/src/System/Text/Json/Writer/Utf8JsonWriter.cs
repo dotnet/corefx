@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -19,21 +19,21 @@ namespace System.Text.Json
     /// Provides a high-performance API for forward-only, non-cached writing of UTF-8 encoded JSON text.
     /// </summary>
     /// <remarks>
-    /// It writes the text sequentially with no caching and adheres to the JSON RFC
-    /// by default (https://tools.ietf.org/html/rfc8259), with the exception of writing comments.
+    ///   <para>
+    ///     It writes the text sequentially with no caching and adheres to the JSON RFC
+    ///     by default (https://tools.ietf.org/html/rfc8259), with the exception of writing comments.
+    ///   </para>
+    ///   <para>
+    ///     When the user attempts to write invalid JSON and validation is enabled, it throws
+    ///     an <see cref="InvalidOperationException"/> with a context specific error message.
+    ///   </para>
+    ///   <para>
+    ///     To be able to format the output with indentation and whitespace OR to skip validation, create an instance of
+    ///     <see cref="JsonWriterOptions"/> and pass that in to the writer.
+    ///   </para>
     /// </remarks>
-    /// <remarks>
-    /// When the user attempts to write invalid JSON and validation is enabled, it throws
-    /// an <see cref="InvalidOperationException"/> with a context specific error message.
-    /// </remarks>
-    /// <remarks>
-    /// To be able to format the output with indentation and whitespace OR to skip validation, create an instance of 
-    /// <see cref="JsonWriterOptions"/> and pass that in to the writer.
-    /// </remarks>
-    public sealed partial class Utf8JsonWriter : IDisposable
-#if BUILDING_INBOX_LIBRARY
-        , IAsyncDisposable
-#endif
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
+    public sealed partial class Utf8JsonWriter : IDisposable, IAsyncDisposable
     {
         // Depending on OS, either '\r\n' OR '\n'
         private static readonly int s_newLineLength = Environment.NewLine.Length;
@@ -48,7 +48,6 @@ namespace System.Text.Json
         private Memory<byte> _memory;
 
         private bool _inObject;
-        private bool _isNotPrimitive;
         private JsonTokenType _tokenType;
         private BitStack _bitStack;
 
@@ -56,6 +55,8 @@ namespace System.Text.Json
         // if (_currentDepth >> 31) == 1, add a list separator before writing the item
         // else, no list separator is needed since we are writing the first item.
         private int _currentDepth;
+
+        private JsonWriterOptions _options; // Since JsonWriterOptions is a struct, use a field to avoid a copy for internal code.
 
         /// <summary>
         /// Returns the amount of bytes written by the <see cref="Utf8JsonWriter"/> so far
@@ -77,7 +78,13 @@ namespace System.Text.Json
         /// the <see cref="Utf8JsonWriter"/> which indicates whether to format the output
         /// while writing and whether to skip structural JSON validation or not.
         /// </summary>
-        public JsonWriterOptions Options { get; }
+        public JsonWriterOptions Options
+        {
+            get
+            {
+                return _options;
+            }
+        }
 
         private int Indentation => CurrentDepth * JsonConstants.SpacesPerIndent;
 
@@ -92,7 +99,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="bufferWriter">An instance of <see cref="IBufferWriter{Byte}" /> used as a destination for writing JSON text into.</param>
         /// <param name="options">Defines the customized behavior of the <see cref="Utf8JsonWriter"/>
-        /// By default, the <see cref="Utf8JsonWriter"/> writes JSON minimized (i.e. with no extra whitespace)
+        /// By default, the <see cref="Utf8JsonWriter"/> writes JSON minimized (that is, with no extra whitespace)
         /// and validates that the JSON being written is structurally valid according to JSON RFC.</param>
         /// <exception cref="ArgumentNullException">
         /// Thrown when the instance of <see cref="IBufferWriter{Byte}" /> that is passed in is null.
@@ -108,10 +115,9 @@ namespace System.Text.Json
             _memory = default;
 
             _inObject = default;
-            _isNotPrimitive = default;
             _tokenType = default;
             _currentDepth = default;
-            Options = options;
+            _options = options;
 
             // Only allocate if the user writes a JSON payload beyond the depth that the _allocationFreeContainer can handle.
             // This way we avoid allocations in the common, default cases, and allocate lazily.
@@ -123,7 +129,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="utf8Json">An instance of <see cref="Stream" /> used as a destination for writing JSON text into.</param>
         /// <param name="options">Defines the customized behavior of the <see cref="Utf8JsonWriter"/>
-        /// By default, the <see cref="Utf8JsonWriter"/> writes JSON minimized (i.e. with no extra whitespace)
+        /// By default, the <see cref="Utf8JsonWriter"/> writes JSON minimized (that is, with no extra whitespace)
         /// and validates that the JSON being written is structurally valid according to JSON RFC.</param>
         /// <exception cref="ArgumentNullException">
         /// Thrown when the instance of <see cref="Stream" /> that is passed in is null.
@@ -144,10 +150,9 @@ namespace System.Text.Json
             _memory = default;
 
             _inObject = default;
-            _isNotPrimitive = default;
             _tokenType = default;
             _currentDepth = default;
-            Options = options;
+            _options = options;
 
             // Only allocate if the user writes a JSON payload beyond the depth that the _allocationFreeContainer can handle.
             // This way we avoid allocations in the common, default cases, and allocate lazily.
@@ -241,7 +246,6 @@ namespace System.Text.Json
             _memory = default;
 
             _inObject = default;
-            _isNotPrimitive = default;
             _tokenType = default;
             _currentDepth = default;
 
@@ -276,22 +280,28 @@ namespace System.Text.Json
         {
             CheckNotDisposed();
 
+            _memory = default;
+
             if (_stream != null)
             {
                 Debug.Assert(_arrayBufferWriter != null);
                 if (BytesPending != 0)
                 {
                     _arrayBufferWriter.Advance(BytesPending);
-                    Debug.Assert(BytesPending == _arrayBufferWriter.WrittenCount);
+                    BytesPending = 0;
+
 #if BUILDING_INBOX_LIBRARY
                     _stream.Write(_arrayBufferWriter.WrittenSpan);
 #else
                     Debug.Assert(_arrayBufferWriter.WrittenMemory.Length == _arrayBufferWriter.WrittenCount);
                     bool result = MemoryMarshal.TryGetArray(_arrayBufferWriter.WrittenMemory, out ArraySegment<byte> underlyingBuffer);
+                    Debug.Assert(result);
                     Debug.Assert(underlyingBuffer.Offset == 0);
                     Debug.Assert(_arrayBufferWriter.WrittenCount == underlyingBuffer.Count);
                     _stream.Write(underlyingBuffer.Array, underlyingBuffer.Offset, underlyingBuffer.Count);
 #endif
+
+                    BytesCommitted += _arrayBufferWriter.WrittenCount;
                     _arrayBufferWriter.Clear();
                 }
                 _stream.Flush();
@@ -302,23 +312,23 @@ namespace System.Text.Json
                 if (BytesPending != 0)
                 {
                     _output.Advance(BytesPending);
+                    BytesCommitted += BytesPending;
+                    BytesPending = 0;
                 }
             }
-
-            _memory = default;
-            BytesCommitted += BytesPending;
-            BytesPending = 0;
         }
 
         /// <summary>
         /// Commits any left over JSON text that has not yet been flushed and releases all resources used by the current instance.
         /// </summary>
         /// <remarks>
-        /// In the case of IBufferWriter, this advances the underlying <see cref="IBufferWriter{Byte}" /> based on what has been written so far.
-        /// In the case of Stream, this writes the data to the stream and flushes it.
-        /// </remarks>
-        /// <remarks>
-        /// The <see cref="Utf8JsonWriter"/> instance cannot be re-used after disposing.
+        ///   <para>
+        ///     In the case of IBufferWriter, this advances the underlying <see cref="IBufferWriter{Byte}" /> based on what has been written so far.
+        ///     In the case of Stream, this writes the data to the stream and flushes it.
+        ///   </para>
+        ///   <para>
+        ///     The <see cref="Utf8JsonWriter"/> instance cannot be re-used after disposing.
+        ///   </para>
         /// </remarks>
         public void Dispose()
         {
@@ -339,16 +349,17 @@ namespace System.Text.Json
             _output = null;
         }
 
-#if BUILDING_INBOX_LIBRARY
         /// <summary>
         /// Asynchronously commits any left over JSON text that has not yet been flushed and releases all resources used by the current instance.
         /// </summary>
         /// <remarks>
-        /// In the case of IBufferWriter, this advances the underlying <see cref="IBufferWriter{Byte}" /> based on what has been written so far.
-        /// In the case of Stream, this writes the data to the stream and flushes it.
-        /// </remarks>
-        /// <remarks>
-        /// The <see cref="Utf8JsonWriter"/> instance cannot be re-used after disposing.
+        ///   <para>
+        ///     In the case of IBufferWriter, this advances the underlying <see cref="IBufferWriter{Byte}" /> based on what has been written so far.
+        ///     In the case of Stream, this writes the data to the stream and flushes it.
+        ///   </para>
+        ///   <para>
+        ///     The <see cref="Utf8JsonWriter"/> instance cannot be re-used after disposing.
+        ///   </para>
         /// </remarks>
         public async ValueTask DisposeAsync()
         {
@@ -368,7 +379,6 @@ namespace System.Text.Json
             _arrayBufferWriter = null;
             _output = null;
         }
-#endif
 
         /// <summary>
         /// Asynchronously commits the JSON text written so far which makes it visible to the output destination.
@@ -384,22 +394,28 @@ namespace System.Text.Json
         {
             CheckNotDisposed();
 
+            _memory = default;
+
             if (_stream != null)
             {
                 Debug.Assert(_arrayBufferWriter != null);
                 if (BytesPending != 0)
                 {
                     _arrayBufferWriter.Advance(BytesPending);
-                    Debug.Assert(BytesPending == _arrayBufferWriter.WrittenCount);
+                    BytesPending = 0;
+
 #if BUILDING_INBOX_LIBRARY
                     await _stream.WriteAsync(_arrayBufferWriter.WrittenMemory, cancellationToken).ConfigureAwait(false);
 #else
                     Debug.Assert(_arrayBufferWriter.WrittenMemory.Length == _arrayBufferWriter.WrittenCount);
                     bool result = MemoryMarshal.TryGetArray(_arrayBufferWriter.WrittenMemory, out ArraySegment<byte> underlyingBuffer);
+                    Debug.Assert(result);
                     Debug.Assert(underlyingBuffer.Offset == 0);
                     Debug.Assert(_arrayBufferWriter.WrittenCount == underlyingBuffer.Count);
                     await _stream.WriteAsync(underlyingBuffer.Array, underlyingBuffer.Offset, underlyingBuffer.Count, cancellationToken).ConfigureAwait(false);
 #endif
+
+                    BytesCommitted += _arrayBufferWriter.WrittenCount;
                     _arrayBufferWriter.Clear();
                 }
                 await _stream.FlushAsync(cancellationToken).ConfigureAwait(false);
@@ -410,20 +426,18 @@ namespace System.Text.Json
                 if (BytesPending != 0)
                 {
                     _output.Advance(BytesPending);
+                    BytesCommitted += BytesPending;
+                    BytesPending = 0;
                 }
             }
-
-            _memory = default;
-            BytesCommitted += BytesPending;
-            BytesPending = 0;
         }
 
         /// <summary>
         /// Writes the beginning of a JSON array.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
-        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000
+        /// OR if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteStartArray()
         {
@@ -435,8 +449,8 @@ namespace System.Text.Json
         /// Writes the beginning of a JSON object.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
-        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000
+        /// OR if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteStartObject()
         {
@@ -449,7 +463,7 @@ namespace System.Text.Json
             if (CurrentDepth >= JsonConstants.MaxWriterDepth)
                 ThrowHelper.ThrowInvalidOperationException(ExceptionResource.DepthTooLarge, _currentDepth, token: default, tokenType: default);
 
-            if (Options.IndentedOrNotSkipValidation)
+            if (_options.IndentedOrNotSkipValidation)
             {
                 WriteStartSlow(token);
             }
@@ -460,7 +474,6 @@ namespace System.Text.Json
 
             _currentDepth &= JsonConstants.RemoveFlagsBitMask;
             _currentDepth++;
-            _isNotPrimitive = true;
         }
 
         private void WriteStartMinimized(byte token)
@@ -480,11 +493,11 @@ namespace System.Text.Json
 
         private void WriteStartSlow(byte token)
         {
-            Debug.Assert(Options.Indented || !Options.SkipValidation);
+            Debug.Assert(_options.Indented || !_options.SkipValidation);
 
-            if (Options.Indented)
+            if (_options.Indented)
             {
-                if (!Options.SkipValidation)
+                if (!_options.SkipValidation)
                 {
                     ValidateStart();
                     UpdateBitStackOnStart(token);
@@ -493,7 +506,7 @@ namespace System.Text.Json
             }
             else
             {
-                Debug.Assert(!Options.SkipValidation);
+                Debug.Assert(!_options.SkipValidation);
                 ValidateStart();
                 UpdateBitStackOnStart(token);
                 WriteStartMinimized(token);
@@ -504,13 +517,19 @@ namespace System.Text.Json
         {
             if (_inObject)
             {
-                Debug.Assert(_tokenType != JsonTokenType.None && _tokenType != JsonTokenType.StartArray);
-                ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotStartObjectArrayWithoutProperty, currentDepth: default, token: default, _tokenType);
+                if (_tokenType != JsonTokenType.PropertyName)
+                {
+                    Debug.Assert(_tokenType != JsonTokenType.None && _tokenType != JsonTokenType.StartArray);
+                    ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotStartObjectArrayWithoutProperty, currentDepth: default, token: default, _tokenType);
+                }
             }
             else
             {
+                Debug.Assert(_tokenType != JsonTokenType.PropertyName);
                 Debug.Assert(_tokenType != JsonTokenType.StartObject);
-                if (_tokenType != JsonTokenType.None && (!_isNotPrimitive || CurrentDepth == 0))
+
+                // It is more likely for CurrentDepth to not equal 0 when writing valid JSON, so check that first to rely on short-circuiting and return quickly.
+                if (CurrentDepth == 0 && _tokenType != JsonTokenType.None)
                 {
                     ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotStartObjectArrayAfterPrimitiveOrClose, currentDepth: default, token: default, _tokenType);
                 }
@@ -537,13 +556,15 @@ namespace System.Text.Json
                 output[BytesPending++] = JsonConstants.ListSeparator;
             }
 
-            if (_tokenType != JsonTokenType.None)
+            if (_tokenType != JsonTokenType.PropertyName)
             {
-                WriteNewLine(output);
+                if (_tokenType != JsonTokenType.None)
+                {
+                    WriteNewLine(output);
+                }
+                JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
+                BytesPending += indent;
             }
-
-            JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
-            BytesPending += indent;
 
             output[BytesPending++] = token;
         }
@@ -551,13 +572,10 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the beginning of a JSON array with a pre-encoded property name as the key.
         /// </summary>
-        /// <param name="propertyName">The JSON encoded property name of the JSON array to be transcoded and written as UTF-8.</param>
-        /// <remarks>
-        /// The property name should already be escaped when the instance of <see cref="JsonEncodedText"/> was created.
-        /// </remarks>
+        /// <param name="propertyName">The JSON-encoded name of the property to write.</param>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
-        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000
+        /// OR if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteStartArray(JsonEncodedText propertyName)
         {
@@ -568,13 +586,10 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the beginning of a JSON object with a pre-encoded property name as the key.
         /// </summary>
-        /// <param name="propertyName">The JSON encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
-        /// <remarks>
-        /// The property name should already be escaped when the instance of <see cref="JsonEncodedText"/> was created.
-        /// </remarks>
+        /// <param name="propertyName">The JSON-encoded name of the property to write.</param>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
-        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000
+        /// OR if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteStartObject(JsonEncodedText propertyName)
         {
@@ -584,7 +599,7 @@ namespace System.Text.Json
 
         private void WriteStartHelper(ReadOnlySpan<byte> utf8PropertyName, byte token)
         {
-            Debug.Assert(utf8PropertyName.Length <= JsonConstants.MaxTokenSize);
+            Debug.Assert(utf8PropertyName.Length <= JsonConstants.MaxUnescapedTokenSize);
 
             ValidateDepth();
 
@@ -592,7 +607,6 @@ namespace System.Text.Json
 
             _currentDepth &= JsonConstants.RemoveFlagsBitMask;
             _currentDepth++;
-            _isNotPrimitive = true;
         }
 
         /// <summary>
@@ -606,8 +620,8 @@ namespace System.Text.Json
         /// Thrown when the specified property name is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
-        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000
+        /// OR if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteStartArray(ReadOnlySpan<byte> utf8PropertyName)
         {
@@ -617,7 +631,6 @@ namespace System.Text.Json
 
             _currentDepth &= JsonConstants.RemoveFlagsBitMask;
             _currentDepth++;
-            _isNotPrimitive = true;
             _tokenType = JsonTokenType.StartArray;
         }
 
@@ -632,8 +645,8 @@ namespace System.Text.Json
         /// Thrown when the specified property name is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
-        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000
+        /// OR if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteStartObject(ReadOnlySpan<byte> utf8PropertyName)
         {
@@ -643,13 +656,12 @@ namespace System.Text.Json
 
             _currentDepth &= JsonConstants.RemoveFlagsBitMask;
             _currentDepth++;
-            _isNotPrimitive = true;
             _tokenType = JsonTokenType.StartObject;
         }
 
         private void WriteStartEscape(ReadOnlySpan<byte> utf8PropertyName, byte token)
         {
-            int propertyIdx = JsonWriterHelper.NeedsEscaping(utf8PropertyName);
+            int propertyIdx = JsonWriterHelper.NeedsEscaping(utf8PropertyName, _options.Encoder);
 
             Debug.Assert(propertyIdx >= -1 && propertyIdx < utf8PropertyName.Length);
 
@@ -667,7 +679,7 @@ namespace System.Text.Json
         {
             ValidateWritingProperty(token);
 
-            if (Options.Indented)
+            if (_options.Indented)
             {
                 WritePropertyNameIndented(utf8PropertyName, token);
             }
@@ -690,7 +702,7 @@ namespace System.Text.Json
                 stackalloc byte[length] :
                 (propertyArray = ArrayPool<byte>.Shared.Rent(length));
 
-            JsonWriterHelper.EscapeString(utf8PropertyName, escapedPropertyName, firstEscapeIndexProp, out int written);
+            JsonWriterHelper.EscapeString(utf8PropertyName, escapedPropertyName, firstEscapeIndexProp, _options.Encoder, out int written);
 
             WriteStartByOptions(escapedPropertyName.Slice(0, written), token);
 
@@ -703,41 +715,47 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the beginning of a JSON array with a property name as the key.
         /// </summary>
-        /// <param name="propertyName">The property name of the JSON array to be transcoded and written as UTF-8.</param>
+        /// <param name="propertyName">The name of the property to write.</param>
         /// <remarks>
         /// The property name is escaped before writing.
         /// </remarks>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// The <paramref name="propertyName"/> parameter is <see langword="null"/>.
+        /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
-        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000
+        /// OR if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteStartArray(string propertyName)
-            => WriteStartArray(propertyName.AsSpan());
+            => WriteStartArray((propertyName ?? throw new ArgumentNullException(nameof(propertyName))).AsSpan());
 
         /// <summary>
         /// Writes the beginning of a JSON object with a property name as the key.
         /// </summary>
-        /// <param name="propertyName">The property name of the JSON object to be transcoded and written as UTF-8.</param>
+        /// <param name="propertyName">The name of the property to write.</param>
         /// <remarks>
         /// The property name is escaped before writing.
         /// </remarks>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// The <paramref name="propertyName"/> parameter is <see langword="null"/>.
+        /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
-        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000
+        /// OR if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteStartObject(string propertyName)
-            => WriteStartObject(propertyName.AsSpan());
+            => WriteStartObject((propertyName ?? throw new ArgumentNullException(nameof(propertyName))).AsSpan());
 
         /// <summary>
         /// Writes the beginning of a JSON array with a property name as the key.
         /// </summary>
-        /// <param name="propertyName">The property name of the JSON array to be transcoded and written as UTF-8.</param>
+        /// <param name="propertyName">The name of the property to write.</param>
         /// <remarks>
         /// The property name is escaped before writing.
         /// </remarks>
@@ -745,8 +763,8 @@ namespace System.Text.Json
         /// Thrown when the specified property name is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
-        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000
+        /// OR if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteStartArray(ReadOnlySpan<char> propertyName)
         {
@@ -756,14 +774,13 @@ namespace System.Text.Json
 
             _currentDepth &= JsonConstants.RemoveFlagsBitMask;
             _currentDepth++;
-            _isNotPrimitive = true;
             _tokenType = JsonTokenType.StartArray;
         }
 
         /// <summary>
         /// Writes the beginning of a JSON object with a property name as the key.
         /// </summary>
-        /// <param name="propertyName">The property name of the JSON object to be transcoded and written as UTF-8.</param>
+        /// <param name="propertyName">The name of the property to write.</param>
         /// <remarks>
         /// The property name is escaped before writing.
         /// </remarks>
@@ -771,8 +788,8 @@ namespace System.Text.Json
         /// Thrown when the specified property name is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
-        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000
+        /// OR if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteStartObject(ReadOnlySpan<char> propertyName)
         {
@@ -782,13 +799,12 @@ namespace System.Text.Json
 
             _currentDepth &= JsonConstants.RemoveFlagsBitMask;
             _currentDepth++;
-            _isNotPrimitive = true;
             _tokenType = JsonTokenType.StartObject;
         }
 
         private void WriteStartEscape(ReadOnlySpan<char> propertyName, byte token)
         {
-            int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
+            int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName, _options.Encoder);
 
             Debug.Assert(propertyIdx >= -1 && propertyIdx < propertyName.Length);
 
@@ -806,7 +822,7 @@ namespace System.Text.Json
         {
             ValidateWritingProperty(token);
 
-            if (Options.Indented)
+            if (_options.Indented)
             {
                 WritePropertyNameIndented(propertyName, token);
             }
@@ -829,7 +845,7 @@ namespace System.Text.Json
                 stackalloc char[length] :
                 (propertyArray = ArrayPool<char>.Shared.Rent(length));
 
-            JsonWriterHelper.EscapeString(propertyName, escapedPropertyName, firstEscapeIndexProp, out int written);
+            JsonWriterHelper.EscapeString(propertyName, escapedPropertyName, firstEscapeIndexProp, _options.Encoder, out int written);
 
             WriteStartByOptions(escapedPropertyName.Slice(0, written), token);
 
@@ -843,7 +859,7 @@ namespace System.Text.Json
         /// Writes the end of a JSON array.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteEndArray()
         {
@@ -855,7 +871,7 @@ namespace System.Text.Json
         /// Writes the end of a JSON object.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteEndObject()
         {
@@ -865,7 +881,7 @@ namespace System.Text.Json
 
         private void WriteEnd(byte token)
         {
-            if (Options.IndentedOrNotSkipValidation)
+            if (_options.IndentedOrNotSkipValidation)
             {
                 WriteEndSlow(token);
             }
@@ -895,11 +911,11 @@ namespace System.Text.Json
 
         private void WriteEndSlow(byte token)
         {
-            Debug.Assert(Options.Indented || !Options.SkipValidation);
+            Debug.Assert(_options.Indented || !_options.SkipValidation);
 
-            if (Options.Indented)
+            if (_options.Indented)
             {
-                if (!Options.SkipValidation)
+                if (!_options.SkipValidation)
                 {
                     ValidateEnd(token);
                 }
@@ -907,7 +923,7 @@ namespace System.Text.Json
             }
             else
             {
-                Debug.Assert(!Options.SkipValidation);
+                Debug.Assert(!_options.SkipValidation);
                 ValidateEnd(token);
                 WriteEndMinimized(token);
             }
@@ -915,15 +931,15 @@ namespace System.Text.Json
 
         private void ValidateEnd(byte token)
         {
-            if (_bitStack.CurrentDepth <= 0)
-                ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MismatchedObjectArray, currentDepth: default, token, tokenType: default);
+            if (_bitStack.CurrentDepth <= 0 || _tokenType == JsonTokenType.PropertyName)
+                ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MismatchedObjectArray, currentDepth: default, token, _tokenType);
 
             if (token == JsonConstants.CloseBracket)
             {
                 if (_inObject)
                 {
                     Debug.Assert(_tokenType != JsonTokenType.None);
-                    ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MismatchedObjectArray, currentDepth: default, token, tokenType: default);
+                    ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MismatchedObjectArray, currentDepth: default, token, _tokenType);
                 }
             }
             else
@@ -932,7 +948,7 @@ namespace System.Text.Json
 
                 if (!_inObject)
                 {
-                    ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MismatchedObjectArray, currentDepth: default, token, tokenType: default);
+                    ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MismatchedObjectArray, currentDepth: default, token, _tokenType);
                 }
             }
 
@@ -959,7 +975,7 @@ namespace System.Text.Json
                 }
 
                 Debug.Assert(indent <= 2 * JsonConstants.MaxWriterDepth);
-                Debug.Assert(Options.SkipValidation || _tokenType != JsonTokenType.None);
+                Debug.Assert(_options.SkipValidation || _tokenType != JsonTokenType.None);
 
                 int maxRequired = indent + 3; // 1 end token, 1-2 bytes for new line
 
@@ -1024,22 +1040,7 @@ namespace System.Text.Json
             {
                 Debug.Assert(_arrayBufferWriter != null);
 
-                _arrayBufferWriter.Advance(BytesPending);
-
-                Debug.Assert(BytesPending == _arrayBufferWriter.WrittenCount);
-
-#if BUILDING_INBOX_LIBRARY
-                _stream.Write(_arrayBufferWriter.WrittenSpan);
-#else
-                Debug.Assert(_arrayBufferWriter.WrittenMemory.Length == _arrayBufferWriter.WrittenCount);
-                bool result = MemoryMarshal.TryGetArray(_arrayBufferWriter.WrittenMemory, out ArraySegment<byte> underlyingBuffer);
-                Debug.Assert(underlyingBuffer.Offset == 0);
-                Debug.Assert(_arrayBufferWriter.WrittenCount == underlyingBuffer.Count);
-                _stream.Write(underlyingBuffer.Array, underlyingBuffer.Offset, underlyingBuffer.Count);
-#endif
-                _arrayBufferWriter.Clear();
-
-                _memory = _arrayBufferWriter.GetMemory(sizeHint);
+                _memory = _arrayBufferWriter.GetMemory(checked(BytesPending + sizeHint));
 
                 Debug.Assert(_memory.Length >= sizeHint);
             }
@@ -1048,6 +1049,8 @@ namespace System.Text.Json
                 Debug.Assert(_output != null);
 
                 _output.Advance(BytesPending);
+                BytesCommitted += BytesPending;
+                BytesPending = 0;
 
                 _memory = _output.GetMemory(sizeHint);
 
@@ -1056,9 +1059,6 @@ namespace System.Text.Json
                     ThrowHelper.ThrowInvalidOperationException_NeedLargerSpan();
                 }
             }
-
-            BytesCommitted += BytesPending;
-            BytesPending = 0;
         }
 
         private void FirstCallToGetMemory(int requiredSize)
@@ -1071,7 +1071,6 @@ namespace System.Text.Json
             if (_stream != null)
             {
                 Debug.Assert(_arrayBufferWriter != null);
-                Debug.Assert(BytesPending == _arrayBufferWriter.WrittenCount);
                 _memory = _arrayBufferWriter.GetMemory(sizeHint);
                 Debug.Assert(_memory.Length >= sizeHint);
             }
@@ -1091,5 +1090,8 @@ namespace System.Text.Json
         {
             _currentDepth |= 1 << 31;
         }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private string DebuggerDisplay => $"BytesCommitted = {BytesCommitted} BytesPending = {BytesPending} CurrentDepth = {CurrentDepth}";
     }
 }

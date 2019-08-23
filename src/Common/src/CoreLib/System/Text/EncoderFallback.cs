@@ -23,7 +23,7 @@ namespace System.Text
                 if (s_replacementFallback == null)
                     Interlocked.CompareExchange<EncoderFallback?>(ref s_replacementFallback, new EncoderReplacementFallback(), null);
 
-                return s_replacementFallback!; // TODO-NULLABLE: Remove ! when compiler specially-recognizes CompareExchange for nullability
+                return s_replacementFallback;
             }
         }
 
@@ -35,7 +35,7 @@ namespace System.Text
                 if (s_exceptionFallback == null)
                     Interlocked.CompareExchange<EncoderFallback?>(ref s_exceptionFallback, new EncoderExceptionFallback(), null);
 
-                return s_exceptionFallback!; // TODO-NULLABLE: Remove ! when compiler specially-recognizes CompareExchange for nullability
+                return s_exceptionFallback;
             }
         }
 
@@ -318,7 +318,7 @@ namespace System.Text
         // Note that this could also change the contents of this.encoder, which is the same
         // object that the caller is using, so the caller could mess up the encoder for us
         // if they aren't careful.
-        internal unsafe virtual bool InternalFallback(char ch, ref char* chars)
+        internal virtual unsafe bool InternalFallback(char ch, ref char* chars)
         {
             // Shouldn't have null charStart
             Debug.Assert(charStart != null,

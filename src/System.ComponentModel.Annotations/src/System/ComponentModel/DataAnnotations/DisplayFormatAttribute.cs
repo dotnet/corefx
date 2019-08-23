@@ -11,7 +11,7 @@ namespace System.ComponentModel.DataAnnotations
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
     public class DisplayFormatAttribute : Attribute
     {
-        private readonly LocalizableString _nullDisplayText = new LocalizableString("NullDisplayText");
+        private readonly LocalizableString _nullDisplayText = new LocalizableString(nameof(NullDisplayText));
 
         /// <summary>
         ///     Default constructor
@@ -73,7 +73,7 @@ namespace System.ComponentModel.DataAnnotations
         ///     Using <see cref="NullDisplayTextResourceType" /> along with <see cref="NullDisplayText" />, allows the <see cref="GetNullDisplayText" />
         ///     method to return localized values.
         /// </summary>
-		public Type NullDisplayTextResourceType
+        public Type NullDisplayTextResourceType
         {
             get => _nullDisplayText.ResourceType;
             set => _nullDisplayText.ResourceType = value;

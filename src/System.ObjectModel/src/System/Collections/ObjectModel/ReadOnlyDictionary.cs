@@ -235,7 +235,7 @@ namespace System.Collections.ObjectModel
         private struct DictionaryEnumerator : IDictionaryEnumerator
         {
             private readonly IDictionary<TKey, TValue> _dictionary;
-            private IEnumerator<KeyValuePair<TKey, TValue>> _enumerator;
+            private readonly IEnumerator<KeyValuePair<TKey, TValue>> _enumerator;
 
             public DictionaryEnumerator(IDictionary<TKey, TValue> dictionary)
             {
@@ -410,7 +410,7 @@ namespace System.Collections.ObjectModel
             }
             else
             {
-                // We can't cast array of value type to object[], so we don't support 
+                // We can't cast array of value type to object[], so we don't support
                 // widening of primitive types here.
                 object[] objects = array as object[];
                 if (objects == null)

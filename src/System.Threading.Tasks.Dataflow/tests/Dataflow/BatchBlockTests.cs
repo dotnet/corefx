@@ -287,10 +287,10 @@ namespace System.Threading.Tasks.Dataflow.Tests
 
                 Task<bool> secondSend = batch.SendAsync(3 + trial);
 
-                Assert.Equal(expected: true, actual: await firstSend);
-                Assert.Equal(expected: true, actual: await secondSend);
+                Assert.True(await firstSend);
+                Assert.True(await secondSend);
 
-                Assert.Equal(expected: true, actual: await batch.OutputAvailableAsync());
+                Assert.True(await batch.OutputAvailableAsync());
                 Assert.Equal(expected: 1, actual: batch.OutputCount);
                 int[] result = await batch.ReceiveAsync();
                 Assert.NotNull(result);
@@ -487,8 +487,8 @@ namespace System.Threading.Tasks.Dataflow.Tests
         [Fact]
         public async Task TestPrecancellation()
         {
-            var b = new BatchBlock<int>(42, new GroupingDataflowBlockOptions { 
-                CancellationToken = new CancellationToken(canceled: true), MaxNumberOfGroups = 1 
+            var b = new BatchBlock<int>(42, new GroupingDataflowBlockOptions {
+                CancellationToken = new CancellationToken(canceled: true), MaxNumberOfGroups = 1
             });
 
             Assert.Equal(expected: 42, actual: b.BatchSize);
@@ -557,7 +557,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             {
                 for (int itemsPerBatch = 1; itemsPerBatch <= 3; itemsPerBatch += 2)
                 {
-                    var batch = new BatchBlock<int>(itemsPerBatch, 
+                    var batch = new BatchBlock<int>(itemsPerBatch,
                         new GroupingDataflowBlockOptions { MaxNumberOfGroups = maxNumberOfGroups, Greedy = greedy });
 
                     // Feed all N batches; all should succeed
@@ -684,7 +684,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                 Assert.Equal(expected: 0, actual: b.OutputCount);
                 b.TriggerBatch();
                 Assert.Equal(expected: 1, actual: b.OutputCount);
-                
+
                 int[] results;
                 Assert.True(b.TryReceive(out results));
                 Assert.Equal(expected: queuedBeforeTrigger, actual: results.Length);

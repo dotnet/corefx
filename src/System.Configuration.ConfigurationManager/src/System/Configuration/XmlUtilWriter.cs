@@ -13,7 +13,7 @@ namespace System.Configuration
     // When this class is used to copy an XML document that may include a "<!DOCTYPE" directive,
     // we must track what is written until the "<!DOCTYPE" or first document element is found.
     // This is needed because the XML reader does not give us accurate spacing information
-    // for the beginning of the "<!DOCTYPE" element. 
+    // for the beginning of the "<!DOCTYPE" element.
     //
     // Note that tracking this information is expensive, as it requires a scan of everything that is written
     // until "<!DOCTYPE" or the first element is found.
@@ -25,18 +25,11 @@ namespace System.Configuration
         private const char Space = ' ';
         private const string NewLine = "\r\n";
 
-        private static readonly string s_spaces8;
-        private static readonly string s_spaces4;
-        private static readonly string s_spaces2;
+        private static readonly string s_spaces8 = new string(Space, 8);
+        private static readonly string s_spaces4 = new string(Space, 4);
+        private static readonly string s_spaces2 = new string(Space, 2);
         private readonly Stream _baseStream; // stream under TextWriter when tracking position
         private object _lineStartCheckpoint; // checkpoint taken at the start of each line
-
-        static XmlUtilWriter()
-        {
-            s_spaces8 = new string(Space, 8);
-            s_spaces4 = new string(Space, 4);
-            s_spaces2 = new string(Space, 2);
-        }
 
         internal XmlUtilWriter(TextWriter writer, bool trackPosition)
         {
@@ -224,7 +217,7 @@ namespace System.Configuration
             int charactersWritten = 0;
             char quote = reader.QuoteChar;
 
-            // In !DOCTYPE, quote is '\0' for second public attribute. 
+            // In !DOCTYPE, quote is '\0' for second public attribute.
             // Protect ourselves from writing invalid XML by always
             // supplying a valid quote char.
             if ((quote != '"') && (quote != '\'')) quote = '"';

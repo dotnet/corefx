@@ -349,7 +349,7 @@ namespace System.ServiceModel.Syndication
             else if (reader.IsStartElement(Atom10Constants.SourceFeedTag, Atom10Constants.Atom10Namespace))
             {
                 reader.ReadStartElement();
-                result.SourceFeed = ReadFeedFrom(reader, new SyndicationFeed(), true); //  isSourceFeed 
+                result.SourceFeed = ReadFeedFrom(reader, new SyndicationFeed(), true); //  isSourceFeed
                 reader.ReadEndElement();
             }
             else if (reader.IsStartElement(Atom10Constants.SummaryTag, Atom10Constants.Atom10Namespace))
@@ -560,21 +560,13 @@ namespace System.ServiceModel.Syndication
                 type = Atom10Constants.PlaintextType;
             }
 
-            TextSyndicationContentKind kind;
-            switch (type)
+            TextSyndicationContentKind kind = type switch
             {
-                case Atom10Constants.PlaintextType:
-                    kind = TextSyndicationContentKind.Plaintext;
-                    break;
-                case Atom10Constants.HtmlType:
-                    kind = TextSyndicationContentKind.Html;
-                    break;
-                case Atom10Constants.XHtmlType:
-                    kind = TextSyndicationContentKind.XHtml;
-                    break;
-                default:
-                    throw new XmlException(FeedUtils.AddLineInfo(reader, SR.Format(SR.Atom10SpecRequiresTextConstruct, context, type)));
-            }
+                Atom10Constants.PlaintextType => TextSyndicationContentKind.Plaintext,
+                Atom10Constants.HtmlType => TextSyndicationContentKind.Html,
+                Atom10Constants.XHtmlType => TextSyndicationContentKind.XHtml,
+                _ => throw new XmlException(FeedUtils.AddLineInfo(reader, SR.Format(SR.Atom10SpecRequiresTextConstruct, context, type))),
+            };
 
             Dictionary<XmlQualifiedName, string> attrs = null;
             if (reader.HasAttributes)
@@ -778,7 +770,7 @@ namespace System.ServiceModel.Syndication
                             {
                                 feedItems = feedItems ?? new NullNotAllowedCollection<SyndicationItem>();
                                 IEnumerable<SyndicationItem> items = ReadItems(reader, result, out areAllItemsRead);
-                                foreach(SyndicationItem item in items)
+                                foreach (SyndicationItem item in items)
                                 {
                                     feedItems.Add(item);
                                 }

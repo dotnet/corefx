@@ -15,6 +15,8 @@ namespace System.Net.NetworkInformation
 {
     public partial class Ping
     {
+        private const int MaxUdpPacket = 0xFFFF + 256; // Marshal.SizeOf(typeof(Icmp6EchoReply)) * 2 + ip header info;
+
         private static readonly SafeWaitHandle s_nullSafeWaitHandle = new SafeWaitHandle(IntPtr.Zero, true);
         private static readonly object s_socketInitializationLock = new object();
         private static bool s_socketInitialized;
@@ -89,7 +91,9 @@ namespace System.Net.NetworkInformation
                 if (!isAsync || error != Interop.IpHlpApi.ERROR_IO_PENDING)
                 {
                     Cleanup(isAsync);
-                    throw new Win32Exception(error);
+
+                    IPStatus status = GetStatusFromCode(error);
+                    return Task.FromResult(new PingReply(address, default, status, default, Array.Empty<byte>()));
                 }
             }
 
@@ -320,12 +324,25 @@ namespace System.Net.NetworkInformation
             }
         }
 
+        private static IPStatus GetStatusFromCode(int statusCode)
+        {
+            // Caveat lector: IcmpSendEcho2 doesn't allow us to know for sure if an error code
+            // is an IP Status code or a general win32 error code. This assumes everything under
+            // the base is a win32 error, and everything beyond is an IPStatus.
+            if (statusCode != 0 && statusCode < Interop.IpHlpApi.IP_STATUS_BASE)
+            {
+                throw new Win32Exception(statusCode);
+            }
+
+            return (IPStatus)statusCode;
+        }
+
         private static PingReply CreatePingReplyFromIcmpEchoReply(Interop.IpHlpApi.IcmpEchoReply reply)
         {
             const int DontFragmentFlag = 2;
 
             IPAddress address = new IPAddress(reply.address);
-            IPStatus ipStatus = (IPStatus)reply.status; // The icmpsendecho IP status codes.
+            IPStatus ipStatus = GetStatusFromCode((int)reply.status);
 
             long rtt;
             PingOptions options;
@@ -352,7 +369,7 @@ namespace System.Net.NetworkInformation
         private static PingReply CreatePingReplyFromIcmp6EchoReply(Interop.IpHlpApi.Icmp6EchoReply reply, IntPtr dataPtr, int sendSize)
         {
             IPAddress address = new IPAddress(reply.Address.Address, reply.Address.ScopeID);
-            IPStatus ipStatus = (IPStatus)reply.Status; // The icmpsendecho IP status codes.
+            IPStatus ipStatus = GetStatusFromCode((int)reply.Status);
 
             long rtt;
             byte[] buffer;
@@ -381,7 +398,7 @@ namespace System.Net.NetworkInformation
                 {
                     if (!s_socketInitialized)
                     {
-                        // Ensure that WSAStartup has been called once per process.  
+                        // Ensure that WSAStartup has been called once per process.
                         // The System.Net.NameResolution contract is responsible with the initialization.
                         Dns.GetHostName();
 

@@ -4,7 +4,6 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Reflection;
 
 namespace System.ComponentModel
@@ -41,9 +40,13 @@ namespace System.ComponentModel
         /// </summary>
         protected MemberDescriptor(string name, Attribute[] attributes)
         {
-            if (name == null || name.Length == 0)
+            if (name == null)
             {
-                throw new ArgumentException(SR.InvalidMemberName);
+                throw new ArgumentNullException(nameof(name));
+            }
+            if (name.Length == 0)
+            {
+                throw new ArgumentException(SR.InvalidMemberName, nameof(name));
             }
 
             _name = name;
@@ -64,9 +67,14 @@ namespace System.ComponentModel
         /// </summary>
         protected MemberDescriptor(MemberDescriptor descr)
         {
+            if (descr == null)
+            {
+                throw new ArgumentNullException(nameof(descr));
+            }
+
             _name = descr.Name;
             _displayName = _name;
-            _nameHash = _name.GetHashCode();
+            _nameHash = _name?.GetHashCode() ?? 0;
 
             _attributes = new Attribute[descr.Attributes.Count];
             descr.Attributes.CopyTo(_attributes, 0);
@@ -78,11 +86,16 @@ namespace System.ComponentModel
 
         /// <summary>
         /// Initializes a new instance of the <see cref='System.ComponentModel.MemberDescriptor'/> class with the name in the specified
-        /// <see cref='System.ComponentModel.MemberDescriptor'/> and the attributes 
+        /// <see cref='System.ComponentModel.MemberDescriptor'/> and the attributes
         /// in both the old <see cref='System.ComponentModel.MemberDescriptor'/> and the <see cref='System.Attribute'/> array.
         /// </summary>
         protected MemberDescriptor(MemberDescriptor oldMemberDescriptor, Attribute[] newAttributes)
         {
+            if (oldMemberDescriptor == null)
+            {
+                throw new ArgumentNullException(nameof(oldMemberDescriptor));
+            }
+
             _name = oldMemberDescriptor.Name;
             _displayName = oldMemberDescriptor.DisplayName;
             _nameHash = _name.GetHashCode();
@@ -157,7 +170,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        /// Gets the name of the category that the member belongs to, as specified 
+        /// Gets the name of the category that the member belongs to, as specified
         /// in the <see cref='System.ComponentModel.CategoryAttribute'/>.
         /// </summary>
         public virtual string Category => _category ?? (_category = ((CategoryAttribute) Attributes[typeof(CategoryAttribute)]).Category);
@@ -170,7 +183,7 @@ namespace System.ComponentModel
 
         /// <summary>
         /// Gets a value indicating whether the member is browsable as specified in the
-        /// <see cref='System.ComponentModel.BrowsableAttribute'/>. 
+        /// <see cref='System.ComponentModel.BrowsableAttribute'/>.
         /// </summary>
         public virtual bool IsBrowsable => ((BrowsableAttribute)Attributes[typeof(BrowsableAttribute)]).Browsable;
 
@@ -180,7 +193,7 @@ namespace System.ComponentModel
         public virtual string Name => _name ?? "";
 
         /// <summary>
-        /// Gets the hash code for the name of the member as specified in <see cref='System.String.GetHashCode()'/>.
+        /// Gets the hash code for the name of the member as specified in <see cref='string.GetHashCode()'/>.
         /// </summary>
         protected virtual int NameHashCode => _nameHash;
 
@@ -305,6 +318,11 @@ namespace System.ComponentModel
         /// </summary>
         protected virtual void FillAttributes(IList attributeList)
         {
+            if (attributeList == null)
+            {
+                throw new ArgumentNullException(nameof(attributeList));
+            }
+
             if (_originalAttributes != null)
             {
                 foreach (Attribute attr in _originalAttributes)
@@ -327,9 +345,8 @@ namespace System.ComponentModel
                     {
                         FillAttributes(list);
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
-                        Debug.Fail($"{_name}>>{e}");
                     }
                 }
                 else
@@ -342,8 +359,12 @@ namespace System.ComponentModel
                 for (int i = 0; i < list.Count;)
                 {
                     int savedIndex = -1;
-                    object typeId = list[i].TypeId;
-                    if (!map.TryGetValue(typeId, out savedIndex))
+                    object typeId = list[i]?.TypeId;
+                    if (typeId == null)
+                    {
+                        list.RemoveAt(i);
+                    }
+                    else if (!map.TryGetValue(typeId, out savedIndex))
                     {
                         map.Add(typeId, i);
                         i++;
@@ -380,17 +401,18 @@ namespace System.ComponentModel
         /// </summary>
         protected static MethodInfo FindMethod(Type componentClass, string name, Type[] args, Type returnType, bool publicOnly)
         {
-            MethodInfo result = null;
+            if (componentClass == null)
+            {
+                throw new ArgumentNullException(nameof(componentClass));
+            }
 
+            MethodInfo result = null;
             if (publicOnly)
             {
                 result = componentClass.GetMethod(name, args);
             }
             else
             {
-                // The original impementation requires the method https://msdn.microsoft.com/en-us/library/5fed8f59(v=vs.110).aspx which is not 
-                // available on .NET Core. The replacement will use the default BindingFlags, which may miss some methods that had been found
-                // on .NET Framework.
                 result = componentClass.GetMethod(name, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, null, args, null);
             }
             if (result != null && !result.ReturnType.IsEquivalentTo(returnType))

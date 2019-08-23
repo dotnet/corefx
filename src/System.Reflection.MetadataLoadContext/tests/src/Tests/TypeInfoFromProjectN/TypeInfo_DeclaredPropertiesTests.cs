@@ -13,21 +13,21 @@ namespace System.Reflection.Tests
 {
     public class TypeInfoDeclaredPropertiesTests
     {
-        // Verify Declared Properties for Base class 
+        // Verify Declared Properties for Base class
         [Fact]
         public static void TestBaseClassProperty1()
         {
             VerifyProperty(typeof(TypeInfoPropertiesBaseClass).Project(), "Pubprop1");
         }
 
-        // Verify Declared Properties for Base class 
+        // Verify Declared Properties for Base class
         [Fact]
         public static void TestBaseClassProperty2()
         {
             VerifyProperty(typeof(TypeInfoPropertiesBaseClass).Project(), "SubPubprop1");
         }
 
-        // Verify Declared Properties for Base class 
+        // Verify Declared Properties for Base class
         [Fact]
         public static void TestBaseClassProperty3()
         {
@@ -35,28 +35,28 @@ namespace System.Reflection.Tests
         }
 
 
-        // Verify Declared Properties for Base class 
+        // Verify Declared Properties for Base class
         [Fact]
         public static void TestBaseClassProperty4()
         {
             VerifyProperty(typeof(TypeInfoPropertiesBaseClass).Project(), "Pubprop3");
         }
 
-        // Verify Declared Properties for Derived class 
+        // Verify Declared Properties for Derived class
         [Fact]
         public static void TestSubClassProperty1()
         {
             VerifyProperty(typeof(TypeInfoPropertiesSubClass).Project(), "Pubprop1");
         }
 
-        // Verify Declared Properties for Derived class 
+        // Verify Declared Properties for Derived class
         [Fact]
         public static void TestSubClassProperty2()
         {
             VerifyProperty(typeof(TypeInfoPropertiesSubClass).Project(), "Pubprop2");
         }
 
-        // Verify Declared Properties for Derived class 
+        // Verify Declared Properties for Derived class
         [Fact]
         public static void TestSubClassProperty3()
         {
@@ -83,7 +83,7 @@ namespace System.Reflection.Tests
             }
 
             if (!found)
-                Assert.False(true, String.Format("Property {0} not found in Type {1}", name, t.Name));
+                Assert.False(true, string.Format("Property {0} not found in Type {1}", name, t.Name));
         }
     } //end class
 
@@ -100,6 +100,6 @@ namespace System.Reflection.Tests
     {
         public new string Pubprop1 { get { return ""; } set { } }
         public new virtual string Pubprop2 { get { return ""; } set { } }
-        public new static string Pubprop3 { get { return ""; } set { } }
+        public static new string Pubprop3 { get { return ""; } set { } }
     }
 }

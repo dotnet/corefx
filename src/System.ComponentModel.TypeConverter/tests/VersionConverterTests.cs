@@ -1,7 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.ComponentModel.Design.Serialization;
 using Xunit;
 
 namespace System.ComponentModel.Tests
@@ -13,10 +14,11 @@ namespace System.ComponentModel.Tests
         [Fact]
         public static void CanConvertFrom_WithContext()
         {
-            CanConvertFrom_WithContext(new object[2, 2]
+            CanConvertFrom_WithContext(new object[3, 2]
                 {
                     { typeof(string), true },
-                    { typeof(Version), true }
+                    { typeof(Version), true },
+                    { typeof(InstanceDescriptor), true }
                 },
                 VersionConverterTests.s_converter);
         }
@@ -35,12 +37,24 @@ namespace System.ComponentModel.Tests
         }
 
         [Fact]
+        public static void CanConvertTo_WithContext()
+        {
+            CanConvertTo_WithContext(new object[3, 2]
+                {
+                    { typeof(string), true },
+                    { typeof(Version), true },
+                    { typeof(InstanceDescriptor), true }
+                },
+                VersionConverterTests.s_converter);
+        }
+
+        [Fact]
         public static void ConvertFromNull_WithContext_ThrowsNotSupportedException()
         {
             Assert.Throws<NotSupportedException>(
                 () => VersionConverterTests.s_converter.ConvertFrom(TypeConverterTests.s_context, null, null));
         }
-        
+
         [Theory]
         [InlineData("")]
         [InlineData("1")]

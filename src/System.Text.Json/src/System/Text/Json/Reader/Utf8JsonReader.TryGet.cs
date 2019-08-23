@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -13,14 +13,23 @@ namespace System.Text.Json
         /// <summary>
         /// Parses the current JSON token value from the source, unescaped, and transcoded as a <see cref="string"/>.
         /// </summary>
+        /// <remarks>
+        /// Returns <see langword="null" /> when <see cref="TokenType"/> is <see cref="JsonTokenType.Null"/>.
+        /// </remarks>
         /// <exception cref="InvalidOperationException">
         /// Thrown if trying to get the value of the JSON token that is not a string
-        /// (i.e. other than <see cref="JsonTokenType.String"/> or <see cref="JsonTokenType.PropertyName"/>).
+        /// (i.e. other than <see cref="JsonTokenType.String"/>, <see cref="JsonTokenType.PropertyName"/> or
+        /// <see cref="JsonTokenType.Null"/>).
         /// <seealso cref="TokenType" />
         /// It will also throw when the JSON string contains invalid UTF-8 bytes, or invalid UTF-16 surrogates.
         /// </exception>
         public string GetString()
         {
+            if (TokenType == JsonTokenType.Null)
+            {
+                return null;
+            }
+
             if (TokenType != JsonTokenType.String && TokenType != JsonTokenType.PropertyName)
             {
                 throw ThrowHelper.GetInvalidOperationException_ExpectedString(TokenType);
@@ -85,14 +94,14 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Parses the current JSON token value from the source and decodes the base 64 encoded JSON string as bytes.
+        /// Parses the current JSON token value from the source and decodes the Base64 encoded JSON string as bytes.
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown if trying to get the value of a JSON token that is not a <see cref="JsonTokenType.String"/>.
         /// <seealso cref="TokenType" />
         /// </exception>
         /// <exception cref="FormatException">
-        /// Thrown when the JSON string contains data outside of the expected base 64 range, or if it contains invalid/more than two padding characters,
+        /// Thrown when the JSON string contains data outside of the expected Base64 range, or if it contains invalid/more than two padding characters,
         /// or is incomplete (i.e. the JSON string length is not a multiple of 4).
         /// </exception>
         public byte[] GetBytesFromBase64()
@@ -101,7 +110,79 @@ namespace System.Text.Json
             {
                 throw ThrowHelper.GetFormatException(DateType.Base64String);
             }
+            return value;
+        }
 
+        /// <summary>
+        /// Parses the current JSON token value from the source as a <see cref="byte"/>.
+        /// Returns the value if the entire UTF-8 encoded token value can be successfully parsed to a <see cref="byte"/>
+        /// value.
+        /// Throws exceptions otherwise.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if trying to get the value of a JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// <seealso cref="TokenType" />
+        /// </exception>
+        /// <exception cref="FormatException">
+        /// Thrown if the JSON token value is either of incorrect numeric format (for example if it contains a decimal or
+        /// is written in scientific notation) or, it represents a number less than <see cref="byte.MinValue"/> or greater
+        /// than <see cref="byte.MaxValue"/>.
+        /// </exception>
+        public byte GetByte()
+        {
+            if (!TryGetByte(out byte value))
+            {
+                throw ThrowHelper.GetFormatException(NumericType.Byte);
+            }
+            return value;
+        }
+
+        /// <summary>
+        /// Parses the current JSON token value from the source as an <see cref="sbyte"/>.
+        /// Returns the value if the entire UTF-8 encoded token value can be successfully parsed to an <see cref="sbyte"/>
+        /// value.
+        /// Throws exceptions otherwise.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if trying to get the value of a JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// <seealso cref="TokenType" />
+        /// </exception>
+        /// <exception cref="FormatException">
+        /// Thrown if the JSON token value is either of incorrect numeric format (for example if it contains a decimal or
+        /// is written in scientific notation) or, it represents a number less than <see cref="sbyte.MinValue"/> or greater
+        /// than <see cref="sbyte.MaxValue"/>.
+        /// </exception>
+        [System.CLSCompliantAttribute(false)]
+        public sbyte GetSByte()
+        {
+            if (!TryGetSByte(out sbyte value))
+            {
+                throw ThrowHelper.GetFormatException(NumericType.SByte);
+            }
+            return value;
+        }
+
+        /// <summary>
+        /// Parses the current JSON token value from the source as a <see cref="short"/>.
+        /// Returns the value if the entire UTF-8 encoded token value can be successfully parsed to a <see cref="short"/>
+        /// value.
+        /// Throws exceptions otherwise.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if trying to get the value of a JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// <seealso cref="TokenType" />
+        /// </exception>
+        /// <exception cref="FormatException">
+        /// Thrown if the JSON token value is either of incorrect numeric format (for example if it contains a decimal or
+        /// is written in scientific notation) or, it represents a number less than <see cref="short.MinValue"/> or greater
+        /// than <see cref="short.MaxValue"/>.
+        /// </exception>
+        public short GetInt16()
+        {
+            if (!TryGetInt16(out short value))
+            {
+                throw ThrowHelper.GetFormatException(NumericType.Int16);
+            }
             return value;
         }
 
@@ -116,8 +197,8 @@ namespace System.Text.Json
         /// <seealso cref="TokenType" />
         /// </exception>
         /// <exception cref="FormatException">
-        /// Thrown if the JSON token value is either of incorrect numeric format (for example if it contains a decimal or 
-        /// is written in scientific notation) or, it represents a number less than <see cref="int.MinValue"/> or greater 
+        /// Thrown if the JSON token value is either of incorrect numeric format (for example if it contains a decimal or
+        /// is written in scientific notation) or, it represents a number less than <see cref="int.MinValue"/> or greater
         /// than <see cref="int.MaxValue"/>.
         /// </exception>
         public int GetInt32()
@@ -140,8 +221,8 @@ namespace System.Text.Json
         /// <seealso cref="TokenType" />
         /// </exception>
         /// <exception cref="FormatException">
-        /// Thrown if the JSON token value is either of incorrect numeric format (for example if it contains a decimal or 
-        /// is written in scientific notation) or, it represents a number less than <see cref="long.MinValue"/> or greater 
+        /// Thrown if the JSON token value is either of incorrect numeric format (for example if it contains a decimal or
+        /// is written in scientific notation) or, it represents a number less than <see cref="long.MinValue"/> or greater
         /// than <see cref="long.MaxValue"/>.
         /// </exception>
         public long GetInt64()
@@ -149,6 +230,31 @@ namespace System.Text.Json
             if (!TryGetInt64(out long value))
             {
                 throw ThrowHelper.GetFormatException(NumericType.Int64);
+            }
+            return value;
+        }
+
+        /// <summary>
+        /// Parses the current JSON token value from the source as a <see cref="ushort"/>.
+        /// Returns the value if the entire UTF-8 encoded token value can be successfully parsed to a <see cref="ushort"/>
+        /// value.
+        /// Throws exceptions otherwise.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if trying to get the value of a JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// <seealso cref="TokenType" />
+        /// </exception>
+        /// <exception cref="FormatException">
+        /// Thrown if the JSON token value is either of incorrect numeric format (for example if it contains a decimal or
+        /// is written in scientific notation) or, it represents a number less than <see cref="ushort.MinValue"/> or greater
+        /// than <see cref="ushort.MaxValue"/>.
+        /// </exception>
+        [System.CLSCompliantAttribute(false)]
+        public ushort GetUInt16()
+        {
+            if (!TryGetUInt16(out ushort value))
+            {
+                throw ThrowHelper.GetFormatException(NumericType.UInt16);
             }
             return value;
         }
@@ -164,8 +270,8 @@ namespace System.Text.Json
         /// <seealso cref="TokenType" />
         /// </exception>
         /// <exception cref="FormatException">
-        /// Thrown if the JSON token value is either of incorrect numeric format (for example if it contains a decimal or 
-        /// is written in scientific notation) or, it represents a number less than <see cref="uint.MinValue"/> or greater 
+        /// Thrown if the JSON token value is either of incorrect numeric format (for example if it contains a decimal or
+        /// is written in scientific notation) or, it represents a number less than <see cref="uint.MinValue"/> or greater
         /// than <see cref="uint.MaxValue"/>.
         /// </exception>
         [System.CLSCompliantAttribute(false)]
@@ -189,8 +295,8 @@ namespace System.Text.Json
         /// <seealso cref="TokenType" />
         /// </exception>
         /// <exception cref="FormatException">
-        /// Thrown if the JSON token value is either of incorrect numeric format (for example if it contains a decimal or 
-        /// is written in scientific notation) or, it represents a number less than <see cref="ulong.MinValue"/> or greater 
+        /// Thrown if the JSON token value is either of incorrect numeric format (for example if it contains a decimal or
+        /// is written in scientific notation) or, it represents a number less than <see cref="ulong.MinValue"/> or greater
         /// than <see cref="ulong.MaxValue"/>.
         /// </exception>
         [System.CLSCompliantAttribute(false)]
@@ -214,7 +320,7 @@ namespace System.Text.Json
         /// <seealso cref="TokenType" />
         /// </exception>
         /// <exception cref="FormatException">
-        /// Thrown if the JSON token value represents a number less than <see cref="float.MinValue"/> or greater 
+        /// On any framework that is not .NET Core 3.0 or higher, thrown if the JSON token value represents a number less than <see cref="float.MinValue"/> or greater
         /// than <see cref="float.MaxValue"/>.
         /// </exception>
         public float GetSingle()
@@ -237,7 +343,7 @@ namespace System.Text.Json
         /// <seealso cref="TokenType" />
         /// </exception>
         /// <exception cref="FormatException">
-        /// Thrown if the JSON token value represents a number less than <see cref="double.MinValue"/> or greater 
+        /// On any framework that is not .NET Core 3.0 or higher, thrown if the JSON token value represents a number less than <see cref="double.MinValue"/> or greater
         /// than <see cref="double.MaxValue"/>.
         /// </exception>
         public double GetDouble()
@@ -260,7 +366,7 @@ namespace System.Text.Json
         /// <seealso cref="TokenType" />
         /// </exception>
         /// <exception cref="FormatException">
-        /// Thrown if the JSON token value represents a number less than <see cref="decimal.MinValue"/> or greater 
+        /// Thrown if the JSON token value represents a number less than <see cref="decimal.MinValue"/> or greater
         /// than <see cref="decimal.MaxValue"/>.
         /// </exception>
         public decimal GetDecimal()
@@ -342,8 +448,8 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Parses the current JSON token value from the source and decodes the base 64 encoded JSON string as bytes.
-        /// Returns <see langword="true"/> if the entire token value is encoded as valid base 64 text and can be successfully
+        /// Parses the current JSON token value from the source and decodes the Base64 encoded JSON string as bytes.
+        /// Returns <see langword="true"/> if the entire token value is encoded as valid Base64 text and can be successfully
         /// decoded to bytes.
         /// Returns <see langword="false"/> otherwise.
         /// </summary>
@@ -372,8 +478,96 @@ namespace System.Text.Json
         }
 
         /// <summary>
+        /// Parses the current JSON token value from the source as a <see cref="byte"/>.
+        /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully
+        /// parsed to a <see cref="byte"/> value.
+        /// Returns <see langword="false"/> otherwise.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if trying to get the value of a JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// <seealso cref="TokenType" />
+        /// </exception>
+        public bool TryGetByte(out byte value)
+        {
+            if (TokenType != JsonTokenType.Number)
+            {
+                throw ThrowHelper.GetInvalidOperationException_ExpectedNumber(TokenType);
+            }
+
+            ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
+            if (Utf8Parser.TryParse(span, out byte tmp, out int bytesConsumed)
+                && span.Length == bytesConsumed)
+            {
+                value = tmp;
+                return true;
+            }
+
+            value = 0;
+            return false;
+        }
+
+        /// <summary>
+        /// Parses the current JSON token value from the source as an <see cref="sbyte"/>.
+        /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully
+        /// parsed to an <see cref="sbyte"/> value.
+        /// Returns <see langword="false"/> otherwise.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if trying to get the value of a JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// <seealso cref="TokenType" />
+        /// </exception>
+        [System.CLSCompliantAttribute(false)]
+        public bool TryGetSByte(out sbyte value)
+        {
+            if (TokenType != JsonTokenType.Number)
+            {
+                throw ThrowHelper.GetInvalidOperationException_ExpectedNumber(TokenType);
+            }
+
+            ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
+            if (Utf8Parser.TryParse(span, out sbyte tmp, out int bytesConsumed)
+                && span.Length == bytesConsumed)
+            {
+                value = tmp;
+                return true;
+            }
+
+            value = 0;
+            return false;
+        }
+
+        /// <summary>
+        /// Parses the current JSON token value from the source as a <see cref="short"/>.
+        /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully
+        /// parsed to a <see cref="short"/> value.
+        /// Returns <see langword="false"/> otherwise.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if trying to get the value of a JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// <seealso cref="TokenType" />
+        /// </exception>
+        public bool TryGetInt16(out short value)
+        {
+            if (TokenType != JsonTokenType.Number)
+            {
+                throw ThrowHelper.GetInvalidOperationException_ExpectedNumber(TokenType);
+            }
+
+            ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
+            if (Utf8Parser.TryParse(span, out short tmp, out int bytesConsumed)
+                && span.Length == bytesConsumed)
+            {
+                value = tmp;
+                return true;
+            }
+
+            value = 0;
+            return false;
+        }
+
+        /// <summary>
         /// Parses the current JSON token value from the source as an <see cref="int"/>.
-        /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully 
+        /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully
         /// parsed to an <see cref="int"/> value.
         /// Returns <see langword="false"/> otherwise.
         /// </summary>
@@ -389,12 +583,20 @@ namespace System.Text.Json
             }
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
-            return Utf8Parser.TryParse(span, out value, out int bytesConsumed) && span.Length == bytesConsumed;
+            if (Utf8Parser.TryParse(span, out int tmp, out int bytesConsumed)
+                && span.Length == bytesConsumed)
+            {
+                value = tmp;
+                return true;
+            }
+
+            value = 0;
+            return false;
         }
 
         /// <summary>
         /// Parses the current JSON token value from the source as a <see cref="long"/>.
-        /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully 
+        /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully
         /// parsed to a <see cref="long"/> value.
         /// Returns <see langword="false"/> otherwise.
         /// </summary>
@@ -410,12 +612,50 @@ namespace System.Text.Json
             }
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
-            return Utf8Parser.TryParse(span, out value, out int bytesConsumed) && span.Length == bytesConsumed;
+            if (Utf8Parser.TryParse(span, out long tmp, out int bytesConsumed)
+                && span.Length == bytesConsumed)
+            {
+                value = tmp;
+                return true;
+            }
+
+            value = 0;
+            return false;
+        }
+
+        /// <summary>
+        /// Parses the current JSON token value from the source as a <see cref="ushort"/>.
+        /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully
+        /// parsed to a <see cref="ushort"/> value.
+        /// Returns <see langword="false"/> otherwise.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if trying to get the value of a JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// <seealso cref="TokenType" />
+        /// </exception>
+        [System.CLSCompliantAttribute(false)]
+        public bool TryGetUInt16(out ushort value)
+        {
+            if (TokenType != JsonTokenType.Number)
+            {
+                throw ThrowHelper.GetInvalidOperationException_ExpectedNumber(TokenType);
+            }
+
+            ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
+            if (Utf8Parser.TryParse(span, out ushort tmp, out int bytesConsumed)
+                && span.Length == bytesConsumed)
+            {
+                value = tmp;
+                return true;
+            }
+
+            value = 0;
+            return false;
         }
 
         /// <summary>
         /// Parses the current JSON token value from the source as a <see cref="uint"/>.
-        /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully 
+        /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully
         /// parsed to a <see cref="uint"/> value.
         /// Returns <see langword="false"/> otherwise.
         /// </summary>
@@ -432,12 +672,20 @@ namespace System.Text.Json
             }
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
-            return Utf8Parser.TryParse(span, out value, out int bytesConsumed) && span.Length == bytesConsumed;
+            if (Utf8Parser.TryParse(span, out uint tmp, out int bytesConsumed)
+                && span.Length == bytesConsumed)
+            {
+                value = tmp;
+                return true;
+            }
+
+            value = 0;
+            return false;
         }
 
         /// <summary>
         /// Parses the current JSON token value from the source as a <see cref="ulong"/>.
-        /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully 
+        /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully
         /// parsed to a <see cref="ulong"/> value.
         /// Returns <see langword="false"/> otherwise.
         /// </summary>
@@ -454,12 +702,20 @@ namespace System.Text.Json
             }
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
-            return Utf8Parser.TryParse(span, out value, out int bytesConsumed) && span.Length == bytesConsumed;
+            if (Utf8Parser.TryParse(span, out ulong tmp, out int bytesConsumed)
+                && span.Length == bytesConsumed)
+            {
+                value = tmp;
+                return true;
+            }
+
+            value = 0;
+            return false;
         }
 
         /// <summary>
         /// Parses the current JSON token value from the source as a <see cref="float"/>.
-        /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully 
+        /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully
         /// parsed to a <see cref="float"/> value.
         /// Returns <see langword="false"/> otherwise.
         /// </summary>
@@ -475,12 +731,20 @@ namespace System.Text.Json
             }
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
-            return Utf8Parser.TryParse(span, out value, out int bytesConsumed, _numberFormat) && span.Length == bytesConsumed;
+            if (Utf8Parser.TryParse(span, out float tmp, out int bytesConsumed, _numberFormat)
+                && span.Length == bytesConsumed)
+            {
+                value = tmp;
+                return true;
+            }
+
+            value = 0;
+            return false;
         }
 
         /// <summary>
         /// Parses the current JSON token value from the source as a <see cref="double"/>.
-        /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully 
+        /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully
         /// parsed to a <see cref="double"/> value.
         /// Returns <see langword="false"/> otherwise.
         /// </summary>
@@ -496,12 +760,20 @@ namespace System.Text.Json
             }
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
-            return Utf8Parser.TryParse(span, out value, out int bytesConsumed, _numberFormat) && span.Length == bytesConsumed;
+            if (Utf8Parser.TryParse(span, out double tmp, out int bytesConsumed, _numberFormat)
+                && span.Length == bytesConsumed)
+            {
+                value = tmp;
+                return true;
+            }
+
+            value = 0;
+            return false;
         }
 
         /// <summary>
         /// Parses the current JSON token value from the source as a <see cref="decimal"/>.
-        /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully 
+        /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully
         /// parsed to a <see cref="decimal"/> value.
         /// Returns <see langword="false"/> otherwise.
         /// </summary>
@@ -517,7 +789,15 @@ namespace System.Text.Json
             }
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
-            return Utf8Parser.TryParse(span, out value, out int bytesConsumed, _numberFormat) && span.Length == bytesConsumed;
+            if (Utf8Parser.TryParse(span, out decimal tmp, out int bytesConsumed, _numberFormat)
+                && span.Length == bytesConsumed)
+            {
+                value = tmp;
+                return true;
+            }
+
+            value = 0;
+            return false;
         }
 
         /// <summary>
@@ -573,10 +853,15 @@ namespace System.Text.Json
 
             Debug.Assert(span.IndexOf(JsonConstants.BackSlash) == -1);
 
+            if (span.Length <= JsonConstants.MaximumDateTimeOffsetParseLength
+                && JsonHelpers.TryParseAsISO(span, out DateTime tmp))
+            {
+                value = tmp;
+                return true;
+            }
+
             value = default;
-            return (span.Length <= JsonConstants.MaximumDateTimeOffsetParseLength)
-                && JsonHelpers.TryParseAsISO(span, out value, out int bytesConsumed)
-                && span.Length == bytesConsumed;
+            return false;
         }
 
         /// <summary>
@@ -632,10 +917,15 @@ namespace System.Text.Json
 
             Debug.Assert(span.IndexOf(JsonConstants.BackSlash) == -1);
 
+            if (span.Length <= JsonConstants.MaximumDateTimeOffsetParseLength
+                && JsonHelpers.TryParseAsISO(span, out DateTimeOffset tmp))
+            {
+                value = tmp;
+                return true;
+            }
+
             value = default;
-            return (span.Length <= JsonConstants.MaximumDateTimeOffsetParseLength)
-                && JsonHelpers.TryParseAsISO(span, out value, out int bytesConsumed)
-                && span.Length == bytesConsumed;
+            return false;
         }
 
         /// <summary>
@@ -691,8 +981,15 @@ namespace System.Text.Json
 
             Debug.Assert(span.IndexOf(JsonConstants.BackSlash) == -1);
 
+            if (span.Length == JsonConstants.MaximumFormatGuidLength
+                && Utf8Parser.TryParse(span, out Guid tmp, out _, 'D'))
+            {
+                value = tmp;
+                return true;
+            }
+
             value = default;
-            return (span.Length == JsonConstants.MaximumFormatGuidLength) && Utf8Parser.TryParse(span, out value, out _, 'D');
+            return false;
         }
     }
 }

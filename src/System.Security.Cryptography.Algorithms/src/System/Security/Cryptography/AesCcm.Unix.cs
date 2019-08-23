@@ -32,8 +32,6 @@ namespace System.Security.Cryptography
             Span<byte> tag,
             ReadOnlySpan<byte> associatedData = default)
         {
-            ref byte nullRef = ref MemoryMarshal.GetReference(Span<byte>.Empty);
-
             using (SafeEvpCipherCtxHandle ctx = Interop.Crypto.EvpCipherCreatePartial(GetCipher(_key.Length * 8)))
             {
                 Interop.Crypto.CheckValidOpenSslHandle(ctx);
@@ -109,6 +107,7 @@ namespace System.Security.Cryptography
 
                 if (!Interop.Crypto.EvpCipherUpdate(ctx, plaintext, out int plaintextBytesWritten, ciphertext))
                 {
+                    plaintext.Fill(0);
                     throw new CryptographicException(SR.Cryptography_AuthTagMismatch);
                 }
 

@@ -289,11 +289,33 @@ namespace System.Security.Cryptography.Rsa.Tests
             }
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public static void ExportAfterDispose(bool importKey)
+        {
+            RSA rsa = importKey ? RSAFactory.Create(TestData.RSA2048Params) : RSAFactory.Create(1024);
+
+            // Ensure that the key got created, and then Dispose it.
+            using (rsa)
+            {
+                rsa.Encrypt(TestData.HelloBytes, RSAEncryptionPadding.Pkcs1);
+            }
+
+            Assert.Throws<ObjectDisposedException>(() => rsa.ExportParameters(false));
+            Assert.Throws<ObjectDisposedException>(() => rsa.ExportParameters(true));
+
+            if (!(PlatformDetection.IsFullFramework && rsa.GetType().Name.EndsWith("Cng")))
+            {
+                Assert.Throws<ObjectDisposedException>(() => rsa.ImportParameters(TestData.RSA1024Params));
+            }
+        }
+
         internal static void AssertKeyEquals(in RSAParameters expected, in RSAParameters actual)
         {
             Assert.Equal(expected.Modulus, actual.Modulus);
             Assert.Equal(expected.Exponent, actual.Exponent);
-            
+
             Assert.Equal(expected.P, actual.P);
             Assert.Equal(expected.DP, actual.DP);
             Assert.Equal(expected.Q, actual.Q);

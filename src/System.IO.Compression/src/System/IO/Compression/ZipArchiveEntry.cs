@@ -13,8 +13,6 @@ namespace System.IO.Compression
     [SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
     public partial class ZipArchiveEntry
     {
-        private const ushort DefaultVersionToExtract = 10;
-
         // The maximum index of our buffers, from the maximum index of a byte array
         private const int MaxSingleBufferSize = 0x7FFFFFC7;
 
@@ -23,7 +21,7 @@ namespace System.IO.Compression
         private readonly int _diskNumberStart;
         private readonly ZipVersionMadeByPlatform _versionMadeByPlatform;
         private ZipVersionNeededValues _versionMadeBySpecification;
-        private ZipVersionNeededValues _versionToExtract;
+        internal ZipVersionNeededValues _versionToExtract;
         private BitFlagValues _generalPurposeBitFlag;
         private CompressionMethodValues _storedCompressionMethod;
         private DateTimeOffset _lastModified;
@@ -44,8 +42,8 @@ namespace System.IO.Compression
         // only apply to update mode
         private List<ZipGenericExtraField> _cdUnknownExtraFields;
         private List<ZipGenericExtraField> _lhUnknownExtraFields;
-        private byte[] _fileComment;
-        private CompressionLevel? _compressionLevel;
+        private readonly byte[] _fileComment;
+        private readonly CompressionLevel? _compressionLevel;
 
         // Initializes, attaches it to archive
         internal ZipArchiveEntry(ZipArchive archive, ZipCentralDirectoryFileHeader cd)
@@ -620,7 +618,7 @@ namespace System.IO.Compression
                 default:
                     compressorStream = new DeflateStream(backingStream, _compressionLevel ?? CompressionLevel.Optimal, leaveBackingStreamOpen);
                     break;
-                
+
             }
             bool leaveCompressorStreamOpenOnClose = leaveBackingStreamOpen && !isIntermediateStream;
             var checkSumStream = new CheckSumAndSizeWriteStream(
@@ -646,10 +644,10 @@ namespace System.IO.Compression
             switch (CompressionMethod)
             {
                 case CompressionMethodValues.Deflate:
-                    uncompressedStream = new DeflateStream(compressedStreamToRead, CompressionMode.Decompress);
+                    uncompressedStream = new DeflateStream(compressedStreamToRead, CompressionMode.Decompress, _uncompressedSize);
                     break;
                 case CompressionMethodValues.Deflate64:
-                    uncompressedStream = new DeflateManagedStream(compressedStreamToRead, CompressionMethodValues.Deflate64);
+                    uncompressedStream = new DeflateManagedStream(compressedStreamToRead, CompressionMethodValues.Deflate64, _uncompressedSize);
                     break;
                 case CompressionMethodValues.Stored:
                 default:
@@ -751,10 +749,21 @@ namespace System.IO.Compression
                     return false;
                 }
                 _archive.ArchiveStream.Seek(_offsetOfLocalHeader, SeekOrigin.Begin);
-                if (!ZipLocalFileHeader.TrySkipBlock(_archive.ArchiveReader))
+                if (needToUncompress && !needToLoadIntoMemory)
                 {
-                    message = SR.LocalFileHeaderCorrupt;
-                    return false;
+                    if (!ZipLocalFileHeader.TryValidateBlock(_archive.ArchiveReader, this))
+                    {
+                        message = SR.LocalFileHeaderCorrupt;
+                        return false;
+                    }
+                }
+                else
+                {
+                    if (!ZipLocalFileHeader.TrySkipBlock(_archive.ArchiveReader))
+                    {
+                        message = SR.LocalFileHeaderCorrupt;
+                        return false;
+                    }
                 }
                 // when this property gets called, some duplicated work
                 if (OffsetOfCompressedData + _compressedSize > _archive.ArchiveStream.Length)
@@ -1110,10 +1119,10 @@ namespace System.IO.Compression
         private sealed partial class DirectToArchiveWriterStream : Stream
         {
             private long _position;
-            private CheckSumAndSizeWriteStream _crcSizeStream;
+            private readonly CheckSumAndSizeWriteStream _crcSizeStream;
             private bool _everWritten;
             private bool _isDisposed;
-            private ZipArchiveEntry _entry;
+            private readonly ZipArchiveEntry _entry;
             private bool _usedZip64inLH;
             private bool _canWrite;
 
@@ -1250,7 +1259,7 @@ namespace System.IO.Compression
         }
 
         [Flags]
-        private enum BitFlagValues : ushort { DataDescriptor = 0x8, UnicodeFileName = 0x800 }
+        internal enum BitFlagValues : ushort { DataDescriptor = 0x8, UnicodeFileName = 0x800 }
 
         internal enum CompressionMethodValues : ushort { Stored = 0x0, Deflate = 0x8, Deflate64 = 0x9, BZip2 = 0xC, LZMA = 0xE }
     }

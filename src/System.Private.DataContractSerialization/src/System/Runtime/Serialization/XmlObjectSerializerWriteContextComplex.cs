@@ -16,14 +16,14 @@ using System.Runtime.CompilerServices;
 
 namespace System.Runtime.Serialization
 {
-#if USE_REFEMIT || uapaot
+#if USE_REFEMIT
     public class XmlObjectSerializerWriteContextComplex : XmlObjectSerializerWriteContext
 #else
     internal class XmlObjectSerializerWriteContextComplex : XmlObjectSerializerWriteContext
 #endif
     {
-        private ISerializationSurrogateProvider _serializationSurrogateProvider;
-        private SerializationMode _mode;
+        private readonly ISerializationSurrogateProvider _serializationSurrogateProvider;
+        private readonly SerializationMode _mode;
 
         internal XmlObjectSerializerWriteContextComplex(DataContractSerializer serializer, DataContract rootTypeDataContract, DataContractResolver dataContractResolver)
             : base(serializer, rootTypeDataContract, dataContractResolver)
@@ -53,31 +53,19 @@ namespace System.Runtime.Serialization
             return false;
         }
 
-#if uapaot
-        public override void WriteAnyType(XmlWriterDelegator xmlWriter, object value)
-#else
         internal override void WriteAnyType(XmlWriterDelegator xmlWriter, object value)
-#endif
         {
             if (!OnHandleReference(xmlWriter, value, false /*canContainCyclicReference*/))
                 xmlWriter.WriteAnyType(value);
         }
 
-#if uapaot
-        public override void WriteString(XmlWriterDelegator xmlWriter, string value)
-#else
         internal override void WriteString(XmlWriterDelegator xmlWriter, string value)
-#endif
         {
             if (!OnHandleReference(xmlWriter, value, false /*canContainCyclicReference*/))
                 xmlWriter.WriteString(value);
         }
 
-#if uapaot
-        public override void WriteString(XmlWriterDelegator xmlWriter, string value, XmlDictionaryString name, XmlDictionaryString ns)
-#else
         internal override void WriteString(XmlWriterDelegator xmlWriter, string value, XmlDictionaryString name, XmlDictionaryString ns)
-#endif
         {
             if (value == null)
                 WriteNull(xmlWriter, typeof(string), true/*isMemberTypeSerializable*/, name, ns);
@@ -90,21 +78,13 @@ namespace System.Runtime.Serialization
             }
         }
 
-#if uapaot
-        public override void WriteBase64(XmlWriterDelegator xmlWriter, byte[] value)
-#else
         internal override void WriteBase64(XmlWriterDelegator xmlWriter, byte[] value)
-#endif
         {
             if (!OnHandleReference(xmlWriter, value, false /*canContainCyclicReference*/))
                 xmlWriter.WriteBase64(value);
         }
 
-#if uapaot
-        public override void WriteBase64(XmlWriterDelegator xmlWriter, byte[] value, XmlDictionaryString name, XmlDictionaryString ns)
-#else
         internal override void WriteBase64(XmlWriterDelegator xmlWriter, byte[] value, XmlDictionaryString name, XmlDictionaryString ns)
-#endif
         {
             if (value == null)
                 WriteNull(xmlWriter, typeof(byte[]), true/*isMemberTypeSerializable*/, name, ns);
@@ -117,21 +97,13 @@ namespace System.Runtime.Serialization
             }
         }
 
-#if uapaot
-        public override void WriteUri(XmlWriterDelegator xmlWriter, Uri value)
-#else
         internal override void WriteUri(XmlWriterDelegator xmlWriter, Uri value)
-#endif
         {
             if (!OnHandleReference(xmlWriter, value, false /*canContainCyclicReference*/))
                 xmlWriter.WriteUri(value);
         }
 
-#if uapaot
-        public override void WriteUri(XmlWriterDelegator xmlWriter, Uri value, XmlDictionaryString name, XmlDictionaryString ns)
-#else
         internal override void WriteUri(XmlWriterDelegator xmlWriter, Uri value, XmlDictionaryString name, XmlDictionaryString ns)
-#endif
         {
             if (value == null)
                 WriteNull(xmlWriter, typeof(Uri), true/*isMemberTypeSerializable*/, name, ns);
@@ -144,21 +116,13 @@ namespace System.Runtime.Serialization
             }
         }
 
-#if uapaot
-        public override void WriteQName(XmlWriterDelegator xmlWriter, XmlQualifiedName value)
-#else
         internal override void WriteQName(XmlWriterDelegator xmlWriter, XmlQualifiedName value)
-#endif
         {
             if (!OnHandleReference(xmlWriter, value, false /*canContainCyclicReference*/))
                 xmlWriter.WriteQName(value);
         }
 
-#if uapaot
-        public override void WriteQName(XmlWriterDelegator xmlWriter, XmlQualifiedName value, XmlDictionaryString name, XmlDictionaryString ns)
-#else
         internal override void WriteQName(XmlWriterDelegator xmlWriter, XmlQualifiedName value, XmlDictionaryString name, XmlDictionaryString ns)
-#endif        
         {
             if (value == null)
                 WriteNull(xmlWriter, typeof(XmlQualifiedName), true/*isMemberTypeSerializable*/, name, ns);
@@ -288,4 +252,3 @@ namespace System.Runtime.Serialization
         }
     }
 }
-

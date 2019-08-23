@@ -375,7 +375,7 @@ namespace System.Xml
             }
             set
             {
-                CheckReadOnly("DoNotEscapeUriAttributes");
+                CheckReadOnly(nameof(DoNotEscapeUriAttributes));
                 _doNotEscapeUriAttributes = value;
             }
         }
@@ -388,7 +388,7 @@ namespace System.Xml
             }
             set
             {
-                CheckReadOnly("MergeCDataSections");
+                CheckReadOnly(nameof(MergeCDataSections));
                 _mergeCDataSections = value;
             }
         }
@@ -402,7 +402,7 @@ namespace System.Xml
             }
             set
             {
-                CheckReadOnly("MediaType");
+                CheckReadOnly(nameof(MediaType));
                 _mediaType = value;
             }
         }
@@ -416,7 +416,7 @@ namespace System.Xml
             }
             set
             {
-                CheckReadOnly("DocTypeSystem");
+                CheckReadOnly(nameof(DocTypeSystem));
                 _docTypeSystem = value;
             }
         }
@@ -430,7 +430,7 @@ namespace System.Xml
             }
             set
             {
-                CheckReadOnly("DocTypePublic");
+                CheckReadOnly(nameof(DocTypePublic));
                 _docTypePublic = value;
             }
         }
@@ -444,7 +444,7 @@ namespace System.Xml
             }
             set
             {
-                CheckReadOnly("Standalone");
+                CheckReadOnly(nameof(Standalone));
                 _standalone = value;
             }
         }
@@ -458,7 +458,7 @@ namespace System.Xml
             }
             set
             {
-                CheckReadOnly("AutoXmlDeclaration");
+                CheckReadOnly(nameof(AutoXmlDeclaration));
                 _autoXmlDecl = value;
             }
         }
@@ -604,7 +604,7 @@ namespace System.Xml
                 }
             }
 
-            // Wrap with Xslt/XQuery specific writer if needed; 
+            // Wrap with Xslt/XQuery specific writer if needed;
             // XmlOutputMethod.AutoDetect writer does this lazily when it creates the underlying Xml or Html writer.
             if (this.OutputMethod != XmlOutputMethod.AutoDetect)
             {
@@ -762,7 +762,7 @@ namespace System.Xml
 
             if (baseWriterSettings == null)
             {
-                // assume the V1 writer already do all conformance checking; 
+                // assume the V1 writer already do all conformance checking;
                 // wrap only if NewLineHandling == Replace or CheckCharacters is true
                 if (_newLineHandling == NewLineHandling.Replace)
                 {

@@ -2,12 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Runtime.Serialization;
-
 #if ES_BUILD_STANDALONE
+using System;
 using Environment = Microsoft.Diagnostics.Tracing.Internal.Environment;
 #endif
+using System.Runtime.Serialization;
 
 #if ES_BUILD_STANDALONE
 namespace Microsoft.Diagnostics.Tracing
@@ -35,7 +34,7 @@ namespace System.Diagnostics.Tracing
         public EventSourceException(string? message) : base(message) { }
 
         /// <summary>
-        /// Initializes a new instance of the EventSourceException class with a specified error message 
+        /// Initializes a new instance of the EventSourceException class with a specified error message
         /// and a reference to the inner exception that is the cause of this exception.
         /// </summary>
         public EventSourceException(string? message, Exception? innerException) : base(message, innerException) { }

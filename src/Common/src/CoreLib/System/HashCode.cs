@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -9,20 +9,20 @@ https://raw.githubusercontent.com/Cyan4973/xxHash/5c174cfa4e45a42f94082dc0d4539b
 
   xxHash - Fast Hash algorithm
   Copyright (C) 2012-2016, Yann Collet
-  
+
   BSD 2-Clause License (http://www.opensource.org/licenses/bsd-license.php)
-  
+
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are
   met:
-  
+
   * Redistributions of source code must retain the above copyright
   notice, this list of conditions and the following disclaimer.
   * Redistributions in binary form must reproduce the above
   copyright notice, this list of conditions and the following disclaimer
   in the documentation and/or other materials provided with the
   distribution.
-  
+
   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -34,7 +34,7 @@ https://raw.githubusercontent.com/Cyan4973/xxHash/5c174cfa4e45a42f94082dc0d4539b
   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  
+
   You can contact the author at :
   - xxHash homepage: http://www.xxhash.com
   - xxHash source repository : https://github.com/Cyan4973/xxHash
@@ -81,7 +81,7 @@ namespace System
             // over a larger space, so diffusing the bits may help the
             // collection work more efficiently.
 
-            var hc1 = (uint)(value1?.GetHashCode() ?? 0);
+            uint hc1 = (uint)(value1?.GetHashCode() ?? 0);
 
             uint hash = MixEmptyState();
             hash += 4;
@@ -94,8 +94,8 @@ namespace System
 
         public static int Combine<T1, T2>(T1 value1, T2 value2)
         {
-            var hc1 = (uint)(value1?.GetHashCode() ?? 0);
-            var hc2 = (uint)(value2?.GetHashCode() ?? 0);
+            uint hc1 = (uint)(value1?.GetHashCode() ?? 0);
+            uint hc2 = (uint)(value2?.GetHashCode() ?? 0);
 
             uint hash = MixEmptyState();
             hash += 8;
@@ -109,9 +109,9 @@ namespace System
 
         public static int Combine<T1, T2, T3>(T1 value1, T2 value2, T3 value3)
         {
-            var hc1 = (uint)(value1?.GetHashCode() ?? 0);
-            var hc2 = (uint)(value2?.GetHashCode() ?? 0);
-            var hc3 = (uint)(value3?.GetHashCode() ?? 0);
+            uint hc1 = (uint)(value1?.GetHashCode() ?? 0);
+            uint hc2 = (uint)(value2?.GetHashCode() ?? 0);
+            uint hc3 = (uint)(value3?.GetHashCode() ?? 0);
 
             uint hash = MixEmptyState();
             hash += 12;
@@ -126,10 +126,10 @@ namespace System
 
         public static int Combine<T1, T2, T3, T4>(T1 value1, T2 value2, T3 value3, T4 value4)
         {
-            var hc1 = (uint)(value1?.GetHashCode() ?? 0);
-            var hc2 = (uint)(value2?.GetHashCode() ?? 0);
-            var hc3 = (uint)(value3?.GetHashCode() ?? 0);
-            var hc4 = (uint)(value4?.GetHashCode() ?? 0);
+            uint hc1 = (uint)(value1?.GetHashCode() ?? 0);
+            uint hc2 = (uint)(value2?.GetHashCode() ?? 0);
+            uint hc3 = (uint)(value3?.GetHashCode() ?? 0);
+            uint hc4 = (uint)(value4?.GetHashCode() ?? 0);
 
             Initialize(out uint v1, out uint v2, out uint v3, out uint v4);
 
@@ -147,11 +147,11 @@ namespace System
 
         public static int Combine<T1, T2, T3, T4, T5>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5)
         {
-            var hc1 = (uint)(value1?.GetHashCode() ?? 0);
-            var hc2 = (uint)(value2?.GetHashCode() ?? 0);
-            var hc3 = (uint)(value3?.GetHashCode() ?? 0);
-            var hc4 = (uint)(value4?.GetHashCode() ?? 0);
-            var hc5 = (uint)(value5?.GetHashCode() ?? 0);
+            uint hc1 = (uint)(value1?.GetHashCode() ?? 0);
+            uint hc2 = (uint)(value2?.GetHashCode() ?? 0);
+            uint hc3 = (uint)(value3?.GetHashCode() ?? 0);
+            uint hc4 = (uint)(value4?.GetHashCode() ?? 0);
+            uint hc5 = (uint)(value5?.GetHashCode() ?? 0);
 
             Initialize(out uint v1, out uint v2, out uint v3, out uint v4);
 
@@ -171,12 +171,12 @@ namespace System
 
         public static int Combine<T1, T2, T3, T4, T5, T6>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6)
         {
-            var hc1 = (uint)(value1?.GetHashCode() ?? 0);
-            var hc2 = (uint)(value2?.GetHashCode() ?? 0);
-            var hc3 = (uint)(value3?.GetHashCode() ?? 0);
-            var hc4 = (uint)(value4?.GetHashCode() ?? 0);
-            var hc5 = (uint)(value5?.GetHashCode() ?? 0);
-            var hc6 = (uint)(value6?.GetHashCode() ?? 0);
+            uint hc1 = (uint)(value1?.GetHashCode() ?? 0);
+            uint hc2 = (uint)(value2?.GetHashCode() ?? 0);
+            uint hc3 = (uint)(value3?.GetHashCode() ?? 0);
+            uint hc4 = (uint)(value4?.GetHashCode() ?? 0);
+            uint hc5 = (uint)(value5?.GetHashCode() ?? 0);
+            uint hc6 = (uint)(value6?.GetHashCode() ?? 0);
 
             Initialize(out uint v1, out uint v2, out uint v3, out uint v4);
 
@@ -197,13 +197,13 @@ namespace System
 
         public static int Combine<T1, T2, T3, T4, T5, T6, T7>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7)
         {
-            var hc1 = (uint)(value1?.GetHashCode() ?? 0);
-            var hc2 = (uint)(value2?.GetHashCode() ?? 0);
-            var hc3 = (uint)(value3?.GetHashCode() ?? 0);
-            var hc4 = (uint)(value4?.GetHashCode() ?? 0);
-            var hc5 = (uint)(value5?.GetHashCode() ?? 0);
-            var hc6 = (uint)(value6?.GetHashCode() ?? 0);
-            var hc7 = (uint)(value7?.GetHashCode() ?? 0);
+            uint hc1 = (uint)(value1?.GetHashCode() ?? 0);
+            uint hc2 = (uint)(value2?.GetHashCode() ?? 0);
+            uint hc3 = (uint)(value3?.GetHashCode() ?? 0);
+            uint hc4 = (uint)(value4?.GetHashCode() ?? 0);
+            uint hc5 = (uint)(value5?.GetHashCode() ?? 0);
+            uint hc6 = (uint)(value6?.GetHashCode() ?? 0);
+            uint hc7 = (uint)(value7?.GetHashCode() ?? 0);
 
             Initialize(out uint v1, out uint v2, out uint v3, out uint v4);
 
@@ -225,14 +225,14 @@ namespace System
 
         public static int Combine<T1, T2, T3, T4, T5, T6, T7, T8>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8)
         {
-            var hc1 = (uint)(value1?.GetHashCode() ?? 0);
-            var hc2 = (uint)(value2?.GetHashCode() ?? 0);
-            var hc3 = (uint)(value3?.GetHashCode() ?? 0);
-            var hc4 = (uint)(value4?.GetHashCode() ?? 0);
-            var hc5 = (uint)(value5?.GetHashCode() ?? 0);
-            var hc6 = (uint)(value6?.GetHashCode() ?? 0);
-            var hc7 = (uint)(value7?.GetHashCode() ?? 0);
-            var hc8 = (uint)(value8?.GetHashCode() ?? 0);
+            uint hc1 = (uint)(value1?.GetHashCode() ?? 0);
+            uint hc2 = (uint)(value2?.GetHashCode() ?? 0);
+            uint hc3 = (uint)(value3?.GetHashCode() ?? 0);
+            uint hc4 = (uint)(value4?.GetHashCode() ?? 0);
+            uint hc5 = (uint)(value5?.GetHashCode() ?? 0);
+            uint hc6 = (uint)(value6?.GetHashCode() ?? 0);
+            uint hc7 = (uint)(value7?.GetHashCode() ?? 0);
+            uint hc8 = (uint)(value8?.GetHashCode() ?? 0);
 
             Initialize(out uint v1, out uint v2, out uint v3, out uint v4);
 
@@ -328,9 +328,9 @@ namespace System
 
             // To see what's really going on here, have a look at the Combine
             // methods.
-            
-            var val = (uint)value;
-            
+
+            uint val = (uint)value;
+
             // Storing the value of _length locally shaves of quite a few bytes
             // in the resulting machine code.
             uint previousLength = _length++;
@@ -361,7 +361,7 @@ namespace System
             // Storing the value of _length locally shaves of quite a few bytes
             // in the resulting machine code.
             uint length = _length;
-            
+
             // position refers to the *next* queue position in this method, so
             // position == 1 means that _queue1 is populated; _queue2 would have
             // been populated on the next call to Add.
@@ -398,10 +398,10 @@ namespace System
         }
 
 #pragma warning disable 0809
-        // Obsolete member 'memberA' overrides non-obsolete member 'memberB'. 
+        // Obsolete member 'memberA' overrides non-obsolete member 'memberB'.
         // Disallowing GetHashCode and Equals is by design
 
-        // * We decided to not override GetHashCode() to produce the hash code 
+        // * We decided to not override GetHashCode() to produce the hash code
         //   as this would be weird, both naming-wise as well as from a
         //   behavioral standpoint (GetHashCode() should return the object's
         //   hash code, not the one being computed).

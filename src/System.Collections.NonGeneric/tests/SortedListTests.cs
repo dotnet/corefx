@@ -724,7 +724,7 @@ namespace System.Collections.Tests
             {
                 IList keys1 = sortList2.GetKeyList();
                 IList keys2 = sortList2.GetKeyList();
-                
+
                 // Test we have copied the correct keys
                 Assert.Equal(count, keys1.Count);
                 Assert.Equal(count, keys2.Count);
@@ -1403,7 +1403,7 @@ namespace System.Collections.Tests
                 Assert.Equal(2048, sortList2[101]);
 
                 sortList2[102] = null;
-                Assert.Equal(null, sortList2[102]);
+                Assert.Null(sortList2[102]);
             });
         }
 
@@ -1489,7 +1489,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public void SetByIndex_InvalidIndex_ThrowsArgumentOutOfRangeExeption()
+        public void SetByIndex_InvalidIndex_ThrowsArgumentOutOfRangeException()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -1498,7 +1498,7 @@ namespace System.Collections.Tests
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => sortList2.SetByIndex(sortList2.Count, 101)); // Index >= list.Count
             });
         }
-        
+
         [Fact]
         public void Synchronized_IsSynchronized()
         {
@@ -1566,7 +1566,7 @@ namespace System.Collections.Tests
                 sortListMother.Add("Key_" + i, "Value_" + i);
             }
 
-            Assert.Equal(sortListMother.SyncRoot.GetType(), typeof(SortedList));
+            Assert.Equal(typeof(SortedList), sortListMother.SyncRoot.GetType());
 
             SortedList sortListSon = SortedList.Synchronized(sortListMother);
             _sortListGrandDaughter = SortedList.Synchronized(sortListSon);
@@ -1580,7 +1580,7 @@ namespace System.Collections.Tests
             Assert.Equal(sortListSon.SyncRoot, sortListMother.SyncRoot);
 
             //we are going to rumble with the SortedLists with some threads
-            
+
             var workers = new Task[4];
             for (int i = 0; i < workers.Length; i += 2)
             {

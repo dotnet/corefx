@@ -52,7 +52,7 @@ namespace System.Reflection
         private RoAssembly _coreAssembly = null;
 
         /// <summary>
-        /// Returns a lazily created and cached Type instance corresponding to the indicated core type. This method throws 
+        /// Returns a lazily created and cached Type instance corresponding to the indicated core type. This method throws
         /// if the core assembly name wasn't supplied, the core assembly could not be loaded for some reason or if the specified
         /// type does not exist in the core assembly.
         /// </summary>
@@ -80,7 +80,7 @@ namespace System.Reflection
         /// the corresponding elements will be null.
         /// </summary>
         internal CoreTypes GetAllFoundCoreTypes() => _coreTypes;
-        private CoreTypes _coreTypes;
+        private readonly CoreTypes _coreTypes;
 
         //
         // Seriously, ugh - the default binder for Reflection has a dependency on checking types for equality with System.Object - for that

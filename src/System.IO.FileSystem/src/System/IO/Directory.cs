@@ -91,7 +91,7 @@ namespace System.IO
         {
             return File.GetCreationTimeUtc(path);
         }
- 
+
         public static void SetLastWriteTime(string path, DateTime lastWriteTime)
         {
             string fullPath = Path.GetFullPath(path);
@@ -177,19 +177,15 @@ namespace System.IO
             if (searchPattern == null)
                 throw new ArgumentNullException(nameof(searchPattern));
 
-            FileSystemEnumerableFactory.NormalizeInputs(ref path, ref searchPattern, options);
+            FileSystemEnumerableFactory.NormalizeInputs(ref path, ref searchPattern, options.MatchType);
 
-            switch (searchTarget)
+            return searchTarget switch
             {
-                case SearchTarget.Files:
-                    return FileSystemEnumerableFactory.UserFiles(path, searchPattern, options);
-                case SearchTarget.Directories:
-                    return FileSystemEnumerableFactory.UserDirectories(path, searchPattern, options);
-                case SearchTarget.Both:
-                    return FileSystemEnumerableFactory.UserEntries(path, searchPattern, options);
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(searchTarget));
-            }
+                SearchTarget.Files => FileSystemEnumerableFactory.UserFiles(path, searchPattern, options),
+                SearchTarget.Directories => FileSystemEnumerableFactory.UserDirectories(path, searchPattern, options),
+                SearchTarget.Both => FileSystemEnumerableFactory.UserEntries(path, searchPattern, options),
+                _ => throw new ArgumentOutOfRangeException(nameof(searchTarget)),
+            };
         }
 
         public static IEnumerable<string> EnumerateDirectories(string path) => EnumerateDirectories(path, "*", enumerationOptions: EnumerationOptions.Compatible);
@@ -286,7 +282,7 @@ namespace System.IO
             // to make sure our cross platform behavior matches NetFX behavior.
             if (!FileSystem.DirectoryExists(fullsourceDirName) && !FileSystem.FileExists(fullsourceDirName))
                 throw new DirectoryNotFoundException(SR.Format(SR.IO_PathNotFound_Path, fullsourceDirName));
-            
+
             if (FileSystem.DirectoryExists(fulldestDirName))
                 throw new IOException(SR.Format(SR.IO_AlreadyExists_Name, fulldestDirName));
 
@@ -311,4 +307,3 @@ namespace System.IO
         }
     }
 }
-

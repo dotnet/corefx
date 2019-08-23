@@ -23,9 +23,9 @@ namespace System.Data.SqlClient
     {
         #region Private fields
 
-        private TdsParserStateObject _stateObj;      // target to write to
-        private SmiMetaData _metaData;      // metadata describing value
-        private bool _isPlp;         // should this column be sent in PLP format?
+        private readonly TdsParserStateObject _stateObj;      // target to write to
+        private readonly SmiMetaData _metaData;      // metadata describing value
+        private readonly bool _isPlp;         // should this column be sent in PLP format?
         private bool _plpUnknownSent;// did we send initial UNKNOWN_LENGTH marker?
         private Encoder _encoder;       // required for chunking character type data
         private SmiMetaData _variantType;   // required for sql_variant
@@ -565,7 +565,7 @@ namespace System.Data.SqlClient
                     _stateObj.Parser.WriteInt(dt.time, _stateObj);
                 }
 
-                // Clean the variant metadata to prevent sharing it with next row. 
+                // Clean the variant metadata to prevent sharing it with next row.
                 // As a reminder, SetVariantType raises an assert if _variantType is not clean
                 _variantType = null;
             }
@@ -661,7 +661,7 @@ namespace System.Data.SqlClient
             byte length;
             if (SqlDbType.Variant == _metaData.SqlDbType)
             {
-                // VSTFDevDiv #885208 - DateTimeOffset throws ArgumentException for when passing DateTimeOffset value to a sql_variant TVP 
+                // VSTFDevDiv #885208 - DateTimeOffset throws ArgumentException for when passing DateTimeOffset value to a sql_variant TVP
                 //                      using a SqlDataRecord or SqlDataReader
                 MSS.SmiMetaData dateTimeOffsetMetaData = MSS.SmiMetaData.DefaultDateTimeOffset;
                 scale = MetaType.MetaDateTimeOffset.Scale;

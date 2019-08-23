@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -11,13 +11,13 @@ namespace System.IO.Tests
     {
         #region Utilities
 
-        public virtual void Move(string sourceFile, string destFile, bool overwrite)
+        protected virtual void Move(string sourceFile, string destFile, bool overwrite)
         {
             File.Move(sourceFile, destFile, overwrite);
         }
 
         private void MoveDestinationFileDoesNotExist(bool overwrite)
-        {   
+        {
             string srcPath = GetTestFilePath();
             string destPath = GetTestFilePath();
 

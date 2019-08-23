@@ -397,25 +397,22 @@ namespace System.Xml.Xsl.IlGen
         // Miscellaneous
         public static readonly MethodInfo GetTypeFromHandle = GetMethod(typeof(Type), "GetTypeFromHandle");
         public static readonly MethodInfo InitializeArray = GetMethod(typeof(System.Runtime.CompilerServices.RuntimeHelpers), "InitializeArray");
-        public static readonly Dictionary<Type, XmlILStorageMethods> StorageMethods;
-
-        static XmlILMethods()
+        public static readonly Dictionary<Type, XmlILStorageMethods> StorageMethods = new Dictionary<Type, XmlILStorageMethods>(13)
         {
-            StorageMethods = new Dictionary<Type, XmlILStorageMethods>();
-            StorageMethods[typeof(string)] = new XmlILStorageMethods(typeof(string));
-            StorageMethods[typeof(bool)] = new XmlILStorageMethods(typeof(bool));
-            StorageMethods[typeof(int)] = new XmlILStorageMethods(typeof(int));
-            StorageMethods[typeof(long)] = new XmlILStorageMethods(typeof(long));
-            StorageMethods[typeof(decimal)] = new XmlILStorageMethods(typeof(decimal));
-            StorageMethods[typeof(double)] = new XmlILStorageMethods(typeof(double));
-            StorageMethods[typeof(float)] = new XmlILStorageMethods(typeof(float));
-            StorageMethods[typeof(DateTime)] = new XmlILStorageMethods(typeof(DateTime));
-            StorageMethods[typeof(byte[])] = new XmlILStorageMethods(typeof(byte[]));
-            StorageMethods[typeof(XmlQualifiedName)] = new XmlILStorageMethods(typeof(XmlQualifiedName));
-            StorageMethods[typeof(TimeSpan)] = new XmlILStorageMethods(typeof(TimeSpan));
-            StorageMethods[typeof(XPathItem)] = new XmlILStorageMethods(typeof(XPathItem));
-            StorageMethods[typeof(XPathNavigator)] = new XmlILStorageMethods(typeof(XPathNavigator));
-        }
+            { typeof(string), new XmlILStorageMethods(typeof(string)) },
+            { typeof(bool), new XmlILStorageMethods(typeof(bool)) },
+            { typeof(int), new XmlILStorageMethods(typeof(int)) },
+            { typeof(long), new XmlILStorageMethods(typeof(long)) },
+            { typeof(decimal), new XmlILStorageMethods(typeof(decimal)) },
+            { typeof(double), new XmlILStorageMethods(typeof(double)) },
+            { typeof(float), new XmlILStorageMethods(typeof(float)) },
+            { typeof(DateTime), new XmlILStorageMethods(typeof(DateTime)) },
+            { typeof(byte[]), new XmlILStorageMethods(typeof(byte[])) },
+            { typeof(XmlQualifiedName), new XmlILStorageMethods(typeof(XmlQualifiedName)) },
+            { typeof(TimeSpan), new XmlILStorageMethods(typeof(TimeSpan)) },
+            { typeof(XPathItem), new XmlILStorageMethods(typeof(XPathItem)) },
+            { typeof(XPathNavigator), new XmlILStorageMethods(typeof(XPathNavigator)) },
+        };
 
         public static MethodInfo GetMethod(Type className, string methName)
         {
@@ -455,9 +452,10 @@ namespace System.Xml.Xsl.IlGen
         private MethodBase _methInfo;
         private ILGenerator _ilgen;
         private LocalBuilder _locXOut;
-        private XmlILModule _module;
-        private bool _isDebug, _initWriters;
-        private StaticDataManager _staticData;
+        private readonly XmlILModule _module;
+        private readonly bool _isDebug;
+        private bool _initWriters;
+        private readonly StaticDataManager _staticData;
         private ISourceLineInfo _lastSourceInfo;
         private MethodInfo _methSyncToNav;
 
@@ -472,8 +470,8 @@ namespace System.Xml.Xsl.IlGen
         /// <summary>
         /// Cache metadata used during code-generation phase.
         /// </summary>
-        // SxS note: Using hardcoded "dump.il" is an SxS issue. Since we are doing this ONLY in debug builds 
-        // and only for tracing purposes and MakeVersionSafeName does not seem to be able to handle file 
+        // SxS note: Using hardcoded "dump.il" is an SxS issue. Since we are doing this ONLY in debug builds
+        // and only for tracing purposes and MakeVersionSafeName does not seem to be able to handle file
         // extensions correctly I decided to suppress the SxS message (as advised by SxS guys).
         public GenerateHelper(XmlILModule module, bool isDebug)
         {
@@ -490,8 +488,8 @@ namespace System.Xml.Xsl.IlGen
         /// <summary>
         /// Begin generating code within a new method.
         /// </summary>
-        // SxS note: Using hardcoded "dump.il" is an SxS issue. Since we are doing this ONLY in debug builds 
-        // and only for tracing purposes and MakeVersionSafeName does not seem to be able to handle file 
+        // SxS note: Using hardcoded "dump.il" is an SxS issue. Since we are doing this ONLY in debug builds
+        // and only for tracing purposes and MakeVersionSafeName does not seem to be able to handle file
         // extensions correctly I decided to suppress the SxS message (as advised by SxS guys).
         public void MethodBegin(MethodBase methInfo, ISourceLineInfo sourceInfo, bool initWriters)
         {

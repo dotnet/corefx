@@ -424,6 +424,8 @@ namespace System.Xml
                         {
                             if (sb == null)
                                 sb = new StringBuilder(result);
+                            if (sb.Length > maxStringContentLength - value.Length)
+                                XmlExceptionHelper.ThrowMaxStringContentLengthExceeded(this, maxStringContentLength);
                             sb.Append(value);
                         }
                         break;
@@ -454,6 +456,8 @@ namespace System.Xml
             }
             if (sb != null)
                 result = sb.ToString();
+            if (result.Length > maxStringContentLength)
+                XmlExceptionHelper.ThrowMaxStringContentLengthExceeded(this, maxStringContentLength);
             return result;
         }
 
@@ -1324,7 +1328,7 @@ namespace System.Xml
 
         private class XmlWrappedReader : XmlDictionaryReader, IXmlLineInfo
         {
-            private XmlReader _reader;
+            private readonly XmlReader _reader;
             private XmlNamespaceManager _nsMgr;
 
             public XmlWrappedReader(XmlReader reader, XmlNamespaceManager nsMgr)

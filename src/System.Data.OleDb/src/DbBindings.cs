@@ -8,23 +8,23 @@ using System.Text;
 
 namespace System.Data.OleDb
 {
-    sealed internal class Bindings
+    internal sealed class Bindings
     {
         private readonly tagDBPARAMBINDINFO[] _bindInfo;
         private readonly tagDBBINDING[] _dbbindings;
         private readonly tagDBCOLUMNACCESS[] _dbcolumns;
 
         private OleDbParameter[] _parameters;
-        private int _collectionChangeID;
+        private readonly int _collectionChangeID;
 
         private OleDbDataReader _dataReader;
         private ColumnBinding[] _columnBindings;
         private RowBinding _rowBinding;
 
         private int _index;
-        private int _count;
+        private readonly int _count;
         private int _dataBufferSize;
-        private bool _ifIRowsetElseIRow;
+        private readonly bool _ifIRowsetElseIRow;
         private bool _forceRebind;
         private bool _needToReset;
 
@@ -411,4 +411,3 @@ namespace System.Data.OleDb
         }
     }
 }
-

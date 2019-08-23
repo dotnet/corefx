@@ -25,8 +25,8 @@ namespace System.ComponentModel.Composition
         ///     with the specified error message.
         /// </summary>
         /// <param name="message">
-        ///     A <see cref="String"/> containing a message that describes the 
-        ///     <see cref="CompositionError"/>; or <see langword="null"/> to set the 
+        ///     A <see cref="string"/> containing a message that describes the
+        ///     <see cref="CompositionError"/>; or <see langword="null"/> to set the
         ///     <see cref="Description"/> property to an empty string ("").
         /// </param>
         public CompositionError(string message)
@@ -42,12 +42,12 @@ namespace System.ComponentModel.Composition
         /// <param name="element">
         ///     The <see cref="ICompositionElement"/> that is the cause of the
         ///     <see cref="CompositionError"/>; or <see langword="null"/> to set
-        ///     the <see cref="CompositionError.Element"/> property to 
+        ///     the <see cref="CompositionError.Element"/> property to
         ///     <see langword="null"/>.
         /// </param>
         /// <param name="message">
-        ///     A <see cref="String"/> containing a message that describes the 
-        ///     <see cref="CompositionError"/>; or <see langword="null"/> to set the 
+        ///     A <see cref="string"/> containing a message that describes the
+        ///     <see cref="CompositionError"/>; or <see langword="null"/> to set the
         ///     <see cref="Description"/> property to an empty string ("").
         /// </param>
         public CompositionError(string message, ICompositionElement element)
@@ -56,17 +56,17 @@ namespace System.ComponentModel.Composition
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="CompositionError"/> class 
-        ///     with the specified error message and exception that is the cause of the  
+        ///     Initializes a new instance of the <see cref="CompositionError"/> class
+        ///     with the specified error message and exception that is the cause of the
         ///     composition error.
         /// </summary>
         /// <param name="message">
-        ///     A <see cref="String"/> containing a message that describes the 
-        ///     <see cref="CompositionError"/>; or <see langword="null"/> to set the 
+        ///     A <see cref="string"/> containing a message that describes the
+        ///     <see cref="CompositionError"/>; or <see langword="null"/> to set the
         ///     <see cref="Description"/> property to an empty string ("").
         /// </param>
         /// <param name="exception">
-        ///     The <see cref="Exception"/> that is the underlying cause of the 
+        ///     The <see cref="Exception"/> that is the underlying cause of the
         ///     <see cref="CompositionError"/>; or <see langword="null"/> to set
         ///     the <see cref="CompositionError.Exception"/> property to <see langword="null"/>.
         /// </param>
@@ -76,23 +76,23 @@ namespace System.ComponentModel.Composition
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="CompositionError"/> class 
-        ///     with the specified error message, and composition element and exception that 
+        ///     Initializes a new instance of the <see cref="CompositionError"/> class
+        ///     with the specified error message, and composition element and exception that
         ///     is the cause of the composition error.
         /// </summary>
         /// <param name="message">
-        ///     A <see cref="String"/> containing a message that describes the 
-        ///     <see cref="CompositionError"/>; or <see langword="null"/> to set the 
+        ///     A <see cref="string"/> containing a message that describes the
+        ///     <see cref="CompositionError"/>; or <see langword="null"/> to set the
         ///     <see cref="Description"/> property to an empty string ("").
         /// </param>
         /// <param name="element">
         ///     The <see cref="ICompositionElement"/> that is the cause of the
         ///     <see cref="CompositionError"/>; or <see langword="null"/> to set
-        ///     the <see cref="CompositionError.Element"/> property to 
+        ///     the <see cref="CompositionError.Element"/> property to
         ///     <see langword="null"/>.
         /// </param>
         /// <param name="exception">
-        ///     The <see cref="Exception"/> that is the underlying cause of the 
+        ///     The <see cref="Exception"/> that is the underlying cause of the
         ///     <see cref="CompositionError"/>; or <see langword="null"/> to set
         ///     the <see cref="CompositionError.Exception"/> property to <see langword="null"/>.
         /// </param>
@@ -125,7 +125,7 @@ namespace System.ComponentModel.Composition
         ///     Gets the message that describes the composition error.
         /// </summary>
         /// <value>
-        ///     A <see cref="String"/> containing a message that describes the
+        ///     A <see cref="string"/> containing a message that describes the
         ///     <see cref="CompositionError"/>.
         /// </value>
         public string Description
@@ -137,7 +137,7 @@ namespace System.ComponentModel.Composition
         ///     Gets the exception that is the underlying cause of the composition error.
         /// </summary>
         /// <value>
-        ///     The <see cref="Exception"/> that is the underlying cause of the 
+        ///     The <see cref="Exception"/> that is the underlying cause of the
         ///     <see cref="CompositionError"/>. The default is <see langword="null"/>.
         /// </value>
         public Exception Exception
@@ -159,7 +159,7 @@ namespace System.ComponentModel.Composition
         ///     Returns a string representation of the composition error.
         /// </summary>
         /// <returns>
-        ///     A <see cref="String"/> containing the <see cref="Description"/> property.
+        ///     A <see cref="string"/> containing the <see cref="Description"/> property.
         /// </returns>
         public override string ToString()
         {

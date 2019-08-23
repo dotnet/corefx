@@ -6,15 +6,11 @@ using System.Reflection;
 
 namespace System.Runtime.Serialization
 {
-#if uapaot
-    public class XmlObjectSerializerReadContextComplex : XmlObjectSerializerReadContext
-#else
     internal class XmlObjectSerializerReadContextComplex : XmlObjectSerializerReadContext
-#endif
     {
-        private bool _preserveObjectReferences;
-        private SerializationMode _mode;
-        private ISerializationSurrogateProvider _serializationSurrogateProvider;
+        private readonly bool _preserveObjectReferences;
+        private readonly SerializationMode _mode;
+        private readonly ISerializationSurrogateProvider _serializationSurrogateProvider;
 
         internal XmlObjectSerializerReadContextComplex(DataContractSerializer serializer, DataContract rootTypeDataContract, DataContractResolver dataContractResolver)
             : base(serializer, rootTypeDataContract, dataContractResolver)

@@ -1115,7 +1115,6 @@ namespace System
 
             int index = 0;
             int num = value[0];
-            uint numValue;
 
             // Skip past any whitespace at the beginning.
             if ((styles & NumberStyles.AllowLeadingWhite) != 0 && IsWhite(num))
@@ -1158,6 +1157,8 @@ namespace System
                     if ((uint)index >= (uint)value.Length)
                         goto DoneAtEnd;
                     num = value[index];
+
+                    uint numValue;
                     if ((uint)num >= (uint)charToHexLookup.Length || (numValue = charToHexLookup[num]) == 0xFF)
                         goto HasTrailingChars;
                     index++;
@@ -1168,7 +1169,7 @@ namespace System
                 if ((uint)index >= (uint)value.Length)
                     goto DoneAtEnd;
                 num = value[index];
-                if ((uint)num >= (uint)charToHexLookup.Length || (numValue = charToHexLookup[num]) == 0xFF)
+                if ((uint)num >= (uint)charToHexLookup.Length || charToHexLookup[num] == 0xFF)
                     goto HasTrailingChars;
 
                 // At this point, we're either overflowing or hitting a formatting error.
@@ -1443,7 +1444,6 @@ namespace System
 
             int index = 0;
             int num = value[0];
-            uint numValue;
 
             // Skip past any whitespace at the beginning.
             if ((styles & NumberStyles.AllowLeadingWhite) != 0 && IsWhite(num))
@@ -1486,6 +1486,8 @@ namespace System
                     if ((uint)index >= (uint)value.Length)
                         goto DoneAtEnd;
                     num = value[index];
+
+                    uint numValue;
                     if ((uint)num >= (uint)charToHexLookup.Length || (numValue = charToHexLookup[num]) == 0xFF)
                         goto HasTrailingChars;
                     index++;
@@ -1496,7 +1498,7 @@ namespace System
                 if ((uint)index >= (uint)value.Length)
                     goto DoneAtEnd;
                 num = value[index];
-                if ((uint)num >= (uint)charToHexLookup.Length || (numValue = charToHexLookup[num]) == 0xFF)
+                if ((uint)num >= (uint)charToHexLookup.Length || charToHexLookup[num] == 0xFF)
                     goto HasTrailingChars;
 
                 // At this point, we're either overflowing or hitting a formatting error.
@@ -1886,6 +1888,8 @@ namespace System
             return true;
         }
 
+        private static bool IsSpaceReplacingChar(char c) => c == '\u00a0' || c == '\u202f';
+
         private static unsafe char* MatchChars(char* p, char* pEnd, string value)
         {
             Debug.Assert(p != null && pEnd != null && p <= pEnd && value != null);
@@ -1895,12 +1899,12 @@ namespace System
                 if (*str != '\0')
                 {
                     // We only hurt the failure case
-                    // This fix is for French or Kazakh cultures. Since a user cannot type 0xA0 as a
+                    // This fix is for French or Kazakh cultures. Since a user cannot type 0xA0 or 0x202F as a
                     // space character we use 0x20 space character instead to mean the same.
                     while (true)
                     {
                         char cp = p < pEnd ? *p : '\0';
-                        if (cp != *str && !(*str == '\u00a0' && cp == '\u0020'))
+                        if (cp != *str && !(IsSpaceReplacingChar(*str) && cp == '\u0020'))
                         {
                             break;
                         }

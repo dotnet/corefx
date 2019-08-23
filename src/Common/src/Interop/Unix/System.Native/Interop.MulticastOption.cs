@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
+
+#pragma warning disable CA1823 // unused private padding fields in MulticastOption structs
 
 internal static partial class Interop
 {
@@ -31,7 +31,7 @@ internal static partial class Interop
             public int InterfaceIndex;
             private int _padding;
         }
-       
+
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetIPv4MulticastOption")]
         internal static extern unsafe Error GetIPv4MulticastOption(SafeHandle socket, MulticastOption multicastOption, IPv4MulticastOption* option);
 

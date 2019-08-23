@@ -157,7 +157,7 @@ namespace System.Data.ProviderBase
             }
         }
 
-        virtual protected bool UnbindOnTransactionCompletion
+        protected virtual bool UnbindOnTransactionCompletion
         {
             get
             {
@@ -166,7 +166,7 @@ namespace System.Data.ProviderBase
         }
 
         // Is this a connection that must be put in stasis (or is already in stasis) pending the end of it's transaction?
-        virtual protected internal bool IsNonPoolableTransactionRoot
+        protected internal virtual bool IsNonPoolableTransactionRoot
         {
             get
             {
@@ -174,7 +174,7 @@ namespace System.Data.ProviderBase
             }
         }
 
-        virtual internal bool IsTransactionRoot
+        internal virtual bool IsTransactionRoot
         {
             get
             {
@@ -182,7 +182,7 @@ namespace System.Data.ProviderBase
             }
         }
 
-        virtual protected bool ReadyToPrepareTransaction
+        protected virtual bool ReadyToPrepareTransaction
         {
             get
             {
@@ -190,7 +190,7 @@ namespace System.Data.ProviderBase
             }
         }
 
-        abstract protected void Activate(Transaction transaction);
+        protected abstract void Activate(Transaction transaction);
 
         internal void ActivateConnection(Transaction transaction)
         {
@@ -306,7 +306,7 @@ namespace System.Data.ProviderBase
             }
         }
 
-        virtual internal void DelegatedTransactionEnded()
+        internal virtual void DelegatedTransactionEnded()
         {
             // Called by System.Transactions when the delegated transaction has
             // completed.  We need to make closed connections that are in stasis
@@ -338,7 +338,7 @@ namespace System.Data.ProviderBase
             else if (-1 == _pooledCount && !_owningObject.IsAlive)
             {
                 // When _pooledCount is -1 and the owning object no longer exists,
-                // it indicates a closed (or leaked), non-pooled connection so 
+                // it indicates a closed (or leaked), non-pooled connection so
                 // it is safe to dispose.
 
                 TerminateStasis(false);
@@ -347,13 +347,13 @@ namespace System.Data.ProviderBase
 
                 // it's a non-pooled connection, we need to dispose of it
                 // once and for all, or the server will have fits about us
-                // leaving connections open until the client-side GC kicks 
+                // leaving connections open until the client-side GC kicks
                 // in.
                 Dispose();
             }
             // When _pooledCount is 0, the connection is a pooled connection
             // that is either open (if the owning object is alive) or leaked (if
-            // the owning object is not alive)  In either case, we can't muck 
+            // the owning object is not alive)  In either case, we can't muck
             // with the connection here.
         }
 
@@ -372,13 +372,13 @@ namespace System.Data.ProviderBase
                 enlistedTransaction.Dispose();
             }
         }
-        
-        abstract public void EnlistTransaction(Transaction transaction);
+
+        public abstract void EnlistTransaction(Transaction transaction);
 
         // Cleanup connection's transaction-specific structures (currently used by Delegated transaction).
         //  This is a separate method because cleanup can be triggered in multiple ways for a delegated
         //  transaction.
-        virtual protected void CleanupTransactionOnCompletion(Transaction transaction)
+        protected virtual void CleanupTransactionOnCompletion(Transaction transaction)
         {
         }
 
@@ -442,7 +442,7 @@ namespace System.Data.ProviderBase
             }
         }
 
-        void TransactionCompletedEvent(object sender, TransactionEventArgs e)
+        private void TransactionCompletedEvent(object sender, TransactionEventArgs e)
         {
             Transaction transaction = e.Transaction;
 

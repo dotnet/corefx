@@ -39,7 +39,7 @@ namespace System.IO.Packaging
         }
 
         #endregion Protected Constructor
-        
+
         #region Public Properties
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace System.IO.Packaging
         }
 
         #endregion Public Properties
-        
+
         #region Public Methods
 
         #region OpenOnFileMethods
@@ -766,7 +766,7 @@ namespace System.IO.Packaging
         protected abstract void FlushCore();
 
         #endregion Protected Abstract Methods
-        
+
         #region Internal Properties
 
 
@@ -836,10 +836,6 @@ namespace System.IO.Packaging
             ThrowIfFileAccessInvalid(packageAccess);
 
             if (packageMode == FileMode.OpenOrCreate && packageAccess != FileAccess.ReadWrite)
-                throw new ArgumentException(SR.UnsupportedCombinationOfModeAccess);
-            if (packageMode == FileMode.Create && packageAccess != FileAccess.ReadWrite)
-                throw new ArgumentException(SR.UnsupportedCombinationOfModeAccess);
-            if (packageMode == FileMode.CreateNew && packageAccess != FileAccess.ReadWrite)
                 throw new ArgumentException(SR.UnsupportedCombinationOfModeAccess);
             if (packageMode == FileMode.Open && packageAccess == FileAccess.Write)
                 throw new ArgumentException(SR.UnsupportedCombinationOfModeAccess);
@@ -1190,7 +1186,7 @@ namespace System.IO.Packaging
         }
 
         #endregion Private Methods
-        
+
         #region Private Members
 
         // Default values for the Package.Open method overloads
@@ -1201,7 +1197,7 @@ namespace System.IO.Packaging
         private const FileMode s_defaultStreamMode = FileMode.Open;
         private const FileAccess s_defaultStreamAccess = FileAccess.Read;
 
-        private FileAccess _openFileAccess;
+        private readonly FileAccess _openFileAccess;
         private FileMode _openFileMode;
         private bool _disposed;
         private SortedList<PackUriHelper.ValidatedPartUri, PackagePart> _partList;

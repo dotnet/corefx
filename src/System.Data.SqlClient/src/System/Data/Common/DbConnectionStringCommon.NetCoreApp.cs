@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -47,15 +47,12 @@ namespace System.Data.Common
         {
             Debug.Assert(IsValidPoolBlockingPeriodValue(value));
 
-            switch (value)
+            return value switch
             {
-                case PoolBlockingPeriod.AlwaysBlock:
-                    return nameof(PoolBlockingPeriod.AlwaysBlock);
-                case PoolBlockingPeriod.NeverBlock:
-                    return nameof(PoolBlockingPeriod.NeverBlock);
-                default:
-                    return nameof(PoolBlockingPeriod.Auto);
-            }
+                PoolBlockingPeriod.AlwaysBlock => nameof(PoolBlockingPeriod.AlwaysBlock),
+                PoolBlockingPeriod.NeverBlock => nameof(PoolBlockingPeriod.NeverBlock),
+                _ => nameof(PoolBlockingPeriod.Auto),
+            };
         }
 
         /// <summary>
@@ -64,7 +61,7 @@ namespace System.Data.Common
         /// * if the value is from type PoolBlockingPeriod, it will be used as is
         /// * if the value is from integral type (SByte, Int16, Int32, Int64, Byte, UInt16, UInt32, or UInt64), it will be converted to enum
         /// * if the value is another enum or any other type, it will be blocked with an appropriate ArgumentException
-        /// 
+        ///
         /// in any case above, if the conerted value is out of valid range, the method raises ArgumentOutOfRangeException.
         /// </summary>
         /// <returns>PoolBlockingPeriod value in the valid range</returns>
@@ -119,7 +116,7 @@ namespace System.Data.Common
                     }
                     catch (ArgumentException e)
                     {
-                        // to be consistent with the messages we send in case of wrong type usage, replace 
+                        // to be consistent with the messages we send in case of wrong type usage, replace
                         // the error with our exception, and keep the original one as inner one for troubleshooting
                         throw ADP.ConvertFailed(value.GetType(), typeof(PoolBlockingPeriod), e);
                     }

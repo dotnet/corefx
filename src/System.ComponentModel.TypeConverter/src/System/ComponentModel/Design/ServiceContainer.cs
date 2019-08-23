@@ -13,20 +13,20 @@ namespace System.ComponentModel.Design
     public class ServiceContainer : IServiceContainer, IDisposable
     {
         private ServiceCollection<object> _services;
-        private IServiceProvider _parentProvider;
+        private readonly IServiceProvider _parentProvider;
         private static readonly Type[] s_defaultServices = new Type[] { typeof(IServiceContainer), typeof(ServiceContainer) };
 
-        private static TraceSwitch s_traceSwitch = new TraceSwitch("TRACESERVICE", "ServiceProvider: Trace service provider requests.");
+        private static readonly TraceSwitch s_traceSwitch = new TraceSwitch("TRACESERVICE", "ServiceProvider: Trace service provider requests.");
 
         /// <summary>
-        /// Creates a new service object container. 
+        /// Creates a new service object container.
         /// </summary>
         public ServiceContainer()
         {
         }
 
         /// <summary>
-        /// Creates a new service object container. 
+        /// Creates a new service object container.
         /// </summary>
         public ServiceContainer(IServiceProvider parentProvider)
         {
@@ -275,7 +275,7 @@ namespace System.ComponentModel.Design
         /// <typeparam name="T"></typeparam>
         private sealed class ServiceCollection<T> : Dictionary<Type, T>
         {
-            private static EmbeddedTypeAwareTypeComparer s_serviceTypeComparer = new EmbeddedTypeAwareTypeComparer();
+            private static readonly EmbeddedTypeAwareTypeComparer s_serviceTypeComparer = new EmbeddedTypeAwareTypeComparer();
 
             private sealed class EmbeddedTypeAwareTypeComparer : IEqualityComparer<Type>
             {
@@ -290,4 +290,3 @@ namespace System.ComponentModel.Design
         }
     }
 }
-

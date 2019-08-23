@@ -53,6 +53,8 @@ typedef enum
  *
  * NOTE: these values are taken from System.Net.AddressFamily. If you add
  *       new entries, be sure that the values are chosen accordingly.
+ *       Unix specific values have distinct offset to avoid conflict with
+ *       Windows values.
  */
 typedef enum
 {
@@ -60,9 +62,8 @@ typedef enum
     AddressFamily_AF_UNIX = 1,     // System.Net.AddressFamily.Unix
     AddressFamily_AF_INET = 2,     // System.Net.AddressFamily.InterNetwork
     AddressFamily_AF_INET6 = 23,   // System.Net.AddressFamily.InterNetworkV6
-    AddressFamily_AF_NETLINK = 30, // System.Net.AddressFamily.Netlink
-    AddressFamily_AF_PACKET = 31,  // System.Net.AddressFamily.Packet
-    AddressFamily_AF_CAN = 32,     // System.Net.AddressFamily.ControllerAreaNetwork
+    AddressFamily_AF_PACKET = 65536,  // System.Net.AddressFamily.Packet
+    AddressFamily_AF_CAN = 65537,     // System.Net.AddressFamily.ControllerAreaNetwork
 } AddressFamily;
 
 /*
@@ -419,3 +420,7 @@ DLLEXPORT char* SystemNative_GetPeerUserName(intptr_t socket);
 DLLEXPORT void SystemNative_GetDomainSocketSizes(int32_t* pathOffset, int32_t* pathSize, int32_t* addressSize);
 
 DLLEXPORT int32_t SystemNative_SendFile(intptr_t out_fd, intptr_t in_fd, int64_t offset, int64_t count, int64_t* sent);
+
+DLLEXPORT int32_t SystemNative_Disconnect(intptr_t socket);
+
+DLLEXPORT uint32_t SystemNative_InterfaceNameToIndex(char* interfaceName);

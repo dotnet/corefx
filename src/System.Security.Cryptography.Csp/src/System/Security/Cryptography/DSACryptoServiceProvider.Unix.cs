@@ -119,6 +119,22 @@ namespace System.Security.Cryptography
             _publicOnly = (parameters.X == null);
         }
 
+        public override void ImportEncryptedPkcs8PrivateKey(
+            ReadOnlySpan<byte> passwordBytes,
+            ReadOnlySpan<byte> source,
+            out int bytesRead)
+        {
+            _impl.ImportEncryptedPkcs8PrivateKey(passwordBytes, source, out bytesRead);
+        }
+
+        public override void ImportEncryptedPkcs8PrivateKey(
+            ReadOnlySpan<char> password,
+            ReadOnlySpan<byte> source,
+            out int bytesRead)
+        {
+            _impl.ImportEncryptedPkcs8PrivateKey(password, source, out bytesRead);
+        }
+
         public override string KeyExchangeAlgorithm => _impl.KeyExchangeAlgorithm;
 
         public override int KeySize
@@ -214,7 +230,7 @@ namespace System.Security.Cryptography
                 throw new ArgumentNullException(nameof(rgbHash));
             if (rgbSignature == null)
                 throw new ArgumentNullException(nameof(rgbSignature));
-            
+
             // For compat with Windows, no check for rgbHash.Length != SHA1_HASHSIZE
 
             // Only SHA1 allowed; the default value is SHA1

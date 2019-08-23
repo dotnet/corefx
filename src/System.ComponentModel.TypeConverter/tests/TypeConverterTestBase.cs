@@ -187,7 +187,10 @@ namespace System.ComponentModel.Tests
             public CultureInfo RemoteInvokeCulture { get; set; }
 
             public bool CanConvert { get; set; }
-            
+
+            public override string ToString() => // for debugging / xunit test output
+                $"Source='{Source}', Type='{DestinationType}', Culture='{Culture?.Name ?? "(null)"}', RemoteCulture='{RemoteInvokeCulture?.Name ?? "(null)"}'";
+
             public static ConvertTest Valid(object source, object expected, CultureInfo culture = null)
             {
                 return new ConvertTest
@@ -259,7 +262,7 @@ namespace System.ComponentModel.Tests
             public ConvertTest()
             {
             }
-  
+
             protected ConvertTest(SerializationInfo info, StreamingContext context)
             {
                 string sourceType = (string)info.GetValue("SourceType", typeof(string));
@@ -334,7 +337,7 @@ namespace System.ComponentModel.Tests
 
                 info.AddValue(nameof(CanConvert), CanConvert);
             }
-   
+
             public static ConvertTest FromSerializedString(string s)
             {
                 byte[] bytes = Convert.FromBase64String(s);
@@ -350,7 +353,7 @@ namespace System.ComponentModel.Tests
             {
                 using (var stream = new MemoryStream())
                 {
-                    new BinaryFormatter().Serialize(stream, this);         
+                    new BinaryFormatter().Serialize(stream, this);
                     return Convert.ToBase64String(stream.ToArray());
                 }
             }

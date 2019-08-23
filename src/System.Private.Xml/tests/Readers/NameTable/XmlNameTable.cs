@@ -164,7 +164,7 @@ namespace System.Xml.Tests
     }
 
     ////////////////////////////////////////////////////////////////
-    // TestCase TCRecord	NameTable.Get
+    // TestCase TCRecord    NameTable.Get
     //
     ////////////////////////////////////////////////////////////////
     //[TestCase(Name="NameTable(Get) VerifyWGetChar", Desc="VerifyWGetChar")]
@@ -627,7 +627,7 @@ namespace System.Xml.Tests
     }
 
     ////////////////////////////////////////////////////////////////
-    // TestCase TCRecord	NameTable.Add
+    // TestCase TCRecord    NameTable.Add
     //
     ////////////////////////////////////////////////////////////////
     //[TestCase(Name="NameTable(Add) VerifyWGetString", Desc="VerifyWGetString")]
@@ -1177,4 +1177,3 @@ namespace System.Xml.Tests
         }
     }
 }
-

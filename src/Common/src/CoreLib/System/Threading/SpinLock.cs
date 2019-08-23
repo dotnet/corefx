@@ -7,7 +7,7 @@
 //
 // A spin lock is a mutual exclusion lock primitive where a thread trying to acquire the lock waits in a loop ("spins")
 // repeatedly checking until the lock becomes available. As the thread remains active performing a non-useful task,
-// the use of such a lock is a kind of busy waiting and consumes CPU resources without performing real work. 
+// the use of such a lock is a kind of busy waiting and consumes CPU resources without performing real work.
 //
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
@@ -57,7 +57,7 @@ namespace System.Threading
         //    1) Ownership tracking enabled: the high bit is 0, and the remaining bits
         //       store the managed thread ID of the current owner.  When the 31 low bits
         //       are 0, the lock is available.
-        //    2) Performance mode: when the high bit is 1, lock availability is indicated by the low bit.  
+        //    2) Performance mode: when the high bit is 1, lock availability is indicated by the low bit.
         //       When the low bit is 1 -- the lock is held; 0 -- the lock is available.
         //
         // There are several masks and constants below for convenience.
@@ -73,7 +73,7 @@ namespace System.Threading
         // Thr thread tracking disabled mask
         private const int LOCK_ID_DISABLE_MASK = unchecked((int)0x80000000);        // 1000 0000 0000 0000 0000 0000 0000 0000
 
-        //the lock is held by some thread, but we don't know which
+        // the lock is held by some thread, but we don't know which
         private const int LOCK_ANONYMOUS_OWNED = 0x1;                               // 0000 0000 0000 0000 0000 0000 0000 0001
 
         // Waiters mask if the thread tracking is disabled
@@ -101,7 +101,7 @@ namespace System.Threading
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:System.Threading.SpinLock"/>
+        /// Initializes a new instance of the <see cref="System.Threading.SpinLock"/>
         /// structure with the option to track thread IDs to improve debugging.
         /// </summary>
         /// <remarks>
@@ -120,7 +120,7 @@ namespace System.Threading
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:System.Threading.SpinLock"/>
+        /// Initializes a new instance of the <see cref="System.Threading.SpinLock"/>
         /// structure with the option to track thread IDs to improve debugging.
         /// </summary>
         /// <remarks>
@@ -140,10 +140,10 @@ namespace System.Threading
         /// </remarks>
         /// <param name="lockTaken">True if the lock is acquired; otherwise, false. <paramref
         /// name="lockTaken"/> must be initialized to false prior to calling this method.</param>
-        /// <exception cref="T:System.Threading.LockRecursionException">
+        /// <exception cref="System.Threading.LockRecursionException">
         /// Thread ownership tracking is enabled, and the current thread has already acquired this lock.
         /// </exception>
-        /// <exception cref="T:System.ArgumentException">
+        /// <exception cref="System.ArgumentException">
         /// The <paramref name="lockTaken"/> argument must be initialized to false prior to calling Enter.
         /// </exception>
         public void Enter(ref bool lockTaken)
@@ -152,7 +152,7 @@ namespace System.Threading
             int observedOwner = _owner;
             if (lockTaken || // invalid parameter
                 (observedOwner & ID_DISABLED_AND_ANONYMOUS_OWNED) != LOCK_ID_DISABLE_MASK || // thread tracking is enabled or the lock is already acquired
-                CompareExchange(ref _owner, observedOwner | LOCK_ANONYMOUS_OWNED, observedOwner, ref lockTaken) != observedOwner) //acquiring the lock failed
+                CompareExchange(ref _owner, observedOwner | LOCK_ANONYMOUS_OWNED, observedOwner, ref lockTaken) != observedOwner) // acquiring the lock failed
                 ContinueTryEnter(Timeout.Infinite, ref lockTaken); // Then try the slow path if any of the above conditions is met
         }
 
@@ -168,10 +168,10 @@ namespace System.Threading
         /// </remarks>
         /// <param name="lockTaken">True if the lock is acquired; otherwise, false. <paramref
         /// name="lockTaken"/> must be initialized to false prior to calling this method.</param>
-        /// <exception cref="T:System.Threading.LockRecursionException">
+        /// <exception cref="System.Threading.LockRecursionException">
         /// Thread ownership tracking is enabled, and the current thread has already acquired this lock.
         /// </exception>
-        /// <exception cref="T:System.ArgumentException">
+        /// <exception cref="System.ArgumentException">
         /// The <paramref name="lockTaken"/> argument must be initialized to false prior to calling TryEnter.
         /// </exception>
         public void TryEnter(ref bool lockTaken)
@@ -210,15 +210,15 @@ namespace System.Threading
         /// </param>
         /// <param name="lockTaken">True if the lock is acquired; otherwise, false. <paramref
         /// name="lockTaken"/> must be initialized to false prior to calling this method.</param>
-        /// <exception cref="T:System.Threading.LockRecursionException">
+        /// <exception cref="System.Threading.LockRecursionException">
         /// Thread ownership tracking is enabled, and the current thread has already acquired this lock.
         /// </exception>
-        /// <exception cref="T:System.ArgumentException">
+        /// <exception cref="System.ArgumentException">
         /// The <paramref name="lockTaken"/> argument must be initialized to false prior to calling TryEnter.
         /// </exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="timeout"/> is a negative
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="timeout"/> is a negative
         /// number other than -1 milliseconds, which represents an infinite time-out -or- timeout is greater
-        /// than <see cref="System.Int32.MaxValue"/> milliseconds.
+        /// than <see cref="int.MaxValue"/> milliseconds.
         /// </exception>
         public void TryEnter(TimeSpan timeout, ref bool lockTaken)
         {
@@ -248,20 +248,20 @@ namespace System.Threading
         /// cref="System.Threading.Timeout.Infinite"/> (-1) to wait indefinitely.</param>
         /// <param name="lockTaken">True if the lock is acquired; otherwise, false. <paramref
         /// name="lockTaken"/> must be initialized to false prior to calling this method.</param>
-        /// <exception cref="T:System.Threading.LockRecursionException">
+        /// <exception cref="System.Threading.LockRecursionException">
         /// Thread ownership tracking is enabled, and the current thread has already acquired this lock.
         /// </exception>
-        /// <exception cref="T:System.ArgumentException">
+        /// <exception cref="System.ArgumentException">
         /// The <paramref name="lockTaken"/> argument must be initialized to false prior to calling TryEnter.
         /// </exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is
         /// a negative number other than -1, which represents an infinite time-out.</exception>
         public void TryEnter(int millisecondsTimeout, ref bool lockTaken)
         {
             int observedOwner = _owner;
-            if (millisecondsTimeout < -1 || //invalid parameter
-                lockTaken || //invalid parameter
-                (observedOwner & ID_DISABLED_AND_ANONYMOUS_OWNED) != LOCK_ID_DISABLE_MASK ||  //thread tracking is enabled or the lock is already acquired
+            if (millisecondsTimeout < -1 || // invalid parameter
+                lockTaken || // invalid parameter
+                (observedOwner & ID_DISABLED_AND_ANONYMOUS_OWNED) != LOCK_ID_DISABLE_MASK ||  // thread tracking is enabled or the lock is already acquired
                 CompareExchange(ref _owner, observedOwner | LOCK_ANONYMOUS_OWNED, observedOwner, ref lockTaken) != observedOwner) // acquiring the lock failed
                 ContinueTryEnter(millisecondsTimeout, ref lockTaken); // The call the slow pth
         }
@@ -313,7 +313,7 @@ namespace System.Threading
 
             int observedOwner;
             int turn = int.MaxValue;
-            //***Step 1, take the lock or update the waiters
+            // ***Step 1, take the lock or update the waiters
 
             // try to acquire the lock directly if possible or update the waiters count
             observedOwner = _owner;
@@ -336,7 +336,7 @@ namespace System.Threading
                 // Did not acquire lock as owned and timeout is 0 so fail fast
                 return;
             }
-            else //failed to acquire the lock, then try to update the waiters. If the waiters count reached the maximum, just break the loop to avoid overflow
+            else // failed to acquire the lock, then try to update the waiters. If the waiters count reached the maximum, just break the loop to avoid overflow
             {
                 if ((observedOwner & WAITERS_MASK) != MAXIMUM_WAITERS)
                 {
@@ -347,7 +347,7 @@ namespace System.Threading
 
             // lock acquired failed and waiters updated
 
-            //*** Step 2, Spinning and Yielding
+            // *** Step 2, Spinning and Yielding
             var spinner = new SpinWait();
             if (turn > PlatformHelper.ProcessorCount)
             {
@@ -460,7 +460,7 @@ namespace System.Threading
         /// </exception>
         public void Exit()
         {
-            //This is the fast path for the thread tracking is disabled, otherwise go to the slow path
+            // This is the fast path for the thread tracking is disabled, otherwise go to the slow path
             if ((_owner & LOCK_ID_DISABLE_MASK) == 0)
                 ExitSlowPath(true);
             else
@@ -564,7 +564,7 @@ namespace System.Threading
         /// by the current thread. It is invalid to use this property when the lock was initialized to not
         /// track thread ownership.
         /// </remarks>
-        /// <exception cref="T:System.InvalidOperationException">
+        /// <exception cref="System.InvalidOperationException">
         /// Thread ownership tracking is disabled.
         /// </exception>
         public bool IsHeldByCurrentThread
@@ -580,11 +580,11 @@ namespace System.Threading
         }
 
         /// <summary>Gets whether thread ownership tracking is enabled for this instance.</summary>
-        public bool IsThreadOwnerTrackingEnabled => (_owner & LOCK_ID_DISABLE_MASK) == 0; 
+        public bool IsThreadOwnerTrackingEnabled => (_owner & LOCK_ID_DISABLE_MASK) == 0;
 
         #region Debugger proxy class
         /// <summary>
-        /// Internal class used by debug type proxy attribute to display the owner thread ID 
+        /// Internal class used by debug type proxy attribute to display the owner thread ID
         /// </summary>
         internal class SystemThreading_SpinLockDebugView
         {

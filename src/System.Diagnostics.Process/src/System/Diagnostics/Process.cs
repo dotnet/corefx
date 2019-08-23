@@ -7,7 +7,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
@@ -66,8 +65,6 @@ namespace System.Diagnostics
         private StreamReader _standardError;
         private bool _disposed;
 
-        private static object s_createProcessLock = new object();
-
         private bool _standardInputAccessed;
 
         private StreamReadMode _outputStreamReadMode;
@@ -84,8 +81,6 @@ namespace System.Diagnostics
         internal bool _pendingErrorRead;
 
         private static int s_cachedSerializationSwitch = 0;
-        delegate void ThrowIfDeserializationInProgressWithSwitchDel(string switchName, ref int cachedValue);
-        private static ThrowIfDeserializationInProgressWithSwitchDel s_throwIfDeserializationInProgressWithSwitch = CreateThrowIfDeserializationInProgressWithSwitchDelegate();
 
         /// <devdoc>
         ///    <para>
@@ -94,7 +89,7 @@ namespace System.Diagnostics
         /// </devdoc>
         public Process()
         {
-            // This class once inherited a finalizer. For backward compatibility it has one so that 
+            // This class once inherited a finalizer. For backward compatibility it has one so that
             // any derived class that depends on it will see the behaviour expected. Since it is
             // not used by this class itself, suppress it immediately if this is not an instance
             // of a derived class it doesn't suffer the GC burden of finalization.
@@ -135,7 +130,7 @@ namespace System.Diagnostics
         ///     Returns whether this process component is associated with a real process.
         /// </devdoc>
         /// <internalonly/>
-        bool Associated
+        private bool Associated
         {
             get { return _haveProcessId || _haveProcessHandle; }
         }
@@ -1140,7 +1135,7 @@ namespace System.Diagnostics
         {
             if (!_haveProcessHandle)
             {
-                //Cannot open a new process handle if the object has been disposed, since finalization has been suppressed.            
+                //Cannot open a new process handle if the object has been disposed, since finalization has been suppressed.
                 if (_disposed)
                 {
                     throw new ObjectDisposedException(GetType().Name);
@@ -1179,28 +1174,11 @@ namespace System.Diagnostics
         /// <summary>Additional optional configuration hook after a process ID is set.</summary>
         partial void ConfigureAfterProcessIdSet();
 
-        /// <summary>
-        /// Builds a wrapper delegate for SerializationInfo.ThrowIfDeserializationInProgress(string, ref int),
-        /// since it is not exposed via contracts.
-        /// </summary>
-        private static ThrowIfDeserializationInProgressWithSwitchDel CreateThrowIfDeserializationInProgressWithSwitchDelegate()
-        {
-            ThrowIfDeserializationInProgressWithSwitchDel throwIfDeserializationInProgressDelegate = null;
-            MethodInfo throwMethod = typeof(SerializationInfo).GetMethod("ThrowIfDeserializationInProgress",
-                BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public, null, new Type[] { typeof(string), typeof(int).MakeByRefType() }, new ParameterModifier[0]);
-            if (throwMethod != null)
-            {
-                throwIfDeserializationInProgressDelegate = (ThrowIfDeserializationInProgressWithSwitchDel)throwMethod.CreateDelegate(typeof(ThrowIfDeserializationInProgressWithSwitchDel));
-            }
-
-            return throwIfDeserializationInProgressDelegate;
-        }
-
         /// <devdoc>
         ///    <para>
         ///       Starts a process specified by the <see cref='System.Diagnostics.Process.StartInfo'/> property of this <see cref='System.Diagnostics.Process'/>
         ///       component and associates it with the
-        ///    <see cref='System.Diagnostics.Process'/> . If a process resource is reused 
+        ///    <see cref='System.Diagnostics.Process'/> . If a process resource is reused
         ///       rather than started, the reused process is associated with this <see cref='System.Diagnostics.Process'/>
         ///       component.
         ///    </para>
@@ -1231,16 +1209,13 @@ namespace System.Diagnostics
                 throw new InvalidOperationException(SR.ArgumentAndArgumentListInitialized);
             }
 
-            //Cannot start a new process and store its handle if the object has been disposed, since finalization has been suppressed.            
+            //Cannot start a new process and store its handle if the object has been disposed, since finalization has been suppressed.
             if (_disposed)
             {
                 throw new ObjectDisposedException(GetType().Name);
             }
 
-            if (s_throwIfDeserializationInProgressWithSwitch != null)
-            {
-                s_throwIfDeserializationInProgressWithSwitch("AllowProcessCreation", ref s_cachedSerializationSwitch);
-            }
+            SerializationGuard.ThrowIfDeserializationInProgress("AllowProcessCreation", ref s_cachedSerializationSwitch);
 
             return StartCore(startInfo);
         }
@@ -1352,7 +1327,7 @@ namespace System.Diagnostics
         }
 
         /// <summary>
-        /// Instructs the Process component to wait the specified number of milliseconds for 
+        /// Instructs the Process component to wait the specified number of milliseconds for
         /// the associated process to exit.
         /// </summary>
         public bool WaitForExit(int milliseconds)

@@ -22,7 +22,6 @@ once before you can iterate and work on a given library project.
 - build-test.cmd cannot be ran successfully until build.cmd has been ran at least once for a `BuildConfiguration`.
 - Build src\tests.builds which builds all applicable test projects. For test project information see [tests](#tests).
 - The build pass will happen twice. Once for the specific `$(BuildConfiguration)` and once for netstandard. That way we run both sets of applicable tests against for the given `$(BuildConfiguration)`.
-- TODO: Currently as part of src/post.builds we call CloudBuild.targets which sets up our test runs. This needs to be moved to be part of build-test.cmd now.
 
 ## Behind the scenes with build-packages.cmd/sh
 - build-packages.cmd cannot be run successfully until build.cmd has been ran at least once for a BuildConfiguration.
@@ -32,7 +31,7 @@ once before you can iterate and work on a given library project.
 Below is a list of all the various options we pivot the project builds on:
 
 - **Target Frameworks:** NetFx (aka Desktop), netstandard (aka dotnet/Portable), NETCoreApp (aka .NET Core), UAP (aka UWP/Store/netcore50)
-- **Platform Runtimes:** NetFx (aka CLR/Desktop), CoreCLR, CoreRT (aka NetNative/AOT/MRT)
+- **Platform Runtimes:** NetFx (aka CLR/Desktop), CoreCLR, Mono
 - **OS:** Windows_NT, Linux, OSX, FreeBSD, AnyOS
 - **Flavor:** Debug, Release
 - **Architecture:** x86, x64, arm, arm64, AnyCPU
@@ -245,7 +244,6 @@ Each source file should use the following guidelines
 - Classes that are forked based on a feature set should have file names `<class>.<feature>.cs`.
  - Where `<feature>` is the name of something that causes a fork in code that isn't a single configuration. Examples:
   - `.CoreCLR.cs` - implementation specific to CoreCLR runtime
-  - `.CoreRT.cs` - implementation specific to CoreRT runtime
   - `.Win32.cs` - implementation based on [Win32](https://en.wikipedia.org/wiki/Windows_API)
   - `.WinRT.cs` - implementation based on [WinRT](https://en.wikipedia.org/wiki/Windows_Runtime)
   - `.Uap.cs` - implementation specific to UAP, also known as [UWP](https://en.wikipedia.org/wiki/Universal_Windows_Platform)

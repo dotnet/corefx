@@ -32,13 +32,13 @@ namespace System.Tests
         public void BaseDirectory_Same_As_AppContext()
         {
             Assert.Equal(AppDomain.CurrentDomain.BaseDirectory, AppContext.BaseDirectory);
-        } 
+        }
 
         [Fact]
         public void RelativeSearchPath_Is_Null()
         {
             Assert.Null(AppDomain.CurrentDomain.RelativeSearchPath);
-        } 
+        }
 
         [Fact]
         public void TargetFrameworkTest()
@@ -48,7 +48,7 @@ namespace System.Tests
             {
                 targetFrameworkName = ".NETCore,Version=v5.0";
             }
-            
+
             RemoteExecutor.Invoke((_targetFrameworkName) => {
                 Assert.Contains(_targetFrameworkName, AppContext.TargetFrameworkName);
             }, targetFrameworkName).Dispose();
@@ -101,12 +101,12 @@ namespace System.Tests
             Assert.True(System.IO.File.Exists("success.txt"));
         }
 
-        static void NotExpectedToBeCalledHandler(object sender, UnhandledExceptionEventArgs args) 
+        static void NotExpectedToBeCalledHandler(object sender, UnhandledExceptionEventArgs args)
         {
             Assert.True(false, "UnhandledException handler not expected to be called");
         }
 
-        static void MyHandler(object sender, UnhandledExceptionEventArgs args) 
+        static void MyHandler(object sender, UnhandledExceptionEventArgs args)
         {
             File.Create("success.txt");
         }
@@ -139,19 +139,19 @@ namespace System.Tests
                 Assert.Equal(1, AppDomain.CurrentDomain.Id);
                 return RemoteExecutor.SuccessExitCode;
             }).Dispose();
-        }        
+        }
 
         [Fact]
         public void IsFullyTrusted()
         {
             Assert.True(AppDomain.CurrentDomain.IsFullyTrusted);
-        }        
+        }
 
         [Fact]
         public void IsHomogenous()
         {
             Assert.True(AppDomain.CurrentDomain.IsHomogenous);
-        }        
+        }
 
         [Fact]
         public void FirstChanceException_Add_Remove()
@@ -195,7 +195,7 @@ namespace System.Tests
 
         class FirstChanceTestException : Exception
         {
-            public FirstChanceTestException(string message) : base(message) 
+            public FirstChanceTestException(string message) : base(message)
             { }
         }
 
@@ -221,6 +221,7 @@ namespace System.Tests
             {
                 EventHandler handler = (sender, e) =>
                 {
+                    Assert.Same(AppDomain.CurrentDomain, sender);
                     File.Create(pathToFile);
                 };
 
@@ -278,7 +279,7 @@ namespace System.Tests
 
             Assert.Equal(5, AppDomain.CurrentDomain.ExecuteAssembly(name));
             Assert.Equal(10, AppDomain.CurrentDomain.ExecuteAssembly(name, new string[2] { "2", "3" }));
-        }        
+        }
 
         [Fact]
         public void GetData_SetData()
@@ -369,7 +370,7 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Does not support Assembly.Load(byte[])")] 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Does not support Assembly.Load(byte[])")]
         public void LoadBytes()
         {
             Assembly assembly = typeof(AppDomainTests).Assembly;
@@ -390,11 +391,13 @@ namespace System.Tests
             Assert.Throws<ArgumentException>(() => { AppDomain.MonitoringIsEnabled = false; });
             AppDomain.MonitoringIsEnabled = true;
 
-            object o = new object();
-            Assert.InRange(AppDomain.MonitoringSurvivedProcessMemorySize, 1, long.MaxValue);
-            Assert.InRange(AppDomain.CurrentDomain.MonitoringSurvivedMemorySize, 1, long.MaxValue);
-            Assert.InRange(AppDomain.CurrentDomain.MonitoringTotalAllocatedMemorySize, 1, long.MaxValue);
-            GC.KeepAlive(o);
+            const int AllocationSize = 1_234_567;
+            object o = new byte[AllocationSize];
+            GC.Collect();
+
+            Assert.InRange(AppDomain.MonitoringSurvivedProcessMemorySize, AllocationSize, long.MaxValue);
+            Assert.InRange(AppDomain.CurrentDomain.MonitoringSurvivedMemorySize, AllocationSize, long.MaxValue);
+            Assert.InRange(AppDomain.CurrentDomain.MonitoringTotalAllocatedMemorySize, AllocationSize, long.MaxValue);
 
             using (Process p = Process.GetCurrentProcess())
             {
@@ -402,6 +405,8 @@ namespace System.Tests
                 TimeSpan monitoringTime = AppDomain.CurrentDomain.MonitoringTotalProcessorTime;
                 Assert.InRange(monitoringTime, processTime, TimeSpan.MaxValue);
             }
+
+            GC.KeepAlive(o);
         }
 
 #pragma warning disable 618
@@ -519,9 +524,13 @@ namespace System.Tests
                 bool AssemblyLoadFlag = false;
                 AssemblyLoadEventHandler handler = (sender, args) =>
                 {
+                    Assert.Same(AppDomain.CurrentDomain, sender);
+                    Assert.NotNull(args);
+                    Assert.NotNull(args.LoadedAssembly);
+
                     if (args.LoadedAssembly.FullName.Equals(typeof(AppDomainTests).Assembly.FullName))
                     {
-                        AssemblyLoadFlag = !AssemblyLoadFlag;
+                        AssemblyLoadFlag = true;
                     }
                 };
 
@@ -541,14 +550,44 @@ namespace System.Tests
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/18718", TargetFrameworkMonikers.Uap)] // Need to copy files out of execution directory'
+        public void AssemblyResolveInvalidAssemblyName()
+        {
+            RemoteExecutor.Invoke(() => {
+                bool AssemblyResolveFlag = false;
+                ResolveEventHandler handler = (sender, args) =>
+                {
+                    Assert.Same(AppDomain.CurrentDomain, sender);
+                    Assert.NotNull(args);
+                    Assert.NotNull(args.Name);
+                    Assert.NotNull(args.RequestingAssembly);
+                    AssemblyResolveFlag = true;
+                    return null;
+                };
+
+                AppDomain.CurrentDomain.AssemblyResolve += handler;
+
+                Type t = Type.GetType("AssemblyResolveTestApp.Class1, InvalidAssemblyName", throwOnError : false);
+                Assert.Null(t);
+                Assert.True(AssemblyResolveFlag);
+                return RemoteExecutor.SuccessExitCode;
+            }).Dispose();
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Does not support Assembly.LoadFile")]
         public void AssemblyResolve()
         {
             CopyTestAssemblies();
 
             RemoteExecutor.Invoke(() => {
-                ResolveEventHandler handler = (sender, e) =>
+                // bool AssemblyResolveFlag = false;
+                ResolveEventHandler handler = (sender, args) =>
                 {
+                    Assert.Same(AppDomain.CurrentDomain, sender);
+                    Assert.NotNull(args);
+                    Assert.NotNull(args.Name);
+                    Assert.NotNull(args.RequestingAssembly);
+                    // AssemblyResolveFlag = true;
                     return Assembly.LoadFile(Path.Combine(Environment.CurrentDirectory, "AssemblyResolveTestApp.dll"));
                 };
 
@@ -556,22 +595,30 @@ namespace System.Tests
 
                 Type t = Type.GetType("AssemblyResolveTestApp.Class1, AssemblyResolveTestApp", true);
                 Assert.NotNull(t);
+                // https://github.com/dotnet/corefx/issues/38361
+                // Assert.True(AssemblyResolveFlag);
                 return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/18718", TargetFrameworkMonikers.Uap)] // Need to copy files out of execution directory
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Does not support Assembly.LoadFile")]
         public void AssemblyResolve_RequestingAssembly()
         {
             CopyTestAssemblies();
 
             RemoteExecutor.Invoke(() => {
+                // bool AssemblyResolveFlag = false;
+
                 Assembly a = Assembly.LoadFile(Path.Combine(Environment.CurrentDirectory, "TestAppOutsideOfTPA.exe"));
 
-                ResolveEventHandler handler = (sender, e) =>
+                ResolveEventHandler handler = (sender, args) =>
                 {
-                    Assert.Equal(e.RequestingAssembly, a);
+                    Assert.Same(AppDomain.CurrentDomain, sender);
+                    Assert.NotNull(args);
+                    Assert.NotNull(args.Name);
+                    Assert.Same(a, args.RequestingAssembly);
+                    // AssemblyResolveFlag = true;
                     return Assembly.LoadFile(Path.Combine(Environment.CurrentDirectory, "AssemblyResolveTestApp.dll"));
                 };
 
@@ -580,6 +627,8 @@ namespace System.Tests
                 MethodInfo myMethodInfo = ptype.GetMethod("foo");
                 object ret = myMethodInfo.Invoke(null, null);
                 Assert.NotNull(ret);
+                // https://github.com/dotnet/corefx/issues/38361
+                // Assert.True(AssemblyResolveFlag);
                 return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
@@ -626,6 +675,10 @@ namespace System.Tests
 
                 ResolveEventHandler handler = (sender, args) =>
                 {
+                    Assert.Same(AppDomain.CurrentDomain, sender);
+                    Assert.NotNull(args);
+                    Assert.NotNull(args.Name);
+                    Assert.NotNull(args.RequestingAssembly);
                     return Assembly.Load("TestApp");
                 };
 
@@ -655,6 +708,10 @@ namespace System.Tests
 
                 ResolveEventHandler handler = (sender, args) =>
                 {
+                    Assert.Same(AppDomain.CurrentDomain, sender);
+                    Assert.NotNull(args);
+                    Assert.NotNull(args.Name);
+                    Assert.NotNull(args.RequestingAssembly);
                     return Assembly.Load("TestApp");
                 };
 
@@ -669,12 +726,12 @@ namespace System.Tests
                 {
                     AppDomain.CurrentDomain.ResourceResolve -= handler;
                 }
-                Assert.Equal(s, "Happy Halloween");
+                Assert.Equal("Happy Halloween", s);
                 return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
-        [Fact]       
+        [Fact]
         public void SetThreadPrincipal()
         {
             RemoteExecutor.Invoke(() => {
@@ -701,7 +758,7 @@ namespace System.Tests
                 Directory.CreateDirectory(Path.GetDirectoryName(destTestAssemblyPath));
                 File.Copy("TestAppOutsideOfTPA.exe", destTestAssemblyPath, false);
             }
-        }        
+        }
     }
 }
 

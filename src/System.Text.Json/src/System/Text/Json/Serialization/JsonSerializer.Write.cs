@@ -14,50 +14,71 @@ namespace System.Text.Json
         // 3) The object is an element in an enumerable.
         private static bool Write(
             Utf8JsonWriter writer,
+            int originalWriterDepth,
             int flushThreshold,
             JsonSerializerOptions options,
             ref WriteStack state)
         {
-            bool continueWriting = true;
             bool finishedSerializing;
-            do
+
+            try
             {
-                WriteStackFrame current = state.Current;
-                switch (current.JsonClassInfo.ClassType)
+                do
                 {
-                    case ClassType.Enumerable:
-                        finishedSerializing = HandleEnumerable(current.JsonClassInfo.ElementClassInfo, options, writer, ref state);
-                        break;
-                    case ClassType.Value:
-                        Debug.Assert(current.JsonPropertyInfo.ClassType == ClassType.Value);
-                        current.JsonPropertyInfo.Write(ref current, writer);
-                        finishedSerializing = true;
-                        break;
-                    case ClassType.Object:
-                        finishedSerializing = WriteObject(options, writer, ref state);
-                        break;
-                    case ClassType.Dictionary:
-                    case ClassType.ImmutableDictionary:
-                        finishedSerializing = HandleDictionary(current.JsonClassInfo.ElementClassInfo, options, writer, ref state);
-                        break;
-                    default:
-                        Debug.Assert(state.Current.JsonClassInfo.ClassType == ClassType.Unknown);
+                    WriteStackFrame current = state.Current;
+                    switch (current.JsonClassInfo.ClassType)
+                    {
+                        case ClassType.Enumerable:
+                            finishedSerializing = HandleEnumerable(current.JsonClassInfo.ElementClassInfo, options, writer, ref state);
+                            break;
+                        case ClassType.Value:
+                            Debug.Assert(current.JsonPropertyInfo.ClassType == ClassType.Value);
+                            current.JsonPropertyInfo.Write(ref state, writer);
+                            finishedSerializing = true;
+                            break;
+                        case ClassType.Object:
+                            finishedSerializing = WriteObject(options, writer, ref state);
+                            break;
+                        case ClassType.Dictionary:
+                        case ClassType.IDictionaryConstructible:
+                            finishedSerializing = HandleDictionary(current.JsonClassInfo.ElementClassInfo, options, writer, ref state);
+                            break;
+                        default:
+                            Debug.Assert(state.Current.JsonClassInfo.ClassType == ClassType.Unknown);
 
-                        // Treat typeof(object) as an empty object.
-                        finishedSerializing = WriteObject(options, writer, ref state);
-                        break;
-                }
+                            // Treat typeof(object) as an empty object.
+                            finishedSerializing = WriteObject(options, writer, ref state);
+                            break;
+                    }
 
-                if (flushThreshold >= 0 && writer.BytesPending > flushThreshold)
-                {
-                    return false;
-                }
+                    if (finishedSerializing)
+                    {
+                        if (writer.CurrentDepth == 0 || writer.CurrentDepth == originalWriterDepth)
+                        {
+                            break;
+                        }
+                    }
+                    else if (writer.CurrentDepth >= options.EffectiveMaxDepth)
+                    {
+                        ThrowHelper.ThrowInvalidOperationException_SerializerCycleDetected(options.MaxDepth);
+                    }
 
-                if (finishedSerializing && writer.CurrentDepth == 0)
-                {
-                    continueWriting = false;
-                }
-            } while (continueWriting);
+                    // If serialization is not yet end and we surpass beyond flush threshold return false and flush stream.
+                    if (flushThreshold >= 0 && writer.BytesPending > flushThreshold)
+                    {
+                        return false;
+                    }
+                } while (true);
+            }
+            catch (InvalidOperationException ex) when (ex.Source == ThrowHelper.ExceptionSourceValueToRethrowAsJsonException)
+            {
+                ThrowHelper.ReThrowWithPath(state, ex);
+            }
+            catch (JsonException ex)
+            {
+                ThrowHelper.AddExceptionInformation(state, ex);
+                throw;
+            }
 
             return true;
         }

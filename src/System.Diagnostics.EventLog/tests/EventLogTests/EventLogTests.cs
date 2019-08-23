@@ -4,6 +4,7 @@
 
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using Xunit;
 
 namespace System.Diagnostics.Tests
@@ -124,7 +125,6 @@ namespace System.Diagnostics.Tests
             Assert.Throws<ArgumentException>(() => EventLog.GetEventLogs(""));
             EventLog[] eventLogCollection = EventLog.GetEventLogs();
             Assert.Contains(eventLogCollection, eventlog => eventlog.Log.Equals("Application"));
-            Assert.Contains(eventLogCollection, eventlog => eventlog.Log.Equals("Security"));
             Assert.Contains(eventLogCollection, eventlog => eventlog.Log.Equals("System"));
         }
 
@@ -348,6 +348,25 @@ namespace System.Diagnostics.Tests
                 eventlog.Source = "Security";
                 Assert.Contains("", eventlog.Entries.LastOrDefault()?.Message ?? "");
             }
+        }
+
+        [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndSupportsEventLogs))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void GetEventLogEntriesTest()
+        {
+            foreach (var eventLog in EventLog.GetEventLogs())
+            {
+                // Accessing eventlog properties should not throw.
+                Assert.True(Helpers.RetryOnWin7(() => eventLog.Entries.Count) >= 0);
+            }
+        }
+
+        [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void GetEventLogContainsSecurityLogTest()
+        {
+            EventLog[] eventlogs = EventLog.GetEventLogs();
+            Assert.Contains("Security", eventlogs.Select(t => t.Log), StringComparer.OrdinalIgnoreCase);
         }
     }
 }

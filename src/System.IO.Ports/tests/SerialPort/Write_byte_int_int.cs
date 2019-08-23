@@ -17,7 +17,7 @@ namespace System.IO.Ports.Tests
         private const int LARGE_BUFFER_SIZE = 2048;
 
         //When we test Write and do not care about actually writing anything we must still
-        //create an byte array to pass into the method the following is the size of the 
+        //create an byte array to pass into the method the following is the size of the
         //byte array used in this situation
         private const int DEFAULT_BUFFER_SIZE = 1;
         private const int DEFAULT_BUFFER_OFFSET = 0;
@@ -301,7 +301,7 @@ namespace System.IO.Ports.Tests
             }
         }
 
-        public void VerifyWriteByteArray(byte[] buffer, int offset, int count, SerialPort com1, SerialPort com2)
+        private void VerifyWriteByteArray(byte[] buffer, int offset, int count, SerialPort com1, SerialPort com2)
         {
             VerifyWriteByteArray(buffer, offset, count, com1, com2, DEFAULT_NUM_WRITES);
         }

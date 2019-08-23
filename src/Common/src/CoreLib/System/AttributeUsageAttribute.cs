@@ -7,11 +7,9 @@
 **
 **
 ** Purpose: The class denotes how to specify the usage of an attribute
-**          
+**
 **
 ===========================================================*/
-
-using System.Reflection;
 
 namespace System
 {
@@ -19,13 +17,12 @@ namespace System
     [AttributeUsage(AttributeTargets.Class, Inherited = true)]
     public sealed class AttributeUsageAttribute : Attribute
     {
-        private AttributeTargets _attributeTarget = AttributeTargets.All; // Defaults to all
+        private readonly AttributeTargets _attributeTarget = AttributeTargets.All; // Defaults to all
         private bool _allowMultiple = false; // Defaults to false
         private bool _inherited = true; // Defaults to true
 
         internal static readonly AttributeUsageAttribute Default = new AttributeUsageAttribute(AttributeTargets.All);
 
-        //Constructors 
         public AttributeUsageAttribute(AttributeTargets validOn)
         {
             _attributeTarget = validOn;
@@ -37,10 +34,7 @@ namespace System
             _inherited = inherited;
         }
 
-        public AttributeTargets ValidOn
-        {
-            get { return _attributeTarget; }
-        }
+        public AttributeTargets ValidOn => _attributeTarget;
 
         public bool AllowMultiple
         {

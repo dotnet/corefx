@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 //
 // Copyright (C) 2006-2007 Novell, Inc (http://www.novell.com)
@@ -389,7 +389,7 @@ namespace System.Drawing.Drawing2D.Tests
             using (GraphicsPath gpf = new GraphicsPath())
             {
                 gpi.AddArc(1, 1, 2, 2, Pi4, Pi4);
-                // AssertArc() method expects added Arc with parameters 
+                // AssertArc() method expects added Arc with parameters
                 // x=1, y=1, width=2, height=2, startAngle=Pi4, seewpAngle=Pi4 here and below.
                 AssertArc(gpi);
 
@@ -1007,7 +1007,7 @@ namespace System.Drawing.Drawing2D.Tests
             using (GraphicsPath gpi = new GraphicsPath())
             {
                 gpi.AddPie(new Rectangle(1, 1, 2, 2), Pi4, Pi4);
-                // AssertPie() method expects added Pie with parameters 
+                // AssertPie() method expects added Pie with parameters
                 // x=1, y=1, width=2, height=2, startAngle=Pi4, seewpAngle=Pi4 here and below.
                 AssertPie(gpi);
             }
@@ -1736,16 +1736,18 @@ namespace System.Drawing.Drawing2D.Tests
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void StartClose_AddCurve()
         {
-            GraphicsPath path = new GraphicsPath();
-            path.AddLine(1, 1, 2, 2);
-            path.AddCurve(new Point[3] { new Point(1, 1), new Point(2, 2), new Point(3, 3) });
-            path.AddLine(10, 10, 20, 20);
-            byte[] types = path.PathTypes;
+            using (GraphicsPath path = new GraphicsPath())
+            {
+                path.AddLine(1, 1, 2, 2);
+                path.AddCurve(new Point[3] { new Point(1, 1), new Point(2, 2), new Point(3, 3) });
+                path.AddLine(10, 10, 20, 20);
+                byte[] types = path.PathTypes;
 
-            Assert.Equal(0, types[0]);
-            Assert.Equal(1, types[2]);
-            Assert.Equal(3, types[path.PointCount - 3]);
-            Assert.Equal(1, types[path.PointCount - 1]);
+                Assert.Equal(0, types[0]);
+                Assert.Equal(1, types[2]);
+                Assert.Equal(3, types[path.PointCount - 3]);
+                Assert.Equal(1, types[path.PointCount - 1]);
+            }
         }
 
         [ConditionalFact(Helpers.IsDrawingSupported)]
@@ -1769,16 +1771,18 @@ namespace System.Drawing.Drawing2D.Tests
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void StartClose_AddLine()
         {
-            GraphicsPath path = new GraphicsPath();
-            path.AddLine(1, 1, 2, 2);
-            path.AddLine(5, 5, 10, 10);
-            path.AddLine(10, 10, 20, 20);
-            byte[] types = path.PathTypes;
+            using (GraphicsPath path = new GraphicsPath())
+            {
+                path.AddLine(1, 1, 2, 2);
+                path.AddLine(5, 5, 10, 10);
+                path.AddLine(10, 10, 20, 20);
+                byte[] types = path.PathTypes;
 
-            Assert.Equal(0, types[0]);
-            Assert.Equal(1, types[2]);
-            Assert.Equal(1, types[path.PointCount - 3]);
-            Assert.Equal(1, types[path.PointCount - 1]);
+                Assert.Equal(0, types[0]);
+                Assert.Equal(1, types[2]);
+                Assert.Equal(1, types[path.PointCount - 3]);
+                Assert.Equal(1, types[path.PointCount - 1]);
+            }
         }
 
         [ConditionalFact(Helpers.IsDrawingSupported)]
@@ -1820,35 +1824,39 @@ namespace System.Drawing.Drawing2D.Tests
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void StartClose_AddPath_NoConnect()
         {
-            GraphicsPath inner = new GraphicsPath();
-            inner.AddArc(10, 10, 100, 100, 90, 180);
-            GraphicsPath path = new GraphicsPath();
-            path.AddLine(1, 1, 2, 2);
-            path.AddPath(inner, false);
-            path.AddLine(10, 10, 20, 20);
-            byte[] types = path.PathTypes;
+            using (GraphicsPath inner = new GraphicsPath())
+            using (GraphicsPath path = new GraphicsPath())
+            {
+                inner.AddArc(10, 10, 100, 100, 90, 180);
+                path.AddLine(1, 1, 2, 2);
+                path.AddPath(inner, false);
+                path.AddLine(10, 10, 20, 20);
+                byte[] types = path.PathTypes;
 
-            Assert.Equal(0, types[0]);
-            Assert.Equal(0, types[2]);
-            Assert.Equal(3, types[path.PointCount - 3]);
-            Assert.Equal(1, types[path.PointCount - 1]);
+                Assert.Equal(0, types[0]);
+                Assert.Equal(0, types[2]);
+                Assert.Equal(3, types[path.PointCount - 3]);
+                Assert.Equal(1, types[path.PointCount - 1]);
+            }
         }
 
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void StartClose_AddPie()
         {
-            GraphicsPath path = new GraphicsPath();
-            path.AddLine(1, 1, 2, 2);
-            path.AddPie(10, 10, 10, 10, 90, 180);
-            path.AddLine(10, 10, 20, 20);
-            byte[] types = path.PathTypes;
+            using (GraphicsPath path = new GraphicsPath())
+            {
+                path.AddLine(1, 1, 2, 2);
+                path.AddPie(10, 10, 10, 10, 90, 180);
+                path.AddLine(10, 10, 20, 20);
+                byte[] types = path.PathTypes;
 
-            Assert.Equal(0, types[0]);
-            Assert.Equal(0, types[2]);
+                Assert.Equal(0, types[0]);
+                Assert.Equal(0, types[2]);
 
-            Assert.Equal((types[path.PointCount - 3] & 128), 128);
-            Assert.Equal(0, types[path.PointCount - 2]);
-            Assert.Equal(1, types[path.PointCount - 1]);
+                Assert.Equal(128, (types[path.PointCount - 3] & 128));
+                Assert.Equal(0, types[path.PointCount - 2]);
+                Assert.Equal(1, types[path.PointCount - 1]);
+            }
         }
 
         [ConditionalFact(Helpers.IsDrawingSupported)]
@@ -2567,7 +2575,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.GreaterThanOrEqualTo(flat.PointCount, original.PointCount);
             for (int i = 0; i < flat.PointCount; i++)
             {
-                Assert.NotEqual(flat.PathTypes[i], 3);
+                Assert.NotEqual(3, flat.PathTypes[i]);
             }
         }
 
@@ -2733,5 +2741,3 @@ namespace System.Drawing.Drawing2D.Tests
         }
     }
 }
-
-

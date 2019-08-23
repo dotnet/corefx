@@ -7,8 +7,8 @@ using System.Collections;
 
 namespace System.DirectoryServices.AccountManagement
 {
-    // This enum tracks the load state of our principal side data cache.  
-    // NotSet = default value, 
+    // This enum tracks the load state of our principal side data cache.
+    // NotSet = default value,
     // Loaded = Value from store was set into cache date, Data in cache matches data in store.
     // Changed = User has modifed the cache value but is has not been pushed to the store yet
     internal enum LoadState
@@ -105,8 +105,8 @@ namespace System.DirectoryServices.AccountManagement
     {
         private PropertyNamesExternal() { }
 
-        private static int s_acctInfoPrefixLength = PropertyNames.AcctInfoPrefix.Length;
-        private static int s_pwdInfoPrefixLength = PropertyNames.PwdInfoPrefix.Length;
+        private static readonly int s_acctInfoPrefixLength = PropertyNames.AcctInfoPrefix.Length;
+        private static readonly int s_pwdInfoPrefixLength = PropertyNames.PwdInfoPrefix.Length;
 
         internal static string GetExternalForm(string propertyName)
         {

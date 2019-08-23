@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace System
 {
@@ -40,11 +41,6 @@ namespace System
 
         public const long TicksPerDay = TicksPerHour * 24;          // 864,000,000,000
         private const double DaysPerTick = 1.0 / TicksPerDay; // 1.1574074074074074074e-12
-
-        private const int MillisPerSecond = 1000;
-        private const int MillisPerMinute = MillisPerSecond * 60; //     60,000
-        private const int MillisPerHour = MillisPerMinute * 60;   //  3,600,000
-        private const int MillisPerDay = MillisPerHour * 24;      // 86,400,000
 
         internal const long MaxSeconds = long.MaxValue / TicksPerSecond;
         internal const long MinSeconds = long.MinValue / TicksPerSecond;
@@ -86,45 +82,21 @@ namespace System
             _ticks = (long)totalMilliSeconds * TicksPerMillisecond;
         }
 
-        public long Ticks
-        {
-            get { return _ticks; }
-        }
+        public long Ticks => _ticks;
 
-        public int Days
-        {
-            get { return (int)(_ticks / TicksPerDay); }
-        }
+        public int Days => (int)(_ticks / TicksPerDay);
 
-        public int Hours
-        {
-            get { return (int)((_ticks / TicksPerHour) % 24); }
-        }
+        public int Hours => (int)((_ticks / TicksPerHour) % 24);
 
-        public int Milliseconds
-        {
-            get { return (int)((_ticks / TicksPerMillisecond) % 1000); }
-        }
+        public int Milliseconds => (int)((_ticks / TicksPerMillisecond) % 1000);
 
-        public int Minutes
-        {
-            get { return (int)((_ticks / TicksPerMinute) % 60); }
-        }
+        public int Minutes => (int)((_ticks / TicksPerMinute) % 60);
 
-        public int Seconds
-        {
-            get { return (int)((_ticks / TicksPerSecond) % 60); }
-        }
+        public int Seconds => (int)((_ticks / TicksPerSecond) % 60);
 
-        public double TotalDays
-        {
-            get { return ((double)_ticks) * DaysPerTick; }
-        }
+        public double TotalDays => ((double)_ticks) * DaysPerTick;
 
-        public double TotalHours
-        {
-            get { return (double)_ticks * HoursPerTick; }
-        }
+        public double TotalHours => (double)_ticks * HoursPerTick;
 
         public double TotalMilliseconds
         {
@@ -141,15 +113,9 @@ namespace System
             }
         }
 
-        public double TotalMinutes
-        {
-            get { return (double)_ticks * MinutesPerTick; }
-        }
+        public double TotalMinutes => (double)_ticks * MinutesPerTick;
 
-        public double TotalSeconds
-        {
-            get { return (double)_ticks * SecondsPerTick; }
-        }
+        public double TotalSeconds => (double)_ticks * SecondsPerTick;
 
         public TimeSpan Add(TimeSpan ts)
         {
@@ -288,17 +254,18 @@ namespace System
             return new TimeSpan(value);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static long TimeToTicks(int hour, int minute, int second)
         {
             // totalSeconds is bounded by 2^31 * 2^12 + 2^31 * 2^8 + 2^31,
             // which is less than 2^44, meaning we won't overflow totalSeconds.
             long totalSeconds = (long)hour * 3600 + (long)minute * 60 + (long)second;
             if (totalSeconds > MaxSeconds || totalSeconds < MinSeconds)
-                throw new ArgumentOutOfRangeException(null, SR.Overflow_TimeSpanTooLong);
+                ThrowHelper.ThrowArgumentOutOfRange_TimeSpanTooLong();
             return totalSeconds * TicksPerSecond;
         }
 
-        // See System.Globalization.TimeSpanParse and System.Globalization.TimeSpanFormat 
+        // See System.Globalization.TimeSpanParse and System.Globalization.TimeSpanFormat
         #region ParseAndFormat
         private static void ValidateStyles(TimeSpanStyles style, string parameterName)
         {

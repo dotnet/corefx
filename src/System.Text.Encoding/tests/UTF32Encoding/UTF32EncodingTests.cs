@@ -30,13 +30,13 @@ namespace System.Text.Tests
             Ctor_Bool_Bool_Bool(bigEndian, byteOrderMark, throwOnInvalidBytes: false);
         }
 
-        public void Ctor_Bool_Bool_Bool(bool bigEndian, bool byteOrderMark, bool throwOnInvalidBytes)
+        private static void Ctor_Bool_Bool_Bool(bool bigEndian, bool byteOrderMark, bool throwOnInvalidBytes)
         {
             UTF32Encoding encoding = new UTF32Encoding(bigEndian, byteOrderMark, throwOnInvalidBytes);
             VerifyUtf32Encoding(encoding, bigEndian, byteOrderMark, throwOnInvalidBytes);
         }
 
-        public static void VerifyUtf32Encoding(UTF32Encoding encoding, bool bigEndian, bool byteOrderMark, bool throwOnInvalidBytes)
+        private static void VerifyUtf32Encoding(UTF32Encoding encoding, bool bigEndian, bool byteOrderMark, bool throwOnInvalidBytes)
         {
             if (byteOrderMark)
             {
@@ -99,22 +99,25 @@ namespace System.Text.Tests
 
         [Theory]
         [MemberData(nameof(Encodings_TestData))]
-        public void EncodingName(UTF32Encoding encoding, string _)
+        public void EncodingName(UTF32Encoding encoding, string description)
         {
+            _ = description;
             Assert.NotEmpty(encoding.EncodingName); // Unicode (UTF-32) in en-US
         }
 
         [Theory]
         [MemberData(nameof(Encodings_TestData))]
-        public void IsSingleByte(UTF32Encoding encoding, string _)
+        public void IsSingleByte(UTF32Encoding encoding, string description)
         {
+            _ = description;
             Assert.False(encoding.IsSingleByte);
         }
 
         [Theory]
         [MemberData(nameof(Encodings_TestData))]
-        public void Clone(UTF32Encoding encoding, string _)
+        public void Clone(UTF32Encoding encoding, string description)
         {
+            _ = description;
             UTF32Encoding clone = (UTF32Encoding)encoding.Clone();
             Assert.NotSame(encoding, clone);
             Assert.Equal(encoding, clone);

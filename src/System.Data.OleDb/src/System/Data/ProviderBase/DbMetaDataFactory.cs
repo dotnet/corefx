@@ -23,7 +23,6 @@ namespace System.Data.ProviderBase
         private const string _minimumVersion = "MinimumVersion";
         private const string _dataSourceProductVersionNormalized = "DataSourceProductVersionNormalized";
         private const string _dataSourceProductVersion = "DataSourceProductVersion";
-        private const string _restrictionDefault = "RestrictionDefault";
         private const string _restrictionNumber = "RestrictionNumber";
         private const string _numberOfRestrictions = "NumberOfRestrictions";
         private const string _restrictionName = "RestrictionName";
@@ -113,7 +112,7 @@ namespace System.Data.ProviderBase
             Dispose(true);
         }
 
-        virtual protected void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
             if (disposing)
             {
@@ -123,7 +122,7 @@ namespace System.Data.ProviderBase
             }
         }
 
-        private DataTable ExecuteCommand(DataRow requestedCollectionRow, String[] restrictions, DbConnection connection)
+        private DataTable ExecuteCommand(DataRow requestedCollectionRow, string[] restrictions, DbConnection connection)
         {
             DataTable metaDataCollectionsTable = _metaDataCollectionsDataSet.Tables[DbMetaDataCollectionNames.MetaDataCollections];
             DataColumn populationStringColumn = metaDataCollectionsTable.Columns[_populationString];
@@ -136,9 +135,9 @@ namespace System.Data.ProviderBase
             DataTable schemaTable = null;
 
             Debug.Assert(requestedCollectionRow != null);
-            String sqlCommand = requestedCollectionRow[populationStringColumn, DataRowVersion.Current] as string;
+            string sqlCommand = requestedCollectionRow[populationStringColumn, DataRowVersion.Current] as string;
             int numberOfRestrictions = (int)requestedCollectionRow[numberOfRestrictionsColumn, DataRowVersion.Current];
-            String collectionName = requestedCollectionRow[collectionNameColumn, DataRowVersion.Current] as string;
+            string collectionName = requestedCollectionRow[collectionNameColumn, DataRowVersion.Current] as string;
 
             if ((restrictions != null) && (restrictions.Length > numberOfRestrictions))
             {
@@ -194,7 +193,7 @@ namespace System.Data.ProviderBase
                 schemaTable = reader.GetSchemaTable();
                 foreach (DataRow row in schemaTable.Rows)
                 {
-                    resultTable.Columns.Add(row["ColumnName"] as string, (Type)row["DataType"] as Type);
+                    resultTable.Columns.Add(row["ColumnName"] as string, (Type)row["DataType"]);
                 }
                 object[] values = new object[resultTable.Columns.Count];
                 while (reader.Read())
@@ -265,13 +264,13 @@ namespace System.Data.ProviderBase
 
             DataColumn collectionNameColumn = metaDataCollectionsTable.Columns[DbMetaDataColumnNames.CollectionName];
 
-            if ((null == collectionNameColumn) || (typeof(System.String) != collectionNameColumn.DataType))
+            if ((null == collectionNameColumn) || (typeof(string) != collectionNameColumn.DataType))
             {
                 throw ADP.InvalidXmlMissingColumn(DbMetaDataCollectionNames.MetaDataCollections, DbMetaDataColumnNames.CollectionName);
             }
 
             DataRow requestedCollectionRow = null;
-            String exactCollectionName = null;
+            string exactCollectionName = null;
 
             // find the requested collection
             versionFailure = false;
@@ -412,7 +411,7 @@ namespace System.Data.ProviderBase
 
         }
 
-        virtual public DataTable GetSchema(DbConnection connection, string collectionName, string[] restrictions)
+        public virtual DataTable GetSchema(DbConnection connection, string collectionName, string[] restrictions)
         {
             Debug.Assert(_metaDataCollectionsDataSet != null);
 
@@ -525,7 +524,7 @@ namespace System.Data.ProviderBase
             _metaDataCollectionsDataSet.ReadXml(XmlStream);
         }
 
-        virtual protected DataTable PrepareCollection(String collectionName, String[] restrictions, DbConnection connection)
+        protected virtual DataTable PrepareCollection(string collectionName, string[] restrictions, DbConnection connection)
         {
             throw ADP.NotSupported();
         }
@@ -535,7 +534,7 @@ namespace System.Data.ProviderBase
             bool result = true;
             DataColumnCollection tableColumns = requestedCollectionRow.Table.Columns;
             DataColumn versionColumn;
-            Object version;
+            object version;
 
             // check the minimum version first
             versionColumn = tableColumns[_minimumVersion];

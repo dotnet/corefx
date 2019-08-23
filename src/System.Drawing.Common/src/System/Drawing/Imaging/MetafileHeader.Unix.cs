@@ -17,10 +17,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -37,7 +37,7 @@ namespace System.Drawing.Imaging
 {
 
     [StructLayout(LayoutKind.Sequential, Pack = 2)]
-    struct EnhMetafileHeader
+    internal struct EnhMetafileHeader
     {
         public int type;
         public int size;
@@ -58,7 +58,7 @@ namespace System.Drawing.Imaging
 
     // hack: keep public type as Sequential while making it possible to get the required union
     [StructLayout(LayoutKind.Explicit)]
-    struct MonoMetafileHeader
+    internal struct MonoMetafileHeader
     {
         [FieldOffset(0)]
         public MetafileType type;
@@ -155,7 +155,7 @@ namespace System.Drawing.Imaging
             {
                 if (this.MetafileSize == 0)
                 {
-                    // GDI+ compatibility; 
+                    // GDI+ compatibility;
                     return new Rectangle();
                 }
 

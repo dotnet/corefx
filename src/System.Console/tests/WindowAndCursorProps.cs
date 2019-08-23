@@ -171,22 +171,9 @@ public class WindowAndCursorProps
         }
     }
 
-    [Fact] 
-    [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
-    [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] //CI system makes it difficult to run things in a non-redirected environments.
-    public static void NonRedirectedCursorVisible()
-    {
-        if (!Console.IsOutputRedirected)
-        {
-            // Validate that Console.CursorVisible adds something to the stream when in a non-redirected environment.
-            Helpers.RunInNonRedirectedOutput((data) => { Console.CursorVisible = false; Assert.True(data.ToArray().Length > 0); });
-            Helpers.RunInNonRedirectedOutput((data) => { Console.CursorVisible = true; Assert.True(data.ToArray().Length > 0); });
-        }
-    }
-
     [Fact]
     [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
-    public static void CursorVisible_GetUnix_ThrowsPlatformNotSupportedExeption()
+    public static void CursorVisible_GetUnix_ThrowsPlatformNotSupportedException()
     {
         Assert.Throws<PlatformNotSupportedException>(() => Console.CursorVisible);
     }
@@ -268,16 +255,6 @@ public class WindowAndCursorProps
             }
             return RemoteExecutor.SuccessExitCode;
         }, lengthOfTitle.ToString()).Dispose();
-    }
-
-    public static void Title_GetWindowsUap_ThrowsIOException()
-    {
-        Assert.Throws<IOException>(() => Console.Title);
-    }
-
-    public static void Title_SetWindowsUap_ThrowsIOException(int lengthOfTitle)
-    {
-        Assert.Throws<IOException>(() => Console.Title = "x");
     }
 
     [Fact]
@@ -403,7 +380,7 @@ public class WindowAndCursorProps
         else if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             Assert.Equal(0, Console.CursorLeft);
-        }   
+        }
     }
 
     [Theory]
@@ -437,7 +414,7 @@ public class WindowAndCursorProps
         else if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             Assert.Equal(0, Console.CursorTop);
-        }   
+        }
     }
 
     [Theory]

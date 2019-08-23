@@ -29,7 +29,7 @@ namespace System.IO.Pipelines
     }
     public partial class PipeOptions
     {
-        public PipeOptions(System.Buffers.MemoryPool<byte> pool = null, System.IO.Pipelines.PipeScheduler readerScheduler = null, System.IO.Pipelines.PipeScheduler writerScheduler = null, long pauseWriterThreshold = (long)65536, long resumeWriterThreshold = (long)32768, int minimumSegmentSize = 4096, bool useSynchronizationContext = true) { }
+        public PipeOptions(System.Buffers.MemoryPool<byte> pool = null, System.IO.Pipelines.PipeScheduler readerScheduler = null, System.IO.Pipelines.PipeScheduler writerScheduler = null, long pauseWriterThreshold = (long)-1, long resumeWriterThreshold = (long)-1, int minimumSegmentSize = -1, bool useSynchronizationContext = true) { }
         public static System.IO.Pipelines.PipeOptions Default { get { throw null; } }
         public int MinimumSegmentSize { get { throw null; } }
         public long PauseWriterThreshold { get { throw null; } }
@@ -47,10 +47,12 @@ namespace System.IO.Pipelines
         public virtual System.IO.Stream AsStream(bool leaveOpen = false) { throw null; }
         public abstract void CancelPendingRead();
         public abstract void Complete(System.Exception exception = null);
+        public virtual System.Threading.Tasks.ValueTask CompleteAsync(System.Exception exception = null) { throw null; }
         public virtual System.Threading.Tasks.Task CopyToAsync(System.IO.Pipelines.PipeWriter destination, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public virtual System.Threading.Tasks.Task CopyToAsync(System.IO.Stream destination, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public static System.IO.Pipelines.PipeReader Create(System.IO.Stream stream, System.IO.Pipelines.StreamPipeReaderOptions readerOptions = null) { throw null; }
-        public abstract void OnWriterCompleted(System.Action<System.Exception, object> callback, object state);
+        [System.ObsoleteAttribute("OnWriterCompleted may not be invoked on all implementations of PipeReader. This will be removed in a future release.")]
+        public virtual void OnWriterCompleted(System.Action<System.Exception, object> callback, object state) { }
         public abstract System.Threading.Tasks.ValueTask<System.IO.Pipelines.ReadResult> ReadAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         public abstract bool TryRead(out System.IO.Pipelines.ReadResult result);
     }
@@ -68,12 +70,14 @@ namespace System.IO.Pipelines
         public virtual System.IO.Stream AsStream(bool leaveOpen = false) { throw null; }
         public abstract void CancelPendingFlush();
         public abstract void Complete(System.Exception exception = null);
+        public virtual System.Threading.Tasks.ValueTask CompleteAsync(System.Exception exception = null) { throw null; }
         protected internal virtual System.Threading.Tasks.Task CopyFromAsync(System.IO.Stream source, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public static System.IO.Pipelines.PipeWriter Create(System.IO.Stream stream, System.IO.Pipelines.StreamPipeWriterOptions writerOptions = null) { throw null; }
         public abstract System.Threading.Tasks.ValueTask<System.IO.Pipelines.FlushResult> FlushAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         public abstract System.Memory<byte> GetMemory(int sizeHint = 0);
         public abstract System.Span<byte> GetSpan(int sizeHint = 0);
-        public abstract void OnReaderCompleted(System.Action<System.Exception, object> callback, object state);
+        [System.ObsoleteAttribute("OnReaderCompleted may not be invoked on all implementations of PipeWriter. This will be removed in a future release.")]
+        public virtual void OnReaderCompleted(System.Action<System.Exception, object> callback, object state) { }
         public virtual System.Threading.Tasks.ValueTask<System.IO.Pipelines.FlushResult> WriteAsync(System.ReadOnlyMemory<byte> source, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
     }
     public readonly partial struct ReadResult
@@ -91,17 +95,17 @@ namespace System.IO.Pipelines
     }
     public partial class StreamPipeReaderOptions
     {
-        public StreamPipeReaderOptions(System.Buffers.MemoryPool<byte> pool = null, int bufferSize = 4096, int minimumReadSize = 1024, bool leaveOpen = false) { }
+        public StreamPipeReaderOptions(System.Buffers.MemoryPool<byte> pool = null, int bufferSize = -1, int minimumReadSize = -1, bool leaveOpen = false) { }
         public int BufferSize { get { throw null; } }
+        public bool LeaveOpen { get { throw null; } }
         public int MinimumReadSize { get { throw null; } }
         public System.Buffers.MemoryPool<byte> Pool { get { throw null; } }
-        public bool LeaveOpen { get { throw null; } }
     }
     public partial class StreamPipeWriterOptions
     {
-        public StreamPipeWriterOptions(System.Buffers.MemoryPool<byte> pool = null, int minimumBufferSize = 4096, bool leaveOpen = false) { }
+        public StreamPipeWriterOptions(System.Buffers.MemoryPool<byte> pool = null, int minimumBufferSize = -1, bool leaveOpen = false) { }
+        public bool LeaveOpen { get { throw null; } }
         public int MinimumBufferSize { get { throw null; } }
         public System.Buffers.MemoryPool<byte> Pool { get { throw null; } }
-        public bool LeaveOpen { get { throw null; } }
     }
 }

@@ -3,7 +3,6 @@
 
   <ItemGroup>
     <TestPackages Condition="'$(TestPackages)' != ''" Include="$(TestPackages)" />
-    <ExcludePackages Include="CoreFx.Private.TestUtilities" />
     <ExcludePackages Include="$(ExcludePackages)" />
 
     <PackageReports Condition="'@(TestPackages)' == ''" Include="$(PackageReportDir)*.json" Exclude="@(ExcludePackages->'$(PackageReportDir)%(Identity).json')"/>
@@ -148,7 +147,8 @@
   <Target Name="CopyProducedPackages">
     <!-- Copy over package local cache to our helix runtime path -->
     <ItemGroup>
-     <_localPackages Include="$(PackageOutputPath)*.nupkg" />
+     <_localPackages Include="$(ArtifactsShippingPackagesDir)*.nupkg"/>
+     <_localPackages Include="$(ArtifactsNonShippingPackagesDir)*.nupkg"/>
     </ItemGroup>
 
     <Copy SourceFiles="@(_localPackages)"

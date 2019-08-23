@@ -1997,7 +1997,7 @@ namespace System.Tests
             DateTimeKind expectedKind = (TimeZoneInfo.Local == TimeZoneInfo.Utc) ? DateTimeKind.Utc : DateTimeKind.Local;
             Assert.Equal(expectedKind, converted.Kind);
             back = TimeZoneInfo.ConvertTimeToUtc(converted, TimeZoneInfo.Local);
-            Assert.Equal(back.Kind, DateTimeKind.Utc);
+            Assert.Equal(DateTimeKind.Utc, back.Kind);
             Assert.Equal(utc, back);
         }
 
@@ -2324,7 +2324,7 @@ namespace System.Tests
             VerifyTimeSpanArray(ret, expectedOffsets, string.Format("Wrong offsets when used {0} with the zone {1}", dt, tz.Id));
         }
 
-        public static void VerifyTimeSpanArray(TimeSpan[] actual, TimeSpan[] expected, string errorMsg)
+        private static void VerifyTimeSpanArray(TimeSpan[] actual, TimeSpan[] expected, string errorMsg)
         {
             Assert.True(actual != null);
             Assert.True(expected != null);

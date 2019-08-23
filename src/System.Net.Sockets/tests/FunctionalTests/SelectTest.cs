@@ -111,8 +111,9 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [Fact]
         [PlatformSpecific(~TestPlatforms.OSX)] // typical OSX install has very low max open file descriptors value
-        public void Select_Read_OneReadyAtATime_ManySockets(int reads)
+        public void Select_Read_OneReadyAtATime_ManySockets()
         {
             Select_Read_OneReadyAtATime(90); // value larger than the internal value in SocketPal.Unix that swaps between stack and heap allocation
         }
@@ -268,7 +269,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        public static void DoAccept(Socket listenSocket, int connectionsToAccept)
+        private static void DoAccept(Socket listenSocket, int connectionsToAccept)
         {
             int connectionCount = 0;
             while (true)
@@ -287,7 +288,7 @@ namespace System.Net.Sockets.Tests
                         }
                         catch (SocketException e)
                         {
-                            Assert.Equal(e.SocketErrorCode, SocketError.WouldBlock);
+                            Assert.Equal(SocketError.WouldBlock, e.SocketErrorCode);
 
                             //No more requests in queue
                             break;

@@ -469,7 +469,7 @@ namespace System.Text.Tests
             if (defaultEncoding.CodePage == Encoding.UTF8.CodePage)
             {
                 // if the default encoding is not UTF8 that means either we are running on the full framework
-                // or the encoding provider is registered throw the call Encoding.RegisterProvider. 
+                // or the encoding provider is registered throw the call Encoding.RegisterProvider.
                 // at that time we shouldn't expect exceptions when creating the following encodings.
                 foreach (object[] mapping in CodePageInfo())
                 {
@@ -573,6 +573,7 @@ namespace System.Text.Tests
         [MemberData(nameof(CodePageInfo))]
         public static void TestEncoderNLSAndDecoderNLSValidateDataRoundTrips(int codePage, string webName, string queryString)
         {
+            _ = webName;
             Encoding encoding;
 
             if (codePage != 20932 && codePage != 50222)
@@ -622,6 +623,8 @@ namespace System.Text.Tests
         [MemberData(nameof(CodePageInfo))]
         public static void TestEncodingDisplayNames(int codePage, string webName, string queryString)
         {
+            _ = webName;
+            _ = queryString;
             var encoding = CodePagesEncodingProvider.Instance.GetEncoding(codePage);
 
             string name = encoding.EncodingName;
@@ -633,7 +636,7 @@ namespace System.Text.Tests
 
         // This test is run as part of the default mappings test, since it modifies global state which that test
         // depends on.
-        public static void TestRegister1252()
+        private static void TestRegister1252()
         {
             // This test case ensure we can map all 1252 codepage codepoints without any exception.
             string s1252Result =

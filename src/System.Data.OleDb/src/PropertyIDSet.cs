@@ -10,10 +10,10 @@ namespace System.Data.OleDb
 {
     internal sealed class PropertyIDSet : DbBuffer
     {
-        static private readonly int PropertyIDSetAndValueSize = ODB.SizeOf_tagDBPROPIDSET + ADP.PtrSize; // sizeof(tagDBPROPIDSET) + sizeof(int)
-        static private readonly int PropertyIDSetSize = ODB.SizeOf_tagDBPROPIDSET;
+        private static readonly int PropertyIDSetAndValueSize = ODB.SizeOf_tagDBPROPIDSET + ADP.PtrSize; // sizeof(tagDBPROPIDSET) + sizeof(int)
+        private static readonly int PropertyIDSetSize = ODB.SizeOf_tagDBPROPIDSET;
 
-        private int _count;
+        private readonly int _count;
 
         // the PropertyID is stored at the end of the tagDBPROPIDSET structure
         // this way only a single memory allocation is required instead of two

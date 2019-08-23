@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -28,7 +28,7 @@ namespace System.Net.Http
             private ulong _chunkBytesRemaining;
             /// <summary>The current state of the parsing state machine for the chunked response.</summary>
             private ParsingState _state = ParsingState.ExpectChunkHeader;
-            private HttpResponseMessage _response;
+            private readonly HttpResponseMessage _response;
 
             public ChunkedEncodingReadStream(HttpConnection connection, HttpResponseMessage response) : base(connection)
             {
@@ -387,7 +387,7 @@ namespace System.Net.Http
                             {
                                 NetEventSource.Error(this, $"Unexpected state: {_state}");
                             }
-                            
+
                             return default;
                     }
                 }

@@ -2,14 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+// ===================================================================================================
+// Portions of the code implemented below are based on the 'Berkeley SoftFloat Release 3e' algorithms.
+// ===================================================================================================
+
 /*============================================================
 **
 ** Purpose: Some single-precision floating-point math operations
 **
 ===========================================================*/
 
-//This class contains only static members and doesn't require serialization.
-
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace System
@@ -23,7 +26,7 @@ namespace System
         private const int maxRoundingDigits = 6;
 
         // This table is required for the Round function which can specify the number of digits to round to
-        private static float[] roundPower10Single = new float[] {
+        private static readonly float[] roundPower10Single = new float[] {
             1e0f, 1e1f, 1e2f, 1e3f, 1e4f, 1e5f, 1e6f
         };
 
@@ -37,7 +40,7 @@ namespace System
 
         public static float BitDecrement(float x)
         {
-            var bits = BitConverter.SingleToInt32Bits(x);
+            int bits = BitConverter.SingleToInt32Bits(x);
 
             if ((bits & 0x7F800000) >= 0x7F800000)
             {
@@ -62,7 +65,7 @@ namespace System
 
         public static float BitIncrement(float x)
         {
-            var bits = BitConverter.SingleToInt32Bits(x);
+            int bits = BitConverter.SingleToInt32Bits(x);
 
             if ((bits & 0x7F800000) >= 0x7F800000)
             {
@@ -90,8 +93,8 @@ namespace System
             // This method is required to work for all inputs,
             // including NaN, so we operate on the raw bits.
 
-            var xbits = BitConverter.SingleToInt32Bits(x);
-            var ybits = BitConverter.SingleToInt32Bits(y);
+            int xbits = BitConverter.SingleToInt32Bits(x);
+            int ybits = BitConverter.SingleToInt32Bits(y);
 
             // If the sign bits of x and y are not the same,
             // flip the sign bit of x and return the new value;
@@ -117,7 +120,7 @@ namespace System
                 return y; // IEEE 754-2008: NaN payload must be preserved
             }
 
-            var regularMod = x % y;
+            float regularMod = x % y;
 
             if (float.IsNaN(regularMod))
             {
@@ -129,12 +132,12 @@ namespace System
                 return float.NegativeZero;
             }
 
-            var alternativeResult = (regularMod - (Abs(y) * Sign(x)));
+            float alternativeResult = (regularMod - (Abs(y) * Sign(x)));
 
             if (Abs(alternativeResult) == Abs(regularMod))
             {
-                var divisionResult = x / y;
-                var roundedResult = Round(divisionResult);
+                float divisionResult = x / y;
+                float roundedResult = Round(divisionResult);
 
                 if (Abs(roundedResult) > Abs(divisionResult))
                 {
@@ -245,29 +248,69 @@ namespace System
         public static float Round(float x)
         {
             // ************************************************************************************
-            // IMPORTANT: Do not change this implementation without also updating Math.Round(double),
+            // IMPORTANT: Do not change this implementation without also updating MathF.Round(float),
             //            FloatingPointUtils::round(double), and FloatingPointUtils::round(float)
             // ************************************************************************************
-    
-            // If the number has no fractional part do nothing
-            // This shortcut is necessary to workaround precision loss in borderline cases on some platforms
 
-            if (x == (float)((int)x))
+            // This is based on the 'Berkeley SoftFloat Release 3e' algorithm
+
+            uint bits = (uint)BitConverter.SingleToInt32Bits(x);
+            int exponent = float.ExtractExponentFromBits(bits);
+
+            if (exponent <= 0x7E)
             {
+                if ((bits << 1) == 0)
+                {
+                    // Exactly +/- zero should return the original value
+                    return x;
+                }
+
+                // Any value less than or equal to 0.5 will always round to exactly zero
+                // and any value greater than 0.5 will always round to exactly one. However,
+                // we need to preserve the original sign for IEEE compliance.
+
+                float result = ((exponent == 0x7E) && (float.ExtractSignificandFromBits(bits) != 0)) ? 1.0f : 0.0f;
+                return CopySign(result, x);
+            }
+
+            if (exponent >= 0x96)
+            {
+                // Any value greater than or equal to 2^23 cannot have a fractional part,
+                // So it will always round to exactly itself.
+
                 return x;
             }
 
-            // We had a number that was equally close to 2 integers.
-            // We need to return the even one.
+            // The absolute value should be greater than or equal to 1.0 and less than 2^23
+            Debug.Assert((0x7F <= exponent) && (exponent <= 0x95));
 
-            float flrTempVal = Floor(x + 0.5f);
+            // Determine the last bit that represents the integral portion of the value
+            // and the bits representing the fractional portion
 
-            if ((x == (Floor(x) + 0.5f)) && (FMod(flrTempVal, 2.0f) != 0))
+            uint lastBitMask = 1U << (0x96 - exponent);
+            uint roundBitsMask = lastBitMask - 1;
+
+            // Increment the first fractional bit, which represents the midpoint between
+            // two integral values in the current window.
+
+            bits += lastBitMask >> 1;
+
+            if ((bits & roundBitsMask) == 0)
             {
-                flrTempVal -= 1.0f;
+                // If that overflowed and the rest of the fractional bits are zero
+                // then we were exactly x.5 and we want to round to the even result
+
+                bits &= ~lastBitMask;
+            }
+            else
+            {
+                // Otherwise, we just want to strip the fractional bits off, truncating
+                // to the current integer value.
+
+                bits &= ~roundBitsMask;
             }
 
-            return CopySign(flrTempVal, x);
+            return BitConverter.Int32BitsToSingle((int)bits);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -296,7 +339,7 @@ namespace System
 
             if (Abs(x) < singleRoundLimit)
             {
-                var power10 = roundPower10Single[digits];
+                float power10 = roundPower10Single[digits];
 
                 x *= power10;
 
@@ -336,7 +379,7 @@ namespace System
                     }
                     // Directed rounding: Round up to the next value, toward positive infinity
                     case MidpointRounding.ToPositiveInfinity:
-                    {  
+                    {
                         x = Ceiling(x);
                         break;
                     }
@@ -345,7 +388,7 @@ namespace System
                         throw new ArgumentException(SR.Format(SR.Argument_InvalidEnumValue, mode, nameof(MidpointRounding)), nameof(mode));
                     }
                 }
-                
+
                 x /= power10;
             }
 

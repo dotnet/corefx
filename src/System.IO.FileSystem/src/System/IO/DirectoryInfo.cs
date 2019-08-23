@@ -20,6 +20,8 @@ namespace System.IO
 {
     public sealed partial class DirectoryInfo : FileSystemInfo
     {
+        private bool _isNormalized;
+
         public DirectoryInfo(string path)
         {
             Init(originalPath: path,
@@ -45,17 +47,19 @@ namespace System.IO
                     Path.GetFileName(Path.TrimEndingDirectorySeparator(fullPath.AsSpan()))).ToString();
 
             FullPath = fullPath;
+
+            _isNormalized = isNormalized;
         }
 
         public DirectoryInfo Parent
         {
             get
             {
-                // FullPath might end in either "parent\child" or "parent\child\", and in either case we want 
+                // FullPath might end in either "parent\child" or "parent\child\", and in either case we want
                 // the parent of child, not the child. Trim off an ending directory separator if there is one,
                 // but don't mangle the root.
                 string parentName = Path.GetDirectoryName(PathInternal.IsRoot(FullPath.AsSpan()) ? FullPath : Path.TrimEndingDirectorySeparator(FullPath));
-                return parentName != null ? 
+                return parentName != null ?
                     new DirectoryInfo(parentName, isNormalized: true) :
                     null;
             }
@@ -93,7 +97,7 @@ namespace System.IO
         // Returns an array of Files in the DirectoryInfo specified by path
         public FileInfo[] GetFiles() => GetFiles("*", enumerationOptions: EnumerationOptions.Compatible);
 
-        // Returns an array of Files in the current DirectoryInfo matching the 
+        // Returns an array of Files in the current DirectoryInfo matching the
         // given search criteria (i.e. "*.txt").
         public FileInfo[] GetFiles(string searchPattern) => GetFiles(searchPattern, enumerationOptions: EnumerationOptions.Compatible);
 
@@ -121,7 +125,7 @@ namespace System.IO
         // Returns an array of Directories in the current directory.
         public DirectoryInfo[] GetDirectories() => GetDirectories("*", enumerationOptions: EnumerationOptions.Compatible);
 
-        // Returns an array of Directories in the current DirectoryInfo matching the 
+        // Returns an array of Directories in the current DirectoryInfo matching the
         // given search criteria (i.e. "System*" could match the System & System32 directories).
         public DirectoryInfo[] GetDirectories(string searchPattern) => GetDirectories(searchPattern, enumerationOptions: EnumerationOptions.Compatible);
 
@@ -165,7 +169,7 @@ namespace System.IO
         public IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(string searchPattern, EnumerationOptions enumerationOptions)
             => InternalEnumerateInfos(FullPath, searchPattern, SearchTarget.Both, enumerationOptions);
 
-        internal static IEnumerable<FileSystemInfo> InternalEnumerateInfos(
+        private IEnumerable<FileSystemInfo> InternalEnumerateInfos(
             string path,
             string searchPattern,
             SearchTarget searchTarget,
@@ -175,19 +179,15 @@ namespace System.IO
             if (searchPattern == null)
                 throw new ArgumentNullException(nameof(searchPattern));
 
-            FileSystemEnumerableFactory.NormalizeInputs(ref path, ref searchPattern, options);
+            _isNormalized &= FileSystemEnumerableFactory.NormalizeInputs(ref path, ref searchPattern, options.MatchType);
 
-            switch (searchTarget)
+            return searchTarget switch
             {
-                case SearchTarget.Directories:
-                    return FileSystemEnumerableFactory.DirectoryInfos(path, searchPattern, options);
-                case SearchTarget.Files:
-                    return FileSystemEnumerableFactory.FileInfos(path, searchPattern, options);
-                case SearchTarget.Both:
-                    return FileSystemEnumerableFactory.FileSystemInfos(path, searchPattern, options);
-                default:
-                    throw new ArgumentException(SR.ArgumentOutOfRange_Enum, nameof(searchTarget));
-            }
+                SearchTarget.Directories => FileSystemEnumerableFactory.DirectoryInfos(path, searchPattern, options, _isNormalized),
+                SearchTarget.Files => FileSystemEnumerableFactory.FileInfos(path, searchPattern, options, _isNormalized),
+                SearchTarget.Both => FileSystemEnumerableFactory.FileSystemInfos(path, searchPattern, options, _isNormalized),
+                _ => throw new ArgumentException(SR.ArgumentOutOfRange_Enum, nameof(searchTarget)),
+            };
         }
 
         public DirectoryInfo Root => new DirectoryInfo(Path.GetPathRoot(FullPath));

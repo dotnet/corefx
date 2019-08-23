@@ -37,7 +37,7 @@ namespace System.IO
         private string CoreNewLineStr = Environment.NewLine;
 
         // Can be null - if so, ask for the Thread's CurrentCulture every time.
-        private IFormatProvider? _internalFormatProvider;
+        private readonly IFormatProvider? _internalFormatProvider;
 
         protected TextWriter()
         {
@@ -712,13 +712,7 @@ namespace System.IO
             {
             }
 
-            public override Encoding Encoding
-            {
-                get
-                {
-                    return Encoding.Unicode;
-                }
-            }
+            public override Encoding Encoding => Encoding.Unicode;
 
             public override void Write(char[] buffer, int index, int count)
             {

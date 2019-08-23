@@ -11,6 +11,8 @@ namespace System
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public partial class Exception : ISerializable
     {
+        private protected const string InnerExceptionPrefix = " ---> ";
+
         public Exception()
         {
             _HResult = HResults.COR_E_EXCEPTION;
@@ -22,11 +24,11 @@ namespace System
             _message = message;
         }
 
-        // Creates a new Exception.  All derived classes should 
+        // Creates a new Exception.  All derived classes should
         // provide this constructor.
-        // Note: the stack trace is not started until the exception 
+        // Note: the stack trace is not started until the exception
         // is thrown
-        // 
+        //
         public Exception(string? message, Exception? innerException)
             : this()
         {
@@ -50,21 +52,9 @@ namespace System
             RestoreRemoteStackTrace(info, context);
         }
 
-        public virtual string Message
-        {
-            get
-            {
-                return _message ?? SR.Format(SR.Exception_WasThrown, GetClassName());
-            }
-        }
+        public virtual string Message => _message ?? SR.Format(SR.Exception_WasThrown, GetClassName());
 
-        public virtual IDictionary Data
-        {
-            get
-            {
-                return _data ?? (_data = CreateDataContainer());
-            }
-        }
+        public virtual IDictionary Data => _data ??= CreateDataContainer();
 
         private string GetClassName() => GetType().ToString();
 
@@ -151,7 +141,7 @@ namespace System
 
             if (_innerException != null)
             {
-                s = s + " ---> " + _innerException.ToString() + Environment.NewLine +
+                s = s + Environment.NewLine + InnerExceptionPrefix + _innerException.ToString() + Environment.NewLine +
                 "   " + SR.Exception_EndOfInnerExceptionStack;
             }
 
@@ -164,7 +154,7 @@ namespace System
             return s;
         }
 
-        protected event EventHandler<SafeSerializationEventArgs> SerializeObjectState
+        protected event EventHandler<SafeSerializationEventArgs>? SerializeObjectState
         {
             add { throw new PlatformNotSupportedException(SR.PlatformNotSupported_SecureBinarySerialization); }
             remove { throw new PlatformNotSupportedException(SR.PlatformNotSupported_SecureBinarySerialization); }

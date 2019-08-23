@@ -2,13 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace System.Threading
 {
     internal partial class TimerQueue
     {
-        private static int TickCount
+        private static long TickCount64
         {
             get
             {
@@ -21,18 +21,16 @@ namespace System.Threading
                 // in sleep/hibernate mode.
                 if (Environment.IsWindows8OrAbove)
                 {
-                    ulong time100ns;
-
-                    bool result = Interop.Kernel32.QueryUnbiasedInterruptTime(out time100ns);
-                    if (!result)
-                        Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
-
-                    // convert to 100ns to milliseconds, and truncate to 32 bits.
-                    return (int)(uint)(time100ns / 10000);
+                    // Based on its documentation the QueryUnbiasedInterruptTime() function validates
+                    // the argument is non-null. In this case we are always supplying an argument,
+                    // so will skip return value validation.
+                    bool success = Interop.Kernel32.QueryUnbiasedInterruptTime(out ulong time100ns);
+                    Debug.Assert(success);
+                    return (long)(time100ns / 10_000); // convert from 100ns to milliseconds
                 }
                 else
                 {
-                    return Environment.TickCount;
+                    return Environment.TickCount64;
                 }
             }
         }

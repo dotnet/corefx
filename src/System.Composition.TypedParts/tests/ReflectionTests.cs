@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -21,7 +21,7 @@ namespace System.Composition.TypedParts.Tests
         /// Non-deterministic
         /// </summary>
         /// <remarks>
-        /// Because MethodInfo.GetParameters() lazy initializes it's return value, 
+        /// Because MethodInfo.GetParameters() lazy initializes it's return value,
         /// concurrent calls can create different ParameterInfo instances.
         /// This can cause arguments to an export's constructor to incorrectly
         /// revert to a default value during GetExport.
@@ -76,12 +76,12 @@ namespace System.Composition.TypedParts.Tests
         {
             CompositionContext cc = CreateContainer(typeof(A), typeof(B), typeof(C), typeof(D));
             D d = cc.GetExport<D>();
-            Assert.IsAssignableFrom(typeof(A), d.A);
-            Assert.IsAssignableFrom(typeof(B), d.B);
-            Assert.IsAssignableFrom(typeof(A), d.B.A);
-            Assert.IsAssignableFrom(typeof(C), d.C);
-            Assert.IsAssignableFrom(typeof(A), d.C.A);
-            Assert.IsAssignableFrom(typeof(B), d.C.B);
+            Assert.IsAssignableFrom<A>(d.A);
+            Assert.IsAssignableFrom<B>(d.B);
+            Assert.IsAssignableFrom<A>(d.B.A);
+            Assert.IsAssignableFrom<C>(d.C);
+            Assert.IsAssignableFrom<A>(d.C.A);
+            Assert.IsAssignableFrom<B>(d.C.B);
         }
 
         private static CompositionContext CreateContainer(params Type[] types)

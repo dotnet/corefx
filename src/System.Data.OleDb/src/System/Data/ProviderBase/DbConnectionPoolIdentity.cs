@@ -16,17 +16,13 @@ using System.Runtime.Versioning;
 
 namespace System.Data.ProviderBase
 {
-    sealed internal class DbConnectionPoolIdentity
+    internal sealed class DbConnectionPoolIdentity
     {
         private const int E_NotImpersonationToken = unchecked((int)0x8007051D);
         private const int Win32_CheckTokenMembership = 1;
-        private const int Win32_GetTokenInformation_1 = 2;
-        private const int Win32_GetTokenInformation_2 = 3;
-        private const int Win32_ConvertSidToStringSidW = 4;
         private const int Win32_CreateWellKnownSid = 5;
 
-        static public readonly DbConnectionPoolIdentity NoIdentity = new DbConnectionPoolIdentity(String.Empty, false, true);
-        static private readonly byte[] NetworkSid = (ADP.IsWindowsNT ? CreateWellKnownSid(WellKnownSidType.NetworkSid) : null);
+        public static readonly DbConnectionPoolIdentity NoIdentity = new DbConnectionPoolIdentity(string.Empty, false, true);
 
         private readonly string _sidString;
         private readonly bool _isRestricted;
@@ -46,7 +42,7 @@ namespace System.Data.ProviderBase
             get { return _isRestricted; }
         }
 
-        static private byte[] CreateWellKnownSid(WellKnownSidType sidType)
+        private static byte[] CreateWellKnownSid(WellKnownSidType sidType)
         {
             // Passing an array as big as it can ever be is a small price to pay for
             // not having to P/Invoke twice (once to get the buffer, once to get the data)
@@ -84,7 +80,7 @@ namespace System.Data.ProviderBase
             return _hashCode;
         }
 
-        static private void IntegratedSecurityError(int caller)
+        private static void IntegratedSecurityError(int caller)
         {
             // passing 1,2,3,4,5 instead of true/false so that with a debugger
             // we could determine more easily which Win32 method call failed
@@ -97,4 +93,3 @@ namespace System.Data.ProviderBase
 
     }
 }
-

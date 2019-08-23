@@ -6,16 +6,16 @@ using System.Threading;
 
 namespace System.ComponentModel.Composition
 {
-    partial class ExportServices
+    internal partial class ExportServices
     {
         private sealed class DisposableLazy<T, TMetadataView> : Lazy<T, TMetadataView>, IDisposable
         {
-            private IDisposable _disposable; 
+            private readonly IDisposable _disposable;
 
             public DisposableLazy(Func<T> valueFactory, TMetadataView metadataView, IDisposable disposable, LazyThreadSafetyMode mode)
                 : base(valueFactory, metadataView, mode)
             {
-                if(disposable == null)
+                if (disposable == null)
                 {
                     throw new ArgumentNullException(nameof(disposable));
                 }
@@ -31,12 +31,12 @@ namespace System.ComponentModel.Composition
 
         private sealed class DisposableLazy<T> : Lazy<T>, IDisposable
         {
-            private IDisposable _disposable;
+            private readonly IDisposable _disposable;
 
             public DisposableLazy(Func<T> valueFactory, IDisposable disposable, LazyThreadSafetyMode mode)
                 : base(valueFactory, mode)
             {
-                if(disposable == null)
+                if (disposable == null)
                 {
                     throw new ArgumentNullException(nameof(disposable));
                 }

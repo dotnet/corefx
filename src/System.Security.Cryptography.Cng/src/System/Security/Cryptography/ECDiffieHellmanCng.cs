@@ -15,13 +15,13 @@ namespace System.Security.Cryptography
         Hmac,
         Tls
     }
-    
+
     /// <summary>
     ///     Wrapper for CNG's implementation of elliptic curve Diffie-Hellman key exchange
     /// </summary>
     public sealed partial class ECDiffieHellmanCng : ECDiffieHellman
     {
-        private CngAlgorithmCore _core = new CngAlgorithmCore { DefaultKeyType = CngAlgorithm.ECDiffieHellman };
+        private CngAlgorithmCore _core = new CngAlgorithmCore(nameof(ECDiffieHellmanCng)) { DefaultKeyType = CngAlgorithm.ECDiffieHellman };
         private CngAlgorithm _hashAlgorithm = CngAlgorithm.Sha256;
         private ECDiffieHellmanKeyDerivationFunction _kdf = ECDiffieHellmanKeyDerivationFunction.Hash;
         private byte[] _hmacKey;
@@ -139,6 +139,11 @@ namespace System.Security.Cryptography
         protected override void Dispose(bool disposing)
         {
             _core.Dispose();
+        }
+
+        private void ThrowIfDisposed()
+        {
+            _core.ThrowIfDisposed();
         }
 
         private void DisposeKey()

@@ -37,7 +37,7 @@ namespace System.Data.Common
         /// </summary>
         protected virtual DbProviderFactory DbProviderFactory => null;
 
-        internal DbProviderFactory ProviderFactory => DbProviderFactory; 
+        internal DbProviderFactory ProviderFactory => DbProviderFactory;
 
         [Browsable(false)]
         public abstract string ServerVersion { get; }
@@ -88,13 +88,8 @@ namespace System.Data.Common
 
         public abstract void Close();
 
-        public virtual Task CloseAsync(CancellationToken cancellationToken = default)
+        public virtual Task CloseAsync()
         {
-            if (cancellationToken.IsCancellationRequested)
-            {
-                return Task.FromCanceled(cancellationToken);
-            }
-
             try
             {
                 Close();
@@ -159,7 +154,7 @@ namespace System.Data.Common
         {
             throw ADP.NotSupported();
         }
-        
+
         protected virtual void OnStateChange(StateChangeEventArgs stateChange)
         {
             if (_suppressStateChangeForReconnection)

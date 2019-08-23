@@ -21,11 +21,11 @@ namespace System.ComponentModel.Composition.Hosting
     {
         private class InnerCatalogExportProvider : ExportProvider
         {
-            private CatalogExportProvider _outerExportProvider;
+            private readonly CatalogExportProvider _outerExportProvider;
 
             public InnerCatalogExportProvider(CatalogExportProvider outerExportProvider)
             {
-                if(outerExportProvider == null)
+                if (outerExportProvider == null)
                 {
                     throw new ArgumentNullException(nameof(outerExportProvider));
                 }
@@ -39,17 +39,17 @@ namespace System.ComponentModel.Composition.Hosting
         }
 
         private readonly CompositionLock _lock;
-        private Dictionary<ComposablePartDefinition, CatalogPart> _activatedParts = new Dictionary<ComposablePartDefinition, CatalogPart>();
-        private HashSet<ComposablePartDefinition> _rejectedParts = new HashSet<ComposablePartDefinition>();
+        private readonly Dictionary<ComposablePartDefinition, CatalogPart> _activatedParts = new Dictionary<ComposablePartDefinition, CatalogPart>();
+        private readonly HashSet<ComposablePartDefinition> _rejectedParts = new HashSet<ComposablePartDefinition>();
         private ConditionalWeakTable<object, List<ComposablePart>> _gcRoots;
-        private HashSet<IDisposable> _partsToDispose = new HashSet<IDisposable>();
+        private readonly HashSet<IDisposable> _partsToDispose = new HashSet<IDisposable>();
         private ComposablePartCatalog _catalog;
         private volatile bool _isDisposed = false;
         private volatile bool _isRunning = false;
-        private bool _disableSilentRejection = false;
+        private readonly bool _disableSilentRejection = false;
         private ExportProvider _sourceProvider;
         private ImportEngine _importEngine;
-        private CompositionOptions _compositionOptions;
+        private readonly CompositionOptions _compositionOptions;
         private ExportProvider _innerExportProvider;
 
         /// <summary>
@@ -102,11 +102,11 @@ namespace System.ComponentModel.Composition.Hosting
         }
 
         /// <summary>
-        ///     Gets the composable part catalog that the provider users to 
+        ///     Gets the composable part catalog that the provider users to
         ///     produce exports.
         /// </summary>
         /// <value>
-        ///     The <see cref="ComposablePartCatalog"/> that the 
+        ///     The <see cref="ComposablePartCatalog"/> that the
         ///     <see cref="CatalogExportProvider"/>
         ///     uses to produce <see cref="Export"/> objects.
         /// </value>
@@ -129,7 +129,7 @@ namespace System.ComponentModel.Composition.Hosting
         ///     exports.
         /// </summary>
         /// <value>
-        ///     The <see cref="ExportProvider"/> which provides the 
+        ///     The <see cref="ExportProvider"/> which provides the
         ///     <see cref="CatalogExportProvider"/> access to additional
         ///     <see cref="Export"/> objects. The default is <see langword="null"/>.
         /// </value>
@@ -141,14 +141,14 @@ namespace System.ComponentModel.Composition.Hosting
         ///     <para>
         ///         -or-
         ///     </para>
-        ///     The methods on the <see cref="CatalogExportProvider"/> 
+        ///     The methods on the <see cref="CatalogExportProvider"/>
         ///     have already been accessed.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///     The <see cref="CatalogExportProvider"/> has been disposed of.
         /// </exception>
         /// <remarks>
-        ///     This property must be set before accessing any methods on the 
+        ///     This property must be set before accessing any methods on the
         ///     <see cref="CatalogExportProvider"/>.
         /// </remarks>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "EnsureCanSet ensures that the property is set only once, Dispose is not required")]
@@ -300,7 +300,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// empty <see cref="IEnumerable{T}"/>.
         /// </result>
         /// <remarks>
-        /// 	<note type="inheritinfo">
+        /// <note type="inheritinfo">
         /// The implementers should not treat the cardinality-related mismatches as errors, and are not
         /// expected to throw exceptions in those cases.
         /// For instance, if the import requests exactly one export and the provider has no matching exports or more than one,
@@ -390,8 +390,8 @@ namespace System.ComponentModel.Composition.Hosting
                     // While creating a PartCreatorExportDefinition for every changed definition may not be the most
                     // efficient way to do this the PartCreatorExportDefinition is very efficient and doesn't do any
                     // real work unless its metadata is pulled on. If this turns out to be a bottleneck then we
-                    // will need to start tracking all the PartCreator's we hand out and only send those which we 
-                    // have handed out. In fact we could do the same thing for all the Exports if we wished but 
+                    // will need to start tracking all the PartCreator's we hand out and only send those which we
+                    // have handed out. In fact we could do the same thing for all the Exports if we wished but
                     // that requires a cache management which we don't want to do at this point.
                     exports.Add(new PartCreatorExportDefinition(export));
                 }
@@ -554,7 +554,7 @@ namespace System.ComponentModel.Composition.Hosting
                 part.ImportsSatisfied = true;
             }
 
-            // Only hold conditional references for recomposable non-shared parts because we are 
+            // Only hold conditional references for recomposable non-shared parts because we are
             // already holding strong references to the shared parts.
             if (exportedValue != null && !isSharedPart && part.Part.IsRecomposable())
             {
@@ -767,7 +767,7 @@ namespace System.ComponentModel.Composition.Hosting
                     // instance to keep the expense of pre-validation to a minimum.  Note that
                     // _activatedParts holds references to both shared and non-shared parts.
                     // The non-shared parts will only be used for rejection purposes only but
-                    // the shared parts will be handed out when requested via GetExports as 
+                    // the shared parts will be handed out when requested via GetExports as
                     // well as be used for rejection purposes.
                     localAtomicComposition.AddCompleteActionAllowNull(() =>
                     {
@@ -796,8 +796,8 @@ namespace System.ComponentModel.Composition.Hosting
                 }
             }
 
-            // If we've reached this point then this part has been rejected so we need to 
-            // record the rejection in our parent composition or execute it immediately if 
+            // If we've reached this point then this part has been rejected so we need to
+            // record the rejection in our parent composition or execute it immediately if
             // one doesn't exist.
             parentAtomicComposition.AddCompleteActionAllowNull(() =>
             {
@@ -1022,8 +1022,8 @@ namespace System.ComponentModel.Composition.Hosting
 
         private class PartEqualsQueryStateNode : PartQueryStateNode
         {
-            private ComposablePartDefinition _part;
-            private int _hashCode;
+            private readonly ComposablePartDefinition _part;
+            private readonly int _hashCode;
             public PartEqualsQueryStateNode(ComposablePartDefinition part, PartQueryStateNode previousNode, AtomicCompositionQueryState state) :
                 base(previousNode, state)
             {
@@ -1043,7 +1043,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private class PartInHashSetQueryStateNode : PartQueryStateNode
         {
-            private HashSet<ComposablePartDefinition> _parts;
+            private readonly HashSet<ComposablePartDefinition> _parts;
             public PartInHashSetQueryStateNode(HashSet<ComposablePartDefinition> parts, PartQueryStateNode previousNode, AtomicCompositionQueryState state) :
                 base(previousNode, state)
             {

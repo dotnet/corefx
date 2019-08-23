@@ -28,7 +28,7 @@ namespace System.Xml.Linq
     ///    etc. to avoid locks.  Any changes to code which accesses these variables should be carefully reviewed and tested,
     ///    as it can be *very* tricky.  In particular, if you don't understand the CLR memory model or if you don't know
     ///    what a memory barrier is, DON'T attempt to modify this code.  A good discussion of these topics can be found at
-    ///    <![CDATA[http://discuss.develop.com/archives/wa.exe?A2=ind0203B&L=DOTNET&P=R375]]>. 
+    ///    <![CDATA[http://discuss.develop.com/archives/wa.exe?A2=ind0203B&L=DOTNET&P=R375]]>.
     ///
     /// 2. Because I am not sure if the CLR spec has changed since versions 1.0/1.1, I am assuming the weak memory model that
     ///    is described in the ECMA spec, in which normal writes can be reordered.  This means I must introduce more memory
@@ -130,10 +130,10 @@ namespace System.Xml.Linq
         /// </remarks>
         private sealed class XHashtableState
         {
-            private int[] _buckets;                  // Buckets contain indexes into entries array (bucket values are SHARED STATE)
-            private Entry[] _entries;                // Entries contain linked lists of buckets (next pointers are SHARED STATE)
+            private readonly int[] _buckets;                  // Buckets contain indexes into entries array (bucket values are SHARED STATE)
+            private readonly Entry[] _entries;                // Entries contain linked lists of buckets (next pointers are SHARED STATE)
             private int _numEntries;                 // SHARED STATE: Current number of entries (including orphaned entries)
-            private ExtractKeyDelegate _extractKey;  // Delegate called in order to extract string key embedded in hashed TValue
+            private readonly ExtractKeyDelegate _extractKey;  // Delegate called in order to extract string key embedded in hashed TValue
 
             private const int EndOfList = 0;        // End of linked list marker
             private const int FullList = -1;        // Indicates entries should not be added to end of linked list

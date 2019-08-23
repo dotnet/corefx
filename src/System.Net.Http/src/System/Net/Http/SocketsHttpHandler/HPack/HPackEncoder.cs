@@ -1,6 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0.
+// See THIRD-PARTY-NOTICES.TXT in the project root for license information.
 
 using System.Diagnostics;
 
@@ -10,7 +10,7 @@ namespace System.Net.Http.HPack
     {
         // Things we should add:
         // * Huffman encoding
-        //      
+        //
         // Things we should consider adding:
         // * Dynamic table encoding:
         //   This would make the encoder stateful, which complicates things significantly.
@@ -291,6 +291,7 @@ namespace System.Net.Http.HPack
 
                 valueLength = checked((int)(valueLength + (values.Length - 1) * separator.Length));
 
+                destination[0] = 0;
                 if (IntegerEncoder.Encode(valueLength, 7, destination, out int integerLength))
                 {
                     Debug.Assert(integerLength >= 1);

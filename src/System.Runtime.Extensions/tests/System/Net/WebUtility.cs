@@ -178,7 +178,7 @@ namespace System.Net.Tests
             yield return Tuple.Create("    ", "++++");
             yield return Tuple.Create("++++", "%2B%2B%2B%2B");
 
-            // Tests for stray surrogate chars (all should be encoded as U+FFFD)            
+            // Tests for stray surrogate chars (all should be encoded as U+FFFD)
             yield return Tuple.Create("\uD800", "%EF%BF%BD"); // High surrogate
             yield return Tuple.Create("\uDC00", "%EF%BF%BD"); // Low surrogate
 
@@ -324,7 +324,7 @@ namespace System.Net.Tests
         {
             AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => WebUtility.UrlDecodeToBytes(new byte[byteCount], offset, count));
         }
-        
+
         public static IEnumerable<object[]> UrlEncodeToBytes_TestData()
         {
             foreach (var tuple in UrlEncode_SharedTestData())
@@ -424,7 +424,7 @@ namespace System.Net.Tests
             string actual = Encoding.UTF8.GetString(encoded);
             Assert.Equal(expected, actual);
         }
-        
+
         [Fact]
         public static void UrlEncodeToBytes_NoEncodingNeeded_ReturnsNewClonedArray()
         {
@@ -463,7 +463,7 @@ namespace System.Net.Tests
         [MemberData(nameof(HtmlDecode_TestData))]
         public static void HtmlDecode_TextWriterOutput(string value, string expected)
         {
-            if(value == null)
+            if (value == null)
                 expected = string.Empty;
             StringWriter output = new StringWriter(CultureInfo.InvariantCulture);
             WebUtility.HtmlDecode(value, output);
@@ -474,7 +474,7 @@ namespace System.Net.Tests
         [MemberData(nameof(HtmlEncode_TestData))]
         public static void HtmlEncode_TextWriterOutput(string value, string expected)
         {
-            if(value == null)
+            if (value == null)
                 expected = string.Empty;
             StringWriter output = new StringWriter(CultureInfo.InvariantCulture);
             WebUtility.HtmlEncode(value, output);

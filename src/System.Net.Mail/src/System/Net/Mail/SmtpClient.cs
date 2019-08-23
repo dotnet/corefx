@@ -51,7 +51,7 @@ namespace System.Net.Mail
         private Timer _timer;
         private ContextAwareResult _operationCompletedResult = null;
         private AsyncOperation _asyncOp = null;
-        private static AsyncCallback s_contextSafeCompleteCallback = new AsyncCallback(ContextSafeCompleteCallback);
+        private static readonly AsyncCallback s_contextSafeCompleteCallback = new AsyncCallback(ContextSafeCompleteCallback);
         private const int DefaultPort = 25;
         internal string clientDomain = null;
         private bool _disposed = false;
@@ -364,8 +364,8 @@ namespace System.Net.Mail
 
         public string TargetName
         {
-            set { _targetName = value; }
             get { return _targetName; }
+            set { _targetName = value; }
         }
 
         private bool ServerSupportsEai
@@ -405,7 +405,7 @@ namespace System.Net.Mail
             }
 
             FileStream fileStream = new FileStream(pathAndFilename, FileMode.CreateNew);
-            return new MailWriter(fileStream);
+            return new MailWriter(fileStream, encodeForTransport: false);
         }
 
         protected void OnSendCompleted(AsyncCompletedEventArgs e)

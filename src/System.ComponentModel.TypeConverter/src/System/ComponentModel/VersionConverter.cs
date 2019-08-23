@@ -1,8 +1,11 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.ComponentModel.Design.Serialization;
+using System.Diagnostics;
 using System.Globalization;
+using System.Reflection;
 
 namespace System.ComponentModel
 {
@@ -18,10 +21,7 @@ namespace System.ComponentModel
         /// </summary>
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
         {
-            if (sourceType == null)
-                throw new ArgumentNullException(nameof(sourceType));
-
-            return sourceType == typeof(string) || sourceType == typeof(Version);
+            return sourceType == typeof(string) || sourceType == typeof(Version) || base.CanConvertFrom(context, sourceType);
         }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace System.ComponentModel
         /// </summary>
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
-            return destinationType == typeof(string) || destinationType == typeof(Version);
+            return destinationType == typeof(Version) || destinationType == typeof(InstanceDescriptor) || base.CanConvertTo(context, destinationType);
         }
 
         /// <summary>
@@ -72,16 +72,27 @@ namespace System.ComponentModel
 
             if (value is Version version)
             {
+                if (destinationType == typeof(InstanceDescriptor))
+                {
+                    ConstructorInfo ctor = typeof(Version).GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, new Type[] { typeof(int), typeof(int), typeof(int), typeof(int) }, null);
+                    Debug.Assert(ctor != null, "Couldn't find constructor");
+                    return new InstanceDescriptor(ctor, new object[] { version.Major, version.Minor, version.Build, version.Revision });
+                }
+
                 if (destinationType == typeof(string))
+                {
                     return version.ToString();
+                }
 
                 if (destinationType == typeof(Version))
+                {
                     return new Version(version.Major, version.Minor, version.Build, version.Revision);
+                }
             }
 
             return base.ConvertTo(context, culture, value, destinationType);
         }
-        
+
         public override bool IsValid(ITypeDescriptorContext context, object value)
         {
             if (value is string version)
@@ -89,6 +100,6 @@ namespace System.ComponentModel
                 return Version.TryParse(version, out Version _);
             }
             return value is Version;
-        }        
+        }
     }
 }

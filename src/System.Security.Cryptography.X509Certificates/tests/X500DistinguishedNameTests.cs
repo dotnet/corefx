@@ -109,24 +109,15 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
         [Theory]
         [MemberData(nameof(InternallyQuotedRDNs))]
-        public static void QuotedWithQuotes(string quoted, string notQuoted, string hexEncoded)
+        public static void QuotedWithQuotesAsAppropriate(string quoted, string notQuoted, string hexEncoded)
         {
             byte[] encoded = hexEncoded.HexToByteArray();
             X500DistinguishedName dn = new X500DistinguishedName(encoded);
 
             Assert.Equal(quoted, dn.Decode(X500DistinguishedNameFlags.None));
-        }
-
-        [Theory]
-        [MemberData(nameof(InternallyQuotedRDNs))]
-        public static void NotQuotedWithQuotes(string quoted, string notQuoted, string hexEncoded)
-        {
-            byte[] encoded = hexEncoded.HexToByteArray();
-            X500DistinguishedName dn = new X500DistinguishedName(encoded);
-
             Assert.Equal(notQuoted, dn.Decode(X500DistinguishedNameFlags.DoNotUseQuotes));
         }
-        
+
         [Theory]
         [MemberData(nameof(T61Cases))]
         public static void T61Strings(string expected, string hexEncoded)
@@ -199,6 +190,15 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             X500DistinguishedName dn = new X500DistinguishedName("OID.2.23.133.2.3=id:0020065,OID.2.23.133.2.2=,OID.2.23.133.2.1=id:564D5700");
             X500DistinguishedName dn2 = new X500DistinguishedName(dn.RawData);
             Assert.Equal("TPMManufacturer=id:564D5700, TPMModel=\"\", TPMVersion=id:0020065", dn2.Decode(X500DistinguishedNameFlags.None));
+        }
+
+        [Fact]
+        public static void NameWithNumericString()
+        {
+            X500DistinguishedName dn = new X500DistinguishedName(
+                "30283117301506052901020203120C313233203635342037383930310D300B0603550403130454657374".HexToByteArray());
+
+            Assert.Equal("OID.1.1.1.2.2.3=123 654 7890, CN=Test", dn.Decode(X500DistinguishedNameFlags.None));
         }
 
         public static readonly object[][] WhitespaceBeforeCases =
@@ -447,7 +447,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             new object[]
             {
                 "SERIALNUMBER=CVR:13471967-UID:121212121212, E=vhm@use.test.dk, " +
-                "CN=Hedeby's M\u00f8belhandel - Salgsafdelingen, " + 
+                "CN=Hedeby's M\u00f8belhandel - Salgsafdelingen, " +
                 "O=Hedeby's M\u00f8belhandel // CVR:13471967, C=DK",
                 "3081B5310B300906035504061302444B312D302B060355040A14244865646562" +
                 "792773204DF862656C68616E64656C202F2F204356523A313334373139363731" +

@@ -7,7 +7,7 @@
 //
 //
 // Compiler-targeted type for switching back into the current execution context, e.g.
-// 
+//
 //   await Task.Yield();
 //   =====================
 //   var $awaiter = Task.Yield().GetAwaiter();
@@ -48,7 +48,7 @@ namespace System.Runtime.CompilerServices
         {
             /// <summary>Gets whether a yield is not required.</summary>
             /// <remarks>This property is intended for compiler user rather than use directly in code.</remarks>
-            public bool IsCompleted { get { return false; } } // yielding is always required for YieldAwaiter, hence false
+            public bool IsCompleted => false;  // yielding is always required for YieldAwaiter, hence false
 
             /// <summary>Posts the <paramref name="continuation"/> back to the current context.</summary>
             /// <param name="continuation">The action to invoke asynchronously.</param>
@@ -83,7 +83,7 @@ namespace System.Runtime.CompilerServices
                 // post the continuation to it.  However, treat the base type
                 // as if there wasn't a SynchronizationContext, since that's what it
                 // logically represents.
-                var syncCtx = SynchronizationContext.Current;
+                SynchronizationContext? syncCtx = SynchronizationContext.Current;
                 if (syncCtx != null && syncCtx.GetType() != typeof(SynchronizationContext))
                 {
                     syncCtx.Post(s_sendOrPostCallbackRunAction, continuation);
@@ -157,9 +157,9 @@ namespace System.Runtime.CompilerServices
                 // fire the correlation ETW event
                 TplEventSource.Log.AwaitTaskContinuationScheduled(TaskScheduler.Current.Id, (currentTask != null) ? currentTask.Id : 0, continuationId);
 
-                return AsyncMethodBuilderCore.CreateContinuationWrapper(continuation, (innerContinuation,continuationIdTask) =>
+                return AsyncMethodBuilderCore.CreateContinuationWrapper(continuation, (innerContinuation, continuationIdTask) =>
                 {
-                    var log = TplEventSource.Log;
+                    TplEventSource log = TplEventSource.Log;
                     log.TaskWaitContinuationStarted(((Task<int>)continuationIdTask).Result);
 
                     // ETW event for Task Wait End.

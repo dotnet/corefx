@@ -107,7 +107,7 @@ namespace System.Collections.Immutable.Tests
         {
             var sortedMap = Empty<int, GenericParameterHelper>().AddRange(Enumerable.Range(1, 100).Select(n => new KeyValuePair<int, GenericParameterHelper>(n, new GenericParameterHelper(n))));
             var unsortedMap = sortedMap.ToImmutableDictionary();
-            Assert.IsAssignableFrom(typeof(ImmutableDictionary<int, GenericParameterHelper>), unsortedMap);
+            Assert.IsAssignableFrom<ImmutableDictionary<int, GenericParameterHelper>>(unsortedMap);
             Assert.Equal(sortedMap.Count, unsortedMap.Count);
             Assert.Equal<KeyValuePair<int, GenericParameterHelper>>(sortedMap.ToList(), unsortedMap.ToList());
         }
@@ -425,7 +425,7 @@ namespace System.Collections.Immutable.Tests
             Assert.IsType<ArgumentNullException>(tie.InnerException);
         }
 
-        ////[Fact] // not really a functional test -- but very useful to enable when collecting perf traces.
+        [Fact(Skip = "Useful to enable when collecting perf traces")]
         public void EnumerationPerformance()
         {
             var dictionary = Enumerable.Range(1, 1000).ToImmutableSortedDictionary(k => k, k => k);
@@ -450,7 +450,7 @@ namespace System.Collections.Immutable.Tests
             Debug.WriteLine("Timing:{0}{1}", Environment.NewLine, timingText);
         }
 
-        ////[Fact] // not really a functional test -- but very useful to enable when collecting perf traces.
+        [Fact(Skip = "Useful to enable when collecting perf traces")]
         public void EnumerationPerformance_Empty()
         {
             var dictionary = ImmutableSortedDictionary<int, int>.Empty;

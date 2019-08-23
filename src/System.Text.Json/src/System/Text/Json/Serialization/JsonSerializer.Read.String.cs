@@ -20,10 +20,10 @@ namespace System.Text.Json
         /// <typeparamref name="TValue"/> is not compatible with the JSON,
         /// or when there is remaining data in the Stream.
         /// </exception>
-        /// <remarks>Using a <see cref="System.String"/> is not as efficient as using the
+        /// <remarks>Using a <see cref="string"/> is not as efficient as using the
         /// UTF-8 methods since the implementation natively uses UTF-8.
         /// </remarks>
-        public static TValue Parse<TValue>(string json, JsonSerializerOptions options = null)
+        public static TValue Deserialize<TValue>(string json, JsonSerializerOptions options = null)
         {
             if (json == null)
                 throw new ArgumentNullException(nameof(json));
@@ -46,10 +46,10 @@ namespace System.Text.Json
         /// the <paramref name="returnType"/> is not compatible with the JSON,
         /// or when there is remaining data in the Stream.
         /// </exception>
-        /// <remarks>Using a <see cref="System.String"/> is not as efficient as using the
+        /// <remarks>Using a <see cref="string"/> is not as efficient as using the
         /// UTF-8 methods since the implementation natively uses UTF-8.
         /// </remarks>
-        public static object Parse(string json, Type returnType, JsonSerializerOptions options = null)
+        public static object Deserialize(string json, Type returnType, JsonSerializerOptions options = null)
         {
             if (json == null)
                 throw new ArgumentNullException(nameof(json));
@@ -75,9 +75,8 @@ namespace System.Text.Json
 
             if (reader.BytesConsumed != jsonBytes.Length)
             {
-                readerState = reader.CurrentState;
                 ThrowHelper.ThrowJsonException_DeserializeDataRemaining(
-                    jsonBytes.Length, jsonBytes.Length - readerState.BytesConsumed);
+                    jsonBytes.Length, jsonBytes.Length - reader.BytesConsumed);
             }
 
             return result;

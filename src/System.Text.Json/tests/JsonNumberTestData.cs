@@ -12,8 +12,12 @@ namespace System.Text.Json.Tests
 {
     internal class JsonNumberTestData
     {
+        public static List<byte> Bytes { get; set; }
+        public static List<sbyte> SBytes { get; set; }
+        public static List<short> Shorts { get; set; }
         public static List<int> Ints { get; set; }
         public static List<long> Longs { get; set; }
+        public static List<ushort> UShorts { get; set; }
         public static List<uint> UInts { get; set; }
         public static List<ulong> ULongs { get; set; }
         public static List<float> Floats { get; set; }
@@ -28,6 +32,53 @@ namespace System.Text.Json.Tests
             const int numberOfItems = 1_000;
 
             // Make sure we have 1_005 values in each numeric list.
+
+            #region generate bytes and sbytes
+            Bytes = new List<byte>
+            {
+                byte.MinValue,
+                byte.MaxValue,
+                64,
+                128,
+                144
+            };
+
+            SBytes = new List<sbyte>
+            {
+                0,
+                64,
+                -64,
+                sbyte.MinValue,
+                sbyte.MaxValue
+            };
+
+            byte[] byteArr = new byte[numberOfItems];
+            random.NextBytes(byteArr);
+
+            Bytes.AddRange(byteArr);
+
+            foreach (byte item in byteArr)
+            {
+                SBytes.Add((sbyte)item);
+            }
+            #endregion
+
+            #region generate shorts
+            Shorts = new List<short>
+            {
+                0,
+                20123,
+                -20123,
+                short.MaxValue,
+                short.MinValue
+            };
+            byte[] b16 = new byte[2 * numberOfItems];
+            random.NextBytes(b16);
+            for (int i = 0; i < numberOfItems; i++)
+            {
+                Shorts.Add(BitConverter.ToInt16(b16, i * 2));
+            }
+            #endregion
 
             #region generate ints
             Ints = new List<int>
@@ -62,6 +113,23 @@ namespace System.Text.Json.Tests
                 else
                     value += int.MaxValue;
                 Longs.Add(value);
+            }
+            #endregion
+
+            #region generate ushorts
+            UShorts = new List<ushort>
+            {
+                ushort.MaxValue,
+                ushort.MinValue,
+                12345,
+                34567,
+                64321
+            };
+            byte[] ub16 = new byte[2 * numberOfItems];
+            random.NextBytes(ub16);
+            for (int i = 0; i < numberOfItems; i++)
+            {
+                UShorts.Add(BitConverter.ToUInt16(ub16, i * 2));
             }
             #endregion
 
@@ -107,8 +175,8 @@ namespace System.Text.Json.Tests
                 0.000,
                 1.1234e1,
                 -1.1234e1,
-                1.79769313486231E+308,  // double.MaxValue doesn't round trip
-                -1.79769313486231E+308  // double.MinValue doesn't round trip
+                double.MaxValue,
+                double.MinValue
             };
             for (int i = 0; i < numberOfItems / 2; i++)
             {
@@ -163,6 +231,21 @@ namespace System.Text.Json.Tests
             var builder = new StringBuilder();
             builder.Append("{");
 
+            for (int i = 0; i < Bytes.Count; i++)
+            {
+                builder.Append("\"byte").Append(i).Append("\": ");
+                builder.Append(Bytes[i]).Append(", ");
+            }
+            for (int i = 0; i < SBytes.Count; i++)
+            {
+                builder.Append("\"sbyte").Append(i).Append("\": ");
+                builder.Append(SBytes[i]).Append(", ");
+            }
+            for (int i = 0; i < Shorts.Count; i++)
+            {
+                builder.Append("\"short").Append(i).Append("\": ");
+                builder.Append(Shorts[i]).Append(", ");
+            }
             for (int i = 0; i < Ints.Count; i++)
             {
                 builder.Append("\"int").Append(i).Append("\": ");
@@ -172,6 +255,11 @@ namespace System.Text.Json.Tests
             {
                 builder.Append("\"long").Append(i).Append("\": ");
                 builder.Append(Longs[i]).Append(", ");
+            }
+            for (int i = 0; i < UShorts.Count; i++)
+            {
+                builder.Append("\"ushort").Append(i).Append("\": ");
+                builder.Append(UShorts[i]).Append(", ");
             }
             for (int i = 0; i < UInts.Count; i++)
             {
@@ -187,19 +275,22 @@ namespace System.Text.Json.Tests
             {
                 // Use InvariantCulture to format the numbers to make sure they retain the decimal point '.'
                 builder.Append("\"double").Append(i).Append("\": ");
-                var str = string.Format(CultureInfo.InvariantCulture, "{0}, ", Doubles[i]);
+                const string Format = "{0:" + JsonTestHelper.DoubleFormatString + "}, ";
+                string str = string.Format(CultureInfo.InvariantCulture, Format, Doubles[i]);
                 builder.AppendFormat(CultureInfo.InvariantCulture, "{0}", str);
             }
             for (int i = 0; i < Floats.Count; i++)
             {
+                // Use InvariantCulture to format the numbers to make sure they retain the decimal point '.'
                 builder.Append("\"float").Append(i).Append("\": ");
-                var str = string.Format(CultureInfo.InvariantCulture, "{0}, ", Floats[i]);
+                const string Format = "{0:" + JsonTestHelper.SingleFormatString + "}, ";
+                string str = string.Format(CultureInfo.InvariantCulture, Format, Floats[i]);
                 builder.AppendFormat(CultureInfo.InvariantCulture, "{0}", str);
             }
             for (int i = 0; i < Decimals.Count; i++)
             {
                 builder.Append("\"decimal").Append(i).Append("\": ");
-                var str = string.Format(CultureInfo.InvariantCulture, "{0}, ", Decimals[i]);
+                string str = string.Format(CultureInfo.InvariantCulture, "{0}, ", Decimals[i]);
                 builder.AppendFormat(CultureInfo.InvariantCulture, "{0}", str);
             }
 
@@ -209,6 +300,5 @@ namespace System.Text.Json.Tests
             string jsonString = builder.ToString();
             JsonData = Encoding.UTF8.GetBytes(jsonString);
         }
-
     }
 }

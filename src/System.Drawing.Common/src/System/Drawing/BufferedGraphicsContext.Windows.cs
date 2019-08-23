@@ -12,6 +12,7 @@ namespace System.Drawing
 {
     public sealed partial class BufferedGraphicsContext : IDisposable
     {
+        private Size _bufferSize = Size.Empty;
         private Size _virtualSize;
         private Point _targetLoc;
         private IntPtr _compatDC;
@@ -33,8 +34,8 @@ namespace System.Drawing
         {
             int oldBusy = Interlocked.CompareExchange(ref _busy, BufferBusyPainting, BufferFree);
 
-            // In the case were we have contention on the buffer - i.e. two threads 
-            // trying to use the buffer at the same time, we just create a temp 
+            // In the case were we have contention on the buffer - i.e. two threads
+            // trying to use the buffer at the same time, we just create a temp
             // buffermanager and have the buffer dispose of it when it is done.
             //
             if (oldBusy != BufferFree)
@@ -79,7 +80,7 @@ namespace System.Drawing
         /// <summary>
         /// Fills in the fields of a BITMAPINFO so that we can create a bitmap
         /// that matches the format of the display.
-        /// 
+        ///
         /// This is done by creating a compatible bitmap and calling GetDIBits
         /// to return the color masks. This is done with two calls. The first
         /// call passes in biBitCount = 0 to GetDIBits which will fill in the
@@ -105,7 +106,7 @@ namespace System.Drawing
 
                 pbmi.bmiHeader_biSize = Marshal.SizeOf(typeof(NativeMethods.BITMAPINFOHEADER));
                 pbmi.bmiColors = new byte[NativeMethods.BITMAPINFO_MAX_COLORSIZE * 4];
-                
+
                 // Call first time to fill in BITMAPINFO header.
                 SafeNativeMethods.GetDIBits(new HandleRef(null, hdc),
                                                     new HandleRef(null, hbm),
@@ -250,7 +251,6 @@ namespace System.Drawing
         ///       the identity palette mapping between the DIB and the display.
         /// </summary>
         /// <returns>A valid bitmap handle if successful, IntPtr.Zero otherwise.</returns>
-        [SuppressMessage("Microsoft.Interoperability", "CA1404:CallGetLastErrorImmediatelyAfterPInvoke")]
         private IntPtr CreateCompatibleDIB(IntPtr hdc, IntPtr hpal, int ulWidth, int ulHeight, ref IntPtr ppvBits)
         {
             if (hdc == IntPtr.Zero)

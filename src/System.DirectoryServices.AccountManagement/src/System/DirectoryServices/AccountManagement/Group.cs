@@ -238,7 +238,7 @@ namespace System.DirectoryServices.AccountManagement
         //
         // Internal "constructor": Used for constructing Groups returned by a query
         //
-        static internal GroupPrincipal MakeGroup(PrincipalContext ctx)
+        internal static GroupPrincipal MakeGroup(PrincipalContext ctx)
         {
             GroupPrincipal g = new GroupPrincipal(ctx);
             g.unpersisted = false;
@@ -317,20 +317,13 @@ namespace System.DirectoryServices.AccountManagement
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "Group", "GetValueForProperty: name=" + propertyName);
 
-            switch (propertyName)
+            return propertyName switch
             {
-                case PropertyNames.GroupIsSecurityGroup:
-                    return _isSecurityGroup;
-
-                case PropertyNames.GroupGroupScope:
-                    return _groupScope;
-
-                case PropertyNames.GroupMembers:
-                    return _members;
-
-                default:
-                    return base.GetValueForProperty(propertyName);
-            }
+                PropertyNames.GroupIsSecurityGroup => _isSecurityGroup,
+                PropertyNames.GroupGroupScope => _groupScope,
+                PropertyNames.GroupMembers => _members,
+                _ => base.GetValueForProperty(propertyName),
+            };
         }
 
         // Reset all change-tracking status for all properties on the object to "unchanged".
@@ -360,7 +353,7 @@ namespace System.DirectoryServices.AccountManagement
 
         /// <summary>
         ///  Finds if the group is "small", meaning that it has less than MaxValRange values (usually 1500)
-        ///  The property list for the searcher of a group has "member" attribute. if there are more results than MaxValRange, there will also be a "member;range=..." attribute               
+        ///  The property list for the searcher of a group has "member" attribute. if there are more results than MaxValRange, there will also be a "member;range=..." attribute
         ///  we can cache the result and don't fear from changes through Add/Remove/Save because the completed/pending lists are looked up before the actual values are
         /// </summary>
         internal bool IsSmallGroup()

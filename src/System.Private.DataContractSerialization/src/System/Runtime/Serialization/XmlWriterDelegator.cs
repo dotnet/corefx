@@ -8,7 +8,7 @@ using System.Globalization;
 
 namespace System.Runtime.Serialization
 {
-#if USE_REFEMIT || uapaot
+#if USE_REFEMIT
     public class XmlWriterDelegator
 #else
     internal class XmlWriterDelegator
@@ -46,11 +46,11 @@ namespace System.Runtime.Serialization
             writer.WriteEndAttribute();
         }
 
-#if USE_REFEMIT        
+#if USE_REFEMIT
         public void WriteEndElement()
-#else                
+#else
         internal void WriteEndElement()
-#endif                
+#endif
         {
             writer.WriteEndElement();
             depth--;
@@ -885,4 +885,3 @@ namespace System.Runtime.Serialization
         }
     }
 }
-

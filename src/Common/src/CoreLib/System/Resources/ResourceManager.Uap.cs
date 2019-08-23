@@ -2,19 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.IO;
 using System.Globalization;
-using System.Collections;
-using System.Text;
 using System.Reflection;
-using System.Security;
-using System.Threading;
-using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
-using Microsoft.Win32;
-using System.Collections.Generic;
-using System.Runtime.Versioning;
 using System.Diagnostics;
 using Internal.Resources;
 
@@ -82,10 +72,10 @@ namespace System.Resources
         //
         // 1) For Framework assemblies, we always use satellite assembly based lookup.
         // 2) For non-FX assemblies:
-        //    
+        //
         //    a) If the assembly lives under PLATFORM_RESOURCE_ROOTS (as specified by the host during AppDomain creation),
         //       then we will use satellite assembly based lookup in assemblies like *.resources.dll.
-        //   
+        //
         //    b) For any other non-FX assembly, we will use the modern resource manager with the premise that app package
         //       contains the PRI resources.
         //

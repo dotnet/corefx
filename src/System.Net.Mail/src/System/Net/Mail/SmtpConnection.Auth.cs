@@ -24,7 +24,6 @@ namespace System.Net.Mail
         private readonly ISmtpAuthenticationModule[] _authenticationModules;
 
         // accounts for the '=' or ' ' character after AUTH
-        private const int SizeOfAuthString = 5;
         private const int SizeOfAuthExtension = 4;
 
         private static readonly char[] s_authExtensionSplitters = new char[] { ' ', '=' };
@@ -50,7 +49,7 @@ namespace System.Net.Mail
                 if (string.Compare(extension, 0, AuthExtension, 0,
                     SizeOfAuthExtension, StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    // remove the AUTH text including the following character 
+                    // remove the AUTH text including the following character
                     // to ensure that split only gets the modules supported
                     string[] authTypes = extension.Remove(0, SizeOfAuthExtension).Split(s_authExtensionSplitters, StringSplitOptions.RemoveEmptyEntries);
                     foreach (string authType in authTypes)

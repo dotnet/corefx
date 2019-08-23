@@ -1,8 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-// FEATURE_COMPILE is not directly required, 
+// FEATURE_COMPILE is not directly required,
 // but this functionality relies on private reflection and that would not work with AOT
 #if FEATURE_INTERPRET && FEATURE_COMPILE
 
@@ -87,7 +87,7 @@ namespace System.Linq.Expressions.Tests
                       IP_0005: Call(Int32 Abs(Int32))
                       IP_0006: Goto[1] -> 13
                     }
-                    catch(DivideByZeroException) [8->11]
+                    catch (DivideByZeroException) [8->11]
                     {
                       IP_0007: EnterExceptionHandler()
                       IP_0008: StoreLocal(1)
@@ -153,7 +153,7 @@ namespace System.Linq.Expressions.Tests
             AssertStackTrace(() => f(new Thrower(error: false)), "Thrower.Foo");
         }
 
-        public static void VerifyInstructions(this LambdaExpression expression, string expected)
+        internal static void VerifyInstructions(this LambdaExpression expression, string expected)
         {
             string actual = expression.GetInstructions();
 
@@ -202,7 +202,7 @@ namespace System.Linq.Expressions.Tests
 
         private static void AssertStackTrace(Exception ex, string searchTerm)
         {
-            Assert.True(ex.StackTrace.Contains(searchTerm));
+            Assert.Contains(searchTerm, ex.StackTrace);
         }
 
         private sealed class Thrower

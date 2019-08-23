@@ -1,7 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -28,11 +29,19 @@ namespace System.Text.Json.Serialization.Tests
         public double MyDouble { get; set; }
         public DateTime MyDateTime { get; set; }
         public DateTimeOffset MyDateTimeOffset { get; set; }
-        public SampleByteEnum MyByteEnum { get; set; }
+        public Guid MyGuid { get; set; }
+        public Uri MyUri { get; set; }
+        public SampleEnumSByte MySByteEnum { get; set; }
+        public SampleEnumByte MyByteEnum { get; set; }
         public SampleEnum MyEnum { get; set; }
-        public SampleInt64Enum MyInt64Enum { get; set; }
-        public SampleUInt32Enum MyUInt32Enum { get; set; }
-        public SampleUInt64Enum MyUInt64Enum { get; set; }
+        public SampleEnumInt16 MyInt16Enum { get; set; }
+        public SampleEnumInt32 MyInt32Enum { get; set; }
+        public SampleEnumInt64 MyInt64Enum { get; set; }
+        public SampleEnumUInt16 MyUInt16Enum { get; set; }
+        public SampleEnumUInt32 MyUInt32Enum { get; set; }
+        public SampleEnumUInt64 MyUInt64Enum { get; set; }
+        public SimpleStruct MySimpleStruct { get; set; }
+        public SimpleTestStruct MySimpleTestStruct { get; set; }
         public short[] MyInt16Array { get; set; }
         public int[] MyInt32Array { get; set; }
         public long[] MyInt64Array { get; set; }
@@ -50,20 +59,28 @@ namespace System.Text.Json.Serialization.Tests
         public double[] MyDoubleArray { get; set; }
         public DateTime[] MyDateTimeArray { get; set; }
         public DateTimeOffset[] MyDateTimeOffsetArray { get; set; }
+        public Guid[] MyGuidArray { get; set; }
+        public Uri[] MyUriArray { get; set; }
         public SampleEnum[] MyEnumArray { get; set; }
         public int[][] MyInt16TwoDimensionArray { get; set; }
         public List<List<int>> MyInt16TwoDimensionList { get; set; }
         public int[][][] MyInt16ThreeDimensionArray { get; set; }
         public List<List<List<int>>> MyInt16ThreeDimensionList { get; set; }
         public List<string> MyStringList { get; set; }
+        public IEnumerable MyStringIEnumerable { get; set; }
+        public IList MyStringIList { get; set; }
+        public ICollection MyStringICollection { get; set; }
         public IEnumerable<string> MyStringIEnumerableT { get; set; }
         public IList<string> MyStringIListT { get; set; }
         public ICollection<string> MyStringICollectionT { get; set; }
         public IReadOnlyCollection<string> MyStringIReadOnlyCollectionT { get; set; }
         public IReadOnlyList<string> MyStringIReadOnlyListT { get; set; }
-        public Dictionary<string, string> MyStringToStringDict { get; set; }
-        public IDictionary<string, string> MyStringToStringIDict { get; set; }
-        public IReadOnlyDictionary<string, string> MyStringToStringIReadOnlyDict { get; set; }
+        public ISet<string> MyStringISetT { get; set; }
+        public KeyValuePair<string, string> MyStringToStringKeyValuePair { get; set; }
+        public IDictionary MyStringToStringIDict { get; set; }
+        public Dictionary<string, string> MyStringToStringGenericDict { get; set; }
+        public IDictionary<string, string> MyStringToStringGenericIDict { get; set; }
+        public IReadOnlyDictionary<string, string> MyStringToStringGenericIReadOnlyDict { get; set; }
         public ImmutableDictionary<string, string> MyStringToStringImmutableDict { get; set; }
         public IImmutableDictionary<string, string> MyStringToStringIImmutableDict { get; set; }
         public ImmutableSortedDictionary<string, string> MyStringToStringImmutableSortedDict { get; set; }
@@ -104,13 +121,21 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyDecimal"" : 3.3," +
                 @"""MyDateTime"" : ""2019-01-30T12:01:02.0000000Z""," +
                 @"""MyDateTimeOffset"" : ""2019-01-30T12:01:02.0000000+01:00""," +
+                @"""MyGuid"" : ""1B33498A-7B7D-4DDA-9C13-F6AA4AB449A6""," +
+                @"""MyUri"" : ""https://github.com/dotnet/corefx""," +
                 @"""MyEnum"" : 2," + // int by default
-                @"""MyStringToStringDict"" : {""key"" : ""value""}," +
+                @"""MyInt64Enum"" : -9223372036854775808," +
+                @"""MyUInt64Enum"" : 18446744073709551615," +
+                @"""MyStringToStringKeyValuePair"" : {""Key"" : ""myKey"", ""Value"" : ""myValue""}," +
                 @"""MyStringToStringIDict"" : {""key"" : ""value""}," +
-                @"""MyStringToStringIReadOnlyDict"" : {""key"" : ""value""}," +
+                @"""MyStringToStringGenericDict"" : {""key"" : ""value""}," +
+                @"""MyStringToStringGenericIDict"" : {""key"" : ""value""}," +
+                @"""MyStringToStringGenericIReadOnlyDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringImmutableDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringIImmutableDict"" : {""key"" : ""value""}," +
-                @"""MyStringToStringImmutableSortedDict"" : {""key"" : ""value""}";
+                @"""MyStringToStringImmutableSortedDict"" : {""key"" : ""value""}," +
+                @"""MySimpleStruct"" : {""One"" : 11, ""Two"" : 1.9999, ""Three"" : 33}," +
+                @"""MySimpleTestStruct"" : {""MyInt64"" : 64, ""MyString"" :""Hello"", ""MyInt32Array"" : [32]}";
 
         private const string s_partialJsonArrays =
                 @"""MyInt16Array"" : [1]," +
@@ -130,17 +155,23 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyDecimalArray"" : [3.3]," +
                 @"""MyDateTimeArray"" : [""2019-01-30T12:01:02.0000000Z""]," +
                 @"""MyDateTimeOffsetArray"" : [""2019-01-30T12:01:02.0000000+01:00""]," +
+                @"""MyGuidArray"" : [""1B33498A-7B7D-4DDA-9C13-F6AA4AB449A6""]," +
+                @"""MyUriArray"" : [""https://github.com/dotnet/corefx""]," +
                 @"""MyEnumArray"" : [2]," + // int by default
                 @"""MyInt16TwoDimensionArray"" : [[10, 11],[20, 21]]," +
                 @"""MyInt16TwoDimensionList"" : [[10, 11],[20, 21]]," +
                 @"""MyInt16ThreeDimensionArray"" : [[[11, 12],[13, 14]],[[21,22],[23,24]]]," +
                 @"""MyInt16ThreeDimensionList"" : [[[11, 12],[13, 14]],[[21,22],[23,24]]]," +
                 @"""MyStringList"" : [""Hello""]," +
+                @"""MyStringIEnumerable"" : [""Hello""]," +
+                @"""MyStringIList"" : [""Hello""]," +
+                @"""MyStringICollection"" : [""Hello""]," +
                 @"""MyStringIEnumerableT"" : [""Hello""]," +
                 @"""MyStringIListT"" : [""Hello""]," +
                 @"""MyStringICollectionT"" : [""Hello""]," +
                 @"""MyStringIReadOnlyCollectionT"" : [""Hello""]," +
                 @"""MyStringIReadOnlyListT"" : [""Hello""]," +
+                @"""MyStringISetT"" : [""Hello""]," +
                 @"""MyStringStackT"" : [""Hello"", ""World""]," +
                 @"""MyStringQueueT"" : [""Hello"", ""World""]," +
                 @"""MyStringHashSetT"" : [""Hello""]," +
@@ -178,8 +209,11 @@ namespace System.Text.Json.Serialization.Tests
             MyDecimal = 3.3m;
             MyDateTime = new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc);
             MyDateTimeOffset = new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0));
+            MyGuid = new Guid("1B33498A-7B7D-4DDA-9C13-F6AA4AB449A6");
+            MyUri = new Uri("https://github.com/dotnet/corefx");
             MyEnum = SampleEnum.Two;
-
+            MyInt64Enum = SampleEnumInt64.MinNegative;
+            MyUInt64Enum = SampleEnumUInt64.Max;
             MyInt16Array = new short[] { 1 };
             MyInt32Array = new int[] { 2 };
             MyInt64Array = new long[] { 3 };
@@ -197,7 +231,11 @@ namespace System.Text.Json.Serialization.Tests
             MyDecimalArray = new decimal[] { 3.3m };
             MyDateTimeArray = new DateTime[] { new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc) };
             MyDateTimeOffsetArray = new DateTimeOffset[] { new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0)) };
+            MyGuidArray = new Guid[] { new Guid("1B33498A-7B7D-4DDA-9C13-F6AA4AB449A6") };
+            MyUriArray = new Uri[] { new Uri("https://github.com/dotnet/corefx") };
             MyEnumArray = new SampleEnum[] { SampleEnum.Two };
+            MySimpleStruct = new SimpleStruct { One = 11, Two = 1.9999 };
+            MySimpleTestStruct = new SimpleTestStruct { MyInt64 = 64, MyString = "Hello", MyInt32Array = new int[] { 32 } };
 
             MyInt16TwoDimensionArray = new int[2][];
             MyInt16TwoDimensionArray[0] = new int[] { 10, 11 };
@@ -226,19 +264,28 @@ namespace System.Text.Json.Serialization.Tests
             list2.Add(new List<int> { 23, 24 });
 
             MyStringList = new List<string>() { "Hello" };
+
+            MyStringIEnumerable = new string[] { "Hello" };
+            MyStringIList = new string[] { "Hello" };
+            MyStringICollection = new string[] { "Hello" };
+
             MyStringIEnumerableT = new string[] { "Hello" };
             MyStringIListT = new string[] { "Hello" };
             MyStringICollectionT = new string[] { "Hello" };
             MyStringIReadOnlyCollectionT = new string[] { "Hello" };
             MyStringIReadOnlyListT = new string[] { "Hello" };
+            MyStringISetT = new HashSet<string> { "Hello" };
 
-            MyStringToStringDict = new Dictionary<string, string> { { "key", "value" } };
+            MyStringToStringKeyValuePair = new KeyValuePair<string, string>("myKey", "myValue");
             MyStringToStringIDict = new Dictionary<string, string> { { "key", "value" } };
-            MyStringToStringIReadOnlyDict = new Dictionary<string, string> { { "key", "value" } };
 
-            MyStringToStringImmutableDict = ImmutableDictionary.CreateRange(MyStringToStringDict);
-            MyStringToStringIImmutableDict = ImmutableDictionary.CreateRange(MyStringToStringDict);
-            MyStringToStringImmutableSortedDict = ImmutableSortedDictionary.CreateRange(MyStringToStringDict);
+            MyStringToStringGenericDict = new Dictionary<string, string> { { "key", "value" } };
+            MyStringToStringGenericIDict = new Dictionary<string, string> { { "key", "value" } };
+            MyStringToStringGenericIReadOnlyDict = new Dictionary<string, string> { { "key", "value" } };
+
+            MyStringToStringImmutableDict = ImmutableDictionary.CreateRange(MyStringToStringGenericDict);
+            MyStringToStringIImmutableDict = ImmutableDictionary.CreateRange(MyStringToStringGenericDict);
+            MyStringToStringImmutableSortedDict = ImmutableSortedDictionary.CreateRange(MyStringToStringGenericDict);
 
             MyStringStackT = new Stack<string>(new List<string>() { "Hello", "World" } );
             MyStringQueueT = new Queue<string>(new List<string>() { "Hello", "World" });
@@ -272,13 +319,22 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal('a', MyChar);
             Assert.Equal("Hello", MyString);
             Assert.Equal(3.3m, MyDecimal);
-            Assert.Equal(false, MyBooleanFalse);
-            Assert.Equal(true, MyBooleanTrue);
+            Assert.False(MyBooleanFalse);
+            Assert.True(MyBooleanTrue);
             Assert.Equal(1.1f, MySingle);
             Assert.Equal(2.2d, MyDouble);
             Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), MyDateTime);
             Assert.Equal(new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0)), MyDateTimeOffset);
+            Assert.Equal(new Guid("1B33498A-7B7D-4DDA-9C13-F6AA4AB449A6"), MyGuid);
+            Assert.Equal(new Uri("https://github.com/dotnet/corefx"), MyUri);
             Assert.Equal(SampleEnum.Two, MyEnum);
+            Assert.Equal(SampleEnumInt64.MinNegative, MyInt64Enum);
+            Assert.Equal(SampleEnumUInt64.Max, MyUInt64Enum);
+            Assert.Equal(11, MySimpleStruct.One);
+            Assert.Equal(1.9999, MySimpleStruct.Two);
+            Assert.Equal(64, MySimpleTestStruct.MyInt64);
+            Assert.Equal("Hello", MySimpleTestStruct.MyString);
+            Assert.Equal(32, MySimpleTestStruct.MyInt32Array[0]);
 
             Assert.Equal((short)1, MyInt16Array[0]);
             Assert.Equal((int)2, MyInt32Array[0]);
@@ -291,12 +347,14 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal('a', MyCharArray[0]);
             Assert.Equal("Hello", MyStringArray[0]);
             Assert.Equal(3.3m, MyDecimalArray[0]);
-            Assert.Equal(false, MyBooleanFalseArray[0]);
-            Assert.Equal(true, MyBooleanTrueArray[0]);
+            Assert.False(MyBooleanFalseArray[0]);
+            Assert.True(MyBooleanTrueArray[0]);
             Assert.Equal(1.1f, MySingleArray[0]);
             Assert.Equal(2.2d, MyDoubleArray[0]);
             Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), MyDateTimeArray[0]);
             Assert.Equal(new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0)), MyDateTimeOffsetArray[0]);
+            Assert.Equal(new Guid("1B33498A-7B7D-4DDA-9C13-F6AA4AB449A6"), MyGuidArray[0]);
+            Assert.Equal(new Uri("https://github.com/dotnet/corefx"), MyUriArray[0]);
             Assert.Equal(SampleEnum.Two, MyEnumArray[0]);
 
             Assert.Equal(10, MyInt16TwoDimensionArray[0][0]);
@@ -328,19 +386,98 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(24, MyInt16ThreeDimensionList[1][1][1]);
 
             Assert.Equal("Hello", MyStringList[0]);
+
+            IEnumerator enumerator = MyStringIEnumerable.GetEnumerator();
+            enumerator.MoveNext();
+            {
+                // Verifying after deserialization.
+                if (enumerator.Current is JsonElement currentJsonElement)
+                {
+                    Assert.Equal("Hello", currentJsonElement.GetString());
+                }
+                // Verifying test data.
+                else
+                {
+                    Assert.Equal("Hello", enumerator.Current);
+                }
+            }
+
+            {
+                // Verifying after deserialization.
+                if (MyStringIList[0] is JsonElement currentJsonElement)
+                {
+                    Assert.Equal("Hello", currentJsonElement.GetString());
+                }
+                // Verifying test data.
+                else
+                {
+                    Assert.Equal("Hello", enumerator.Current);
+                }
+            }
+
+            enumerator = MyStringICollection.GetEnumerator();
+            enumerator.MoveNext();
+            {
+                // Verifying after deserialization.
+                if (enumerator.Current is JsonElement currentJsonElement)
+                {
+                    Assert.Equal("Hello", currentJsonElement.GetString());
+                }
+                // Verifying test data.
+                else
+                {
+                    Assert.Equal("Hello", enumerator.Current);
+                }
+            }
+
             Assert.Equal("Hello", MyStringIEnumerableT.First());
             Assert.Equal("Hello", MyStringIListT[0]);
             Assert.Equal("Hello", MyStringICollectionT.First());
             Assert.Equal("Hello", MyStringIReadOnlyCollectionT.First());
             Assert.Equal("Hello", MyStringIReadOnlyListT[0]);
+            Assert.Equal("Hello", MyStringISetT.First());
 
-            Assert.Equal("value", MyStringToStringDict["key"]);
-            Assert.Equal("value", MyStringToStringIDict["key"]);
-            Assert.Equal("value", MyStringToStringIReadOnlyDict["key"]);
+            enumerator = MyStringToStringIDict.GetEnumerator();
+            enumerator.MoveNext();
+            {
+                // Verifying after deserialization.
+                if (enumerator.Current is JsonElement currentJsonElement)
+                {
+                    IEnumerator jsonEnumerator = currentJsonElement.EnumerateObject();
+                    jsonEnumerator.MoveNext();
+
+                    JsonProperty property = (JsonProperty)jsonEnumerator.Current;
+
+                    Assert.Equal("key", property.Name);
+                    Assert.Equal("value", property.Value.GetString());
+                }
+                // Verifying test data.
+                else
+                {
+                    DictionaryEntry entry = (DictionaryEntry)enumerator.Current;
+                    Assert.Equal("key", entry.Key);
+
+                    if (entry.Value is JsonElement element)
+                    {
+                        Assert.Equal("value", element.GetString());
+                    }
+                    else
+                    {
+                        Assert.Equal("value", entry.Value);
+                    }
+                }
+            }
+
+            Assert.Equal("value", MyStringToStringGenericDict["key"]);
+            Assert.Equal("value", MyStringToStringGenericIDict["key"]);
+            Assert.Equal("value", MyStringToStringGenericIReadOnlyDict["key"]);
 
             Assert.Equal("value", MyStringToStringImmutableDict["key"]);
             Assert.Equal("value", MyStringToStringIImmutableDict["key"]);
             Assert.Equal("value", MyStringToStringImmutableSortedDict["key"]);
+
+            Assert.Equal("myKey", MyStringToStringKeyValuePair.Key);
+            Assert.Equal("myValue", MyStringToStringKeyValuePair.Value);
 
             Assert.Equal(2, MyStringStackT.Count);
             Assert.True(MyStringStackT.Contains("Hello"));

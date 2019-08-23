@@ -15,7 +15,6 @@
 **
 =============================================================================*/
 
-using System;
 using System.Runtime.Serialization;
 
 namespace System
@@ -43,7 +42,7 @@ namespace System
             HResult = HResults.COR_E_EXECUTIONENGINE;
         }
 
-        internal ExecutionEngineException(SerializationInfo info, StreamingContext context) : base(info, context)
+        private ExecutionEngineException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }

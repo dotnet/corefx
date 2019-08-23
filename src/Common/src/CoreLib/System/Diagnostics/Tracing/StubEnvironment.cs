@@ -3,30 +3,31 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+#if ES_BUILD_PCL || ES_BUILD_PN
 using System.Collections.Generic;
-
+#endif
+using System.Reflection;
 #if ES_BUILD_STANDALONE
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
+#endif
+#if ES_BUILD_AGAINST_DOTNET_V35
+using Microsoft.Internal;
+#endif
+using Microsoft.Reflection;
 
+#if ES_BUILD_STANDALONE
 namespace Microsoft.Diagnostics.Tracing.Internal
 #else
 namespace System.Diagnostics.Tracing.Internal
 #endif
 {
-#if ES_BUILD_AGAINST_DOTNET_V35
-    using Microsoft.Internal;
-#endif
-    using Microsoft.Reflection;
-    using System.Reflection;
-
     internal static class Environment
     {
         public static readonly string NewLine = System.Environment.NewLine;
 
-        public static int TickCount
-        { get { return System.Environment.TickCount; } }
+        public static int TickCount => System.Environment.TickCount;
 
         public static string GetResourceString(string key, params object?[] args)
         {
@@ -44,7 +45,7 @@ namespace System.Diagnostics.Tracing.Internal
             return GetResourceString(key, args);
         }
 
-        private static System.Resources.ResourceManager rm = new System.Resources.ResourceManager("Microsoft.Diagnostics.Tracing.Messages", typeof(Environment).Assembly());
+        private static readonly System.Resources.ResourceManager rm = new System.Resources.ResourceManager("Microsoft.Diagnostics.Tracing.Messages", typeof(Environment).Assembly());
     }
 
 #if ES_BUILD_STANDALONE
@@ -174,8 +175,6 @@ namespace Microsoft.Internal
 
 namespace Microsoft.Reflection
 {
-    using System.Reflection;
-
 #if ES_BUILD_PCL
     [Flags]
     public enum BindingFlags
@@ -186,7 +185,7 @@ namespace Microsoft.Reflection
         Public       = 0x10,        // Include Public members in search
         NonPublic    = 0x20,        // Include Non-Public members in search
     }
-    
+
     public enum TypeCode {
         Empty = 0,                  // Null reference
         Object = 1,                 // Instance that isn't a value
@@ -208,7 +207,7 @@ namespace Microsoft.Reflection
         String = 18,                // Unicode character string
     }
 #endif
-    static class ReflectionExtensions
+    internal static class ReflectionExtensions
     {
 #if (!ES_BUILD_PCL && !ES_BUILD_PN)
 
@@ -226,7 +225,7 @@ namespace Microsoft.Reflection
 
         public static bool ReflectionOnly(this Assembly assm) { return assm.ReflectionOnly; }
 
-#else // ES_BUILD_PCL
+#else
 
         //
         // Type extension methods
@@ -248,7 +247,7 @@ namespace Microsoft.Reflection
         }
         public static MethodInfo? GetGetMethod(this PropertyInfo propInfo) { return propInfo.GetMethod; }
         public static Type[] GetGenericArguments(this Type type) { return type.GenericTypeArguments; }
-        
+
         public static MethodInfo[] GetMethods(this Type type, BindingFlags flags)
         {
             // Minimal implementation to cover only the cases we need
@@ -310,7 +309,7 @@ namespace Microsoft.Reflection
         public static Type? GetNestedType(this Type type, string nestedTypeName)
         {
             TypeInfo? ti = null;
-            foreach(var nt in type.GetTypeInfo().DeclaredNestedTypes)
+            foreach (var nt in type.GetTypeInfo().DeclaredNestedTypes)
             {
                 if (nt.Name == nestedTypeName)
                 {
@@ -320,7 +319,7 @@ namespace Microsoft.Reflection
             }
             return ti == null ? null : ti.AsType();
         }
-        public static TypeCode GetTypeCode(this Type type) 
+        public static TypeCode GetTypeCode(this Type type)
         {
             if (type == typeof(bool)) return TypeCode.Boolean;
             else if (type == typeof(byte)) return TypeCode.Byte;
@@ -362,7 +361,7 @@ namespace Microsoft.Reflection
 #if ES_BUILD_STANDALONE
 internal static partial class Interop
 {
-    [SuppressUnmanagedCodeSecurityAttribute()]
+    [SuppressUnmanagedCodeSecurityAttribute]
     internal static partial class Kernel32
     {
         [DllImport("kernel32.dll", CharSet = CharSet.Auto)]

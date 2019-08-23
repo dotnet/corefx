@@ -17,10 +17,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -37,14 +37,14 @@ namespace System.Drawing.Imaging
     // MUST BE KEPT IN SYNC WITH gdip.h in libgdiplus!
     // The first 6 fields MUST also match MS definition
     [StructLayout(LayoutKind.Sequential)]
-    public sealed class BitmapData
+    public sealed partial class BitmapData
     {
-        private int width;
-        private int height;
-        private int stride;
-        private PixelFormat pixel_format; // int
-        private IntPtr scan0;
-        private int reserved;
+        private int _width;
+        private int _height;
+        private int _stride;
+        private PixelFormat _pixelFormat;
+        private IntPtr _scan0;
+        private int _reserved;
 #pragma warning disable 169
         // *** Warning ***    don't depend on those fields in managed
         //            code as they won't exists when using MS
@@ -62,84 +62,5 @@ namespace System.Drawing.Imaging
         private int transparent;
         // *** Warning ***
 #pragma warning restore 169
-
-        public int Height
-        {
-            get
-            {
-                return height;
-            }
-
-            set
-            {
-                height = value;
-            }
-        }
-
-        public int Width
-        {
-            get
-            {
-                return width;
-            }
-
-            set
-            {
-                width = value;
-            }
-        }
-
-        public PixelFormat PixelFormat
-        {
-            get
-            {
-
-                return pixel_format;
-            }
-
-            set
-            {
-                pixel_format = value;
-            }
-        }
-
-        public int Reserved
-        {
-            get
-            {
-                return reserved;
-            }
-
-            set
-            {
-                reserved = value;
-            }
-        }
-
-        public IntPtr Scan0
-        {
-            get
-            {
-                return scan0;
-            }
-
-            set
-            {
-                scan0 = value;
-            }
-        }
-
-        public int Stride
-        {
-            get
-            {
-                return stride;
-            }
-
-            set
-            {
-                stride = value;
-            }
-        }
     }
 }

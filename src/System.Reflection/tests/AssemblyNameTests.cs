@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -48,7 +48,7 @@ namespace System.Reflection.Tests
         public void Ctor_String(string name, string expectedName)
         {
             AssemblyName assemblyName = new AssemblyName(name);
-            Assert.Equal(expectedName.ToLowerInvariant(), assemblyName.Name.ToLowerInvariant());
+            Assert.Equal(expectedName, assemblyName.Name);
             Assert.Equal(ProcessorArchitecture.None, assemblyName.ProcessorArchitecture);
         }
 
@@ -176,7 +176,7 @@ namespace System.Reflection.Tests
 
             n.CodeBase = System.IO.Directory.GetCurrentDirectory();
             Assert.NotNull(n.CodeBase);
-        }        
+        }
 
         [Fact]
         public static void Verify_EscapedCodeBase()
@@ -211,7 +211,7 @@ namespace System.Reflection.Tests
             an.VersionCompatibility = System.Configuration.Assemblies.AssemblyVersionCompatibility.SameProcess;
             Assert.Equal(System.Configuration.Assemblies.AssemblyVersionCompatibility.SameProcess, an.VersionCompatibility);
         }
-              
+
         [Fact]
         public static void Clone()
         {
@@ -224,7 +224,7 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "AssemblyName.GetAssemblyName() not supported on UapAot")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "AssemblyName.GetAssemblyName() not supported on UWP")]
         public static void GetAssemblyName()
         {
             AssertExtensions.Throws<ArgumentNullException>("assemblyFile", () => AssemblyName.GetAssemblyName(null));
@@ -243,10 +243,10 @@ namespace System.Reflection.Tests
 
             Assembly a = typeof(AssemblyNameTests).Assembly;
             Assert.Equal(new AssemblyName(a.FullName).ToString(), AssemblyName.GetAssemblyName(a.Location).ToString());
-        }        
+        }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "AssemblyName.GetAssemblyName() not supported on UapAot")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "AssemblyName.GetAssemblyName() not supported on UWP")]
         public static void GetAssemblyName_LockedFile()
         {
             using (var tempFile = new TempFile(Path.GetTempFileName(), 100))
@@ -292,7 +292,7 @@ namespace System.Reflection.Tests
         public void Flags_CurrentlyExecutingAssembly()
         {
             AssemblyName assemblyName = Helpers.ExecutingAssembly.GetName();
-            Assert.NotNull(assemblyName.Flags);
+            Assert.NotEqual(AssemblyNameFlags.None, assemblyName.Flags);
         }
 
         [Theory]
@@ -300,12 +300,7 @@ namespace System.Reflection.Tests
         public void FullName(string name, string expectedName)
         {
             AssemblyName assemblyName = new AssemblyName(name);
-
-            expectedName = expectedName.ToLowerInvariant();
-            string extended = $"{expectedName}, Culture=neutral, PublicKeyToken=null".ToLowerInvariant();
-            string afn = assemblyName.FullName.ToLowerInvariant();
-
-            Assert.True(afn == expectedName || afn == extended, $"Expected\n{afn} == {expectedName}\nor\n{afn} == {extended}");
+            Assert.Equal(expectedName, assemblyName.FullName);
         }
 
         [Fact]
@@ -358,7 +353,7 @@ namespace System.Reflection.Tests
         {
             AssemblyName assemblyName = new AssemblyName("MyAssemblyName");
             assemblyName.Name = name;
-            Assert.Equal(name, assemblyName.Name);
+            Assert.Equal(expectedName, assemblyName.Name);
         }
 
         [Fact]
@@ -407,10 +402,8 @@ namespace System.Reflection.Tests
             assemblyName.Version = version;
 
             string expected = "MyAssemblyName, Version=" + versionString;
-            string extended = expected + ", Culture=neutral, PublicKeyToken=null";
 
-            Assert.True(assemblyName.FullName == expected || assemblyName.FullName == extended,
-                        $"Expected\n{assemblyName.FullName} == {expected}\nor\n{assemblyName.FullName} == {extended}");
+            Assert.Equal(expected, assemblyName.FullName);
         }
 
         [Fact]
@@ -503,22 +496,21 @@ namespace System.Reflection.Tests
         {
             Assert.NotNull(expectedVersion);
 
-            Action<AssemblyName> verify =
-                an =>
+            void Verify(AssemblyName an)
+            {
+                if (expectedVersion == null)
                 {
-                    if (expectedVersion == null)
-                    {
-                        Assert.Null(an.Version);
-                    }
-                    else
-                    {
-                        Assert.Equal(expectedVersion, an.Version);
-                    }
-                };
+                    Assert.Null(an.Version);
+                }
+                else
+                {
+                    Assert.Equal(expectedVersion, an.Version);
+                }
+            }
 
             var assemblyNameFromStr = new AssemblyName("a, Version=" + versionStr);
-            verify(assemblyNameFromStr);
-            verify(new AssemblyName(assemblyNameFromStr.FullName));
+            Verify(assemblyNameFromStr);
+            Verify(new AssemblyName(assemblyNameFromStr.FullName));
 
             var versionFromStr = new Version(versionStr);
 
@@ -529,12 +521,12 @@ namespace System.Reflection.Tests
             }
 
             assemblyNameFromStr = new AssemblyName("a, Version=" + versionFromStr);
-            verify(assemblyNameFromStr);
-            verify(new AssemblyName(assemblyNameFromStr.FullName));
+            Verify(assemblyNameFromStr);
+            Verify(new AssemblyName(assemblyNameFromStr.FullName));
 
             assemblyNameFromStr = new AssemblyName() { Name = "a", Version = expectedVersion };
-            verify(assemblyNameFromStr);
-            verify(new AssemblyName(assemblyNameFromStr.FullName));
+            Verify(assemblyNameFromStr);
+            Verify(new AssemblyName(assemblyNameFromStr.FullName));
         }
 
         [Fact]
@@ -575,15 +567,6 @@ namespace System.Reflection.Tests
                 Assert.Throws<FileNotFoundException>(() => Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_1_1_0, Version=1.1.1.1")));
             Assert.NotNull(Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_1_1_3, Version=1.1.1.1")));
 
-            Constructor_String_LoadVersionTest_ReferenceVersionAssemblies();
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)] // delay type loading so that the test above can run first
-        private static void Constructor_String_LoadVersionTest_ReferenceVersionAssemblies()
-        {
-            // The purpose of this function is only to have a static reference to each of the test assemblies required by
-            // Constructor_String_LoadVersionTest so that the compiler does not optimize away the project references and ILC can
-            // include them in the closure. Otherwise, the test does not work on UapAot.
             Assert.NotNull(typeof(AssemblyVersion.Program_0_0_0_0));
             Assert.NotNull(typeof(AssemblyVersion.Program_1_0_0_0));
             Assert.NotNull(typeof(AssemblyVersion.Program_1_1_0_0));
@@ -650,6 +633,7 @@ namespace System.Reflection.Tests
         [MemberData(nameof(Ctor_ProcessorArchitecture_TestData))]
         public void GetFullNameAndToString_AreEquivalentAndDoNotPreserveArchitecture(string name, ProcessorArchitecture expected)
         {
+            _ = expected;
             string originalFullName = "Test, Culture=en-US, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=" + name;
             string expectedSerializedFullName = "Test, Culture=en-US, PublicKeyToken=b77a5c561934e089";
 

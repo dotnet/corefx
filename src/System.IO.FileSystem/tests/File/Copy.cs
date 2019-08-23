@@ -10,7 +10,7 @@ namespace System.IO.Tests
 {
     public partial class File_Copy_str_str : FileSystemTest
     {
-        public virtual void Copy(string source, string dest)
+        protected virtual void Copy(string source, string dest)
         {
             File.Copy(source, dest);
         }
@@ -137,7 +137,7 @@ namespace System.IO.Tests
             {
                 char[] readData = new char[data.Length];
                 stream.Read(readData, 0, data.Length);
-                Assert.Equal(data, readData);
+                AssertExtensions.Equal(data, readData);
             }
 
             // Ensure last write/access time on the new file is appropriate
@@ -237,12 +237,12 @@ namespace System.IO.Tests
 
     public class File_Copy_str_str_b : File_Copy_str_str
     {
-        public override void Copy(string source, string dest)
+        protected override void Copy(string source, string dest)
         {
             File.Copy(source, dest, false);
         }
 
-        public virtual void Copy(string source, string dest, bool overwrite)
+        protected virtual void Copy(string source, string dest, bool overwrite)
         {
             File.Copy(source, dest, overwrite);
         }
@@ -269,7 +269,7 @@ namespace System.IO.Tests
             {
                 char[] readData = new char[sourceData.Length];
                 stream.Read(readData, 0, sourceData.Length);
-                Assert.Equal(sourceData, readData);
+                AssertExtensions.Equal(sourceData, readData);
             }
         }
 
@@ -295,7 +295,7 @@ namespace System.IO.Tests
             {
                 char[] readData = new char[sourceData.Length];
                 stream.Read(readData, 0, sourceData.Length);
-                Assert.Equal(destData, readData);
+                AssertExtensions.Equal(destData, readData);
             }
         }
 

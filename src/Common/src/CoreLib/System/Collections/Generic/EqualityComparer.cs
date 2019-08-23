@@ -9,7 +9,7 @@ using System.Runtime.Serialization;
 namespace System.Collections.Generic
 {
     [Serializable]
-    [TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")] 
+    [TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public abstract partial class EqualityComparer<T> : IEqualityComparer, IEqualityComparer<T>
     {
         // public static EqualityComparer<T> Default is runtime-specific
@@ -17,9 +17,7 @@ namespace System.Collections.Generic
         public abstract bool Equals([AllowNull] T x, [AllowNull] T y);
         public abstract int GetHashCode([DisallowNull] T obj);
 
-#pragma warning disable CS8617 // TODO-NULLABLE: Covariant parameter types (https://github.com/dotnet/roslyn/issues/30958)
         int IEqualityComparer.GetHashCode(object? obj)
-#pragma warning restore CS8617
         {
             if (obj == null) return 0;
             if (obj is T) return GetHashCode((T)obj);
@@ -42,7 +40,10 @@ namespace System.Collections.Generic
     [Serializable]
     [TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     // Needs to be public to support binary serialization compatibility
-    public sealed partial class GenericEqualityComparer<T> : EqualityComparer<T> where T : IEquatable<T>
+    public sealed partial class GenericEqualityComparer<T> : EqualityComparer<T>
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
+        where T : IEquatable<T>
+#nullable restore
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals([AllowNull] T x, [AllowNull] T y)
@@ -72,7 +73,10 @@ namespace System.Collections.Generic
     [Serializable]
     [TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     // Needs to be public to support binary serialization compatibility
-    public sealed partial class NullableEqualityComparer<T> : EqualityComparer<T?> where T : struct, IEquatable<T>
+    public sealed partial class NullableEqualityComparer<T> : EqualityComparer<T?> where T : struct,
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
+        IEquatable<T>
+#nullable restore
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(T? x, T? y)
@@ -162,8 +166,9 @@ namespace System.Collections.Generic
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            // For back-compat we need to serialize the comparers for enums with underlying types other than int as ObjectEqualityComparer 
-            if (Type.GetTypeCode(Enum.GetUnderlyingType(typeof(T))) != TypeCode.Int32) {
+            // For back-compat we need to serialize the comparers for enums with underlying types other than int as ObjectEqualityComparer
+            if (Type.GetTypeCode(Enum.GetUnderlyingType(typeof(T))) != TypeCode.Int32)
+            {
                 info.SetType(typeof(ObjectEqualityComparer<T>));
             }
         }

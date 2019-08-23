@@ -11,7 +11,7 @@ namespace System.Net.Mime
 {
     internal abstract class BaseWriter
     {
-        // This is the maximum default line length that can actually be written.  When encoding 
+        // This is the maximum default line length that can actually be written.  When encoding
         // headers, the line length is more conservative to account for things like folding.
         // In MailWriter, all encoding has already been done so this will only fold lines
         // that are NOT encoded already, which means being less conservative is ok.
@@ -23,7 +23,7 @@ namespace System.Net.Mime
         protected readonly Stream _stream;
         private readonly EventHandler _onCloseHandler;
         private readonly bool _shouldEncodeLeadingDots;
-        private int _lineLength;
+        private readonly int _lineLength;
         protected Stream _contentStream;
         protected bool _isInContent;
 

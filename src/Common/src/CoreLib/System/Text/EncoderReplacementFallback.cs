@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Runtime;
 using System.Diagnostics;
 
 namespace System.Text
@@ -11,7 +9,7 @@ namespace System.Text
     public sealed class EncoderReplacementFallback : EncoderFallback
     {
         // Our variables
-        private string _strDefault;
+        private readonly string _strDefault;
 
         // Construction.  Default replacement fallback uses no best fit and ? replacement string
         public EncoderReplacementFallback() : this("?")
@@ -63,47 +61,25 @@ namespace System.Text
             _strDefault = replacement;
         }
 
-        public string DefaultString
-        {
-            get
-            {
-                return _strDefault;
-            }
-        }
+        public string DefaultString => _strDefault;
 
-        public override EncoderFallbackBuffer CreateFallbackBuffer()
-        {
-            return new EncoderReplacementFallbackBuffer(this);
-        }
+        public override EncoderFallbackBuffer CreateFallbackBuffer() =>
+            new EncoderReplacementFallbackBuffer(this);
 
         // Maximum number of characters that this instance of this fallback could return
-        public override int MaxCharCount
-        {
-            get
-            {
-                return _strDefault.Length;
-            }
-        }
+        public override int MaxCharCount => _strDefault.Length;
 
-        public override bool Equals(object? value)
-        {
-            if (value is EncoderReplacementFallback that)
-            {
-                return _strDefault == that._strDefault;
-            }
-            return false;
-        }
+        public override bool Equals(object? value) =>
+            value is EncoderReplacementFallback that &&
+            _strDefault == that._strDefault;
 
-        public override int GetHashCode()
-        {
-            return _strDefault.GetHashCode();
-        }
+        public override int GetHashCode() => _strDefault.GetHashCode();
     }
 
     public sealed class EncoderReplacementFallbackBuffer : EncoderFallbackBuffer
     {
         // Store our default string
-        private string _strDefault;
+        private readonly string _strDefault;
         private int _fallbackCount = -1;
         private int _fallbackIndex = -1;
 
@@ -202,14 +178,9 @@ namespace System.Text
         }
 
         // How many characters left to output?
-        public override int Remaining
-        {
-            get
-            {
+        public override int Remaining =>
                 // Our count is 0 for 1 character left.
-                return (_fallbackCount < 0) ? 0 : _fallbackCount;
-            }
-        }
+                (_fallbackCount < 0) ? 0 : _fallbackCount;
 
         // Clear the buffer
         public override unsafe void Reset()
@@ -221,4 +192,3 @@ namespace System.Text
         }
     }
 }
-

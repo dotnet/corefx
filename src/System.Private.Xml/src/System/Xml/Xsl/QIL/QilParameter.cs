@@ -41,12 +41,12 @@ namespace System.Xml.Xsl.Qil
         {
             get
             {
-                switch (index)
+                return index switch
                 {
-                    case 0: return Binding;
-                    case 1: return _name;
-                    default: throw new IndexOutOfRangeException();
-                }
+                    0 => Binding,
+                    1 => _name,
+                    _ => throw new IndexOutOfRangeException(),
+                };
             }
             set
             {
@@ -83,4 +83,3 @@ namespace System.Xml.Xsl.Qil
         }
     }
 }
-

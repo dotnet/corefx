@@ -19,7 +19,7 @@ namespace System
         private readonly string? _data;
 
         /// <summary>
-        /// A helper method that returns the SerializationInfo that a class utilizing 
+        /// A helper method that returns the SerializationInfo that a class utilizing
         /// UnitySerializationHelper should return from a call to GetObjectData. It contains
         /// the unityType (defined above) and any optional data (used only for the reflection types).
         /// </summary>
@@ -31,7 +31,9 @@ namespace System
             info.AddValue("AssemblyName", string.Empty);
         }
 
+#pragma warning disable CA2229 // public for compat
         public UnitySerializationHolder(SerializationInfo info, StreamingContext context)
+#pragma warning restore CA2229
         {
             if (info == null)
             {

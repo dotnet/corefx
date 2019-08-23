@@ -13,7 +13,7 @@ namespace System.Globalization
         private int _index;
         private readonly int _startIndex;
 
-                // This is the length of the total string, counting from the beginning of string.
+        // This is the length of the total string, counting from the beginning of string.
         private readonly int _strLen;
 
         // The current text element lenght after MoveNext() is called.
@@ -50,9 +50,7 @@ namespace System.Globalization
             return true;
         }
 
-#pragma warning disable CS8612 // TODO-NULLABLE: Covariant return types (https://github.com/dotnet/roslyn/issues/23268)
         public object Current => GetTextElement();
-#pragma warning restore CS8612
 
         public string GetTextElement()
         {

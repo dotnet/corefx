@@ -84,7 +84,7 @@ namespace System.IO.Tests
 
         [Theory]
         [MemberData(nameof(GetStringBuilderTestData))]
-        public async void WriteAsyncStringBuilderTest(bool isSynchronized, StringBuilder testData)
+        public async Task WriteAsyncStringBuilderTest(bool isSynchronized, StringBuilder testData)
         {
             using (CharArrayTextWriter ctw = NewTextWriter)
             {
@@ -97,7 +97,7 @@ namespace System.IO.Tests
 
         [Theory]
         [MemberData(nameof(GetStringBuilderTestData))]
-        public async void WriteLineAsyncStringBuilderTest(bool isSynchronized, StringBuilder testData)
+        public async Task WriteLineAsyncStringBuilderTest(bool isSynchronized, StringBuilder testData)
         {
             using (CharArrayTextWriter ctw = NewTextWriter)
             {
@@ -135,11 +135,11 @@ namespace System.IO.Tests
             protected override void Dispose(bool disposing) => DisposeAction?.Invoke();
         }
 
-        // Generate data for TextWriter.Write* methods that take a stringBuilder.  
-        // We test both the synchronized and unsynchronized variation, on strinbuilder swith 0, small and large values.    
+        // Generate data for TextWriter.Write* methods that take a stringBuilder.
+        // We test both the synchronized and unsynchronized variation, on strinbuilder swith 0, small and large values.
         public static IEnumerable<object[]> GetStringBuilderTestData()
         {
-            // Make a string that has 10 or so 8K chunks (probably).  
+            // Make a string that has 10 or so 8K chunks (probably).
             StringBuilder complexStringBuilder = new StringBuilder();
             for (int i = 0; i < 4000; i++)
                 complexStringBuilder.Append(TestDataProvider.CharData); // CharData ~ 25 chars

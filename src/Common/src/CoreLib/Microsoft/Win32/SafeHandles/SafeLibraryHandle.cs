@@ -4,11 +4,11 @@
 
 namespace Microsoft.Win32.SafeHandles
 {
-    sealed internal class SafeLibraryHandle : SafeHandleZeroOrMinusOneIsInvalid
+    internal sealed class SafeLibraryHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         internal SafeLibraryHandle() : base(true) { }
 
-        override protected bool ReleaseHandle()
+        protected override bool ReleaseHandle()
         {
             return Interop.Kernel32.FreeLibrary(handle);
         }

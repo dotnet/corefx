@@ -3,7 +3,7 @@
     <ProjectGuid>{D4550556-4745-457F-BA8F-3EBF3836D6B4}</ProjectGuid>
     <AssemblyName>System.Data.SqlClient</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <NoWarn>$(NoWarn);CS1573;</NoWarn>
+    <NoWarn>$(NoWarn);CS1573;nullable</NoWarn>
     <IsPartialFacadeAssembly Condition="'$(TargetsNetFx)' == 'true'">true</IsPartialFacadeAssembly>
     <IsUAPAssembly Condition="'$(TargetGroup)' == 'uap' OR '$(TargetGroup)' == 'uap10.0.16299'">true</IsUAPAssembly>
     <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(OSGroup)' == 'AnyOS'">SR.PlatformNotSupported_DataSqlClient</GeneratePlatformNotSupportedAssemblyMessage>
@@ -384,8 +384,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\GlobalSSPI.cs">
       <Link>Common\Interop\Windows\SspiCli\GlobalSSPI.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\SSPIInterface.cs">
-      <Link>Common\Interop\Windows\SspiCli\SSPIInterface.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\ISSPIInterface.cs">
+      <Link>Common\Interop\Windows\SspiCli\ISSPIInterface.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\SecurityPackageInfoClass.cs">
       <Link>Common\Interop\Windows\SspiCli\SecurityPackageInfoClass.cs</Link>

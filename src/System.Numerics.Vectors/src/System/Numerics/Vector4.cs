@@ -96,13 +96,13 @@ namespace System.Numerics
         /// </summary>
         /// <param name="format">The format of individual elements.</param>
         /// <returns>The string representation.</returns>
-        public readonly string ToString(string format)
+        public readonly string ToString(string? format)
         {
             return ToString(format, CultureInfo.CurrentCulture);
         }
 
         /// <summary>
-        /// Returns a String representing this Vector4 instance, using the specified format to format individual elements 
+        /// Returns a String representing this Vector4 instance, using the specified format to format individual elements
         /// and the given IFormatProvider.
         /// </summary>
         /// <param name="format">The format of individual elements.</param>

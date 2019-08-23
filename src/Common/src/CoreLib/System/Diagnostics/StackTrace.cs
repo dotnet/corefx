@@ -21,7 +21,7 @@ namespace System.Diagnostics
 
         private int _numOfFrames;
         private int _methodsToSkip;
-        
+
         /// <summary>
         /// Stack frames comprising this stack trace.
         /// </summary>
@@ -136,10 +136,7 @@ namespace System.Diagnostics
         /// <summary>
         /// Property to get the number of frames in the stack trace
         /// </summary>
-        public virtual int FrameCount
-        {
-            get { return _numOfFrames; }
-        }
+        public virtual int FrameCount => _numOfFrames;
 
         /// <summary>
         /// Returns a given stack frame.  Stack frames are numbered starting at
@@ -159,10 +156,10 @@ namespace System.Diagnostics
         /// The nth element of this array is the same as GetFrame(n).
         /// The length of the array is the same as FrameCount.
         /// </summary>
-        public virtual StackFrame?[]? GetFrames()
+        public virtual StackFrame?[] GetFrames()
         {
             if (_stackFrames == null || _numOfFrames <= 0)
-                return null;
+                return Array.Empty<StackFrame>();
 
             // We have to return a subset of the array. Unfortunately this
             // means we have to allocate a new array and copy over.
@@ -181,7 +178,7 @@ namespace System.Diagnostics
         }
 
         /// <summary>
-        /// TraceFormat is used to specify options for how the 
+        /// TraceFormat is used to specify options for how the
         /// string-representation of a StackTrace should be generated.
         /// </summary>
         internal enum TraceFormat
@@ -192,7 +189,7 @@ namespace System.Diagnostics
 
 #if !CORERT
         /// <summary>
-        /// Builds a readable representation of the stack trace, specifying 
+        /// Builds a readable representation of the stack trace, specifying
         /// the format for backwards compatibility.
         /// </summary>
         internal string ToString(TraceFormat traceFormat)
@@ -206,7 +203,7 @@ namespace System.Diagnostics
             {
                 StackFrame? sf = GetFrame(iFrameIndex);
                 MethodBase? mb = sf?.GetMethod();
-                if (mb != null && (ShowInStackTrace(mb) || 
+                if (mb != null && (ShowInStackTrace(mb) ||
                                    (iFrameIndex == _numOfFrames - 1))) // Don't filter last frame
                 {
                     // We want a newline at the end of every line except for the last
@@ -226,7 +223,7 @@ namespace System.Diagnostics
                         isAsync = typeof(IAsyncStateMachine).IsAssignableFrom(declaringType);
                         if (isAsync || typeof(IEnumerator).IsAssignableFrom(declaringType))
                         {
-                            methodChanged = TryResolveStateMachineMethod(ref mb!, out declaringType); // TODO-NULLABLE: Pass non-null string? to string ref (https://github.com/dotnet/roslyn/issues/34874)
+                            methodChanged = TryResolveStateMachineMethod(ref mb, out declaringType);
                         }
                     }
 
@@ -339,7 +336,32 @@ namespace System.Diagnostics
         private static bool ShowInStackTrace(MethodBase mb)
         {
             Debug.Assert(mb != null);
-            return !(mb.IsDefined(typeof(StackTraceHiddenAttribute)) || (mb.DeclaringType?.IsDefined(typeof(StackTraceHiddenAttribute)) ?? false));
+
+            if ((mb.MethodImplementationFlags & MethodImplAttributes.AggressiveInlining) != 0)
+            {
+                // Aggressive Inlines won't normally show in the StackTrace; however for Tier0 Jit and
+                // cross-assembly AoT/R2R these inlines will be blocked until Tier1 Jit re-Jits
+                // them when they will inline. We don't show them in the StackTrace to bring consistency
+                // between this first-pass asm and fully optimized asm.
+                return false;
+            }
+
+            if (mb.IsDefined(typeof(StackTraceHiddenAttribute), inherit: false))
+            {
+                // Don't show where StackTraceHidden is applied to the method.
+                return false;
+            }
+
+            Type? declaringType = mb.DeclaringType;
+            // Methods don't always have containing types, for example dynamic RefEmit generated methods.
+            if (declaringType != null &&
+                declaringType.IsDefined(typeof(StackTraceHiddenAttribute), inherit: false))
+            {
+                // Don't show where StackTraceHidden is applied to the containing Type of the method.
+                return false;
+            }
+
+            return true;
         }
 
         private static bool TryResolveStateMachineMethod(ref MethodBase method, out Type declaringType)

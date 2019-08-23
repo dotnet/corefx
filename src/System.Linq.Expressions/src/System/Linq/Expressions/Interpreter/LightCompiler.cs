@@ -9,6 +9,7 @@ using System.Dynamic.Utils;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 using static System.Linq.Expressions.CachedReflectionInfo;
 
 using AstUtils = System.Linq.Expressions.Utils;
@@ -50,7 +51,7 @@ namespace System.Linq.Expressions.Interpreter
         public bool Matches(Type exceptionType) => _exceptionType.IsAssignableFrom(exceptionType);
 
         public override string ToString() =>
-            string.Format(CultureInfo.InvariantCulture, "catch({0}) [{1}->{2}]", _exceptionType.Name, HandlerStartIndex, HandlerEndIndex);
+            string.Format(CultureInfo.InvariantCulture, "catch ({0}) [{1}->{2}]", _exceptionType.Name, HandlerStartIndex, HandlerEndIndex);
     }
 
     internal sealed class TryCatchFinallyHandler
@@ -195,8 +196,11 @@ namespace System.Linq.Expressions.Interpreter
     /// <summary>
     /// The re-throw instruction will throw this exception
     /// </summary>
+    [Serializable]
     internal sealed class RethrowException : Exception
     {
+        public RethrowException() : base() { }
+        internal RethrowException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 
     internal sealed class DebugInfo
@@ -779,9 +783,9 @@ namespace System.Linq.Expressions.Interpreter
                         case ExpressionType.Equal:
                         case ExpressionType.NotEqual:
                             /* generating (equal/not equal):
-                                * if(left == null) {
+                                * if (left == null) {
                                 *      right == null/right != null
-                                * }else if(right == null) {
+                                * }else if (right == null) {
                                 *      False/True
                                 * }else{
                                 *      op_Equality(left, right)/op_Inequality(left, right)

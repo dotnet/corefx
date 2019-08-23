@@ -39,7 +39,7 @@ namespace System.Drawing.Printing
         private short _copies = -1;
         private Duplex _duplex = System.Drawing.Printing.Duplex.Default;
         private TriState _collate = TriState.Default;
-        private PageSettings _defaultPageSettings;
+        private readonly PageSettings _defaultPageSettings;
         private int _fromPage;
         private int _toPage;
         private int _maxPage = 9999;
@@ -84,10 +84,10 @@ namespace System.Drawing.Printing
                                                              nameof(value), value.ToString(CultureInfo.CurrentCulture),
                                                              (0).ToString(CultureInfo.CurrentCulture)));
                 /*
-                    We shouldnt allow copies to be set since the copies can be a large number 
+                    We shouldnt allow copies to be set since the copies can be a large number
                     and can be reflected in PrintDialog. So for the Copies property,
-                    we prefer that for SafePrinting, copied cannot be set programmatically 
-                    but through the print dialog. 
+                    we prefer that for SafePrinting, copied cannot be set programmatically
+                    but through the print dialog.
                     Any lower security could set copies to anything.
                 */
                 _copies = value;
@@ -425,7 +425,7 @@ namespace System.Drawing.Printing
                 _cachedDevmode = null;
                 _extrainfo = null;
                 _printerName = value;
-                // PrinterName can be set through a fulltrusted assembly without using  the PrintDialog. 
+                // PrinterName can be set through a fulltrusted assembly without using  the PrintDialog.
                 // So dont set this variable here.
                 //PrintDialogDisplayed = true;
             }
@@ -1337,7 +1337,7 @@ namespace System.Drawing.Printing
 
             public IEnumerator GetEnumerator()
             {
-                return new ArrayEnumerator(_array, 0, Count);
+                return new ArrayEnumerator(_array, Count);
             }
 
             int ICollection.Count
@@ -1429,7 +1429,7 @@ namespace System.Drawing.Printing
 
             public IEnumerator GetEnumerator()
             {
-                return new ArrayEnumerator(_array, 0, Count);
+                return new ArrayEnumerator(_array, Count);
             }
 
             int ICollection.Count
@@ -1519,7 +1519,7 @@ namespace System.Drawing.Printing
 
             public IEnumerator GetEnumerator()
             {
-                return new ArrayEnumerator(_array, 0, Count);
+                return new ArrayEnumerator(_array, Count);
             }
 
             int ICollection.Count
@@ -1608,7 +1608,7 @@ namespace System.Drawing.Printing
 
             public IEnumerator GetEnumerator()
             {
-                return new ArrayEnumerator(_array, 0, Count);
+                return new ArrayEnumerator(_array, Count);
             }
 
             int ICollection.Count
@@ -1666,29 +1666,18 @@ namespace System.Drawing.Printing
 
         private class ArrayEnumerator : IEnumerator
         {
-            private object[] _array;
-            private object _item;
+            private readonly object[] _array;
+            private readonly int _endIndex;
             private int _index;
-            private int _startIndex;
-            private int _endIndex;
+            private object _item;
 
-            public ArrayEnumerator(object[] array, int startIndex, int count)
+            public ArrayEnumerator(object[] array, int count)
             {
                 _array = array;
-                _startIndex = startIndex;
-                _endIndex = _index + count;
-
-                _index = _startIndex;
+                _endIndex = count;
             }
 
-            public object Current
-            {
-                get
-                {
-                    return _item;
-                }
-            }
-
+            public object Current => _item;
 
             public bool MoveNext()
             {
@@ -1700,9 +1689,8 @@ namespace System.Drawing.Printing
 
             public void Reset()
             {
-                // Position enumerator before first item 
-
-                _index = _startIndex;
+                // Position enumerator before first item
+                _index = 0;
                 _item = null;
             }
         }

@@ -22,8 +22,8 @@ namespace System.Xml
         private int _logAttrIndex;
 
         //presave these 2 variables since they shouldn't change.
-        private XmlNameTable _nameTable;
-        private XmlDocument _doc;
+        private readonly XmlNameTable _nameTable;
+        private readonly XmlDocument _doc;
 
         private int _nAttrInd; //used to identify virtual attributes of DocumentType node and XmlDeclaration node
 
@@ -42,7 +42,7 @@ namespace System.Xml
         private int _nLogLevel;
         private int _nLogAttrInd;
         private bool _bLogOnAttrVal;
-        private bool _bCreatedOnAttribute;
+        private readonly bool _bCreatedOnAttribute;
 
         internal struct VirtualAttribute
         {
@@ -475,18 +475,15 @@ namespace System.Xml
         {
             if (_bCreatedOnAttribute)
                 return null;
-            switch (_curNode.NodeType)
+
+            return _curNode.NodeType switch
             {
-                case XmlNodeType.Element:
-                    return GetAttributeFromElement((XmlElement)_curNode, name);
-                case XmlNodeType.Attribute:
-                    return GetAttributeFromElement((XmlElement)_elemNode, name);
-                case XmlNodeType.XmlDeclaration:
-                    return GetDeclarationAttr((XmlDeclaration)_curNode, name);
-                case XmlNodeType.DocumentType:
-                    return GetDocumentTypeAttr((XmlDocumentType)_curNode, name);
-            }
-            return null;
+                XmlNodeType.Element => GetAttributeFromElement((XmlElement)_curNode, name),
+                XmlNodeType.Attribute => GetAttributeFromElement((XmlElement)_elemNode, name),
+                XmlNodeType.XmlDeclaration => GetDeclarationAttr((XmlDeclaration)_curNode, name),
+                XmlNodeType.DocumentType => GetDocumentTypeAttr((XmlDocumentType)_curNode, name),
+                _ => null,
+            };
         }
 
         private string GetAttributeFromElement(XmlElement elem, string name, string ns)
@@ -500,18 +497,15 @@ namespace System.Xml
         {
             if (_bCreatedOnAttribute)
                 return null;
-            switch (_curNode.NodeType)
+
+            return _curNode.NodeType switch
             {
-                case XmlNodeType.Element:
-                    return GetAttributeFromElement((XmlElement)_curNode, name, ns);
-                case XmlNodeType.Attribute:
-                    return GetAttributeFromElement((XmlElement)_elemNode, name, ns);
-                case XmlNodeType.XmlDeclaration:
-                    return (ns.Length == 0) ? GetDeclarationAttr((XmlDeclaration)_curNode, name) : null;
-                case XmlNodeType.DocumentType:
-                    return (ns.Length == 0) ? GetDocumentTypeAttr((XmlDocumentType)_curNode, name) : null;
-            }
-            return null;
+                XmlNodeType.Element => GetAttributeFromElement((XmlElement)_curNode, name, ns),
+                XmlNodeType.Attribute => GetAttributeFromElement((XmlElement)_elemNode, name, ns),
+                XmlNodeType.XmlDeclaration => (ns.Length == 0) ? GetDeclarationAttr((XmlDeclaration)_curNode, name) : null,
+                XmlNodeType.DocumentType => (ns.Length == 0) ? GetDocumentTypeAttr((XmlDocumentType)_curNode, name) : null,
+                _ => null,
+            };
         }
 
         public string GetAttribute(int attributeIndex)
@@ -1115,7 +1109,7 @@ namespace System.Xml
     // to XML data in an XmlDocument or a specific XmlNode within an XmlDocument.
     public class XmlNodeReader : XmlReader, IXmlNamespaceResolver
     {
-        private XmlNodeReaderNavigator _readerNav;
+        private readonly XmlNodeReaderNavigator _readerNav;
 
         private XmlNodeType _nodeType;   // nodeType of the node that the reader is currently positioned on
         private int _curDepth;   // depth of attrNav ( also functions as reader's depth )

@@ -115,6 +115,51 @@ namespace Microsoft.VisualBasic.Tests
         }
 
         [Theory]
+        [InlineData(0, 0)]
+        [InlineData(33, 33)]
+        [InlineData(172, 172)]
+        [InlineData(255, 255)]
+        public void Asc_Chr_Invariant(int charCode, int expected)
+        {
+            RemoteExecutor.Invoke((charCodeString, expectedString) =>
+            {
+                int charCode = int.Parse(charCodeString);
+                int expected = int.Parse(expectedString);
+
+                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+                Assert.Equal(1252, CultureInfo.CurrentCulture.TextInfo.ANSICodePage);
+
+                Assert.Equal(expected, Strings.Asc(Strings.Chr(charCode)));
+            }, charCode.ToString(), expected.ToString()).Dispose();
+        }
+
+        [ActiveIssue(39888, TargetFrameworkMonikers.NetFramework)]
+        [Theory]
+        [InlineData(0, 0)]
+        [InlineData(33, 33)]
+        [InlineData(172, 0)]
+        [InlineData(255, 255)]
+        [InlineData(256, 1)]
+        [InlineData(0x8141, 0x8141)]
+        [InlineData(0xC8FE, 0xC8FE)]
+        [InlineData(0xFFFF, 0xFF)]
+        public void Asc_Chr_DoubleByte(int charCode, int expected)
+        {
+            RemoteExecutor.Invoke((charCodeString, expectedString) =>
+            {
+                int charCode = int.Parse(charCodeString);
+                int expected = int.Parse(expectedString);
+
+                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                CultureInfo.CurrentCulture = new CultureInfo("ko-KR");
+                Assert.Equal(949, CultureInfo.CurrentCulture.TextInfo.ANSICodePage);
+
+                Assert.Equal(expected, (ushort)Strings.Asc(Strings.Chr(charCode)));
+            }, charCode.ToString(), expected.ToString()).Dispose();
+        }
+
+        [Theory]
         [InlineData(new string[] { }, null, null)]
         [InlineData(new string[] { }, "", null)]
         public void Filter_WhenNoMatchArgument_ReturnsNull(string[] source, string match, string[] expected)
@@ -204,7 +249,7 @@ namespace Microsoft.VisualBasic.Tests
             Assert.Throws<InvalidCastException>(() => Strings.Format(expression, style));
         }
 
-        private static IEnumerable<object[]> Format_TestData()
+        public static IEnumerable<object[]> Format_TestData()
         {
             yield return new object[] { null, null, "" };
             yield return new object[] { null, "", "" };
@@ -246,7 +291,7 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { 123.4, "general number", 123.4.ToString("G", null) };
         }
 
-        private static IEnumerable<object[]> Format_InvalidCastException_TestData()
+        public static IEnumerable<object[]> Format_InvalidCastException_TestData()
         {
             yield return new object[] { new object(), null };
             yield return new object[] { new object(), "0" };
@@ -259,7 +304,7 @@ namespace Microsoft.VisualBasic.Tests
             Assert.Equal(expected, Strings.FormatCurrency(expression, numDigitsAfterDecimal, includeLeadingDigit, useParensForNegativeNumbers, groupDigits));
         }
 
-        private static IEnumerable<object[]> FormatCurrency_TestData()
+        public static IEnumerable<object[]> FormatCurrency_TestData()
         {
             yield return new object[] { null, 2, TriState.UseDefault, TriState.UseDefault, TriState.UseDefault, "" };
             if (IsEnUS())
@@ -285,7 +330,7 @@ namespace Microsoft.VisualBasic.Tests
             Assert.Equal(expected, Strings.FormatDateTime(expression, format));
         }
 
-        private static IEnumerable<object[]> FormatDateTime_TestData()
+        public static IEnumerable<object[]> FormatDateTime_TestData()
         {
             DateTime d = DateTime.Now;
             yield return new object[] { d, DateFormat.LongTime, d.ToString("T") };
@@ -302,7 +347,7 @@ namespace Microsoft.VisualBasic.Tests
             Assert.Equal(expected, Strings.FormatNumber(expression, numDigitsAfterDecimal, includeLeadingDigit, useParensForNegativeNumbers, groupDigits));
         }
 
-        private static IEnumerable<object[]> FormatNumber_TestData()
+        public static IEnumerable<object[]> FormatNumber_TestData()
         {
             yield return new object[] { null, 2, TriState.UseDefault, TriState.UseDefault, TriState.UseDefault, "" };
             if (IsEnUS())
@@ -329,7 +374,7 @@ namespace Microsoft.VisualBasic.Tests
             Assert.Equal(expected, Strings.FormatPercent(expression, numDigitsAfterDecimal, includeLeadingDigit, useParensForNegativeNumbers, groupDigits));
         }
 
-        private static IEnumerable<object[]> FormatPercent_TestData()
+        public static IEnumerable<object[]> FormatPercent_TestData()
         {
             yield return new object[] { null, 2, TriState.UseDefault, TriState.UseDefault, TriState.UseDefault, "" };
             if (IsEnUS())
@@ -484,7 +529,7 @@ namespace Microsoft.VisualBasic.Tests
             Assert.Equal(expected, Strings.Join(source, delimiter));
         }
 
-        private static IEnumerable<object[]> Join_Object_TestData()
+        public static IEnumerable<object[]> Join_Object_TestData()
         {
             yield return new object[] { new object[0], null, null };
             yield return new object[] { new object[0], ",", null };
@@ -501,7 +546,7 @@ namespace Microsoft.VisualBasic.Tests
             Assert.Equal(expected, Strings.Join(source, delimiter));
         }
 
-        private static IEnumerable<object[]> Join_String_TestData()
+        public static IEnumerable<object[]> Join_String_TestData()
         {
             yield return new object[] { new string[0], null, null };
             yield return new object[] { new string[0], ",", null };
@@ -512,11 +557,11 @@ namespace Microsoft.VisualBasic.Tests
         }
 
         [Theory]
-        [InlineData('\0', "\0")]
-        [InlineData('\uffff', "\uffff")]
-        [InlineData('a', "a")]
-        [InlineData('A', "a")]
-        [InlineData('1', "1")]
+        [InlineData('\0', '\0')]
+        [InlineData('\uffff', '\uffff')]
+        [InlineData('a', 'a')]
+        [InlineData('A', 'a')]
+        [InlineData('1', '1')]
         public void LCase(char value, char expected)
         {
             Assert.Equal(expected, Strings.LCase(value));
@@ -536,11 +581,11 @@ namespace Microsoft.VisualBasic.Tests
         }
 
         [Theory]
-        [InlineData('\0', "\0")]
-        [InlineData('\uffff', "\uffff")]
-        [InlineData('a', "A")]
-        [InlineData('A', "A")]
-        [InlineData('1', "1")]
+        [InlineData('\0', '\0')]
+        [InlineData('\uffff', '\uffff')]
+        [InlineData('a', 'A')]
+        [InlineData('A', 'A')]
+        [InlineData('1', '1')]
         public void UCase(char value, char expected)
         {
             Assert.Equal(expected, Strings.UCase(value));
@@ -788,7 +833,6 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData("", "", -1, CompareMethod.Text, new string[] { "" })]
         [InlineData("ABC", ",", -1, CompareMethod.Text, new string[] { "ABC" })]
         [InlineData("A,,BC", ",", -1, CompareMethod.Text, new string[] { "A", "", "BC" })]
-        [InlineData("A,,BC", ",", -1, CompareMethod.Text, new string[] { "A", "", "BC" })]
         [InlineData("ABC", "b", -1, CompareMethod.Text, new string[] { "A", "C" })]
         [InlineData("ABC", "b", -1, CompareMethod.Binary, new string[] { "ABC" })]
         [InlineData("A, B, C", ", ", -1, CompareMethod.Text, new string[] { "A", "B", "C" })]
@@ -883,12 +927,12 @@ namespace Microsoft.VisualBasic.Tests
             Assert.Throws<ArgumentException>(() => Strings.StrDup(number, character));
         }
 
-        private static IEnumerable<object[]> StrDup_Object_TestData()
+        public static IEnumerable<object[]> StrDup_Object_TestData()
         {
             yield break;
         }
 
-        private static IEnumerable<object[]> StrDup_Char_TestData()
+        public static IEnumerable<object[]> StrDup_Char_TestData()
         {
             yield return new object[] { 3, '\0', "\0\0\0" };
             yield return new object[] { 0, 'A', "" };
@@ -896,7 +940,7 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { 3, 'A', "AAA" };
         }
 
-        private static IEnumerable<object[]> StrDup_String_TestData()
+        public static IEnumerable<object[]> StrDup_String_TestData()
         {
             yield return new object[] { 0, "A", "" };
             yield return new object[] { 1, "A", "A" };
@@ -906,7 +950,7 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { 3, "ABC", "AAA" };
         }
 
-        private static IEnumerable<object[]> StrDup_Object_ArgumentException_TestData()
+        public static IEnumerable<object[]> StrDup_Object_ArgumentException_TestData()
         {
             yield return new object[] { -1, new object() };
             yield return new object[] { 1, 0 };
@@ -916,12 +960,12 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { 1, "" };
         }
 
-        private static IEnumerable<object[]> StrDup_Char_ArgumentException_TestData()
+        public static IEnumerable<object[]> StrDup_Char_ArgumentException_TestData()
         {
             yield return new object[] { -1, 'A' };
         }
 
-        private static IEnumerable<object[]> StrDup_String_ArgumentException_TestData()
+        public static IEnumerable<object[]> StrDup_String_ArgumentException_TestData()
         {
             yield return new object[] { -1, "A" };
             yield return new object[] { 1, null };
@@ -1002,6 +1046,6 @@ namespace Microsoft.VisualBasic.Tests
             { "abab", "ab", 3, 1 },
         };
 
-        private static bool IsEnUS() => System.Threading.Thread.CurrentThread.CurrentUICulture.Name == "en-US";
+        private static bool IsEnUS() => System.Threading.Thread.CurrentThread.CurrentCulture.Name == "en-US";
     }
 }

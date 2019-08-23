@@ -17,7 +17,7 @@ namespace System.Xml.Serialization
 {
     internal class ReflectionXmlSerializationWriter : XmlSerializationWriter
     {
-        private XmlMapping _mapping;
+        private readonly XmlMapping _mapping;
 
         internal static TypeDesc StringTypeDesc { get; private set; } = (new TypeScope()).GetTypeDesc(typeof(string));
         internal static TypeDesc QnameTypeDesc { get; private set; } = (new TypeScope()).GetTypeDesc(typeof(XmlQualifiedName));
@@ -88,7 +88,7 @@ namespace System.Xml.Serialization
             {
                 string ns = (element.Form == XmlSchemaForm.Qualified ? element.Namespace : string.Empty);
                 if (element.IsNullable)
-                {                    
+                {
                     if (mapping.IsSoap)
                     {
                         WriteNullTagEncoded(element.Name, ns);
@@ -156,8 +156,6 @@ namespace System.Xml.Serialization
 
         private void WriteArrayItems(ElementAccessor[] elements, TextAccessor text, ChoiceIdentifierAccessor choice, TypeDesc arrayTypeDesc, object o)
         {
-            TypeDesc arrayElementTypeDesc = arrayTypeDesc.ArrayElementTypeDesc;
-
             var arr = o as IList;
 
             if (arr != null)
@@ -268,8 +266,6 @@ namespace System.Xml.Serialization
 
                 if (text != null)
                 {
-                    bool useReflection = text.Mapping.TypeDesc.UseReflection;
-                    string fullTypeName = text.Mapping.TypeDesc.CSharpName;
                     WriteText(o, text);
                     return;
                 }
@@ -1176,60 +1172,26 @@ namespace System.Xml.Serialization
 
         private string ConvertPrimitiveToString(object o, TypeDesc typeDesc)
         {
-            string stringValue;
-            switch (typeDesc.FormatterName)
+            string stringValue = typeDesc.FormatterName switch
             {
-                case "Boolean":
-                    stringValue = XmlConvert.ToString((bool)o);
-                    break;
-                case "Int32":
-                    stringValue = XmlConvert.ToString((int)o);
-                    break;
-                case "Int16":
-                    stringValue = XmlConvert.ToString((short)o);
-                    break;
-                case "Int64":
-                    stringValue = XmlConvert.ToString((long)o);
-                    break;
-                case "Single":
-                    stringValue = XmlConvert.ToString((float)o);
-                    break;
-                case "Double":
-                    stringValue = XmlConvert.ToString((double)o);
-                    break;
-                case "Decimal":
-                    stringValue = XmlConvert.ToString((decimal)o);
-                    break;
-                case "Byte":
-                    stringValue = XmlConvert.ToString((byte)o);
-                    break;
-                case "SByte":
-                    stringValue = XmlConvert.ToString((sbyte)o);
-                    break;
-                case "UInt16":
-                    stringValue = XmlConvert.ToString((ushort)o);
-                    break;
-                case "UInt32":
-                    stringValue = XmlConvert.ToString((uint)o);
-                    break;
-                case "UInt64":
-                    stringValue = XmlConvert.ToString((ulong)o);
-                    break;
+                "Boolean" => XmlConvert.ToString((bool)o),
+                "Int32" => XmlConvert.ToString((int)o),
+                "Int16" => XmlConvert.ToString((short)o),
+                "Int64" => XmlConvert.ToString((long)o),
+                "Single" => XmlConvert.ToString((float)o),
+                "Double" => XmlConvert.ToString((double)o),
+                "Decimal" => XmlConvert.ToString((decimal)o),
+                "Byte" => XmlConvert.ToString((byte)o),
+                "SByte" => XmlConvert.ToString((sbyte)o),
+                "UInt16" => XmlConvert.ToString((ushort)o),
+                "UInt32" => XmlConvert.ToString((uint)o),
+                "UInt64" => XmlConvert.ToString((ulong)o),
                 // Types without direct mapping (ambiguous)
-                case "Guid":
-                    stringValue = XmlConvert.ToString((Guid)o);
-                    break;
-                case "Char":
-                    stringValue = XmlConvert.ToString((char)o);
-                    break;
-                case "TimeSpan":
-                    stringValue = XmlConvert.ToString((TimeSpan)o);
-                    break;
-                default:
-                    stringValue = o.ToString();
-                    break;
-            }
-
+                "Guid" => XmlConvert.ToString((Guid)o),
+                "Char" => XmlConvert.ToString((char)o),
+                "TimeSpan" => XmlConvert.ToString((TimeSpan)o),
+                _ => o.ToString(),
+            };
             return stringValue;
         }
 

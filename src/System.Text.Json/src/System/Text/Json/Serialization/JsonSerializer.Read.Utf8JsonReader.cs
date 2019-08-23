@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -30,7 +30,7 @@ namespace System.Text.Json
         ///     reader will be advanced by one call to <see cref="Utf8JsonReader.Read"/> to determine
         ///     the start of the value.
         ///   </para>
-        /// 
+        ///
         ///   <para>
         ///     Upon completion of this method <paramref name="reader"/> will be positioned at the
         ///     final token in the JSON value.  If an exception is thrown the reader is reset to
@@ -41,12 +41,13 @@ namespace System.Text.Json
         ///     This method makes a copy of the data the reader acted on, so there is no caller
         ///     requirement to maintain data integrity beyond the return of this method.
         ///   </para>
+        ///
+        ///   <para>
+        ///     The <see cref="JsonReaderOptions"/> used to create the instance of the <see cref="Utf8JsonReader"/> take precedence over the <see cref="JsonSerializerOptions"/> when they conflict.
+        ///     Hence, <see cref="JsonReaderOptions.AllowTrailingCommas"/>, <see cref="JsonReaderOptions.MaxDepth"/>, <see cref="JsonReaderOptions.CommentHandling"/> are used while reading.
+        ///   </para>
         /// </remarks>
-        /// <remarks>
-        /// The <see cref="JsonReaderOptions"/> used to create the instance of the <see cref="Utf8JsonReader"/> take precedence over the <see cref="JsonSerializerOptions"/> when they conflict.
-        /// Hence, <see cref="JsonReaderOptions.AllowTrailingCommas"/>, <see cref="JsonReaderOptions.MaxDepth"/>, <see cref="JsonReaderOptions.CommentHandling"/> are used while reading.
-        /// </remarks>
-        public static TValue ReadValue<TValue>(ref Utf8JsonReader reader, JsonSerializerOptions options = null)
+        public static TValue Deserialize<TValue>(ref Utf8JsonReader reader, JsonSerializerOptions options = null)
         {
             return (TValue)ReadValueCore(ref reader, typeof(TValue), options);
         }
@@ -76,7 +77,7 @@ namespace System.Text.Json
         ///     reader will be advanced by one call to <see cref="Utf8JsonReader.Read"/> to determine
         ///     the start of the value.
         ///   </para>
-        /// 
+        ///
         ///   <para>
         ///     Upon completion of this method <paramref name="reader"/> will be positioned at the
         ///     final token in the JSON value.  If an exception is thrown the reader is reset to
@@ -87,12 +88,12 @@ namespace System.Text.Json
         ///     This method makes a copy of the data the reader acted on, so there is no caller
         ///     requirement to maintain data integrity beyond the return of this method.
         ///   </para>
+        ///   <para>
+        ///     The <see cref="JsonReaderOptions"/> used to create the instance of the <see cref="Utf8JsonReader"/> take precedence over the <see cref="JsonSerializerOptions"/> when they conflict.
+        ///     Hence, <see cref="JsonReaderOptions.AllowTrailingCommas"/>, <see cref="JsonReaderOptions.MaxDepth"/>, <see cref="JsonReaderOptions.CommentHandling"/> are used while reading.
+        ///   </para>
         /// </remarks>
-        /// <remarks>
-        /// The <see cref="JsonReaderOptions"/> used to create the instance of the <see cref="Utf8JsonReader"/> take precedence over the <see cref="JsonSerializerOptions"/> when they conflict.
-        /// Hence, <see cref="JsonReaderOptions.AllowTrailingCommas"/>, <see cref="JsonReaderOptions.MaxDepth"/>, <see cref="JsonReaderOptions.CommentHandling"/> are used while reading.
-        /// </remarks>
-        public static object ReadValue(ref Utf8JsonReader reader, Type returnType, JsonSerializerOptions options = null)
+        public static object Deserialize(ref Utf8JsonReader reader, Type returnType, JsonSerializerOptions options = null)
         {
             if (returnType == null)
                 throw new ArgumentNullException(nameof(returnType));
@@ -276,11 +277,11 @@ namespace System.Text.Json
                         }
                 }
             }
-            catch (JsonReaderException e)
+            catch (JsonReaderException ex)
             {
                 reader = restore;
                 // Re-throw with Path information.
-                ThrowHelper.ReThrowWithPath(e, readStack.JsonPath);
+                ThrowHelper.ReThrowWithPath(readStack, ex);
             }
 
             int length = valueSpan.IsEmpty ? checked((int)valueSequence.Length) : valueSpan.Length;
@@ -304,8 +305,7 @@ namespace System.Text.Json
 
                 if (newReader.BytesConsumed != length)
                 {
-                    state = newReader.CurrentState;
-                    ThrowHelper.ThrowJsonException_DeserializeDataRemaining(length, length - state.BytesConsumed);
+                    ThrowHelper.ThrowJsonException_DeserializeDataRemaining(length, length - newReader.BytesConsumed);
                 }
             }
             catch (JsonException)

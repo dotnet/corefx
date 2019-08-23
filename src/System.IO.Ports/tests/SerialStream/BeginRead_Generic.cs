@@ -135,7 +135,7 @@ namespace System.IO.Ports.Tests
         {
             var rndGen = new Random(-55);
 
-            // 		if(!VerifyParityReplaceByte((int)'\0', rndGen.Next(0, numRndBytesPairty - 1), new System.Text.UTF7Encoding())){
+            //         if (!VerifyParityReplaceByte((int)'\0', rndGen.Next(0, numRndBytesPairty - 1), new System.Text.UTF7Encoding())){
             VerifyParityReplaceByte((int)'\0', rndGen.Next(0, numRndBytesPairty - 1), Encoding.Unicode);
         }
 
@@ -229,7 +229,7 @@ namespace System.IO.Ports.Tests
         [ConditionalFact(nameof(HasNullModem))]
         public void BytesToRead_1_Buffer_Size()
         {
-            // 		if(!VerifyBytesToRead(1, new System.Text.UTF7Encoding())){
+            //         if (!VerifyBytesToRead(1, new System.Text.UTF7Encoding())){
             VerifyBytesToRead(1, Encoding.UTF32);
         }
 
@@ -315,13 +315,13 @@ namespace System.IO.Ports.Tests
             }
         }
 
-        public void VerifyBytesToRead(int numBytesRead)
+        private void VerifyBytesToRead(int numBytesRead)
         {
             VerifyBytesToRead(numBytesRead, new ASCIIEncoding());
         }
 
 
-        public void VerifyBytesToRead(int numBytesRead, Encoding encoding)
+        private void VerifyBytesToRead(int numBytesRead, Encoding encoding)
         {
             using (var com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
             using (var com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName))

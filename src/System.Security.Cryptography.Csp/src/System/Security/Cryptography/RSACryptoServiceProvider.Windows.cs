@@ -19,6 +19,7 @@ namespace System.Security.Cryptography
         private SafeKeyHandle _safeKeyHandle;
         private SafeProvHandle _safeProvHandle;
         private static volatile CspProviderFlags s_useMachineKeyStore = 0;
+        private bool _disposed;
 
         public RSACryptoServiceProvider()
             : this(0, new CspParameters(CapiHelper.DefaultRsaProviderType,
@@ -288,15 +289,19 @@ namespace System.Security.Cryptography
         /// </summary>
         protected override void Dispose(bool disposing)
         {
-            base.Dispose(disposing);
+            if (disposing)
+            {
+                if (_safeKeyHandle != null && !_safeKeyHandle.IsClosed)
+                {
+                    _safeKeyHandle.Dispose();
+                }
 
-            if (_safeKeyHandle != null && !_safeKeyHandle.IsClosed)
-            {
-                _safeKeyHandle.Dispose();
-            }
-            if (_safeProvHandle != null && !_safeProvHandle.IsClosed)
-            {
-                _safeProvHandle.Dispose();
+                if (_safeProvHandle != null && !_safeProvHandle.IsClosed)
+                {
+                    _safeProvHandle.Dispose();
+                }
+
+                _disposed = true;
             }
         }
 
@@ -375,6 +380,7 @@ namespace System.Security.Cryptography
         /// <param name="keyBlob"></param>
         public void ImportCspBlob(byte[] keyBlob)
         {
+            ThrowIfDisposed();
             SafeKeyHandle safeKeyHandle;
 
             if (IsPublic(keyBlob))
@@ -401,6 +407,24 @@ namespace System.Security.Cryptography
         {
             byte[] keyBlob = parameters.ToKeyBlob();
             ImportCspBlob(keyBlob);
+        }
+
+        public override void ImportEncryptedPkcs8PrivateKey(
+            ReadOnlySpan<byte> passwordBytes,
+            ReadOnlySpan<byte> source,
+            out int bytesRead)
+        {
+            ThrowIfDisposed();
+            base.ImportEncryptedPkcs8PrivateKey(passwordBytes, source, out bytesRead);
+        }
+
+        public override void ImportEncryptedPkcs8PrivateKey(
+            ReadOnlySpan<char> password,
+            ReadOnlySpan<byte> source,
+            out int bytesRead)
+        {
+            ThrowIfDisposed();
+            base.ImportEncryptedPkcs8PrivateKey(password, source, out bytesRead);
         }
 
         /// <summary>
@@ -581,43 +605,27 @@ namespace System.Security.Cryptography
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5351", Justification = "MD5 is used when the user asks for it.")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5350", Justification = "SHA1 is used when the user asks for it.")]
-        private static HashAlgorithm GetHashAlgorithm(HashAlgorithmName hashAlgorithm)
-        {
-            switch (hashAlgorithm.Name)
+        private static HashAlgorithm GetHashAlgorithm(HashAlgorithmName hashAlgorithm) =>
+            hashAlgorithm.Name switch
             {
-                case "MD5":
-                    return MD5.Create();
-                case "SHA1":
-                    return SHA1.Create();
-                case "SHA256":
-                    return SHA256.Create();
-                case "SHA384":
-                    return SHA384.Create();
-                case "SHA512":
-                    return SHA512.Create();
-                default:
-                    throw new CryptographicException(SR.Cryptography_UnknownHashAlgorithm, hashAlgorithm.Name);
-            }
-        }
+                "MD5" => MD5.Create(),
+                "SHA1" => SHA1.Create(),
+                "SHA256" => SHA256.Create(),
+                "SHA384" => SHA384.Create(),
+                "SHA512" => SHA512.Create(),
+                _ => throw new CryptographicException(SR.Cryptography_UnknownHashAlgorithm, hashAlgorithm.Name),
+            };
 
-        private static int GetAlgorithmId(HashAlgorithmName hashAlgorithm)
-        {
-            switch (hashAlgorithm.Name)
+        private static int GetAlgorithmId(HashAlgorithmName hashAlgorithm) =>
+            hashAlgorithm.Name switch
             {
-                case "MD5":
-                    return CapiHelper.CALG_MD5;
-                case "SHA1":
-                    return CapiHelper.CALG_SHA1;
-                case "SHA256":
-                    return CapiHelper.CALG_SHA_256;
-                case "SHA384":
-                    return CapiHelper.CALG_SHA_384;
-                case "SHA512":
-                    return CapiHelper.CALG_SHA_512;
-                default:
-                    throw new CryptographicException(SR.Cryptography_UnknownHashAlgorithm, hashAlgorithm.Name);
-            }
-        }
+                "MD5" => CapiHelper.CALG_MD5,
+                "SHA1" => CapiHelper.CALG_SHA1,
+                "SHA256" => CapiHelper.CALG_SHA_256,
+                "SHA384" => CapiHelper.CALG_SHA_384,
+                "SHA512" => CapiHelper.CALG_SHA_512,
+                _ => throw new CryptographicException(SR.Cryptography_UnknownHashAlgorithm, hashAlgorithm.Name),
+            };
 
         public override byte[] Encrypt(byte[] data, RSAEncryptionPadding padding)
         {
@@ -726,6 +734,14 @@ namespace System.Security.Cryptography
         private static Exception HashAlgorithmNameNullOrEmpty()
         {
             return new ArgumentException(SR.Cryptography_HashAlgorithmNameNullOrEmpty, "hashAlgorithm");
+        }
+
+        private void ThrowIfDisposed()
+        {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(DSACryptoServiceProvider));
+            }
         }
     }
 }

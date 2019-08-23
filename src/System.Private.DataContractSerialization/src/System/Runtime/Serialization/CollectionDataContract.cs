@@ -118,11 +118,7 @@ namespace System.Runtime.Serialization
         }
     }
 
-#if uapaot
-    public enum CollectionKind : byte
-#else
     internal enum CollectionKind : byte
-#endif
     {
         None,
         GenericDictionary,
@@ -136,7 +132,7 @@ namespace System.Runtime.Serialization
         Array,
     }
 
-#if USE_REFEMIT || uapaot
+#if USE_REFEMIT
     public sealed class CollectionDataContract : DataContract
 #else
     internal sealed class CollectionDataContract : DataContract
@@ -337,30 +333,15 @@ namespace System.Runtime.Serialization
             { return _helper.InvalidCollectionInSharedContractMessage; }
         }
 
-#if uapaot
-        [RemovableFeature(ReflectionBasedSerializationFeature.Name)]
-#endif
         private XmlFormatCollectionWriterDelegate CreateXmlFormatWriterDelegate()
         {
             return new XmlFormatWriterGenerator().GenerateCollectionWriter(this);
         }
 
-#if uapaot
-        private XmlFormatCollectionWriterDelegate _xmlFormatWriterDelegate;
-        public XmlFormatCollectionWriterDelegate XmlFormatWriterDelegate
-#else
         internal XmlFormatCollectionWriterDelegate XmlFormatWriterDelegate
-#endif
         {
             get
             {
-#if uapaot
-                if (DataContractSerializer.Option == SerializationOption.CodeGenOnly
-                || (DataContractSerializer.Option == SerializationOption.ReflectionAsBackup && _xmlFormatWriterDelegate != null))
-                {
-                    return _xmlFormatWriterDelegate;
-                }
-#endif
                 if (_helper.XmlFormatWriterDelegate == null)
                 {
                     lock (this)
@@ -377,36 +358,18 @@ namespace System.Runtime.Serialization
             }
             set
             {
-#if uapaot
-                _xmlFormatWriterDelegate = value;
-#endif
             }
         }
 
-#if uapaot
-        [RemovableFeature(ReflectionBasedSerializationFeature.Name)]
-#endif
         private XmlFormatCollectionReaderDelegate CreateXmlFormatReaderDelegate()
         {
             return new XmlFormatReaderGenerator().GenerateCollectionReader(this);
         }
 
-#if uapaot
-        private XmlFormatCollectionReaderDelegate _xmlFormatReaderDelegate;
-        public XmlFormatCollectionReaderDelegate XmlFormatReaderDelegate
-#else
         internal XmlFormatCollectionReaderDelegate XmlFormatReaderDelegate
-#endif
         {
             get
             {
-#if uapaot
-                if (DataContractSerializer.Option == SerializationOption.CodeGenOnly
-                || (DataContractSerializer.Option == SerializationOption.ReflectionAsBackup && _xmlFormatReaderDelegate != null))
-                {
-                    return _xmlFormatReaderDelegate;
-                }
-#endif
                 if (_helper.XmlFormatReaderDelegate == null)
                 {
                     lock (this)
@@ -423,37 +386,19 @@ namespace System.Runtime.Serialization
             }
             set
             {
-#if uapaot
-                _xmlFormatReaderDelegate = value;
-#endif
             }
         }
 
-#if uapaot
-        [RemovableFeature(ReflectionBasedSerializationFeature.Name)]
-#endif
         private XmlFormatGetOnlyCollectionReaderDelegate CreateXmlFormatGetOnlyCollectionReaderDelegate()
         {
             return new XmlFormatReaderGenerator().GenerateGetOnlyCollectionReader(this);
         }
 
 
-#if uapaot
-        private XmlFormatGetOnlyCollectionReaderDelegate _xmlFormatGetOnlyCollectionReaderDelegate;
-        public XmlFormatGetOnlyCollectionReaderDelegate XmlFormatGetOnlyCollectionReaderDelegate
-#else
         internal XmlFormatGetOnlyCollectionReaderDelegate XmlFormatGetOnlyCollectionReaderDelegate
-#endif
         {
             get
             {
-#if uapaot
-                if (DataContractSerializer.Option == SerializationOption.CodeGenOnly
-                || (DataContractSerializer.Option == SerializationOption.ReflectionAsBackup && _xmlFormatGetOnlyCollectionReaderDelegate != null))
-                {
-                    return _xmlFormatGetOnlyCollectionReaderDelegate;
-                }
-#endif
                 if (_helper.XmlFormatGetOnlyCollectionReaderDelegate == null)
                 {
                     lock (this)
@@ -480,9 +425,6 @@ namespace System.Runtime.Serialization
             }
             set
             {
-#if uapaot
-                _xmlFormatGetOnlyCollectionReaderDelegate = value;
-#endif
             }
         }
 
@@ -520,7 +462,7 @@ namespace System.Runtime.Serialization
             private string _keyName;
             private string _valueName;
             private XmlDictionaryString _childElementNamespace;
-            private string _invalidCollectionInSharedContractMessage;
+            private readonly string _invalidCollectionInSharedContractMessage;
             private XmlFormatCollectionReaderDelegate _xmlFormatReaderDelegate;
             private XmlFormatGetOnlyCollectionReaderDelegate _xmlFormatGetOnlyCollectionReaderDelegate;
             private XmlFormatCollectionWriterDelegate _xmlFormatWriterDelegate;
@@ -1508,7 +1450,7 @@ namespace System.Runtime.Serialization
 
         public override void WriteXmlValue(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context)
         {
-            // IsGetOnlyCollection value has already been used to create current collectiondatacontract, value can now be reset. 
+            // IsGetOnlyCollection value has already been used to create current collectiondatacontract, value can now be reset.
             context.IsGetOnlyCollection = false;
             XmlFormatWriterDelegate(xmlWriter, obj, context, this);
         }
@@ -1519,14 +1461,8 @@ namespace System.Runtime.Serialization
             object o = null;
             if (context.IsGetOnlyCollection)
             {
-                // IsGetOnlyCollection value has already been used to create current collectiondatacontract, value can now be reset. 
+                // IsGetOnlyCollection value has already been used to create current collectiondatacontract, value can now be reset.
                 context.IsGetOnlyCollection = false;
-#if uapaot
-                if (XmlFormatGetOnlyCollectionReaderDelegate == null)
-                {
-                    throw new InvalidDataContractException(SR.Format(SR.SerializationCodeIsMissingForType, UnderlyingType));
-                }
-#endif
                 XmlFormatGetOnlyCollectionReaderDelegate(xmlReader, context, CollectionItemName, Namespace, this);
             }
             else
@@ -1539,7 +1475,7 @@ namespace System.Runtime.Serialization
 
         internal class DictionaryEnumerator : IEnumerator<KeyValue<object, object>>
         {
-            private IDictionaryEnumerator _enumerator;
+            private readonly IDictionaryEnumerator _enumerator;
 
             public DictionaryEnumerator(IDictionaryEnumerator enumerator)
             {
@@ -1574,7 +1510,7 @@ namespace System.Runtime.Serialization
 
         internal class GenericDictionaryEnumerator<K, V> : IEnumerator<KeyValue<K, V>>
         {
-            private IEnumerator<KeyValuePair<K, V>> _enumerator;
+            private readonly IEnumerator<KeyValuePair<K, V>> _enumerator;
 
             public GenericDictionaryEnumerator(IEnumerator<KeyValuePair<K, V>> enumerator)
             {

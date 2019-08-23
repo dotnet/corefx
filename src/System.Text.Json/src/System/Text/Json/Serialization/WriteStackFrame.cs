@@ -2,10 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Collections;
 using System.Diagnostics;
-using System.Text.Json.Serialization.Converters;
+using System.Text.Json.Serialization;
 
 namespace System.Text.Json
 {
@@ -18,39 +17,35 @@ namespace System.Text.Json
         // Support Dictionary keys.
         public string KeyName;
 
-        // Whether the current object is an immutable dictionary.
-        public bool IsImmutableDictionary;
-        public bool IsImmutableDictionaryProperty;
+        // The current IEnumerable or IDictionary.
+        public IEnumerator CollectionEnumerator;
+        // Note all bools are kept together for packing:
+        public bool PopStackOnEndCollection;
+        public bool IsIDictionaryConstructible;
+        public bool IsIDictionaryConstructibleProperty;
 
-        // The current enumerator for the IEnumerable or IDictionary.
-        public IEnumerator Enumerator;
-
-        // Current property values.
-        public JsonPropertyInfo JsonPropertyInfo;
+        // The current object.
+        public bool PopStackOnEndObject;
+        public bool StartObjectWritten;
+        public bool MoveToNextProperty;
 
         // The current property.
-        public int PropertyIndex;
-
-        // Has the Start tag been written.
-        public bool StartObjectWritten;
-
-        // Pop the stack when the current array or dictionary is done.
-        public bool PopStackOnEnd;
-
-        // Pop the stack when the current object is done.
-        public bool PopStackOnEndObject;
+        public bool PropertyEnumeratorActive;
+        public ExtensionDataWriteStatus ExtensionDataStatus;
+        public IEnumerator PropertyEnumerator;
+        public JsonPropertyInfo JsonPropertyInfo;
 
         public void Initialize(Type type, JsonSerializerOptions options)
         {
             JsonClassInfo = options.GetOrAddClass(type);
             if (JsonClassInfo.ClassType == ClassType.Value || JsonClassInfo.ClassType == ClassType.Enumerable || JsonClassInfo.ClassType == ClassType.Dictionary)
             {
-                JsonPropertyInfo = JsonClassInfo.GetPolicyProperty();
+                JsonPropertyInfo = JsonClassInfo.PolicyProperty;
             }
-            else if (JsonClassInfo.ClassType == ClassType.ImmutableDictionary)
+            else if (JsonClassInfo.ClassType == ClassType.IDictionaryConstructible)
             {
-                JsonPropertyInfo = JsonClassInfo.GetPolicyProperty();
-                IsImmutableDictionary = true;
+                JsonPropertyInfo = JsonClassInfo.PolicyProperty;
+                IsIDictionaryConstructible = true;
             }
         }
 
@@ -70,7 +65,7 @@ namespace System.Text.Json
                 Debug.Assert(writeNull == false);
 
                 // Write start without a property name.
-                if (classType == ClassType.Object || classType == ClassType.Dictionary || classType == ClassType.ImmutableDictionary)
+                if (classType == ClassType.Object || classType == ClassType.Dictionary || classType == ClassType.IDictionaryConstructible)
                 {
                     writer.WriteStartObject();
                     StartObjectWritten = true;
@@ -91,7 +86,7 @@ namespace System.Text.Json
             }
             else if (classType == ClassType.Object ||
                 classType == ClassType.Dictionary ||
-                classType == ClassType.ImmutableDictionary)
+                classType == ClassType.IDictionaryConstructible)
             {
                 writer.WriteStartObject(propertyName);
                 StartObjectWritten = true;
@@ -106,42 +101,63 @@ namespace System.Text.Json
         public void Reset()
         {
             CurrentValue = null;
-            Enumerator = null;
-            KeyName = null;
-            JsonClassInfo = null;
-            JsonPropertyInfo = null;
-            PropertyIndex = 0;
-            IsImmutableDictionary = false;
-            PopStackOnEndObject = false;
-            PopStackOnEnd = false;
-            StartObjectWritten = false;
+            EndObject();
         }
 
         public void EndObject()
         {
-            PropertyIndex = 0;
+            CollectionEnumerator = null;
+            ExtensionDataStatus = ExtensionDataWriteStatus.NotStarted;
+            IsIDictionaryConstructible = false;
+            JsonClassInfo = null;
+            PropertyEnumerator = null;
+            PropertyEnumeratorActive = false;
+            PopStackOnEndCollection = false;
             PopStackOnEndObject = false;
-            IsImmutableDictionaryProperty = false;
+            StartObjectWritten = false;
+            EndProperty();
+        }
+
+        public void EndProperty()
+        {
+            IsIDictionaryConstructibleProperty = false;
             JsonPropertyInfo = null;
+            KeyName = null;
+            MoveToNextProperty = false;
         }
 
         public void EndDictionary()
         {
-            Enumerator = null;
-            PopStackOnEnd = false;
+            CollectionEnumerator = null;
+            PopStackOnEndCollection = false;
         }
 
         public void EndArray()
         {
-            Enumerator = null;
-            PopStackOnEnd = false;
-            JsonPropertyInfo = null;
+            CollectionEnumerator = null;
+            PopStackOnEndCollection = false;
         }
 
         public void NextProperty()
         {
-            JsonPropertyInfo = null;
-            PropertyIndex++;
+            EndProperty();
+
+            if (PropertyEnumeratorActive)
+            {
+                if (PropertyEnumerator.MoveNext())
+                {
+                    PropertyEnumeratorActive = true;
+                }
+                else
+                {
+                    PropertyEnumeratorActive = false;
+                    ExtensionDataStatus = ExtensionDataWriteStatus.Writing;
+                }
+            }
+            else
+            {
+                ExtensionDataStatus = ExtensionDataWriteStatus.Finished;
+            }
         }
     }
 }

@@ -60,7 +60,7 @@ namespace System.DirectoryServices.AccountManagement
                         tempArray.Add(containmentEnumerator.Current);
                         checked { tempArraySize++; }
 
-                        // Make sure the array has enough space, allowing for the "index" offset.        
+                        // Make sure the array has enough space, allowing for the "index" offset.
                         // We check inline, rather than doing a PrincipalCollection.Count upfront,
                         // because counting is just as expensive as enumerating over all the results, so we
                         // only want to do it once.
@@ -304,7 +304,7 @@ namespace System.DirectoryServices.AccountManagement
             }
             else
             {
-                // No Principal matching the IdentityReference could be found in the PrincipalContext      
+                // No Principal matching the IdentityReference could be found in the PrincipalContext
                 GlobalDebug.WriteLineIf(GlobalDebug.Warn, "PrincipalCollection", "Add(urn/urn): no match");
                 throw new NoMatchingPrincipalException(SR.NoMatchingPrincipalExceptionText);
             }
@@ -648,27 +648,27 @@ namespace System.DirectoryServices.AccountManagement
         // Private implementation
         //
 
-        // The group we're a PrincipalCollection of        
-        private GroupPrincipal _owningGroup;
+        // The group we're a PrincipalCollection of
+        private readonly GroupPrincipal _owningGroup;
 
         //
         // SYNCHRONIZATION
         //   Access to:
         //      resultSet
         //   must be synchronized, since multiple enumerators could be iterating over us at once.
-        //   Synchronize by locking on resultSet.        
+        //   Synchronize by locking on resultSet.
 
         // Represents the Principals retrieved from the store for this collection
-        private BookmarkableResultSet _resultSet;
+        private readonly BookmarkableResultSet _resultSet;
 
         // Contains Principals inserted into this collection for which the insertion has not been persisted to the store
-        private List<Principal> _insertedValuesCompleted = new List<Principal>();
-        private List<Principal> _insertedValuesPending = new List<Principal>();
+        private readonly List<Principal> _insertedValuesCompleted = new List<Principal>();
+        private readonly List<Principal> _insertedValuesPending = new List<Principal>();
 
         // Contains Principals removed from this collection for which the removal has not been persisted
         // to the store
-        private List<Principal> _removedValuesCompleted = new List<Principal>();
-        private List<Principal> _removedValuesPending = new List<Principal>();
+        private readonly List<Principal> _removedValuesCompleted = new List<Principal>();
+        private readonly List<Principal> _removedValuesPending = new List<Principal>();
 
         // Has this collection been cleared?
         private bool _clearPending = false;

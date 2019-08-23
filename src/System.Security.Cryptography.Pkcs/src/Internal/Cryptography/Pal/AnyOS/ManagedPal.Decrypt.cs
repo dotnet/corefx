@@ -16,7 +16,7 @@ namespace Internal.Cryptography.Pal.AnyOS
     {
         internal sealed class ManagedDecryptorPal : DecryptorPal
         {
-            private byte[] _dataCopy;
+            private readonly byte[] _dataCopy;
             private EnvelopedDataAsn _envelopedData;
 
             public ManagedDecryptorPal(
@@ -114,7 +114,7 @@ namespace Internal.Cryptography.Pal.AnyOS
 
                 // Compat: Previous versions of the managed PAL encryptor would wrap the contents in an octet stream
                 // which is not correct and is incompatible with other CMS readers. To maintain compatibility with
-                // existing CMS that have the incorrect wrapping, we attempt to remove it. 
+                // existing CMS that have the incorrect wrapping, we attempt to remove it.
                 if (contentType == Oids.Pkcs7Data)
                 {
                     byte[] tmp = null;

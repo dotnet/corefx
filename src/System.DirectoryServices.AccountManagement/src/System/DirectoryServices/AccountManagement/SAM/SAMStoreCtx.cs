@@ -17,20 +17,20 @@ namespace System.DirectoryServices.AccountManagement
 {
     internal partial class SAMStoreCtx : StoreCtx
     {
-        private DirectoryEntry _ctxBase;
-        private object _ctxBaseLock = new object(); // when mutating ctxBase
+        private readonly DirectoryEntry _ctxBase;
+        private readonly object _ctxBaseLock = new object(); // when mutating ctxBase
 
-        private bool _ownCtxBase;    // if true, we "own" ctxBase and must Dispose of it when we're done
+        private readonly bool _ownCtxBase;    // if true, we "own" ctxBase and must Dispose of it when we're done
 
         private bool _disposed = false;
 
         internal NetCred Credentials { get { return _credentials; } }
-        private NetCred _credentials = null;
+        private readonly NetCred _credentials = null;
 
         internal AuthenticationTypes AuthTypes { get { return _authTypes; } }
-        private AuthenticationTypes _authTypes;
+        private readonly AuthenticationTypes _authTypes;
 
-        private ContextOptions _contextOptions;
+        private readonly ContextOptions _contextOptions;
 
         static SAMStoreCtx()
         {
@@ -373,7 +373,7 @@ namespace System.DirectoryServices.AccountManagement
         {
             Debug.Assert(p != null);
             Debug.Assert(p.fakePrincipal == false);
-            Debug.Assert(p.unpersisted == true); // should only ever be called for new principals            
+            Debug.Assert(p.unpersisted == true); // should only ever be called for new principals
 
             // set the userAccountControl bits on the underlying directory entry
             DirectoryEntry de = (DirectoryEntry)p.UnderlyingObject;
@@ -604,7 +604,7 @@ namespace System.DirectoryServices.AccountManagement
                                                 schemaTypes,
                                                 entries,
                                                 _ctxBase,
-                                                -1,             // no size limit 
+                                                -1,             // no size limit
                                                 this,
                                                 new FindByDateMatcher(property, matchType, value));
 
@@ -669,7 +669,7 @@ namespace System.DirectoryServices.AccountManagement
                                                     schemaTypes,
                                                     entries,
                                                     _ctxBase,
-                                                    -1,             // no size limit 
+                                                    -1,             // no size limit
                                                     this,
                                                     new GroupMemberMatcher(SidB));
 
@@ -804,8 +804,8 @@ namespace System.DirectoryServices.AccountManagement
         // Cross-store support
         //
 
-        // Given a native store object that represents a "foreign" principal (e.g., a FPO object in this store that 
-        // represents a pointer to another store), maps that representation to the other store's StoreCtx and returns 
+        // Given a native store object that represents a "foreign" principal (e.g., a FPO object in this store that
+        // represents a pointer to another store), maps that representation to the other store's StoreCtx and returns
         // a Principal from that other StoreCtx.  The implementation of this method is highly dependent on the
         // details of the particular store, and must have knowledge not only of this StoreCtx, but also of how to
         // interact with other StoreCtxs to fulfill the request.
@@ -867,7 +867,7 @@ namespace System.DirectoryServices.AccountManagement
                             (this.credentials != null ? credentials.UserName : null),
                             (this.credentials != null ? credentials.Password : null),
                             DefaultContextOptions.ADDefaultContextOption);
-            
+
 #endif
 
             SecurityIdentifier sidObj = new SecurityIdentifier(sid, 0);
@@ -1007,7 +1007,7 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        private object _computerInfoLock = new object();
+        private readonly object _computerInfoLock = new object();
         private Nullable<bool> _isLSAM = null;
         private string _machineUserSuppliedName = null;
         private string _machineFlatName = null;
@@ -1109,4 +1109,3 @@ namespace System.DirectoryServices.AccountManagement
 }
 
 // #endif  // PAPI_REGSAM
-

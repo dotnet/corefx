@@ -66,26 +66,26 @@ namespace System.Text.Json.Tests
             person.LastModified = new DateTime(2000, 11, 20, 23, 55, 44, DateTimeKind.Utc);
             person.Name = "Name!";
 
-            string json = JsonSerializer.ToString(person, s_camelCaseAndIndentedOption);
+            string json = JsonSerializer.Serialize(person, s_camelCaseAndIndentedOption);
 
             Assert.Equal(@"{
   ""name"": ""Name!"",
   ""birthDate"": ""2000-11-20T23:55:44Z"",
   ""lastModified"": ""2000-11-20T23:55:44Z""
-}", json);
+}".NormalizeLineEndings(), json);
 
-            Person deserializedPerson = JsonSerializer.Parse<Person>(json, s_camelCaseAndIndentedOption);
+            Person deserializedPerson = JsonSerializer.Deserialize<Person>(json, s_camelCaseAndIndentedOption);
 
             Assert.Equal(person.BirthDate, deserializedPerson.BirthDate);
             Assert.Equal(person.LastModified, deserializedPerson.LastModified);
             Assert.Equal(person.Name, deserializedPerson.Name);
 
-            json = JsonSerializer.ToString(person, new JsonSerializerOptions { WriteIndented = true });
+            json = JsonSerializer.Serialize(person, new JsonSerializerOptions { WriteIndented = true });
             Assert.Equal(@"{
   ""Name"": ""Name!"",
   ""BirthDate"": ""2000-11-20T23:55:44Z"",
   ""LastModified"": ""2000-11-20T23:55:44Z""
-}", json);
+}".NormalizeLineEndings(), json);
         }
 
         [Fact]
@@ -99,7 +99,7 @@ namespace System.Text.Json.Tests
                 Sizes = new[] { "Small", "Medium", "Large" }
             };
 
-            string json = JsonSerializer.ToString(product, s_camelCaseAndIndentedOption);
+            string json = JsonSerializer.Serialize(product, s_camelCaseAndIndentedOption);
 
             Assert.Equal(@"{
   ""name"": ""Widget"",
@@ -110,7 +110,7 @@ namespace System.Text.Json.Tests
     ""Medium"",
     ""Large""
   ]
-}", json);
+}".NormalizeLineEndings(), json);
         }
     }
 }

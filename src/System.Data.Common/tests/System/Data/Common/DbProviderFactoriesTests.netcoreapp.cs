@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
@@ -103,7 +103,7 @@ namespace System.Data.Common
             Assert.Throws<ArgumentException>(() => DbProviderFactories.GetFactory("System.Data.SqlClient"));
             Assert.Throws<ArgumentException>(() => DbProviderFactories.RegisterFactory(string.Empty, typeof(System.Data.SqlClient.SqlClientFactory)));
         }
-        
+
         [Fact]
         public void RegisterFactoryWithAssemblyQualifiedNameTest()
         {
@@ -172,14 +172,14 @@ namespace System.Data.Common
             DataTable providerTable = DbProviderFactories.GetFactoryClasses();
             Assert.Equal(2, providerTable.Rows.Count);
             List<string> invariantNames = DbProviderFactories.GetProviderInvariantNames().ToList();
-            Assert.Equal(invariantNames.Count, 2);
-            Assert.True(invariantNames.Contains("System.Data.Common.TestProvider"));
-            Assert.True(invariantNames.Contains("System.Data.SqlClient"));
+            Assert.Equal(2, invariantNames.Count);
+            Assert.Contains("System.Data.Common.TestProvider", invariantNames);
+            Assert.Contains("System.Data.SqlClient", invariantNames);
         }
 
         private void ClearRegisteredFactories()
         {
-            // as the DbProviderFactories table is shared, for tests we need a clean one before a test starts to make sure the tests always succeed. 
+            // as the DbProviderFactories table is shared, for tests we need a clean one before a test starts to make sure the tests always succeed.
             Type type = typeof(DbProviderFactories);
             FieldInfo info = type.GetField("_registeredFactories", BindingFlags.NonPublic | BindingFlags.Static);
             IDictionary providerStorage = info.GetValue(null) as IDictionary;
@@ -187,7 +187,7 @@ namespace System.Data.Common
             providerStorage.Clear();
             Assert.Equal(0, providerStorage.Count);
         }
-        
+
 
         private void RegisterSqlClientAndTestRegistration(Action registrationFunc)
         {

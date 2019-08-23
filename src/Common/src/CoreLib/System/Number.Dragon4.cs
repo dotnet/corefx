@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.Numerics;
-using Internal.Runtime.CompilerServices;
 
 namespace System
 {
@@ -21,7 +20,7 @@ namespace System
 
             ulong mantissa = ExtractFractionAndBiasedExponent(value, out int exponent);
 
-            uint mantissaHighBitIdx = 0;
+            uint mantissaHighBitIdx;
             bool hasUnequalMargins = false;
 
             if ((mantissa >> DiyFp.DoubleImplicitBitIndex) != 0)
@@ -51,7 +50,7 @@ namespace System
 
             uint mantissa = ExtractFractionAndBiasedExponent(value, out int exponent);
 
-            uint mantissaHighBitIdx = 0;
+            uint mantissaHighBitIdx;
             bool hasUnequalMargins = false;
 
             if ((mantissa >> DiyFp.SingleImplicitBitIndex) != 0)
@@ -233,7 +232,7 @@ namespace System
             {
                 // The exponent estimate was incorrect.
                 // Increment the exponent and don't perform the premultiply needed for the first loop iteration.
-                digitExponent = digitExponent + 1;
+                digitExponent++;
             }
             else
             {
@@ -384,23 +383,26 @@ namespace System
             }
             else
             {
-                // In the scenario where the first significand digit is after the cutoff, we want to treat that
-                // first significand digit as the rounding digit and increase the decimalExponent by one. This
-                // ensures we correctly handle the case where the first significand digit is exactly one after
+                // In the scenario where the first significant digit is after the cutoff, we want to treat that
+                // first significant digit as the rounding digit. If the first significant would cause the next
+                // digit to round, we will increase the decimalExponent by one and set the previous digit to one.
+                // This  ensures we correctly handle the case where the first significant digit is exactly one after
                 // the cutoff, it is a 4, and the subsequent digit would round that to 5 inducing a double rounding
-                // bug when NumberToString is does its own rounding checks.
-
-                decimalExponent++;
+                // bug when NumberToString does its own rounding checks. However, if the first significant digit
+                // would not cause the next one to round, we preserve that digit as is.
 
                 // divide out the scale to extract the digit
                 outputDigit = BigInteger.HeuristicDivide(ref scaledValue, ref scale);
-                Debug.Assert(outputDigit < 10);
+                Debug.Assert((0 < outputDigit) && (outputDigit < 10));
 
                 if ((outputDigit > 5) || ((outputDigit == 5) && !scaledValue.IsZero()))
                 {
-                    buffer[curDigit] = (byte)('1');
-                    curDigit += 1;
+                    decimalExponent++;
+                    outputDigit = 1;
                 }
+
+                buffer[curDigit] = (byte)('0' + outputDigit);
+                curDigit += 1;
 
                 // return the number of digits output
                 return (uint)(curDigit);

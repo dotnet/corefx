@@ -3,12 +3,14 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Diagnostics;
 
 namespace System.Text.Json
 {
     /// <summary>
     ///   Represents a single property for a JSON object.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public readonly struct JsonProperty
     {
         /// <summary>
@@ -87,6 +89,33 @@ namespace System.Text.Json
         }
 
         /// <summary>
+        ///   Write the property into the provided writer as a named JSON object property.
+        /// </summary>
+        /// <param name="writer">The writer.</param>
+        /// <exception cref="ArgumentNullException">
+        ///   The <paramref name="writer"/> parameter is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        ///   This <see cref="Name"/>'s length is too large to be a JSON object property.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        ///   This <see cref="Value"/>'s <see cref="JsonElement.ValueKind"/> would result in an invalid JSON.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>>
+        public void WriteTo(Utf8JsonWriter writer)
+        {
+            if (writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            writer.WritePropertyName(Name);
+            Value.WriteTo(writer);
+        }
+
+        /// <summary>
         ///   Provides a <see cref="string"/> representation of the property for
         ///   debugging purposes.
         /// </summary>
@@ -99,5 +128,8 @@ namespace System.Text.Json
         {
             return Value.GetPropertyRawText();
         }
+
+        private string DebuggerDisplay
+            => Value.ValueKind == JsonValueKind.Undefined ? "<Undefined>" : $"\"{ToString()}\"";
     }
 }

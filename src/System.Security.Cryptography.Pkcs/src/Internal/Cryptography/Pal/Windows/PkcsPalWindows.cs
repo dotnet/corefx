@@ -28,76 +28,6 @@ namespace Internal.Cryptography.Pal.Windows
             return DecryptorPalWindows.Decode(encodedMessage, out version, out contentInfo, out contentEncryptionAlgorithm, out originatorCerts, out unprotectedAttributes);
         }
 
-        public sealed override byte[] EncodeOctetString(byte[] octets)
-        {
-            unsafe
-            {
-                fixed (byte* pOctets = octets)
-                {
-                    DATA_BLOB blob = new DATA_BLOB((IntPtr)pOctets, (uint)(octets.Length));
-                    return Interop.Crypt32.CryptEncodeObjectToByteArray(CryptDecodeObjectStructType.X509_OCTET_STRING, &blob);
-                }
-            }
-        }
-
-        public sealed override byte[] DecodeOctetString(byte[] encodedOctets)
-        {
-            using (SafeHandle sh = Interop.Crypt32.CryptDecodeObjectToMemory(CryptDecodeObjectStructType.X509_OCTET_STRING, encodedOctets))
-            {
-                unsafe
-                {
-                    DATA_BLOB blob = *(DATA_BLOB*)(sh.DangerousGetHandle());
-                    return blob.ToByteArray();
-                }
-            }
-        }
-
-        public sealed override byte[] EncodeUtcTime(DateTime utcTime)
-        {
-            long ft;
-            try 
-            {
-                ft = utcTime.ToFileTimeUtc();
-            }
-            catch (ArgumentException ex)
-            {
-                throw new CryptographicException(ex.Message, ex);
-            }
-
-            unsafe
-            {
-                return Interop.Crypt32.CryptEncodeObjectToByteArray(CryptDecodeObjectStructType.PKCS_UTC_TIME, &ft);
-            }
-        }
-
-        public sealed override DateTime DecodeUtcTime(byte[] encodedUtcTime)
-        {
-            long signingTime = 0;
-            unsafe
-            {
-                fixed (byte* pEncodedUtcTime = encodedUtcTime)
-                {
-                    int cbSize = sizeof(long);
-                    if (!Interop.Crypt32.CryptDecodeObject(CryptDecodeObjectStructType.PKCS_UTC_TIME, (IntPtr)pEncodedUtcTime, encodedUtcTime.Length, &signingTime, ref cbSize))
-                        throw Marshal.GetLastWin32Error().ToCryptographicException();
-                }
-            }
-            return DateTime.FromFileTimeUtc(signingTime);
-        }
-
-        public sealed override string DecodeOid(byte[] encodedOid)
-        {
-            using (SafeHandle sh = Interop.Crypt32.CryptDecodeObjectToMemory(CryptDecodeObjectStructType.X509_OBJECT_IDENTIFIER, encodedOid))
-            {
-                unsafe
-                {
-                    IntPtr pOidValue = *(IntPtr*)(sh.DangerousGetHandle());
-                    string contentType = pOidValue.ToStringAnsi();
-                    return contentType;
-                }
-            }
-        }
-
         public sealed override Oid GetEncodedMessageType(byte[] encodedMessage)
         {
             using (SafeCryptMsgHandle hCryptMsg = Interop.Crypt32.CryptMsgOpenToDecode(MsgEncodingType.All, 0, 0, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero))
@@ -113,31 +43,16 @@ namespace Internal.Cryptography.Pal.Windows
                 if (!Interop.Crypt32.CryptMsgGetParam(hCryptMsg, CryptMsgParamType.CMSG_TYPE_PARAM, 0, out msgTypeAsInt, ref cbSize))
                     throw Marshal.GetLastWin32Error().ToCryptographicException();
 
-                CryptMsgType msgType = (CryptMsgType)msgTypeAsInt;
-
-                switch (msgType)
+                return (CryptMsgType)msgTypeAsInt switch
                 {
-                    case CryptMsgType.CMSG_DATA:
-                        return Oid.FromOidValue(Oids.Pkcs7Data, OidGroup.ExtensionOrAttribute);
-
-                    case CryptMsgType.CMSG_SIGNED:
-                        return Oid.FromOidValue(Oids.Pkcs7Signed, OidGroup.ExtensionOrAttribute);
-
-                    case CryptMsgType.CMSG_ENVELOPED:
-                        return Oid.FromOidValue(Oids.Pkcs7Enveloped, OidGroup.ExtensionOrAttribute);
-
-                    case CryptMsgType.CMSG_SIGNED_AND_ENVELOPED:
-                        return Oid.FromOidValue(Oids.Pkcs7SignedEnveloped, OidGroup.ExtensionOrAttribute);
-
-                    case CryptMsgType.CMSG_HASHED:
-                        return Oid.FromOidValue(Oids.Pkcs7Hashed, OidGroup.ExtensionOrAttribute);
-
-                    case CryptMsgType.CMSG_ENCRYPTED:
-                        return Oid.FromOidValue(Oids.Pkcs7Encrypted, OidGroup.ExtensionOrAttribute);
-
-                    default:
-                        throw ErrorCode.CRYPT_E_INVALID_MSG_TYPE.ToCryptographicException();
-                }
+                    CryptMsgType.CMSG_DATA => Oid.FromOidValue(Oids.Pkcs7Data, OidGroup.ExtensionOrAttribute),
+                    CryptMsgType.CMSG_SIGNED => Oid.FromOidValue(Oids.Pkcs7Signed, OidGroup.ExtensionOrAttribute),
+                    CryptMsgType.CMSG_ENVELOPED => Oid.FromOidValue(Oids.Pkcs7Enveloped, OidGroup.ExtensionOrAttribute),
+                    CryptMsgType.CMSG_SIGNED_AND_ENVELOPED => Oid.FromOidValue(Oids.Pkcs7SignedEnveloped, OidGroup.ExtensionOrAttribute),
+                    CryptMsgType.CMSG_HASHED => Oid.FromOidValue(Oids.Pkcs7Hashed, OidGroup.ExtensionOrAttribute),
+                    CryptMsgType.CMSG_ENCRYPTED => Oid.FromOidValue(Oids.Pkcs7Encrypted, OidGroup.ExtensionOrAttribute),
+                    _ => throw ErrorCode.CRYPT_E_INVALID_MSG_TYPE.ToCryptographicException(),
+                };
             }
         }
 

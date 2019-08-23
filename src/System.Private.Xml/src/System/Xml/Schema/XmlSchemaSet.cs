@@ -21,29 +21,29 @@ namespace System.Xml.Schema
     /// </summary>
     public class XmlSchemaSet
     {
-        private XmlNameTable _nameTable;
+        private readonly XmlNameTable _nameTable;
         private SchemaNames _schemaNames;
-        private SortedList _schemas;              // List of source schemas 
+        private readonly SortedList _schemas;              // List of source schemas
 
         //Event handling
-        private ValidationEventHandler _internalEventHandler;
+        private readonly ValidationEventHandler _internalEventHandler;
         private ValidationEventHandler _eventHandler;
 
         private bool _isCompiled = false;
 
         //Dictionary<Uri, XmlSchema> schemaLocations;
         //Dictionary<ChameleonKey, XmlSchema> chameleonSchemas;
-        private Hashtable _schemaLocations;
-        private Hashtable _chameleonSchemas;
+        private readonly Hashtable _schemaLocations;
+        private readonly Hashtable _chameleonSchemas;
 
-        private Hashtable _targetNamespaces;
+        private readonly Hashtable _targetNamespaces;
         private bool _compileAll;
 
         //Cached Compiled Info
         private SchemaInfo _cachedCompiledInfo;
 
         //Reader settings to parse schema
-        private XmlReaderSettings _readerSettings;
+        private readonly XmlReaderSettings _readerSettings;
         private XmlSchema _schemaForSchema;  //Only one schema for schema per set
 
         //Schema compilation settings
@@ -64,7 +64,7 @@ namespace System.Xml.Schema
                 if (_internalSyncObject == null)
                 {
                     object o = new object();
-                    Interlocked.CompareExchange<Object>(ref _internalSyncObject, o, null);
+                    Interlocked.CompareExchange<object>(ref _internalSyncObject, o, null);
                 }
                 return _internalSyncObject;
             }
@@ -120,7 +120,7 @@ namespace System.Xml.Schema
         }
 
 
-        //Public Properties       
+        //Public Properties
         /// <summary>
         /// The default XmlNameTable used by the XmlSchemaSet when loading new schemas.
         /// </summary>
@@ -303,7 +303,7 @@ namespace System.Xml.Schema
                     try
                     {
                         schema = Add(targetNamespace, ParseSchema(targetNamespace, reader));
-                        while (reader.Read()) ;// wellformness check; 
+                        while (reader.Read()) ;// wellformness check;
                     }
                     finally
                     {
@@ -578,7 +578,7 @@ namespace System.Xml.Schema
                         compiler.ImportAllCompiledSchemas(this);
                     }
                     try
-                    { //First thing to do in the try block is to acquire locks since finally will try to release them. 
+                    { //First thing to do in the try block is to acquire locks since finally will try to release them.
                         //If we don't acquire the locks first, and an exception occurs in the code before the locking code, then Threading.SynchronizationLockException will be thrown
                         //when attempting to release it in the finally block
                         XmlSchema currentSchema;
@@ -651,7 +651,7 @@ namespace System.Xml.Schema
             // Due to bug 644477 - this method is tightly coupled (THE CODE IS BASICALLY COPIED) to Remove, Add and AddSchemaToSet
             // methods. If you change anything here *make sure* to update Remove/Add/AddSchemaToSet method(s) accordingly.
             // The only difference is that we don't touch .schemas collection here to not break a code like this:
-            // foreach(XmlSchema s in schemaset.schemas) { schemaset.Reprocess(s); }
+            // foreach (XmlSchema s in schemaset.schemas) { schemaset.Reprocess(s); }
             // This is by purpose.
             if (schema == null)
             {
@@ -665,7 +665,7 @@ namespace System.Xml.Schema
             lock (InternalSyncObject)
             { //Lock set so that set cannot be compiled in another thread
                 // This code is copied from method:
-                // Remove(XmlSchema schema, bool forceCompile) 
+                // Remove(XmlSchema schema, bool forceCompile)
                 // If you changed anything here go and change the same in Remove(XmlSchema schema, bool forceCompile) method
                 #region Copied from Remove(XmlSchema schema, bool forceCompile)
 
@@ -774,7 +774,7 @@ namespace System.Xml.Schema
 
         private XmlSchema Add(string targetNamespace, XmlSchema schema)
         {
-            // Due to bug 644477 - this method is tightly coupled (THE CODE IS BASICALLY COPIED) to Reprocess 
+            // Due to bug 644477 - this method is tightly coupled (THE CODE IS BASICALLY COPIED) to Reprocess
             // method. If you change anything here *make sure* to update Reprocess method accordingly.
 
             if (schema == null || schema.ErrorCount != 0)
@@ -783,7 +783,7 @@ namespace System.Xml.Schema
             }
 
             // This code is copied to method:
-            // Reprocess(XmlSchema schema) 
+            // Reprocess(XmlSchema schema)
             // If you changed anything here go and change the same in Reprocess(XmlSchema schema) method
             if (PreprocessSchema(ref schema, targetNamespace))
             { //No perf opt for already compiled schemas
@@ -829,7 +829,7 @@ namespace System.Xml.Schema
             }
 
             foreach (XmlSchemaElement element in schema.Elements.Values) {
-                if(!AddToTable(elements, element.QualifiedName, element)) {
+                if (!AddToTable(elements, element.QualifiedName, element)) {
                     RemoveSchemaFromGlobalTables(schema);
                     return false;
                 }
@@ -863,7 +863,7 @@ namespace System.Xml.Schema
                 }
             }
             schema.AddCompiledInfo(newCompiledInfo);
-            
+
             return true;
         }
 #endif
@@ -993,14 +993,14 @@ namespace System.Xml.Schema
 
         private void AddSchemaToSet(XmlSchema schema)
         {
-            // Due to bug 644477 - this method is tightly coupled (THE CODE IS BASICALLY COPIED) to Reprocess 
+            // Due to bug 644477 - this method is tightly coupled (THE CODE IS BASICALLY COPIED) to Reprocess
             // method. If you change anything here *make sure* to update Reprocess method accordingly.
 
             _schemas.Add(schema.SchemaId, schema);
             //Add to targetNamespaces table
 
             // This code is copied to method:
-            // Reprocess(XmlSchema schema) 
+            // Reprocess(XmlSchema schema)
             // If you changed anything here go and change the same in Reprocess(XmlSchema schema) method
             #region This code is copied to Reprocess(XmlSchema schema) method
 
@@ -1043,7 +1043,7 @@ namespace System.Xml.Schema
                     ResolveSubstitutionGroup(substGroup, substitutionGroupsTable);
                 }
 
-                //Add or Merge new substitutionGroups with those that already exist in the set 
+                //Add or Merge new substitutionGroups with those that already exist in the set
                 XmlQualifiedName head = substGroup.Examplar;
                 XmlSchemaSubstitutionGroup oldSubstGroup = (XmlSchemaSubstitutionGroup)substitutionGroups[head];
                 if (oldSubstGroup != null)
@@ -1106,7 +1106,7 @@ namespace System.Xml.Schema
 
         internal XmlSchema Remove(XmlSchema schema, bool forceCompile)
         {
-            // Due to bug 644477 - this method is tightly coupled (THE CODE IS BASICALLY COPIED) to Reprocess 
+            // Due to bug 644477 - this method is tightly coupled (THE CODE IS BASICALLY COPIED) to Reprocess
             // method. If you change anything here *make sure* to update Reprocess method accordingly.
             if (schema == null)
             {
@@ -1117,7 +1117,7 @@ namespace System.Xml.Schema
                 if (_schemas.ContainsKey(schema.SchemaId))
                 {
                     // This code is copied to method:
-                    // Reprocess(XmlSchema schema) 
+                    // Reprocess(XmlSchema schema)
                     // If you changed anything here go and change the same in Reprocess(XmlSchema schema) method
                     #region This code is copied to Reprocess(XmlSchema schema) method
 

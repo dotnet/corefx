@@ -15,7 +15,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Runtime.Serialization
 {
-#if USE_REFEMIT || uapaot
+#if USE_REFEMIT
     public delegate void XmlFormatClassWriterDelegate(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, ClassDataContract dataContract);
     public delegate void XmlFormatCollectionWriterDelegate(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, CollectionDataContract dataContract);
     public sealed class XmlFormatWriterGenerator
@@ -25,7 +25,7 @@ namespace System.Runtime.Serialization
     internal sealed class XmlFormatWriterGenerator
 #endif
     {
-        private CriticalHelper _helper;
+        private readonly CriticalHelper _helper;
 
         public XmlFormatWriterGenerator()
         {
@@ -49,7 +49,7 @@ namespace System.Runtime.Serialization
         /// </SecurityNote>
         private class CriticalHelper
         {
-#if !USE_REFEMIT && !uapaot
+#if !USE_REFEMIT
             private CodeGenerator _ilg;
             private ArgBuilder _xmlWriterArg;
             private ArgBuilder _contextArg;
@@ -64,9 +64,6 @@ namespace System.Runtime.Serialization
             private int _childElementIndex = 0;
 #endif
 
-#if uapaot
-            [RemovableFeature(ReflectionBasedSerializationFeature.Name)]
-#endif
             private XmlFormatClassWriterDelegate CreateReflectionXmlFormatClassWriterDelegate()
             {
                 return new ReflectionXmlFormatWriter().ReflectionWriteClass;
@@ -78,15 +75,9 @@ namespace System.Runtime.Serialization
                 {
                     return CreateReflectionXmlFormatClassWriterDelegate();
                 }
-#if uapaot
-                else if (DataContractSerializer.Option == SerializationOption.ReflectionAsBackup)
-                {
-                    return CreateReflectionXmlFormatClassWriterDelegate();
-                }
-#endif
                 else
                 {
-#if USE_REFEMIT || uapaot
+#if USE_REFEMIT
                     throw new InvalidOperationException("Cannot generate class writer");
 #else
                     _ilg = new CodeGenerator();
@@ -113,9 +104,6 @@ namespace System.Runtime.Serialization
                 }
             }
 
-#if uapaot
-            [RemovableFeature(ReflectionBasedSerializationFeature.Name)]
-#endif
             private XmlFormatCollectionWriterDelegate CreateReflectionXmlFormatCollectionWriterDelegate()
             {
                 return new ReflectionXmlFormatWriter().ReflectionWriteCollection;
@@ -127,15 +115,9 @@ namespace System.Runtime.Serialization
                 {
                     return CreateReflectionXmlFormatCollectionWriterDelegate();
                 }
-#if uapaot
-                else if (DataContractSerializer.Option == SerializationOption.ReflectionAsBackup)
-                {
-                    return CreateReflectionXmlFormatCollectionWriterDelegate();
-                }
-#endif
                 else
                 {
-#if USE_REFEMIT || uapaot
+#if USE_REFEMIT
                     throw new InvalidOperationException("Cannot generate class writer");
 #else
                     _ilg = new CodeGenerator();
@@ -162,7 +144,7 @@ namespace System.Runtime.Serialization
                 }
             }
 
-#if !USE_REFEMIT && !uapaot
+#if !USE_REFEMIT
             private void InitArgs(Type objType)
             {
                 _xmlWriterArg = _ilg.GetArg(0);
@@ -182,7 +164,7 @@ namespace System.Runtime.Serialization
                     _ilg.ConvertValue(objectArg.ArgType, Globals.TypeOfDateTimeOffset);
                     _ilg.Call(XmlFormatGeneratorStatics.GetDateTimeOffsetAdapterMethod);
                 }
-                //Copy the KeyValuePair<K,T> to a KeyValuePairAdapter<K,T>. 
+                //Copy the KeyValuePair<K,T> to a KeyValuePairAdapter<K,T>.
                 else if (objType.IsGenericType && objType.GetGenericTypeDefinition() == Globals.TypeOfKeyValuePairAdapter)
                 {
                     ClassDataContract dc = (ClassDataContract)DataContract.GetDataContract(objType);
@@ -303,8 +285,8 @@ namespace System.Runtime.Serialization
                     LocalBuilder memberValue = null;
 
                     _ilg.Load(_contextArg);
-                    _ilg.Call(methodInfo: member.IsGetOnlyCollection ? 
-                        XmlFormatGeneratorStatics.StoreIsGetOnlyCollectionMethod : 
+                    _ilg.Call(methodInfo: member.IsGetOnlyCollection ?
+                        XmlFormatGeneratorStatics.StoreIsGetOnlyCollectionMethod :
                         XmlFormatGeneratorStatics.ResetIsGetOnlyCollectionMethod);
 
                     if (!member.EmitDefaultValue)
@@ -540,7 +522,7 @@ namespace System.Runtime.Serialization
                     _ilg.Load(_contextArg);
                     _ilg.Load(_xmlWriterArg);
                 }
-                // load primitive value 
+                // load primitive value
                 if (value != null)
                 {
                     _ilg.Load(value);
@@ -688,7 +670,7 @@ namespace System.Runtime.Serialization
                 _ilg.Load(memberValue);
                 _ilg.ConvertValue(memberValue.LocalType, Globals.TypeOfObject);
                 //In SL GetTypeHandle throws MethodAccessException as its internal and extern.
-                //So as a workaround, call XmlObjectSerializerWriteContext.IsMemberTypeSameAsMemberValue that 
+                //So as a workaround, call XmlObjectSerializerWriteContext.IsMemberTypeSameAsMemberValue that
                 //does the actual comparison and returns the bool value we care.
                 _ilg.Call(null, XmlFormatGeneratorStatics.IsMemberTypeSameAsMemberValue, memberValue, memberType);
                 _ilg.Load(writeXsiType);

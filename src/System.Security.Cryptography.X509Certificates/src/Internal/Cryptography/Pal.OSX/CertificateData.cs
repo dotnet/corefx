@@ -343,7 +343,7 @@ namespace Internal.Cryptography.Pal
                 {
                     AsnReader tavReader = rdnReader.ReadSequence();
                     string oid = tavReader.ReadObjectIdentifierAsString();
-                    string value = tavReader.ReadDirectoryOrIA5String();
+                    string value = tavReader.ReadAnyAsnString();
                     tavReader.ThrowIfNotEmpty();
                     yield return new KeyValuePair<string, string>(oid, value);
                 }
@@ -359,10 +359,10 @@ namespace Internal.Cryptography.Pal
             StringBuilder builder = new StringBuilder(PemHeader.Length + PemFooter.Length + rawData.Length * 2);
             builder.Append(PemHeader);
             builder.AppendLine();
-            
+
             builder.Append(Convert.ToBase64String(rawData, Base64FormattingOptions.InsertLineBreaks));
             builder.AppendLine();
-        
+
             builder.Append(PemFooter);
             builder.AppendLine();
 

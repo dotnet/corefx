@@ -342,9 +342,9 @@ namespace SerializationTypes
         }
     }
 
-    public class __TypeNameWithSpecialCharacters漢ñ
+    public class __TypeNameWithSpecialCharacters\u6F22\u00F1
     {
-        public string PropertyNameWithSpecialCharacters漢ñ { get; set; }
+        public string PropertyNameWithSpecialCharacters\u6F22\u00F1 { get; set; }
     }
 
     public class BaseClassWithSamePropertyName
@@ -839,6 +839,18 @@ namespace SerializationTypes
         public string StringField2;
     }
 
+    [KnownType(typeof(List<SimpleType>))]
+    [KnownType(typeof(SimpleType[]))]
+    [DataContract]
+    public class TypeWithKnownTypesOfCollectionsWithConflictingXmlName
+    {
+        [DataMember]
+        public object Value1 = new List<SimpleType>();
+
+        [DataMember]
+        public object Value2 = new SimpleType[1];
+
+    }
 }
 
 public class TypeWithXmlElementProperty
@@ -1066,7 +1078,7 @@ public class BaseClass1
 public class DerivedClass1 : BaseClass1
 {
     [XmlElement]
-    new public MyCollection1 Prop;
+    public new MyCollection1 Prop;
 }
 
 public class MyCollection1 : IEnumerable<DateTime>, IEnumerable

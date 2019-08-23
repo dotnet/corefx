@@ -217,12 +217,13 @@ namespace System.IO
                         && errorCode != Interop.Errors.ERROR_INVALID_PARAMETER
                         && errorCode != Interop.Errors.ERROR_NETWORK_UNREACHABLE
                         && errorCode != Interop.Errors.ERROR_NETWORK_ACCESS_DENIED
-                        && errorCode != Interop.Errors.ERROR_INVALID_HANDLE  // eg from \\.\CON
+                        && errorCode != Interop.Errors.ERROR_INVALID_HANDLE         // eg from \\.\CON
+                        && errorCode != Interop.Errors.ERROR_FILENAME_EXCED_RANGE   // Path is too long
                         )
                     {
                         // Assert so we can track down other cases (if any) to add to our test suite
                         Debug.Assert(errorCode == Interop.Errors.ERROR_ACCESS_DENIED || errorCode == Interop.Errors.ERROR_SHARING_VIOLATION,
-                            $"Unexpected error code getting attributes {errorCode}");
+                            $"Unexpected error code getting attributes {errorCode} from path {path}");
 
                         // Files that are marked for deletion will not let you GetFileAttributes,
                         // ERROR_ACCESS_DENIED is given back without filling out the data struct.

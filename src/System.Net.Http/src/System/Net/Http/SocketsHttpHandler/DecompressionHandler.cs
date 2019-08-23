@@ -94,8 +94,8 @@ namespace System.Net.Http
 
         private abstract class DecompressedContent : HttpContent
         {
-            HttpContent _originalContent;
-            bool _contentConsumed;
+            private readonly HttpContent _originalContent;
+            private bool _contentConsumed;
 
             public DecompressedContent(HttpContent originalContent)
             {
@@ -150,6 +150,8 @@ namespace System.Net.Http
                 length = 0;
                 return false;
             }
+
+            internal override bool AllowDuplex => false;
 
             protected override void Dispose(bool disposing)
             {

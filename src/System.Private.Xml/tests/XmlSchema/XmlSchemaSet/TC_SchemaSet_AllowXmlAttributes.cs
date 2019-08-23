@@ -26,7 +26,7 @@ namespace System.Xml.Tests
         public int warningCount;
         public string testData = null;
 
-        public void Initialize()
+        private void Initialize()
         {
             this.testData = Path.Combine(TestData._Root, "AllowXmlAttributes");
             bWarningCallback = bErrorCallback = false;
@@ -34,7 +34,7 @@ namespace System.Xml.Tests
         }
 
         //hook up validaton callback
-        public void ValidationCallback(object sender, ValidationEventArgs args)
+        private void ValidationCallback(object sender, ValidationEventArgs args)
         {
             if (args.Severity == XmlSeverityType.Warning)
             {
@@ -85,7 +85,7 @@ namespace System.Xml.Tests
         }
 
         /*
-         *	Attribute Wildcards
+         *  Attribute Wildcards
          */
 
         [Theory]
@@ -134,7 +134,7 @@ namespace System.Xml.Tests
         //[Variation(Desc = "v8.1.1- Attributes Wildcards(1), allowXmlAttribute=false", Priority = 1, id = 59, Params = new object[] { "v9-1.xml", "v9-1.xsd", false, 0, 0, 2 })]
         [InlineData("v9-1.xml", "v9-1.xsd", false, 0, 0, 2)]
         /*
-         *	Required and Prohibited Attributes
+         *  Required and Prohibited Attributes
          */
         //[Variation(Desc = "v7.1.8- Required and Prohibited Attributes(4), allowXmlAttribute=true", Priority = 1, id = 58, Params = new object[] { "v8-4.xml", "v8-3.xsd", true, 0, 1, 2 })]
         [InlineData("v8-4.xml", "v8-3.xsd", true, 0, 1, 2)]

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Internal.Runtime.InteropServices.WindowsRuntime;
 using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -17,8 +18,8 @@ namespace System.IO
 
     internal abstract partial class StreamOperationAsyncResult : IAsyncResult
     {
-        private AsyncCallback _userCompletionCallback = null;
-        private object _userAsyncStateInfo = null;
+        private readonly AsyncCallback _userCompletionCallback = null;
+        private readonly object _userAsyncStateInfo = null;
 
         private IAsyncInfo _asyncStreamOperation = null;
 
@@ -281,6 +282,11 @@ namespace System.IO
             if (_userCompletionCallback != null)
                 _userCompletionCallback(this);
         }
+
+        private void ThrowWithIOExceptionDispatchInfo(Exception e)
+        {
+            WinRtIOHelper.NativeExceptionToIOExceptionInfo(ExceptionSupport.AttachRestrictedErrorInfo(_completedOperation.ErrorCode)).Throw();
+        }
     }  // class StreamOperationAsyncResult
 
     #endregion class StreamOperationAsyncResult
@@ -290,7 +296,7 @@ namespace System.IO
 
     internal class StreamReadAsyncResult : StreamOperationAsyncResult
     {
-        private IBuffer _userBuffer = null;
+        private readonly IBuffer _userBuffer = null;
 
         internal StreamReadAsyncResult(IAsyncOperationWithProgress<IBuffer, uint> asyncStreamReadOperation, IBuffer buffer,
                                        AsyncCallback userCompletionCallback, object userAsyncStateInfo,

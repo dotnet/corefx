@@ -14,7 +14,7 @@ namespace System.Net.Sockets
     internal sealed unsafe class SocketAsyncEngine
     {
         //
-        // Encapsulates a particular SocketAsyncContext object's access to a SocketAsyncEngine.  
+        // Encapsulates a particular SocketAsyncContext object's access to a SocketAsyncEngine.
         //
         public readonly struct Token
         {
@@ -57,31 +57,34 @@ namespace System.Net.Sockets
 
         // In debug builds, force there to be 2 engines. In release builds, use half the number of processors when
         // there are at least 6. The lower bound is to avoid using multiple engines on systems which aren't servers.
-        private static readonly int EngineCount =
+#pragma warning disable CA1802 // const works for debug, but needs to be static readonly for release
+        private static readonly int s_engineCount =
 #if DEBUG
             2;
 #else
             Environment.ProcessorCount >= 6 ? Environment.ProcessorCount / 2 : 1;
 #endif
+#pragma warning restore CA1802
+
         //
         // The current engines. We replace an engine when it runs out of "handle" values.
         // Must be accessed under s_lock.
         //
-        private static readonly SocketAsyncEngine[] s_currentEngines = new SocketAsyncEngine[EngineCount];
+        private static readonly SocketAsyncEngine[] s_currentEngines = new SocketAsyncEngine[s_engineCount];
         private static int s_allocateFromEngine = 0;
 
         private readonly IntPtr _port;
         private readonly Interop.Sys.SocketEvent* _buffer;
 
         //
-        // The read and write ends of a native pipe, used to signal that this instance's event loop should stop 
+        // The read and write ends of a native pipe, used to signal that this instance's event loop should stop
         // processing events.
-        // 
+        //
         private readonly int _shutdownReadPipe;
         private readonly int _shutdownWritePipe;
 
         //
-        // Each SocketAsyncContext is associated with a particular "handle" value, used to identify that 
+        // Each SocketAsyncContext is associated with a particular "handle" value, used to identify that
         // SocketAsyncContext when events are raised.  These handle values are never reused, because we do not have
         // a way to ensure that we will never see an event for a socket/handle that has been freed.  Instead, we
         // allocate monotonically increasing handle values up to some limit; when we would exceed that limit,
@@ -102,7 +105,7 @@ namespace System.Net.Sockets
         //
         private static readonly IntPtr MaxHandles = IntPtr.Size == 4 ? (IntPtr)int.MaxValue : (IntPtr)long.MaxValue;
 #endif
-        private static readonly IntPtr MinHandlesForAdditionalEngine = EngineCount == 1 ? MaxHandles : (IntPtr)32;
+        private static readonly IntPtr MinHandlesForAdditionalEngine = s_engineCount == 1 ? MaxHandles : (IntPtr)32;
 
         //
         // Sentinel handle value to identify events from the "shutdown pipe," used to signal an event loop to stop
@@ -119,7 +122,7 @@ namespace System.Net.Sockets
         //
         // Count of handles that have been allocated for this event port, but not yet freed.
         // Must be accessed under s_lock.
-        // 
+        //
         private IntPtr _outstandingHandles;
 
         //
@@ -181,7 +184,7 @@ namespace System.Net.Sockets
                 // Round-robin to the next engine once we have sufficient sockets on this one.
                 if (!engine.HasLowNumberOfSockets)
                 {
-                    s_allocateFromEngine = (s_allocateFromEngine + 1) % EngineCount;
+                    s_allocateFromEngine = (s_allocateFromEngine + 1) % s_engineCount;
                 }
             }
         }
@@ -215,7 +218,7 @@ namespace System.Net.Sockets
                     Debug.Assert(_outstandingHandles.ToInt64() >= 0, $"Unexpected _outstandingHandles: {_outstandingHandles}");
 
                     //
-                    // If we've allocated all possible handles for this instance, and freed them all, then 
+                    // If we've allocated all possible handles for this instance, and freed them all, then
                     // we don't need the event loop any more, and can reclaim resources.
                     //
                     if (IsFull && _outstandingHandles == IntPtr.Zero)
@@ -226,7 +229,7 @@ namespace System.Net.Sockets
             }
 
             //
-            // Signal shutdown outside of the lock to reduce contention.  
+            // Signal shutdown outside of the lock to reduce contention.
             //
             if (shutdownNeeded)
             {
@@ -331,6 +334,7 @@ namespace System.Net.Sockets
                             if (context != null)
                             {
                                 context.HandleEvents(_buffer[i].Events);
+                                context = null;
                             }
                         }
                     }
@@ -379,7 +383,7 @@ namespace System.Net.Sockets
 
         private bool TryRegister(SafeSocketHandle socket, IntPtr handle, out Interop.Error error)
         {
-            error = Interop.Sys.TryChangeSocketEventRegistration(_port, socket, Interop.Sys.SocketEvents.None, 
+            error = Interop.Sys.TryChangeSocketEventRegistration(_port, socket, Interop.Sys.SocketEvents.None,
                 Interop.Sys.SocketEvents.Read | Interop.Sys.SocketEvents.Write, handle);
             return error == Interop.Error.SUCCESS;
         }

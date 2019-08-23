@@ -10,7 +10,7 @@ using System.Threading;
 namespace System.Collections.Concurrent
 {
     /// <summary>
-    /// Represents a thread-safe, unordered collection of objects. 
+    /// Represents a thread-safe, unordered collection of objects.
     /// </summary>
     /// <typeparam name="T">Specifies the type of elements in the bag.</typeparam>
     /// <remarks>
@@ -20,7 +20,7 @@ namespace System.Collections.Concurrent
     /// scenarios where the same thread will be both producing and consuming data stored in the bag.
     /// </para>
     /// <para>
-    /// <see cref="ConcurrentBag{T}"/> accepts null reference (Nothing in Visual Basic) as a valid 
+    /// <see cref="ConcurrentBag{T}"/> accepts null reference (Nothing in Visual Basic) as a valid
     /// value for reference types.
     /// </para>
     /// <para>
@@ -82,7 +82,7 @@ namespace System.Collections.Concurrent
         /// <summary>
         /// Attempts to add an object to the <see cref="ConcurrentBag{T}"/>.
         /// </summary>
-        /// <param name="item">The object to be added to the 
+        /// <param name="item">The object to be added to the
         /// <see cref="ConcurrentBag{T}"/>. The value can be a null reference
         /// (Nothing in Visual Basic) for reference types.</param>
         /// <returns>Always returns true</returns>
@@ -251,13 +251,13 @@ namespace System.Collections.Concurrent
 
         /// <summary>
         /// Copies the <see cref="ConcurrentBag{T}"/> elements to an existing
-        /// one-dimensional <see cref="T:System.Array">Array</see>, starting at the specified array
+        /// one-dimensional <see cref="System.Array">Array</see>, starting at the specified array
         /// index.
         /// </summary>
-        /// <param name="array">The one-dimensional <see cref="T:System.Array">Array</see> that is the
+        /// <param name="array">The one-dimensional <see cref="System.Array">Array</see> that is the
         /// destination of the elements copied from the
         /// <see cref="ConcurrentBag{T}"/>. The <see
-        /// cref="T:System.Array">Array</see> must have zero-based indexing.</param>
+        /// cref="System.Array">Array</see> must have zero-based indexing.</param>
         /// <param name="index">The zero-based index in <paramref name="array"/> at which copying
         /// begins.</param>
         /// <exception cref="ArgumentNullException"><paramref name="array"/> is a null reference (Nothing in
@@ -330,14 +330,14 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
-        /// Copies the elements of the <see cref="T:System.Collections.ICollection"/> to an <see
-        /// cref="T:System.Array"/>, starting at a particular
-        /// <see cref="T:System.Array"/> index.
+        /// Copies the elements of the <see cref="System.Collections.ICollection"/> to an <see
+        /// cref="System.Array"/>, starting at a particular
+        /// <see cref="System.Array"/> index.
         /// </summary>
-        /// <param name="array">The one-dimensional <see cref="T:System.Array">Array</see> that is the
+        /// <param name="array">The one-dimensional <see cref="System.Array">Array</see> that is the
         /// destination of the elements copied from the
         /// <see cref="ConcurrentBag{T}"/>. The <see
-        /// cref="T:System.Array">Array</see> must have zero-based indexing.</param>
+        /// cref="System.Array">Array</see> must have zero-based indexing.</param>
         /// <param name="index">The zero-based index in <paramref name="array"/> at which copying
         /// begins.</param>
         /// <exception cref="ArgumentNullException"><paramref name="array"/> is a null reference (Nothing in
@@ -348,10 +348,10 @@ namespace System.Collections.Concurrent
         /// <paramref name="array"/> is multidimensional. -or-
         /// <paramref name="array"/> does not have zero-based indexing. -or-
         /// <paramref name="index"/> is equal to or greater than the length of the <paramref name="array"/>
-        /// -or- The number of elements in the source <see cref="T:System.Collections.ICollection"/> is
+        /// -or- The number of elements in the source <see cref="System.Collections.ICollection"/> is
         /// greater than the available space from <paramref name="index"/> to the end of the destination
         /// <paramref name="array"/>. -or- The type of the source <see
-        /// cref="T:System.Collections.ICollection"/> cannot be cast automatically to the type of the
+        /// cref="System.Collections.ICollection"/> cannot be cast automatically to the type of the
         /// destination <paramref name="array"/>.
         /// </exception>
         void ICollection.CopyTo(Array array, int index)
@@ -459,7 +459,7 @@ namespace System.Collections.Concurrent
         /// cref="ConcurrentBag{T}"/>.</returns>
         /// <remarks>
         /// The enumeration represents a moment-in-time snapshot of the contents
-        /// of the bag.  It does not reflect any updates to the collection after 
+        /// of the bag.  It does not reflect any updates to the collection after
         /// <see cref="GetEnumerator"/> was called.  The enumerator is safe to use
         /// concurrently with reads from and writes to the bag.
         /// </remarks>
@@ -473,7 +473,7 @@ namespace System.Collections.Concurrent
         /// cref="ConcurrentBag{T}"/>.</returns>
         /// <remarks>
         /// The items enumerated represent a moment-in-time snapshot of the contents
-        /// of the bag.  It does not reflect any update to the collection after 
+        /// of the bag.  It does not reflect any update to the collection after
         /// <see cref="GetEnumerator"/> was called.
         /// </remarks>
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -484,7 +484,7 @@ namespace System.Collections.Concurrent
         /// <value>The number of elements contained in the <see cref="ConcurrentBag{T}"/>.</value>
         /// <remarks>
         /// The count returned represents a moment-in-time snapshot of the contents
-        /// of the bag.  It does not reflect any updates to the collection after 
+        /// of the bag.  It does not reflect any updates to the collection after
         /// <see cref="GetEnumerator"/> was called.
         /// </remarks>
         public int Count
@@ -583,19 +583,19 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
-        /// Gets a value indicating whether access to the <see cref="T:System.Collections.ICollection"/> is
+        /// Gets a value indicating whether access to the <see cref="System.Collections.ICollection"/> is
         /// synchronized with the SyncRoot.
         /// </summary>
-        /// <value>true if access to the <see cref="T:System.Collections.ICollection"/> is synchronized
+        /// <value>true if access to the <see cref="System.Collections.ICollection"/> is synchronized
         /// with the SyncRoot; otherwise, false. For <see cref="ConcurrentBag{T}"/>, this property always
         /// returns false.</value>
         bool ICollection.IsSynchronized => false;
 
         /// <summary>
         /// Gets an object that can be used to synchronize access to the <see
-        /// cref="T:System.Collections.ICollection"/>. This property is not supported.
+        /// cref="System.Collections.ICollection"/>. This property is not supported.
         /// </summary>
-        /// <exception cref="T:System.NotSupportedException">The SyncRoot property is not supported.</exception>
+        /// <exception cref="System.NotSupportedException">The SyncRoot property is not supported.</exception>
         object ICollection.SyncRoot
         {
             get { throw new NotSupportedException(SR.ConcurrentCollection_SyncRoot_NotSupported); }
@@ -714,7 +714,7 @@ namespace System.Collections.Concurrent
                     // >= _tailIndex, then the queue is about to be empty.  This does mean, though, that while holding the lock,
                     // it is possible to observe Count == 1 but IsEmpty == true.  As such, we simply need to avoid doing any operation
                     // while the bag is frozen that requires those values to be consistent.
-                    return _headIndex >= _tailIndex;
+                    return _headIndex - _tailIndex >= 0;
                 }
             }
 
@@ -751,7 +751,7 @@ namespace System.Collections.Concurrent
                             // for the head to end up > than the tail, since you can't set any more bits than all of them.
                             _headIndex = _headIndex & _mask;
                             _tailIndex = tail = tail & _mask;
-                            Debug.Assert(_headIndex <= _tailIndex);
+                            Debug.Assert(_headIndex - _tailIndex <= 0);
 
                             Interlocked.Exchange(ref _currentOp, (int)Operation.Add); // ensure subsequent reads aren't reordered before this
                         }
@@ -774,7 +774,7 @@ namespace System.Collections.Concurrent
                     //   take the lock, and another steal couldn't then increment the header further because it'll see that
                     //   there's currently an add operation in progress and wait until the add completes.
                     int head = _headIndex; // read after _currentOp set to Add
-                    if (!_frozen && head < tail - 1 & tail < (head + _mask))
+                    if (!_frozen && (head - (tail - 1) < 0) && (tail - (head + _mask) < 0))
                     {
                         _array[tail & _mask] = item;
                         _tailIndex = tail + 1;
@@ -849,7 +849,7 @@ namespace System.Collections.Concurrent
                 lock (this) // synchronize with steals
                 {
                     // If the queue isn't empty, reset the state to clear out all items.
-                    if (_headIndex < _tailIndex)
+                    if (_headIndex - _tailIndex < 0)
                     {
                         _headIndex = _tailIndex = StartIndex;
                         _addTakeCount = _stealCount = 0;
@@ -865,7 +865,7 @@ namespace System.Collections.Concurrent
                 Debug.Assert(Environment.CurrentManagedThreadId == _ownerThreadId);
 
                 int tail = _tailIndex;
-                if (_headIndex >= tail)
+                if (_headIndex - tail >= 0)
                 {
                     result = default(T)!;
                     return false;
@@ -885,7 +885,7 @@ namespace System.Collections.Concurrent
                     // Note that we use _headIndex < tail rather than _headIndex <= tail to account
                     // for stealing peeks, which don't increment _headIndex, and which could observe
                     // the written default(T) in a race condition to peek at the element.
-                    if (!_frozen && _headIndex < tail)
+                    if (!_frozen && (_headIndex - tail < 0))
                     {
                         int idx = tail & _mask;
                         result = _array[idx];
@@ -898,7 +898,7 @@ namespace System.Collections.Concurrent
                         // Interaction with steals: 0 or 1 elements left.
                         _currentOp = (int)Operation.None; // set back to None to avoid a deadlock
                         Monitor.Enter(this, ref lockTaken);
-                        if (_headIndex <= tail)
+                        if (_headIndex - tail <= 0)
                         {
                             // Element still available. Take it.
                             int idx = tail & _mask;
@@ -934,7 +934,7 @@ namespace System.Collections.Concurrent
                 Debug.Assert(Environment.CurrentManagedThreadId == _ownerThreadId);
 
                 int tail = _tailIndex;
-                if (_headIndex < tail)
+                if (_headIndex - tail < 0)
                 {
                     // It is possible to enable lock-free peeks, following the same general approach
                     // that's used in TryLocalPop.  However, peeks are more complicated as we can't
@@ -947,7 +947,7 @@ namespace System.Collections.Concurrent
                     // for now we'll use the simpler/safer code.
                     lock (this)
                     {
-                        if (_headIndex < tail)
+                        if (_headIndex - tail < 0)
                         {
                             result = _array[(tail - 1) & _mask];
                             return true;
@@ -973,7 +973,7 @@ namespace System.Collections.Concurrent
                         // is in progress, as add operations need to accurately count transitions
                         // from empty to non-empty, and they can only do that if there are no concurrent
                         // steal operations happening at the time.
-                        if (head < _tailIndex - 1 && _currentOp != (int)Operation.Add)
+                        if ((head - (_tailIndex - 2) >= 0) && _currentOp == (int)Operation.Add)
                         {
                             var spinner = new SpinWait();
                             do
@@ -1082,7 +1082,7 @@ namespace System.Collections.Concurrent
         private sealed class Enumerator : IEnumerator<T>
         {
             private readonly T[] _array;
-            [AllowNull] private T _current = default!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
+            [AllowNull] private T _current = default;
             private int _index;
 
             public Enumerator(T[] array)
@@ -1120,7 +1120,7 @@ namespace System.Collections.Concurrent
             public void Reset()
             {
                 _index = 0;
-                _current = default(T)!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
+                _current = default;
             }
 
             public void Dispose() { }

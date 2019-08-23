@@ -66,7 +66,7 @@ namespace Internal.Cryptography.Pal
 
                 // RelativeDistinguishedName ::=
                 //   SET SIZE (1..MAX) OF AttributeTypeAndValue
-                // 
+                //
                 // AttributeTypeAndValue::= SEQUENCE {
                 //   type AttributeType,
                 //   value    AttributeValue }
@@ -91,7 +91,7 @@ namespace Internal.Cryptography.Pal
                 {
                     AsnReader tavReader = rdnReader.ReadSequence();
                     string oid = tavReader.ReadObjectIdentifierAsString();
-                    string attributeValue = tavReader.ReadDirectoryOrIA5String();
+                    string attributeValue = tavReader.ReadAnyAsnString();
 
                     tavReader.ThrowIfNotEmpty();
 

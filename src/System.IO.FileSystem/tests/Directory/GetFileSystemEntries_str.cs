@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
@@ -282,11 +281,11 @@ namespace System.IO.Tests
             if (TestDirectories)
             {
                 DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
-                
+
                 testDir.CreateSubdirectory(valid);
 
                 string[] results = GetEntries(testDir.FullName);
-                 
+
                 Assert.Contains(Path.Combine(testDir.FullName, valid), results);
             }
         }

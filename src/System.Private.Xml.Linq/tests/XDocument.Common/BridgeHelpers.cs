@@ -43,7 +43,7 @@ namespace CoreXml.Test.XLinq
         public static string pXsltCopyStylesheet = "XsltCtest.xsl";
         public static string pValidXDR = "XdrFile.xml";
 
-        //Reader constants        
+        //Reader constants
         public const string ST_TEST_NAME = "ISDEFAULT";
         public const string ST_ENTTEST_NAME = "ENTITY1";
         public const string ST_MARKUP_TEST_NAME = "CHARS2";
@@ -63,7 +63,7 @@ namespace CoreXml.Test.XLinq
         public const string ST_D1_VALUE = "d1value";
         public const string ST_GEN_ENT_VALUE = "e1foo";
 
-        //Writer helpers      
+        //Writer helpers
         public XmlWriter CreateWriter()
         {
             XDocument doc = new XDocument();
@@ -553,7 +553,7 @@ namespace CoreXml.Test.XLinq
             TextWriter tw = new StreamWriter(FilePathUtil.getStream(strFileName), encode);
 
             tw.WriteLine("<root>");
-            tw.Write("�");
+            tw.Write("\uFFFD");
             tw.WriteLine("</root>");
 
             tw.Flush();
@@ -1267,7 +1267,7 @@ namespace CoreXml.Test.XLinq
         }
     }
 
-    // Class Signatures used for verifying names 
+    // Class Signatures used for verifying names
     public class Signatures
     {
         private string[] _stringsExpected;

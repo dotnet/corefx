@@ -16,7 +16,7 @@ namespace System.Net.Http.Functional.Tests
     {
         public HttpClient_SelectedSites_Test(ITestOutputHelper output) : base(output) { }
 
-        public static bool IsSelectedSitesTestEnabled() 
+        public static bool IsSelectedSitesTestEnabled()
         {
             string envVar = Environment.GetEnvironmentVariable("CORFX_NET_HTTP_SELECTED_SITES");
             return envVar != null &&
@@ -59,7 +59,7 @@ namespace System.Net.Http.Functional.Tests
             await VisitSite(site);
         }
 
-        public static IEnumerable<string[]> GetSelectedSites()
+        public static IEnumerable<object[]> GetSelectedSites()
         {
             const string resourceName = "SelectedSitesTest.txt";
             Assembly assembly = typeof(HttpClient_SelectedSites_Test).Assembly;

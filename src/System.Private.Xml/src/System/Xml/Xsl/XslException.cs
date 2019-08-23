@@ -17,6 +17,11 @@ namespace System.Xml.Xsl
             : base(CreateMessage(res, args), inner)
         { }
 
+        public XslTransformException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+
         public XslTransformException(string message)
             : base(CreateMessage(message, null), null)
         { }
@@ -90,6 +95,7 @@ namespace System.Xml.Xsl
         }
     }
 
+    [Serializable]
     internal class XslLoadException : XslTransformException
     {
         private ISourceLineInfo _lineInfo;
@@ -104,6 +110,23 @@ namespace System.Xml.Xsl
             SetSourceLineInfo(lineInfo);
         }
 
+        internal XslLoadException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+            bool hasLineInfo = (bool)info.GetValue("hasLineInfo", typeof(bool));
+
+            if (hasLineInfo)
+            {
+                string uriString = (string)info.GetValue("Uri", typeof(string));
+                int startLine = (int)info.GetValue("StartLine", typeof(int));
+                int startPos = (int)info.GetValue("StartPos", typeof(int));
+                int endLine = (int)info.GetValue("EndLine", typeof(int));
+                int endPos = (int)info.GetValue("EndPos", typeof(int));
+
+                _lineInfo = new SourceLineInfo(uriString, startLine, startPos, endLine, endPos);
+            }
+        }
+
         internal XslLoadException(CompilerError error)
             : base(SR.Xml_UserException, new string[] { error.ErrorText })
         {
@@ -112,7 +135,7 @@ namespace System.Xml.Xsl
 
             if (errorLine == 0)
             {
-                // If the compiler reported error on Line 0 - ignore columns, 
+                // If the compiler reported error on Line 0 - ignore columns,
                 //   0 means it doesn't know where the error was and our SourceLineInfo
                 //   expects either all zeroes or all non-zeroes
                 errorColumn = 0;
@@ -136,6 +159,21 @@ namespace System.Xml.Xsl
         {
             Debug.Assert(lineInfo == null || lineInfo.Uri != null);
             _lineInfo = lineInfo;
+        }
+
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+            info.AddValue("hasLineInfo", _lineInfo != null);
+
+            if (_lineInfo != null)
+            {
+                info.AddValue("Uri", _lineInfo.Uri, typeof(string));
+                info.AddValue("StartLine", _lineInfo.Start.Line, typeof(int));
+                info.AddValue("StartPos", _lineInfo.Start.Pos, typeof(int));
+                info.AddValue("EndLine", _lineInfo.End.Line, typeof(int));
+                info.AddValue("EndPos", _lineInfo.End.Pos, typeof(int));
+            }
         }
 
         public override string SourceUri

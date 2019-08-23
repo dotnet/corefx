@@ -42,7 +42,7 @@
 ** progress). The runtime cannot protect you from undefined program
 ** behvior that might result from such scenarios. You have been warned.
 **
-** 
+**
 ===========================================================*/
 
 using System.Runtime.ConstrainedExecution;
@@ -77,14 +77,10 @@ using System.Runtime.ConstrainedExecution;
 
   Most classes using CriticalHandle should not provide a finalizer.  If they do
   need to do so (ie, for flushing out file buffers, needing to write some data
-  back into memory, etc), then they can provide a finalizer that will be 
+  back into memory, etc), then they can provide a finalizer that will be
   guaranteed to run before the CriticalHandle's critical finalizer.
 
-  Subclasses are expected to be written as follows (note that
-  SuppressUnmanagedCodeSecurity should always be used on any P/Invoke methods
-  invoked as part of ReleaseHandle, in order to switch the security check from
-  runtime to jit time and thus remove a possible failure path from the
-  invocation of the method):
+  Subclasses are expected to be written as follows:
 
   internal sealed MyCriticalHandleSubclass : CriticalHandle {
       // Called by P/Invoke when returning CriticalHandles
@@ -99,7 +95,7 @@ using System.Runtime.ConstrainedExecution;
           get { return handle == IntPtr.Zero; }
       }
 
-      [DllImport(Interop.Libraries.Kernel32), SuppressUnmanagedCodeSecurity, ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+      [DllImport(Interop.Libraries.Kernel32), ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
       private static extern bool CloseHandle(IntPtr handle);
 
       override protected bool ReleaseHandle()
@@ -125,7 +121,7 @@ namespace System.Runtime.InteropServices
     {
         // ! Do not add or rearrange fields as the EE depends on this layout.
         //------------------------------------------------------------------
-        protected IntPtr handle;    // This must be protected so derived classes can use out params. 
+        protected IntPtr handle;    // This must be protected so derived classes can use out params.
         private bool _isClosed;     // Set by SetHandleAsInvalid or Close/Dispose/finalization.
 
         // Creates a CriticalHandle class.  Users must then set the Handle property or allow P/Invoke marshaling to set it implicitly.
@@ -167,10 +163,7 @@ namespace System.Runtime.InteropServices
 
         // Returns whether the handle has been explicitly marked as closed
         // (Close/Dispose) or invalid (SetHandleAsInvalid).
-        public bool IsClosed
-        {
-            get { return _isClosed; }
-        }
+        public bool IsClosed => _isClosed;
 
         // Returns whether the handle looks like an invalid value (i.e. matches one
         // of the handle's designated illegal values). CriticalHandle itself doesn't

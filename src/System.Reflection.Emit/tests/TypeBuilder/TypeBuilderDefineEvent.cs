@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -14,7 +14,7 @@ namespace System.Reflection.Emit.Tests
             yield return new object[] { "TestEvent", EventAttributes.None, typeof(int), "TestEvent", EventAttributes.None };
             yield return new object[] { "a\0b\0c", EventAttributes.RTSpecialName, typeof(void), "a", EventAttributes.None };
             yield return new object[] { "\uD800\uDC00", EventAttributes.SpecialName, typeof(Delegate), "\uD800\uDC00", EventAttributes.SpecialName };
-            yield return new object[] { "привет", EventAttributes.SpecialName | EventAttributes.RTSpecialName, typeof(EmptyGenericStruct<>), "привет", EventAttributes.SpecialName };
+            yield return new object[] { "\u043F\u0440\u0438\u0432\u0435\u0442", EventAttributes.SpecialName | EventAttributes.RTSpecialName, typeof(EmptyGenericStruct<>), "\u043F\u0440\u0438\u0432\u0435\u0442", EventAttributes.SpecialName };
             yield return new object[] { "class", (EventAttributes)(-1), typeof(string), "class", EventAttributes.None };
             yield return new object[] { "Test Name With Spaces", EventAttributes.None, typeof(BasicDelegate), "Test Name With Spaces", EventAttributes.None };
             yield return new object[] { "TestEvent", EventAttributes.None, typeof(EmptyGenericStruct<int>), "TestEvent", EventAttributes.None };
@@ -51,7 +51,7 @@ namespace System.Reflection.Emit.Tests
             Assert.Equal((expectedAttributes & EventAttributes.SpecialName) != 0, eventInfo.IsSpecialName);
             Assert.Null(eventInfo.EventHandlerType);
         }
-        
+
         [Fact]
         public void DefineProperty_InvalidUnicodeChars()
         {

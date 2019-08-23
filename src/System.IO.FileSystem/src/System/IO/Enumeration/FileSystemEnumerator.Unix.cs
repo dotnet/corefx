@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -33,17 +33,8 @@ namespace System.IO.Enumeration
         // Used to get the raw entry data
         private byte[] _entryBuffer;
 
-        /// <summary>
-        /// Encapsulates a find operation.
-        /// </summary>
-        /// <param name="directory">The directory to search in.</param>
-        /// <param name="options">Enumeration options to use.</param>
-        public FileSystemEnumerator(string directory, EnumerationOptions options = null)
+        private void Init()
         {
-            _originalRootDirectory = directory ?? throw new ArgumentNullException(nameof(directory));
-            _rootDirectory = Path.TrimEndingDirectorySeparator(Path.GetFullPath(directory));
-            _options = options ?? EnumerationOptions.Default;
-
             // We need to initialize the directory handle up front to ensure
             // we immediately throw IO exceptions for missing directory/etc.
             _directoryHandle = CreateDirectoryHandle(_rootDirectory);
@@ -112,7 +103,7 @@ namespace System.IO.Enumeration
 
                 // If HAVE_READDIR_R is defined for the platform FindNextEntry depends on _entryBuffer being fixed since
                 // _entry will point to a string in the middle of the array. If the array is not fixed GC can move it after
-                // the native call and _entry will point to a bogus file name. 
+                // the native call and _entry will point to a bogus file name.
                 fixed (byte* entryBufferPtr = _entryBuffer)
                 {
                     do

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
@@ -81,7 +80,7 @@ namespace System.Threading
                 throw Win32Marshal.GetExceptionForLastWin32Error();
             return res;
         }
-        
+
         public bool Set()
         {
             bool res = Interop.Kernel32.SetEvent(SafeWaitHandle);

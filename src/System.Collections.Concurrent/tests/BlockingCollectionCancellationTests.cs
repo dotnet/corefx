@@ -71,18 +71,14 @@ namespace System.Collections.Concurrent.Tests
 
             int item;
             EnsureOperationCanceledExceptionThrown(
-                () => bc.Take(cs.Token), cs.Token,
-                "ExternalCancel_Take:  The operation should wake up via token cancellation.");
+                () => bc.Take(cs.Token), cs.Token);
             EnsureOperationCanceledExceptionThrown(
-               () => bc.TryTake(out item, 100000, cs.Token), cs.Token,
-                "ExternalCancel_TryTake:  The operation should wake up via token cancellation.");
+                () => bc.TryTake(out item, 100000, cs.Token), cs.Token);
             EnsureOperationCanceledExceptionThrown(
-                () => bc.Add(1, cs.Token), cs.Token,
-                "ExternalCancel_Add:  The operation should wake up via token cancellation.");
+                () => bc.Add(1, cs.Token), cs.Token);
             EnsureOperationCanceledExceptionThrown(
                 () => bc.TryAdd(1, 100000, cs.Token), // a long timeout.
-                cs.Token,
-                "ExternalCancel_TryAdd:  The operation should wake up via token cancellation.");
+                cs.Token);
 
             BlockingCollection<int> bc1 = new BlockingCollection<int>(1);
             BlockingCollection<int> bc2 = new BlockingCollection<int>(1);
@@ -90,17 +86,15 @@ namespace System.Collections.Concurrent.Tests
             bc2.Add(1); //fill the bc.
             EnsureOperationCanceledExceptionThrown(
                 () => BlockingCollection<int>.AddToAny(new[] { bc1, bc2 }, 1, cs.Token),
-                cs.Token,
-                "ExternalCancel_AddToAny:  The operation should wake up via token cancellation.");
+                cs.Token);
             EnsureOperationCanceledExceptionThrown(
                () => BlockingCollection<int>.TryAddToAny(new[] { bc1, bc2 }, 1, 10000, cs.Token),
-               cs.Token,
-               "ExternalCancel_AddToAny:  The operation should wake up via token cancellation.");
+               cs.Token);
 
             IEnumerable<int> enumerable = bc.GetConsumingEnumerable(cs.Token);
             EnsureOperationCanceledExceptionThrown(
                () => enumerable.GetEnumerator().MoveNext(),
-               cs.Token, "ExternalCancel_GetConsumingEnumerable:  The operation should wake up via token cancellation.");
+               cs.Token);
         }
 
         [Fact]
@@ -116,7 +110,7 @@ namespace System.Collections.Concurrent.Tests
                 // This may or may not cancel before {Try}AddToAny executes, but either way the test should pass.
                 // A delay could be used to attempt to force the right timing, but not for an inner loop test.
                 CancellationTokenSource cs = new CancellationTokenSource();
-                Task.Run(() => cs.Cancel()); 
+                Task.Run(() => cs.Cancel());
                 Assert.Throws<OperationCanceledException>(() =>
                 {
                     switch (test)
@@ -159,7 +153,7 @@ namespace System.Collections.Concurrent.Tests
 
         #region Helper Methods
 
-        public static void EnsureOperationCanceledExceptionThrown(Action action, CancellationToken token, string message)
+        private static void EnsureOperationCanceledExceptionThrown(Action action, CancellationToken token)
         {
             OperationCanceledException operationCanceledEx =
                 Assert.Throws<OperationCanceledException>(action); // "BlockingCollectionCancellationTests: OperationCanceledException not thrown.");

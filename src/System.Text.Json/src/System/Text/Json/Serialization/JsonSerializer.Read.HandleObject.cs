@@ -11,7 +11,7 @@ namespace System.Text.Json
     {
         private static void HandleStartObject(JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
         {
-            Debug.Assert(!state.Current.IsProcessingDictionary && !state.Current.IsProcessingImmutableDictionary);
+            Debug.Assert(!state.Current.IsProcessingDictionary && !state.Current.IsProcessingIDictionaryConstructible);
 
             if (state.Current.IsProcessingEnumerable)
             {
@@ -42,9 +42,9 @@ namespace System.Text.Json
                 }
             }
 
-            if (state.Current.IsProcessingImmutableDictionary)
+            if (state.Current.IsProcessingIDictionaryConstructible)
             {
-                state.Current.TempDictionaryValues = (IDictionary)classInfo.CreateObject();
+                state.Current.TempDictionaryValues = (IDictionary)classInfo.CreateConcreteDictionary();
             }
             else
             {
@@ -54,9 +54,13 @@ namespace System.Text.Json
 
         private static void HandleEndObject(JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
         {
-            Debug.Assert(!state.Current.IsProcessingDictionary && !state.Current.IsProcessingImmutableDictionary);
+            Debug.Assert(!state.Current.IsProcessingDictionary && !state.Current.IsProcessingIDictionaryConstructible);
 
-            state.Current.JsonClassInfo.UpdateSortedPropertyCache(ref state.Current);
+            // Check if we are trying to build the sorted cache.
+            if (state.Current.PropertyRefCache != null)
+            {
+                state.Current.JsonClassInfo.UpdateSortedPropertyCache(ref state.Current);
+            }
 
             object value = state.Current.ReturnValue;
 

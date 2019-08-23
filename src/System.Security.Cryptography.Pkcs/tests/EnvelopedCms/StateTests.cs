@@ -21,8 +21,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 {
     public static partial class StateTests
     {
-        public static bool SupportsCngCertificates { get; } = (!PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx462OrNewer);
-
         //
         // Exercises various edge cases when EnvelopedCms methods and properties are called out of the "expected" order.
         //
@@ -35,7 +33,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         //    ctor() => Decode() => RecipientInfos => Decrypt() => ContentInfo
         //
         // Most of these semantics are driven by backward compatibility. A tighter api design wouldn't
-        // have exposed all these state transitions in the first place.  
+        // have exposed all these state transitions in the first place.
         //
         // The four states an EnvelopedCms can be in are as follows:
         //
@@ -58,21 +56,21 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         //   State 3: Post Decode()
         //
         //       Decode() can also be called at any time - it's effectively a constructor that resets the internal
-        //       state and all the member properties. 
+        //       state and all the member properties.
         //
         //       In this state, you can invoke the RecipientInfos properties to decide which recipient to pass to Decrypt().
         //
         //   State 4: Post Decrypt()
         //
         //       A Decrypt() can only happen after a Decode().
-        //     
+        //
         //       Once in this state, you can fetch ContentInfo to get the decrypted content
         //       but otherwise, the CMS is in a pretty useless state.
         //
 
         //
         // State 1
-        // 
+        //
         //    Constructed using any of the constructor overloads.
         //
 
@@ -119,7 +117,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
         //
         // State 2
-        // 
+        //
         //    Called constructor + Encrypt()
         //
 
@@ -202,7 +200,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         // State 3: Called Decode()
         //
 
-        public static void PostDecode_Encode(bool isRunningOnDesktop)
+        private static void PostDecode_Encode(bool isRunningOnDesktop)
         {
             byte[] encodedMessage =
                 ("3082010c06092a864886f70d010703a081fe3081fb0201003181c83081c5020100302e301a311830160603550403130f5253"
@@ -236,7 +234,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             PostDecode_Encode(isRunningOnDesktop: false);
         }
 
-        public static void PostDecode_ContentInfo(bool isRunningOnDesktop)
+        private static void PostDecode_ContentInfo(bool isRunningOnDesktop)
         {
             byte[] encodedMessage =
                 ("3082010c06092a864886f70d010703a081fe3081fb0201003181c83081c5020100302e301a311830160603550403130f5253"
@@ -274,7 +272,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         //
         // State 4: Called Decode() + Decrypt()
         //
-        [ConditionalTheory(nameof(SupportsCngCertificates))]
+        [Theory]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         [InlineData(false)]
 #if netcoreapp // API not supported on netfx
@@ -317,13 +315,13 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
                 // Desktop compat: Calling Encode() at this point should have thrown an InvalidOperationException. Instead, it returns
                 // the decrypted inner content (same as ecms.ContentInfo.Content). This is easy for someone to take a reliance on
-                // so for compat sake, we'd better keep it. 
+                // so for compat sake, we'd better keep it.
                 byte[] encoded = ecms.Encode();
                 Assert.Equal<byte>(expectedContent, encoded);
             }
         }
 
-        [ConditionalFact(nameof(SupportsCngCertificates))]
+        [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void PostDecrypt_RecipientInfos()
         {
@@ -362,7 +360,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             }
         }
 
-        [ConditionalTheory(nameof(SupportsCngCertificates))]
+        [Theory]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         [InlineData(false)]
 #if netcoreapp // API not supported on netfx
@@ -465,5 +463,3 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
     }
 }
-
-

@@ -5,7 +5,6 @@
 using System.Diagnostics;
 using System.IO;
 using Internal.NativeCrypto;
-using Microsoft.Win32.SafeHandles;
 
 namespace System.Security.Cryptography
 {
@@ -16,8 +15,9 @@ namespace System.Security.Cryptography
         private readonly bool _randomKeyContainer;
         private SafeKeyHandle _safeKeyHandle;
         private SafeProvHandle _safeProvHandle;
-        private SHA1 _sha1;
+        private readonly SHA1 _sha1;
         private static volatile CspProviderFlags s_useMachineKeyStore = 0;
+        private bool _disposed;
 
         /// <summary>
         /// Initializes a new instance of the DSACryptoServiceProvider class.
@@ -75,7 +75,7 @@ namespace System.Security.Cryptography
             _keySize = dwKeySize;
             _sha1 = SHA1.Create();
 
-            // If this is not a random container we generate, create it eagerly 
+            // If this is not a random container we generate, create it eagerly
             // in the constructor so we can report any errors now.
             if (!_randomKeyContainer)
             {
@@ -268,17 +268,22 @@ namespace System.Security.Cryptography
 
         protected override void Dispose(bool disposing)
         {
+            if (disposing)
+            {
+                if (_safeKeyHandle != null && !_safeKeyHandle.IsClosed)
+                {
+                    _safeKeyHandle.Dispose();
+                }
+
+                if (_safeProvHandle != null && !_safeProvHandle.IsClosed)
+                {
+                    _safeProvHandle.Dispose();
+                }
+
+                _disposed = true;
+            }
+
             base.Dispose(disposing);
-
-            if (_safeKeyHandle != null && !_safeKeyHandle.IsClosed)
-            {
-                _safeKeyHandle.Dispose();
-            }
-
-            if (_safeProvHandle != null && !_safeProvHandle.IsClosed)
-            {
-                _safeProvHandle.Dispose();
-            }
         }
 
         /// <summary>
@@ -325,6 +330,8 @@ namespace System.Security.Cryptography
         /// <param name="keyBlob">A byte array that represents a DSA key blob.</param>
         public void ImportCspBlob(byte[] keyBlob)
         {
+            ThrowIfDisposed();
+
             SafeKeyHandle safeKeyHandle;
 
             if (IsPublic(keyBlob))
@@ -348,6 +355,24 @@ namespace System.Security.Cryptography
         {
             byte[] keyBlob = parameters.ToKeyBlob();
             ImportCspBlob(keyBlob);
+        }
+
+        public override void ImportEncryptedPkcs8PrivateKey(
+            ReadOnlySpan<byte> passwordBytes,
+            ReadOnlySpan<byte> source,
+            out int bytesRead)
+        {
+            ThrowIfDisposed();
+            base.ImportEncryptedPkcs8PrivateKey(passwordBytes, source, out bytesRead);
+        }
+
+        public override void ImportEncryptedPkcs8PrivateKey(
+            ReadOnlySpan<char> password,
+            ReadOnlySpan<byte> source,
+            out int bytesRead)
+        {
+            ThrowIfDisposed();
+            base.ImportEncryptedPkcs8PrivateKey(password, source, out bytesRead);
         }
 
         /// <summary>
@@ -402,12 +427,12 @@ namespace System.Security.Cryptography
         /// </summary>
         /// <param name="rgbHash">The data to be signed.</param>
         /// <returns>The digital signature for the specified data.</returns>
-        override public byte[] CreateSignature(byte[] rgbHash)
+        public override byte[] CreateSignature(byte[] rgbHash)
         {
             return SignHash(rgbHash, null);
         }
 
-        override public bool VerifySignature(byte[] rgbHash, byte[] rgbSignature)
+        public override bool VerifySignature(byte[] rgbHash, byte[] rgbSignature)
         {
             return VerifyHash(rgbHash, null, rgbSignature);
         }
@@ -521,6 +546,14 @@ namespace System.Security.Cryptography
             }
 
             return true;
+        }
+
+        private void ThrowIfDisposed()
+        {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(DSACryptoServiceProvider));
+            }
         }
     }
 }

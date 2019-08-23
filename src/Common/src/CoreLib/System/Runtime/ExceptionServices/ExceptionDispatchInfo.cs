@@ -12,7 +12,7 @@ namespace System.Runtime.ExceptionServices
     // object. This allows us to track error (via the exception object) independent
     // of the path the error takes.
     //
-    // This is particularly useful for frameworks that wish to propagate 
+    // This is particularly useful for frameworks that wish to propagate
     // exceptions (i.e. errors to be precise) across threads.
     public sealed class ExceptionDispatchInfo
     {
@@ -39,13 +39,7 @@ namespace System.Runtime.ExceptionServices
         }
 
         // Return the exception object represented by this ExceptionDispatchInfo instance
-        public Exception SourceException
-        {
-            get
-            {
-                return _exception;
-            }
-        }
+        public Exception SourceException => _exception;
 
         // When a framework needs to "Rethrow" an exception on a thread different (but not necessarily so) from
         // where it was thrown, it should invoke this method against the ExceptionDispatchInfo

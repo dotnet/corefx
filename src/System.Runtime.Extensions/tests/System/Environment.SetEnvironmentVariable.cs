@@ -17,6 +17,12 @@ namespace System.Tests
 
         internal static bool IsSupportedTarget(EnvironmentVariableTarget target)
         {
+            // [ActiveIssue(40226)]
+            if (target == EnvironmentVariableTarget.User && PlatformDetection.IsWindowsNanoServer)
+            {
+                return false;
+            }
+
             return target == EnvironmentVariableTarget.Process || (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !PlatformDetection.IsUap);
         }
 
@@ -258,15 +264,15 @@ namespace System.Tests
                 // First set the value to something and then ensure that it can be deleted.
                 Environment.SetEnvironmentVariable(varName, value);
                 Environment.SetEnvironmentVariable(varName, string.Empty);
-                Assert.Equal(null, Environment.GetEnvironmentVariable(varName));
+                Assert.Null(Environment.GetEnvironmentVariable(varName));
 
                 Environment.SetEnvironmentVariable(varName, value);
                 Environment.SetEnvironmentVariable(varName, null);
-                Assert.Equal(null, Environment.GetEnvironmentVariable(varName));
+                Assert.Null(Environment.GetEnvironmentVariable(varName));
 
                 Environment.SetEnvironmentVariable(varName, value);
                 Environment.SetEnvironmentVariable(varName, NullString);
-                Assert.Equal(null, Environment.GetEnvironmentVariable(varName));
+                Assert.Null(Environment.GetEnvironmentVariable(varName));
             });
         }
 
@@ -282,8 +288,8 @@ namespace System.Tests
             {
                 Environment.SetEnvironmentVariable(varName, value);
                 Environment.SetEnvironmentVariable(varName, null);
-                Assert.Equal(Environment.GetEnvironmentVariable(varName), null);
-                Assert.Equal(Environment.GetEnvironmentVariable(varNamePrefix), null);
+                Assert.Null(Environment.GetEnvironmentVariable(varName));
+                Assert.Null(Environment.GetEnvironmentVariable(varNamePrefix));
             }
             finally
             {
@@ -301,7 +307,7 @@ namespace System.Tests
             try
             {
                 Environment.SetEnvironmentVariable(varName, value);
-                Assert.Equal(null, Environment.GetEnvironmentVariable(varName));
+                Assert.Null(Environment.GetEnvironmentVariable(varName));
             }
             finally
             {

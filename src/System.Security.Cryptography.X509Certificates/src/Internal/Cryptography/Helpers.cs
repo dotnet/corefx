@@ -110,8 +110,8 @@ namespace Internal.Cryptography
         private static char NibbleToHex(byte b)
         {
             Debug.Assert(b >= 0 && b <= 15);
-            return (char)(b >= 0 && b <= 9 ? 
-                '0' + b : 
+            return (char)(b >= 0 && b <= 9 ?
+                '0' + b :
                 'A' + (b - 10));
         }
 
@@ -212,7 +212,7 @@ namespace Internal.Cryptography
 
     internal static class DictionaryStringHelper
     {
-        internal static string ReadDirectoryOrIA5String(this AsnReader tavReader)
+        internal static string ReadAnyAsnString(this AsnReader tavReader)
         {
             Asn1Tag tag = tavReader.PeekTag();
 
@@ -225,6 +225,7 @@ namespace Internal.Cryptography
             {
                 case UniversalTagNumber.BMPString:
                 case UniversalTagNumber.IA5String:
+                case UniversalTagNumber.NumericString:
                 case UniversalTagNumber.PrintableString:
                 case UniversalTagNumber.UTF8String:
                 case UniversalTagNumber.T61String:
@@ -232,7 +233,7 @@ namespace Internal.Cryptography
                     // NULL character which was literally embedded in the DER would cause a
                     // failure in .NET whereas it wouldn't have with strcmp.
                     return tavReader.ReadCharacterString((UniversalTagNumber)tag.TagValue).TrimEnd('\0');
-                    
+
                 default:
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }

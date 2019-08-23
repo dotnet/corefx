@@ -304,7 +304,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
 
                 foreach (X509Certificate2 documentCert in cms.Certificates)
                 {
-                    Assert.True(expectedCerts.Contains(documentCert));
+                    Assert.Contains(documentCert, expectedCerts);
                 }
             }
         }
@@ -455,6 +455,22 @@ namespace System.Security.Cryptography.Pkcs.Tests
                     CmsSigner signer = new CmsSigner(certWithEphemeralKey);
                     cms.ComputeSignature(signer);
                 }
+            }
+        }
+
+        [Fact]
+        public static void CreateSignature_DigestAlgorithmWithSignatureOid_Prohibited()
+        {
+            ContentInfo content = new ContentInfo(new byte[] { 1, 2, 3 });
+            SignedCms cms = new SignedCms(content);
+            using (X509Certificate2 cert = Certificates.RSAKeyTransferCapi1.TryGetCertificateWithPrivateKey())
+            {
+                CmsSigner signer = new CmsSigner(cert);
+                signer.DigestAlgorithm = new Oid(Oids.RsaPkcs1Sha256);
+
+                Assert.Throws<CryptographicException>(() => {
+                    cms.ComputeSignature(signer);
+                });
             }
         }
 

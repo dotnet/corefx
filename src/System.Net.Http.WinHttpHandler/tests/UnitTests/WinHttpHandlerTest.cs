@@ -25,7 +25,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
     public class WinHttpHandlerTest
     {
         private const string FakeProxy = "http://proxy.contoso.com";
-        
+
         private readonly ITestOutputHelper _output;
 
         public WinHttpHandlerTest(ITestOutputHelper output)
@@ -40,21 +40,21 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             var handler = new WinHttpHandler();
 
             Assert.Equal(SslProtocols.None, handler.SslProtocols);
-            Assert.Equal(true, handler.AutomaticRedirection);
+            Assert.True(handler.AutomaticRedirection);
             Assert.Equal(50, handler.MaxAutomaticRedirections);
             Assert.Equal(DecompressionMethods.None, handler.AutomaticDecompression);
             Assert.Equal(CookieUsePolicy.UseInternalCookieStoreOnly, handler.CookieUsePolicy);
-            Assert.Equal(null, handler.CookieContainer);
-            Assert.Equal(null, handler.ServerCertificateValidationCallback);
-            Assert.Equal(false, handler.CheckCertificateRevocationList);
+            Assert.Null(handler.CookieContainer);
+            Assert.Null(handler.ServerCertificateValidationCallback);
+            Assert.False(handler.CheckCertificateRevocationList);
             Assert.Equal(ClientCertificateOption.Manual, handler.ClientCertificateOption);
             X509Certificate2Collection certs = handler.ClientCertificates;
             Assert.True(certs.Count == 0);
-            Assert.Equal(false, handler.PreAuthenticate);
-            Assert.Equal(null, handler.ServerCredentials);
+            Assert.False(handler.PreAuthenticate);
+            Assert.Null(handler.ServerCredentials);
             Assert.Equal(WindowsProxyUsePolicy.UseWinHttpProxy, handler.WindowsProxyUsePolicy);
-            Assert.Equal(null, handler.DefaultProxyCredentials);
-            Assert.Equal(null, handler.Proxy);
+            Assert.Null(handler.DefaultProxyCredentials);
+            Assert.Null(handler.Proxy);
             Assert.Equal(int.MaxValue, handler.MaxConnectionsPerServer);
             Assert.Equal(TimeSpan.FromSeconds(30), handler.SendTimeout);
             Assert.Equal(TimeSpan.FromSeconds(30), handler.ReceiveHeadersTimeout);
@@ -69,7 +69,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
         {
             var handler = new WinHttpHandler();
             handler.AutomaticRedirection = false;
-            
+
             Assert.False(handler.AutomaticRedirection);
         }
 
@@ -118,7 +118,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
 
             SendRequestHelper.Send(handler, delegate { handler.CheckCertificateRevocationList = false; });
 
-            Assert.Equal(false, APICallHistory.WinHttpOptionEnableSslRevocation.HasValue);
+            Assert.False(APICallHistory.WinHttpOptionEnableSslRevocation.HasValue);
         }
 
         [Fact]
@@ -205,7 +205,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
                 handler,
                 delegate { handler.CookieUsePolicy = CookieUsePolicy.UseInternalCookieStoreOnly; });
 
-            Assert.Equal(false, APICallHistory.WinHttpOptionDisableCookies.HasValue);
+            Assert.False(APICallHistory.WinHttpOptionDisableCookies.HasValue);
         }
 
         [Fact]
@@ -220,7 +220,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
                     handler.CookieContainer = new CookieContainer();
                 });
 
-            Assert.Equal(true, APICallHistory.WinHttpOptionDisableCookies.HasValue);
+            Assert.True(APICallHistory.WinHttpOptionDisableCookies.HasValue);
         }
 
         [Fact]
@@ -365,7 +365,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             var handler = new WinHttpHandler();
             handler.MaxConnectionsPerServer = 1;
         }
-        
+
         [Fact]
         public void ReceiveDataTimeout_SetNegativeValue_ThrowsArgumentOutOfRangeException()
         {
@@ -718,7 +718,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
                 });
 
             Assert.Equal(Interop.WinHttp.WINHTTP_ACCESS_TYPE_NO_PROXY, APICallHistory.SessionProxySettings.AccessType);
-            Assert.Equal(false, APICallHistory.RequestProxySettings.AccessType.HasValue);
+            Assert.False(APICallHistory.RequestProxySettings.AccessType.HasValue);
         }
 
         [Fact]
@@ -736,7 +736,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
                 });
 
             Assert.Equal(Interop.WinHttp.WINHTTP_ACCESS_TYPE_NAMED_PROXY, APICallHistory.SessionProxySettings.AccessType);
-            Assert.Equal(false, APICallHistory.RequestProxySettings.AccessType.HasValue);
+            Assert.False(APICallHistory.RequestProxySettings.AccessType.HasValue);
         }
 
         [Fact]
@@ -754,7 +754,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
                 });
 
             Assert.Equal(Interop.WinHttp.WINHTTP_ACCESS_TYPE_NO_PROXY, APICallHistory.SessionProxySettings.AccessType);
-            Assert.Equal(false, APICallHistory.RequestProxySettings.AccessType.HasValue);
+            Assert.False(APICallHistory.RequestProxySettings.AccessType.HasValue);
         }
 
         [Fact]
@@ -923,7 +923,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             Exception ex = await Assert.ThrowsAsync<HttpRequestException>(() => client.SendAsync(request));
             Assert.Equal(typeof(WinHttpException), ex.InnerException.GetType());
         }
-        
+
         [Fact]
         public void SendAsync_MultipleCallsWithDispose_NoHandleLeaksManuallyVerifiedUsingLogging()
         {
@@ -957,7 +957,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             }
             else if (responseContentWasAutoDecompressed)
             {
-                
+
                 Assert.Null(contentLength);
                 Assert.Equal(0, contentEncoding.Count);
             }
@@ -1044,7 +1044,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
                 return this.bypassAll;
             }
         }
-        
+
         public class FakeDefaultWebProxy : IWebProxy
         {
             private ICredentials _credentials = null;
@@ -1064,7 +1064,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
                     _credentials = value;
                 }
             }
-            
+
             // This is a sentinel object representing the internal default system proxy that a developer would
             // use when accessing the System.Net.WebRequest.DefaultWebProxy property (from the System.Net.Requests
             // package). It can't support the GetProxy or IsBypassed methods. WinHttpHandler will handle this

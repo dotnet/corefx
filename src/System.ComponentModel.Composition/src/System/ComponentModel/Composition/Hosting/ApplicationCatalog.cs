@@ -18,8 +18,8 @@ namespace System.ComponentModel.Composition.Hosting
         private bool _isDisposed = false;
         private volatile AggregateCatalog _innerCatalog = null;
         private readonly object _thisLock = new object();
-        private ICompositionElement _definitionOrigin = null;
-        private ReflectionContext _reflectionContext = null;
+        private readonly ICompositionElement _definitionOrigin = null;
+        private readonly ReflectionContext _reflectionContext = null;
 
         public ApplicationCatalog() {}
 
@@ -29,7 +29,7 @@ namespace System.ComponentModel.Composition.Hosting
 
             _definitionOrigin = definitionOrigin;
         }
-        
+
         public ApplicationCatalog(ReflectionContext reflectionContext)
         {
             Requires.NotNull(reflectionContext, nameof(reflectionContext));
@@ -48,7 +48,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         internal ComposablePartCatalog CreateCatalog(string location, string pattern)
         {
-            if(_reflectionContext != null)
+            if (_reflectionContext != null)
             {
                 return (_definitionOrigin != null)
                     ? new DirectoryCatalog(location, pattern, _reflectionContext, _definitionOrigin)
@@ -66,30 +66,30 @@ namespace System.ComponentModel.Composition.Hosting
         {
             get
             {
-                if(_innerCatalog == null)
+                if (_innerCatalog == null)
                 {
-                    lock(_thisLock)
+                    lock (_thisLock)
                     {
-                        if(_innerCatalog == null)
+                        if (_innerCatalog == null)
                         {
                             var location = AppDomain.CurrentDomain.BaseDirectory;
-                            if(location == null)
+                            if (location == null)
                             {
                                 throw new Exception(SR.Diagnostic_InternalExceptionMessage);
                             }
-        
+
                             var catalogs = new List<ComposablePartCatalog>();
                             catalogs.Add(CreateCatalog(location, "*.exe"));
                             catalogs.Add(CreateCatalog(location, "*.dll"));
-        
+
                             string relativeSearchPath = AppDomain.CurrentDomain.RelativeSearchPath;
-                            if(!string.IsNullOrEmpty(relativeSearchPath))
+                            if (!string.IsNullOrEmpty(relativeSearchPath))
                             {
                                 string[] probingPaths = relativeSearchPath.Split(new char[] {';'}, StringSplitOptions.RemoveEmptyEntries);
-                                foreach(var probingPath in probingPaths)
+                                foreach (var probingPath in probingPaths)
                                 {
                                     var path = Path.Combine(location, probingPath);
-                                    if(Directory.Exists(path))
+                                    if (Directory.Exists(path))
                                     {
                                         catalogs.Add(CreateCatalog(path, "*.dll"));
                                     }
@@ -118,7 +118,7 @@ namespace System.ComponentModel.Composition.Hosting
                         _innerCatalog = null;
                         _isDisposed = true;
                     }
-                    if(innerCatalog != null)
+                    if (innerCatalog != null)
                     {
                         innerCatalog.Dispose();
                     }
@@ -141,13 +141,13 @@ namespace System.ComponentModel.Composition.Hosting
         ///     Returns the export definitions that match the constraint defined by the specified definition.
         /// </summary>
         /// <param name="definition">
-        ///     The <see cref="ImportDefinition"/> that defines the conditions of the 
+        ///     The <see cref="ImportDefinition"/> that defines the conditions of the
         ///     <see cref="ExportDefinition"/> objects to return.
         /// </param>
         /// <returns>
-        ///     An <see cref="IEnumerable{T}"/> of <see cref="Tuple{T1, T2}"/> containing the 
-        ///     <see cref="ExportDefinition"/> objects and their associated 
-        ///     <see cref="ComposablePartDefinition"/> for objects that match the constraint defined 
+        ///     An <see cref="IEnumerable{T}"/> of <see cref="Tuple{T1, T2}"/> containing the
+        ///     <see cref="ExportDefinition"/> objects and their associated
+        ///     <see cref="ComposablePartDefinition"/> for objects that match the constraint defined
         ///     by <paramref name="definition"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
@@ -179,7 +179,7 @@ namespace System.ComponentModel.Composition.Hosting
             return string.Format(CultureInfo.CurrentCulture,
                                 "{0} (Path=\"{1}\") (PrivateProbingPath=\"{2}\")",   // NOLOC
                                 GetType().Name,
-                                AppDomain.CurrentDomain.BaseDirectory, 
+                                AppDomain.CurrentDomain.BaseDirectory,
                                 AppDomain.CurrentDomain.RelativeSearchPath);
         }
 
@@ -187,7 +187,7 @@ namespace System.ComponentModel.Composition.Hosting
         ///     Returns a string representation of the directory catalog.
         /// </summary>
         /// <returns>
-        ///     A <see cref="String"/> containing the string representation of the <see cref="DirectoryCatalog"/>.
+        ///     A <see cref="string"/> containing the string representation of the <see cref="DirectoryCatalog"/>.
         /// </returns>
         public override string ToString()
         {
@@ -198,7 +198,7 @@ namespace System.ComponentModel.Composition.Hosting
         ///     Gets the display name of the ApplicationCatalog.
         /// </summary>
         /// <value>
-        ///     A <see cref="String"/> containing a human-readable display name of the <see cref="ApplicationCatalog"/>.
+        ///     A <see cref="string"/> containing a human-readable display name of the <see cref="ApplicationCatalog"/>.
         /// </value>
         [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes")]
         string ICompositionElement.DisplayName

@@ -174,7 +174,7 @@ namespace System.Security.Principal
         WinBuiltinTerminalServerLicenseServersSid = 60,
         [Obsolete("This member has been depcreated and is only maintained for backwards compatability. WellKnownSidType values greater than MaxDefined may be defined in future releases.")]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        MaxDefined = WinBuiltinTerminalServerLicenseServersSid, 
+        MaxDefined = WinBuiltinTerminalServerLicenseServersSid,
         /// <summary>Indicates a SID that matches the distributed COM user group.</summary>
         WinBuiltinDCOMUsersSid = 61,
         /// <summary>Indicates a SID that matches the Internet built-in user group.</summary>
@@ -259,13 +259,13 @@ namespace System.Security.Principal
         // Identifier authority must be at most six bytes long
         //
 
-        internal static readonly long MaxIdentifierAuthority = 0xFFFFFFFFFFFF;
+        internal const long MaxIdentifierAuthority = 0xFFFFFFFFFFFF;
 
         //
         // Maximum number of subauthorities in a SID
         //
 
-        internal static readonly byte MaxSubAuthorities = 15;
+        internal const byte MaxSubAuthorities = 15;
 
         //
         // Minimum length of a binary representation of a SID
@@ -318,7 +318,7 @@ namespace System.Security.Principal
             }
 
             //
-            // Check the number of subauthorities passed in 
+            // Check the number of subauthorities passed in
             //
 
             if (subAuthorities.Length > MaxSubAuthorities)
@@ -557,7 +557,7 @@ nameof(binaryForm));
         }
 
         //
-        // Constructs a SecurityIdentifier object from an IntPtr 
+        // Constructs a SecurityIdentifier object from an IntPtr
         //
 
         public SecurityIdentifier(IntPtr binaryForm)
@@ -663,21 +663,6 @@ nameof(binaryForm));
             }
 
             CreateFromBinaryForm(resultSid, 0);
-        }
-
-        internal SecurityIdentifier(SecurityIdentifier domainSid, uint rid)
-        {
-            int i;
-            int[] SubAuthorities = new int[domainSid.SubAuthorityCount + 1];
-
-            for (i = 0; i < domainSid.SubAuthorityCount; i++)
-            {
-                SubAuthorities[i] = domainSid.GetSubAuthority(i);
-            }
-
-            SubAuthorities[i] = (int)rid;
-
-            CreateFromParts(domainSid.IdentifierAuthority, SubAuthorities);
         }
 
         internal SecurityIdentifier(IdentifierAuthority identifierAuthority, int[] subAuthorities)
@@ -863,7 +848,7 @@ nameof(binaryForm));
         {
             return IsValidTargetTypeStatic(targetType);
         }
-        
+
 
         internal SecurityIdentifier GetAccountDomainSid()
         {

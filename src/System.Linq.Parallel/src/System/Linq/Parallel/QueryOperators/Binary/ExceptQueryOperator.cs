@@ -16,7 +16,7 @@ namespace System.Linq.Parallel
 {
     /// <summary>
     /// Operator that yields the elements from the first data source that aren't in the second.
-    /// This is known as the set relative complement, i.e. left - right. 
+    /// This is known as the set relative complement, i.e. left - right.
     /// </summary>
     /// <typeparam name="TInputOutput"></typeparam>
     internal sealed class ExceptQueryOperator<TInputOutput> :
@@ -40,7 +40,7 @@ namespace System.Linq.Parallel
         internal override QueryResults<TInputOutput> Open(
             QuerySettings settings, bool preferStriping)
         {
-            // We just open our child operators, left and then right.  Do not propagate the preferStriping value, but 
+            // We just open our child operators, left and then right.  Do not propagate the preferStriping value, but
             // instead explicitly set it to false. Regardless of whether the parent prefers striping or range
             // partitioning, the output will be hash-partitioned.
             QueryResults<TInputOutput> leftChildResults = LeftChild.Open(settings, false);
@@ -134,13 +134,13 @@ namespace System.Linq.Parallel
         // elements that have not yet been seen.
         //
 
-        class ExceptQueryOperatorEnumerator<TLeftKey> : QueryOperatorEnumerator<TInputOutput, int>
+        private class ExceptQueryOperatorEnumerator<TLeftKey> : QueryOperatorEnumerator<TInputOutput, int>
         {
-            private QueryOperatorEnumerator<Pair<TInputOutput, NoKeyMemoizationRequired>, TLeftKey> _leftSource; // Left data source.
-            private QueryOperatorEnumerator<Pair<TInputOutput, NoKeyMemoizationRequired>, int> _rightSource; // Right data source.
-            private IEqualityComparer<TInputOutput> _comparer; // A comparer used for equality checks/hash-coding.
+            private readonly QueryOperatorEnumerator<Pair<TInputOutput, NoKeyMemoizationRequired>, TLeftKey> _leftSource; // Left data source.
+            private readonly QueryOperatorEnumerator<Pair<TInputOutput, NoKeyMemoizationRequired>, int> _rightSource; // Right data source.
+            private readonly IEqualityComparer<TInputOutput> _comparer; // A comparer used for equality checks/hash-coding.
             private Set<TInputOutput> _hashLookup; // The hash lookup, used to produce the distinct set.
-            private CancellationToken _cancellationToken;
+            private readonly CancellationToken _cancellationToken;
             private Shared<int> _outputLoopCount;
 
             //---------------------------------------------------------------------------------------
@@ -223,14 +223,14 @@ namespace System.Linq.Parallel
             }
         }
 
-        class OrderedExceptQueryOperatorEnumerator<TLeftKey> : QueryOperatorEnumerator<TInputOutput, TLeftKey>
+        private class OrderedExceptQueryOperatorEnumerator<TLeftKey> : QueryOperatorEnumerator<TInputOutput, TLeftKey>
         {
-            private QueryOperatorEnumerator<Pair<TInputOutput, NoKeyMemoizationRequired>, TLeftKey> _leftSource; // Left data source.
-            private QueryOperatorEnumerator<Pair<TInputOutput, NoKeyMemoizationRequired>, int> _rightSource; // Right data source.
-            private IEqualityComparer<TInputOutput> _comparer; // A comparer used for equality checks/hash-coding.
-            private IComparer<TLeftKey> _leftKeyComparer; // A comparer for order keys.
+            private readonly QueryOperatorEnumerator<Pair<TInputOutput, NoKeyMemoizationRequired>, TLeftKey> _leftSource; // Left data source.
+            private readonly QueryOperatorEnumerator<Pair<TInputOutput, NoKeyMemoizationRequired>, int> _rightSource; // Right data source.
+            private readonly IEqualityComparer<TInputOutput> _comparer; // A comparer used for equality checks/hash-coding.
+            private readonly IComparer<TLeftKey> _leftKeyComparer; // A comparer for order keys.
             private IEnumerator<KeyValuePair<Wrapper<TInputOutput>, Pair<TInputOutput, TLeftKey>>> _outputEnumerator; // The enumerator output elements + order keys.
-            private CancellationToken _cancellationToken;
+            private readonly CancellationToken _cancellationToken;
 
             //---------------------------------------------------------------------------------------
             // Instantiates a new except query operator enumerator.

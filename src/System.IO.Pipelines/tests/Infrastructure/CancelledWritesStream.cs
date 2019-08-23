@@ -9,13 +9,12 @@ namespace System.IO.Pipelines.Tests
 {
     public class CancelledWritesStream : WriteOnlyStream
     {
-        public TaskCompletionSource<object> WaitForWriteTask = new TaskCompletionSource<object>(TaskContinuationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource<object> WaitForWriteTask = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        public TaskCompletionSource<object> WaitForFlushTask = new TaskCompletionSource<object>(TaskContinuationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource<object> WaitForFlushTask = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            throw new NotImplementedException();
         }
 
         public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)

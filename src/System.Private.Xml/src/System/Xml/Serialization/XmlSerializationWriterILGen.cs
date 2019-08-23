@@ -13,7 +13,6 @@ using System.Text;
 using System.Xml.Schema;
 using System.Xml.Extensions;
 
-#if !FEATURE_SERIALIZATION_UAPAOT
 namespace System.Xml.Serialization
 {
     internal class XmlSerializationWriterILGen : XmlSerializationILGen
@@ -702,7 +701,7 @@ namespace System.Xml.Serialization
                         CodeGenerator.StaticBindingFlags,
                         Array.Empty<Type>()
                         );
-                    MethodInfo Int64_ToString = typeof(Int64).GetMethod(
+                    MethodInfo Int64_ToString = typeof(long).GetMethod(
                         "ToString",
                         CodeGenerator.InstanceBindingFlags,
                         new Type[] { typeof(IFormatProvider) }
@@ -1321,7 +1320,7 @@ namespace System.Xml.Serialization
                             ilg.Ldstr(GetCSharpString(ns));
                             argTypes.Add(typeof(string));
                         }
-                        MethodInfo Object_ToString = typeof(Object).GetMethod(
+                        MethodInfo Object_ToString = typeof(object).GetMethod(
                             "ToString",
                             CodeGenerator.InstanceBindingFlags,
                             Array.Empty<Type>()
@@ -2294,7 +2293,6 @@ namespace System.Xml.Serialization
     internal class ReflectionAwareILGen
     {
         private const string hexDigits = "0123456789ABCDEF";
-        private const string arrayMemberKey = "0";
         // reflectionVariables holds mapping between a reflection entity
         // referenced in the generated code (such as TypeInfo,
         // FieldInfo) and the variable which represent the entity (and
@@ -2633,4 +2631,3 @@ namespace System.Xml.Serialization
         }
     }
 }
-#endif

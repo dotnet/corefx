@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.InteropServices;
+using Test.Cryptography;
 using Xunit;
 
 namespace System.Security.Cryptography.X509Certificates.Tests
@@ -179,7 +180,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                     Assert.Equal(expectedCount, chain.ChainElements.Count);
                     Assert.Equal(expectedAllErrors, chain.AllStatusFlags());
-                    
+
                     Assert.Equal(endEntityErrors, chain.ChainElements[0].AllStatusFlags());
 
                     if (expectedCount > 2)
@@ -236,8 +237,37 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 using (X509Certificate2 ee = certReq.Create(root, notBefore, notAfter, root.GetSerialNumber()))
                 {
                     X509Chain chain = new X509Chain();
+                    chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
                     Assert.False(chain.Build(ee));
                     Assert.Equal(1, chain.ChainElements.Count);
+                    Assert.Equal(X509ChainStatusFlags.PartialChain, chain.AllStatusFlags());
+                }
+            }
+        }
+
+        [Fact]
+        // macOS (10.14) will not load certificates with NumericString in their subject
+        // if the 0x12 (NumericString) is changed to 0x13 (PrintableString) then the cert
+        // import doesn't fail.
+        [PlatformSpecific(~TestPlatforms.OSX)]
+        public static void VerifyNumericStringSubject()
+        {
+            X500DistinguishedName dn = new X500DistinguishedName(
+                "30283117301506052901020203120C313233203635342037383930310D300B0603550403130454657374".HexToByteArray());
+
+            using (RSA key = RSA.Create())
+            {
+                CertificateRequest req = new CertificateRequest(
+                    dn,
+                    key,
+                    HashAlgorithmName.SHA256,
+                    RSASignaturePadding.Pkcs1);
+
+                DateTimeOffset now = DateTimeOffset.UtcNow;
+
+                using (X509Certificate2 cert = req.CreateSelfSigned(now.AddDays(-1), now.AddDays(1)))
+                {
+                    Assert.Equal("CN=Test, OID.1.1.1.2.2.3=123 654 7890", cert.Subject);
                 }
             }
         }

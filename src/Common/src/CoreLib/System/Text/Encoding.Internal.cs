@@ -18,20 +18,20 @@ namespace System.Text
          * are no longer responsible for handling anything related to the EncoderNLS / DecoderNLS
          * infrastructure, nor are they responsible for implementing anything related to fallback
          * buffers logic.
-         * 
+         *
          * Instead, subclassed types are responsible only for transcoding of individual scalar values
          * to and from the encoding's byte representation (see the two methods immediately below).
          * They can optionally implement fast-path logic to perform bulk transcoding up until the
          * first segment of data that cannot be transcoded. They can special-case certain fallback
          * mechanisms if desired.
-         * 
+         *
          * Most of the fast-path code is written using raw pointers as the exchange types, just as
          * in the standard Encoding infrastructure. Since the fallback logic is more complex, most
          * of it is written using type-safe constructs like Span<T>, with some amount of glue to
          * allow it to work correctly with pointer-based fast-path code.
-         * 
+         *
          * A typical call graph for GetBytes is represented below, using ASCIIEncoding as an example.
-         * 
+         *
          * ASCIIEncoding.GetBytes(...) [non-EncoderNLS path, public virtual override]
          * `- <parameter validation>
          *  - ASCIIEncoding.GetBytesCommon [private helper method per derived type, inlined]
@@ -49,9 +49,9 @@ namespace System.Text
          *                 - <drain the fallback buffer to the destination>
          *                 - <loop until source is fully consumed or destination is full>
          *              - <signal full or partial success to EncoderNLS instance / throw if necessary>
-         * 
+         *
          * The call graph for GetBytes(..., EncoderNLS) is similar:
-         * 
+         *
          * Encoding.GetBytes(..., EncoderNLS) [base implementation]
          * `- <if no leftover data from previous invocation, invoke fast-path>
          *  - <if fast-path invocation above completed, return immediately>
@@ -62,7 +62,7 @@ namespace System.Text
          *        - <if all data transcoded, return immediately>
          *        - <if all data not transcoded...>
          *          `- Encoding.GetBytesWithFallback [virtual method as described above]
-         *  
+         *
          * There are different considerations in each call graph for things like error handling,
          * since the error conditions will be different depending on whether or not an EncoderNLS
          * instance is available and what values its properties have.
@@ -257,7 +257,7 @@ namespace System.Text
         private unsafe int GetByteCountWithFallback(char* pOriginalChars, int originalCharCount, int charsConsumedSoFar, EncoderNLS encoder)
         {
             Debug.Assert(encoder != null, "This code path should only be called from EncoderNLS.");
-            Debug.Assert(0 <= charsConsumedSoFar && charsConsumedSoFar < originalCharCount, "Caller should've checked this condition.");
+            Debug.Assert(0 <= charsConsumedSoFar && charsConsumedSoFar <= originalCharCount, "Caller should've checked this condition.");
 
             // First, try draining any data that already exists on the encoder instance. If we can't complete
             // that operation, there's no point to continuing down to the main workhorse methods.
@@ -523,7 +523,7 @@ namespace System.Text
         private unsafe int GetBytesWithFallback(char* pOriginalChars, int originalCharCount, byte* pOriginalBytes, int originalByteCount, int charsConsumedSoFar, int bytesWrittenSoFar, EncoderNLS encoder)
         {
             Debug.Assert(encoder != null, "This code path should only be called from EncoderNLS.");
-            Debug.Assert(0 <= charsConsumedSoFar && charsConsumedSoFar < originalCharCount, "Caller should've checked this condition.");
+            Debug.Assert(0 <= charsConsumedSoFar && charsConsumedSoFar <= originalCharCount, "Caller should've checked this condition.");
             Debug.Assert(0 <= bytesWrittenSoFar && bytesWrittenSoFar <= originalByteCount, "Caller should've checked this condition.");
 
             // First, try draining any data that already exists on the encoder instance. If we can't complete
@@ -843,14 +843,14 @@ namespace System.Text
         private unsafe int GetCharCountWithFallback(byte* pOriginalBytes, int originalByteCount, int bytesConsumedSoFar, DecoderNLS decoder)
         {
             Debug.Assert(decoder != null, "This code path should only be called from DecoderNLS.");
-            Debug.Assert(0 <= bytesConsumedSoFar && bytesConsumedSoFar < originalByteCount, "Caller should've checked this condition.");
+            Debug.Assert(0 <= bytesConsumedSoFar && bytesConsumedSoFar <= originalByteCount, "Caller should've checked this condition.");
 
             // First, try draining any data that already exists on the decoder instance. If we can't complete
             // that operation, there's no point to continuing down to the main workhorse methods.
 
             ReadOnlySpan<byte> bytes = new ReadOnlySpan<byte>(pOriginalBytes, originalByteCount).Slice(bytesConsumedSoFar);
 
-            int bytesConsumedJustNow = 0;
+            int bytesConsumedJustNow;
             int totalCharCount = 0;
 
             if (decoder.HasLeftoverData)
@@ -1111,7 +1111,7 @@ namespace System.Text
         private protected unsafe int GetCharsWithFallback(byte* pOriginalBytes, int originalByteCount, char* pOriginalChars, int originalCharCount, int bytesConsumedSoFar, int charsWrittenSoFar, DecoderNLS decoder)
         {
             Debug.Assert(decoder != null, "This code path should only be called from DecoderNLS.");
-            Debug.Assert(0 <= bytesConsumedSoFar && bytesConsumedSoFar < originalByteCount, "Caller should've checked this condition.");
+            Debug.Assert(0 <= bytesConsumedSoFar && bytesConsumedSoFar <= originalByteCount, "Caller should've checked this condition.");
             Debug.Assert(0 <= charsWrittenSoFar && charsWrittenSoFar <= originalCharCount, "Caller should've checked this condition.");
 
             // First, try draining any data that already exists on the encoder instance. If we can't complete
@@ -1126,8 +1126,8 @@ namespace System.Text
             ReadOnlySpan<byte> bytes = new ReadOnlySpan<byte>(pOriginalBytes, originalByteCount).Slice(bytesConsumedSoFar);
             Span<char> chars = new Span<char>(pOriginalChars, originalCharCount).Slice(charsWrittenSoFar);
 
-            int bytesConsumedJustNow = 0;
-            int charsWrittenJustNow = 0;
+            int bytesConsumedJustNow;
+            int charsWrittenJustNow;
 
             if (decoder.HasLeftoverData)
             {

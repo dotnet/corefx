@@ -2,12 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace System.Text.Json
 {
     internal static partial class JsonHelpers
     {
+#if !BUILDING_INBOX_LIBRARY
         /// <summary>
         /// Returns <see langword="true"/> if <paramref name="value"/> is a valid Unicode scalar
         /// value, i.e., is in [ U+0000..U+D7FF ], inclusive; or [ U+E000..U+10FFFF ], inclusive.
@@ -22,6 +24,7 @@ namespace System.Text.Json
 
             return IsInRangeInclusive(value ^ 0xD800U, 0x800U, 0x10FFFFU);
         }
+#endif
 
         /// <summary>
         /// Returns <see langword="true"/> if <paramref name="value"/> is between
@@ -30,14 +33,6 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInRangeInclusive(uint value, uint lowerBound, uint upperBound)
             => (value - lowerBound) <= (upperBound - lowerBound);
-
-        /// <summary>
-        /// Returns <see langword="true"/> if <paramref name="value"/> is between
-        /// <paramref name="lowerBound"/> and <paramref name="upperBound"/>, inclusive.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsInRangeInclusive(byte value, byte lowerBound, byte upperBound)
-            => ((byte)(value - lowerBound) <= (byte)(upperBound - lowerBound));
 
         /// <summary>
         /// Returns <see langword="true"/> if <paramref name="value"/> is between
@@ -81,6 +76,24 @@ namespace System.Text.Json
                         .ToArray()
 #endif
                 );
+        }
+
+        /// <summary>
+        /// Emulates Dictionary.TryAdd on netstandard.
+        /// </summary>
+        internal static bool TryAdd<TKey, TValue>(Dictionary<TKey, TValue> dictionary, TKey key, TValue value)
+        {
+#if netstandard
+            if (!dictionary.ContainsKey(key))
+            {
+                dictionary[key] = value;
+                return true;
+            }
+
+            return false;
+#else
+            return dictionary.TryAdd(key, value);
+#endif
         }
     }
 }

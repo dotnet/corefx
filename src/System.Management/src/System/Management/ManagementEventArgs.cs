@@ -12,9 +12,9 @@ internal class IdentifierChangedEventArgs : EventArgs
 
 internal class InternalObjectPutEventArgs : EventArgs
 {
-    private ManagementPath path;
+    private readonly ManagementPath path;
 
-    internal InternalObjectPutEventArgs (ManagementPath path) 
+    internal InternalObjectPutEventArgs (ManagementPath path)
     {
         this.path = path.Clone();
     }
@@ -24,13 +24,13 @@ internal class InternalObjectPutEventArgs : EventArgs
     }
 }
 
-    
+
     /// <summary>
     ///    <para>Represents the virtual base class to hold event data for WMI events.</para>
     /// </summary>
 public abstract class ManagementEventArgs : EventArgs
 {
-    private object context;
+    private readonly object context;
 
     /// <summary>
     /// Constructor. This is not callable directly by applications.
@@ -49,7 +49,7 @@ public abstract class ManagementEventArgs : EventArgs
     ///    A WMI context object containing
     ///    context information provided by the operation that triggered the event.
     /// </value>
-    public object Context { get { return context; } 
+    public object Context { get { return context; }
     }
 }
 
@@ -58,8 +58,8 @@ public abstract class ManagementEventArgs : EventArgs
 /// </summary>
 public class ObjectReadyEventArgs : ManagementEventArgs
 {
-    private ManagementBaseObject wmiObject;
-    
+    private readonly ManagementBaseObject wmiObject;
+
     /// <summary>
     /// Constructor.
     /// </summary>
@@ -78,10 +78,10 @@ public class ObjectReadyEventArgs : ManagementEventArgs
     ///    <para> Gets the newly-returned object.</para>
     /// </summary>
     /// <value>
-    /// <para>A <see cref='System.Management.ManagementBaseObject'/> representing the 
+    /// <para>A <see cref='System.Management.ManagementBaseObject'/> representing the
     ///    newly-returned object.</para>
     /// </value>
-    public ManagementBaseObject NewObject 
+    public ManagementBaseObject NewObject
     {
         get {
             return wmiObject;
@@ -123,7 +123,7 @@ public class CompletedEventArgs : ManagementEventArgs
     /// <para><see langword='null '/> if an error did not occur. Otherwise, may be non-null if the provider
     ///    supports extended error information.</para>
     /// </value>
-    public ManagementBaseObject StatusObject 
+    public ManagementBaseObject StatusObject
     {
         get {
             return wmiObject;
@@ -137,7 +137,7 @@ public class CompletedEventArgs : ManagementEventArgs
     /// <para>A <see cref='System.Management.ManagementStatus'/> value
     ///    indicating the return code of the operation.</para>
     /// </value>
-    public ManagementStatus Status 
+    public ManagementStatus Status
     {
         get {
             return (ManagementStatus) status;
@@ -150,8 +150,8 @@ public class CompletedEventArgs : ManagementEventArgs
 /// </summary>
 public class ObjectPutEventArgs : ManagementEventArgs
 {
-    private ManagementPath wmiPath;
-    
+    private readonly ManagementPath wmiPath;
+
     /// <summary>
     /// Constructor
     /// </summary>
@@ -172,10 +172,10 @@ public class ObjectPutEventArgs : ManagementEventArgs
     ///       object that has been put.</para>
     /// </summary>
     /// <value>
-    /// <para>A <see cref='System.Management.ManagementPath'/> containing the path of the object that has 
+    /// <para>A <see cref='System.Management.ManagementPath'/> containing the path of the object that has
     ///    been put.</para>
     /// </value>
-    public ManagementPath Path 
+    public ManagementPath Path
     {
         get {
             return wmiPath;
@@ -188,10 +188,10 @@ public class ObjectPutEventArgs : ManagementEventArgs
 /// </summary>
 public class ProgressEventArgs : ManagementEventArgs
 {
-    private int			upperBound;
-    private int			current;
-    private string		message;
-    
+    private readonly int    upperBound;
+    private readonly int    current;
+    private readonly string message;
+
     /// <summary>
     /// Constructor
     /// </summary>
@@ -224,7 +224,7 @@ public class ProgressEventArgs : ManagementEventArgs
     ///    An integer representing the total
     ///    amount of work for the operation.
     /// </value>
-    public int UpperBound 
+    public int UpperBound
     {
         get {
             return upperBound;
@@ -232,14 +232,14 @@ public class ProgressEventArgs : ManagementEventArgs
     }
 
     /// <summary>
-    ///    <para> Gets the current amount of work 
+    ///    <para> Gets the current amount of work
     ///       done by the operation. This is always less than or equal to <see cref='System.Management.ProgressEventArgs.UpperBound'/>.</para>
     /// </summary>
     /// <value>
-    ///    <para>An integer representing the current amount of work 
+    ///    <para>An integer representing the current amount of work
     ///       already completed by the operation.</para>
     /// </value>
-    public int Current 
+    public int Current
     {
         get {
             return current;
@@ -253,7 +253,7 @@ public class ProgressEventArgs : ManagementEventArgs
     ///    A string containing additional
     ///    information regarding the operation's progress.
     /// </value>
-    public string Message 
+    public string Message
     {
         get {
             return (null != message) ? message : string.Empty;
@@ -266,7 +266,7 @@ public class ProgressEventArgs : ManagementEventArgs
 /// </summary>
 public class EventArrivedEventArgs : ManagementEventArgs
 {
-    private ManagementBaseObject eventObject;
+    private readonly ManagementBaseObject eventObject;
 
     internal EventArrivedEventArgs (
                 object context,
@@ -281,7 +281,7 @@ public class EventArrivedEventArgs : ManagementEventArgs
     /// <value>
     ///    The object representing the WMI event.
     /// </value>
-    public ManagementBaseObject NewEvent 
+    public ManagementBaseObject NewEvent
     {
         get { return this.eventObject; }
     }
@@ -292,11 +292,11 @@ public class EventArrivedEventArgs : ManagementEventArgs
 /// </summary>
 public class StoppedEventArgs : ManagementEventArgs
 {
-    private int status;
+    private readonly int status;
 
     internal StoppedEventArgs (
                 object context,
-                int status) : base (context) 
+                int status) : base (context)
     {
         this.status = status;
     }
@@ -305,10 +305,10 @@ public class StoppedEventArgs : ManagementEventArgs
     ///    <para> Gets the completion status of the operation.</para>
     /// </summary>
     /// <value>
-    /// <para>A <see cref='System.Management.ManagementStatus'/> value representing the status of the 
+    /// <para>A <see cref='System.Management.ManagementStatus'/> value representing the status of the
     ///    operation.</para>
     /// </value>
-    public ManagementStatus Status 
+    public ManagementStatus Status
     {
         get {
             return (ManagementStatus) status;

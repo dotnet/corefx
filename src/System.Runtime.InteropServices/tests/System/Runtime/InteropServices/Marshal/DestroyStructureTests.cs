@@ -67,7 +67,7 @@ namespace System.Runtime.InteropServices.Tests
         {
             AssertExtensions.Throws<ArgumentNullException>("structureType", () => Marshal.DestroyStructure((IntPtr)1, null));
         }
-        
+
         public static IEnumerable<object[]> DestroyStructure_InvalidType_TestData()
         {
             yield return new object[] { typeof(int).MakeByRefType() };
@@ -80,8 +80,8 @@ namespace System.Runtime.InteropServices.Tests
 
             yield return new object[] { typeof(GenericStruct<>) };
             yield return new object[] { typeof(GenericStruct<string>) };
-            yield return new object[] { typeof(GenericInterface<>) };
-            yield return new object[] { typeof(GenericInterface<string>) };
+            yield return new object[] { typeof(IGenericInterface<>) };
+            yield return new object[] { typeof(IGenericInterface<string>) };
 
             yield return new object[] { typeof(GenericClass<>).GetTypeInfo().GenericTypeParameters[0] };
 

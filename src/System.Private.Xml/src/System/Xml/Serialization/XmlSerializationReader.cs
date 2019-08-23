@@ -104,41 +104,7 @@ namespace System.Xml.Serialization
         private string _guidID;
         private string _timeSpanID;
 
-        private static bool s_checkDeserializeAdvances=false;
-
         protected abstract void InitIDs();
-
-#if FEATURE_SERIALIZATION_UAPAOT
-        // this method must be called before any generated deserialization methods are called
-        internal void Init(XmlReader r, XmlDeserializationEvents events, string encodingStyle)
-        {
-            _events = events;
-            _r = r;
-            _soap12 = (encodingStyle == Soap12.Encoding);
-
-            _schemaNsID = r.NameTable.Add(XmlSchema.Namespace);
-            _schemaNs2000ID = r.NameTable.Add("http://www.w3.org/2000/10/XMLSchema");
-            _schemaNs1999ID = r.NameTable.Add("http://www.w3.org/1999/XMLSchema");
-            _schemaNonXsdTypesNsID = r.NameTable.Add(UrtTypes.Namespace);
-            _instanceNsID = r.NameTable.Add(XmlSchema.InstanceNamespace);
-            _instanceNs2000ID = r.NameTable.Add("http://www.w3.org/2000/10/XMLSchema-instance");
-            _instanceNs1999ID = r.NameTable.Add("http://www.w3.org/1999/XMLSchema-instance");
-            _soapNsID = r.NameTable.Add(Soap.Encoding);
-            _soap12NsID = r.NameTable.Add(Soap12.Encoding);
-            _schemaID = r.NameTable.Add("schema");
-            _wsdlNsID = r.NameTable.Add(Wsdl.Namespace);
-            _wsdlArrayTypeID = r.NameTable.Add(Wsdl.ArrayType);
-            _nullID = r.NameTable.Add("null");
-            _nilID = r.NameTable.Add("nil");
-            _typeID = r.NameTable.Add("type");
-            _arrayTypeID = r.NameTable.Add("arrayType");
-            _itemTypeID = r.NameTable.Add("itemType");
-            _arraySizeID = r.NameTable.Add("arraySize");
-            _arrayID = r.NameTable.Add("Array");
-            _urTypeID = r.NameTable.Add(Soap.UrType);
-            InitIDs();
-        }
-#endif
 
         // this method must be called before any generated deserialization methods are called
         internal void Init(XmlReader r, XmlDeserializationEvents events, string encodingStyle, TempAssembly tempAssembly)
@@ -294,7 +260,7 @@ namespace System.Xml.Serialization
             return ToXmlQualifiedName(type, false);
         }
 
-        // throwOnUnknown flag controls whether this method throws an exception or just returns 
+        // throwOnUnknown flag controls whether this method throws an exception or just returns
         // null if typeName.Namespace is unknown. the method still throws if typeName.Namespace
         // is recognized but typeName.Name isn't.
         private Type GetPrimitiveType(XmlQualifiedName typeName, bool throwOnUnknown)
@@ -1303,26 +1269,17 @@ namespace System.Xml.Serialization
             }
         }
 
-        private string CurrentTag()
-        {
-            switch (_r.NodeType)
+        private string CurrentTag() =>
+            _r.NodeType switch
             {
-                case XmlNodeType.Element:
-                    return "<" + _r.LocalName + " xmlns='" + _r.NamespaceURI + "'>";
-                case XmlNodeType.EndElement:
-                    return ">";
-                case XmlNodeType.Text:
-                    return _r.Value;
-                case XmlNodeType.CDATA:
-                    return "CDATA";
-                case XmlNodeType.Comment:
-                    return "<--";
-                case XmlNodeType.ProcessingInstruction:
-                    return "<?";
-                default:
-                    return "(unknown)";
-            }
-        }
+                XmlNodeType.Element => "<" + _r.LocalName + " xmlns='" + _r.NamespaceURI + "'>",
+                XmlNodeType.EndElement => ">",
+                XmlNodeType.Text => _r.Value,
+                XmlNodeType.CDATA => "CDATA",
+                XmlNodeType.Comment => "<--",
+                XmlNodeType.ProcessingInstruction => "<?",
+                _ => "(unknown)",
+            };
 
         protected Exception CreateUnknownTypeException(XmlQualifiedName type)
         {
@@ -1405,14 +1362,6 @@ namespace System.Xml.Serialization
             Array b = Array.CreateInstance(elementType, length);
             Array.Copy(a, b, length);
             return b;
-        }
-
-        // 0x6018
-        private static uint s_isTextualNodeBitmap = (1 << (int)XmlNodeType.Text) | (1 << (int)XmlNodeType.CDATA) | (1 << (int)XmlNodeType.Whitespace) | (1 << (int)XmlNodeType.SignificantWhitespace);
-
-        private static bool IsTextualNode(XmlNodeType nodeType)
-        {
-            return 0 != (s_isTextualNodeBitmap & (1 << (int)nodeType));
         }
 
         protected string ReadString(string value)
@@ -2001,9 +1950,9 @@ namespace System.Xml.Serialization
         ///<internalonly/>
         protected class Fixup
         {
-            private XmlSerializationFixupCallback _callback;
+            private readonly XmlSerializationFixupCallback _callback;
             private object _source;
-            private string[] _ids;
+            private readonly string[] _ids;
 
             public Fixup(object o, XmlSerializationFixupCallback callback, int count)
                 : this(o, callback, new string[count])
@@ -2036,9 +1985,9 @@ namespace System.Xml.Serialization
 
         protected class CollectionFixup
         {
-            private XmlSerializationCollectionFixupCallback _callback;
-            private object _collection;
-            private object _collectionItems;
+            private readonly XmlSerializationCollectionFixupCallback _callback;
+            private readonly object _collection;
+            private readonly object _collectionItems;
 
             public CollectionFixup(object collection, XmlSerializationCollectionFixupCallback callback, object collectionItems)
             {
@@ -2074,15 +2023,13 @@ namespace System.Xml.Serialization
     ///<internalonly/>
     public delegate object XmlSerializationReadCallback();
 
-#if !FEATURE_SERIALIZATION_UAPAOT
     internal class XmlSerializationReaderCodeGen : XmlSerializationCodeGen
     {
-        private Hashtable _idNames = new Hashtable();
+        private readonly Hashtable _idNames = new Hashtable();
         private Hashtable _enums;
-        private Hashtable _createMethods = new Hashtable();
+        private readonly Hashtable _createMethods = new Hashtable();
         private int _nextCreateMethodNumber = 0;
         private int _nextIdNumber = 0;
-        private int _nextWhileLoopIndex = 0;
 
         internal Hashtable Enums
         {
@@ -2098,8 +2045,8 @@ namespace System.Xml.Serialization
 
         private class CreateCollectionInfo
         {
-            private string _name;
-            private TypeDesc _td;
+            private readonly string _name;
+            private readonly TypeDesc _td;
 
             internal CreateCollectionInfo(string name, TypeDesc td)
             {
@@ -2118,15 +2065,15 @@ namespace System.Xml.Serialization
         }
         private class Member
         {
-            private string _source;
-            private string _arrayName;
-            private string _arraySource;
-            private string _choiceArrayName;
-            private string _choiceSource;
-            private string _choiceArraySource;
-            private MemberMapping _mapping;
-            private bool _isArray;
-            private bool _isList;
+            private readonly string _source;
+            private readonly string _arrayName;
+            private readonly string _arraySource;
+            private readonly string _choiceArrayName;
+            private readonly string _choiceSource;
+            private readonly string _choiceArraySource;
+            private readonly MemberMapping _mapping;
+            private readonly bool _isArray;
+            private readonly bool _isList;
             private bool _isNullable;
             private bool _multiRef;
             private int _fixupIndex = -1;
@@ -5173,5 +5120,4 @@ namespace System.Xml.Serialization
             RaCodeGen.WriteLocalDecl(typeFullName, variableName, initValue, useReflection);
         }
     }
-#endif
 }

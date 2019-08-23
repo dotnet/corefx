@@ -91,11 +91,11 @@ namespace System.Data.SqlClient.SNI
         {
             if (_encapsulate)
             {
-                return await ReadInternalEncapsulate(buffer, offset, count, token, async);
+                return await ReadInternalEncapsulate(buffer, offset, count, token, async).ConfigureAwait(false);
             }
             else if (async)
             {
-                return await ReadInternalAsync(buffer, offset, count, token);
+                return await ReadInternalAsync(buffer, offset, count, token).ConfigureAwait(false);
             }
             else
             {
@@ -114,7 +114,7 @@ namespace System.Data.SqlClient.SNI
                 while (readBytes < TdsEnums.HEADER_LEN)
                 {
                     readBytes += (async ?
-                        await ReadInternalAsync(packetData, readBytes, TdsEnums.HEADER_LEN - readBytes, token) :
+                        await ReadInternalAsync(packetData, readBytes, TdsEnums.HEADER_LEN - readBytes, token).ConfigureAwait(false) :
                         ReadInternalSync(packetData, readBytes, TdsEnums.HEADER_LEN - readBytes)
                    );
                 }
@@ -127,15 +127,15 @@ namespace System.Data.SqlClient.SNI
             {
                 count = _packetBytes;
             }
-            
+
             readBytes = (async ?
-                await ReadInternalAsync(packetData, 0, count, token) :
+                await ReadInternalAsync(packetData, 0, count, token).ConfigureAwait(false) :
                 ReadInternalSync(packetData, 0, count)
             );
 
 
             _packetBytes -= readBytes;
-            
+
             Buffer.BlockCopy(packetData, 0, buffer, offset, readBytes);
 
             Array.Clear(packetData, 0, readBytes);
@@ -184,9 +184,9 @@ namespace System.Data.SqlClient.SNI
                     int combinedLength = TdsEnums.HEADER_LEN + currentCount;
                     byte[] combinedBuffer = ArrayPool<byte>.Shared.Rent(combinedLength);
 
-                    // We can only send 4088 bytes in one packet. Header[1] is set to 1 if this is a 
+                    // We can only send 4088 bytes in one packet. Header[1] is set to 1 if this is a
                     // partial packet (whether or not count != 0).
-                    // 
+                    //
                     combinedBuffer[7] = 0; // touch this first for the jit bounds check
                     combinedBuffer[0] = PRELOGIN_PACKET_TYPE;
                     combinedBuffer[1] = (byte)(count > 0 ? 0 : 1);
@@ -240,7 +240,7 @@ namespace System.Data.SqlClient.SNI
         }
 
         /// <summary>
-        /// Set stream length. 
+        /// Set stream length.
         /// </summary>
         /// <param name="value">Length</param>
         public override void SetLength(long value)

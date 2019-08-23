@@ -15,11 +15,12 @@ namespace System.Net.Mail
     {
         internal const int DefaultPort = 25;
 
-        private ISmtpAuthenticationModule[] _authenticationModules;
+        private readonly ISmtpAuthenticationModule[] _authenticationModules;
         private SmtpConnection _connection;
-        private SmtpClient _client;
+        private readonly SmtpClient _client;
         private ICredentialsByHost _credentials;
-        private List<SmtpFailedRecipientException> _failedRecipientExceptions = new List<SmtpFailedRecipientException>();
+        private int _timeout = 100000; // seconds
+        private readonly List<SmtpFailedRecipientException> _failedRecipientExceptions = new List<SmtpFailedRecipientException>();
         private bool _identityRequired;
         private bool _aborted;
 
@@ -275,23 +276,23 @@ namespace System.Net.Mail
             }
 
             DataCommand.Send(_connection);
-            return new MailWriter(_connection.GetClosableStream());
+            return new MailWriter(_connection.GetClosableStream(), encodeForTransport: true);
         }
     }
 
     internal class SendMailAsyncResult : LazyAsyncResult
     {
-        private SmtpConnection _connection;
-        private MailAddress _from;
-        private string _deliveryNotify;
-        private static AsyncCallback s_sendMailFromCompleted = new AsyncCallback(SendMailFromCompleted);
-        private static AsyncCallback s_sendToCollectionCompleted = new AsyncCallback(SendToCollectionCompleted);
-        private static AsyncCallback s_sendDataCompleted = new AsyncCallback(SendDataCompleted);
-        private List<SmtpFailedRecipientException> _failedRecipientExceptions = new List<SmtpFailedRecipientException>();
+        private readonly SmtpConnection _connection;
+        private readonly MailAddress _from;
+        private readonly string _deliveryNotify;
+        private static readonly AsyncCallback s_sendMailFromCompleted = new AsyncCallback(SendMailFromCompleted);
+        private static readonly AsyncCallback s_sendToCollectionCompleted = new AsyncCallback(SendToCollectionCompleted);
+        private static readonly AsyncCallback s_sendDataCompleted = new AsyncCallback(SendDataCompleted);
+        private readonly List<SmtpFailedRecipientException> _failedRecipientExceptions = new List<SmtpFailedRecipientException>();
         private Stream _stream;
-        private MailAddressCollection _toCollection;
+        private readonly MailAddressCollection _toCollection;
         private int _toIndex;
-        private bool _allowUnicode;
+        private readonly bool _allowUnicode;
 
 
         internal SendMailAsyncResult(SmtpConnection connection, MailAddress from, MailAddressCollection toCollection,
@@ -324,7 +325,7 @@ namespace System.Net.Mail
                 ExceptionDispatchInfo.Throw(e);
             }
 
-            return new MailWriter(thisPtr._stream);
+            return new MailWriter(thisPtr._stream, encodeForTransport: true);
         }
         private void SendMailFrom()
         {

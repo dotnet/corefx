@@ -23,18 +23,18 @@ namespace System.DirectoryServices.AccountManagement
         // Note that, since computer is a derived class of user in AD, if you don't want to confuse
         // computers with users, you must test an object for computer status before testing it for
         // user status.
-        static internal bool IsOfObjectClass(DirectoryEntry de, string classToCompare)
+        internal static bool IsOfObjectClass(DirectoryEntry de, string classToCompare)
         {
             return de.Properties["objectClass"].Contains(classToCompare);
         }
 
-        static internal bool IsOfObjectClass(SearchResult sr, string classToCompare)
+        internal static bool IsOfObjectClass(SearchResult sr, string classToCompare)
         {
             return sr.Properties["objectClass"].Contains(classToCompare);
         }
 
         // Retrieves the name of the actual server that the DirectoryEntry is connected to
-        static internal string GetServerName(DirectoryEntry de)
+        internal static string GetServerName(DirectoryEntry de)
         {
             UnsafeNativeMethods.IAdsObjectOptions objOptions = (UnsafeNativeMethods.IAdsObjectOptions)de.NativeObject;
             return (string)objOptions.GetOption(0 /* == ADS_OPTION_SERVERNAME */);
@@ -42,8 +42,8 @@ namespace System.DirectoryServices.AccountManagement
 
         // This routine escapes values used in DNs, per RFC 2253 and ADSI escaping rules.
         // It treats its input as a unescaped literal and produces a LDAP string that represents that literal
-        // and that is escaped according to RFC 2253 and ADSI rules for DN components.        
-        static internal string EscapeDNComponent(string dnComponent)
+        // and that is escaped according to RFC 2253 and ADSI rules for DN components.
+        internal static string EscapeDNComponent(string dnComponent)
         {
             //
             //   From RFC 2254:
@@ -56,11 +56,11 @@ namespace System.DirectoryServices.AccountManagement
             //          string
             //
             //      o   a space character occurring at the end of the string
-            // 
+            //
             //      o   one of the characters ",", "+", """, "\", "<", ">" or ";"
-            // 
+            //
             //      Implementations MAY escape other characters.
-            // 
+            //
             //      If a character to be escaped is one of the list shown above, then it
             //      is prefixed by a backslash ('\' ASCII 92).
             //
@@ -149,7 +149,7 @@ namespace System.DirectoryServices.AccountManagement
         // This routine escapes values used in search filters, per RFC 2254 escaping rules.
         // It treats its input as a unescaped literal and produces a LDAP string that represents that literal
         // and that is escaped according to RFC 2254 rules.
-        static internal string EscapeRFC2254SpecialChars(string s)
+        internal static string EscapeRFC2254SpecialChars(string s)
         {
             StringBuilder sb = new StringBuilder(s.Length);
 
@@ -193,7 +193,7 @@ namespace System.DirectoryServices.AccountManagement
         // It treats its input string as a PAPI string filter (escaped according to
         // PAPI rules, and possibly containing wildcards), and produces a string
         // escaped to RFC 2254 rules and possibly containing wildcards.
-        static internal string PAPIQueryToLdapQueryString(string papiString)
+        internal static string PAPIQueryToLdapQueryString(string papiString)
         {
             //
             // Wildcard
@@ -209,7 +209,7 @@ namespace System.DirectoryServices.AccountManagement
             //   \( --> \28
             //   \) --> \29
             //   x  --> x       (where x is anything else)
-            //   \x --> x       (where x is anything else)        
+            //   \x --> x       (where x is anything else)
 
             StringBuilder sb = new StringBuilder(papiString.Length);
 
@@ -278,7 +278,7 @@ namespace System.DirectoryServices.AccountManagement
             return sb.ToString();
         }
 
-        static internal string EscapeBinaryValue(byte[] bytes)
+        internal static string EscapeBinaryValue(byte[] bytes)
         {
             StringBuilder sb = new StringBuilder(bytes.Length * 3);
 
@@ -291,7 +291,7 @@ namespace System.DirectoryServices.AccountManagement
             return sb.ToString();
         }
 
-        static internal string DateTimeToADString(DateTime dateTime)
+        internal static string DateTimeToADString(DateTime dateTime)
         {
             // DateTime --> FILETIME --> stringized FILETIME
 
@@ -300,19 +300,19 @@ namespace System.DirectoryServices.AccountManagement
             return fileTime.ToString(CultureInfo.InvariantCulture);
         }
 
-        static internal DateTime ADFileTimeToDateTime(long filetime)
+        internal static DateTime ADFileTimeToDateTime(long filetime)
         {
             // int64 FILETIME --> DateTime
             return DateTime.FromFileTimeUtc(filetime);
         }
 
-        static internal long DateTimeToADFileTime(DateTime dt)
+        internal static long DateTimeToADFileTime(DateTime dt)
         {
             // DateTime --> int64 FILETIME
             return dt.ToFileTimeUtc();
         }
 
-        static internal long LargeIntToInt64(UnsafeNativeMethods.IADsLargeInteger largeInt)
+        internal static long LargeIntToInt64(UnsafeNativeMethods.IADsLargeInteger largeInt)
         {
             uint lowPart = (uint)largeInt.LowPart;
             uint highPart = (uint)largeInt.HighPart;
@@ -323,7 +323,7 @@ namespace System.DirectoryServices.AccountManagement
 
         // Transform from hex string ("1AFF") to LDAP hex string ("\1A\FF").
         // Returns null if input string is not a valid hex string.
-        static internal string HexStringToLdapHexString(string s)
+        internal static string HexStringToLdapHexString(string s)
         {
             Debug.Assert(s != null);
 
@@ -358,7 +358,7 @@ namespace System.DirectoryServices.AccountManagement
             return sb.ToString();
         }
 
-        static internal bool ArePrincipalsInSameForest(Principal p1, Principal p2)
+        internal static bool ArePrincipalsInSameForest(Principal p1, Principal p2)
         {
             string p1DnsForestName = ((ADStoreCtx)p1.GetStoreCtxToUse()).DnsForestName;
             string p2DnsForestName = ((ADStoreCtx)p2.GetStoreCtxToUse()).DnsForestName;
@@ -366,18 +366,18 @@ namespace System.DirectoryServices.AccountManagement
             return (string.Equals(p1DnsForestName, p2DnsForestName, StringComparison.OrdinalIgnoreCase));
         }
 
-        /// 
+        ///
         /// <summary>
         /// Returns true if the specified SIDs are from the same domain.
         /// Otherwise return false.
         /// </summary>
         /// <param name="sid1"></param>
         /// <param name="sid2"></param>
-        /// <returns>Returns true if the specified SIDs are from the same domain. 
+        /// <returns>Returns true if the specified SIDs are from the same domain.
         /// Otherwise return false
         /// </returns>
-        /// 
-        static internal bool AreSidsInSameDomain(SecurityIdentifier sid1, SecurityIdentifier sid2)
+        ///
+        internal static bool AreSidsInSameDomain(SecurityIdentifier sid1, SecurityIdentifier sid2)
         {
             if (sid1.IsAccountSid() && sid2.IsAccountSid())
             {
@@ -389,7 +389,7 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        static internal Principal DirectoryEntryAsPrincipal(DirectoryEntry de, ADStoreCtx storeCtx)
+        internal static Principal DirectoryEntryAsPrincipal(DirectoryEntry de, ADStoreCtx storeCtx)
         {
             if (ADUtils.IsOfObjectClass(de, "computer") ||
                ADUtils.IsOfObjectClass(de, "user") ||
@@ -407,7 +407,7 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        static internal Principal SearchResultAsPrincipal(SearchResult sr, ADStoreCtx storeCtx, object discriminant)
+        internal static Principal SearchResultAsPrincipal(SearchResult sr, ADStoreCtx storeCtx, object discriminant)
         {
             if (ADUtils.IsOfObjectClass(sr, "computer") ||
                ADUtils.IsOfObjectClass(sr, "user") ||
@@ -425,13 +425,13 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        // This function is used to check if we will be able to lookup a SID from the 
+        // This function is used to check if we will be able to lookup a SID from the
         // target domain by targeting the local computer.  This is done by checking for either
         // a outbound or bidirectional trust between the computers domain and the target
         // domain or the current forest and the target domain's forest.
         // target domain must be the full DNS domain name of the target domain to make the string
         // compare below work properly.
-        static internal bool VerifyOutboundTrust(string targetDomain, string username, string password)
+        internal static bool VerifyOutboundTrust(string targetDomain, string username, string password)
         {
             Domain currentDom = null;
 
@@ -492,7 +492,7 @@ namespace System.DirectoryServices.AccountManagement
             return false;
         }
 
-        static internal string RetriveWkDn(DirectoryEntry deBase, string defaultNamingContext, string serverName, byte[] wellKnownContainerGuid)
+        internal static string RetriveWkDn(DirectoryEntry deBase, string defaultNamingContext, string serverName, byte[] wellKnownContainerGuid)
         {
             /*
                             bool w2k3Supported  = false;

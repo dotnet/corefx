@@ -25,17 +25,11 @@ namespace System.Configuration
 
         private byte _mode;
 
-        internal static OverrideModeSetting s_sectionDefault;
-        internal static OverrideModeSetting s_locationDefault;
+        // Default for section is ALLOW
+        internal static readonly OverrideModeSetting s_sectionDefault = new OverrideModeSetting { _mode = (byte)OverrideMode.Allow };
 
-        static OverrideModeSetting()
-        {
-            // Default for section is ALLOW
-            s_sectionDefault = new OverrideModeSetting { _mode = (byte)OverrideMode.Allow };
-
-            // Default for location tags is INHERIT. Note that we do not make the value as existent in the XML or specified by the API
-            s_locationDefault = new OverrideModeSetting { _mode = (byte)OverrideMode.Inherit };
-        }
+        // Default for location tags is INHERIT. Note that we do not make the value as existent in the XML or specified by the API
+        internal static readonly OverrideModeSetting s_locationDefault = new OverrideModeSetting { _mode = (byte)OverrideMode.Inherit };
 
         internal static OverrideModeSetting CreateFromXmlReadValue(bool allowOverride)
         {
@@ -62,28 +56,18 @@ namespace System.Configuration
             return result;
         }
 
-        internal static OverrideMode ParseOverrideModeXmlValue(string value, XmlUtil xmlUtil)
-        {
+        internal static OverrideMode ParseOverrideModeXmlValue(string value, XmlUtil xmlUtil) =>
             // 'value' is the string representation of OverrideMode enum
             // Try to parse the string to the enum and generate errors if not possible
-
-            switch (value)
+            value switch
             {
-                case BaseConfigurationRecord.OverrideModeInherit:
-                    return OverrideMode.Inherit;
-
-                case BaseConfigurationRecord.OverrideModeAllow:
-                    return OverrideMode.Allow;
-
-                case BaseConfigurationRecord.OverrideModeDeny:
-                    return OverrideMode.Deny;
-
-                default:
-                    throw new ConfigurationErrorsException(
+                BaseConfigurationRecord.OverrideModeInherit => OverrideMode.Inherit,
+                BaseConfigurationRecord.OverrideModeAllow => OverrideMode.Allow,
+                BaseConfigurationRecord.OverrideModeDeny => OverrideMode.Deny,
+                _ => throw new ConfigurationErrorsException(
                         SR.Config_section_override_mode_attribute_invalid,
-                        xmlUtil);
-            }
-        }
+                        xmlUtil),
+            };
 
         internal static bool CanUseSameLocationTag(OverrideModeSetting x, OverrideModeSetting y)
         {
@@ -115,7 +99,7 @@ namespace System.Configuration
                         ((y._mode & XmlDefinedAny) != 0))
                         result = (x._mode & XmlDefinedAny) == (y._mode & XmlDefinedAny);
 
-                    // Neither "x" nor "y" was XML defined - they are a match since they can both go 
+                    // Neither "x" nor "y" was XML defined - they are a match since they can both go
                     // to a default <location> with no explicit mode setting written out
                 }
             }

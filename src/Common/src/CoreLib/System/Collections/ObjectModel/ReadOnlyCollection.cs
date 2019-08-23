@@ -13,7 +13,7 @@ namespace System.Collections.ObjectModel
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class ReadOnlyCollection<T> : IList<T>, IList, IReadOnlyList<T>
     {
-        private IList<T> list; // Do not rename (binary serialization)
+        private readonly IList<T> list; // Do not rename (binary serialization)
 
         public ReadOnlyCollection(IList<T> list)
         {
@@ -21,13 +21,10 @@ namespace System.Collections.ObjectModel
             {
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.list);
             }
-            this.list = list!; // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            this.list = list;
         }
 
-        public int Count
-        {
-            get { return list.Count; }
-        }
+        public int Count => list.Count;
 
         public T this[int index]
         {
@@ -54,18 +51,9 @@ namespace System.Collections.ObjectModel
             return list.IndexOf(value);
         }
 
-        protected IList<T> Items
-        {
-            get
-            {
-                return list;
-            }
-        }
+        protected IList<T> Items => list;
 
-        bool ICollection<T>.IsReadOnly
-        {
-            get { return true; }
-        }
+        bool ICollection<T>.IsReadOnly => true;
 
         T IList<T>.this[int index]
         {
@@ -107,18 +95,9 @@ namespace System.Collections.ObjectModel
             return ((IEnumerable)list).GetEnumerator();
         }
 
-        bool ICollection.IsSynchronized
-        {
-            get { return false; }
-        }
+        bool ICollection.IsSynchronized => false;
 
-        object ICollection.SyncRoot
-        {
-            get
-            {
-                return (list is ICollection coll) ? coll.SyncRoot : this;
-            }
-        }
+        object ICollection.SyncRoot => list is ICollection coll ? coll.SyncRoot : this;
 
         void ICollection.CopyTo(Array array, int index)
         {
@@ -127,7 +106,7 @@ namespace System.Collections.ObjectModel
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             }
 
-            if (array!.Rank != 1)  // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if (array.Rank != 1)
             {
                 ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_RankMultiDimNotSupported);
             }
@@ -167,7 +146,7 @@ namespace System.Collections.ObjectModel
                 }
 
                 //
-                // We can't cast array of value type to object[], so we don't support 
+                // We can't cast array of value type to object[], so we don't support
                 // widening of primitive types here.
                 //
                 object?[]? objects = array as object[];
@@ -181,7 +160,7 @@ namespace System.Collections.ObjectModel
                 {
                     for (int i = 0; i < count; i++)
                     {
-                        objects![index++] = list[i]; // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+                        objects[index++] = list[i];
                     }
                 }
                 catch (ArrayTypeMismatchException)
@@ -191,15 +170,9 @@ namespace System.Collections.ObjectModel
             }
         }
 
-        bool IList.IsFixedSize
-        {
-            get { return true; }
-        }
+        bool IList.IsFixedSize => true;
 
-        bool IList.IsReadOnly
-        {
-            get { return true; }
-        }
+        bool IList.IsReadOnly => true;
 
         object? IList.this[int index]
         {
@@ -224,7 +197,7 @@ namespace System.Collections.ObjectModel
         private static bool IsCompatibleObject(object? value)
         {
             // Non-null values are fine.  Only accept nulls if T is a class or Nullable<U>.
-            // Note that default(T) is not equal to null for value types except when T is Nullable<U>. 
+            // Note that default(T) is not equal to null for value types except when T is Nullable<U>.
             return ((value is T) || (value == null && default(T)! == null));
         }
 

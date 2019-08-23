@@ -20,8 +20,8 @@ namespace System.Linq.Parallel
     /// <typeparam name="TResult"></typeparam>
     internal class RepeatEnumerable<TResult> : ParallelQuery<TResult>, IParallelPartitionable<TResult>
     {
-        private TResult _element; // Element value to repeat.
-        private int _count; // Count of element values.
+        private readonly TResult _element; // Element value to repeat.
+        private readonly int _count; // Count of element values.
 
         //-----------------------------------------------------------------------------------
         // Constructs a new repeat enumerable object for the repeat operation.
@@ -77,7 +77,7 @@ namespace System.Linq.Parallel
         // The actual enumerator that produces a set of repeated elements.
         //
 
-        class RepeatEnumerator : QueryOperatorEnumerator<TResult, int>
+        private class RepeatEnumerator : QueryOperatorEnumerator<TResult, int>
         {
             private readonly TResult _element; // The element to repeat.
             private readonly int _count; // The number of times to repeat it.

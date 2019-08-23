@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -27,6 +27,75 @@ namespace System.Buffers.Tests
             bufferWriter.Write(Encoding.UTF8.GetBytes(" World!"));
             Assert.Equal(12, bufferWriter.Comitted.Count);
             Assert.Equal("Hello World!", bufferWriter.ToString());
+        }
+
+        [Fact]
+        public void WritingEmptyBufferToSingleSegmentEmptyBufferWriterDoesNothing()
+        {
+            IBufferWriter<byte> bufferWriter = new MultiSegmentArrayBufferWriter<byte>(
+                new byte[][] { Array.Empty<byte>() }
+            );
+
+            bufferWriter.Write(Array.Empty<byte>()); // This is equivalent to: Span<byte>.Empty.CopyTo(Span<byte>.Empty);
+        }
+
+        [Fact]
+        public void WritingEmptyBufferToMultipleSegmentEmptyBufferWriterDoesNothing()
+        {
+            IBufferWriter<byte> bufferWriter = new MultiSegmentArrayBufferWriter<byte>(
+                new byte[][] { Array.Empty<byte>(), Array.Empty<byte>() }
+            );
+
+            bufferWriter.Write(Array.Empty<byte>());
+        }
+
+        [Theory]
+        [InlineData(1, 0)]
+        [InlineData(10, 9)]
+        public void WritingToTooSmallSingleSegmentBufferFailsWithException(int inputSize, int destinationSize)
+        {
+            IBufferWriter<byte> bufferWriter = new MultiSegmentArrayBufferWriter<byte>(
+                new byte[][] { new byte[destinationSize] }
+            );
+
+            Assert.Throws<ArgumentOutOfRangeException>(paramName: "writer", testCode: () => bufferWriter.Write(new byte[inputSize]));
+        }
+
+        [Theory]
+        [InlineData(10, 2, 2)]
+        [InlineData(10, 9, 0)]
+        public void WritingToTooSmallMultiSegmentBufferFailsWithException(int inputSize, int firstSegmentSize, int secondSegmentSize)
+        {
+            IBufferWriter<byte> bufferWriter = new MultiSegmentArrayBufferWriter<byte>(
+                new byte[][] {
+                    new byte[firstSegmentSize],
+                    new byte[secondSegmentSize]
+                }
+            );
+
+            Assert.Throws<ArgumentOutOfRangeException>(
+                paramName: "writer",
+                testCode: () => bufferWriter.Write(new byte[inputSize]));
+        }
+
+        private class MultiSegmentArrayBufferWriter<T> : IBufferWriter<T>
+        {
+            private readonly T[][] _segments;
+            private int _segmentIndex;
+
+            public MultiSegmentArrayBufferWriter(T[][] segments) => _segments = segments;
+
+            public void Advance(int size)
+            {
+                if (size != _segments[_segmentIndex].Length)
+                    throw new NotSupportedException("By design");
+
+                _segmentIndex++;
+            }
+
+            public Memory<T> GetMemory(int sizeHint = 0) => _segmentIndex < _segments.Length ? _segments[_segmentIndex] : Memory<T>.Empty;
+
+            public Span<T> GetSpan(int sizeHint = 0) => _segmentIndex < _segments.Length ? _segments[_segmentIndex] : Span<T>.Empty;
         }
 
         private class TestBufferWriterSingleSegment : IBufferWriter<byte>

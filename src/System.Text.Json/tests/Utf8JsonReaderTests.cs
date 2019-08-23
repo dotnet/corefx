@@ -1,12 +1,10 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using Newtonsoft.Json;
 using Xunit;
 
@@ -29,8 +27,6 @@ namespace System.Text.Json.Tests
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
 
-            Assert.Equal(0, json.CurrentState.BytesConsumed);
-            Assert.Equal(default, json.CurrentState.Position);
             Assert.Equal(0, json.CurrentState.Options.MaxDepth);
             Assert.False(json.CurrentState.Options.AllowTrailingCommas);
             Assert.Equal(JsonCommentHandling.Disallow, json.CurrentState.Options.CommentHandling);
@@ -49,6 +45,14 @@ namespace System.Text.Json.Tests
         private static void TestGetMethodsOnDefault()
         {
             Utf8JsonReader json = default;
+
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.TryGetByte(out _));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.GetByte());
+
+            json = default;
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.GetComment());
+
+            json = default;
             JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.TryGetDateTime(out _));
             JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.GetDateTime());
 
@@ -65,6 +69,10 @@ namespace System.Text.Json.Tests
             JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.GetDouble());
 
             json = default;
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.TryGetInt16(out _));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.GetInt16());
+
+            json = default;
             JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.TryGetInt32(out _));
             JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.GetInt32());
 
@@ -73,8 +81,16 @@ namespace System.Text.Json.Tests
             JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.GetInt64());
 
             json = default;
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.TryGetSByte(out _));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.GetSByte());
+
+            json = default;
             JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.TryGetSingle(out _));
             JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.GetSingle());
+
+            json = default;
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.TryGetUInt16(out _));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.GetUInt16());
 
             json = default;
             JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.TryGetUInt32(out _));
@@ -106,8 +122,29 @@ namespace System.Text.Json.Tests
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
 
-            Assert.Equal(0, json.CurrentState.BytesConsumed);
-            Assert.Equal(default, json.CurrentState.Position);
+            Assert.Equal(64, json.CurrentState.Options.MaxDepth);
+            Assert.False(json.CurrentState.Options.AllowTrailingCommas);
+            Assert.Equal(JsonCommentHandling.Disallow, json.CurrentState.Options.CommentHandling);
+
+            Assert.True(json.Read());
+            Assert.False(json.Read());
+        }
+
+        [Fact]
+        public static void InitialStateSimpleCtor()
+        {
+            var json = new Utf8JsonReader(Encoding.UTF8.GetBytes("1"));
+
+            Assert.Equal(0, json.BytesConsumed);
+            Assert.Equal(0, json.TokenStartIndex);
+            Assert.Equal(0, json.CurrentDepth);
+            Assert.Equal(JsonTokenType.None, json.TokenType);
+            Assert.Equal(default, json.Position);
+            Assert.False(json.HasValueSequence);
+            Assert.True(json.IsFinalBlock);
+            Assert.True(json.ValueSpan.SequenceEqual(default));
+            Assert.True(json.ValueSequence.IsEmpty);
+
             Assert.Equal(64, json.CurrentState.Options.MaxDepth);
             Assert.False(json.CurrentState.Options.AllowTrailingCommas);
             Assert.Equal(JsonCommentHandling.Disallow, json.CurrentState.Options.CommentHandling);
@@ -132,8 +169,6 @@ namespace System.Text.Json.Tests
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
 
-            Assert.Equal(0, json.CurrentState.BytesConsumed);
-            Assert.Equal(default, json.CurrentState.Position);
             Assert.Equal(64, json.CurrentState.Options.MaxDepth);
             Assert.False(json.CurrentState.Options.AllowTrailingCommas);
             Assert.Equal(JsonCommentHandling.Disallow, json.CurrentState.Options.CommentHandling);
@@ -150,8 +185,6 @@ namespace System.Text.Json.Tests
             Assert.True(json.ValueSpan.SequenceEqual(new byte[] { (byte)'1' }));
             Assert.True(json.ValueSequence.IsEmpty);
 
-            Assert.Equal(2, json.CurrentState.BytesConsumed);
-            Assert.Equal(default, json.CurrentState.Position);
             Assert.Equal(64, json.CurrentState.Options.MaxDepth);
             Assert.False(json.CurrentState.Options.AllowTrailingCommas);
             Assert.Equal(JsonCommentHandling.Disallow, json.CurrentState.Options.CommentHandling);
@@ -170,8 +203,6 @@ namespace System.Text.Json.Tests
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
 
-            Assert.Equal(0, json.CurrentState.BytesConsumed);
-            Assert.Equal(default, json.CurrentState.Position);
             Assert.Equal(64, json.CurrentState.Options.MaxDepth);
             Assert.False(json.CurrentState.Options.AllowTrailingCommas);
             Assert.Equal(JsonCommentHandling.Disallow, json.CurrentState.Options.CommentHandling);
@@ -270,7 +301,6 @@ namespace System.Text.Json.Tests
                 int written = firstLength;
 
                 long consumed = json.BytesConsumed;
-                Assert.Equal(consumed, json.CurrentState.BytesConsumed);
                 Assert.Equal(default, json.Position);
 
                 json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed), isFinalBlock: true, json.CurrentState);
@@ -278,9 +308,7 @@ namespace System.Text.Json.Tests
                 output.AsSpan(0, length).CopyTo(outputSpan.Slice(written));
                 written += length;
                 Assert.Equal(dataUtf8.Length - consumed, json.BytesConsumed);
-                Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
                 Assert.Equal(default, json.Position);
-                Assert.Equal(default, json.CurrentState.Position);
 
                 Assert.Equal(outputSpan.Length, written);
                 string actualStr = Encoding.UTF8.GetString(outputArray);
@@ -293,6 +321,8 @@ namespace System.Text.Json.Tests
         [MemberData(nameof(SmallTestCases))]
         public static void TestPartialJsonReader(bool compactData, TestCaseType type, string jsonString)
         {
+            _ = type;
+
             // Remove all formatting/indendation
             if (compactData)
             {
@@ -318,7 +348,6 @@ namespace System.Text.Json.Tests
                 int written = firstLength;
 
                 long consumed = json.BytesConsumed;
-                Assert.Equal(consumed, json.CurrentState.BytesConsumed);
                 Assert.Equal(default, json.Position);
 
                 for (long j = consumed; j < dataUtf8.Length - consumed; j++)
@@ -338,15 +367,12 @@ namespace System.Text.Json.Tests
                     written += length;
 
                     long consumedInner = json.BytesConsumed;
-                    Assert.Equal(consumedInner, json.CurrentState.BytesConsumed);
                     json = new Utf8JsonReader(dataUtf8.AsSpan((int)(consumed + consumedInner)), isFinalBlock: true, json.CurrentState);
                     output = JsonTestHelper.ReaderLoop(outputSpan.Length - written, out length, ref json);
                     output.AsSpan(0, length).CopyTo(outputSpan.Slice(written));
                     written += length;
                     Assert.Equal(dataUtf8.Length - consumedInner - consumed, json.BytesConsumed);
-                    Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
                     Assert.Equal(default, json.Position);
-                    Assert.Equal(default, json.CurrentState.Position);
 
                     Assert.Equal(outputSpan.Length, written);
                     string actualStr = Encoding.UTF8.GetString(outputArray);
@@ -376,7 +402,6 @@ namespace System.Text.Json.Tests
                 int written = firstLength;
 
                 long consumed = json.BytesConsumed;
-                Assert.Equal(consumed, json.CurrentState.BytesConsumed);
                 Assert.Equal(default, json.Position);
                 Assert.Equal(0, json.TokenStartIndex);
 
@@ -397,15 +422,12 @@ namespace System.Text.Json.Tests
                     written += length;
 
                     long consumedInner = json.BytesConsumed;
-                    Assert.Equal(consumedInner, json.CurrentState.BytesConsumed);
                     json = new Utf8JsonReader(dataUtf8.AsSpan((int)(consumed + consumedInner)), isFinalBlock: true, json.CurrentState);
                     output = JsonTestHelper.ReaderLoop(outputSpan.Length - written, out length, ref json);
                     output.AsSpan(0, length).CopyTo(outputSpan.Slice(written));
                     written += length;
                     Assert.Equal(dataUtf8.Length - consumedInner - consumed, json.BytesConsumed);
-                    Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
                     Assert.Equal(default, json.Position);
-                    Assert.Equal(default, json.CurrentState.Position);
                     Assert.Equal(0, json.TokenStartIndex);
 
                     Assert.Equal(outputSpan.Length, written);
@@ -427,26 +449,51 @@ namespace System.Text.Json.Tests
     ]
 ]";
 
-            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            {
+                byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+                var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
 
-            Assert.Equal(0, json.CurrentDepth);
-            Assert.True(json.Read());
-            Assert.Equal(0, json.CurrentDepth);
-            Assert.True(json.Read());
-            Assert.Equal(1, json.CurrentDepth);
-            Assert.True(json.Read());
-            Assert.Equal(2, json.CurrentDepth);
-            Assert.True(json.Read());
-            Assert.Equal(2, json.CurrentDepth);
-            Assert.True(json.Read());
-            Assert.Equal(2, json.CurrentDepth);
-            Assert.True(json.Read());
-            Assert.Equal(1, json.CurrentDepth);
-            Assert.True(json.Read());
-            Assert.Equal(0, json.CurrentDepth);
-            Assert.False(json.Read());
-            Assert.Equal(0, json.CurrentDepth);
+                Assert.Equal(0, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(0, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(1, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(2, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(2, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(2, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(1, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(0, json.CurrentDepth);
+                Assert.False(json.Read());
+                Assert.Equal(0, json.CurrentDepth);
+            }
+
+            {
+                byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+                var json = new Utf8JsonReader(dataUtf8);
+
+                Assert.Equal(0, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(0, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(1, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(2, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(2, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(2, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(1, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(0, json.CurrentDepth);
+                Assert.False(json.Read());
+                Assert.Equal(0, json.CurrentDepth);
+            }
         }
 
         [Fact]
@@ -523,7 +570,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(JsonTokenType.None, json.TokenType);
             Assert.Equal(0, json.CurrentDepth);
             Assert.Equal(0, json.BytesConsumed);
-            Assert.Equal(false, json.HasValueSequence);
+            Assert.False(json.HasValueSequence);
             Assert.True(json.IsFinalBlock);
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
@@ -535,7 +582,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(previous, current);
             Assert.Equal(0, json.CurrentDepth);
             Assert.Equal(0, json.BytesConsumed);
-            Assert.Equal(false, json.HasValueSequence);
+            Assert.False(json.HasValueSequence);
             Assert.True(json.IsFinalBlock);
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
@@ -547,7 +594,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(previous, current);
             Assert.Equal(0, json.CurrentDepth);
             Assert.Equal(0, json.BytesConsumed);
-            Assert.Equal(false, json.HasValueSequence);
+            Assert.False(json.HasValueSequence);
             Assert.True(json.IsFinalBlock);
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
@@ -564,7 +611,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(lastToken, json.TokenType);
             Assert.Equal(0, json.CurrentDepth);
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(false, json.HasValueSequence);
+            Assert.False(json.HasValueSequence);
             Assert.True(json.IsFinalBlock);
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
@@ -576,7 +623,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(lastToken, json.TokenType);
             Assert.Equal(0, json.CurrentDepth);
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(false, json.HasValueSequence);
+            Assert.False(json.HasValueSequence);
             Assert.True(json.IsFinalBlock);
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
@@ -588,7 +635,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(lastToken, json.TokenType);
             Assert.Equal(0, json.CurrentDepth);
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(false, json.HasValueSequence);
+            Assert.False(json.HasValueSequence);
             Assert.True(json.IsFinalBlock);
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
@@ -647,6 +694,27 @@ namespace System.Text.Json.Tests
             }
             {
                 var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(jsonString), isFinalBlock: false, state: default);
+                for (int i = 0; i < readCount; i++)
+                {
+                    reader.Read();
+                }
+
+                Assert.True(reader.TrySkip());
+                Assert.Equal(expectedConsumed, reader.BytesConsumed);
+            }
+
+            {
+                var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(jsonString));
+                for (int i = 0; i < readCount; i++)
+                {
+                    reader.Read();
+                }
+
+                reader.Skip();
+                Assert.Equal(expectedConsumed, reader.BytesConsumed);
+            }
+            {
+                var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(jsonString));
                 for (int i = 0; i < readCount; i++)
                 {
                     reader.Read();
@@ -801,7 +869,6 @@ namespace System.Text.Json.Tests
                 ValidateNextTrySkip(ref json);
 
                 long consumed = json.BytesConsumed;
-                Assert.Equal(consumed, json.CurrentState.BytesConsumed);
 
                 json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed), isFinalBlock: true, json.CurrentState);
                 while (json.TrySkip())
@@ -833,7 +900,6 @@ namespace System.Text.Json.Tests
                 ValidateNextTrySkip(ref json);
 
                 long consumed = json.BytesConsumed;
-                Assert.Equal(consumed, json.CurrentState.BytesConsumed);
 
                 json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed), isFinalBlock: true, json.CurrentState);
                 long bytesConsumed = json.BytesConsumed;
@@ -880,7 +946,6 @@ namespace System.Text.Json.Tests
                 ValidateNextTrySkip(ref json);
 
                 long consumed = json.BytesConsumed;
-                Assert.Equal(consumed, json.CurrentState.BytesConsumed);
 
                 json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed), isFinalBlock: true, json.CurrentState);
                 while (json.Read())
@@ -896,7 +961,7 @@ namespace System.Text.Json.Tests
             JsonTokenType prevTokenType = json.TokenType;
             int prevDepth = json.CurrentDepth;
             long prevConsumed = json.BytesConsumed;
-            Assert.Equal(false, json.HasValueSequence);
+            Assert.False(json.HasValueSequence);
             Assert.True(json.ValueSequence.IsEmpty);
             ReadOnlySpan<byte> prevValue = json.ValueSpan;
 
@@ -914,7 +979,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(prevTokenType, json.TokenType);
             Assert.Equal(prevDepth, json.CurrentDepth);
             Assert.Equal(prevConsumed, json.BytesConsumed);
-            Assert.Equal(false, json.HasValueSequence);
+            Assert.False(json.HasValueSequence);
             Assert.True(json.ValueSequence.IsEmpty);
             Assert.True(json.ValueSpan.SequenceEqual(prevValue));
         }
@@ -923,6 +988,7 @@ namespace System.Text.Json.Tests
         [MemberData(nameof(TrySkipValues))]
         public static void TestSkipPartial(string jsonString, JsonTokenType lastToken)
         {
+            _ = lastToken;
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
             var json = new Utf8JsonReader(dataUtf8, isFinalBlock: false, default);
@@ -966,7 +1032,6 @@ namespace System.Text.Json.Tests
                 }
 
                 long consumed = json.BytesConsumed;
-                Assert.Equal(consumed, json.CurrentState.BytesConsumed);
 
                 json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed), isFinalBlock: true, json.CurrentState);
                 while (true)
@@ -998,7 +1063,6 @@ namespace System.Text.Json.Tests
                     ;
 
                 long consumed = json.BytesConsumed;
-                Assert.Equal(consumed, json.CurrentState.BytesConsumed);
 
                 json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed), isFinalBlock: true, json.CurrentState);
                 long bytesConsumed = json.BytesConsumed;
@@ -1487,6 +1551,7 @@ namespace System.Text.Json.Tests
         [MemberData(nameof(SpecialNumTestCases))]
         public static void TestPartialJsonReaderSpecialNumbers(TestCaseType type, string jsonString)
         {
+            _ = type;
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
@@ -1497,9 +1562,6 @@ namespace System.Text.Json.Tests
                     var json = new Utf8JsonReader(dataUtf8.AsSpan(0, i), isFinalBlock: false, state);
                     while (json.Read())
                         ;
-
-                    long consumed = json.BytesConsumed;
-                    Assert.Equal(consumed, json.CurrentState.BytesConsumed);
                 }
             }
         }
@@ -1509,6 +1571,7 @@ namespace System.Text.Json.Tests
         [MemberData(nameof(SpecialNumTestCases))]
         public static void TestPartialJsonReaderSlicesSpecialNumbers(TestCaseType type, string jsonString)
         {
+            _ = type;
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
@@ -1521,7 +1584,6 @@ namespace System.Text.Json.Tests
                         ;
 
                     long consumed = json.BytesConsumed;
-                    Assert.Equal(consumed, json.CurrentState.BytesConsumed);
 
                     for (long j = consumed; j < dataUtf8.Length - consumed; j++)
                     {
@@ -1538,12 +1600,10 @@ namespace System.Text.Json.Tests
                             ;
 
                         long consumedInner = json.BytesConsumed;
-                        Assert.Equal(consumedInner, json.CurrentState.BytesConsumed);
                         json = new Utf8JsonReader(dataUtf8.AsSpan((int)(consumed + consumedInner)), isFinalBlock: true, json.CurrentState);
                         while (json.Read())
                             ;
                         Assert.Equal(dataUtf8.Length - consumedInner - consumed, json.BytesConsumed);
-                        Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
                     }
                 }
             }
@@ -1580,7 +1640,45 @@ namespace System.Text.Json.Tests
                     while (json.Read())
                     {
                         if (json.TokenType >= JsonTokenType.String && json.TokenType <= JsonTokenType.Null)
+                        {
                             actualDepth = json.CurrentDepth;
+                        }
+                    }
+
+                    int expectedDepth = 0;
+                    var newtonJson = new JsonTextReader(new StringReader(jsonStr))
+                    {
+                        MaxDepth = depth
+                    };
+                    while (newtonJson.Read())
+                    {
+                        if (newtonJson.TokenType == JsonToken.String)
+                        {
+                            expectedDepth = newtonJson.Depth;
+                        }
+                    }
+
+                    Assert.Equal(expectedDepth, actualDepth);
+                    Assert.Equal(i + 1, actualDepth);
+                }
+            }
+
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                for (int i = 0; i < depth; i++)
+                {
+                    string jsonStr = JsonTestHelper.WriteDepthObject(i, commentHandling == JsonCommentHandling.Allow);
+                    Span<byte> data = Encoding.UTF8.GetBytes(jsonStr);
+
+                    var json = new Utf8JsonReader(data, new JsonReaderOptions { CommentHandling = commentHandling, MaxDepth = depth });
+
+                    int actualDepth = 0;
+                    while (json.Read())
+                    {
+                        if (json.TokenType >= JsonTokenType.String && json.TokenType <= JsonTokenType.Null)
+                        {
+                            actualDepth = json.CurrentDepth;
+                        }
                     }
 
                     int expectedDepth = 0;
@@ -1694,7 +1792,6 @@ namespace System.Text.Json.Tests
                     }
 
                     long consumed = json.BytesConsumed;
-                    Assert.Equal(consumed, json.CurrentState.BytesConsumed);
                     json = new Utf8JsonReader(data.AsSpan((int)consumed), true, json.CurrentState);
                     while (json.Read())
                     {
@@ -1703,7 +1800,6 @@ namespace System.Text.Json.Tests
                             builder.Append(Encoding.UTF8.GetString(json.ValueSpan.ToArray()));
                     }
                     Assert.Equal(data.Length - consumed, json.BytesConsumed);
-                    Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
 
                     Assert.Equal(commentHandling == JsonCommentHandling.Allow ? expectedWithComments : expectedWithoutComments, builder.ToString());
                 }
@@ -1818,7 +1914,6 @@ namespace System.Text.Json.Tests
                     }
 
                     long consumed = json.BytesConsumed;
-                    Assert.Equal(consumed, json.CurrentState.BytesConsumed);
                     json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed), true, json.CurrentState);
                     while (json.Read())
                     {
@@ -1832,7 +1927,6 @@ namespace System.Text.Json.Tests
                         }
                     }
                     Assert.Equal(dataUtf8.Length - consumed, json.BytesConsumed);
-                    Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
                 }
             }
         }
@@ -1867,29 +1961,43 @@ namespace System.Text.Json.Tests
                 while (json.Read())
                     ;
                 Assert.Equal(consumed, json.BytesConsumed);
-                Assert.Equal(consumed, json.CurrentState.BytesConsumed);
                 Assert.Equal(default, json.Position);
-                Assert.Equal(default, json.CurrentState.Position);
 
                 json = new Utf8JsonReader(dataUtf8.AsSpan((int)json.BytesConsumed), true, json.CurrentState);
                 while (json.Read())
                     ;
                 Assert.Equal(dataUtf8.Length - consumed, json.BytesConsumed);
-                Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
                 Assert.Equal(default, json.Position);
-                Assert.Equal(default, json.CurrentState.Position);
+            }
+
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                if (jsonString == "12345")
+                {
+                    continue;
+                }
+
+                var json = new Utf8JsonReader(dataUtf8.AsSpan(0, splitLocation), options: new JsonReaderOptions { CommentHandling = commentHandling });
+
+                try
+                {
+                    while (json.Read())
+                        ;
+                    Assert.True(false, "Expected JsonException was not thrown.");
+                }
+                catch (JsonException) { }
             }
         }
 
         [Theory]
-        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false \"in\u6F22\u5B57valid\"\r\n}", 30, 30, 2, 21)]
-        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false \"in\u6F22\u5B57valid\"\r\n}", 31, 31, 2, 21)]
-        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, \"in\u6F22\u5B57valid\"\r\n}", 30, 30, 3, 0)]
-        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, \"in\u6F22\u5B57valid\"\r\n}", 31, 30, 3, 0)]
-        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, \"in\u6F22\u5B57valid\"\r\n}", 32, 30, 3, 0)]
-        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, 5\r\n}", 30, 30, 2, 22)]
-        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, 5\r\n}", 31, 30, 2, 22)]
-        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, 5\r\n}", 32, 30, 2, 22)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false \"in\u6F22\u5B57valid\"\r\n}", 30, 30, 1, 28)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false \"in\u6F22\u5B57valid\"\r\n}", 31, 31, 1, 28)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, \"in\u6F22\u5B57valid\"\r\n}", 30, 30, 2, 0)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, \"in\u6F22\u5B57valid\"\r\n}", 31, 30, 2, 0)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, \"in\u6F22\u5B57valid\"\r\n}", 32, 30, 2, 0)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, 5\r\n}", 30, 30, 1, 29)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, 5\r\n}", 31, 30, 1, 29)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, 5\r\n}", 32, 30, 1, 29)]
         public static void InvalidJsonSplitRemainsInvalid(string jsonString, int splitLocation, int consumed, int expectedlineNumber, int expectedBytePosition)
         {
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
@@ -1900,7 +2008,6 @@ namespace System.Text.Json.Tests
                 while (json.Read())
                     ;
                 Assert.Equal(consumed, json.BytesConsumed);
-                Assert.Equal(consumed, json.CurrentState.BytesConsumed);
 
                 json = new Utf8JsonReader(dataUtf8.AsSpan((int)json.BytesConsumed), true, json.CurrentState);
                 try
@@ -1943,7 +2050,7 @@ namespace System.Text.Json.Tests
         [InlineData("[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2\":[}]]]]}]]]]", 1, 28, 64)]
         [InlineData("[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2\":[]},[}]]]]}]]]]", 1, 32, 64)]
         [InlineData("{\r\n\t\"isActive\": false,\r\n\t\"array\": [\r\n\t\t[{\r\n\t\t\t\"id\": 1\r\n\t\t}]\r\n\t]\r\n}", 3, 3, 3)]
-        [InlineData("{\"Here is a \u6F22\u5B57string: \\\"\\\"\":\"Here is \u6F22\u5B57a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str:\"\\\"\\\"\"}", 4, 35, 64)]
+        [InlineData("{\"Here is a \u6F22\u5B57string: \\\"\\\"\":\"Here is \u6F22\u5B57a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str:\"\\\"\\\"\"}", 0, 190, 64)]
         public static void InvalidJsonWhenPartial(string jsonString, int expectedlineNumber, int expectedBytePosition, int maxDepth)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
@@ -1965,11 +2072,28 @@ namespace System.Text.Json.Tests
                     Assert.Equal(expectedBytePosition, ex.BytePositionInLine);
                 }
             }
+
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                var json = new Utf8JsonReader(dataUtf8, new JsonReaderOptions { CommentHandling = commentHandling, MaxDepth = maxDepth });
+
+                try
+                {
+                    while (json.Read())
+                        ;
+                    Assert.True(false, "Expected JsonException was not thrown.");
+                }
+                catch (JsonException ex)
+                {
+                    Assert.Equal(expectedlineNumber, ex.LineNumber);
+                    Assert.Equal(expectedBytePosition, ex.BytePositionInLine);
+                }
+            }
         }
 
         [Theory]
         [InlineData("{\"text\": \"\u0E4F\u0020\u0E2A\u0E27\u0E31\u0E2A\u0E14\u0E35\\uABCZ \u0E42\u0E25\u0E01\"}", 0, 37)]   // * Hello\\uABCZ World in thai
-        [InlineData("{\"text\": \"\u0E4F\u0020\u0E2A\u0E39\u0E07\\n\u0E15\u0E48\u0E33\\uABCZ \u0E42\u0E25\u0E01\"}", 1, 14)]    // * High\\nlow\\uABCZ World in thai
+        [InlineData("{\"text\": \"\u0E4F\u0020\u0E2A\u0E39\u0E07\\n\u0E15\u0E48\u0E33\\uABCZ \u0E42\u0E25\u0E01\"}", 0, 39)]    // * High\\nlow\\uABCZ World in thai
         public static void PositionInCodeUnits(string jsonString, int expectedlineNumber, int expectedBytePosition)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
@@ -2015,7 +2139,24 @@ namespace System.Text.Json.Tests
                     Assert.Equal(expectedlineNumber, ex.LineNumber);
                     Assert.Equal(expectedBytePosition, ex.BytePositionInLine);
                     Assert.Equal(default, json.Position);
-                    Assert.Equal(default, json.CurrentState.Position);
+                }
+            }
+
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                var json = new Utf8JsonReader(dataUtf8, new JsonReaderOptions { CommentHandling = commentHandling, MaxDepth = maxDepth });
+
+                try
+                {
+                    while (json.Read())
+                        ;
+                    Assert.True(false, "Expected JsonException was not thrown with single-segment data.");
+                }
+                catch (JsonException ex)
+                {
+                    Assert.Equal(expectedlineNumber, ex.LineNumber);
+                    Assert.Equal(expectedBytePosition, ex.BytePositionInLine);
+                    Assert.Equal(default, json.Position);
                 }
             }
         }
@@ -2054,9 +2195,7 @@ namespace System.Text.Json.Tests
                             ;
 
                         long consumed = jsonSlice.BytesConsumed;
-                        Assert.Equal(consumed, jsonSlice.CurrentState.BytesConsumed);
                         Assert.Equal(default, json.Position);
-                        Assert.Equal(default, json.CurrentState.Position);
 
                         JsonReaderState jsonState = jsonSlice.CurrentState;
 
@@ -2077,7 +2216,6 @@ namespace System.Text.Json.Tests
                         errorMessage += " | " + firstSegmentString + " | " + secondSegmentString;
                         Assert.True(expectedBytePosition == ex.BytePositionInLine, errorMessage);
                         Assert.Equal(default, json.Position);
-                        Assert.Equal(default, json.CurrentState.Position);
                     }
                 }
             }
@@ -2136,7 +2274,6 @@ namespace System.Text.Json.Tests
                             break;
                         foundComment = true;
                         indexAfterFirstComment = json.BytesConsumed;
-                        Assert.Equal(indexAfterFirstComment, json.CurrentState.BytesConsumed);
                         string actualComment = json.GetComment();
                         Assert.Equal(expectedComment, actualComment);
                         break;
@@ -2206,7 +2343,6 @@ namespace System.Text.Json.Tests
                             break;
                         foundComment = true;
                         indexAfterFirstComment = json.BytesConsumed;
-                        Assert.Equal(indexAfterFirstComment, json.CurrentState.BytesConsumed);
                         string actualComment = json.GetComment();
                         Assert.Equal(expectedComment, actualComment);
                         break;
@@ -2233,7 +2369,6 @@ namespace System.Text.Json.Tests
                                 break;
                             foundComment = true;
                             indexAfterFirstComment = jsonSlice.BytesConsumed;
-                            Assert.Equal(indexAfterFirstComment, jsonSlice.CurrentState.BytesConsumed);
                             string actualComment = jsonSlice.GetComment();
                             Assert.Equal(expectedComment, actualComment);
                             break;
@@ -2241,7 +2376,6 @@ namespace System.Text.Json.Tests
                 }
 
                 int consumed = (int)jsonSlice.BytesConsumed;
-                Assert.Equal(consumed, jsonSlice.CurrentState.BytesConsumed);
                 jsonSlice = new Utf8JsonReader(dataUtf8.AsSpan(consumed), isFinalBlock: true, jsonSlice.CurrentState);
 
                 if (!foundComment)
@@ -2257,7 +2391,6 @@ namespace System.Text.Json.Tests
                                     break;
                                 foundComment = true;
                                 indexAfterFirstComment = jsonSlice.BytesConsumed;
-                                Assert.Equal(indexAfterFirstComment, jsonSlice.CurrentState.BytesConsumed);
                                 string actualComment = jsonSlice.GetComment();
                                 Assert.Equal(expectedComment, actualComment);
                                 break;
@@ -2272,38 +2405,38 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData("//T\u6F22\u5B57his is a \u6F22\u5B57comment before json\n\"hello\"", 32)]
-        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json", 37)]
-        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json\n", 38)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment", 41)]
-        [InlineData("\"b\u6F22\u5B57eta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 40)]
-        [InlineData("\"g\u6F22\u5B57amma\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment", 41)]
-        [InlineData("\"d\u6F22\u5B57elta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 41)]
-        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json with new line\n", 52)]
-        [InlineData("{\"a\u6F22\u5B57ge\" : \n//This is a \u6F22\u5B57comment between key-value pairs\n 30}", 54)]
-        [InlineData("{\"a\u6F22\u5B57ge\" : 30//This is a \u6F22\u5B57comment between key-value pairs on the same line\n}", 72)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a carriage return\r//Another single-line comment", 59)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a line break\n//Another single-line comment", 54)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a carriage return and line break\r\n//Another single-line comment", 75)]
+        [InlineData("//T\u6F22\u5B57his is a \u6F22\u5B57comment before json\n\"hello\"")]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json")]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json\n")]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment")]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/")]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment")]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/")]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json with new line\n")]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n//This is a \u6F22\u5B57comment between key-value pairs\n 30}")]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30//This is a \u6F22\u5B57comment between key-value pairs on the same line\n}")]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a carriage return\r//Another single-line comment")]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a line break\n//Another single-line comment")]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a carriage return and line break\r\n//Another single-line comment")]
 
-        [InlineData("/*T\u6F22\u5B57his is a multi-line \u6F22\u5B57comment before json*/\"hello\"", 44)]
-        [InlineData("\"h\u6F22\u5B57ello\"/*This is a multi-line \u6F22\u5B57comment after json*/", 50)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", 53)]
-        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 52)]
-        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", 53)]
-        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 53)]
-        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a \u6F22\u5B57comment between key-value pairs*/ 30}", 55)]
-        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a \u6F22\u5B57comment between key-value pairs on the same line*/}", 73)]
+        [InlineData("/*T\u6F22\u5B57his is a multi-line \u6F22\u5B57comment before json*/\"hello\"")]
+        [InlineData("\"h\u6F22\u5B57ello\"/*This is a multi-line \u6F22\u5B57comment after json*/")]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment")]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/")]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment")]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/")]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a \u6F22\u5B57comment between key-value pairs*/ 30}")]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a \u6F22\u5B57comment between key-value pairs on the same line*/}")]
 
-        [InlineData("/*T\u6F22\u5B57his is a split multi-line \n\u6F22\u5B57comment before json*/\"hello\"", 51)]
-        [InlineData("\"h\u6F22\u5B57ello\"/*This is a split multi-line \n\u6F22\u5B57comment after json*/", 57)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", 60)]
-        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 59)]
-        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", 60)]
-        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 60)]
-        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs*/ 30}", 73)]
-        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line*/}", 91)]
-        public static void Skip(string jsonString, int expectedConsumed)
+        [InlineData("/*T\u6F22\u5B57his is a split multi-line \n\u6F22\u5B57comment before json*/\"hello\"")]
+        [InlineData("\"h\u6F22\u5B57ello\"/*This is a split multi-line \n\u6F22\u5B57comment after json*/")]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment")]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/")]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment")]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/")]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs*/ 30}")]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line*/}")]
+        public static void Skip(string jsonString)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
             var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip });
@@ -2323,45 +2456,44 @@ namespace System.Text.Json.Tests
                 prevTokenType = tokenType;
             }
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(dataUtf8.Length, json.CurrentState.BytesConsumed);
         }
 
         [Theory]
-        [InlineData("//T\u6F22\u5B57his is a \u6F22\u5B57comment before json\n\"hello\"", 32)]
-        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json", 37)]
-        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json\n", 38)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment", 41)]
-        [InlineData("\"b\u6F22\u5B57eta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 40)]
-        [InlineData("\"g\u6F22\u5B57amma\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment", 41)]
-        [InlineData("\"d\u6F22\u5B57elta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 41)]
-        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json with new line\n", 52)]
-        [InlineData("{\"a\u6F22\u5B57ge\" : \n//This is a \u6F22\u5B57comment between key-value pairs\n 30}", 54)]
-        [InlineData("{\"a\u6F22\u5B57ge\" : 30//This is a \u6F22\u5B57comment between key-value pairs on the same line\n}", 72)]
+        [InlineData("//T\u6F22\u5B57his is a \u6F22\u5B57comment before json\n\"hello\"")]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json")]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json\n")]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment")]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/")]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment")]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/")]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json with new line\n")]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n//This is a \u6F22\u5B57comment between key-value pairs\n 30}")]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30//This is a \u6F22\u5B57comment between key-value pairs on the same line\n}")]
 
-        [InlineData("/*T\u6F22\u5B57his is a multi-line \u6F22\u5B57comment before json*/\"hello\"", 44)]
-        [InlineData("\"h\u6F22\u5B57ello\"/*This is a multi-line \u6F22\u5B57comment after json*/", 50)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", 53)]
-        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 52)]
-        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", 53)]
-        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 53)]
-        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a \u6F22\u5B57comment between key-value pairs*/ 30}", 55)]
-        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a \u6F22\u5B57comment between key-value pairs on the same line*/}", 73)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a carriage return\r//Another single-line comment", 59)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a line break\n//Another single-line comment", 54)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a carriage return and line break\r\n//Another single-line comment", 75)]
+        [InlineData("/*T\u6F22\u5B57his is a multi-line \u6F22\u5B57comment before json*/\"hello\"")]
+        [InlineData("\"h\u6F22\u5B57ello\"/*This is a multi-line \u6F22\u5B57comment after json*/")]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment")]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/")]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment")]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/")]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a \u6F22\u5B57comment between key-value pairs*/ 30}")]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a \u6F22\u5B57comment between key-value pairs on the same line*/}")]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a carriage return\r//Another single-line comment")]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a line break\n//Another single-line comment")]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a carriage return and line break\r\n//Another single-line comment")]
 
-        [InlineData("/*T\u6F22\u5B57his is a split multi-line \n\u6F22\u5B57comment before json*/\"hello\"", 51)]
-        [InlineData("\"h\u6F22\u5B57ello\"/*This is a split multi-line \n\u6F22\u5B57comment after json*/", 57)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", 60)]
-        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 59)]
-        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", 60)]
-        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 60)]
-        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs*/ 30}", 73)]
-        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line*/}", 91)]
+        [InlineData("/*T\u6F22\u5B57his is a split multi-line \n\u6F22\u5B57comment before json*/\"hello\"")]
+        [InlineData("\"h\u6F22\u5B57ello\"/*This is a split multi-line \n\u6F22\u5B57comment after json*/")]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment")]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/")]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment")]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/")]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs*/ 30}")]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line*/}")]
 
-        [InlineData("{\r\n   \"value\": 11,\r\n   /* yes, it's mis-spelled */\r\n   \"deelay\": 3\r\n}", 50)]
-        [InlineData("[\r\n   12,\r\n   87,\r\n   /* Isn't it \"nice\" that JSON provides no limits on the length of numbers? */\r\n   123456789012345678901234567890123456789.01234567890123456789e+9876543218976543219876543210\r\n]", 98)]
-        public static void SkipSingleSegment(string jsonString, int expectedConsumed)
+        [InlineData("{\r\n   \"value\": 11,\r\n   /* yes, it's mis-spelled */\r\n   \"deelay\": 3\r\n}")]
+        [InlineData("[\r\n   12,\r\n   87,\r\n   /* Isn't it \"nice\" that JSON provides no limits on the length of numbers? */\r\n   123456789012345678901234567890123456789.01234567890123456789e+9876543218976543219876543210\r\n]")]
+        public static void SkipSingleSegment(string jsonString)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
             var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip });
@@ -2378,7 +2510,6 @@ namespace System.Text.Json.Tests
                 }
             }
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(dataUtf8.Length, json.CurrentState.BytesConsumed);
 
             for (int i = 0; i < dataUtf8.Length; i++)
             {
@@ -2397,7 +2528,6 @@ namespace System.Text.Json.Tests
                 }
 
                 int prevConsumed = (int)jsonSlice.BytesConsumed;
-                Assert.Equal(prevConsumed, jsonSlice.CurrentState.BytesConsumed);
                 jsonSlice = new Utf8JsonReader(dataUtf8.AsSpan(prevConsumed), isFinalBlock: true, jsonSlice.CurrentState);
 
                 while (jsonSlice.Read())
@@ -2412,7 +2542,6 @@ namespace System.Text.Json.Tests
                 }
 
                 Assert.Equal(dataUtf8.Length - prevConsumed, jsonSlice.BytesConsumed);
-                Assert.Equal(jsonSlice.BytesConsumed, jsonSlice.CurrentState.BytesConsumed);
             }
         }
 
@@ -2551,7 +2680,6 @@ namespace System.Text.Json.Tests
                         }
                     }
 
-                    Assert.Equal(jsonSlice.BytesConsumed, jsonSlice.CurrentState.BytesConsumed);
                     jsonSlice = new Utf8JsonReader(dataUtf8.AsSpan((int)jsonSlice.BytesConsumed), isFinalBlock: true, jsonSlice.CurrentState);
                     while (jsonSlice.Read())
                     {
@@ -2734,6 +2862,88 @@ namespace System.Text.Json.Tests
                 Assert.Equal(expectedlineNumber, ex.LineNumber);
                 Assert.Equal(expectedPosition, ex.BytePositionInLine);
             }
+        }
+
+        [Theory]
+        [InlineData("//asd\r", "asd", 6)]
+        [InlineData("//asd\r\n", "asd", 7)]
+        [InlineData("//asd\n", "asd", 6)]
+        public static void JsonWithASingleCommentEndingWithLineEndingSingleSegment(string jsonString, string expectedComment, int expectedBytesConsumed)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+
+            Assert.True(json.Read());
+            Assert.Equal(expectedComment, json.GetComment());
+            Assert.False(json.Read());
+            Assert.Equal(expectedBytesConsumed, json.BytesConsumed);
+        }
+
+        [Theory]
+        [InlineData("//\u2028")]
+        [InlineData("//\u2029")]
+        [InlineData("// \u2028")]
+        [InlineData("//   \u2028")]
+        [InlineData("//  \u2029 ")]
+        [InlineData("//  \u2029  ")]
+        [InlineData("//\u2028\n")]
+        [InlineData("//\u2028 \n")]
+        [InlineData("// \u2028\n")]
+        [InlineData("// \u2028 \n")]
+        [InlineData("//\u2028\r\n")]
+        [InlineData("//\u2028 \r\n")]
+        [InlineData("// \u2028\r\n")]
+        [InlineData("// \u2028 \r\n")]
+        [InlineData("//\u2028\r")]
+        [InlineData("//\u2028 \r")]
+        [InlineData("// \u2028\r")]
+        [InlineData("// \u2028 \r")]
+        public static void JsonWithSingleLineCommentEndingWithNonStandardLineEnding(string jsonString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
+                var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+
+                try
+                {
+                    json.Read();
+                    Assert.True(false, $"Expected JsonException was not thrown. CommentHandling = {commentHandling}");
+                }
+                catch (JsonException) { }
+            }
+        }
+
+        [Theory]
+        // Non-standard line-endings are: \u2028 \u2029 (E2, 80, A8/A9)
+        // last byte does not match (E2, 80, AA)
+        [InlineData("//\u2030\n", "\u2030")]
+        [InlineData("//\u2030 \r\n", "\u2030 ")]
+        [InlineData("// \u2030\r", " \u2030")]
+        [InlineData("//\u2030\u2031\n", "\u2030\u2031")]
+        [InlineData("//\u2030 \u2031\r\n", "\u2030 \u2031")]
+        [InlineData("// \u2030 \u2031\n", " \u2030 \u2031")]
+        [InlineData("// \u2030 \u2031 \r", " \u2030 \u2031 ")]
+        // second byte does not match (E2, 81, A8/A9)
+        [InlineData("//\u2069\r\n", "\u2069")]
+        [InlineData("// \u2069\r", " \u2069")]
+        [InlineData("//\u2069 \n", "\u2069 ")]
+        [InlineData("//\u2069\u2068\n", "\u2069\u2068")]
+        [InlineData("//\u2069 \u2068\n", "\u2069 \u2068")]
+        [InlineData("//\u2069 \u2068 \u2068\n", "\u2069 \u2068 \u2068")]
+        [InlineData("// \u2069 \u2068 \u2068 \n", " \u2069 \u2068 \u2068 ")]
+        public static void JsonWithSingleCorrectLineCommentWithPartialNonStandardLineEnding(string jsonString, string expectedComment)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+
+            Assert.True(json.Read());
+            Assert.Equal(expectedComment, json.GetComment());
+            Assert.False(json.Read());
         }
 
         [Fact]
@@ -2921,6 +3131,7 @@ namespace System.Text.Json.Tests
                 {
                     case JsonTokenType.Null:
                         Assert.Equal(expectedString, Encoding.UTF8.GetString(json.ValueSpan.ToArray()));
+                        Assert.Null(json.GetString());
                         foundPrimitiveValue = true;
                         break;
                     case JsonTokenType.Number:
@@ -3004,7 +3215,7 @@ namespace System.Text.Json.Tests
                 var json = new Utf8JsonReader(dataUtf8.AsSpan(0, i), isFinalBlock: false, state);
                 VerifyReadLoop(ref json, expected);
 
-                json = new Utf8JsonReader(dataUtf8.AsSpan((int)state.BytesConsumed), isFinalBlock: true, state);
+                json = new Utf8JsonReader(dataUtf8.AsSpan((int)json.BytesConsumed), isFinalBlock: true, json.CurrentState);
                 VerifyReadLoop(ref json, expected);
             }
         }
@@ -3023,7 +3234,7 @@ namespace System.Text.Json.Tests
                 var json = new Utf8JsonReader(dataUtf8.AsSpan(0, i), isFinalBlock: false, state);
                 VerifyReadLoop(ref json, null);
 
-                json = new Utf8JsonReader(dataUtf8.AsSpan((int)state.BytesConsumed), isFinalBlock: true, state);
+                json = new Utf8JsonReader(dataUtf8.AsSpan((int)json.BytesConsumed), isFinalBlock: true, json.CurrentState);
                 VerifyReadLoop(ref json, null);
             }
         }
@@ -3530,6 +3741,20 @@ namespace System.Text.Json.Tests
 
                 Assert.Equal(utf8.Length - 1, reader.TokenStartIndex);
             }
+        }
+
+        [Theory]
+        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, true)]
+        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, false)]
+        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, true)]
+        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, false)]
+        public static void TestBOMWithSingleJsonValue(byte[] utf8BomAndValue, bool isFinalBlock)
+        {
+            Assert.ThrowsAny<JsonException>(() =>
+            {
+                var json = new Utf8JsonReader(utf8BomAndValue, isFinalBlock: isFinalBlock, state: default);
+                json.Read();
+            });
         }
 
         public static IEnumerable<object[]> TestCases
@@ -4120,7 +4345,7 @@ namespace System.Text.Json.Tests
             {
                 return new List<object[]>
                 {
-                    new object[] {"\"", 0, 0},
+                    new object[] {"\"", 0, 1},
                     new object[] {"{]", 0, 1},
                     new object[] {"[}", 0, 1},
                     new object[] {"nul", 0, 3},
@@ -4128,7 +4353,8 @@ namespace System.Text.Json.Tests
                     new object[] {"fals", 0, 4},
                     new object[] {"\"a\u6F22\u5B57ge\":", 0, 11},
                     new object[] {"{\"a\u6F22\u5B57ge\":", 0, 13},
-                    new object[] {"{\"name\":\"A\u6F22\u5B57hso", 0, 8},
+                    new object[] {"{\"name\":\"A\u6F22\u5B57hso", 0, 19},
+                    new object[] {"{\"name\":\"A\u6F22\u5B57h\\nso", 0, 21},
                     new object[] {"12345.1.", 0, 7},
                     new object[] {"-", 0, 1},
                     new object[] {"-f", 0, 1},
@@ -4170,13 +4396,13 @@ namespace System.Text.Json.Tests
                     new object[] {"{\"ints\":[1, 2, 3, 4, 5", 0, 22},
                     new object[] {"{\"s\u6F22\u5B57trings\":[\"a\u6F22\u5B57bc\", \"def\"", 0, 36},
                     new object[] {"{\"age\":30, \"ints\":[1, 2, 3, 4, 5}}", 0, 32},
-                    new object[] {"{\"age\":30, \"name\":\"test}", 0, 18},
+                    new object[] {"{\"age\":30, \"name\":\"test}", 0, 24},
                     new object[] {"{\r\n\"isActive\": false \"\r\n}", 1, 18},
                     new object[] {"[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2\":[}]]]]}]]]]", 1, 28},
-                    new object[] {"[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2:[]}]]]]}]]]]", 1, 19},
+                    new object[] {"[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2:[]}]]]]}]]]]", 1, 38},
                     new object[] {"[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2\":[]},[}]]]]}]]]]", 1, 32},
                     new object[] {"{\r\n\t\"isActive\": false,\r\n\t\"array\": [\r\n\t\t[{\r\n\t\t\t\"id\": 1\r\n\t\t}]\r\n\t]\r\n}", 3, 3, 3},
-                    new object[] {"{\"Here is a \u6F22\u5B57string: \\\"\\\"\":\"Here is \u6F22\u5B57a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str:\"\\\"\\\"\"}", 4, 35},
+                    new object[] {"{\"Here is a \u6F22\u5B57string: \\\"\\\"\":\"Here is \u6F22\u5B57a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str:\"\\\"\\\"\"}", 0, 190},
                     new object[] {"\"hel\rlo\"", 0, 4},
                     new object[] {"\"hel\nlo\"", 0, 4},
                     new object[] {"\"hel\\uABCXlo\"", 0, 9},
@@ -4185,14 +4411,14 @@ namespace System.Text.Json.Tests
                     new object[] {"\"hel\nlo\\\"\"", 0, 4},
                     new object[] {"\"hel\\uABCXlo\\\"\"", 0, 9},
                     new object[] {"\"hel\\\tlo\\\"\"", 0, 5},
-                    new object[] {"\"he\\nl\rlo\\\"\"", 1, 1},
-                    new object[] {"\"he\\nl\nlo\\\"\"", 1, 1},
-                    new object[] {"\"he\\nl\\uABCXlo\\\"\"", 1, 6},
-                    new object[] {"\"he\\nl\\\tlo\\\"\"", 1, 2},
-                    new object[] {"\"he\\nl\rlo", 1, 1},
-                    new object[] {"\"he\\nl\nlo", 1, 1},
-                    new object[] {"\"he\\nl\\uABCXlo", 1, 6},
-                    new object[] {"\"he\\nl\\\tlo", 1, 2},
+                    new object[] {"\"he\\nl\rlo\\\"\"", 0, 6},
+                    new object[] {"\"he\\nl\nlo\\\"\"", 0, 6},
+                    new object[] {"\"he\\nl\\uABCXlo\\\"\"", 0, 11},
+                    new object[] {"\"he\\nl\\\tlo\\\"\"", 0, 7},
+                    new object[] {"\"he\\nl\rlo", 0, 6},
+                    new object[] {"\"he\\nl\nlo", 0, 6},
+                    new object[] {"\"he\\nl\\uABCXlo", 0, 11},
+                    new object[] {"\"he\\nl\\\tlo", 0, 7},
                 };
             }
         }
@@ -4277,7 +4503,7 @@ namespace System.Text.Json.Tests
                 {
                     "A string with {0}valid UTF8 \\t tab",
                     "A string with {0}invalid UTF8 \\xc3\\x28",
-                    "A string with {0}valid UTF16 \\u002e \\u0009 म",
+                    "A string with {0}valid UTF16 \\u002e \\u0009 \u092E",
                     "A string with {0}invalid UTF16 \\uDD1E"
                 };
 

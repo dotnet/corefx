@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if ES_BUILD_STANDALONE
 using System;
+#endif
 using System.Collections.Generic;
 
 #if ES_BUILD_STANDALONE
@@ -40,13 +42,13 @@ namespace System.Diagnostics.Tracing
             string? name,
             EventFieldFormat format)
         {
-            var groupCollector = collector.AddGroup(name);
+            TraceLoggingMetadataCollector groupCollector = collector.AddGroup(name);
             if (this.properties != null)
             {
-                foreach (var property in this.properties)
+                foreach (PropertyAnalysis property in this.properties)
                 {
-                    var propertyFormat = EventFieldFormat.Default;
-                    var propertyAttribute = property.fieldAttribute;
+                    EventFieldFormat propertyFormat = EventFieldFormat.Default;
+                    EventFieldAttribute? propertyAttribute = property.fieldAttribute;
                     if (propertyAttribute != null)
                     {
                         groupCollector.Tags = propertyAttribute.Tags;
@@ -65,7 +67,7 @@ namespace System.Diagnostics.Tracing
         {
             if (this.properties != null)
             {
-                foreach (var property in this.properties)
+                foreach (PropertyAnalysis property in this.properties)
                 {
                     property.typeInfo.WriteData(collector, property.getter(value));
                 }
@@ -80,7 +82,7 @@ namespace System.Diagnostics.Tracing
                 var memebersValues = new List<object?>();
                 for (int i = 0; i < this.properties.Length; i++)
                 {
-                    var propertyValue = properties[i].propertyInfo.GetValue(value);
+                    object? propertyValue = properties[i].propertyInfo.GetValue(value);
                     membersNames.Add(properties[i].name);
                     memebersValues.Add(properties[i].typeInfo.GetData(propertyValue));
                 }

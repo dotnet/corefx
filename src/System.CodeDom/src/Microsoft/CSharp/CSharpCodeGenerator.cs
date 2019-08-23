@@ -54,109 +54,6 @@ namespace Microsoft.CSharp
                                                          GeneratorSupport.GenericTypeDeclaration |
                                                          GeneratorSupport.DeclareIndexerProperties;
 
-        private static readonly string[][] s_keywords = new string[][] {
-            null,           // 1 character
-            new string[] {  // 2 characters
-                "as",
-                "do",
-                "if",
-                "in",
-                "is",
-            },
-            new string[] {  // 3 characters
-                "for",
-                "int",
-                "new",
-                "out",
-                "ref",
-                "try",
-            },
-            new string[] {  // 4 characters
-                "base",
-                "bool",
-                "byte",
-                "case",
-                "char",
-                "else",
-                "enum",
-                "goto",
-                "lock",
-                "long",
-                "null",
-                "this",
-                "true",
-                "uint",
-                "void",
-            },
-            new string[] {  // 5 characters
-                "break",
-                "catch",
-                "class",
-                "const",
-                "event",
-                "false",
-                "fixed",
-                "float",
-                "sbyte",
-                "short",
-                "throw",
-                "ulong",
-                "using",
-                "while",
-            },
-            new string[] {  // 6 characters
-                "double",
-                "extern",
-                "object",
-                "params",
-                "public",
-                "return",
-                "sealed",
-                "sizeof",
-                "static",
-                "string",
-                "struct",
-                "switch",
-                "typeof",
-                "unsafe",
-                "ushort",
-            },
-            new string[] {  // 7 characters
-                "checked",
-                "decimal",
-                "default",
-                "finally",
-                "foreach",
-                "private",
-                "virtual",
-            },
-            new string[] {  // 8 characters
-                "abstract",
-                "continue",
-                "delegate",
-                "explicit",
-                "implicit",
-                "internal",
-                "operator",
-                "override",
-                "readonly",
-                "volatile",
-            },
-            new string[] {  // 9 characters
-                "__arglist",
-                "__makeref",
-                "__reftype",
-                "interface",
-                "namespace",
-                "protected",
-                "unchecked",
-            },
-            new string[] {  // 10 characters
-                "__refvalue",
-                "stackalloc",
-            },
-        };
-
         internal CSharpCodeGenerator() { }
 
         internal CSharpCodeGenerator(IDictionary<string, string> providerOptions)
@@ -238,9 +135,9 @@ namespace Microsoft.CSharp
 
                 if (i > 0 && i % MaxLineLength == 0)
                 {
-                    // If current character is a high surrogate and the following 
+                    // If current character is a high surrogate and the following
                     // character is a low surrogate, don't break them.
-                    // Otherwise when we write the string to a file, we might lose 
+                    // Otherwise when we write the string to a file, we might lose
                     // the characters.
                     if (char.IsHighSurrogate(value[i]) && (i < value.Length - 1) && char.IsLowSurrogate(value[i + 1]))
                     {
@@ -767,7 +664,7 @@ namespace Microsoft.CSharp
             }
             else if (e.Value is sbyte)
             {
-                // C# has no literal marker for types smaller than Int32                
+                // C# has no literal marker for types smaller than Int32
                 Output.Write(((sbyte)e.Value).ToString(CultureInfo.InvariantCulture));
             }
             else if (e.Value is ushort)
@@ -2111,7 +2008,7 @@ namespace Microsoft.CSharp
 
                 // Generate an extra new line at the end of the snippet.
                 // If the snippet is comment and this type only contains comments.
-                // The generated code will not compile. 
+                // The generated code will not compile.
                 Output.WriteLine();
             }
 
@@ -2197,7 +2094,7 @@ namespace Microsoft.CSharp
             }
             // Generate an extra new line at the end of the snippet.
             // If the snippet is comment and this type only contains comments.
-            // The generated code will not compile. 
+            // The generated code will not compile.
             if (hasSnippet)
             {
                 Output.WriteLine();
@@ -2664,8 +2561,8 @@ namespace Microsoft.CSharp
             bool paramArray = false;
             foreach (CodeAttributeDeclaration current in attributes)
             {
-                // we need to convert paramArrayAttribute to params keyword to 
-                // make csharp compiler happy. In addition, params keyword needs to be after 
+                // we need to convert paramArrayAttribute to params keyword to
+                // make csharp compiler happy. In addition, params keyword needs to be after
                 // other attributes.
 
                 if (current.Name.Equals("system.paramarrayattribute", StringComparison.OrdinalIgnoreCase))
@@ -2881,8 +2778,8 @@ namespace Microsoft.CSharp
                                 GetTypeArgumentsOutput(typeRef.TypeArguments, currentTypeArgStart, numTypeArgs, sb);
                                 currentTypeArgStart += numTypeArgs;
 
-                                // Arity can be in the middle of a nested type name, so we might have a . or + after it. 
-                                // Skip it if so. 
+                                // Arity can be in the middle of a nested type name, so we might have a . or + after it.
+                                // Skip it if so.
                                 if (i < baseType.Length && (baseType[i] == '+' || baseType[i] == '.'))
                                 {
                                     sb.Append('.');
@@ -2923,7 +2820,7 @@ namespace Microsoft.CSharp
                 }
 
                 // it's possible that we call GetTypeArgumentsOutput with an empty typeArguments collection.  This is the case
-                // for open types, so we want to just output the brackets and commas. 
+                // for open types, so we want to just output the brackets and commas.
                 if (i < typeArguments.Count)
                     sb.Append(GetTypeOutput(typeArguments[i]));
             }
@@ -3139,7 +3036,7 @@ namespace Microsoft.CSharp
             {
                 if (ea[i] == null)
                 {
-                    continue;       // the other two batch methods just work if one element is null, so we'll match that. 
+                    continue;       // the other two batch methods just work if one element is null, so we'll match that.
                 }
 
                 ResolveReferencedAssemblies(options, ea[i]);

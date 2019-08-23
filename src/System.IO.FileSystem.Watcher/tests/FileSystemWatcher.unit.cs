@@ -15,9 +15,9 @@ namespace System.IO.Tests
     {
         private static void ValidateDefaults(FileSystemWatcher watcher, string path, string filter)
         {
-            Assert.Equal(false, watcher.EnableRaisingEvents);
+            Assert.False(watcher.EnableRaisingEvents);
             Assert.Equal(filter, watcher.Filter);
-            Assert.Equal(false, watcher.IncludeSubdirectories);
+            Assert.False(watcher.IncludeSubdirectories);
             Assert.Equal(8192, watcher.InternalBufferSize);
             Assert.Equal(NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName, watcher.NotifyFilter);
             Assert.Equal(path, watcher.Path);
@@ -184,13 +184,13 @@ namespace System.IO.Tests
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
             {
                 FileSystemWatcher watcher = new FileSystemWatcher(testDirectory.Path);
-                Assert.Equal(false, watcher.EnableRaisingEvents);
+                Assert.False(watcher.EnableRaisingEvents);
 
                 watcher.EnableRaisingEvents = true;
-                Assert.Equal(true, watcher.EnableRaisingEvents);
+                Assert.True(watcher.EnableRaisingEvents);
 
                 watcher.EnableRaisingEvents = false;
-                Assert.Equal(false, watcher.EnableRaisingEvents);
+                Assert.False(watcher.EnableRaisingEvents);
             }
         }
 
@@ -252,13 +252,13 @@ namespace System.IO.Tests
         public void FileSystemWatcher_IncludeSubdirectories()
         {
             FileSystemWatcher watcher = new FileSystemWatcher();
-            Assert.Equal(false, watcher.IncludeSubdirectories);
+            Assert.False(watcher.IncludeSubdirectories);
 
             watcher.IncludeSubdirectories = true;
-            Assert.Equal(true, watcher.IncludeSubdirectories);
+            Assert.True(watcher.IncludeSubdirectories);
 
             watcher.IncludeSubdirectories = false;
-            Assert.Equal(false, watcher.IncludeSubdirectories);
+            Assert.False(watcher.IncludeSubdirectories);
         }
 
         [Fact]
@@ -523,7 +523,7 @@ namespace System.IO.Tests
             Assert.Equal(currentDirRelative, watcher.Path);
 
             // FSW starts with String.Empty and will ignore setting this if it is already set,
-            // but if you set it after some other valid string has been set it will throw.            
+            // but if you set it after some other valid string has been set it will throw.
             Assert.Throws<ArgumentException>(() => watcher.Path = string.Empty);
             // Non-existent path
             Assert.Throws<ArgumentException>(() => watcher.Path = GetTestFilePath());
@@ -587,7 +587,7 @@ namespace System.IO.Tests
         [Fact]
         public void FileSystemWatcher_StopCalledOnBackgroundThreadDoesNotDeadlock()
         {
-            // Check the case where Stop or Dispose (they do the same thing) is called from 
+            // Check the case where Stop or Dispose (they do the same thing) is called from
             // a FSW event callback and make sure we don't Thread.Join to deadlock
             using (var dir = new TempDirectory(GetTestFilePath()))
             {
@@ -735,7 +735,7 @@ namespace System.IO.Tests
             var watcher = new FileSystemWatcher();
             watcher.Filters.Add("*.pdb");
             watcher.Filters.Add("*.dll");
-            
+
             watcher.Filters.RemoveAt(0);
             Assert.Equal(1, watcher.Filters.Count);
             Assert.Equal("*.dll", watcher.Filter);
@@ -775,8 +775,8 @@ namespace System.IO.Tests
             watcher.Filters.Add("*.dll");
             watcher.Filters.Add(string.Empty);
 
-            Assert.False(watcher.Filters.Contains(string.Empty));
-            Assert.True(watcher.Filters.Contains("*"));
+            Assert.DoesNotContain(string.Empty, watcher.Filters);
+            Assert.Contains("*", watcher.Filters);
         }
 
         [Fact]
@@ -787,8 +787,8 @@ namespace System.IO.Tests
             watcher.Filters.Add("*.dll");
             watcher.Filters.Add(null);
 
-            Assert.False(watcher.Filters.Contains(null));
-            Assert.True(watcher.Filters.Contains("*"));
+            Assert.DoesNotContain(null, watcher.Filters);
+            Assert.Contains("*", watcher.Filters);
         }
 
         [Fact]
@@ -797,8 +797,8 @@ namespace System.IO.Tests
             var watcher = new FileSystemWatcher();
             watcher.Filters.Add("*.pdb");
             watcher.Filters.Add("*.dll");
-            
-            Assert.True(watcher.Filters.Contains("*.pdb"));
+
+            Assert.Contains("*.pdb", watcher.Filters);
         }
 
         [Fact]
@@ -881,7 +881,7 @@ namespace System.IO.Tests
             var watcher = new FileSystemWatcher();
             watcher.Filters.Add("*.pdb");
             watcher.Filters.Add("*.dll");
-            
+
             Assert.Equal(-1, watcher.Filters.IndexOf("foo"));
             Assert.Equal(0, watcher.Filters.IndexOf("*.pdb"));
         }
@@ -944,7 +944,7 @@ namespace System.IO.Tests
             watcher.Filters.Add("*.pdb");
             watcher.Filters.Add("*.dll");
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => watcher.Filters.Insert(4, "*"));            
+            Assert.Throws<ArgumentOutOfRangeException>(() => watcher.Filters.Insert(4, "*"));
             watcher.Filters.Clear();
             Assert.Throws<ArgumentOutOfRangeException>(() => watcher.Filters[0]);
         }

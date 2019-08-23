@@ -144,7 +144,7 @@ namespace System.Threading.Tasks
         {
             object? obj = _obj;
             Debug.Assert(obj == null || obj is Task || obj is IValueTaskSource);
-            return 
+            return
                 obj == null ? CompletedTask :
                 obj as Task ??
                 GetTaskForValueTaskSource(Unsafe.As<IValueTaskSource>(obj));
@@ -350,7 +350,6 @@ namespace System.Threading.Tasks
 
         /// <summary>Throws the exception that caused the <see cref="ValueTask"/> to fail.  If it completed successfully, nothing is thrown.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [StackTraceHidden]
         internal void ThrowIfCompletedUnsuccessfully()
         {
             object? obj = _obj;
@@ -450,7 +449,7 @@ namespace System.Threading.Tasks
 
             _obj = task;
 
-            _result = default!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
+            _result = default;
             _continueOnCapturedContext = true;
             _token = 0;
         }
@@ -469,7 +468,7 @@ namespace System.Threading.Tasks
             _obj = source;
             _token = token;
 
-            _result = default!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
+            _result = default;
             _continueOnCapturedContext = true;
         }
 
@@ -741,6 +740,7 @@ namespace System.Threading.Tasks
         }
 
         /// <summary>Gets the result.</summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)] // prevent debugger evaluation from invalidating an underling IValueTaskSource<T>
         public TResult Result
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -781,6 +781,8 @@ namespace System.Threading.Tasks
         {
             if (IsCompletedSuccessfully)
             {
+                Debugger.NotifyOfCrossThreadDependency(); // prevent debugger evaluation from invalidating an underling IValueTaskSource<T> unless forced
+
                 TResult result = Result;
                 if (result != null)
                 {

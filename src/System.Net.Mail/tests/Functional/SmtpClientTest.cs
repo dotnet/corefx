@@ -9,6 +9,7 @@
 // (C) 2006 John Luke
 //
 
+using System.Collections.Generic;
 using System.IO;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -49,7 +50,6 @@ namespace System.Net.Mail.Tests
 
         [Theory]
         [InlineData(SmtpDeliveryMethod.SpecifiedPickupDirectory)]
-        [InlineData(SmtpDeliveryMethod.PickupDirectoryFromIis)]
         [InlineData(SmtpDeliveryMethod.PickupDirectoryFromIis)]
         public void DeliveryMethodTest(SmtpDeliveryMethod method)
         {
@@ -216,6 +216,28 @@ namespace System.Net.Mail.Tests
             string[] files = Directory.GetFiles(TempFolder, "*");
             Assert.Equal(1, files.Length);
             Assert.Equal(".eml", Path.GetExtension(files[0]));
+        }
+
+        [Fact]
+        public void Send_SpecifiedPickupDirectory_MessageBodyDoesNotEncodeForTransport()
+        {
+            // This test verifies that a line fold which results in a dot appearing as the first character of
+            // a new line does not get dot-stuffed when the delivery method is pickup. To do so, it relies on
+            // folding happening at a precise location. If folding implementation details change, this test will
+            // likely fail and need to be updated accordingly.
+
+            string padding = new string('a', 65);
+
+            Smtp.DeliveryMethod = SmtpDeliveryMethod.SpecifiedPickupDirectory;
+            Smtp.PickupDirectoryLocation = TempFolder;
+            Smtp.Send("mono@novell.com", "everyone@novell.com", "introduction", padding + ".");
+
+            string[] files = Directory.GetFiles(TempFolder, "*");
+            Assert.Equal(1, files.Length);
+            Assert.Equal(".eml", Path.GetExtension(files[0]));
+
+            string message = File.ReadAllText(files[0]);
+            Assert.EndsWith($"{padding}=\r\n.\r\n", message);
         }
 
         [Theory]
@@ -399,7 +421,7 @@ namespace System.Net.Mail.Tests
             server.SupportSmtpUTF8 = useSmtpUTF8;
 
             SmtpClient client = new SmtpClient("localhost", server.EndPoint.Port);
-            
+
             if (useSevenBit)
             {
                 // Subject will be encoded by Base64.
@@ -421,7 +443,7 @@ namespace System.Net.Mail.Tests
 
                 if (useAsyncSend)
                 {
-                    client.SendMailAsync(msg).Wait(); 
+                    client.SendMailAsync(msg).Wait();
                 }
                 else
                 {

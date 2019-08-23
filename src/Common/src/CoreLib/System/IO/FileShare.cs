@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-
 namespace System.IO
 {
     // Contains constants for controlling file sharing options while
@@ -12,7 +10,7 @@ namespace System.IO
     //
     // Note these values currently match the values for FILE_SHARE_READ,
     // FILE_SHARE_WRITE, and FILE_SHARE_DELETE in winnt.h
-    // 
+    //
     [Flags]
     public enum FileShare
     {

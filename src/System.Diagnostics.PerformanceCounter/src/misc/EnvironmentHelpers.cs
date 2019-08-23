@@ -17,9 +17,9 @@ namespace System
         {
             get
             {
-                if(!s_isAppContainerProcessInitalized)
+                if (!s_isAppContainerProcessInitalized)
                 {
-                   if(Environment.OSVersion.Version.Major < 6 || (Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor <= 1))
+                   if (Environment.OSVersion.Version.Major < 6 || (Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor <= 1))
                    {
                        // Windows 7 or older.
                        s_isAppContainerProcess = false;
@@ -28,10 +28,10 @@ namespace System
                    {
                        s_isAppContainerProcess = HasAppContainerToken();
                    }
- 
+
                     s_isAppContainerProcessInitalized = true;
                 }
- 
+
                 return s_isAppContainerProcess;
             }
         }

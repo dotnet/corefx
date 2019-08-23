@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -18,8 +18,12 @@ namespace System.Text.Json.Tests
         public static void TestingNumbers_TryGetMethods()
         {
             byte[] dataUtf8 = JsonNumberTestData.JsonData;
+            List<byte> bytes = JsonNumberTestData.Bytes;
+            List<sbyte> sbytes = JsonNumberTestData.SBytes;
+            List<short> shorts = JsonNumberTestData.Shorts;
             List<int> ints = JsonNumberTestData.Ints;
             List<long> longs = JsonNumberTestData.Longs;
+            List<ushort> ushorts = JsonNumberTestData.UShorts;
             List<uint> uints = JsonNumberTestData.UInts;
             List<ulong> ulongs = JsonNumberTestData.ULongs;
             List<float> floats = JsonNumberTestData.Floats;
@@ -37,7 +41,31 @@ namespace System.Text.Json.Tests
                 }
                 if (json.TokenType == JsonTokenType.Number)
                 {
-                    if (key.StartsWith("int"))
+                    if (key.StartsWith("byte"))
+                    {
+                        Assert.True(json.TryGetByte(out byte numberByte));
+                        if (count >= bytes.Count)
+                            count = 0;
+                        Assert.Equal(bytes[count], numberByte);
+                        count++;
+                    }
+                    else if (key.StartsWith("sbyte"))
+                    {
+                        Assert.True(json.TryGetSByte(out sbyte numberSByte));
+                        if (count >= sbytes.Count)
+                            count = 0;
+                        Assert.Equal(sbytes[count], numberSByte);
+                        count++;
+                    }
+                    else if (key.StartsWith("short"))
+                    {
+                        Assert.True(json.TryGetInt16(out short numberShort));
+                        if (count >= shorts.Count)
+                            count = 0;
+                        Assert.Equal(shorts[count], numberShort);
+                        count++;
+                    }
+                    else if (key.StartsWith("int"))
                     {
                         Assert.True(json.TryGetInt32(out int numberInt));
                         if (count >= ints.Count)
@@ -51,6 +79,14 @@ namespace System.Text.Json.Tests
                         if (count >= longs.Count)
                             count = 0;
                         Assert.Equal(longs[count], numberLong);
+                        count++;
+                    }
+                    else if (key.StartsWith("ushort"))
+                    {
+                        Assert.True(json.TryGetUInt16(out ushort numberUShort));
+                        if (count >= ushorts.Count)
+                            count = 0;
+                        Assert.Equal(ushorts[count], numberUShort);
                         count++;
                     }
                     else if (key.StartsWith("uint"))
@@ -75,10 +111,13 @@ namespace System.Text.Json.Tests
                         if (count >= floats.Count)
                             count = 0;
 
-                        var str = string.Format(CultureInfo.InvariantCulture, "{0}", floats[count]);
-                        float expected = float.Parse(str, CultureInfo.InvariantCulture);
+                        string roundTripActual = numberFloat.ToString(JsonTestHelper.SingleFormatString, CultureInfo.InvariantCulture);
+                        float actual = float.Parse(roundTripActual, CultureInfo.InvariantCulture);
 
-                        Assert.Equal(expected, numberFloat);
+                        string roundTripExpected = floats[count].ToString(JsonTestHelper.SingleFormatString, CultureInfo.InvariantCulture);
+                        float expected = float.Parse(roundTripExpected, CultureInfo.InvariantCulture);
+
+                        Assert.Equal(expected, actual);
                         count++;
                     }
                     else if (key.StartsWith("double"))
@@ -87,23 +126,13 @@ namespace System.Text.Json.Tests
                         if (count >= doubles.Count)
                             count = 0;
 
-                        string roundTripActual = numberDouble.ToString("R", CultureInfo.InvariantCulture);
+                        string roundTripActual = numberDouble.ToString(JsonTestHelper.DoubleFormatString, CultureInfo.InvariantCulture);
                         double actual = double.Parse(roundTripActual, CultureInfo.InvariantCulture);
 
-                        string roundTripExpected = doubles[count].ToString("R", CultureInfo.InvariantCulture);
+                        string roundTripExpected = doubles[count].ToString(JsonTestHelper.DoubleFormatString, CultureInfo.InvariantCulture);
                         double expected = double.Parse(roundTripExpected, CultureInfo.InvariantCulture);
 
-                        // Temporary work around for precision/round-tripping issues with Utf8Parser
-                        // https://github.com/dotnet/corefx/issues/33360
-                        if (expected != actual)
-                        {
-                            double diff = Math.Abs(expected - actual);
-                            Assert.True(diff < 1E-9 || diff > 1E288);
-                        }
-                        else
-                        {
-                            Assert.Equal(expected, actual);
-                        }
+                        Assert.Equal(expected, actual);
                         count++;
                     }
                     else if (key.StartsWith("decimal"))
@@ -121,15 +150,18 @@ namespace System.Text.Json.Tests
             }
 
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
         }
 
         [Fact]
         public static void TestingNumbers_GetMethods()
         {
             byte[] dataUtf8 = JsonNumberTestData.JsonData;
+            List<byte> bytes = JsonNumberTestData.Bytes;
+            List<sbyte> sbytes = JsonNumberTestData.SBytes;
+            List<short> shorts = JsonNumberTestData.Shorts;
             List<int> ints = JsonNumberTestData.Ints;
             List<long> longs = JsonNumberTestData.Longs;
+            List<ushort> ushorts = JsonNumberTestData.UShorts;
             List<uint> uints = JsonNumberTestData.UInts;
             List<ulong> ulongs = JsonNumberTestData.ULongs;
             List<float> floats = JsonNumberTestData.Floats;
@@ -147,7 +179,28 @@ namespace System.Text.Json.Tests
                 }
                 if (json.TokenType == JsonTokenType.Number)
                 {
-                    if (key.StartsWith("int"))
+                    if (key.StartsWith("byte"))
+                    {
+                        if (count >= bytes.Count)
+                            count = 0;
+                        Assert.Equal(bytes[count], json.GetByte());
+                        count++;
+                    }
+                    else if (key.StartsWith("sbyte"))
+                    {
+                        if (count >= sbytes.Count)
+                            count = 0;
+                        Assert.Equal(sbytes[count], json.GetSByte());
+                        count++;
+                    }
+                    else if (key.StartsWith("short"))
+                    {
+                        if (count >= shorts.Count)
+                            count = 0;
+                        Assert.Equal(shorts[count], json.GetInt16());
+                        count++;
+                    }
+                    else if (key.StartsWith("int"))
                     {
                         if (count >= ints.Count)
                             count = 0;
@@ -159,6 +212,13 @@ namespace System.Text.Json.Tests
                         if (count >= longs.Count)
                             count = 0;
                         Assert.Equal(longs[count], json.GetInt64());
+                        count++;
+                    }
+                    else if (key.StartsWith("ushort"))
+                    {
+                        if (count >= ushorts.Count)
+                            count = 0;
+                        Assert.Equal(ushorts[count], json.GetUInt16());
                         count++;
                     }
                     else if (key.StartsWith("uint"))
@@ -180,10 +240,13 @@ namespace System.Text.Json.Tests
                         if (count >= floats.Count)
                             count = 0;
 
-                        var str = string.Format(CultureInfo.InvariantCulture, "{0}", floats[count]);
-                        float expected = float.Parse(str, CultureInfo.InvariantCulture);
+                        string roundTripActual = json.GetSingle().ToString(JsonTestHelper.SingleFormatString, CultureInfo.InvariantCulture);
+                        float actual = float.Parse(roundTripActual, CultureInfo.InvariantCulture);
 
-                        Assert.Equal(expected, json.GetSingle());
+                        string roundTripExpected = floats[count].ToString(JsonTestHelper.SingleFormatString, CultureInfo.InvariantCulture);
+                        float expected = float.Parse(roundTripExpected, CultureInfo.InvariantCulture);
+
+                        Assert.Equal(expected, actual);
                         count++;
                     }
                     else if (key.StartsWith("double"))
@@ -191,23 +254,13 @@ namespace System.Text.Json.Tests
                         if (count >= doubles.Count)
                             count = 0;
 
-                        string roundTripActual = json.GetDouble().ToString("R", CultureInfo.InvariantCulture);
+                        string roundTripActual = json.GetDouble().ToString(JsonTestHelper.DoubleFormatString, CultureInfo.InvariantCulture);
                         double actual = double.Parse(roundTripActual, CultureInfo.InvariantCulture);
 
-                        string roundTripExpected = doubles[count].ToString("R", CultureInfo.InvariantCulture);
+                        string roundTripExpected = doubles[count].ToString(JsonTestHelper.DoubleFormatString, CultureInfo.InvariantCulture);
                         double expected = double.Parse(roundTripExpected, CultureInfo.InvariantCulture);
 
-                        // Temporary work around for precision/round-tripping issues with Utf8Parser
-                        // https://github.com/dotnet/corefx/issues/33360
-                        if (expected != actual)
-                        {
-                            double diff = Math.Abs(expected - actual);
-                            Assert.True(diff < 1E-9 || diff > 1E288);
-                        }
-                        else
-                        {
-                            Assert.Equal(expected, actual);
-                        }
+                        Assert.Equal(expected, actual);
                         count++;
                     }
                     else if (key.StartsWith("decimal"))
@@ -232,7 +285,123 @@ namespace System.Text.Json.Tests
             }
 
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
+        }
+
+        [Theory]
+        [InlineData("0.000", 0)]
+        [InlineData("1e1", 10)]
+        [InlineData("1.1e2", 110)]
+        [InlineData("220.1", 220.1)]
+        [InlineData("12345678901", 12345678901)]
+        [InlineData("123456789012345678901", 123456789012345678901d)]
+        [InlineData("-1", -1)] // byte.MinValue - 1
+        public static void TestingNumbersInvalidConversionToByte(string jsonString, double expected)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.Number)
+                {
+                    Assert.False(json.TryGetByte(out byte value));
+                    Assert.Equal(default, value);
+                    Assert.True(json.TryGetDouble(out double doubleValue));
+                    Assert.Equal(expected, doubleValue);
+
+                    try
+                    {
+                        json.GetByte();
+                        Assert.True(false, "Expected GetByte to throw FormatException.");
+                    }
+                    catch (FormatException)
+                    {
+                        /* Expected exception */
+                    }
+                    doubleValue = json.GetDouble();
+                    Assert.Equal(expected, doubleValue);
+                }
+            }
+
+            Assert.Equal(dataUtf8.Length, json.BytesConsumed);
+        }
+
+        [Theory]
+        [InlineData("0.000", 0)]
+        [InlineData("1e1", 10)]
+        [InlineData("1.1e2", 110)]
+        [InlineData("120.1", 120.1)]
+        [InlineData("12345678901", 12345678901)]
+        [InlineData("123456789012345678901", 123456789012345678901d)]
+        [InlineData("-129", -129)] // sbyte.MinValue - 1
+        public static void TestingNumbersInvalidConversionToSByte(string jsonString, double expected)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.Number)
+                {
+                    Assert.False(json.TryGetSByte(out sbyte value));
+                    Assert.Equal(default, value);
+                    Assert.True(json.TryGetDouble(out double doubleValue));
+                    Assert.Equal(expected, doubleValue);
+
+                    try
+                    {
+                        json.GetSByte();
+                        Assert.True(false, "Expected GetSByte to throw FormatException.");
+                    }
+                    catch (FormatException)
+                    {
+                        /* Expected exception */
+                    }
+                    doubleValue = json.GetDouble();
+                    Assert.Equal(expected, doubleValue);
+                }
+            }
+
+            Assert.Equal(dataUtf8.Length, json.BytesConsumed);
+        }
+
+        [Theory]
+        [InlineData("0.000", 0)]
+        [InlineData("1e1", 10)]
+        [InlineData("1.1e2", 110)]
+        [InlineData("12345.1", 12345.1)]
+        [InlineData("12345678901", 12345678901)]
+        [InlineData("123456789012345678901", 123456789012345678901d)]
+        [InlineData("-32769", -32769)] // short.MinValue - 1
+        public static void TestingNumbersInvalidConversionToInt16(string jsonString, double expected)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.Number)
+                {
+                    Assert.False(json.TryGetInt16(out short value));
+                    Assert.Equal(default, value);
+                    Assert.True(json.TryGetDouble(out double doubleValue));
+                    Assert.Equal(expected, doubleValue);
+
+                    try
+                    {
+                        json.GetInt16();
+                        Assert.True(false, "Expected GetInt16 to throw FormatException.");
+                    }
+                    catch (FormatException)
+                    {
+                        /* Expected exception */
+                    }
+                    doubleValue = json.GetDouble();
+                    Assert.Equal(expected, doubleValue);
+                }
+            }
+
+            Assert.Equal(dataUtf8.Length, json.BytesConsumed);
         }
 
         [Theory]
@@ -253,6 +422,7 @@ namespace System.Text.Json.Tests
                 if (json.TokenType == JsonTokenType.Number)
                 {
                     Assert.False(json.TryGetInt32(out int value));
+                    Assert.Equal(default, value);
                     Assert.True(json.TryGetDouble(out double doubleValue));
                     Assert.Equal(expected, doubleValue);
 
@@ -271,7 +441,6 @@ namespace System.Text.Json.Tests
             }
 
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
         }
 
         [Theory]
@@ -291,6 +460,7 @@ namespace System.Text.Json.Tests
                 if (json.TokenType == JsonTokenType.Number)
                 {
                     Assert.False(json.TryGetInt64(out long value));
+                    Assert.Equal(default, value);
                     Assert.True(json.TryGetDouble(out double doubleValue));
                     Assert.Equal(expected, doubleValue);
 
@@ -309,7 +479,45 @@ namespace System.Text.Json.Tests
             }
 
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
+        }
+
+        [Theory]
+        [InlineData("0.000", 0)]
+        [InlineData("1e1", 10)]
+        [InlineData("1.1e2", 110)]
+        [InlineData("12345.1", 12345.1)]
+        [InlineData("12345678901", 12345678901)]
+        [InlineData("123456789012345678901", 123456789012345678901d)]
+        [InlineData("-1", -1)] // ushort.MinValue - 1
+        public static void TestingNumbersInvalidConversionToUInt16(string jsonString, double expected)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.Number)
+                {
+                    Assert.False(json.TryGetUInt16(out ushort value));
+                    Assert.Equal(default, value);
+                    Assert.True(json.TryGetDouble(out double doubleValue));
+                    Assert.Equal(expected, doubleValue);
+
+                    try
+                    {
+                        json.GetUInt16();
+                        Assert.True(false, "Expected GetUInt16 to throw FormatException.");
+                    }
+                    catch (FormatException)
+                    {
+                        /* Expected exception */
+                    }
+                    doubleValue = json.GetDouble();
+                    Assert.Equal(expected, doubleValue);
+                }
+            }
+
+            Assert.Equal(dataUtf8.Length, json.BytesConsumed);
         }
 
         [Theory]
@@ -330,6 +538,7 @@ namespace System.Text.Json.Tests
                 if (json.TokenType == JsonTokenType.Number)
                 {
                     Assert.False(json.TryGetUInt32(out uint value));
+                    Assert.Equal(default, value);
                     Assert.True(json.TryGetDouble(out double doubleValue));
                     Assert.Equal(expected, doubleValue);
 
@@ -348,7 +557,6 @@ namespace System.Text.Json.Tests
             }
 
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
         }
 
         [Theory]
@@ -368,6 +576,7 @@ namespace System.Text.Json.Tests
                 if (json.TokenType == JsonTokenType.Number)
                 {
                     Assert.False(json.TryGetUInt64(out ulong value));
+                    Assert.Equal(default, value);
                     Assert.True(json.TryGetDouble(out double doubleValue));
                     Assert.Equal(expected, doubleValue);
 
@@ -386,13 +595,11 @@ namespace System.Text.Json.Tests
             }
 
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
         }
 
         [Theory]
         [InlineData("-4.402823E+38", float.NegativeInfinity, -4.402823E+38)] // float.MinValue - 1
         [InlineData("4.402823E+38", float.PositiveInfinity, 4.402823E+38)]  // float.MaxValue + 1
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Utf8Parser does not support parsing really large float and double values to infinity.")]
         public static void TestingTooLargeSingleConversionToInfinity(string jsonString, float expectedFloat, double expectedDouble)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
@@ -402,24 +609,43 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.Number)
                 {
-                    Assert.True(json.TryGetSingle(out float floatValue));
-                    Assert.Equal(expectedFloat, floatValue);
+                    if (PlatformDetection.IsFullFramework)
+                    {
+                        // Full framework throws for overflow rather than returning Infinity
+                        // This was fixed for .NET Core 3.0 in order to be IEEE 754 compliant
+
+                        Assert.False(json.TryGetSingle(out float _));
+
+                        try
+                        {
+                            json.GetSingle();
+                            Assert.True(false, $"Expected {nameof(FormatException)}.");
+                        }
+                        catch (FormatException)
+                        {
+                            /* Expected exception */
+                        }
+                    }
+                    else
+                    {
+                        Assert.True(json.TryGetSingle(out float floatValue));
+                        Assert.Equal(expectedFloat, floatValue);
+
+                        Assert.Equal(expectedFloat, json.GetSingle());
+                    }
+
                     Assert.True(json.TryGetDouble(out double doubleValue));
                     Assert.Equal(expectedDouble, doubleValue);
-
-                    Assert.Equal(expectedFloat, json.GetSingle());
                     Assert.Equal(expectedDouble, json.GetDouble());
                 }
             }
 
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
         }
 
         [Theory]
         [InlineData("-2.79769313486232E+308", double.NegativeInfinity)] // double.MinValue - 1
         [InlineData("2.79769313486232E+308", double.PositiveInfinity)]  // double.MaxValue + 1
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Utf8Parser does not support parsing really large float and double values to infinity.")]
         public static void TestingTooLargeDoubleConversionToInfinity(string jsonString, double expected)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
@@ -429,15 +655,34 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.Number)
                 {
-                    Assert.True(json.TryGetDouble(out double actual));
-                    Assert.Equal(expected, actual);
+                    if (PlatformDetection.IsFullFramework)
+                    {
+                        // Full framework throws for overflow rather than returning Infinity
+                        // This was fixed for .NET Core 3.0 in order to be IEEE 754 compliant
 
-                    Assert.Equal(expected, json.GetDouble());
+                        Assert.False(json.TryGetDouble(out double _));
+
+                        try
+                        {
+                            json.GetDouble();
+                            Assert.True(false, $"Expected {nameof(FormatException)}.");
+                        }
+                        catch (FormatException)
+                        {
+                            /* Expected exception */
+                        }
+                    }
+                    else
+                    {
+                        Assert.True(json.TryGetDouble(out double actual));
+                        Assert.Equal(expected, actual);
+
+                        Assert.Equal(expected, json.GetDouble());
+                    }
                 }
             }
 
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
         }
 
         [Theory]
@@ -453,6 +698,7 @@ namespace System.Text.Json.Tests
                 if (json.TokenType == JsonTokenType.Number)
                 {
                     Assert.False(json.TryGetDecimal(out decimal value));
+                    Assert.Equal(default, value);
                     Assert.True(json.TryGetDouble(out double doubleValue));
                     Assert.Equal(expected, doubleValue);
 
@@ -471,13 +717,12 @@ namespace System.Text.Json.Tests
             }
 
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
         }
 
         [Fact]
         public static void InvalidConversion()
         {
-            string jsonString = "[\"stringValue\", true, /* Comment within */ 1234] // Comment outside";
+            string jsonString = "[\"stringValue\", true, /* Comment within */ 1234, null] // Comment outside";
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
             var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
@@ -486,13 +731,14 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType != JsonTokenType.String)
                 {
-                    try
+                    if (json.TokenType == JsonTokenType.Null)
                     {
-                        string value = json.GetString();
-                        Assert.True(false, "Expected GetString to throw InvalidOperationException due to mismatch token type.");
+                        Assert.Null(json.GetString());
                     }
-                    catch (InvalidOperationException)
-                    { }
+                    else
+                    {
+                        JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.GetString());
+                    }
 
                     try
                     {
@@ -573,6 +819,54 @@ namespace System.Text.Json.Tests
                 {
                     try
                     {
+                        json.TryGetByte(out byte value);
+                        Assert.True(false, "Expected TryGetByte to throw InvalidOperationException due to mismatch token type.");
+                    }
+                    catch (InvalidOperationException)
+                    { }
+
+                    try
+                    {
+                        json.GetByte();
+                        Assert.True(false, "Expected GetByte to throw InvalidOperationException due to mismatch token type.");
+                    }
+                    catch (InvalidOperationException)
+                    { }
+
+                    try
+                    {
+                        json.TryGetSByte(out sbyte value);
+                        Assert.True(false, "Expected TryGetSByte to throw InvalidOperationException due to mismatch token type.");
+                    }
+                    catch (InvalidOperationException)
+                    { }
+
+                    try
+                    {
+                        json.GetSByte();
+                        Assert.True(false, "Expected GetSByte to throw InvalidOperationException due to mismatch token type.");
+                    }
+                    catch (InvalidOperationException)
+                    { }
+
+                    try
+                    {
+                        json.TryGetInt16(out short value);
+                        Assert.True(false, "Expected TryGetInt16 to throw InvalidOperationException due to mismatch token type.");
+                    }
+                    catch (InvalidOperationException)
+                    { }
+
+                    try
+                    {
+                        json.GetInt16();
+                        Assert.True(false, "Expected GetInt16 to throw InvalidOperationException due to mismatch token type.");
+                    }
+                    catch (InvalidOperationException)
+                    { }
+
+                    try
+                    {
                         json.TryGetInt32(out int value);
                         Assert.True(false, "Expected TryGetInt32 to throw InvalidOperationException due to mismatch token type.");
                     }
@@ -599,6 +893,22 @@ namespace System.Text.Json.Tests
                     {
                         json.GetInt64();
                         Assert.True(false, "Expected GetInt64 to throw InvalidOperationException due to mismatch token type.");
+                    }
+                    catch (InvalidOperationException)
+                    { }
+
+                    try
+                    {
+                        json.TryGetUInt16(out ushort value);
+                        Assert.True(false, "Expected TryGetUInt16 to throw InvalidOperationException due to mismatch token type.");
+                    }
+                    catch (InvalidOperationException)
+                    { }
+
+                    try
+                    {
+                        json.GetUInt16();
+                        Assert.True(false, "Expected GetUInt16 to throw InvalidOperationException due to mismatch token type.");
                     }
                     catch (InvalidOperationException)
                     { }
@@ -686,7 +996,6 @@ namespace System.Text.Json.Tests
             }
 
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
         }
 
         [Theory]
@@ -761,7 +1070,6 @@ namespace System.Text.Json.Tests
             }
 
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
         }
 
         [Theory]
@@ -823,7 +1131,7 @@ namespace System.Text.Json.Tests
                         }
                         catch (InvalidOperationException ex)
                         {
-                            Assert.Equal(ex.InnerException.GetType(), typeof(DecoderFallbackException));
+                            Assert.Equal(typeof(DecoderFallbackException), ex.InnerException.GetType());
                         }
                     }
                 }
@@ -1042,147 +1350,6 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [MemberData(nameof(JsonDateTimeTestData.ValidISO8601Tests), MemberType = typeof(JsonDateTimeTestData))]
-        public static void TestingStringsConversionToDateTime(string jsonString, string expectedString)
-        {
-            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-
-            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
-            while (json.Read())
-            {
-                if (json.TokenType == JsonTokenType.String)
-                {
-                    DateTime expected = DateTime.Parse(expectedString);
-
-                    Assert.True(json.TryGetDateTime(out DateTime actual));
-                    Assert.Equal(expected, actual);
-
-                    Assert.Equal(expected, json.GetDateTime());
-                }
-            }
-
-            Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
-        }
-
-        [Theory]
-        [MemberData(nameof(JsonDateTimeTestData.ValidISO8601Tests), MemberType = typeof(JsonDateTimeTestData))]
-        public static void TestingStringsConversionToDateTimeOffset(string jsonString, string expectedString)
-        {
-            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-
-            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
-            while (json.Read())
-            {
-                if (json.TokenType == JsonTokenType.String)
-                {
-                    DateTimeOffset expected = DateTimeOffset.Parse(expectedString);
-
-                    Assert.True(json.TryGetDateTimeOffset(out DateTimeOffset actual));
-                    Assert.Equal(expected, actual);
-
-                    Assert.Equal(expected, json.GetDateTimeOffset());
-                }
-            }
-
-            Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
-        }
-
-        [Theory]
-        [MemberData(nameof(JsonDateTimeTestData.ValidISO8601TestsWithUtcOffset), MemberType = typeof(JsonDateTimeTestData))]
-        public static void TestingStringsWithUTCOffsetToDateTime(string jsonString, string expectedString)
-        {
-            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-
-            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
-            while (json.Read())
-            {
-                if (json.TokenType == JsonTokenType.String)
-                {
-                    DateTime expected = DateTime.ParseExact(expectedString, "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
-
-                    Assert.True(json.TryGetDateTime(out DateTime actual));
-                    Assert.Equal(expected, actual);
-
-                    Assert.Equal(expected, json.GetDateTime());
-                }
-            }
-
-            Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
-        }
-
-        [Theory]
-        [MemberData(nameof(JsonDateTimeTestData.ValidISO8601TestsWithUtcOffset), MemberType = typeof(JsonDateTimeTestData))]
-        public static void TestingStringsWithUTCOffsetToDateTimeOffset(string jsonString, string expectedString)
-        {
-            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-
-            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
-            while (json.Read())
-            {
-                if (json.TokenType == JsonTokenType.String)
-                {
-                    DateTimeOffset expected = DateTimeOffset.ParseExact(expectedString, "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
-
-                    Assert.True(json.TryGetDateTimeOffset(out DateTimeOffset actual));
-                    Assert.Equal(expected, actual);
-
-                    Assert.Equal(expected, json.GetDateTimeOffset());
-                }
-            }
-
-            Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
-        }
-
-        [Theory]
-        [MemberData(nameof(JsonDateTimeTestData.InvalidISO8601Tests), MemberType = typeof(JsonDateTimeTestData))]
-        public static void TestingStringsInvalidConversionToDateTime(string jsonString)
-        {
-            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-
-            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
-            while (json.Read())
-            {
-                Assert.False(json.TryGetDateTime(out DateTime actualDateTime));
-
-                try
-                {
-                    DateTime value = json.GetDateTime();
-                    Assert.True(false, "Expected GetDateTime to throw FormatException due to invalid ISO 8601 input.");
-                }
-                catch (FormatException)
-                { }
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(JsonDateTimeTestData.InvalidISO8601Tests), MemberType = typeof(JsonDateTimeTestData))]
-        public static void TestingStringsInvalidConversionToDateTimeOffset(string jsonString)
-        {
-            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-
-            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
-            while (json.Read())
-            {
-                if (json.TokenType == JsonTokenType.String)
-                {
-                    Assert.False(json.TryGetDateTimeOffset(out DateTimeOffset actualDateTime));
-
-                    try
-                    {
-                        DateTimeOffset value = json.GetDateTimeOffset();
-                        Assert.True(false, "Expected GetDateTimeOffset to throw FormatException due to invalid ISO 8601 input.");
-                    }
-                    catch (FormatException)
-                    { }
-                }
-            }
-        }
-
-        [Theory]
         [MemberData(nameof(JsonGuidTestData.ValidGuidTests), MemberType = typeof(JsonGuidTestData))]
         [MemberData(nameof(JsonGuidTestData.ValidHexGuidTests), MemberType = typeof(JsonGuidTestData))]
         public static void TestingStringsConversionToGuid(string testString, string expectedString)
@@ -1200,7 +1367,6 @@ namespace System.Text.Json.Tests
             Assert.Equal(expected, json.GetGuid());
 
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
         }
 
         [Theory]
@@ -1211,14 +1377,14 @@ namespace System.Text.Json.Tests
             TryGetGuid_HasValueSequence_RetrievesGuid(testString, expectedString, isFinalBlock: false);
         }
 
-        public static void TryGetGuid_HasValueSequence_RetrievesGuid(string testString, string expectedString, bool isFinalBlock)
+        private static void TryGetGuid_HasValueSequence_RetrievesGuid(string testString, string expectedString, bool isFinalBlock)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes($"\"{testString}\"");
             ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
             var json = new Utf8JsonReader(sequence, isFinalBlock: isFinalBlock, state: default);
 
             Guid expected = new Guid(expectedString);
-            
+
             Assert.True(json.Read(), "json.Read()");
             Assert.Equal(JsonTokenType.String, json.TokenType);
 
@@ -1241,7 +1407,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(JsonTokenType.String, json.TokenType);
 
             Assert.False(json.TryGetGuid(out Guid actual));
-            Assert.Equal(Guid.Empty, actual);
+            Assert.Equal(default, actual);
 
             JsonTestHelper.AssertThrows<FormatException>(json, (jsonReader) => jsonReader.GetGuid());
         }

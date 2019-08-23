@@ -57,8 +57,6 @@ namespace System.Diagnostics
         internal const string DllName = "EventLogMessages.dll";
         private const string eventLogMutexName = "netfxeventlog.1.0";
         private const int SecondsPerDay = 60 * 60 * 24;
-        private const int DefaultMaxSize = 512 * 1024;
-        private const int DefaultRetention = 7 * SecondsPerDay;
 
         private const int Flag_notifying = 0x1;           // keeps track of whether we're notifying our listeners - to prevent double notifications
         private const int Flag_forwards = 0x2;     // whether the cache contains entries in forwards order (true) or backwards (false)
@@ -72,7 +70,7 @@ namespace System.Diagnostics
         private BitVector32 boolFlags = new BitVector32();
 
         private Hashtable messageLibraries;
-        private readonly static Hashtable listenerInfos = new Hashtable(StringComparer.OrdinalIgnoreCase);
+        private static readonly Hashtable listenerInfos = new Hashtable(StringComparer.OrdinalIgnoreCase);
 
         private object m_InstanceLockObject;
         private object InstanceLockObject
@@ -136,8 +134,6 @@ namespace System.Diagnostics
         {
             get
             {
-                string currentMachineName = this.machineName;
-
                 if (entriesCollection == null)
                     entriesCollection = new EventLogEntryCollection(this);
                 return entriesCollection;
@@ -337,7 +333,6 @@ namespace System.Diagnostics
         {
             get
             {
-                string currentMachineName = this.machineName;
                 return boolFlags[Flag_monitoring];
             }
             set
@@ -388,7 +383,6 @@ namespace System.Diagnostics
         {
             get
             {
-                string currentMachineName = this.machineName;
                 if (this.synchronizingObject == null && parent.ComponentDesignMode)
                 {
                     IDesignerHost host = (IDesignerHost)parent.ComponentGetService(typeof(IDesignerHost));
@@ -413,7 +407,6 @@ namespace System.Diagnostics
         {
             get
             {
-                string currentMachineName = this.machineName;
                 return sourceName;
             }
         }
@@ -451,12 +444,10 @@ namespace System.Diagnostics
         {
             add
             {
-                string currentMachineName = this.machineName;
                 onEntryWrittenHandler += value;
             }
             remove
             {
-                string currentMachineName = this.machineName;
                 onEntryWrittenHandler -= value;
             }
         }
@@ -482,7 +473,7 @@ namespace System.Diagnostics
             if (!success)
             {
                 // Ignore file not found errors.  ClearEventLog seems to try to delete the file where the event log is
-                // stored.  If it can't find it, it gives an error. 
+                // stored.  If it can't find it, it gives an error.
                 int error = Marshal.GetLastWin32Error();
                 if (error != Interop.Errors.ERROR_FILE_NOT_FOUND)
                     throw new Win32Exception();
@@ -603,7 +594,7 @@ namespace System.Diagnostics
 
             try
             {
-                // if the user cleared the log while we were receiving events, the call to GetEntryWithOldest above could have 
+                // if the user cleared the log while we were receiving events, the call to GetEntryWithOldest above could have
                 // thrown an exception and i could be too large.  Make sure we don't set lastSeenCount to something bogus.
                 int newCount = EntryCount + OldestEntryNumber;
                 if (i > newCount)
@@ -1405,7 +1396,7 @@ namespace System.Diagnostics
                 if (strings[i] == null)
                     strings[i] = string.Empty;
 
-                // make sure the strings aren't too long.  MSDN says each string has a limit of 32k (32768) characters, but 
+                // make sure the strings aren't too long.  MSDN says each string has a limit of 32k (32768) characters, but
                 // experimentation shows that it doesn't like anything larger than 32766
                 if (strings[i].Length > 32766)
                     throw new ArgumentException(SR.LogEntryTooLong);

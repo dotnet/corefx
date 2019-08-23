@@ -7,7 +7,7 @@ using System.Data.SqlClient.SNI;
 
 namespace System.Data.SqlClient
 {
-    sealed internal partial class TdsParser
+    internal sealed partial class TdsParser
     {
         internal void PostReadAsyncForMars()
         {
@@ -22,7 +22,7 @@ namespace System.Data.SqlClient
         private void WaitForSSLHandShakeToComplete(ref uint error)
         {
             // No - Op
-            
+
         }
 
         private SNIErrorDetails GetSniErrorDetails()
@@ -36,7 +36,7 @@ namespace System.Data.SqlClient
             details.lineNumber = sniError.lineNumber;
             details.function = sniError.function;
             details.exception = sniError.exception;
-            
+
             return details;
         }
 

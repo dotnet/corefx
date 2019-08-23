@@ -2,10 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Runtime.CompilerServices;
-using System.Runtime.Intrinsics;
-using Internal.Runtime.CompilerServices;
 
 namespace System.Runtime.Intrinsics.X86
 {
@@ -18,7 +15,7 @@ namespace System.Runtime.Intrinsics.X86
     {
         internal Avx() { }
 
-        public new static bool IsSupported { get => IsSupported; }
+        public static new bool IsSupported { get => IsSupported; }
 
         /// <summary>
         /// __m256 _mm256_add_ps (__m256 a, __m256 b)
@@ -667,7 +664,7 @@ namespace System.Runtime.Intrinsics.X86
         ///   VPERM2F128 ymm, ymm, ymm/m256, imm8
         /// </summary>
         public static Vector256<short> Permute2x128(Vector256<short> left, Vector256<short> right, byte control) => Permute2x128(left, right, control);
-        
+
         /// <summary>
         /// __m256i _mm256_permute2f128_si256 (__m256i a, __m256i b, int imm8)
         ///   VPERM2F128 ymm, ymm, ymm/m256, imm8

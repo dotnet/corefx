@@ -49,7 +49,7 @@ namespace System.Reflection
 
         public virtual IEnumerable<Type> ImplementedInterfaces => GetInterfaces();
 
-        //a re-implementation of ISAF from Type, skipping the use of UnderlyingType
+        // a re-implementation of ISAF from Type, skipping the use of UnderlyingType
         public virtual bool IsAssignableFrom(TypeInfo? typeInfo)
         {
             if (typeInfo == null)
@@ -77,6 +77,16 @@ namespace System.Reflection
             }
 
             return false;
+        }
+
+        internal static string GetRankString(int rank)
+        {
+            if (rank <= 0)
+                throw new IndexOutOfRangeException();
+
+            return rank == 1 ?
+                "[*]" :
+                "[" + new string(',', rank - 1) + "]";
         }
 
         private const BindingFlags DeclaredOnlyLookup = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;

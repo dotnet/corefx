@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -33,7 +33,6 @@ namespace System.Net.Tests
         [Theory]
         [InlineData("Accept: Test", new string[] { "Test" })]
         [InlineData("Accept: Test, Test2,Test3 ,  Test4", new string[] { "Test", "Test2", "Test3 ", " Test4" })]
-        [InlineData("Accept: Test", new string[] { "Test" })]
         [InlineData("Accept: ", new string[] { "" })]
         [InlineData("Unknown-Header: ", null)]
         public async Task AcceptTypes_GetProperty_ReturnsExpected(string acceptString, string[] expected)
@@ -135,7 +134,6 @@ namespace System.Net.Tests
         [InlineData("PUT", "Content-Length: 1\nContent-Length: 1", 1, true)]
         [InlineData("POST", "Transfer-Encoding: chunked", -1, true)]
         [InlineData("PUT", "Transfer-Encoding: chunked", -1, true)]
-        [InlineData("PUT", "Transfer-Encoding: chunked", -1, true)]
         [InlineData("PUT", "Content-Length: 10\nTransfer-Encoding: chunked", -1, true)]
         [InlineData("PUT", "Transfer-Encoding: chunked\nContent-Length: 10", -1, true)]
         public async Task ContentLength_GetProperty_ReturnsExpected(string method, string contentLengthString, long expected, bool hasEntityBody)
@@ -143,25 +141,6 @@ namespace System.Net.Tests
             HttpListenerRequest request = await GetRequest(method, "", contentLengthString.Split('\n'), content: "\r\n");
             Assert.Equal(expected, request.ContentLength64);
             Assert.Equal(hasEntityBody, request.HasEntityBody);
-        }
-
-        [Theory]
-        [InlineData(100)]
-        [InlineData("-100")]
-        [InlineData("")]
-        [InlineData("abc")]
-        [InlineData("9223372036854775808")]
-        [ActiveIssue(20294, TargetFrameworkMonikers.Netcoreapp)]
-        public async Task ContentLength_ManuallySetInHeaders_ReturnsExpected(string newValue)
-        {
-            HttpListenerRequest request = await GetRequest("POST", null, new string[] { "Content-Length: 1" }, content: "\r\n");
-            Assert.Equal("1", request.Headers["Content-Length"]);
-
-            request.Headers.Set("Content-Length", newValue);
-            Assert.Equal(newValue, request.Headers["Content-Length"]);
-            Assert.Equal(1, request.ContentLength64);
-
-            Assert.True(request.HasEntityBody);
         }
 
         [Fact]
@@ -246,7 +225,7 @@ namespace System.Net.Tests
             HttpListenerRequest request = await GetRequest("POST", null, null);
             Assert.Null(request.ServiceName);
         }
-        
+
         [Fact]
         public async Task RequestTraceIdentifier_GetWindows_ReturnsExpected()
         {
@@ -340,7 +319,7 @@ namespace System.Net.Tests
             HttpListenerRequest request = await GetRequest("POST", null, null);
             IAsyncResult beginGetClientCertificateResult = request.BeginGetClientCertificate(null, null);
             request.EndGetClientCertificate(beginGetClientCertificateResult);
-                
+
             Assert.Throws<InvalidOperationException>(() => request.EndGetClientCertificate(beginGetClientCertificateResult));
         }
 
@@ -405,9 +384,9 @@ namespace System.Net.Tests
                 "?name1=+&name2=\u1234&\u0100=value&name3=\u00FF", new NameValueCollection
                 {
                     { "name1", " " },
-                    { "name2", "á\u0088´" },
-                    { "Ä\u0080", "value" },
-                    { "name3", "Ã¿" }
+                    { "name2", "\u00E1\u0088\u00B4" },
+                    { "\u00C4\u0080", "value" },
+                    { "name3", "\u00C3\u00BF" }
                 }
             };
 

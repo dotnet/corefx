@@ -31,7 +31,9 @@ namespace System.IO.Pipelines.Tests
             }
 
             var readerCompletedTask = new TaskCompletionSource<bool>();
+#pragma warning disable CS0618 // Type or member is obsolete
             pipe.Writer.OnReaderCompleted(delegate { readerCompletedTask.SetResult(true); }, null);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             // Call Dispose{Async} multiple times; all should succeed.
             for (int i = 0; i < 2; i++)
@@ -143,7 +145,7 @@ namespace System.IO.Pipelines.Tests
         public async Task BuggyPipeReaderImplementationThrows()
         {
             var pipeReader = new BuggyPipeReader();
-            
+
             Stream stream = pipeReader.AsStream();
 
             await Assert.ThrowsAsync<InvalidOperationException>(async () => await stream.ReadAsync(new byte[5]));
@@ -282,7 +284,7 @@ namespace System.IO.Pipelines.Tests
         public void AsStreamDoNotCompleteReader()
         {
             var pipeReader = new NotImplementedPipeReader();
-            
+
             // would throw in Complete if it was actually invoked
             pipeReader.AsStream(leaveOpen: true).Dispose();
         }
@@ -291,12 +293,12 @@ namespace System.IO.Pipelines.Tests
         {
             public override void AdvanceTo(SequencePosition consumed)
             {
-                
+
             }
 
             public override void AdvanceTo(SequencePosition consumed, SequencePosition examined)
             {
-                
+
             }
 
             public override void CancelPendingRead()
@@ -305,11 +307,6 @@ namespace System.IO.Pipelines.Tests
             }
 
             public override void Complete(Exception exception = null)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override void OnWriterCompleted(Action<Exception, object> callback, object state)
             {
                 throw new NotImplementedException();
             }
@@ -332,7 +329,6 @@ namespace System.IO.Pipelines.Tests
             public override void AdvanceTo(SequencePosition consumed, SequencePosition examined) => throw new NotImplementedException();
             public override void CancelPendingRead() => throw new NotImplementedException();
             public override void Complete(Exception exception = null) => throw new NotImplementedException();
-            public override void OnWriterCompleted(Action<Exception, object> callback, object state) => throw new NotImplementedException();
             public override ValueTask<ReadResult> ReadAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
             public override bool TryRead(out ReadResult result) => throw new NotImplementedException();
         }
@@ -358,11 +354,6 @@ namespace System.IO.Pipelines.Tests
             }
 
             public override void Complete(Exception exception = null)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override void OnWriterCompleted(Action<Exception, object> callback, object state)
             {
                 throw new NotImplementedException();
             }

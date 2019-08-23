@@ -39,6 +39,10 @@
 # installed on the machine instead of downloading one.
 [bool]$useInstalledDotNetCli = if (Test-Path variable:useInstalledDotNetCli) { $useInstalledDotNetCli } else { $true }
 
+# Enable repos to use a particular version of the on-line dotnet-install scripts.
+#    default URL: https://dot.net/v1/dotnet-install.ps1
+[string]$dotnetInstallScriptVersion = if (Test-Path variable:dotnetInstallScriptVersion) { $dotnetInstallScriptVersion } else { "v1" }
+
 # True to use global NuGet cache instead of restoring packages to repository-local directory.
 [bool]$useGlobalNuGetCache = if (Test-Path variable:useGlobalNuGetCache) { $useGlobalNuGetCache } else { !$ci }
 
@@ -84,74 +88,12 @@ function Exec-Process([string]$command, [string]$commandArgs) {
     return $global:LASTEXITCODE = $process.ExitCode
   }
   finally {
-    # If we didn't finish then an error occured or the user hit ctrl-c.  Either
+    # If we didn't finish then an error occurred or the user hit ctrl-c.  Either
     # way kill the process
     if (-not $finished) {
       $process.Kill()
     }
   }
-}
-
-function Write-PipelineTaskError {
-  [CmdletBinding()]
-  param(
-    [Parameter(Mandatory = $true)]
-    [string]$Message,
-    [Parameter(Mandatory = $false)]
-    [string]$Type = 'error',
-    [string]$ErrCode,
-    [string]$SourcePath,
-    [string]$LineNumber,
-    [string]$ColumnNumber,
-    [switch]$AsOutput)
-
-    if(!$ci) {
-      if($Type -eq 'error') {
-        Write-Host $Message -ForegroundColor Red
-        return
-      }
-      elseif ($Type -eq 'warning') {
-        Write-Host $Message -ForegroundColor Yellow
-        return
-      }
-    }
-
-    if(($Type -ne 'error') -and ($Type -ne 'warning')) {
-      Write-Host $Message
-      return
-    }
-    if(-not $PSBoundParameters.ContainsKey('Type')) {
-      $PSBoundParameters.Add('Type', 'error')
-    }
-    Write-LogIssue @PSBoundParameters
-}
-
-function Write-PipelineSetVariable {
-  [CmdletBinding()]
-  param(
-    [Parameter(Mandatory = $true)]
-    [string]$Name,
-    [string]$Value,
-    [switch]$Secret,
-    [switch]$AsOutput)
-
-    if($ci) {
-      Write-LoggingCommand -Area 'task' -Event 'setvariable' -Data $Value -Properties @{
-        'variable' = $Name
-        'issecret' = $Secret
-      } -AsOutput:$AsOutput
-    }
-}
-
-function Write-PipelinePrependPath {
-  [CmdletBinding()]
-  param(
-    [Parameter(Mandatory=$true)]
-    [string]$Path,
-    [switch]$AsOutput)
-    if($ci) {
-      Write-LoggingCommand -Area 'task' -Event 'prependpath' -Data $Path -AsOutput:$AsOutput
-    }
 }
 
 function InitializeDotNetCli([bool]$install) {
@@ -196,7 +138,7 @@ function InitializeDotNetCli([bool]$install) {
       if ($install) {
         InstallDotNetSdk $dotnetRoot $dotnetSdkVersion
       } else {
-        Write-PipelineTaskError "Unable to find dotnet with SDK version '$dotnetSdkVersion'"
+        Write-PipelineTelemetryError -Category "InitializeToolset" -Message "Unable to find dotnet with SDK version '$dotnetSdkVersion'"
         ExitWithExitCode 1
       }
     }
@@ -209,7 +151,7 @@ function InitializeDotNetCli([bool]$install) {
   # It also ensures that VS msbuild will use the downloaded sdk targets.
   $env:PATH = "$dotnetRoot;$env:PATH"
 
-  # Make Sure that our bootstrapped dotnet cli is avaliable in future steps of the Azure Pipelines build
+  # Make Sure that our bootstrapped dotnet cli is available in future steps of the Azure Pipelines build
   Write-PipelinePrependPath -Path $dotnetRoot
   Write-PipelineSetVariable -Name 'DOTNET_MULTILEVEL_LOOKUP' -Value '0'
   Write-PipelineSetVariable -Name 'DOTNET_SKIP_FIRST_TIME_EXPERIENCE' -Value '1'
@@ -221,7 +163,7 @@ function GetDotNetInstallScript([string] $dotnetRoot) {
   $installScript = Join-Path $dotnetRoot "dotnet-install.ps1"
   if (!(Test-Path $installScript)) {
     Create-Directory $dotnetRoot
-    Invoke-WebRequest "https://dot.net/v1/dotnet-install.ps1" -OutFile $installScript
+    Invoke-WebRequest "https://dot.net/$dotnetInstallScriptVersion/dotnet-install.ps1" -OutFile $installScript
   }
 
   return $installScript
@@ -231,7 +173,7 @@ function InstallDotNetSdk([string] $dotnetRoot, [string] $version, [string] $arc
   InstallDotNet $dotnetRoot $version $architecture
 }
 
-function InstallDotNet([string] $dotnetRoot, [string] $version, [string] $architecture = "", [string] $runtime = "", [bool] $skipNonVersionedFiles = $false) {  $installScript = GetDotNetInstallScript $dotnetRoot
+function InstallDotNet([string] $dotnetRoot, [string] $version, [string] $architecture = "", [string] $runtime = "", [bool] $skipNonVersionedFiles = $false) {
   $installScript = GetDotNetInstallScript $dotnetRoot
   $installParameters = @{
     Version = $version
@@ -244,7 +186,7 @@ function InstallDotNet([string] $dotnetRoot, [string] $version, [string] $archit
 
   & $installScript @installParameters
   if ($lastExitCode -ne 0) {
-    Write-PipelineTaskError -Message "Failed to install dotnet cli (exit code '$lastExitCode')."
+    Write-PipelineTelemetryError -Category "InitializeToolset" -Message "Failed to install dotnet cli (exit code '$lastExitCode')."
     ExitWithExitCode $lastExitCode
   }
 }
@@ -377,7 +319,7 @@ function LocateVisualStudio([object]$vsRequirements = $null){
   }
 
   if (!$vsRequirements) { $vsRequirements = $GlobalJson.tools.vs }
-  $args = @("-latest", "-prerelease", "-format", "json", "-requires", "Microsoft.Component.MSBuild")
+  $args = @("-latest", "-prerelease", "-format", "json", "-requires", "Microsoft.Component.MSBuild", "-products", "*")
 
   if (Get-Member -InputObject $vsRequirements -Name "version") {
     $args += "-version"
@@ -418,7 +360,7 @@ function InitializeBuildTool() {
 
   if ($msbuildEngine -eq "dotnet") {
     if (!$dotnetRoot) {
-      Write-PipelineTaskError "/global.json must specify 'tools.dotnet'."
+      Write-PipelineTelemetryError -Category "InitializeToolset" -Message "/global.json must specify 'tools.dotnet'."
       ExitWithExitCode 1
     }
 
@@ -427,13 +369,13 @@ function InitializeBuildTool() {
     try {
       $msbuildPath = InitializeVisualStudioMSBuild -install:$restore
     } catch {
-      Write-PipelineTaskError $_
+      Write-PipelineTelemetryError -Category "InitializeToolset" -Message $_
       ExitWithExitCode 1
     }
 
     $buildTool = @{ Path = $msbuildPath; Command = ""; Tool = "vs"; Framework = "net472" }
   } else {
-    Write-PipelineTaskError "Unexpected value of -msbuildEngine: '$msbuildEngine'."
+    Write-PipelineTelemetryError -Category "InitializeToolset" -Message "Unexpected value of -msbuildEngine: '$msbuildEngine'."
     ExitWithExitCode 1
   }
 
@@ -450,7 +392,7 @@ function GetDefaultMSBuildEngine() {
     return "dotnet"
   }
 
-  Write-PipelineTaskError "-msbuildEngine must be specified, or /global.json must specify 'tools.dotnet' or 'tools.vs'."
+  Write-PipelineTelemetryError -Category "InitializeToolset" -Message "-msbuildEngine must be specified, or /global.json must specify 'tools.dotnet' or 'tools.vs'."
   ExitWithExitCode 1
 }
 
@@ -503,7 +445,7 @@ function InitializeToolset() {
   }
 
   if (-not $restore) {
-    Write-PipelineTaskError "Toolset version $toolsetVersion has not been restored."
+    Write-PipelineTelemetryError -Category "InitializeToolset" -Message "Toolset version $toolsetVersion has not been restored."
     ExitWithExitCode 1
   }
 
@@ -563,11 +505,13 @@ function MSBuild() {
 function MSBuild-Core() {
   if ($ci) {
     if (!$binaryLog) {
-      throw "Binary log must be enabled in CI build."
+      Write-PipelineTaskError -Message "Binary log must be enabled in CI build."
+      ExitWithExitCode 1
     }
 
     if ($nodeReuse) {
-      throw "Node reuse must be disabled in CI build."
+      Write-PipelineTaskError -Message "Node reuse must be disabled in CI build."
+      ExitWithExitCode 1
     }
   }
 
@@ -577,6 +521,9 @@ function MSBuild-Core() {
 
   if ($warnAsError) {
     $cmdArgs += " /warnaserror /p:TreatWarningsAsErrors=true"
+  }
+  else {
+    $cmdArgs += " /p:TreatWarningsAsErrors=false"
   }
 
   foreach ($arg in $args) {
@@ -588,7 +535,7 @@ function MSBuild-Core() {
   $exitCode = Exec-Process $buildTool.Path $cmdArgs
 
   if ($exitCode -ne 0) {
-    Write-PipelineTaskError "Build failed."
+    Write-PipelineTaskError -Message "Build failed."
 
     $buildLog = GetMSBuildBinaryLogCommandLineArgument $args
     if ($buildLog -ne $null) {
@@ -616,7 +563,7 @@ function GetMSBuildBinaryLogCommandLineArgument($arguments) {
   return $null
 }
 
-. $PSScriptRoot\LoggingCommandFunctions.ps1
+. $PSScriptRoot\pipeline-logging-functions.ps1
 
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $EngRoot = Resolve-Path (Join-Path $PSScriptRoot "..")

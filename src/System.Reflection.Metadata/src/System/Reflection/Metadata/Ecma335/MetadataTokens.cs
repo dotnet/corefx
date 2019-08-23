@@ -17,7 +17,7 @@ namespace System.Reflection.Metadata.Ecma335
         public static readonly int HeapCount = HeapIndexExtensions.Count;
 
         /// <summary>
-        /// Returns the row number of a metadata table entry that corresponds 
+        /// Returns the row number of a metadata table entry that corresponds
         /// to the specified <paramref name="handle"/> in the context of <paramref name="reader"/>.
         /// </summary>
         /// <returns>One based row number.</returns>
@@ -33,7 +33,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
 
         /// <summary>
-        /// Returns the offset of metadata heap data that corresponds 
+        /// Returns the offset of metadata heap data that corresponds
         /// to the specified <paramref name="handle"/> in the context of <paramref name="reader"/>.
         /// </summary>
         /// <returns>Zero based offset, or -1 if <paramref name="handle"/> isn't a metadata heap handle.</returns>
@@ -114,7 +114,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
 
         /// <summary>
-        /// Returns the row number of a metadata table entry that corresponds 
+        /// Returns the row number of a metadata table entry that corresponds
         /// to the specified <paramref name="handle"/>.
         /// </summary>
         /// <returns>
@@ -127,7 +127,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
 
         /// <summary>
-        /// Returns the offset of metadata heap data that corresponds 
+        /// Returns the offset of metadata heap data that corresponds
         /// to the specified <paramref name="handle"/>.
         /// </summary>
         /// <returns>
@@ -150,7 +150,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
 
         /// <summary>
-        /// Returns the offset of metadata heap data that corresponds 
+        /// Returns the offset of metadata heap data that corresponds
         /// to the specified <paramref name="handle"/>.
         /// </summary>
         /// <returns>
@@ -160,27 +160,25 @@ namespace System.Reflection.Metadata.Ecma335
         public static int GetHeapOffset(BlobHandle handle) => handle.IsVirtual ? -1 : handle.GetHeapOffset();
 
         /// <summary>
-        /// Returns the offset of metadata heap data that corresponds 
+        /// Returns the offset of metadata heap data that corresponds
         /// to the specified <paramref name="handle"/>.
         /// </summary>
         /// <returns>
-        /// Zero based offset, or -1 if <paramref name="handle"/> can only be interpreted in a context of a specific <see cref="MetadataReader"/> or <see cref="MetadataBuilder"/>.
-        /// See <see cref="GetHeapOffset(MetadataReader, Handle)"/>.
+        /// 1-based index into the #Guid heap. Unlike other heaps, which are essentially byte arrays, the #Guid heap is an array of 16-byte GUIDs.
         /// </returns>
         public static int GetHeapOffset(GuidHandle handle) => handle.Index;
 
         /// <summary>
-        /// Returns the offset of metadata heap data that corresponds 
+        /// Returns the offset of metadata heap data that corresponds
         /// to the specified <paramref name="handle"/>.
         /// </summary>
         /// <returns>
-        /// Zero based offset, or -1 if <paramref name="handle"/> can only be interpreted in a context of a specific <see cref="MetadataReader"/> or <see cref="MetadataBuilder"/>.
-        /// See <see cref="GetHeapOffset(MetadataReader, Handle)"/>.
+        /// Zero based offset.
         /// </returns>
         public static int GetHeapOffset(UserStringHandle handle) => handle.GetHeapOffset();
 
         /// <summary>
-        /// Returns the offset of metadata heap data that corresponds 
+        /// Returns the offset of metadata heap data that corresponds
         /// to the specified <paramref name="handle"/>.
         /// </summary>
         /// <returns>
@@ -235,7 +233,7 @@ namespace System.Reflection.Metadata.Ecma335
         /// <returns>True if the handle type corresponds to an Ecma335 or Portable PDB table, false otherwise.</returns>
         public static bool TryGetTableIndex(HandleKind type, out TableIndex index)
         {
-            // We don't have a HandleKind for PropertyMap, EventMap, MethodSemantics, *Ptr, AssemblyOS, etc. tables, 
+            // We don't have a HandleKind for PropertyMap, EventMap, MethodSemantics, *Ptr, AssemblyOS, etc. tables,
             // but one can get ahold of one by creating a handle from a token and getting its Kind.
             if ((int)type < TableCount && ((1UL << (int)type) & (ulong)TableMask.AllTables) != 0)
             {
@@ -280,7 +278,7 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        #region Handle Factories 
+        #region Handle Factories
 
         /// <summary>
         /// Creates a handle from a token value.

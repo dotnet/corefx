@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Linq;
+using System.Net.Sockets;
 using System.Net.Test.Common;
 using System.Text;
 using System.Threading.Tasks;
@@ -73,7 +75,7 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("WWW-Authenticate: Basic realm=\"hello\"\r\nWWW-Authenticate: Basic realm=\"hello\"\r\n")]
         [InlineData("WWW-Authenticate: Digest realm=\"hello\", nonce=\"hello\", algorithm=MD5\r\nWWW-Authenticate: Digest realm=\"hello\", nonce=\"hello\", algorithm=MD5\r\n")]
         [InlineData("WWW-Authenticate: Digest realm=\"hello1\", nonce=\"hello\", algorithm=MD5\r\nWWW-Authenticate: Digest realm=\"hello\", nonce=\"hello\", algorithm=MD5\r\n")]
-        public async void HttpClientHandler_MultipleAuthenticateHeaders_WithSameAuth_Succeeds(string authenticateHeader)
+        public async Task HttpClientHandler_MultipleAuthenticateHeaders_WithSameAuth_Succeeds(string authenticateHeader)
         {
             if (IsWinHttpHandler)
             {
@@ -133,7 +135,7 @@ namespace System.Net.Http.Functional.Tests
         [Theory]
         [InlineData("WWW-Authenticate: Basic realm=\"hello\"\r\n")]
         [InlineData("WWW-Authenticate: Digest realm=\"hello\", nonce=\"testnonce\"\r\n")]
-        public async void HttpClientHandler_IncorrectCredentials_Fails(string authenticateHeader)
+        public async Task HttpClientHandler_IncorrectCredentials_Fails(string authenticateHeader)
         {
             var options = new LoopbackServer.Options { Domain = Domain, Username = Username, Password = Password };
             await LoopbackServer.CreateServerAsync(async (server, url) =>
@@ -282,7 +284,6 @@ namespace System.Net.Http.Functional.Tests
         [InlineData((HttpStatusCode)207)] // MultiStatus
         [InlineData((HttpStatusCode)208)] // AlreadyReported
         [InlineData((HttpStatusCode)226)] // IMUsed
-        [InlineData(HttpStatusCode.Ambiguous)]
         [InlineData(HttpStatusCode.Ambiguous)]
         [InlineData(HttpStatusCode.NotModified)]
         [InlineData(HttpStatusCode.UseProxy)]
@@ -518,6 +519,59 @@ namespace System.Net.Http.Functional.Tests
         private static bool IsNtlmInstalled => Capability.IsNtlmInstalled();
         private static bool IsWindowsServerAvailable => !string.IsNullOrEmpty(Configuration.Http.WindowsServerHttpHost);
         private static bool IsDomainJoinedServerAvailable => !string.IsNullOrEmpty(Configuration.Http.DomainJoinedHttpHost);
+        private static NetworkCredential DomainCredential = new NetworkCredential(
+                    Configuration.Security.ActiveDirectoryUserName,
+                    Configuration.Security.ActiveDirectoryUserPassword,
+                    Configuration.Security.ActiveDirectoryName);
+
+        public static IEnumerable<object[]> EchoServersData()
+        {
+            foreach (Uri serverUri in Configuration.Http.EchoServerList)
+            {
+                yield return new object[] { serverUri };
+            }
+        }
+
+        [MemberData(nameof(EchoServersData))]
+        [ConditionalTheory(nameof(IsDomainJoinedServerAvailable))]
+        public async Task Proxy_DomainJoinedProxyServerUsesKerberos_Success(Uri server)
+        {
+            // We skip the test unless it is running on a Windows client machine. That is because only Windows
+            // automatically registers an SPN for HTTP/<hostname> of the machine. This will enable Kerberos to properly
+            // work with the loopback proxy server.
+            if (!PlatformDetection.IsWindows || !PlatformDetection.IsNotWindowsNanoServer)
+            {
+                throw new SkipTestException("Test can only run on domain joined Windows client machine");
+            }
+
+            var options = new LoopbackProxyServer.Options { AuthenticationSchemes = AuthenticationSchemes.Negotiate };
+            using (LoopbackProxyServer proxyServer = LoopbackProxyServer.Create(options))
+            {
+                using (HttpClientHandler handler = CreateHttpClientHandler())
+                using (HttpClient client = CreateHttpClient(handler))
+                {
+                    // Use 'localhost' DNS name for loopback proxy server (instead of IP address) so that the SPN will
+                    // get calculated properly to use Kerberos.
+                    _output.WriteLine(proxyServer.Uri.AbsoluteUri.ToString());
+                    handler.Proxy = new WebProxy("localhost", proxyServer.Uri.Port) { Credentials = DomainCredential };
+
+                    using (HttpResponseMessage response = await client.GetAsync(server))
+                    {
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+                        int requestCount = proxyServer.Requests.Count;
+
+                        // We expect 2 requests to the proxy server. One without the 'Proxy-Authorization' header and
+                        // one with the header.
+                        Assert.Equal(2, requestCount);
+                        Assert.Equal("Negotiate", proxyServer.Requests[requestCount - 1].AuthorizationHeaderValueScheme);
+
+                        // Base64 tokens that use SPNEGO protocol start with 'Y'. NTLM tokens start with 'T'.
+                        Assert.Equal('Y', proxyServer.Requests[requestCount - 1].AuthorizationHeaderValueToken[0]);
+                    }
+                }
+            }
+        }
 
         [ConditionalFact(nameof(IsDomainJoinedServerAvailable))]
         public async Task Credentials_DomainJoinedServerUsesKerberos_Success()
@@ -530,19 +584,39 @@ namespace System.Net.Http.Functional.Tests
             using (HttpClientHandler handler = CreateHttpClientHandler())
             using (HttpClient client = CreateHttpClient(handler))
             {
-                handler.Credentials = new NetworkCredential(
-                    Configuration.Security.ActiveDirectoryUserName,
-                    Configuration.Security.ActiveDirectoryUserPassword,
-                    Configuration.Security.ActiveDirectoryName);
+                handler.Credentials = DomainCredential;
+
+                string server = $"http://{Configuration.Http.DomainJoinedHttpHost}/test/auth/kerberos/showidentity.ashx";
+                using (HttpResponseMessage response = await client.GetAsync(server))
+                {
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    string body = await response.Content.ReadAsStringAsync();
+                    _output.WriteLine(body);
+                }
+            }
+        }
+
+        [ConditionalFact(nameof(IsDomainJoinedServerAvailable))]
+        public async Task Credentials_DomainJoinedServerUsesKerberos_UseIpAddressAndHostHeader_Success()
+        {
+            if (IsCurlHandler || IsWinHttpHandler)
+            {
+                throw new SkipTestException("Skipping test on platform handlers (CurlHandler, WinHttpHandler)");
+            }
+
+            using (HttpClientHandler handler = CreateHttpClientHandler())
+            using (HttpClient client = CreateHttpClient(handler))
+            {
+                handler.Credentials = DomainCredential;
+
+                IPAddress[] addresses = Dns.GetHostAddresses(Configuration.Http.DomainJoinedHttpHost);
+                IPAddress hostIP = addresses.Where(a => a.AddressFamily == AddressFamily.InterNetwork).Select(a => a).First();
 
                 var request = new HttpRequestMessage();
-                var server = $"http://{Configuration.Http.DomainJoinedHttpHost}/test/auth/kerberos/showidentity.ashx";
-                request.RequestUri = new Uri(server);
-
-                // Force HTTP/1.1 since both CurlHandler and SocketsHttpHandler have problems with
-                // HTTP/2.0 and Windows authentication (due to HTTP/2.0 -> HTTP/1.1 downgrade handling).
-                // Issue #35195 (for SocketsHttpHandler).
-                request.Version = new Version(1,1);
+                request.RequestUri = new Uri($"http://{hostIP}/test/auth/kerberos/showidentity.ashx");
+                request.Headers.Host = Configuration.Http.DomainJoinedHttpHost;
+                _output.WriteLine(request.RequestUri.AbsoluteUri.ToString());
+                _output.WriteLine($"Host: {request.Headers.Host}");
 
                 using (HttpResponseMessage response = await client.SendAsync(request))
                 {
@@ -569,15 +643,7 @@ namespace System.Net.Http.Functional.Tests
                     Configuration.Security.WindowsServerUserName,
                     Configuration.Security.WindowsServerUserPassword);
 
-                var request = new HttpRequestMessage();
-                request.RequestUri = new Uri(server);
-
-                // Force HTTP/1.1 since both CurlHandler and SocketsHttpHandler have problems with
-                // HTTP/2.0 and Windows authentication (due to HTTP/2.0 -> HTTP/1.1 downgrade handling).
-                // Issue #35195 (for SocketsHttpHandler).
-                request.Version = new Version(1,1);
-
-                using (HttpResponseMessage response = await client.SendAsync(request))
+                using (HttpResponseMessage response = await client.GetAsync(server))
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                     string body = await response.Content.ReadAsStringAsync();

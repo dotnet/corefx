@@ -4,7 +4,7 @@
 // Unit tests for XmlDecryptionTransform
 //
 // Author:
-//	Sebastien Pouliot  <sebastien@ximian.com>
+//  Sebastien Pouliot  <sebastien@ximian.com>
 //
 // Copyright (C) 2008 Novell, Inc (http://www.novell.com)
 //
@@ -250,4 +250,3 @@ namespace System.Security.Cryptography.Xml.Tests
         }
     }
 }
-

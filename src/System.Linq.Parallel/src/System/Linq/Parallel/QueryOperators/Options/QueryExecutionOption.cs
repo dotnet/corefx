@@ -14,13 +14,13 @@ using System.Threading;
 namespace System.Linq.Parallel
 {
     /// <summary>
-    /// Represents operators that set various query execution options. 
+    /// Represents operators that set various query execution options.
     /// </summary>
     /// <typeparam name="TSource"></typeparam>
     internal class QueryExecutionOption<TSource> : QueryOperator<TSource>
     {
-        private QueryOperator<TSource> _child;
-        private OrdinalIndexState _indexState;
+        private readonly QueryOperator<TSource> _child;
+        private readonly OrdinalIndexState _indexState;
 
         internal QueryExecutionOption(QueryOperator<TSource> source, QuerySettings settings)
             : base(source.OutputOrdered, settings.Merge(source.SpecifiedQuerySettings))

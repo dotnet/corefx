@@ -113,7 +113,7 @@ namespace System.Xml.Schema
             {
                 return false;
             }
-            // matched ...  
+            // matched ...
             if (this.curNode == parent.TopNode)
             {
                 this.isMatch = true;
@@ -123,7 +123,7 @@ namespace System.Xml.Schema
             DoubleLinkAxis nowNode = (DoubleLinkAxis)(this.curNode.Next);
             if (Asttree.IsAttribute(nowNode))
             {
-                this.isMatch = true;                    // for attribute 
+                this.isMatch = true;                    // for attribute
                 return false;
             }
             this.curNode = nowNode;
@@ -135,9 +135,9 @@ namespace System.Xml.Schema
     internal class AxisStack
     {
         // property
-        private ArrayList _stack;                            // of AxisElement
-        private ForwardAxis _subtree;                        // reference to the corresponding subtree
-        private ActiveAxis _parent;
+        private readonly ArrayList _stack;                            // of AxisElement
+        private readonly ForwardAxis _subtree;                        // reference to the corresponding subtree
+        private readonly ActiveAxis _parent;
 
         internal ForwardAxis Subtree
         {
@@ -286,9 +286,9 @@ namespace System.Xml.Schema
         // just reset contextDepth & isActive....
         private int _currentDepth;                       // current depth, trace the depth by myself... movetochild, movetoparent, movetoattribute
         private bool _isActive;                          // not active any more after moving out context node
-        private Asttree _axisTree;                       // reference to the whole tree
+        private readonly Asttree _axisTree;                       // reference to the whole tree
         // for each subtree i need to keep a stack...
-        private ArrayList _axisStack;                    // of AxisStack
+        private readonly ArrayList _axisStack;                    // of AxisStack
 
         public int CurrentDepth
         {
@@ -373,7 +373,7 @@ namespace System.Xml.Schema
             return false;
         }
 
-        // Secondly field interface 
+        // Secondly field interface
         public bool MoveToAttribute(string localname, string URN)
         {
             if (!_isActive)
@@ -384,7 +384,7 @@ namespace System.Xml.Schema
             for (int i = 0; i < _axisStack.Count; ++i)
             {
                 if (((AxisStack)_axisStack[i]).MoveToAttribute(localname, URN, _currentDepth + 1))
-                {  // don't change depth for attribute, but depth is add 1 
+                {  // don't change depth for attribute, but depth is add 1
                     result = true;
                 }
             }
@@ -438,13 +438,13 @@ namespace System.Xml.Schema
     internal class ForwardAxis
     {
         // Axis tree
-        private DoubleLinkAxis _topNode;
-        private DoubleLinkAxis _rootNode;                // the root for reverse Axis
+        private readonly DoubleLinkAxis _topNode;
+        private readonly DoubleLinkAxis _rootNode;                // the root for reverse Axis
 
         // Axis tree property
-        private bool _isAttribute;                       // element or attribute?      "@"?
-        private bool _isDss;                             // has ".//" in front of it?
-        private bool _isSelfAxis;                        // only one node in the tree, and it's "." (self) node
+        private readonly bool _isAttribute;                       // element or attribute?      "@"?
+        private readonly bool _isDss;                             // has ".//" in front of it?
+        private readonly bool _isSelfAxis;                        // only one node in the tree, and it's "." (self) node
 
         internal DoubleLinkAxis RootNode
         {
@@ -492,9 +492,9 @@ namespace System.Xml.Schema
     {
         // set private then give out only get access, to keep it intact all along
         private ArrayList _fAxisArray;
-        private string _xpathexpr;
-        private bool _isField;                                   // field or selector
-        private XmlNamespaceManager _nsmgr;
+        private readonly string _xpathexpr;
+        private readonly bool _isField;                                   // field or selector
+        private readonly XmlNamespaceManager _nsmgr;
 
         internal ArrayList SubtreeArray
         {
@@ -675,7 +675,7 @@ namespace System.Xml.Schema
 
         // depending on axis.Name & axis.Prefix, i will set the axis.URN;
         // also, record urn from prefix during this
-        // 4 different types of element or attribute (with @ before it) combinations: 
+        // 4 different types of element or attribute (with @ before it) combinations:
         // (1) a:b (2) b (3) * (4) a:*
         // i will check xpath to be strictly conformed from these forms
         // for (1) & (4) i will have URN set properly

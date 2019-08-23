@@ -26,7 +26,7 @@ namespace System.Diagnostics.Tests
                 Assert.False(eventLogWatcher.Enabled);
             }
         }
-            
+
         [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
         public void Ctor_UsingBookmark()
         {
@@ -59,7 +59,7 @@ namespace System.Diagnostics.Tests
             return bookmark;
         }
 
-        public void RaisingEvent(string log, string methodName, bool waitOnEvent = true)
+        private void RaisingEvent(string log, string methodName, bool waitOnEvent = true)
         {
             signal = new AutoResetEvent(false);
             eventCounter = 0;

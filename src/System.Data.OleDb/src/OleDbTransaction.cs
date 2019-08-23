@@ -104,7 +104,7 @@ namespace System.Data.OleDb
                 return hr;
             }
 
-            override protected bool ReleaseHandle()
+            protected override bool ReleaseHandle()
             {
                 if (_mustComplete && (IntPtr.Zero != base.handle))
                 {
@@ -138,7 +138,7 @@ namespace System.Data.OleDb
             _isolationLevel = isolevel;
         }
 
-        new public OleDbConnection Connection
+        public new OleDbConnection Connection
         {
             get
             {
@@ -146,7 +146,7 @@ namespace System.Data.OleDb
             }
         }
 
-        override protected DbConnection DbConnection
+        protected override DbConnection DbConnection
         {
             get
             {
@@ -154,7 +154,7 @@ namespace System.Data.OleDb
             }
         }
 
-        override public IsolationLevel IsolationLevel
+        public override IsolationLevel IsolationLevel
         {
             get
             {
@@ -222,7 +222,7 @@ namespace System.Data.OleDb
             }
         }
 
-        override public void Commit()
+        public override void Commit()
         {
             if (null == _transaction)
             {
@@ -302,7 +302,7 @@ namespace System.Data.OleDb
             { throw e; }
         }
 
-        override public void Rollback()
+        public override void Rollback()
         {
             if (null == _transaction)
             {
@@ -350,7 +350,7 @@ namespace System.Data.OleDb
             return hr;
         }
 
-        static internal OleDbTransaction TransactionLast(OleDbTransaction head)
+        internal static OleDbTransaction TransactionLast(OleDbTransaction head)
         {
             if (null != head._nestedTransaction)
             {
@@ -363,7 +363,7 @@ namespace System.Data.OleDb
             return head;
         }
 
-        static internal OleDbTransaction TransactionUpdate(OleDbTransaction transaction)
+        internal static OleDbTransaction TransactionUpdate(OleDbTransaction transaction)
         {
             if ((null != transaction) && (null == transaction._transaction))
             {

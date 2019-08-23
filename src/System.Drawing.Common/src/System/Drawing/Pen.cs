@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -66,7 +66,7 @@ namespace System.Drawing
             SetNativePen(pen);
 
 #if FEATURE_SYSTEM_EVENTS
-            if (ColorUtil.IsSystemColor(_color))
+            if (_color.IsSystemColor)
             {
                 SystemColorTracker.Add(this);
             }
@@ -84,7 +84,7 @@ namespace System.Drawing
         /// Initializes a new instance of the <see cref='Pen'/> class with the specified <see cref='Drawing.Brush'/> and width.
         /// </summary>
         public Pen(Brush brush, float width)
-        {            
+        {
             if (brush == null)
             {
                 throw new ArgumentNullException(nameof(brush));
@@ -156,12 +156,12 @@ namespace System.Drawing
                 try
                 {
 #if DEBUG
-                    int status =
+                    int status = !Gdip.Initialized ? Gdip.Ok :
 #endif
                     Gdip.GdipDeletePen(new HandleRef(this, NativePen));
 #if DEBUG
                     Debug.Assert(status == Gdip.Ok, "GDI+ returned an error status: " + status.ToString(CultureInfo.InvariantCulture));
-#endif       
+#endif
                 }
                 catch (Exception ex) when (!ClientUtils.IsSecurityOrCriticalException(ex))
                 {
@@ -590,7 +590,7 @@ namespace System.Drawing
 #if FEATURE_SYSTEM_EVENTS
                     // NOTE: We never remove pens from the active list, so if someone is
                     // changing their pen colors a lot, this could be a problem.
-                    if (ColorUtil.IsSystemColor(value) && !ColorUtil.IsSystemColor(oldColor))
+                    if (value.IsSystemColor && !oldColor.IsSystemColor)
                     {
                         SystemColorTracker.Add(this);
                     }
