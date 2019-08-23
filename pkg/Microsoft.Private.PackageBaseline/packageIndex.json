@@ -241,7 +241,7 @@
       }
     },
     "Microsoft.VisualBasic.Core": {
-      "BaselineVersion": "10.5.0",
+      "BaselineVersion": "10.6.0",
       "InboxOn": {
         "netcoreapp3.0": "10.0.4.0",
         "uap10.0.16300": "10.0.4.0"
