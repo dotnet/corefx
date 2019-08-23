@@ -134,7 +134,7 @@ namespace System.Threading.Tasks.Tests
             int concurrencyLevel = 50;
             Task[] threads = null;
 
-            // Testing competing SetExceptions 
+            // Testing competing SetExceptions
 
             ManualResetEvent mres = new ManualResetEvent(false);
 
@@ -188,18 +188,18 @@ namespace System.Threading.Tasks.Tests
                 CancellationTokenSource cts = new CancellationTokenSource();
                 TaskCompletionSource<int> tcs = new TaskCompletionSource<int>(cts.Token);
                 tcs.SetResult(5);
-                Assert.Equal(tcs.Task.Status, TaskStatus.RanToCompletion);
+                Assert.Equal(TaskStatus.RanToCompletion, tcs.Task.Status);
 
                 cts.Cancel();
 
-                Assert.Equal(tcs.Task.Status, TaskStatus.RanToCompletion);
+                Assert.Equal(TaskStatus.RanToCompletion, tcs.Task.Status);
 
                 Assert.False(tcs.TrySetException(new Exception("some exception")), "RunTaskCompletionSourceTests:    > Error!  Set result, Canceled, tcs.TrySetException succeeded");
 
                 Assert.False(tcs.TrySetResult(10), "RunTaskCompletionSourceTests:    > Error!  Set result, Canceled, tcs.TrySetResult succeeded");
                 Assert.False(tcs.TrySetCanceled(), "RunTaskCompletionSourceTests:    > Error!  Set result, Canceled, tcs.TrySetCanceled succeeded");
 
-                Assert.Equal(tcs.Task.Result, 5);
+                Assert.Equal(5, tcs.Task.Result);
 
                 Exception fake = new Exception("blah!");
                 try
@@ -732,7 +732,7 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        // Basic future functionality. This is also covered in scenario unit tests, here we focus on wait functionality, and promises 
+        // Basic future functionality. This is also covered in scenario unit tests, here we focus on wait functionality, and promises
         [Fact]
         public static void RunBasicFutureTest()
         {
@@ -954,7 +954,7 @@ namespace System.Threading.Tasks.Tests
             bool bExecuted = false;
             TaskScheduler observedTaskscheduler = null;
 
-            // do RunSynchronously for a non-exceptional task            
+            // do RunSynchronously for a non-exceptional task
             Task t = new Task(delegate
             {
                 observedTaskscheduler = TaskScheduler.Current;
@@ -991,7 +991,7 @@ namespace System.Threading.Tasks.Tests
         {
             //Executing RunSynchronously() validations on external thread
 
-            // do RunSynchronously for a non-exceptional task            
+            // do RunSynchronously for a non-exceptional task
             Task t = new Task(delegate
             {
             });
@@ -1018,7 +1018,7 @@ namespace System.Threading.Tasks.Tests
             //
             // RunSynchronously() should not throw itself for exceptional tasks, and we should get the exception
             // regularly through Wait()
-            // 
+            //
             t = new Task(delegate { throw new Exception(); });
             try
             {
@@ -1070,7 +1070,7 @@ namespace System.Threading.Tasks.Tests
             // wait until the outer task starts executing on a TPL thread and launches its child task
             mre2.WaitOne();
 
-            // make sure the outer task finishes processing the exception 
+            // make sure the outer task finishes processing the exception
             //while (outer.Status == TaskStatus.Running) Thread.Sleep(10);
 
             if (outer.Exception != null)
@@ -2090,7 +2090,7 @@ namespace System.Threading.Tasks.Tests
             }
 
             //
-            // Test that Task whose CT gets canceled while it's running but 
+            // Test that Task whose CT gets canceled while it's running but
             // which doesn't throw an OCE to acknowledge cancellation will end up in RunToCompletion state
             //
             {
@@ -2478,7 +2478,7 @@ namespace System.Threading.Tasks.Tests
                 }
             }
 
-            // wait on a task that has an exceptional child task 
+            // wait on a task that has an exceptional child task
             Task childTask = null;
             t = Task.Factory.StartNew(() =>
             {

@@ -18,7 +18,7 @@
 // Regarding Normalization for ISO-2022-JP (50220, 50221, 50222), its the same rules as EUCJP
 //  Forms KC & KD are precluded because of things like halfwidth Katakana that has compatibility mappings
 //  Form D is precluded because of 0x00a8, which changes to space + dieresis.
-// 
+//
 // Note: I think that IsAlwaysNormalized should probably return true for form C for Japanese 20932 based CPs.
 //
 // For ISO-2022-KR
@@ -61,7 +61,7 @@ namespace System.Text
         {
         }
 
-        private static int[] s_tableBaseCodePages =
+        private static readonly int[] s_tableBaseCodePages =
         {
             932,    // 50220  ISO-2022-JP, No halfwidth Katakana, convert to full width
             932,    // 50221  ISO-2022-JP, Use escape sequence for half width Katakana
@@ -710,7 +710,7 @@ namespace System.Text
                 // This is ASCII if we had to flush
                 encoder.currentMode = currentMode;
 
-                // We don't use shift out mode, but if we've flushed we need to reset it so it doesn't 
+                // We don't use shift out mode, but if we've flushed we need to reset it so it doesn't
                 // get output again.
                 if (!encoder.MustFlush || encoder.charLeftOver != (char)0)
                 {
@@ -1857,7 +1857,7 @@ namespace System.Text
             }
         }
 
-        private static ushort[] s_HalfToFullWidthKanaTable =
+        private static readonly ushort[] s_HalfToFullWidthKanaTable =
         {
             0xa1a3, // 0x8ea1 : Halfwidth Ideographic Period
             0xa1d6, // 0x8ea2 : Halfwidth Opening Corner Bracket
@@ -1925,5 +1925,3 @@ namespace System.Text
         };
     }
 }
-
-

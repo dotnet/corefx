@@ -129,7 +129,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (source.Capacity - sourceIndex < count) throw new ArgumentException(SR.Argument_InsufficientSpaceInSourceBuffer);
 
             if (count == 0)
-                return Array.Empty<Byte>();
+                return Array.Empty<byte>();
 
             byte[] destination = new byte[count];
             source.CopyTo(sourceIndex, destination, 0, count);
@@ -462,7 +462,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             // we must keep around a reference to the IBuffer from which we got the memory pointer. Otherwise the ref count
             // of the underlying COM object may drop to zero and the memory may get freed.
 
-            private IBuffer _sourceBuffer;
+            private readonly IBuffer _sourceBuffer;
 
             internal unsafe WindowsRuntimeBufferUnmanagedMemoryStream(IBuffer sourceBuffer, byte* dataPtr)
 

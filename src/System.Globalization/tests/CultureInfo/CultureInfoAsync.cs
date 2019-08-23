@@ -8,7 +8,7 @@ using Xunit;
 namespace System.Globalization.Tests
 {
     public class CultureInfoAsync
-    {        
+    {
         [Fact]
         public void TestCurrentCulturesAsync()
         {
@@ -17,10 +17,10 @@ namespace System.Globalization.Tests
 
             CultureInfo newCurrentCulture = new CultureInfo(currentCulture.Name.Equals("ja-JP", StringComparison.OrdinalIgnoreCase) ? "en-US" : "ja-JP");
             CultureInfo newCurrentUICulture = new CultureInfo(currentUICulture.Name.Equals("ja-JP", StringComparison.OrdinalIgnoreCase) ? "en-US" : "ja-JP");
-            
+
             CultureInfo.CurrentCulture = newCurrentCulture;
             CultureInfo.CurrentUICulture = newCurrentUICulture;
-            
+
             try
             {
                 Task t = Task.Run(() => {
@@ -29,7 +29,7 @@ namespace System.Globalization.Tests
                 });
 
                 ((IAsyncResult)t).AsyncWaitHandle.WaitOne();
-                t.Wait();                
+                t.Wait();
             }
             finally
             {
@@ -37,7 +37,7 @@ namespace System.Globalization.Tests
                 CultureInfo.CurrentUICulture = currentUICulture;
             }
         }
-        
+
         [Fact]
         public void TestCurrentCulturesWithAwait()
         {
@@ -46,27 +46,27 @@ namespace System.Globalization.Tests
 
             CultureInfo newCurrentCulture = new CultureInfo(currentCulture.Name.Equals("ja-JP", StringComparison.OrdinalIgnoreCase) ? "en-US" : "ja-JP");
             CultureInfo newCurrentUICulture = new CultureInfo(currentUICulture.Name.Equals("ja-JP", StringComparison.OrdinalIgnoreCase) ? "en-US" : "ja-JP");
-            
+
             CultureInfo.CurrentCulture = newCurrentCulture;
             CultureInfo.CurrentUICulture = newCurrentUICulture;
-            
-            Func<Task> mainAsync = async delegate 
+
+            async Task MainAsync()
             {
                 await Task.Delay(1).ConfigureAwait(false);
-                
+
                 Assert.Equal(CultureInfo.CurrentCulture, newCurrentCulture);
                 Assert.Equal(CultureInfo.CurrentUICulture, newCurrentUICulture);
-            };
-            
-            try 
+            }
+
+            try
             {
-                mainAsync().Wait();
+                MainAsync().Wait();
             }
             finally
             {
                 CultureInfo.CurrentCulture = currentCulture;
-                CultureInfo.CurrentUICulture = currentUICulture;               
-            }                
+                CultureInfo.CurrentUICulture = currentUICulture;
+            }
         }
     }
 }

@@ -18,10 +18,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -303,7 +303,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        //methods        
+        //methods
         public object Clone()
         {
             PrinterSettings ps = new PrinterSettings();
@@ -379,7 +379,7 @@ namespace System.Drawing.Printing
 
         public class PaperSourceCollection : ICollection, IEnumerable
         {
-            ArrayList _PaperSources = new ArrayList();
+            private ArrayList _PaperSources = new ArrayList();
 
             public PaperSourceCollection(PaperSource[] array)
             {
@@ -424,7 +424,7 @@ namespace System.Drawing.Printing
 
         public class PaperSizeCollection : ICollection, IEnumerable
         {
-            ArrayList _PaperSizes = new ArrayList();
+            private ArrayList _PaperSizes = new ArrayList();
 
             public PaperSizeCollection(PaperSize[] array)
             {
@@ -468,7 +468,7 @@ namespace System.Drawing.Printing
 
         public class PrinterResolutionCollection : ICollection, IEnumerable
         {
-            ArrayList _PrinterResolutions = new ArrayList();
+            private ArrayList _PrinterResolutions = new ArrayList();
 
             public PrinterResolutionCollection(PrinterResolution[] array)
             {
@@ -512,7 +512,7 @@ namespace System.Drawing.Printing
 
         public class StringCollection : ICollection, IEnumerable
         {
-            ArrayList _Strings = new ArrayList();
+            private ArrayList _Strings = new ArrayList();
 
             public StringCollection(string[] array)
             {

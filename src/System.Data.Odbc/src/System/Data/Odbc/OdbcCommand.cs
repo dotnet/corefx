@@ -159,7 +159,7 @@ namespace System.Data.Odbc
             get
             {
                 string value = _commandText;
-                return ((null != value) ? value : ADP.StrEmpty);
+                return ((null != value) ? value : string.Empty);
             }
             set
             {
@@ -1112,7 +1112,7 @@ namespace System.Data.Odbc
                 }
                 catch (Exception e)
                 {
-                    // 
+                    //
                     if (ADP.IsCatchableExceptionType(e))
                     {
                         _stmt = null;
@@ -1135,7 +1135,7 @@ namespace System.Data.Odbc
                 }
                 catch (Exception e)
                 {
-                    // 
+                    //
                     if (ADP.IsCatchableExceptionType(e))
                     {
                         _keyinfostmt = null;

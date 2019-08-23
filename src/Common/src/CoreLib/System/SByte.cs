@@ -10,7 +10,8 @@ using System.Runtime.Versioning;
 namespace System
 {
     [Serializable]
-    [CLSCompliant(false)]    [StructLayout(LayoutKind.Sequential)]
+    [CLSCompliant(false)]
+    [StructLayout(LayoutKind.Sequential)]
     [TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public readonly struct SByte : IComparable, IConvertible, IFormattable, IComparable<sbyte>, IEquatable<sbyte>, ISpanFormattable
     {
@@ -24,11 +25,11 @@ namespace System
 
 
         // Compares this object to another object, returning an integer that
-        // indicates the relationship. 
+        // indicates the relationship.
         // Returns a value less than zero if this  object
         // null is considered to be less than any instance.
         // If object is not of type SByte, this method throws an ArgumentException.
-        // 
+        //
         public int CompareTo(object? obj)
         {
             if (obj == null)
@@ -129,9 +130,9 @@ namespace System
         }
 
         // Parses a signed byte from a String in the given style.  If
-        // a NumberFormatInfo isn't specified, the current culture's 
+        // a NumberFormatInfo isn't specified, the current culture's
         // NumberFormatInfo is assumed.
-        // 
+        //
         [CLSCompliant(false)]
         public static sbyte Parse(string s, NumberStyles style, IFormatProvider? provider)
         {
@@ -219,7 +220,7 @@ namespace System
 
         //
         // IConvertible implementation
-        // 
+        //
 
         public TypeCode GetTypeCode()
         {

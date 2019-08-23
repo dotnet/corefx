@@ -189,7 +189,7 @@ namespace System
                 0xC1D238D9,
                 0x633415D4,
                 0x0000001C,
-                
+
                 // 10^1024
                 107,        // _length
                 0x00000000, // _blocks
@@ -323,8 +323,8 @@ namespace System
 
             public BigInteger(ulong value)
             {
-                var lower = (uint)(value);
-                var upper = (uint)(value >> 32);
+                uint lower = (uint)(value);
+                uint upper = (uint)(value >> 32);
 
                 _blocks[0] = lower;
                 _blocks[1] = upper;
@@ -862,18 +862,18 @@ namespace System
                 // s_Pow10UInt32Table stores the results of 10^0 to 10^7.
                 // s_Pow10BigNumTable stores the results of 10^8, 10^16, 10^32, 10^64, 10^128, 10^256, and 10^512
                 //
-                // For example, let's say exp = 0b111111. We can split the exp to two parts, one is small exp, 
-                // which 10^smallExp can be represented as uint, another part is 10^bigExp, which must be represented as BigNum. 
+                // For example, let's say exp = 0b111111. We can split the exp to two parts, one is small exp,
+                // which 10^smallExp can be represented as uint, another part is 10^bigExp, which must be represented as BigNum.
                 // So the result should be 10^smallExp * 10^bigExp.
                 //
-                // Calculating 10^smallExp is simple, we just lookup the 10^smallExp from s_Pow10UInt32Table. 
-                // But here's a bad news: although uint can represent 10^9, exp 9's binary representation is 1001. 
-                // That means 10^(1011), 10^(1101), 10^(1111) all cannot be stored as uint, we cannot easily say something like: 
-                // "Any bits <= 3 is small exp, any bits > 3 is big exp". So instead of involving 10^8, 10^9 to s_Pow10UInt32Table, 
-                // consider 10^8 and 10^9 as a bigNum, so they fall into s_Pow10BigNumTable. Now we can have a simple rule: 
+                // Calculating 10^smallExp is simple, we just lookup the 10^smallExp from s_Pow10UInt32Table.
+                // But here's a bad news: although uint can represent 10^9, exp 9's binary representation is 1001.
+                // That means 10^(1011), 10^(1101), 10^(1111) all cannot be stored as uint, we cannot easily say something like:
+                // "Any bits <= 3 is small exp, any bits > 3 is big exp". So instead of involving 10^8, 10^9 to s_Pow10UInt32Table,
+                // consider 10^8 and 10^9 as a bigNum, so they fall into s_Pow10BigNumTable. Now we can have a simple rule:
                 // "Any bits <= 3 is small exp, any bits > 3 is big exp".
                 //
-                // For 0b111111, we first calculate 10^(smallExp), which is 10^(7), now we can shift right 3 bits, prepare to calculate the bigExp part, 
+                // For 0b111111, we first calculate 10^(smallExp), which is 10^(7), now we can shift right 3 bits, prepare to calculate the bigExp part,
                 // the exp now becomes 0b000111.
                 //
                 // Apparently the lowest bit of bigExp should represent 10^8 because we have already shifted 3 bits for smallExp, so s_Pow10BigNumTable[0] = 10^8.
@@ -885,7 +885,7 @@ namespace System
 
                 // Validate that `s_Pow10BigNumTable` has exactly enough trailing elements to fill a BigInteger (which contains MaxBlockCount + 1 elements)
                 // We validate here, since this is the only current consumer of the array
-                Debug.Assert((s_Pow10BigNumTableIndices[s_Pow10BigNumTableIndices.Length - 1] + MaxBlockCount + 2) == s_Pow10BigNumTable.Length);
+                Debug.Assert((s_Pow10BigNumTableIndices[^1] + MaxBlockCount + 2) == s_Pow10BigNumTable.Length);
 
                 BigInteger temp1 = new BigInteger(s_Pow10UInt32Table[exponent & 0x7]);
                 ref BigInteger lhs = ref temp1;
@@ -1011,8 +1011,8 @@ namespace System
                 ulong chkHi = divHi * q;
                 ulong chkLo = divLo * q;
 
-                chkHi = chkHi + (chkLo >> 32);
-                chkLo = chkLo & uint.MaxValue;
+                chkHi += (chkLo >> 32);
+                chkLo &= uint.MaxValue;
 
                 if (chkHi < valHi)
                     return false;
@@ -1048,7 +1048,7 @@ namespace System
                 {
                     carry += rhs._blocks[i] * q;
                     uint digit = unchecked((uint)carry);
-                    carry = carry >> 32;
+                    carry >>= 32;
 
                     ref uint lhsValue = ref lhs._blocks[lhsStartIndex + i];
 
@@ -1139,7 +1139,7 @@ namespace System
 
                 while (index < length)
                 {
-                    var block = (ulong)(_blocks[index]);
+                    ulong block = (ulong)(_blocks[index]);
                     ulong product = (block << 3) + (block << 1) + carry;
                     carry = product >> 32;
                     _blocks[index] = (uint)(product);
@@ -1177,8 +1177,8 @@ namespace System
 
             public void SetUInt64(ulong value)
             {
-                var lower = (uint)(value);
-                var upper = (uint)(value >> 32);
+                uint lower = (uint)(value);
+                uint upper = (uint)(value >> 32);
 
                 _blocks[0] = lower;
                 _blocks[1] = upper;
@@ -1201,7 +1201,7 @@ namespace System
             public void ShiftLeft(uint shift)
             {
                 // Process blocks high to low so that we can safely process in place
-                var length = _length;
+                int length = _length;
 
                 if ((length == 0) || (shift == 0))
                 {

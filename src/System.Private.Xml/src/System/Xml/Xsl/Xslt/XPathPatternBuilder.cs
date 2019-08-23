@@ -17,12 +17,12 @@ namespace System.Xml.Xsl.Xslt
 
     internal class XPathPatternBuilder : XPathPatternParser.IPatternBuilder
     {
-        private XPathPredicateEnvironment _predicateEnvironment;
-        private XPathBuilder _predicateBuilder;
+        private readonly XPathPredicateEnvironment _predicateEnvironment;
+        private readonly XPathBuilder _predicateBuilder;
         private bool _inTheBuild;
-        private XPathQilFactory _f;
-        private QilNode _fixupNode;
-        private IXPathEnvironment _environment;
+        private readonly XPathQilFactory _f;
+        private readonly QilNode _fixupNode;
+        private readonly IXPathEnvironment _environment;
 
         public XPathPatternBuilder(IXPathEnvironment environment)
         {
@@ -245,8 +245,8 @@ namespace System.Xml.Xsl.Xslt
             QilLoop nodeFilter = (QilLoop)nodeset;
             QilIterator current = nodeFilter.Variable;
 
-            //If no last() and position() in predicates, use nodeFilter.Variable to fixup current 
-            //because all the predicates only based on the input variable, no matter what other predicates are.           
+            //If no last() and position() in predicates, use nodeFilter.Variable to fixup current
+            //because all the predicates only based on the input variable, no matter what other predicates are.
             if (_predicateEnvironment.numFixupLast == 0 && _predicateEnvironment.numFixupPosition == 0)
             {
                 foreach (var predicate in convertedPredicates)
@@ -267,7 +267,7 @@ namespace System.Xml.Xsl.Xslt
                 siblingFilter.Variable.Binding = sibling;
                 siblingFilter = (QilLoop)_f.Loop(parentIter, siblingFilter);
 
-                //build predicates from left to right to get all the matching nodes 
+                //build predicates from left to right to get all the matching nodes
                 QilNode matchingSet = siblingFilter;
                 foreach (var predicate in convertedPredicates)
                 {
@@ -425,7 +425,7 @@ namespace System.Xml.Xsl.Xslt
 
         private class XsltFunctionFocus : IFocus
         {
-            private QilIterator _current;
+            private readonly QilIterator _current;
 
             public XsltFunctionFocus(QilIterator current)
             {

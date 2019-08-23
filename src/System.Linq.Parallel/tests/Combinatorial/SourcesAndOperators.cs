@@ -23,7 +23,7 @@ namespace System.Linq.Parallel.Tests
 
         private static readonly Labeled<Operation> Failing = Label("ThrowOnFirstEnumeration", (start, count, source) => Enumerables<int>.ThrowOnEnumeration().AsParallel());
 
-        private static IEnumerable<Labeled<Operation>> UnorderedRangeSources()
+        public static IEnumerable<Labeled<Operation>> UnorderedRangeSources()
         {
             // The difference between this and the existing sources is more control is needed over the range creation.
             // Specifically, start/count won't be known until the nesting level is resolved at runtime.
@@ -37,7 +37,7 @@ namespace System.Linq.Parallel.Tests
             // yield return Label("ReadOnlyCollection", (start, count, ignore) => new System.Collections.ReadOnlyCollection<int>(Enumerable.Range(start, count).ToList()).AsParallel());
         }
 
-        private static IEnumerable<Labeled<Operation>> RangeSources()
+        public static IEnumerable<Labeled<Operation>> RangeSources()
         {
             foreach (Labeled<Operation> source in UnorderedRangeSources())
             {
@@ -49,7 +49,7 @@ namespace System.Linq.Parallel.Tests
             }
         }
 
-        private static IEnumerable<Labeled<Operation>> OrderOperators()
+        public static IEnumerable<Labeled<Operation>> OrderOperators()
         {
             yield return Label("OrderBy", (start, count, source) => source(start, count).OrderBy(x => x));
             yield return Label("OrderByDescending", (start, count, source) => source(start, count).OrderByDescending(x => -x));
@@ -57,7 +57,7 @@ namespace System.Linq.Parallel.Tests
             yield return Label("ThenByDescending", (start, count, source) => source(start, count).OrderBy(x => 0).ThenByDescending(x => -x));
         }
 
-        private static IEnumerable<Labeled<Operation>> ReverseOrderOperators()
+        public static IEnumerable<Labeled<Operation>> ReverseOrderOperators()
         {
             yield return Label("OrderBy-Reversed", (start, count, source) => source(start, count).OrderBy(x => x, ReverseComparer.Instance));
             yield return Label("OrderByDescending-Reversed", (start, count, source) => source(start, count).OrderByDescending(x => -x, ReverseComparer.Instance));
@@ -136,7 +136,7 @@ namespace System.Linq.Parallel.Tests
             }
         }
 
-        private static IEnumerable<Labeled<Operation>> SkipTakeOperations()
+        public static IEnumerable<Labeled<Operation>> SkipTakeOperations()
         {
             // Take/Skip-based operations require ordered input, or will disobey
             // the [start, start + count) convention expected in tests.
@@ -244,34 +244,34 @@ namespace System.Linq.Parallel.Tests
             yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("Where-Index", (source, cancel) => source.Where((x, index) => { cancel(); return true; })) };
         }
 
-        private static IEnumerable<Labeled<Operation>> BinaryOperations(Labeled<Operation> otherSource)
+        public static IEnumerable<object[]> BinaryOperations(Labeled<Operation> otherSource)
         {
             string label = otherSource.ToString();
             Operation other = otherSource.Item;
 
-            yield return Label("Concat-Right:" + label, (start, count, source) => source(start, count / 2).Concat(other(start + count / 2, count / 2 + count % 2)));
-            yield return Label("Concat-Left:" + label, (start, count, source) => other(start, count / 2).Concat(source(start + count / 2, count / 2 + count % 2)));
+            yield return new object[] { Label("Concat-Right:" + label, (start, count, source) => source(start, count / 2).Concat(other(start + count / 2, count / 2 + count % 2))) };
+            yield return new object[] { Label("Concat-Left:" + label, (start, count, source) => other(start, count / 2).Concat(source(start + count / 2, count / 2 + count % 2))) };
 
             // Comparator needs to cover _source_ size, as which of two "equal" items is returned is undefined for unordered collections.
-            yield return Label("Except-Right:" + label, (start, count, source) => source(start, count + count / 2).Except(other(start + count, count), new ModularCongruenceComparer(count * 2)));
-            yield return Label("Except-Left:" + label, (start, count, source) => other(start, count + count / 2).Except(source(start + count, count), new ModularCongruenceComparer(count * 2)));
+            yield return new object[] { Label("Except-Right:" + label, (start, count, source) => source(start, count + count / 2).Except(other(start + count, count), new ModularCongruenceComparer(count * 2))) };
+            yield return new object[] { Label("Except-Left:" + label, (start, count, source) => other(start, count + count / 2).Except(source(start + count, count), new ModularCongruenceComparer(count * 2))) };
 
-            yield return Label("GroupJoin-Right:" + label, (start, count, source) => source(start, count).GroupJoin(other(start, count * CountFactor), x => x, y => y % count, (x, g) => g.Min(), new ModularCongruenceComparer(count)));
-            yield return Label("GroupJoin-Left:" + label, (start, count, source) => other(start, count).GroupJoin(source(start, count * CountFactor), x => x, y => y % count, (x, g) => g.Min(), new ModularCongruenceComparer(count)));
+            yield return new object[] { Label("GroupJoin-Right:" + label, (start, count, source) => source(start, count).GroupJoin(other(start, count * CountFactor), x => x, y => y % count, (x, g) => g.Min(), new ModularCongruenceComparer(count))) };
+            yield return new object[] { Label("GroupJoin-Left:" + label, (start, count, source) => other(start, count).GroupJoin(source(start, count * CountFactor), x => x, y => y % count, (x, g) => g.Min(), new ModularCongruenceComparer(count))) };
 
             // Comparator needs to cover _source_ size, as which of two "equal" items is returned is undefined.
-            yield return Label("Intersect-Right:" + label, (start, count, source) => source(start, count + count / 2).Intersect(other(start - count / 2, count + count / 2), new ModularCongruenceComparer(count * 2)));
-            yield return Label("Intersect-Left:" + label, (start, count, source) => other(start, count + count / 2).Intersect(source(start - count / 2, count + count / 2), new ModularCongruenceComparer(count * 2)));
+            yield return new object[] { Label("Intersect-Right:" + label, (start, count, source) => source(start, count + count / 2).Intersect(other(start - count / 2, count + count / 2), new ModularCongruenceComparer(count * 2))) };
+            yield return new object[] { Label("Intersect-Left:" + label, (start, count, source) => other(start, count + count / 2).Intersect(source(start - count / 2, count + count / 2), new ModularCongruenceComparer(count * 2))) };
 
-            yield return Label("Join-Right:" + label, (start, count, source) => source(0, count).Join(other(start, count), x => x, y => y - start, (x, y) => x + start, new ModularCongruenceComparer(count)));
-            yield return Label("Join-Left:" + label, (start, count, source) => other(0, count).Join(source(start, count), x => x, y => y - start, (x, y) => x + start, new ModularCongruenceComparer(count)));
+            yield return new object[] { Label("Join-Right:" + label, (start, count, source) => source(0, count).Join(other(start, count), x => x, y => y - start, (x, y) => x + start, new ModularCongruenceComparer(count))) };
+            yield return new object[] { Label("Join-Left:" + label, (start, count, source) => other(0, count).Join(source(start, count), x => x, y => y - start, (x, y) => x + start, new ModularCongruenceComparer(count))) };
 
-            yield return Label("Union-Right:" + label, (start, count, source) => source(start, count * 3 / 4).Union(other(start + count / 2, count / 2 + count % 2), new ModularCongruenceComparer(count)));
-            yield return Label("Union-Left:" + label, (start, count, source) => other(start, count * 3 / 4).Union(source(start + count / 2, count / 2 + count % 2), new ModularCongruenceComparer(count)));
+            yield return new object[] { Label("Union-Right:" + label, (start, count, source) => source(start, count * 3 / 4).Union(other(start + count / 2, count / 2 + count % 2), new ModularCongruenceComparer(count))) };
+            yield return new object[] { Label("Union-Left:" + label, (start, count, source) => other(start, count * 3 / 4).Union(source(start + count / 2, count / 2 + count % 2), new ModularCongruenceComparer(count))) };
 
             // When both sources are unordered any element can be matched to any other, so a different check is required.
-            yield return Label("Zip-Unordered-Right:" + label, (start, count, source) => source(0, count).Zip(other(start * 2, count), (x, y) => x + start));
-            yield return Label("Zip-Unordered-Left:" + label, (start, count, source) => other(start * 2, count).Zip(source(0, count), (x, y) => y + start));
+            yield return new object[] { Label("Zip-Unordered-Right:" + label, (start, count, source) => source(0, count).Zip(other(start * 2, count), (x, y) => x + start)) };
+            yield return new object[] { Label("Zip-Unordered-Left:" + label, (start, count, source) => other(start * 2, count).Zip(source(0, count), (x, y) => y + start)) };
         }
 
         public static IEnumerable<object[]> BinaryOperations()
@@ -284,7 +284,7 @@ namespace System.Linq.Parallel.Tests
             foreach (Labeled<Operation> source in UnorderedRangeSources())
             {
                 // Operations having multiple paths to check.
-                foreach (Labeled<Operation> operation in BinaryOperations(LabeledDefaultSource))
+                foreach (Labeled<Operation> operation in BinaryOperations(LabeledDefaultSource).Select(i => i[0]))
                 {
                     yield return new object[] { source, operation };
                 }
@@ -298,7 +298,7 @@ namespace System.Linq.Parallel.Tests
                 // Each binary can work differently, depending on which of the two source queries (or both) is ordered.
 
                 // For most, only the ordering of the first query is important
-                foreach (Labeled<Operation> operation in BinaryOperations(LabeledDefaultSource).Where(op => !(op.ToString().StartsWith("Union") || op.ToString().StartsWith("Zip") || op.ToString().StartsWith("Concat")) && op.ToString().Contains("Right")))
+                foreach (Labeled<Operation> operation in BinaryOperations(LabeledDefaultSource).Select(i => i[0]).Where(op => !(op.ToString().StartsWith("Union") || op.ToString().StartsWith("Zip") || op.ToString().StartsWith("Concat")) && op.ToString().Contains("Right")))
                 {
                     yield return new object[] { source, operation };
                 }
@@ -333,7 +333,7 @@ namespace System.Linq.Parallel.Tests
         {
             Labeled<Operation> failing = Label("Failing", (start, count, s) => s(start, count).Select<int, int>(x => { throw new DeliberateTestException(); }));
 
-            foreach (Labeled<Operation> operation in BinaryOperations(LabeledDefaultSource))
+            foreach (Labeled<Operation> operation in BinaryOperations(LabeledDefaultSource).Select(i => i[0]))
             {
                 yield return new object[] { LabeledDefaultSource.Append(failing), operation };
                 yield return new object[] { Failing, operation };

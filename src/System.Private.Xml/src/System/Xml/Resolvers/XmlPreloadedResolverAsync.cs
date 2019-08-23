@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace System.Xml.Resolvers
 {
-    // 
+    //
     // XmlPreloadedResolver is an XmlResolver that which can be pre-loaded with data.
-    // By default it contains well-known DTDs for XHTML 1.0 and RSS 0.91. 
+    // By default it contains well-known DTDs for XHTML 1.0 and RSS 0.91.
     // Custom mappings of URIs to data can be added with the Add method.
     //
     public partial class XmlPreloadedResolver : XmlResolver
@@ -36,11 +36,11 @@ namespace System.Xml.Resolvers
 
             if (ofObjectToReturn == null || ofObjectToReturn == typeof(Stream) || ofObjectToReturn == typeof(object))
             {
-                return Task.FromResult<Object>(data.AsStream());
+                return Task.FromResult<object>(data.AsStream());
             }
             else if (ofObjectToReturn == typeof(TextReader))
             {
-                return Task.FromResult<Object>(data.AsTextReader());
+                return Task.FromResult<object>(data.AsTextReader());
             }
             else
             {

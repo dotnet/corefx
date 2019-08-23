@@ -26,8 +26,6 @@ namespace System.Diagnostics
         internal const string DllName = "EventLogMessages.dll";
         private const string eventLogMutexName = "netfxeventlog.1.0";
         private const int DefaultMaxSize = 512 * 1024;
-        private const int DefaultRetention = 7 * SecondsPerDay;
-        private const int SecondsPerDay = 60 * 60 * 24;
 
         private EventLogInternal _underlyingEventLog;
 
@@ -456,8 +454,8 @@ namespace System.Diagnostics
             {
                 NetFrameworkUtils.EnterMutex(eventLogMutexName, ref mutex);
                 RegistryKey key = null;
-                // First open the key read only so we can do some checks.  This is important so we get the same 
-                // exceptions even if we don't have write access to the reg key. 
+                // First open the key read only so we can do some checks.  This is important so we get the same
+                // exceptions even if we don't have write access to the reg key.
                 using (key = FindSourceRegistration(source, machineName, true))
                 {
                     if (key == null)
@@ -667,6 +665,12 @@ namespace System.Diagnostics
                     handle.Close();
                     logs.Add(log);
                 }
+                else if (Marshal.GetLastWin32Error() != Interop.Errors.ERROR_INVALID_PARAMETER)
+                {
+                    // This api should return the list of all event logs present on the system even if the current user can't open the log.
+                    // Windows returns ERROR_INVALID_PARAMETER for special keys which were added in RS5+ but do not represent actual event logs.
+                    logs.Add(log);
+                }
             }
 
             return logs.ToArray();
@@ -757,10 +761,10 @@ namespace System.Diagnostics
 
         private static void SetSpecialLogRegValues(RegistryKey logKey, string logName)
         {
-            // Set all the default values for this log.  AutoBackupLogfiles only makes sense in 
-            // Win2000 SP4, WinXP SP1, and Win2003, but it should alright elsewhere. 
+            // Set all the default values for this log.  AutoBackupLogfiles only makes sense in
+            // Win2000 SP4, WinXP SP1, and Win2003, but it should alright elsewhere.
             // Since we use this method on the existing system logs as well as our own,
-            // we need to make sure we don't overwrite any existing values. 
+            // we need to make sure we don't overwrite any existing values.
             if (logKey.GetValue("MaxSize") == null)
                 logKey.SetValue("MaxSize", DefaultMaxSize, RegistryValueKind.DWord);
             if (logKey.GetValue("AutoBackupLogFiles") == null)
@@ -921,7 +925,7 @@ namespace System.Diagnostics
         }
         // CharIsPrintable used to be Char.IsPrintable, but Jay removed it and
         // is forcing people to use the Unicode categories themselves.  Copied
-        // the code here.  
+        // the code here.
         private static bool CharIsPrintable(char c)
         {
             UnicodeCategory uc = char.GetUnicodeCategory(c);

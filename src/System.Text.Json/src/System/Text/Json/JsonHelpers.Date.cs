@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -9,48 +9,6 @@ namespace System.Text.Json
 {
     internal static partial class JsonHelpers
     {
-        /// <summary>
-        /// Parse the given UTF-8 <paramref name="source"/> as extended ISO 8601 format.
-        /// </summary>
-        /// <param name="source">UTF-8 source to parse.</param>
-        /// <param name="value">The parsed <see cref="DateTime"/> if successful.</param>
-        /// <returns>"true" if successfully parsed.</returns>
-        public static bool TryParseAsISO(ReadOnlySpan<byte> source, out DateTime value)
-        {
-            if (!TryParseDateTimeOffset(source, out DateTimeOffset dateTimeOffset, out DateTimeKind kind))
-            {
-                value = default;
-                return false;
-            }
-
-            switch (kind)
-            {
-                case DateTimeKind.Local:
-                    value = dateTimeOffset.LocalDateTime;
-                    break;
-                case DateTimeKind.Utc:
-                    value = dateTimeOffset.UtcDateTime;
-                    break;
-                default:
-                    Debug.Assert(kind == DateTimeKind.Unspecified);
-                    value = dateTimeOffset.DateTime;
-                    break;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Parse the given UTF-8 <paramref name="source"/> as extended ISO 8601 format.
-        /// </summary>
-        /// <param name="source">UTF-8 source to parse.</param>
-        /// <param name="value">The parsed <see cref="DateTimeOffset"/> if successful.</param>
-        /// <returns>"true" if successfully parsed.</returns>
-        public static bool TryParseAsISO(ReadOnlySpan<byte> source, out DateTimeOffset value)
-        {
-            return TryParseDateTimeOffset(source, out value, out _);
-        }
-
         private struct DateTimeParseData
         {
             public int Year;
@@ -67,23 +25,76 @@ namespace System.Text.Json
         }
 
         /// <summary>
+        /// Parse the given UTF-8 <paramref name="source"/> as extended ISO 8601 format.
+        /// </summary>
+        /// <param name="source">UTF-8 source to parse.</param>
+        /// <param name="value">The parsed <see cref="DateTime"/> if successful.</param>
+        /// <returns>"true" if successfully parsed.</returns>
+        public static bool TryParseAsISO(ReadOnlySpan<byte> source, out DateTime value)
+        {
+            if (!TryParseDateTimeOffset(source, out DateTimeParseData parseData))
+            {
+                value = default;
+                return false;
+            }
+
+            if (parseData.OffsetToken == JsonConstants.UtcOffsetToken)
+            {
+                return TryCreateDateTime(parseData, DateTimeKind.Utc, out value);
+            }
+            else if (parseData.OffsetToken == JsonConstants.Plus || parseData.OffsetToken == JsonConstants.Hyphen)
+            {
+                if (!TryCreateDateTimeOffset(ref parseData, out DateTimeOffset dateTimeOffset))
+                {
+                    value = default;
+                    return false;
+                }
+
+                value = dateTimeOffset.LocalDateTime;
+                return true;
+            }
+
+            return TryCreateDateTime(parseData, DateTimeKind.Unspecified, out value);
+        }
+
+        /// <summary>
+        /// Parse the given UTF-8 <paramref name="source"/> as extended ISO 8601 format.
+        /// </summary>
+        /// <param name="source">UTF-8 source to parse.</param>
+        /// <param name="value">The parsed <see cref="DateTimeOffset"/> if successful.</param>
+        /// <returns>"true" if successfully parsed.</returns>
+        public static bool TryParseAsISO(ReadOnlySpan<byte> source, out DateTimeOffset value)
+        {
+            if (!TryParseDateTimeOffset(source, out DateTimeParseData parseData))
+            {
+                value = default;
+                return false;
+            }
+
+            if (parseData.OffsetToken == JsonConstants.UtcOffsetToken || // Same as specifying an offset of "+00:00", except that DateTime's Kind gets set to UTC rather than Local
+                parseData.OffsetToken == JsonConstants.Plus || parseData.OffsetToken == JsonConstants.Hyphen)
+            {
+                return TryCreateDateTimeOffset(ref parseData, out value);
+            }
+
+            // No offset, attempt to read as local time.
+            return TryCreateDateTimeOffsetInterpretingDataAsLocalTime(parseData, out value);
+        }
+
+        /// <summary>
         /// ISO 8601 date time parser (ISO 8601-1:2019).
         /// </summary>
         /// <param name="source">The date/time to parse in UTF-8 format.</param>
-        /// <param name="value">The parsed <see cref="DateTimeOffset"/> for the given <paramref name="source"/>.</param>
-        /// <param name="kind">
-        /// The parsed <see cref="DateTimeKind"/> for extracting the most relevant <see cref="DateTime"/> when
-        /// needed.
-        /// </param>
+        /// <param name="parseData">The parsed <see cref="DateTimeParseData"/> for the given <paramref name="source"/>.</param>
         /// <remarks>
         /// Supports extended calendar date (5.2.2.1) and complete (5.4.2.1) calendar date/time of day
         /// representations with optional specification of seconds and fractional seconds.
-        /// 
+        ///
         /// Times can be explicitly specified as UTC ("Z" - 5.3.3) or offsets from UTC ("+/-hh:mm" 5.3.4.2).
-        /// If unspecified they are considered to be local per spec. 
-        /// 
+        /// If unspecified they are considered to be local per spec.
+        ///
         /// Examples: (TZD is either "Z" or hh:mm offset from UTC)
-        /// 
+        ///
         ///  YYYY-MM-DD               (eg 1997-07-16)
         ///  YYYY-MM-DDThh:mm         (eg 1997-07-16T19:20)
         ///  YYYY-MM-DDThh:mm:ss      (eg 1997-07-16T19:20:30)
@@ -91,36 +102,34 @@ namespace System.Text.Json
         ///  YYYY-MM-DDThh:mmTZD      (eg 1997-07-16T19:20+01:00)
         ///  YYYY-MM-DDThh:mm:ssTZD   (eg 1997-07-16T19:20:3001:00)
         ///  YYYY-MM-DDThh:mm:ss.sTZD (eg 1997-07-16T19:20:30.45Z)
-        /// 
+        ///
         /// Generally speaking we always require the "extended" option when one exists (3.1.3.5).
         /// The extended variants have separator characters between components ('-', ':', '.', etc.).
         /// Spaces are not permitted.
         /// </remarks>
         /// <returns>"true" if successfully parsed.</returns>
-        private static bool TryParseDateTimeOffset(ReadOnlySpan<byte> source, out DateTimeOffset value, out DateTimeKind kind)
+        private static bool TryParseDateTimeOffset(ReadOnlySpan<byte> source, out DateTimeParseData parseData)
         {
-            value = default;
-            kind = default;
-
             // Source does not have enough characters for YYYY-MM-DD
             if (source.Length < 10)
             {
+                parseData = default;
                 return false;
             }
 
             // Parse the calendar date
             // -----------------------
             // ISO 8601-1:2019 5.2.2.1b "Calendar date complete extended format"
-            //  [dateX] = [year][“-”][month][“-”][day]
+            //  [dateX] = [year]["-"][month]["-"][day]
             //  [year]  = [YYYY] [0000 - 9999] (4.3.2)
             //  [month] = [MM] [01 - 12] (4.3.3)
             //  [day]   = [DD] [01 - 28, 29, 30, 31] (4.3.4)
             //
             // Note: 5.2.2.2 "Representations with reduced precision" allows for
-            // just [year][“-”][month] (a) and just [year] (b), but we currently
+            // just [year]["-"][month] (a) and just [year] (b), but we currently
             // don't permit it.
 
-            DateTimeParseData parseData = new DateTimeParseData();
+            parseData = new DateTimeParseData();
 
             {
                 uint digit1 = source[0] - (uint)'0';
@@ -150,25 +159,25 @@ namespace System.Text.Json
             if (source.Length == 10)
             {
                 // Just a calendar date
-                return FinishParsing(ref parseData, out value, out kind);
+                return true;
             }
 
             // Parse the time of day
             // ---------------------
             //
             // ISO 8601-1:2019 5.3.1.2b "Local time of day complete extended format"
-            //  [timeX]   = [“T”][hour][“:”][min][“:”][sec]
+            //  [timeX]   = ["T"][hour][":"][min][":"][sec]
             //  [hour]    = [hh] [00 - 23] (4.3.8a)
             //  [minute]  = [mm] [00 - 59] (4.3.9a)
             //  [sec]     = [ss] [00 - 59, 60 with a leap second] (4.3.10a)
             //
             // ISO 8601-1:2019 5.3.3 "UTC of day"
-            //  [timeX][“Z”]
+            //  [timeX]["Z"]
             //
             // ISO 8601-1:2019 5.3.4.2 "Local time of day with the time shift between
             // local time scale and UTC" (Extended format)
             //
-            //  [shiftX] = [“+”|“-”][hour][“:”][min]
+            //  [shiftX] = ["+"|"-"][hour][":"][min]
             //
             // Notes:
             //
@@ -207,7 +216,7 @@ namespace System.Text.Json
             Debug.Assert(source.Length >= 16);
             if (source.Length == 16)
             {
-                return FinishParsing(ref parseData, out value, out kind);
+                return true;
             }
 
             byte curByte = source[16];
@@ -218,13 +227,11 @@ namespace System.Text.Json
             {
                 case JsonConstants.UtcOffsetToken:
                     parseData.OffsetToken = JsonConstants.UtcOffsetToken;
-                    return sourceIndex == source.Length
-                        && FinishParsing(ref parseData, out value, out kind);
+                    return sourceIndex == source.Length;
                 case JsonConstants.Plus:
                 case JsonConstants.Hyphen:
                     parseData.OffsetToken = curByte;
-                    return ParseOffset(ref parseData, source.Slice(sourceIndex))
-                        && FinishParsing(ref parseData, out value, out kind);
+                    return ParseOffset(ref parseData, source.Slice(sourceIndex));
                 case JsonConstants.Colon:
                     break;
                 default:
@@ -242,7 +249,7 @@ namespace System.Text.Json
             Debug.Assert(source.Length >= 19);
             if (source.Length == 19)
             {
-                return FinishParsing(ref parseData, out value, out kind);
+                return true;
             }
 
             curByte = source[19];
@@ -253,13 +260,11 @@ namespace System.Text.Json
             {
                 case JsonConstants.UtcOffsetToken:
                     parseData.OffsetToken = JsonConstants.UtcOffsetToken;
-                    return sourceIndex == source.Length
-                        && FinishParsing(ref parseData, out value, out kind);
+                    return sourceIndex == source.Length;
                 case JsonConstants.Plus:
                 case JsonConstants.Hyphen:
                     parseData.OffsetToken = curByte;
-                    return ParseOffset(ref parseData, source.Slice(sourceIndex))
-                        && FinishParsing(ref parseData, out value, out kind);
+                    return ParseOffset(ref parseData, source.Slice(sourceIndex));
                 case JsonConstants.Period:
                     break;
                 default:
@@ -303,7 +308,7 @@ namespace System.Text.Json
             Debug.Assert(sourceIndex <= source.Length);
             if (sourceIndex == source.Length)
             {
-                return FinishParsing(ref parseData, out value, out kind);
+                return true;
             }
 
             curByte = source[sourceIndex++];
@@ -313,13 +318,12 @@ namespace System.Text.Json
             {
                 case JsonConstants.UtcOffsetToken:
                     parseData.OffsetToken = JsonConstants.UtcOffsetToken;
-                    return sourceIndex == source.Length
-                        && FinishParsing(ref parseData, out value, out kind);
+                    return sourceIndex == source.Length;
                 case JsonConstants.Plus:
                 case JsonConstants.Hyphen:
                     parseData.OffsetToken = curByte;
                     return ParseOffset(ref parseData, source.Slice(sourceIndex))
-                        && FinishParsing(ref parseData, out value, out kind);
+                        && true;
                 default:
                     return false;
             }
@@ -347,44 +351,6 @@ namespace System.Text.Json
                     || !TryGetNextTwoDigits(offsetData.Slice(3), ref parseData.OffsetMinutes))
                 {
                     return false;
-                }
-
-                return true;
-            }
-
-            static bool FinishParsing(ref DateTimeParseData parseData, out DateTimeOffset dateTimeOffset, out DateTimeKind dateTimeKind)
-            {
-                dateTimeKind = default;
-
-                switch (parseData.OffsetToken)
-                {
-                    case JsonConstants.UtcOffsetToken:
-                        // Same as specifying an offset of "+00:00", except that DateTime's Kind gets set to UTC rather than Local
-                        if (!TryCreateDateTimeOffset(ref parseData, out dateTimeOffset))
-                        {
-                            return false;
-                        }
-
-                        dateTimeKind = DateTimeKind.Utc;
-                        break;
-                    case JsonConstants.Plus:
-                    case JsonConstants.Hyphen:
-                        if (!TryCreateDateTimeOffset(ref parseData, out dateTimeOffset))
-                        {
-                            return false;
-                        }
-
-                        dateTimeKind = DateTimeKind.Local;
-                        break;
-                    default:
-                        // No offset, attempt to read as local time.
-                        if (!TryCreateDateTimeOffsetInterpretingDataAsLocalTime(ref parseData, out dateTimeOffset))
-                        {
-                            return false;
-                        }
-
-                        dateTimeKind = DateTimeKind.Unspecified;
-                        break;
                 }
 
                 return true;
@@ -460,7 +426,7 @@ namespace System.Text.Json
         /// </summary>
         private static bool TryCreateDateTimeOffset(ref DateTimeParseData parseData, out DateTimeOffset value)
         {
-            if (!TryCreateDateTime(ref parseData, kind: DateTimeKind.Unspecified, out DateTime dateTime))
+            if (!TryCreateDateTime(parseData, kind: DateTimeKind.Unspecified, out DateTime dateTime))
             {
                 value = default;
                 return false;
@@ -478,9 +444,9 @@ namespace System.Text.Json
         /// <summary>
         /// Overflow-safe DateTimeOffset/Local time conversion factory.
         /// </summary>
-        private static bool TryCreateDateTimeOffsetInterpretingDataAsLocalTime(ref DateTimeParseData parseData, out DateTimeOffset value)
+        private static bool TryCreateDateTimeOffsetInterpretingDataAsLocalTime(DateTimeParseData parseData, out DateTimeOffset value)
         {
-            if (!TryCreateDateTime(ref parseData, DateTimeKind.Local, out DateTime dateTime))
+            if (!TryCreateDateTime(parseData, DateTimeKind.Local, out DateTime dateTime))
             {
                 value = default;
                 return false;
@@ -504,7 +470,7 @@ namespace System.Text.Json
         /// <summary>
         /// Overflow-safe DateTime factory.
         /// </summary>
-        private static bool TryCreateDateTime(ref DateTimeParseData parseData, DateTimeKind kind, out DateTime value)
+        private static bool TryCreateDateTime(DateTimeParseData parseData, DateTimeKind kind, out DateTime value)
         {
             if (parseData.Year == 0)
             {

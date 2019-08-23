@@ -19,7 +19,7 @@ namespace System
 
         internal static DateTime ParseExact(ReadOnlySpan<char> s, ReadOnlySpan<char> format, DateTimeFormatInfo dtfi, DateTimeStyles style)
         {
-            DateTimeResult result = new DateTimeResult();       // The buffer to store the parsing result.
+            DateTimeResult result = default; // The buffer to store the parsing result.
             result.Init(s);
             if (TryParseExact(s, format, dtfi, style, ref result))
             {
@@ -33,8 +33,7 @@ namespace System
 
         internal static DateTime ParseExact(ReadOnlySpan<char> s, ReadOnlySpan<char> format, DateTimeFormatInfo dtfi, DateTimeStyles style, out TimeSpan offset)
         {
-            DateTimeResult result = new DateTimeResult();       // The buffer to store the parsing result.
-            offset = TimeSpan.Zero;
+            DateTimeResult result = default; // The buffer to store the parsing result.
             result.Init(s);
             result.flags |= ParseFlags.CaptureOffset;
             if (TryParseExact(s, format, dtfi, style, ref result))
@@ -116,7 +115,6 @@ namespace System
                                                 DateTimeFormatInfo dtfi, DateTimeStyles style, out TimeSpan offset)
         {
             DateTimeResult result = new DateTimeResult();       // The buffer to store the parsing result.
-            offset = TimeSpan.Zero;
             result.Init(s);
             result.flags |= ParseFlags.CaptureOffset;
             if (TryParseExactMultiple(s, formats, dtfi, style, ref result))
@@ -331,69 +329,69 @@ namespace System
         //
         ////////////////////////////////////////////////////////////////////////////
 
-        //          End       NumEnd      NumAmPm     NumSpace    NumDaySep   NumTimesep  MonthEnd    MonthSpace  MonthDSep   NumDateSuff NumTimeSuff     DayOfWeek     YearSpace   YearDateSep YearEnd     TimeZone   Era         UTCTimeMark
-        private static DS[][] dateParsingStates = {
+        // End        NumEnd      NumAmPm     NumSpace    NumDaySep   NumTimesep  MonthEnd    MonthSpace  MonthDSep   NumDateSuff NumTimeSuff     DayOfWeek     YearSpace   YearDateSep YearEnd     TimeZone   Era         UTCTimeMark
+        private static readonly DS[][] dateParsingStates = {
 // DS.BEGIN                                                                             // DS.BEGIN
-new DS[] { DS.BEGIN, DS.ERROR,   DS.TX_N,    DS.N,       DS.D_Nd,    DS.T_Nt,    DS.ERROR,   DS.D_M,     DS.D_M,     DS.D_S,     DS.T_S,         DS.BEGIN,     DS.D_Y,     DS.D_Y,     DS.ERROR,   DS.BEGIN,  DS.BEGIN,    DS.ERROR},
+new DS[] { DS.BEGIN,  DS.ERROR,   DS.TX_N,    DS.N,       DS.D_Nd,    DS.T_Nt,    DS.ERROR,   DS.D_M,     DS.D_M,     DS.D_S,     DS.T_S,         DS.BEGIN,     DS.D_Y,     DS.D_Y,     DS.ERROR,   DS.BEGIN,  DS.BEGIN,    DS.ERROR },
 
 // DS.N                                                                                 // DS.N
-new DS[] { DS.ERROR, DS.DX_NN,   DS.ERROR,   DS.NN,      DS.D_NNd,   DS.ERROR,   DS.DX_NM,   DS.D_NM,    DS.D_MNd,   DS.D_NDS,   DS.ERROR,       DS.N,         DS.D_YN,    DS.D_YNd,   DS.DX_YN,   DS.N,      DS.N,        DS.ERROR},
+new DS[] { DS.ERROR,  DS.DX_NN,   DS.ERROR,   DS.NN,      DS.D_NNd,   DS.ERROR,   DS.DX_NM,   DS.D_NM,    DS.D_MNd,   DS.D_NDS,   DS.ERROR,       DS.N,         DS.D_YN,    DS.D_YNd,   DS.DX_YN,   DS.N,      DS.N,        DS.ERROR },
 
 // DS.NN                                                                                // DS.NN
-new DS[] { DS.DX_NN, DS.DX_NNN,  DS.TX_N,    DS.DX_NNN,  DS.ERROR,   DS.T_Nt,    DS.DX_MNN,  DS.DX_MNN,  DS.ERROR,   DS.ERROR,   DS.T_S,         DS.NN,        DS.DX_NNY,  DS.ERROR,   DS.DX_NNY,  DS.NN,     DS.NN,       DS.ERROR},
+new DS[] { DS.DX_NN,  DS.DX_NNN,  DS.TX_N,    DS.DX_NNN,  DS.ERROR,   DS.T_Nt,    DS.DX_MNN,  DS.DX_MNN,  DS.ERROR,   DS.ERROR,   DS.T_S,         DS.NN,        DS.DX_NNY,  DS.ERROR,   DS.DX_NNY,  DS.NN,     DS.NN,       DS.ERROR },
 
 // DS.D_Nd                                                                              // DS.D_Nd
-new DS[] { DS.ERROR, DS.DX_NN,   DS.ERROR,   DS.D_NN,    DS.D_NNd,   DS.ERROR,   DS.DX_NM,   DS.D_MN,    DS.D_MNd,   DS.ERROR,   DS.ERROR,       DS.D_Nd,      DS.D_YN,    DS.D_YNd,   DS.DX_YN,   DS.ERROR,  DS.D_Nd,     DS.ERROR},
+new DS[] { DS.ERROR,  DS.DX_NN,   DS.ERROR,   DS.D_NN,    DS.D_NNd,   DS.ERROR,   DS.DX_NM,   DS.D_MN,    DS.D_MNd,   DS.ERROR,   DS.ERROR,       DS.D_Nd,      DS.D_YN,    DS.D_YNd,   DS.DX_YN,   DS.ERROR,  DS.D_Nd,     DS.ERROR },
 
 // DS.D_NN                                                                              // DS.D_NN
-new DS[] { DS.DX_NN, DS.DX_NNN,  DS.TX_N,    DS.DX_NNN,  DS.ERROR,   DS.T_Nt,    DS.DX_MNN,  DS.DX_MNN,  DS.ERROR,   DS.DX_DS,   DS.T_S,         DS.D_NN,     DS.DX_NNY,   DS.ERROR,   DS.DX_NNY,  DS.ERROR,  DS.D_NN,     DS.ERROR},
+new DS[] { DS.DX_NN,  DS.DX_NNN,  DS.TX_N,    DS.DX_NNN,  DS.ERROR,   DS.T_Nt,    DS.DX_MNN,  DS.DX_MNN,  DS.ERROR,   DS.DX_DS,   DS.T_S,         DS.D_NN,     DS.DX_NNY,   DS.ERROR,   DS.DX_NNY,  DS.ERROR,  DS.D_NN,     DS.ERROR },
 
 // DS.D_NNd                                                                             // DS.D_NNd
-new DS[] { DS.ERROR, DS.DX_NNN,  DS.DX_NNN,  DS.DX_NNN,  DS.ERROR,   DS.ERROR,   DS.DX_MNN,  DS.DX_MNN,  DS.ERROR,   DS.DX_DS,   DS.ERROR,       DS.D_NNd,     DS.DX_NNY,  DS.ERROR,   DS.DX_NNY,  DS.ERROR,  DS.D_NNd,    DS.ERROR},
+new DS[] { DS.ERROR,  DS.DX_NNN,  DS.DX_NNN,  DS.DX_NNN,  DS.ERROR,   DS.ERROR,   DS.DX_MNN,  DS.DX_MNN,  DS.ERROR,   DS.DX_DS,   DS.ERROR,       DS.D_NNd,     DS.DX_NNY,  DS.ERROR,   DS.DX_NNY,  DS.ERROR,  DS.D_NNd,    DS.ERROR },
 
 // DS.D_M                                                                               // DS.D_M
-new DS[] { DS.ERROR, DS.DX_MN,   DS.ERROR,   DS.D_MN,    DS.D_MNd,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,       DS.D_M,       DS.D_YM,    DS.D_YMd,   DS.DX_YM,   DS.ERROR,  DS.D_M,      DS.ERROR},
+new DS[] { DS.ERROR,  DS.DX_MN,   DS.ERROR,   DS.D_MN,    DS.D_MNd,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,       DS.D_M,       DS.D_YM,    DS.D_YMd,   DS.DX_YM,   DS.ERROR,  DS.D_M,      DS.ERROR },
 
 // DS.D_MN                                                                              // DS.D_MN
-new DS[] { DS.DX_MN, DS.DX_MNN,  DS.DX_MNN,  DS.DX_MNN,  DS.ERROR,   DS.T_Nt,    DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.DX_DS,   DS.T_S,         DS.D_MN,      DS.DX_YMN,  DS.ERROR,   DS.DX_YMN,  DS.ERROR,  DS.D_MN,     DS.ERROR},
+new DS[] { DS.DX_MN,  DS.DX_MNN,  DS.DX_MNN,  DS.DX_MNN,  DS.ERROR,   DS.T_Nt,    DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.DX_DS,   DS.T_S,         DS.D_MN,      DS.DX_YMN,  DS.ERROR,   DS.DX_YMN,  DS.ERROR,  DS.D_MN,     DS.ERROR },
 
 // DS.D_NM                                                                              // DS.D_NM
-new DS[] { DS.DX_NM, DS.DX_MNN,  DS.DX_MNN,  DS.DX_MNN,  DS.ERROR,   DS.T_Nt,    DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.DX_DS,   DS.T_S,         DS.D_NM,      DS.DX_YMN,  DS.ERROR,   DS.DX_YMN,  DS.ERROR,   DS.D_NM,    DS.ERROR},
+new DS[] { DS.DX_NM,  DS.DX_MNN,  DS.DX_MNN,  DS.DX_MNN,  DS.ERROR,   DS.T_Nt,    DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.DX_DS,   DS.T_S,         DS.D_NM,      DS.DX_YMN,  DS.ERROR,   DS.DX_YMN,  DS.ERROR,   DS.D_NM,    DS.ERROR },
 
 // DS.D_MNd                                                                             // DS.D_MNd
-new DS[] { DS.ERROR, DS.DX_MNN,  DS.ERROR,   DS.DX_MNN,  DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,       DS.D_MNd,     DS.DX_YMN,  DS.ERROR,   DS.DX_YMN,  DS.ERROR,   DS.D_MNd,   DS.ERROR},
+new DS[] { DS.ERROR,  DS.DX_MNN,  DS.ERROR,   DS.DX_MNN,  DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,       DS.D_MNd,     DS.DX_YMN,  DS.ERROR,   DS.DX_YMN,  DS.ERROR,   DS.D_MNd,   DS.ERROR },
 
 // DS.D_NDS,                                                                            // DS.D_NDS,
-new DS[] { DS.DX_NDS,DS.DX_NNDS, DS.DX_NNDS, DS.DX_NNDS, DS.ERROR,   DS.T_Nt,    DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.D_NDS,   DS.T_S,         DS.D_NDS,     DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.D_NDS,   DS.ERROR},
+new DS[] { DS.DX_NDS, DS.DX_NNDS, DS.DX_NNDS, DS.DX_NNDS, DS.ERROR,   DS.T_Nt,    DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.D_NDS,   DS.T_S,         DS.D_NDS,     DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.D_NDS,   DS.ERROR },
 
 // DS.D_Y                                                                               // DS.D_Y
-new DS[] { DS.ERROR, DS.DX_YN,   DS.ERROR,   DS.D_YN,    DS.D_YNd,   DS.ERROR,   DS.DX_YM,   DS.D_YM,    DS.D_YMd,   DS.D_YM,    DS.ERROR,       DS.D_Y,       DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.D_Y,     DS.ERROR},
+new DS[] { DS.ERROR,  DS.DX_YN,   DS.ERROR,   DS.D_YN,    DS.D_YNd,   DS.ERROR,   DS.DX_YM,   DS.D_YM,    DS.D_YMd,   DS.D_YM,    DS.ERROR,       DS.D_Y,       DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.D_Y,     DS.ERROR },
 
 // DS.D_YN                                                                              // DS.D_YN
-new DS[] { DS.DX_YN, DS.DX_YNN,  DS.DX_YNN,  DS.DX_YNN,  DS.ERROR,   DS.ERROR,   DS.DX_YMN,  DS.DX_YMN,  DS.ERROR,   DS.ERROR,   DS.ERROR,       DS.D_YN,      DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.D_YN,    DS.ERROR},
+new DS[] { DS.DX_YN,  DS.DX_YNN,  DS.DX_YNN,  DS.DX_YNN,  DS.ERROR,   DS.ERROR,   DS.DX_YMN,  DS.DX_YMN,  DS.ERROR,   DS.ERROR,   DS.ERROR,       DS.D_YN,      DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.D_YN,    DS.ERROR },
 
 // DS.D_YNd                                                                             // DS.D_YNd
-new DS[] { DS.ERROR, DS.DX_YNN,  DS.DX_YNN,  DS.DX_YNN,  DS.ERROR,   DS.ERROR,   DS.DX_YMN,  DS.DX_YMN,  DS.ERROR,   DS.ERROR,   DS.ERROR,       DS.D_YN,      DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.D_YN,    DS.ERROR},
+new DS[] { DS.ERROR,  DS.DX_YNN,  DS.DX_YNN,  DS.DX_YNN,  DS.ERROR,   DS.ERROR,   DS.DX_YMN,  DS.DX_YMN,  DS.ERROR,   DS.ERROR,   DS.ERROR,       DS.D_YN,      DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.D_YN,    DS.ERROR },
 
 // DS.D_YM                                                                              // DS.D_YM
-new DS[] { DS.DX_YM, DS.DX_YMN,  DS.DX_YMN,  DS.DX_YMN,  DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,       DS.D_YM,      DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.D_YM,    DS.ERROR},
+new DS[] { DS.DX_YM,  DS.DX_YMN,  DS.DX_YMN,  DS.DX_YMN,  DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,       DS.D_YM,      DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.D_YM,    DS.ERROR },
 
 // DS.D_YMd                                                                             // DS.D_YMd
-new DS[] { DS.ERROR, DS.DX_YMN,  DS.DX_YMN,  DS.DX_YMN,  DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,       DS.D_YM,      DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.D_YM,    DS.ERROR},
+new DS[] { DS.ERROR,  DS.DX_YMN,  DS.DX_YMN,  DS.DX_YMN,  DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,       DS.D_YM,      DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.D_YM,    DS.ERROR },
 
 // DS.D_S                                                                               // DS.D_S
-new DS[] { DS.DX_DS, DS.DX_DSN,  DS.TX_N,    DS.T_Nt,    DS.ERROR,   DS.T_Nt,    DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.D_S,     DS.T_S,         DS.D_S,       DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.D_S,     DS.ERROR},
+new DS[] { DS.DX_DS,  DS.DX_DSN,  DS.TX_N,    DS.T_Nt,    DS.ERROR,   DS.T_Nt,    DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.D_S,     DS.T_S,         DS.D_S,       DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.D_S,     DS.ERROR },
 
 // DS.T_S                                                                               // DS.T_S
-new DS[] { DS.TX_TS, DS.TX_TS,   DS.TX_TS,   DS.T_Nt,    DS.D_Nd,    DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.D_S,     DS.T_S,         DS.T_S,       DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.T_S,     DS.T_S,     DS.ERROR},
+new DS[] { DS.TX_TS,  DS.TX_TS,   DS.TX_TS,   DS.T_Nt,    DS.D_Nd,    DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.D_S,     DS.T_S,         DS.T_S,       DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.T_S,     DS.T_S,     DS.ERROR },
 
 // DS.T_Nt                                                                              // DS.T_Nt
-new DS[] { DS.ERROR, DS.TX_NN,   DS.TX_NN,   DS.TX_NN,   DS.ERROR,   DS.T_NNt,   DS.DX_NM,   DS.D_NM,    DS.ERROR,   DS.ERROR,   DS.T_S,         DS.ERROR,     DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.T_Nt,    DS.T_Nt,    DS.TX_NN},
+new DS[] { DS.ERROR,  DS.TX_NN,   DS.TX_NN,   DS.TX_NN,   DS.ERROR,   DS.T_NNt,   DS.DX_NM,   DS.D_NM,    DS.ERROR,   DS.ERROR,   DS.T_S,         DS.ERROR,     DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.T_Nt,    DS.T_Nt,    DS.TX_NN },
 
 // DS.T_NNt                                                                             // DS.T_NNt
-new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.T_S,         DS.T_NNt,     DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.T_NNt,   DS.T_NNt,   DS.TX_NNN},
+new DS[] { DS.ERROR,  DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.T_S,         DS.T_NNt,     DS.ERROR,   DS.ERROR,   DS.ERROR,   DS.T_NNt,   DS.T_NNt,   DS.TX_NNN },
 };
-        //          End       NumEnd      NumAmPm     NumSpace    NumDaySep   NumTimesep  MonthEnd    MonthSpace  MonthDSep   NumDateSuff NumTimeSuff     DayOfWeek     YearSpace   YearDateSep YearEnd     TimeZone    Era        UTCMark
+        // End        NumEnd      NumAmPm     NumSpace    NumDaySep   NumTimesep  MonthEnd    MonthSpace  MonthDSep   NumDateSuff NumTimeSuff     DayOfWeek     YearSpace   YearDateSep YearEnd     TimeZone    Era        UTCMark
 
         internal const string GMTName = "GMT";
         internal const string ZuluName = "Z";
@@ -494,7 +492,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
         private static bool ParseTimeZone(ref __DTString str, ref TimeSpan result)
         {
             // The hour/minute offset for timezone.
-            int hourOffset = 0;
+            int hourOffset;
             int minuteOffset = 0;
             DTSubString sub;
 
@@ -1022,7 +1020,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                                 }
                                 break;
                             default:
-                                //Invalid separator after month name
+                                // Invalid separator after month name
                                 result.SetBadDateTimeFailure();
                                 LexTraceExit("0130 (Invalid separator after month name)", dps);
                                 return false;
@@ -1247,7 +1245,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
         //
         // Return 0 for YMD, 1 for MDY, 2 for DMY, otherwise -1.
         //
-        private static bool GetYearMonthDayOrder(string datePattern, DateTimeFormatInfo dtfi, out int order)
+        private static bool GetYearMonthDayOrder(string datePattern, out int order)
         {
             int yearOrder = -1;
             int monthOrder = -1;
@@ -1345,7 +1343,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
         //
         // Return 0 for YM, 1 for MY, otherwise -1.
         //
-        private static bool GetYearMonthOrder(string pattern, DateTimeFormatInfo dtfi, out int order)
+        private static bool GetYearMonthOrder(string pattern, out int order)
         {
             int yearOrder = -1;
             int monthOrder = -1;
@@ -1411,7 +1409,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
         //
         // Return 0 for MD, 1 for DM, otherwise -1.
         //
-        private static bool GetMonthDayOrder(string pattern, DateTimeFormatInfo dtfi, out int order)
+        private static bool GetMonthDayOrder(string pattern, out int order)
         {
             int monthOrder = -1;
             int dayOrder = -1;
@@ -1554,7 +1552,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
             GetDefaultYear(ref result, ref styles);
 
             int order;
-            if (!GetMonthDayOrder(dtfi.MonthDayPattern, dtfi, out order))
+            if (!GetMonthDayOrder(dtfi.MonthDayPattern, out order))
             {
                 result.SetFailure(ParseFailureKind.FormatWithParameter, nameof(SR.Format_BadDatePattern), dtfi.MonthDayPattern);
                 return false;
@@ -1592,11 +1590,11 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
             }
 
             int n1 = raw.GetNumber(0);
-            int n2 = raw.GetNumber(1); ;
+            int n2 = raw.GetNumber(1);
             int n3 = raw.GetNumber(2);
 
             int order;
-            if (!GetYearMonthDayOrder(dtfi.ShortDatePattern, dtfi, out order))
+            if (!GetYearMonthDayOrder(dtfi.ShortDatePattern, out order))
             {
                 result.SetFailure(ParseFailureKind.FormatWithParameter, nameof(SR.Format_BadDatePattern), dtfi.ShortDatePattern);
                 return false;
@@ -1661,7 +1659,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
             // than a 2 digit year.
 
             int monthDayOrder;
-            if (!GetMonthDayOrder(dtfi.MonthDayPattern, dtfi, out monthDayOrder))
+            if (!GetMonthDayOrder(dtfi.MonthDayPattern, out monthDayOrder))
             {
                 result.SetFailure(ParseFailureKind.FormatWithParameter, nameof(SR.Format_BadDatePattern), dtfi.MonthDayPattern);
                 return false;
@@ -1669,7 +1667,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
             if (monthDayOrder == ORDER_DM)
             {
                 int yearMonthOrder;
-                if (!GetYearMonthOrder(dtfi.YearMonthPattern, dtfi, out yearMonthOrder))
+                if (!GetYearMonthOrder(dtfi.YearMonthPattern, out yearMonthOrder))
                 {
                     result.SetFailure(ParseFailureKind.FormatWithParameter, nameof(SR.Format_BadDatePattern), dtfi.YearMonthPattern);
                     return false;
@@ -1704,7 +1702,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
         private static bool GetHebrewDayOfNM(ref DateTimeResult result, ref DateTimeRawInfo raw, DateTimeFormatInfo dtfi)
         {
             int monthDayOrder;
-            if (!GetMonthDayOrder(dtfi.MonthDayPattern, dtfi, out monthDayOrder))
+            if (!GetMonthDayOrder(dtfi.MonthDayPattern, out monthDayOrder))
             {
                 result.SetFailure(ParseFailureKind.FormatWithParameter, nameof(SR.Format_BadDatePattern), dtfi.MonthDayPattern);
                 return false;
@@ -1744,7 +1742,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
             // than a 2 digit year.
 
             int monthDayOrder;
-            if (!GetMonthDayOrder(dtfi.MonthDayPattern, dtfi, out monthDayOrder))
+            if (!GetMonthDayOrder(dtfi.MonthDayPattern, out monthDayOrder))
             {
                 result.SetFailure(ParseFailureKind.FormatWithParameter, nameof(SR.Format_BadDatePattern), dtfi.MonthDayPattern);
                 return false;
@@ -1752,7 +1750,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
             if (monthDayOrder == ORDER_MD)
             {
                 int yearMonthOrder;
-                if (!GetYearMonthOrder(dtfi.YearMonthPattern, dtfi, out yearMonthOrder))
+                if (!GetYearMonthOrder(dtfi.YearMonthPattern, out yearMonthOrder))
                 {
                     result.SetFailure(ParseFailureKind.FormatWithParameter, nameof(SR.Format_BadDatePattern), dtfi.YearMonthPattern);
                     return false;
@@ -1791,7 +1789,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
             int n2 = raw.GetNumber(1);
 
             int order;
-            if (!GetYearMonthDayOrder(dtfi.ShortDatePattern, dtfi, out order))
+            if (!GetYearMonthDayOrder(dtfi.ShortDatePattern, out order))
             {
                 result.SetFailure(ParseFailureKind.FormatWithParameter, nameof(SR.Format_BadDatePattern), dtfi.ShortDatePattern);
                 return false;
@@ -1863,7 +1861,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
 
             // For compatibility, don't throw if we can't determine the order, but default to YMD instead
             int order;
-            if (GetYearMonthDayOrder(pattern, dtfi, out order) && order == ORDER_YDM)
+            if (GetYearMonthDayOrder(pattern, out order) && order == ORDER_YDM)
             {
                 if (SetDateYMD(ref result, raw.year, n2, n1))
                 {
@@ -1896,7 +1894,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
             int n2 = raw.GetNumber(1);
 
             int order;
-            if (!GetYearMonthDayOrder(dtfi.ShortDatePattern, dtfi, out order))
+            if (!GetYearMonthDayOrder(dtfi.ShortDatePattern, out order))
             {
                 result.SetFailure(ParseFailureKind.FormatWithParameter, nameof(SR.Format_BadDatePattern), dtfi.ShortDatePattern);
                 return false;
@@ -2102,7 +2100,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
         {
             if (result.Month == -1)
             {
-                //Should have a month suffix
+                // Should have a month suffix
                 result.SetBadDateTimeFailure();
                 return false;
             }
@@ -2143,7 +2141,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                 if (((result.flags & ParseFlags.HaveYear) == 0) && ((result.flags & ParseFlags.HaveDay) == 0))
                 {
                     int order;
-                    if (!GetYearMonthDayOrder(dtfi.ShortDatePattern, dtfi, out order))
+                    if (!GetYearMonthDayOrder(dtfi.ShortDatePattern, out order))
                     {
                         result.SetFailure(ParseFailureKind.FormatWithParameter, nameof(SR.Format_BadDatePattern), dtfi.ShortDatePattern);
                         return false;
@@ -2236,7 +2234,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
         //
         ////////////////////////////////////////////////////////////////////////
 
-        internal static bool ProcessHebrewTerminalState(DS dps, ref __DTString str, ref DateTimeResult result, ref DateTimeStyles styles, ref DateTimeRawInfo raw, DateTimeFormatInfo dtfi)
+        internal static bool ProcessHebrewTerminalState(DS dps, ref DateTimeResult result, ref DateTimeStyles styles, ref DateTimeRawInfo raw, DateTimeFormatInfo dtfi)
         {
             // The following are accepted terminal state for Hebrew date.
             switch (dps)
@@ -2634,7 +2632,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                     {
                         if ((dtfi.FormatFlags & DateTimeFormatFlags.UseHebrewRule) != 0)
                         {
-                            if (!ProcessHebrewTerminalState(dps, ref str, ref result, ref styles, ref raw, dtfi))
+                            if (!ProcessHebrewTerminalState(dps, ref result, ref styles, ref raw, dtfi))
                             {
                                 TPTraceExit("0050 (ProcessHebrewTerminalState)", dps);
                                 return false;
@@ -4494,7 +4492,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                         case 'O':
                         case 'o':
                             ConfigureFormatOS(ref dtfi, ref parseInfo);
-                            return ParseFormatO(s, ref parseInfo, ref result);
+                            return ParseFormatO(s, ref result);
                     }
                 }
 
@@ -4737,7 +4735,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                     return false;
                 }
 
-                day = (int)(digit1*10 + digit2);
+                day = (int)(digit1 * 10 + digit2);
             }
 
             if (source[7] != ' ')
@@ -4759,18 +4757,18 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
 
                 switch ((m0 << 24) | (m1 << 16) | (m2 << 8) | space | 0x20202000)
                 {
-                    case 0x6a616e20 /* 'jan ' */ : month = 1; break;
-                    case 0x66656220 /* 'feb ' */ : month = 2; break;
-                    case 0x6d617220 /* 'mar ' */ : month = 3; break;
-                    case 0x61707220 /* 'apr ' */ : month = 4; break;
-                    case 0x6d617920 /* 'may ' */ : month = 5; break;
-                    case 0x6a756e20 /* 'jun ' */ : month = 6; break;
-                    case 0x6a756c20 /* 'jul ' */ : month = 7; break;
-                    case 0x61756720 /* 'aug ' */ : month = 8; break;
-                    case 0x73657020 /* 'sep ' */ : month = 9; break;
-                    case 0x6f637420 /* 'oct ' */ : month = 10; break;
-                    case 0x6e6f7620 /* 'nov ' */ : month = 11; break;
-                    case 0x64656320 /* 'dec ' */ : month = 12; break;
+                    case 0x6a616e20: /* 'jan ' */ month = 1; break;
+                    case 0x66656220: /* 'feb ' */ month = 2; break;
+                    case 0x6d617220: /* 'mar ' */ month = 3; break;
+                    case 0x61707220: /* 'apr ' */ month = 4; break;
+                    case 0x6d617920: /* 'may ' */ month = 5; break;
+                    case 0x6a756e20: /* 'jun ' */ month = 6; break;
+                    case 0x6a756c20: /* 'jul ' */ month = 7; break;
+                    case 0x61756720: /* 'aug ' */ month = 8; break;
+                    case 0x73657020: /* 'sep ' */ month = 9; break;
+                    case 0x6f637420: /* 'oct ' */ month = 10; break;
+                    case 0x6e6f7620: /* 'nov ' */ month = 11; break;
+                    case 0x64656320: /* 'dec ' */ month = 12; break;
                     default:
                         result.SetBadDateTimeFailure();
                         return false;
@@ -4788,7 +4786,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                     return false;
                 }
 
-                year = (int)(y1*1000 + y2*100 + y3*10 + y4);
+                year = (int)(y1 * 1000 + y2 * 100 + y3 * 10 + y4);
             }
 
             if (source[16] != ' ')
@@ -4808,7 +4806,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                     return false;
                 }
 
-                hour = (int)(h1*10 + h2);
+                hour = (int)(h1 * 10 + h2);
             }
 
             if (source[19] != ':')
@@ -4829,7 +4827,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                     return false;
                 }
 
-                minute = (int)(m1*10 + m2);
+                minute = (int)(m1 * 10 + m2);
             }
 
             if (source[22] != ':')
@@ -4849,7 +4847,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                     return false;
                 }
 
-                second = (int)(s1*10 + s2);
+                second = (int)(s1 * 10 + s2);
             }
 
             // Parse " GMT".  It must be upper case.
@@ -4876,7 +4874,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
             return true;
         }
 
-        private static bool ParseFormatO(ReadOnlySpan<char> source, ref ParsingInfo parseInfo, ref DateTimeResult result)
+        private static bool ParseFormatO(ReadOnlySpan<char> source, ref DateTimeResult result)
         {
             // Examples:
             // 2017-06-12T05:30:45.7680000        (interpreted as local time wrt to current time zone)
@@ -4906,7 +4904,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                     return false;
                 }
 
-                year = (int)(y1*1000 + y2*100 + y3*10 + y4);
+                year = (int)(y1 * 1000 + y2 * 100 + y3 * 10 + y4);
             }
 
             int month;
@@ -4919,7 +4917,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                     return false;
                 }
 
-                month = (int)(m1*10 + m2);
+                month = (int)(m1 * 10 + m2);
             }
 
             int day;
@@ -4932,7 +4930,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                     return false;
                 }
 
-                day = (int)(d1*10 + d2);
+                day = (int)(d1 * 10 + d2);
             }
 
             int hour;
@@ -4945,7 +4943,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                     return false;
                 }
 
-                hour = (int)(h1*10 + h2);
+                hour = (int)(h1 * 10 + h2);
             }
 
             int minute;
@@ -4958,7 +4956,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                     return false;
                 }
 
-                minute = (int)(m1*10 + m2);
+                minute = (int)(m1 * 10 + m2);
             }
 
             int second;
@@ -4971,7 +4969,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                     return false;
                 }
 
-                second = (int)(s1*10 + s2);
+                second = (int)(s1 * 10 + s2);
             }
 
             double fraction;
@@ -4990,7 +4988,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                     return false;
                 }
 
-                fraction = (f1*1000000 + f2*100000 + f3*10000 + f4*1000 + f5*100 + f6*10 + f7) / 10000000.0;
+                fraction = (f1 * 1000000 + f2 * 100000 + f3 * 10000 + f4 * 1000 + f5 * 100 + f6 * 10 + f7) / 10000000.0;
             }
 
             if (!DateTime.TryCreate(year, month, day, hour, minute, second, 0, out DateTime dateTime))
@@ -5070,7 +5068,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                                 return false;
                             }
 
-                            offsetMinutes = (int)(om1*10 + om2);
+                            offsetMinutes = (int)(om1 * 10 + om2);
                         }
 
                         result.flags |= ParseFlags.TimeZoneUsed;
@@ -5176,7 +5174,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
             int newLinePadding = 20;
 
 
-            //invariant: strs.Length >= 2
+            // invariant: strs.Length >= 2
             StringBuilder buffer = new StringBuilder();
             buffer.Append(Hex(strs[0]));
             curLineLength = buffer.Length;
@@ -5246,6 +5244,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
             // Internal.Console.WriteLine(s);
         }
 
+        // for testing; do not make this readonly
         private static bool _tracingEnabled = false;
 #endif // _LOGGING
     }
@@ -5274,10 +5273,10 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
         // The current character to be looked at.
         internal char m_current;
 
-        private CompareInfo m_info;
+        private readonly CompareInfo m_info;
         // Flag to indicate if we encouter an digit, we should check for token or not.
         // In some cultures, such as mn-MN, it uses "\x0031\x00a0\x0434\x04af\x0433\x044d\x044d\x0440\x00a0\x0441\x0430\x0440" in month names.
-        private bool m_checkDigitToken;
+        private readonly bool m_checkDigitToken;
 
         internal __DTString(ReadOnlySpan<char> str, DateTimeFormatInfo dtfi, bool checkDigitToken) : this(str, dtfi)
         {
@@ -5296,10 +5295,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
             m_checkDigitToken = ((dtfi.FormatFlags & DateTimeFormatFlags.UseDigitPrefixInTokens) != 0);
         }
 
-        internal CompareInfo CompareInfo
-        {
-            get { return m_info; }
-        }
+        internal CompareInfo CompareInfo => m_info;
 
         //
         // Advance the Index.
@@ -5348,8 +5344,6 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                 tokenType = TokenType.EndOfString;
                 return;
             }
-
-            tokenType = TokenType.UnknownToken;
 
         Start:
             if (DateTimeParse.IsDigit(m_current))
@@ -5448,8 +5442,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
             if (!DateTimeParse.IsDigit(m_current))
             {
                 // Not a digit.  Tokenize it.
-                int tokenValue;
-                bool found = dtfi.Tokenize(TokenType.SeparatorTokenMask, out tokenType, out tokenValue, ref this);
+                bool found = dtfi.Tokenize(TokenType.SeparatorTokenMask, out tokenType, out _, ref this);
                 if (!found)
                 {
                     tokenType = TokenType.SEP_Space;
@@ -5944,7 +5937,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
         FormatWithFormatSpecifier = 5,
         FormatWithOriginalDateTimeAndParameter = 6,
         FormatBadDateTimeCalendar = 7,  // FormatException when ArgumentOutOfRange is thrown by a Calendar.TryToDateTime().
-    };
+    }
 
     [Flags]
     internal enum ParseFlags
@@ -5970,8 +5963,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
     // This will store the result of the parsing.  And it will be eventually
     // used to construct a DateTime instance.
     //
-    internal
-    ref struct DateTimeResult
+    internal ref struct DateTimeResult
     {
         internal int Year;
         internal int Month;

@@ -44,9 +44,9 @@ namespace System.Net.Test.Common
         public abstract void Dispose();
 
         // Legacy API.
-        public Task<HttpRequestData> AcceptConnectionSendResponseAndCloseAsync(HttpStatusCode statusCode = HttpStatusCode.OK, string content = "")
+        public Task<HttpRequestData> AcceptConnectionSendResponseAndCloseAsync(HttpStatusCode statusCode = HttpStatusCode.OK, string content = "", IList<HttpHeaderData> additionalHeaders = null)
         {
-            return HandleRequestAsync(statusCode, null, content);
+            return HandleRequestAsync(statusCode, headers: additionalHeaders, content: content);
         }
     }
 

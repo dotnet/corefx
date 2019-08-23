@@ -27,11 +27,10 @@ namespace System.Collections
         private int _head; // First valid element in the queue. Do not rename (binary serialization)
         private int _tail; // Last valid element in the queue. Do not rename (binary serialization)
         private int _size; // Number of elements. Do not rename (binary serialization)
-        private int _growFactor; // 100 == 1.0, 130 == 1.3, 200 == 2.0. Do not rename (binary serialization)
+        private readonly int _growFactor; // 100 == 1.0, 130 == 1.3, 200 == 2.0. Do not rename (binary serialization)
         private int _version; // Do not rename (binary serialization)
 
-        private const int _MinimumGrow = 4;
-        private const int _ShrinkThreshold = 32;
+        private const int MinimumGrow = 4;
 
         // Creates a queue with room for capacity objects. The default initial
         // capacity and grow factor are used.
@@ -130,7 +129,7 @@ namespace System.Collections
 
         // CopyTo copies a collection into an Array, starting at a particular
         // index into the array.
-        // 
+        //
         public virtual void CopyTo(Array array, int index)
         {
             if (array == null)
@@ -161,9 +160,9 @@ namespace System.Collections
             if (_size == _array.Length)
             {
                 int newcapacity = (int)((long)_array.Length * (long)_growFactor / 100);
-                if (newcapacity < _array.Length + _MinimumGrow)
+                if (newcapacity < _array.Length + MinimumGrow)
                 {
-                    newcapacity = _array.Length + _MinimumGrow;
+                    newcapacity = _array.Length + MinimumGrow;
                 }
                 SetCapacity(newcapacity);
             }
@@ -176,7 +175,7 @@ namespace System.Collections
 
         // GetEnumerator returns an IEnumerator over this Queue.  This
         // Enumerator will support removing.
-        // 
+        //
         public virtual IEnumerator GetEnumerator()
         {
             return new QueueEnumerator(this);
@@ -198,7 +197,7 @@ namespace System.Collections
         }
 
         // Returns the object at the head of the queue. The object remains in the
-        // queue. If the queue is empty, this method throws an 
+        // queue. If the queue is empty, this method throws an
         // InvalidOperationException.
         public virtual object Peek()
         {
@@ -211,7 +210,7 @@ namespace System.Collections
         // Returns a synchronized Queue.  Returns a synchronized wrapper
         // class around the queue - the caller must not use references to the
         // original queue.
-        // 
+        //
         public static Queue Synchronized(Queue queue)
         {
             if (queue == null)
@@ -258,7 +257,7 @@ namespace System.Collections
         public virtual object[] ToArray()
         {
             if (_size == 0)
-                return Array.Empty<Object>();
+                return Array.Empty<object>();
 
             object[] arr = new object[_size];
             if (_head < _tail)
@@ -308,8 +307,8 @@ namespace System.Collections
         // Implements a synchronization wrapper around a queue.
         private class SynchronizedQueue : Queue
         {
-            private Queue _q;
-            private object _root;
+            private readonly Queue _q;
+            private readonly object _root;
 
             internal SynchronizedQueue(Queue q)
             {
@@ -428,9 +427,9 @@ namespace System.Collections
         // made to the list while an enumeration is in progress.
         private class QueueEnumerator : IEnumerator, ICloneable
         {
-            private Queue _q;
+            private readonly Queue _q;
             private int _index;
-            private int _version;
+            private readonly int _version;
             private object _currentElement;
 
             internal QueueEnumerator(Queue q)
@@ -491,7 +490,7 @@ namespace System.Collections
 
         internal class QueueDebugView
         {
-            private Queue _queue;
+            private readonly Queue _queue;
 
             public QueueDebugView(Queue queue)
             {

@@ -21,11 +21,11 @@ namespace System.Data.ProviderBase
         private const int PruningDueTime = 4 * 60 * 1000;           // 4 minutes
         private const int PruningPeriod = 30 * 1000;           // thirty seconds
 
-        // s_pendingOpenNonPooled is an array of tasks used to throttle creation of non-pooled connections to 
+        // s_pendingOpenNonPooled is an array of tasks used to throttle creation of non-pooled connections to
         // a maximum of Environment.ProcessorCount at a time.
-        static int s_pendingOpenNonPooledNext = 0;
-        static Task<DbConnectionInternal>[] s_pendingOpenNonPooled = new Task<DbConnectionInternal>[Environment.ProcessorCount];
-        static Task<DbConnectionInternal> s_completedTask;
+        private static int s_pendingOpenNonPooledNext = 0;
+        private static readonly Task<DbConnectionInternal>[] s_pendingOpenNonPooled = new Task<DbConnectionInternal>[Environment.ProcessorCount];
+        private static Task<DbConnectionInternal> s_completedTask;
 
         protected DbConnectionFactory() : this(DbConnectionPoolCountersNoCounters.SingletonInstance) { }
 
@@ -43,7 +43,7 @@ namespace System.Data.ProviderBase
             get { return _performanceCounters; }
         }
 
-        abstract public DbProviderFactory ProviderFactory
+        public abstract DbProviderFactory ProviderFactory
         {
             get;
         }
@@ -61,7 +61,7 @@ namespace System.Data.ProviderBase
             }
         }
 
-        virtual protected DbMetaDataFactory CreateMetaDataFactory(DbConnectionInternal internalConnection, out bool cacheMetaDataFactory)
+        protected virtual DbMetaDataFactory CreateMetaDataFactory(DbConnectionInternal internalConnection, out bool cacheMetaDataFactory)
         {
             // providers that support GetSchema must override this with a method that creates a meta data
             // factory appropriate for them.
@@ -101,7 +101,7 @@ namespace System.Data.ProviderBase
             return newConnection;
         }
 
-        virtual internal DbConnectionPoolGroupProviderInfo CreateConnectionPoolGroupProviderInfo(DbConnectionOptions connectionOptions)
+        internal virtual DbConnectionPoolGroupProviderInfo CreateConnectionPoolGroupProviderInfo(DbConnectionOptions connectionOptions)
         {
             return null;
         }
@@ -113,7 +113,7 @@ namespace System.Data.ProviderBase
         }
 
         // GetCompletedTask must be called from within s_pendingOpenPooled lock
-        static Task<DbConnectionInternal> GetCompletedTask()
+        private static Task<DbConnectionInternal> GetCompletedTask()
         {
             if (s_completedTask == null)
             {
@@ -132,7 +132,7 @@ namespace System.Data.ProviderBase
             DbConnectionPool connectionPool;
             connection = null;
 
-            //  Work around race condition with clearing the pool between GetConnectionPool obtaining pool 
+            //  Work around race condition with clearing the pool between GetConnectionPool obtaining pool
             //  and GetConnection on the pool checking the pool state.  Clearing the pool in this window
             //  will switch the pool into the ShuttingDown state, and GetConnection will return null.
             //  There is probably a better solution involving locking the pool/group, but that entails a major
@@ -186,9 +186,9 @@ namespace System.Data.ProviderBase
 
                             // now that we have an antecedent task, schedule our work when it is completed.
                             // If it is a new slot or a compelted task, this continuation will start right away.
-                            // BUG? : If we have timed out task on top of running task, then new task could be started                             
+                            // BUG? : If we have timed out task on top of running task, then new task could be started
                             // on top of that, since we are only checking the top task. This will lead to starting more threads
-                            // than intended.                           
+                            // than intended.
                             newTask = s_pendingOpenNonPooled[idx].ContinueWith((_) =>
                             {
                                 Transactions.Transaction originalTransaction = ADP.GetCurrentTransaction();
@@ -560,26 +560,26 @@ namespace System.Data.ProviderBase
             PerformanceCounters.NumberOfInactiveConnectionPoolGroups.Increment();
         }
 
-        virtual protected DbConnectionInternal CreateConnection(DbConnectionOptions options, DbConnectionPoolKey poolKey, object poolGroupProviderInfo, DbConnectionPool pool, DbConnection owningConnection, DbConnectionOptions userOptions)
+        protected virtual DbConnectionInternal CreateConnection(DbConnectionOptions options, DbConnectionPoolKey poolKey, object poolGroupProviderInfo, DbConnectionPool pool, DbConnection owningConnection, DbConnectionOptions userOptions)
         {
             return CreateConnection(options, poolKey, poolGroupProviderInfo, pool, owningConnection);
         }
 
-        abstract protected DbConnectionInternal CreateConnection(DbConnectionOptions options, DbConnectionPoolKey poolKey, object poolGroupProviderInfo, DbConnectionPool pool, DbConnection owningConnection);
+        protected abstract DbConnectionInternal CreateConnection(DbConnectionOptions options, DbConnectionPoolKey poolKey, object poolGroupProviderInfo, DbConnectionPool pool, DbConnection owningConnection);
 
-        abstract protected DbConnectionOptions CreateConnectionOptions(string connectionString, DbConnectionOptions previous);
+        protected abstract DbConnectionOptions CreateConnectionOptions(string connectionString, DbConnectionOptions previous);
 
-        abstract protected DbConnectionPoolGroupOptions CreateConnectionPoolGroupOptions(DbConnectionOptions options);
+        protected abstract DbConnectionPoolGroupOptions CreateConnectionPoolGroupOptions(DbConnectionOptions options);
 
-        abstract internal DbConnectionPoolGroup GetConnectionPoolGroup(DbConnection connection);
-        abstract internal void PermissionDemand(DbConnection outerConnection);
+        internal abstract DbConnectionPoolGroup GetConnectionPoolGroup(DbConnection connection);
+        internal abstract void PermissionDemand(DbConnection outerConnection);
 
-        abstract internal void SetConnectionPoolGroup(DbConnection outerConnection, DbConnectionPoolGroup poolGroup);
+        internal abstract void SetConnectionPoolGroup(DbConnection outerConnection, DbConnectionPoolGroup poolGroup);
 
-        abstract internal void SetInnerConnectionEvent(DbConnection owningObject, DbConnectionInternal to);
+        internal abstract void SetInnerConnectionEvent(DbConnection owningObject, DbConnectionInternal to);
 
-        abstract internal bool SetInnerConnectionFrom(DbConnection owningObject, DbConnectionInternal to, DbConnectionInternal from);
+        internal abstract bool SetInnerConnectionFrom(DbConnection owningObject, DbConnectionInternal to, DbConnectionInternal from);
 
-        abstract internal void SetInnerConnectionTo(DbConnection owningObject, DbConnectionInternal to);
+        internal abstract void SetInnerConnectionTo(DbConnection owningObject, DbConnectionInternal to);
     }
 }

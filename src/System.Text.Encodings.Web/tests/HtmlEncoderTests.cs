@@ -1,15 +1,14 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using System;
 using System.Globalization;
 using System.IO;
-using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using Xunit;
 
-namespace Microsoft.Framework.WebEncoders
+namespace System.Text.Encodings.Web.Tests
 {
     public class HtmlEncoderTests
     {
@@ -22,7 +21,7 @@ namespace Microsoft.Framework.WebEncoders
         public void TestSurrogate(string expected, string actual)
         {
             Assert.Equal(expected, System.Text.Encodings.Web.HtmlEncoder.Default.Encode(actual));
-            
+
             using (var writer = new StringWriter())
             {
                 System.Text.Encodings.Web.HtmlEncoder.Default.Encode(writer, actual);

@@ -16,7 +16,7 @@ namespace System.Linq.Tests
                     where x > int.MinValue
                     select x;
 
-            Func<int, bool> predicate = IsEven; 
+            Func<int, bool> predicate = IsEven;
             Assert.Equal(q.Any(predicate), q.Any(predicate));
         }
 
@@ -29,8 +29,42 @@ namespace System.Linq.Tests
             Func<string, bool> predicate = string.IsNullOrEmpty;
             Assert.Equal(q.Any(predicate), q.Any(predicate));
         }
-        
+
         public static IEnumerable<object[]> TestData()
+        {
+            foreach (int count in new[] { 0, 1, 2 })
+            {
+                bool expected = count > 0;
+
+                var arr = new int[count];
+                var collectionTypes = new IEnumerable<int>[]
+                {
+                    arr,
+                    new List<int>(arr),
+                    new TestCollection<int>(arr),
+                    new TestNonGenericCollection<int>(arr),
+                    NumberRangeGuaranteedNotCollectionType(0, count),
+                };
+
+                foreach (IEnumerable<int> source in collectionTypes)
+                {
+                    yield return new object[] { source, expected };
+                    yield return new object[] { source.Select(i => i), expected };
+                    yield return new object[] { source.Where(i => true), expected };
+
+                    yield return new object[] { source.Where(i => false), false };
+                }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(TestData))]
+        public void Any(IEnumerable<int> source, bool expected)
+        {
+            Assert.Equal(expected, source.Any());
+        }
+
+        public static IEnumerable<object[]> TestDataWithPredicate()
         {
             yield return new object[] { new int[0], null, false };
             yield return new object[] { new int[] { 3 }, null, true };
@@ -52,7 +86,7 @@ namespace System.Linq.Tests
         }
 
         [Theory]
-        [MemberData(nameof(TestData))]
+        [MemberData(nameof(TestDataWithPredicate))]
         public void Any(IEnumerable<int> source, Func<int, bool> predicate, bool expected)
         {
             if (predicate == null)
@@ -65,7 +99,7 @@ namespace System.Linq.Tests
             }
         }
 
-        [Theory, MemberData(nameof(TestData))]
+        [Theory, MemberData(nameof(TestDataWithPredicate))]
         public void AnyRunOnce(IEnumerable<int> source, Func<int, bool> predicate, bool expected)
         {
             if (predicate == null)

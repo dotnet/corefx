@@ -67,7 +67,7 @@ namespace System.Linq.Expressions.Tests
             }
         }
 
-        public static IEnumerable<object> ImplicitNumericConversionData()
+        public static IEnumerable<object[]> ImplicitNumericConversionData()
         {
             foreach (bool useInterpreter in new bool[] { true, false })
             {
@@ -282,7 +282,7 @@ namespace System.Linq.Expressions.Tests
             }
         }
 
-        public static void VerifyCoalesce(object obj1, Type type1, object obj2, Type type2, bool useInterpreter, object expected = null)
+        private static void VerifyCoalesce(object obj1, Type type1, object obj2, Type type2, bool useInterpreter, object expected = null)
         {
             BinaryExpression expression = Expression.Coalesce(Expression.Constant(obj1, type1), Expression.Constant(obj2, type2));
             Delegate lambda = Expression.Lambda(expression).Compile(useInterpreter);

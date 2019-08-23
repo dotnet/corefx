@@ -4,7 +4,7 @@
 // System.Net.HttpListenerResponse
 //
 // Author:
-//	Gonzalo Paniagua Javier (gonzalo@novell.com)
+//  Gonzalo Paniagua Javier (gonzalo@novell.com)
 //
 // Copyright (c) 2005 Novell, Inc. (http://www.novell.com)
 //
@@ -15,10 +15,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -217,13 +217,13 @@ namespace System.Net
                 }
 
                 /* Apache forces closing the connection for these status codes:
-                 *	HttpStatusCode.BadRequest 		        400
-                 *	HttpStatusCode.RequestTimeout 		    408
-                 *	HttpStatusCode.LengthRequired 		    411
-                 *	HttpStatusCode.RequestEntityTooLarge 	413
-                 *	HttpStatusCode.RequestUriTooLong 	    414
-                 *	HttpStatusCode.InternalServerError      500
-                 *	HttpStatusCode.ServiceUnavailable 	    503
+                 *    HttpStatusCode.BadRequest                 400
+                 *    HttpStatusCode.RequestTimeout             408
+                 *    HttpStatusCode.LengthRequired             411
+                 *    HttpStatusCode.RequestEntityTooLarge     413
+                 *    HttpStatusCode.RequestUriTooLong         414
+                 *    HttpStatusCode.InternalServerError      500
+                 *    HttpStatusCode.ServiceUnavailable         503
                  */
                 bool conn_close = (_statusCode == (int)HttpStatusCode.BadRequest || _statusCode == (int)HttpStatusCode.RequestTimeout
                         || _statusCode == (int)HttpStatusCode.LengthRequired || _statusCode == (int)HttpStatusCode.RequestEntityTooLarge
@@ -349,4 +349,3 @@ namespace System.Net
         internal bool SentHeaders { get; set; }
     }
 }
-

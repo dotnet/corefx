@@ -1,13 +1,27 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Text.Encodings.Web;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
 {
     public static partial class ValueTests
     {
+        [Fact]
+        public static void WriteStringWithRelaxedEscaper()
+        {
+            string inputString = ">><++>>>\">>\\>>&>>>\u6f22\u5B57>>>"; // Non-ASCII text should remain unescaped. \u6f22 = \u6C49, \u5B57 = \u5B57
+
+            string actual = JsonSerializer.Serialize(inputString, new JsonSerializerOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+            string expected = "\">><++>>>\\\">>\\\\>>&>>>\u6f22\u5B57>>>\"";
+            Assert.Equal(JsonConvert.SerializeObject(inputString), actual);
+            Assert.Equal(expected, actual);
+            Assert.NotEqual(expected, JsonSerializer.Serialize(inputString));
+        }
+
         [Fact]
         public static void WritePrimitives()
         {
@@ -60,12 +74,12 @@ namespace System.Text.Json.Serialization.Tests
 
             {
                 Uri uri = new Uri("https://domain/path");
-                Assert.Equal(@"""https:\/\/domain\/path""", JsonSerializer.Serialize(uri));
+                Assert.Equal(@"""https://domain/path""", JsonSerializer.Serialize(uri));
             }
 
             {
                 Uri.TryCreate("~/path", UriKind.RelativeOrAbsolute, out Uri uri);
-                Assert.Equal(@"""~\/path""", JsonSerializer.Serialize(uri));
+                Assert.Equal(@"""~/path""", JsonSerializer.Serialize(uri));
             }
 
             // The next two scenarios validate that we're NOT using Uri.ToString() for serializing Uri. The serializer
@@ -74,14 +88,14 @@ namespace System.Text.Json.Serialization.Tests
             {
                 // ToString would collapse the relative segment
                 Uri uri = new Uri("http://a/b/../c");
-                Assert.Equal(@"""http:\/\/a\/b\/..\/c""", JsonSerializer.Serialize(uri));
+                Assert.Equal(@"""http://a/b/../c""", JsonSerializer.Serialize(uri));
             }
 
             {
                 // "%20" gets turned into a space by Uri.ToString()
                 // https://coding.abel.nu/2014/10/beware-of-uri-tostring/
                 Uri uri = new Uri("http://localhost?p1=Value&p2=A%20B%26p3%3DFooled!");
-                Assert.Equal(@"""http:\/\/localhost?p1=Value\u0026p2=A%20B%26p3%3DFooled!""", JsonSerializer.Serialize(uri));
+                Assert.Equal(@"""http://localhost?p1=Value\u0026p2=A%20B%26p3%3DFooled!""", JsonSerializer.Serialize(uri));
             }
         }
     }

@@ -96,17 +96,16 @@ namespace Internal.Cryptography.Pal.Windows
                         delegate (CMSG_KEY_AGREE_RECIPIENT_INFO* recipient)
                         {
                             CMsgKeyAgreeOriginatorChoice originatorChoice = recipient->dwOriginatorChoice;
-                            switch (originatorChoice)
+                            return originatorChoice switch
                             {
-                                case CMsgKeyAgreeOriginatorChoice.CMSG_KEY_AGREE_ORIGINATOR_CERT:
-                                    return recipient->OriginatorCertId.ToSubjectIdentifierOrKey();
+                                CMsgKeyAgreeOriginatorChoice.CMSG_KEY_AGREE_ORIGINATOR_CERT =>
+                                    recipient->OriginatorCertId.ToSubjectIdentifierOrKey(),
 
-                                case CMsgKeyAgreeOriginatorChoice.CMSG_KEY_AGREE_ORIGINATOR_PUBLIC_KEY:
-                                    return recipient->OriginatorPublicKeyInfo.ToSubjectIdentifierOrKey();
+                                CMsgKeyAgreeOriginatorChoice.CMSG_KEY_AGREE_ORIGINATOR_PUBLIC_KEY =>
+                                    recipient->OriginatorPublicKeyInfo.ToSubjectIdentifierOrKey(),
 
-                                default:
-                                    throw new CryptographicException(SR.Format(SR.Cryptography_Cms_Invalid_Originator_Identifier_Choice, originatorChoice));
-                            }
+                                _ => throw new CryptographicException(SR.Format(SR.Cryptography_Cms_Invalid_Originator_Identifier_Choice, originatorChoice)),
+                            };
                         });
                 }
             }
@@ -164,7 +163,7 @@ namespace Internal.Cryptography.Pal.Windows
         internal int Index { get; }
         internal int SubIndex { get; }
 
-        // Provides access to the native CMSG_KEY_TRANS_RECIPIENT_INFO* structure. This helper is structured as taking a delegate to 
+        // Provides access to the native CMSG_KEY_TRANS_RECIPIENT_INFO* structure. This helper is structured as taking a delegate to
         // help avoid the easy trap of forgetting to prevent the underlying memory block from being GC'd early.
         internal T WithCmsgCmsRecipientInfo<T>(KeyAgreeReceiver<T> receiver)
         {
@@ -181,8 +180,7 @@ namespace Internal.Cryptography.Pal.Windows
         internal unsafe delegate T KeyAgreeReceiver<T>(CMSG_KEY_AGREE_RECIPIENT_INFO* recipient);
 
         // This is the backing store for the CMSG_CMS_RECIPIENT_INFO* structure for this RecipientInfo. CMSG_CMS_RECIPIENT_INFO is full of interior
-        // pointers so we store in a native heap block to keep it pinned. 
+        // pointers so we store in a native heap block to keep it pinned.
         private readonly SafeHandle _pCmsgCmsRecipientInfoMemory;
     }
 }
-

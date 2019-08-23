@@ -7,11 +7,10 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using Xunit;
 
-namespace Microsoft.Framework.WebEncoders
+namespace System.Text.Encodings.Web.Tests
 {
     public class UrlEncoderTests
     {
@@ -27,7 +26,7 @@ namespace Microsoft.Framework.WebEncoders
                 Assert.Equal("%F0%9F%92%A9", writer.GetStringBuilder().ToString());
             }
         }
-        
+
         [Fact]
         public void Ctor_WithTextEncoderSettings()
         {
@@ -294,7 +293,7 @@ namespace Microsoft.Framework.WebEncoders
         private static string GetKnownGoodPercentEncodedValue(int codePoint)
         {
             // Convert the code point to UTF16, then call Encoding.UTF8.GetBytes, then hex-encode everything
-            return string.Concat(_utf8EncodingThrowOnInvalidBytes.GetBytes(Char.ConvertFromUtf32(codePoint)).Select(b => string.Format(CultureInfo.InvariantCulture, "%{0:X2}", b)));
+            return string.Concat(_utf8EncodingThrowOnInvalidBytes.GetBytes(char.ConvertFromUtf32(codePoint)).Select(b => string.Format(CultureInfo.InvariantCulture, "%{0:X2}", b)));
         }
 
         private static bool IsSurrogateCodePoint(int codePoint)

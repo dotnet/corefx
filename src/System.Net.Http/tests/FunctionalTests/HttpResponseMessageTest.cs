@@ -22,8 +22,8 @@ namespace System.Net.Http.Functional.Tests
                 Assert.Equal(HttpStatusCode.OK, rm.StatusCode);
                 Assert.Equal("OK", rm.ReasonPhrase);
                 Assert.Equal(new Version(1, 1), rm.Version);
-                Assert.Equal(null, rm.Content);
-                Assert.Equal(null, rm.RequestMessage);
+                Assert.Null(rm.Content);
+                Assert.Null(rm.RequestMessage);
             }
         }
 
@@ -35,8 +35,8 @@ namespace System.Net.Http.Functional.Tests
                 Assert.Equal(HttpStatusCode.Accepted, rm.StatusCode);
                 Assert.Equal("Accepted", rm.ReasonPhrase);
                 Assert.Equal(new Version(1, 1), rm.Version);
-                Assert.Equal(null, rm.Content);
-                Assert.Equal(null, rm.RequestMessage);
+                Assert.Null(rm.Content);
+                Assert.Null(rm.RequestMessage);
             }
         }
 
@@ -281,6 +281,21 @@ namespace System.Net.Http.Functional.Tests
                     "  Content-Type: text/plain; charset=utf-8\r\n" +
                     "  Custom-Content-Header: value2\r\n" +
                     "}", rm.ToString());
+
+                rm.TrailingHeaders.Add("Custom-Trailing-Header", "value3");
+
+                Assert.Equal(
+                    "StatusCode: 400, ReasonPhrase: 'Bad Request', Version: 1.0, Content: " + typeof(StringContent).ToString() + ", Headers:\r\n" +
+                    "{\r\n" +
+                    "  Accept-Ranges: bytes\r\n" +
+                    "  Accept-Ranges: pages\r\n" +
+                    "  Custom-Response-Header: value1\r\n" +
+                    "  Content-Type: text/plain; charset=utf-8\r\n" +
+                    "  Custom-Content-Header: value2\r\n" +
+                    "}, Trailing Headers:\r\n" +
+                    "{\r\n" +
+                    "  Custom-Trailing-Header: value3\r\n" +
+                    "}", rm.ToString());
             }
         }
 
@@ -307,6 +322,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        #endregion   
+        #endregion
     }
 }

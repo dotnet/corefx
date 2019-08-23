@@ -1,6 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
+
+using System.Text.Encodings.Web;
 
 namespace System.Text.Json
 {
@@ -13,6 +15,11 @@ namespace System.Text.Json
     public struct JsonWriterOptions
     {
         private int _optionsMask;
+
+        /// <summary>
+        /// The encoder to use when escaping strings, or <see langword="null" /> to use the default encoder.
+        /// </summary>
+        public JavaScriptEncoder Encoder { get; set; }
 
         /// <summary>
         /// Defines whether the <see cref="Utf8JsonWriter"/> should pretty print the JSON which includes:
@@ -44,7 +51,7 @@ namespace System.Text.Json
         /// then skipping validation (by setting it to true) could improve performance.
         /// An example of invalid JSON where the writer will throw (when SkipValidation
         /// is set to false) is when you write a value within a JSON object
-        /// without a property name. 
+        /// without a property name.
         /// </remarks>
         public bool SkipValidation
         {

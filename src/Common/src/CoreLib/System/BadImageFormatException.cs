@@ -8,10 +8,9 @@
 **
 ** Purpose: Exception to an invalid dll or executable format.
 **
-** 
+**
 ===========================================================*/
 
-using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization;
 
@@ -21,8 +20,8 @@ namespace System
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public partial class BadImageFormatException : SystemException
     {
-        private string? _fileName;  // The name of the corrupt PE file.
-        private string? _fusionLog;  // fusion log (when applicable)
+        private readonly string? _fileName;  // The name of the corrupt PE file.
+        private readonly string? _fusionLog;  // fusion log (when applicable)
 
         public BadImageFormatException()
             : base(SR.Arg_BadImageFormatException)
@@ -91,10 +90,7 @@ namespace System
             }
         }
 
-        public string? FileName
-        {
-            get { return _fileName; }
-        }
+        public string? FileName => _fileName;
 
         public override string ToString()
         {
@@ -121,9 +117,6 @@ namespace System
             return s;
         }
 
-        public string? FusionLog
-        {
-            get { return _fusionLog; }
-        }
+        public string? FusionLog => _fusionLog;
     }
 }

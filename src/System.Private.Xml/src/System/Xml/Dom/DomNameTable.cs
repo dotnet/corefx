@@ -13,8 +13,8 @@ namespace System.Xml
         private XmlName[] _entries;
         private int _count;
         private int _mask;
-        private XmlDocument _ownerDocument;
-        private XmlNameTable _nameTable;
+        private readonly XmlDocument _ownerDocument;
+        private readonly XmlNameTable _nameTable;
 
         private const int InitialSize = 64; // must be a power of two
 
@@ -106,7 +106,7 @@ namespace System.Xml
             XmlName[] oldEntries = _entries;
             XmlName[] newEntries = new XmlName[newMask + 1];
 
-            // use oldEntries.Length to eliminate the range check            
+            // use oldEntries.Length to eliminate the range check
             for (int i = 0; i < oldEntries.Length; i++)
             {
                 XmlName name = oldEntries[i];

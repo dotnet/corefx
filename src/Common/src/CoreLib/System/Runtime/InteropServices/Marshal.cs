@@ -10,6 +10,7 @@ using System.Text;
 using Internal.Runtime.CompilerServices;
 using System.Diagnostics.CodeAnalysis;
 
+#pragma warning disable SA1121 // explicitly using type aliases instead of built-in types
 #if BIT64
 using nuint = System.UInt64;
 #else
@@ -661,7 +662,7 @@ namespace System.Runtime.InteropServices
                 throw new ArgumentNullException(nameof(s));
             }
 
-            return s.MarshalToString(globalAlloc: true, unicode: true); ;
+            return s.MarshalToString(globalAlloc: true, unicode: true);
         }
 
         public static unsafe IntPtr StringToHGlobalAnsi(string? s)
@@ -702,7 +703,7 @@ namespace System.Runtime.InteropServices
             }
 
             IntPtr hglobal = AllocHGlobal((IntPtr)nb);
-            
+
             fixed (char* firstChar = s)
             {
                 string.wstrcpy((char*)hglobal, firstChar, s.Length + 1);
@@ -924,7 +925,7 @@ namespace System.Runtime.InteropServices
             FreeBSTR(s);
         }
 
-        public unsafe static void ZeroFreeCoTaskMemAnsi(IntPtr s)
+        public static unsafe void ZeroFreeCoTaskMemAnsi(IntPtr s)
         {
             ZeroFreeCoTaskMemUTF8(s);
         }
@@ -949,7 +950,7 @@ namespace System.Runtime.InteropServices
             FreeCoTaskMem(s);
         }
 
-        public unsafe static void ZeroFreeGlobalAllocAnsi(IntPtr s)
+        public static unsafe void ZeroFreeGlobalAllocAnsi(IntPtr s)
         {
             if (s == IntPtr.Zero)
             {

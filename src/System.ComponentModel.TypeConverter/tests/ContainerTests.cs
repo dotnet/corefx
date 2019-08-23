@@ -1,11 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
-// See the LICENSE file in the project root for more information. 
+// See the LICENSE file in the project root for more information.
 
 //
 // System.ComponentModel.Container test cases
 //
 // Authors:
-// 	Gonzalo Paniagua Javier (gonzalo@ximian.com)
+//  Gonzalo Paniagua Javier (gonzalo@ximian.com)
 //  Ivan N. Zlatev (contact i-nZ.net)
 
 // Copyright (c) 2006 Novell, Inc. (http://www.novell.com)
@@ -288,7 +288,7 @@ namespace System.ComponentModel.Tests
         {
             var container = new Container();
             var components = new Component[] { new Component(), new Component(), new Component(), new Component(), new Component() };
-            
+
             for (int i = 0; i < components.Length; i++)
             {
                 container.Add(components[i]);

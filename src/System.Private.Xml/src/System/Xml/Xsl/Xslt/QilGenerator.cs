@@ -47,21 +47,21 @@ namespace System.Xml.Xsl.Xslt
 
     internal partial class QilGenerator : IErrorHelper
     {
-        private CompilerScopeManager<QilIterator> _scope;
-        private OutputScopeManager _outputScope;
-        private HybridDictionary _prefixesInUse;
+        private readonly CompilerScopeManager<QilIterator> _scope;
+        private readonly OutputScopeManager _outputScope;
+        private readonly HybridDictionary _prefixesInUse;
 
-        private XsltQilFactory _f;
-        private XPathBuilder _xpathBuilder;
-        private XPathParser<QilNode> _xpathParser;
-        private XPathPatternBuilder _ptrnBuilder;
-        private XPathPatternParser _ptrnParser;
-        private ReferenceReplacer _refReplacer;
+        private readonly XsltQilFactory _f;
+        private readonly XPathBuilder _xpathBuilder;
+        private readonly XPathParser<QilNode> _xpathParser;
+        private readonly XPathPatternBuilder _ptrnBuilder;
+        private readonly XPathPatternParser _ptrnParser;
+        private readonly ReferenceReplacer _refReplacer;
         private KeyMatchBuilder _keyMatchBuilder;
-        private InvokeGenerator _invkGen;
-        private MatcherBuilder _matcherBuilder;
-        private QilStrConcatenator _strConcat;
-        private VariableHelper _varHelper;
+        private readonly InvokeGenerator _invkGen;
+        private readonly MatcherBuilder _matcherBuilder;
+        private readonly QilStrConcatenator _strConcat;
+        private readonly VariableHelper _varHelper;
 
         private Compiler _compiler;
         private QilList _functions;
@@ -71,16 +71,16 @@ namespace System.Xml.Xsl.Xslt
         private QilList _gloVars;
         private QilList _nsVars;
 
-        private XmlQueryType _elementOrDocumentType;
-        private XmlQueryType _textOrAttributeType;
+        private readonly XmlQueryType _elementOrDocumentType;
+        private readonly XmlQueryType _textOrAttributeType;
         private XslNode _lastScope;
         private XslVersion _xslVersion;
 
-        private QilName _nameCurrent;
-        private QilName _namePosition;
-        private QilName _nameLast;
-        private QilName _nameNamespaces;
-        private QilName _nameInit;
+        private readonly QilName _nameCurrent;
+        private readonly QilName _namePosition;
+        private readonly QilName _nameLast;
+        private readonly QilName _nameNamespaces;
+        private readonly QilName _nameInit;
 
         private SingletonFocus _singlFocus;
         private FunctionFocus _funcFocus;
@@ -240,9 +240,9 @@ namespace System.Xml.Xsl.Xslt
             // Initialization code should be executed before any other code (global variables/parameters or root expression)
             // For this purpose we insert it as THE FIRST global variable $init (global variables are calculated before global parameters)
             // and put all initalization code in it.
-            // In retail mode global variables are calculated lasely if they don't have side effects. 
+            // In retail mode global variables are calculated lasely if they don't have side effects.
             // To mark $init as variable with side effect we put all code to function and set SideEffect flag on this function.
-            // ILGen expects that all library functions are sideeffect free. To prevent calls to RegisterDecimalFormat() to be optimized out 
+            // ILGen expects that all library functions are sideeffect free. To prevent calls to RegisterDecimalFormat() to be optimized out
             // we add results returned from these calls and return them as a result of initialization function.
             QilNode init = _f.Int32(0);
 
@@ -2705,8 +2705,8 @@ namespace System.Xml.Xsl.Xslt
                     // passed on to any templates invoked by the built-in rule. At XSLT 2.0, these parameters are
                     // passed through the built-in template rule unchanged.
 
-                    // we can't just modify current/position/last of actualArgs in XSLT 2.0 as we tried before, 
-                    // becuase flags for apply-import amy now be different then flags for apply-templates, so 
+                    // we can't just modify current/position/last of actualArgs in XSLT 2.0 as we tried before,
+                    // becuase flags for apply-import amy now be different then flags for apply-templates, so
                     // we may need to add some space for additional position/last arguments
                     QilNode body = InvokeApplyFunction(_compiler.Root, mode, /*actualArgs:*/null);
                     if (IsDebug)
@@ -2851,8 +2851,8 @@ namespace System.Xml.Xsl.Xslt
         // This helper internal class is used for compiling sort's and with-param's
         private class VariableHelper
         {
-            private Stack<QilIterator> _vars = new Stack<QilIterator>();
-            private XPathQilFactory _f;
+            private readonly Stack<QilIterator> _vars = new Stack<QilIterator>();
+            private readonly XPathQilFactory _f;
 
             public VariableHelper(XPathQilFactory f)
             {

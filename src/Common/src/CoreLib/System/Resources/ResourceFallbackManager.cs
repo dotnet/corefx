@@ -4,31 +4,27 @@
 
 /*============================================================
 **
-** 
-** 
 **
 **
-** Purpose: Encapsulates CultureInfo fallback for resource 
+**
+**
+** Purpose: Encapsulates CultureInfo fallback for resource
 ** lookup
 **
-** 
+**
 ===========================================================*/
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
 
 namespace System.Resources
 {
     internal class ResourceFallbackManager : IEnumerable<CultureInfo>
     {
-        private CultureInfo m_startingCulture;
-        private CultureInfo? m_neutralResourcesCulture;
-        private bool m_useParents;
+        private readonly CultureInfo m_startingCulture;
+        private readonly CultureInfo? m_neutralResourcesCulture;
+        private readonly bool m_useParents;
 
         internal ResourceFallbackManager(CultureInfo? startingCulture, CultureInfo? neutralResourcesCulture, bool useParents)
         {

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -14,7 +14,7 @@ namespace System.Data.SqlTypes
             throw new PlatformNotSupportedException(SR.SqlFileStream_NotSupported);
         }
 
-        public SqlFileStream(string path, byte[] transactionContext, FileAccess access, FileOptions options, Int64 allocationSize)
+        public SqlFileStream(string path, byte[] transactionContext, FileAccess access, FileOptions options, long allocationSize)
         {
             throw new PlatformNotSupportedException(SR.SqlFileStream_NotSupported);
         }
@@ -33,5 +33,3 @@ namespace System.Data.SqlTypes
         public override void Write(byte[] buffer, int offset, int count) { throw new PlatformNotSupportedException(SR.SqlFileStream_NotSupported); }
     }
 }
-
-

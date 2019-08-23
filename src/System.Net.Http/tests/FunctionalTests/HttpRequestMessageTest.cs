@@ -26,8 +26,8 @@ namespace System.Net.Http.Functional.Tests
 
             Assert.Equal(HttpMethod.Get, rm.Method);
             Assert.Equal(_expectedRequestMessageVersion, rm.Version);
-            Assert.Equal(null, rm.Content);
-            Assert.Equal(null, rm.RequestUri);
+            Assert.Null(rm.Content);
+            Assert.Null(rm.RequestUri);
         }
 
         [Fact]
@@ -37,7 +37,7 @@ namespace System.Net.Http.Functional.Tests
 
             Assert.Equal(HttpMethod.Post, rm.Method);
             Assert.Equal(_expectedRequestMessageVersion, rm.Version);
-            Assert.Equal(null, rm.Content);
+            Assert.Null(rm.Content);
             Assert.Equal(new Uri("/relative", UriKind.Relative), rm.RequestUri);
         }
 
@@ -48,7 +48,7 @@ namespace System.Net.Http.Functional.Tests
 
             Assert.Equal(HttpMethod.Post, rm.Method);
             Assert.Equal(_expectedRequestMessageVersion, rm.Version);
-            Assert.Equal(null, rm.Content);
+            Assert.Null(rm.Content);
             Assert.Equal(new Uri("http://host/absolute/"), rm.RequestUri);
         }
 
@@ -57,10 +57,10 @@ namespace System.Net.Http.Functional.Tests
         {
             var rm = new HttpRequestMessage(HttpMethod.Put, (string)null);
 
-            Assert.Equal(null, rm.RequestUri);
+            Assert.Null(rm.RequestUri);
             Assert.Equal(HttpMethod.Put, rm.Method);
             Assert.Equal(_expectedRequestMessageVersion, rm.Version);
-            Assert.Equal(null, rm.Content);
+            Assert.Null(rm.Content);
         }
 
         [Fact]
@@ -71,7 +71,7 @@ namespace System.Net.Http.Functional.Tests
 
             Assert.Equal(HttpMethod.Post, rm.Method);
             Assert.Equal(_expectedRequestMessageVersion, rm.Version);
-            Assert.Equal(null, rm.Content);
+            Assert.Null(rm.Content);
             Assert.Equal(uri, rm.RequestUri);
         }
 
@@ -83,7 +83,7 @@ namespace System.Net.Http.Functional.Tests
 
             Assert.Equal(HttpMethod.Post, rm.Method);
             Assert.Equal(_expectedRequestMessageVersion, rm.Version);
-            Assert.Equal(null, rm.Content);
+            Assert.Null(rm.Content);
             Assert.Equal(uri, rm.RequestUri);
         }
 
@@ -92,10 +92,10 @@ namespace System.Net.Http.Functional.Tests
         {
             var rm = new HttpRequestMessage(HttpMethod.Put, (Uri)null);
 
-            Assert.Equal(null, rm.RequestUri);
+            Assert.Null(rm.RequestUri);
             Assert.Equal(HttpMethod.Put, rm.Method);
             Assert.Equal(_expectedRequestMessageVersion, rm.Version);
-            Assert.Equal(null, rm.Content);
+            Assert.Null(rm.Content);
         }
 
         [Fact]
@@ -120,7 +120,7 @@ namespace System.Net.Http.Functional.Tests
 
             rm.Dispose();
             rm.Dispose(); // Multiple calls don't throw.
-            
+
             Assert.True(content.IsDisposed);
             Assert.Throws<ObjectDisposedException>(() => { rm.Method = HttpMethod.Put; });
             Assert.Throws<ObjectDisposedException>(() => { rm.RequestUri = null; });
@@ -183,9 +183,9 @@ namespace System.Net.Http.Functional.Tests
         public void ToString_DefaultAndNonDefaultInstance_DumpAllFields()
         {
             var rm = new HttpRequestMessage();
-            string expected = 
-                    "Method: GET, RequestUri: '<null>', Version: " + 
-                    _expectedRequestMessageVersion.ToString(2) + 
+            string expected =
+                    "Method: GET, RequestUri: '<null>', Version: " +
+                    _expectedRequestMessageVersion.ToString(2) +
                     ", Content: <null>, Headers:\r\n{\r\n}";
             Assert.Equal(expected, rm.ToString());
 
@@ -204,7 +204,7 @@ namespace System.Net.Http.Functional.Tests
 
             rm.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain", 0.2));
             rm.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/xml", 0.1));
-            rm.Headers.Add("Custom-Request-Header", "value1");            
+            rm.Headers.Add("Custom-Request-Header", "value1");
             rm.Content.Headers.Add("Custom-Content-Header", "value2");
 
             Assert.Equal(
@@ -261,7 +261,7 @@ namespace System.Net.Http.Functional.Tests
                     var request = new HttpRequestMessage(HttpMethod.Head, uri);
 
                     Task<HttpResponseMessage> requestTask = client.SendAsync(request);
-                    
+
                     await server.AcceptConnectionAsync(async connection =>
                     {
                         // Content-Length greater than 2GB.

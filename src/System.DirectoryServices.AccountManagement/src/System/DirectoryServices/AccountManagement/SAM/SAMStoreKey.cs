@@ -10,8 +10,8 @@ namespace System.DirectoryServices.AccountManagement
 {
     internal class SAMStoreKey : StoreKey
     {
-        private byte[] _sid;
-        private string _machineName;
+        private readonly byte[] _sid;
+        private readonly string _machineName;
 
         public SAMStoreKey(string machineName, byte[] sid)
         {
@@ -45,10 +45,9 @@ namespace System.DirectoryServices.AccountManagement
             return Utils.AreBytesEqual(_sid, that._sid);
         }
 
-        override public int GetHashCode()
+        public override int GetHashCode()
         {
             return _machineName.GetHashCode() ^ _sid.GetHashCode();
         }
     }
 }
-

@@ -100,7 +100,7 @@ namespace System.Globalization.Tests
             yield return new object[] { s_currentCompare, "\u0131", "\u0131", 0, 1, CompareOptions.Ordinal, 0 };
             yield return new object[] { s_currentCompare, "\u0130", "\u0131", 0, 1, CompareOptions.Ordinal, -1 };
             yield return new object[] { s_currentCompare, "\u0131", "\u0130", 0, 1, CompareOptions.Ordinal, -1 };
-            
+
             // Platform differences
             yield return new object[] { s_hungarianCompare, "foobardzsdzs", "rddzs", 0, 12, CompareOptions.None, PlatformDetection.IsWindows ? 5 : -1};
         }
@@ -108,7 +108,7 @@ namespace System.Globalization.Tests
         public static IEnumerable<object[]> IndexOf_Aesc_Ligature_TestData()
         {
             bool isWindows = PlatformDetection.IsWindows;
-            // Searches for the ligature Æ
+            // Searches for the ligature \u00C6
             string source1 = "Is AE or ae the same as \u00C6 or \u00E6?";
             yield return new object[] { s_invariantCompare, source1, "AE", 8, 18, CompareOptions.None, isWindows ? 24 : -1};
             yield return new object[] { s_invariantCompare, source1, "ae", 8, 18, CompareOptions.None, 9 };
@@ -209,7 +209,7 @@ namespace System.Globalization.Tests
         [Fact]
         public void IndexOf_UnassignedUnicode()
         {
-            bool isWindows = PlatformDetection.IsWindows; 
+            bool isWindows = PlatformDetection.IsWindows;
             IndexOf_String(s_invariantCompare, "FooBar", "Foo\uFFFFBar", 0, 6, CompareOptions.None, isWindows ? 0 : -1);
             IndexOf_String(s_invariantCompare, "~FooBar", "Foo\uFFFFBar", 0, 7, CompareOptions.IgnoreNonSpace, isWindows ? 1 : -1);
         }

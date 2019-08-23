@@ -45,7 +45,6 @@ namespace System.Reflection.TypeLoading
         {
             return _pointerDict.GetOrAdd(elementType, (e) => new RoPointerType(e));
         }
-        private static readonly Func<RoType, RoPointerType> s_pointerTypeFactory = (e) => new RoPointerType(e);
         private readonly ConcurrentDictionary<RoType, RoPointerType> _pointerDict = new ConcurrentDictionary<RoType, RoPointerType>();
 
         //
@@ -55,7 +54,7 @@ namespace System.Reflection.TypeLoading
         {
             return _constructedGenericTypeDict.GetOrAdd(new RoConstructedGenericType.Key(genericTypeDefinition, genericTypeArguments), s_constructedGenericTypeFactory);
         }
-        private static readonly Func<RoConstructedGenericType.Key, RoConstructedGenericType> s_constructedGenericTypeFactory = 
+        private static readonly Func<RoConstructedGenericType.Key, RoConstructedGenericType> s_constructedGenericTypeFactory =
             (k) => new RoConstructedGenericType(k.GenericTypeDefinition, k.GenericTypeArguments);
         private readonly ConcurrentDictionary<RoConstructedGenericType.Key, RoConstructedGenericType> _constructedGenericTypeDict = new ConcurrentDictionary<RoConstructedGenericType.Key, RoConstructedGenericType>();
     }

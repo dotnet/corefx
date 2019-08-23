@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -254,7 +254,7 @@ namespace System.Xml.Tests
         [XmlWriterInlineData(WriterType.AllButCustom & ~WriterType.CharCheckingWriter, "EntityRef", true)]
         [XmlWriterInlineData(WriterType.AllButCustom & ~WriterType.CharCheckingWriter, "Name", true)]
         [XmlWriterInlineData(WriterType.AllButCustom & ~WriterType.CharCheckingWriter, "NmToken", true)]
-        [XmlWriterInlineData(WriterType.AllButCustom & ~WriterType.CharCheckingWriter, "QName", true)]		
+        [XmlWriterInlineData(WriterType.AllButCustom & ~WriterType.CharCheckingWriter, "QName", true)]
         public void checkChars_4(XmlWriterUtils utils, string tokenType, bool checkCharacters)
         {
             XmlWriterSettings wSettings = new XmlWriterSettings();
@@ -316,7 +316,7 @@ namespace System.Xml.Tests
 
         /*=============================================================================
         The writer contructor will throw XmlException when CheckCharacters=true and
-            - IndentChars or NewLineChars contains non-whitespace character when NewLineOnAttributes=true 
+            - IndentChars or NewLineChars contains non-whitespace character when NewLineOnAttributes=true
         or
             - IndentChars or NewLineChars contains <, &, ]]> or an invalid surrogate character when NewLineOnAttributes=false
         ===============================================================================*/

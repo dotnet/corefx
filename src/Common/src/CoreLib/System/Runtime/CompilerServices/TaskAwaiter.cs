@@ -6,9 +6,9 @@
 //
 //
 //
-// Types for awaiting Task and Task<T>. These types are emitted from Task{<T>}.GetAwaiter 
+// Types for awaiting Task and Task<T>. These types are emitted from Task{<T>}.GetAwaiter
 // and Task{<T>}.ConfigureAwait.  They are meant to be used only by the compiler, e.g.
-// 
+//
 //   await nonGenericTask;
 //   =====================
 //       var $awaiter = nonGenericTask.GetAwaiter();
@@ -37,8 +37,10 @@
 //
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -71,10 +73,7 @@ namespace System.Runtime.CompilerServices
         /// <summary>Gets whether the task being awaited is completed.</summary>
         /// <remarks>This property is intended for compiler user rather than use directly in code.</remarks>
         /// <exception cref="System.NullReferenceException">The awaiter was not properly initialized.</exception>
-        public bool IsCompleted
-        {
-            get { return m_task.IsCompleted; }
-        }
+        public bool IsCompleted => m_task.IsCompleted;
 
         /// <summary>Schedules the continuation onto the <see cref="System.Threading.Tasks.Task"/> associated with this <see cref="TaskAwaiter"/>.</summary>
         /// <param name="continuation">The action to invoke when the await operation completes.</param>
@@ -124,7 +123,7 @@ namespace System.Runtime.CompilerServices
         }
 
         /// <summary>
-        /// Ensures the task is completed, triggers any necessary debugger breakpoints for completing 
+        /// Ensures the task is completed, triggers any necessary debugger breakpoints for completing
         /// the await on the task, and throws an exception if the task did not complete successfully.
         /// </summary>
         /// <param name="task">The awaited task.</param>
@@ -166,7 +165,7 @@ namespace System.Runtime.CompilerServices
                 // TaskCanceledException. TCE derives from OCE, and by throwing it we automatically pick up the
                 // completed task's CancellationToken if it has one, including that CT in the OCE.
                 case TaskStatus.Canceled:
-                    var oceEdi = task.GetCancellationExceptionDispatchInfo();
+                    ExceptionDispatchInfo? oceEdi = task.GetCancellationExceptionDispatchInfo();
                     if (oceEdi != null)
                     {
                         oceEdi.Throw();
@@ -177,7 +176,7 @@ namespace System.Runtime.CompilerServices
                 // If the task faulted, throw its first exception,
                 // even if it contained more than one.
                 case TaskStatus.Faulted:
-                    var edis = task.GetExceptionDispatchInfos();
+                    ReadOnlyCollection<ExceptionDispatchInfo> edis = task.GetExceptionDispatchInfos();
                     if (edis.Count > 0)
                     {
                         edis[0].Throw();
@@ -251,15 +250,15 @@ namespace System.Runtime.CompilerServices
                 Task.AddToActiveTasks(task);
             }
 
-            var log = TplEventSource.Log;
+            TplEventSource log = TplEventSource.Log;
 
             if (log.IsEnabled())
             {
                 // ETW event for Task Wait Begin
-                var currentTaskAtBegin = Task.InternalCurrent;
+                Task? currentTaskAtBegin = Task.InternalCurrent;
 
                 // If this task's continuation is another task, get it.
-                var continuationTask = AsyncMethodBuilderCore.TryGetContinuationTask(continuation);
+                Task? continuationTask = AsyncMethodBuilderCore.TryGetContinuationTask(continuation);
                 log.TaskWaitBegin(
                     (currentTaskAtBegin != null ? currentTaskAtBegin.m_taskScheduler!.Id : TaskScheduler.Default.Id),
                     (currentTaskAtBegin != null ? currentTaskAtBegin.Id : 0),
@@ -272,7 +271,7 @@ namespace System.Runtime.CompilerServices
             // is enabled, and in doing so it allows us to pass the awaited task's information into the end event
             // in a purely pay-for-play manner (the alternatively would be to increase the size of TaskAwaiter
             // just for this ETW purpose, not pay-for-play, since GetResult would need to know whether a real yield occurred).
-            return AsyncMethodBuilderCore.CreateContinuationWrapper(continuation, (innerContinuation,innerTask) =>
+            return AsyncMethodBuilderCore.CreateContinuationWrapper(continuation, (innerContinuation, innerTask) =>
             {
                 if (Task.s_asyncDebuggingEnabled)
                 {
@@ -286,7 +285,7 @@ namespace System.Runtime.CompilerServices
                 bool bEtwLogEnabled = innerEtwLog.IsEnabled();
                 if (bEtwLogEnabled)
                 {
-                    var currentTaskAtEnd = Task.InternalCurrent;
+                    Task? currentTaskAtEnd = Task.InternalCurrent;
                     innerEtwLog.TaskWaitEnd(
                         (currentTaskAtEnd != null ? currentTaskAtEnd.m_taskScheduler!.Id : TaskScheduler.Default.Id),
                         (currentTaskAtEnd != null ? currentTaskAtEnd.Id : 0),
@@ -332,10 +331,7 @@ namespace System.Runtime.CompilerServices
         /// <summary>Gets whether the task being awaited is completed.</summary>
         /// <remarks>This property is intended for compiler user rather than use directly in code.</remarks>
         /// <exception cref="System.NullReferenceException">The awaiter was not properly initialized.</exception>
-        public bool IsCompleted
-        {
-            get { return m_task.IsCompleted; }
-        }
+        public bool IsCompleted => m_task.IsCompleted;
 
         /// <summary>Schedules the continuation onto the <see cref="System.Threading.Tasks.Task"/> associated with this <see cref="TaskAwaiter"/>.</summary>
         /// <param name="continuation">The action to invoke when the await operation completes.</param>
@@ -417,9 +413,9 @@ namespace System.Runtime.CompilerServices
             // Its layout must remain the same.
 
             /// <summary>The task being awaited.</summary>
-            internal readonly Task m_task; 
+            internal readonly Task m_task;
             /// <summary>Whether to attempt marshaling back to the original context.</summary>
-            internal readonly bool m_continueOnCapturedContext; 
+            internal readonly bool m_continueOnCapturedContext;
 
             /// <summary>Initializes the <see cref="ConfiguredTaskAwaiter"/>.</summary>
             /// <param name="task">The <see cref="System.Threading.Tasks.Task"/> to await.</param>
@@ -437,10 +433,7 @@ namespace System.Runtime.CompilerServices
             /// <summary>Gets whether the task being awaited is completed.</summary>
             /// <remarks>This property is intended for compiler user rather than use directly in code.</remarks>
             /// <exception cref="System.NullReferenceException">The awaiter was not properly initialized.</exception>
-            public bool IsCompleted
-            {
-                get { return m_task.IsCompleted; }
-            }
+            public bool IsCompleted => m_task.IsCompleted;
 
             /// <summary>Schedules the continuation onto the <see cref="System.Threading.Tasks.Task"/> associated with this <see cref="TaskAwaiter"/>.</summary>
             /// <param name="continuation">The action to invoke when the await operation completes.</param>
@@ -463,7 +456,6 @@ namespace System.Runtime.CompilerServices
             }
 
             /// <summary>Ends the await on the completed <see cref="System.Threading.Tasks.Task"/>.</summary>
-            /// <returns>The result of the completed <see cref="System.Threading.Tasks.Task{TResult}"/>.</returns>
             /// <exception cref="System.NullReferenceException">The awaiter was not properly initialized.</exception>
             /// <exception cref="System.Threading.Tasks.TaskCanceledException">The task was canceled.</exception>
             /// <exception cref="System.Exception">The task completed in a Faulted state.</exception>
@@ -526,10 +518,7 @@ namespace System.Runtime.CompilerServices
             /// <summary>Gets whether the task being awaited is completed.</summary>
             /// <remarks>This property is intended for compiler user rather than use directly in code.</remarks>
             /// <exception cref="System.NullReferenceException">The awaiter was not properly initialized.</exception>
-            public bool IsCompleted
-            {
-                get { return m_task.IsCompleted; }
-            }
+            public bool IsCompleted => m_task.IsCompleted;
 
             /// <summary>Schedules the continuation onto the <see cref="System.Threading.Tasks.Task"/> associated with this <see cref="TaskAwaiter"/>.</summary>
             /// <param name="continuation">The action to invoke when the await operation completes.</param>

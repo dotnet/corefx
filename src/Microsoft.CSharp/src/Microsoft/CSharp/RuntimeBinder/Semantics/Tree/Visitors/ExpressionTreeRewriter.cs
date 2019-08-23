@@ -41,7 +41,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
                 else
                 {
-                    // Indexed assignment. Here we need to find the instance of the object, create the 
+                    // Indexed assignment. Here we need to find the instance of the object, create the
                     // PropInfo for the thing, and get the array of expressions that make up the index arguments.
                     //
                     // The LHS becomes Expression.Property(instance, indexerInfo, arguments).
@@ -144,7 +144,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return Visit(pArgument);
             }
 
-            // If we have a cast to PredefinedType.PT_G_EXPRESSION and the thing that we're casting is 
+            // If we have a cast to PredefinedType.PT_G_EXPRESSION and the thing that we're casting is
             // a EXPRBOUNDLAMBDA that is an expression tree, then just visit the expression tree.
             if (pExpr.Type != null &&
                     pExpr.Type.IsPredefType(PredefinedType.PT_G_EXPRESSION) &&
@@ -262,7 +262,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // source code then it will be an EXPLICITCAST and we will visit it normally.
                 //
                 // It might be better to rewrite the expression tree API so that it
-                // can handle in the general case all implicit boxing conversions. Right now it 
+                // can handle in the general case all implicit boxing conversions. Right now it
                 // requires that all arguments to a call that need to be boxed be explicitly boxed.
 
                 if (pObject != null && pObject is ExprCast cast && cast.IsBoxingCast)
@@ -337,40 +337,32 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private Expr GenerateBuiltInBinaryOperator(ExprBinOp expr)
         {
             Debug.Assert(expr != null);
-            PREDEFMETH pdm;
 
-            switch (expr.Kind)
+            PREDEFMETH pdm = expr.Kind switch
             {
-                case ExpressionKind.LeftShirt: pdm = PREDEFMETH.PM_EXPRESSION_LEFTSHIFT; break;
-                case ExpressionKind.RightShift: pdm = PREDEFMETH.PM_EXPRESSION_RIGHTSHIFT; break;
-                case ExpressionKind.BitwiseExclusiveOr: pdm = PREDEFMETH.PM_EXPRESSION_EXCLUSIVEOR; break;
-                case ExpressionKind.BitwiseOr: pdm = PREDEFMETH.PM_EXPRESSION_OR; break;
-                case ExpressionKind.BitwiseAnd: pdm = PREDEFMETH.PM_EXPRESSION_AND; break;
-                case ExpressionKind.LogicalAnd: pdm = PREDEFMETH.PM_EXPRESSION_ANDALSO; break;
-                case ExpressionKind.LogicalOr: pdm = PREDEFMETH.PM_EXPRESSION_ORELSE; break;
-                case ExpressionKind.StringEq: pdm = PREDEFMETH.PM_EXPRESSION_EQUAL; break;
-                case ExpressionKind.Eq: pdm = PREDEFMETH.PM_EXPRESSION_EQUAL; break;
-                case ExpressionKind.StringNotEq: pdm = PREDEFMETH.PM_EXPRESSION_NOTEQUAL; break;
-                case ExpressionKind.NotEq: pdm = PREDEFMETH.PM_EXPRESSION_NOTEQUAL; break;
-                case ExpressionKind.GreaterThanOrEqual: pdm = PREDEFMETH.PM_EXPRESSION_GREATERTHANOREQUAL; break;
-                case ExpressionKind.LessThanOrEqual: pdm = PREDEFMETH.PM_EXPRESSION_LESSTHANOREQUAL; break;
-                case ExpressionKind.LessThan: pdm = PREDEFMETH.PM_EXPRESSION_LESSTHAN; break;
-                case ExpressionKind.GreaterThan: pdm = PREDEFMETH.PM_EXPRESSION_GREATERTHAN; break;
-                case ExpressionKind.Modulo: pdm = PREDEFMETH.PM_EXPRESSION_MODULO; break;
-                case ExpressionKind.Divide: pdm = PREDEFMETH.PM_EXPRESSION_DIVIDE; break;
-                case ExpressionKind.Multiply:
-                    pdm = expr.isChecked() ? PREDEFMETH.PM_EXPRESSION_MULTIPLYCHECKED : PREDEFMETH.PM_EXPRESSION_MULTIPLY;
-                    break;
-                case ExpressionKind.Subtract:
-                    pdm = expr.isChecked() ? PREDEFMETH.PM_EXPRESSION_SUBTRACTCHECKED : PREDEFMETH.PM_EXPRESSION_SUBTRACT;
-                    break;
-                case ExpressionKind.Add:
-                    pdm = expr.isChecked() ? PREDEFMETH.PM_EXPRESSION_ADDCHECKED : PREDEFMETH.PM_EXPRESSION_ADD;
-                    break;
+                ExpressionKind.LeftShirt => PREDEFMETH.PM_EXPRESSION_LEFTSHIFT,
+                ExpressionKind.RightShift => PREDEFMETH.PM_EXPRESSION_RIGHTSHIFT,
+                ExpressionKind.BitwiseExclusiveOr => PREDEFMETH.PM_EXPRESSION_EXCLUSIVEOR,
+                ExpressionKind.BitwiseOr => PREDEFMETH.PM_EXPRESSION_OR,
+                ExpressionKind.BitwiseAnd => PREDEFMETH.PM_EXPRESSION_AND,
+                ExpressionKind.LogicalAnd => PREDEFMETH.PM_EXPRESSION_ANDALSO,
+                ExpressionKind.LogicalOr => PREDEFMETH.PM_EXPRESSION_ORELSE,
+                ExpressionKind.StringEq => PREDEFMETH.PM_EXPRESSION_EQUAL,
+                ExpressionKind.Eq => PREDEFMETH.PM_EXPRESSION_EQUAL,
+                ExpressionKind.StringNotEq => PREDEFMETH.PM_EXPRESSION_NOTEQUAL,
+                ExpressionKind.NotEq => PREDEFMETH.PM_EXPRESSION_NOTEQUAL,
+                ExpressionKind.GreaterThanOrEqual => PREDEFMETH.PM_EXPRESSION_GREATERTHANOREQUAL,
+                ExpressionKind.LessThanOrEqual => PREDEFMETH.PM_EXPRESSION_LESSTHANOREQUAL,
+                ExpressionKind.LessThan => PREDEFMETH.PM_EXPRESSION_LESSTHAN,
+                ExpressionKind.GreaterThan => PREDEFMETH.PM_EXPRESSION_GREATERTHAN,
+                ExpressionKind.Modulo => PREDEFMETH.PM_EXPRESSION_MODULO,
+                ExpressionKind.Divide => PREDEFMETH.PM_EXPRESSION_DIVIDE,
+                ExpressionKind.Multiply => expr.isChecked() ? PREDEFMETH.PM_EXPRESSION_MULTIPLYCHECKED : PREDEFMETH.PM_EXPRESSION_MULTIPLY,
+                ExpressionKind.Subtract => expr.isChecked() ? PREDEFMETH.PM_EXPRESSION_SUBTRACTCHECKED : PREDEFMETH.PM_EXPRESSION_SUBTRACT,
+                ExpressionKind.Add => expr.isChecked() ? PREDEFMETH.PM_EXPRESSION_ADDCHECKED : PREDEFMETH.PM_EXPRESSION_ADD,
 
-                default:
-                    throw Error.InternalCompilerError();
-            }
+                _ => throw Error.InternalCompilerError(),
+            };
             Expr origL = expr.OptionalLeftChild;
             Expr origR = expr.OptionalRightChild;
             Debug.Assert(origL != null);
@@ -597,23 +589,21 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private Expr GenerateUserDefinedComparisonOperator(ExprBinOp expr)
         {
             Debug.Assert(expr != null);
-            PREDEFMETH pdm;
 
-            switch (expr.Kind)
+            PREDEFMETH pdm = expr.Kind switch
             {
-                case ExpressionKind.StringEq: pdm = PREDEFMETH.PM_EXPRESSION_EQUAL_USER_DEFINED; break;
-                case ExpressionKind.StringNotEq: pdm = PREDEFMETH.PM_EXPRESSION_NOTEQUAL_USER_DEFINED; break;
-                case ExpressionKind.DelegateEq: pdm = PREDEFMETH.PM_EXPRESSION_EQUAL_USER_DEFINED; break;
-                case ExpressionKind.DelegateNotEq: pdm = PREDEFMETH.PM_EXPRESSION_NOTEQUAL_USER_DEFINED; break;
-                case ExpressionKind.Eq: pdm = PREDEFMETH.PM_EXPRESSION_EQUAL_USER_DEFINED; break;
-                case ExpressionKind.NotEq: pdm = PREDEFMETH.PM_EXPRESSION_NOTEQUAL_USER_DEFINED; break;
-                case ExpressionKind.LessThanOrEqual: pdm = PREDEFMETH.PM_EXPRESSION_LESSTHANOREQUAL_USER_DEFINED; break;
-                case ExpressionKind.LessThan: pdm = PREDEFMETH.PM_EXPRESSION_LESSTHAN_USER_DEFINED; break;
-                case ExpressionKind.GreaterThanOrEqual: pdm = PREDEFMETH.PM_EXPRESSION_GREATERTHANOREQUAL_USER_DEFINED; break;
-                case ExpressionKind.GreaterThan: pdm = PREDEFMETH.PM_EXPRESSION_GREATERTHAN_USER_DEFINED; break;
-                default:
-                    throw Error.InternalCompilerError();
-            }
+                ExpressionKind.StringEq => PREDEFMETH.PM_EXPRESSION_EQUAL_USER_DEFINED,
+                ExpressionKind.StringNotEq => PREDEFMETH.PM_EXPRESSION_NOTEQUAL_USER_DEFINED,
+                ExpressionKind.DelegateEq => PREDEFMETH.PM_EXPRESSION_EQUAL_USER_DEFINED,
+                ExpressionKind.DelegateNotEq => PREDEFMETH.PM_EXPRESSION_NOTEQUAL_USER_DEFINED,
+                ExpressionKind.Eq => PREDEFMETH.PM_EXPRESSION_EQUAL_USER_DEFINED,
+                ExpressionKind.NotEq => PREDEFMETH.PM_EXPRESSION_NOTEQUAL_USER_DEFINED,
+                ExpressionKind.LessThanOrEqual => PREDEFMETH.PM_EXPRESSION_LESSTHANOREQUAL_USER_DEFINED,
+                ExpressionKind.LessThan => PREDEFMETH.PM_EXPRESSION_LESSTHAN_USER_DEFINED,
+                ExpressionKind.GreaterThanOrEqual => PREDEFMETH.PM_EXPRESSION_GREATERTHANOREQUAL_USER_DEFINED,
+                ExpressionKind.GreaterThan => PREDEFMETH.PM_EXPRESSION_GREATERTHAN_USER_DEFINED,
+                _ => throw Error.InternalCompilerError(),
+            };
             Expr p1 = expr.OptionalLeftChild;
             Expr p2 = expr.OptionalRightChild;
             if (expr.OptionalUserDefinedCall != null)
@@ -663,9 +653,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // that we convert the enum? to its nullable underlying CType.
             if (isEnumToDecimalConversion(arg.Type, CType))
             {
-                // Special case: If we have enum? to decimal? then we need to emit 
+                // Special case: If we have enum? to decimal? then we need to emit
                 // a conversion from enum? to its nullable underlying CType first.
-                // This is unfortunate; we ought to reorganize how conversions are 
+                // This is unfortunate; we ought to reorganize how conversions are
                 // represented in the Expr tree so that this is more transparent.
 
                 // converting an enum to its underlying CType never fails, so no need to check it.
@@ -677,7 +667,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // If the methodinfo does not return the target CType AND this is not a lifted conversion
             // from one value CType to another, then we need to wrap the whole thing in another conversion,
-            // e.g. if we have a user-defined conversion from int to S? and we have (S)myint, then we need to generate 
+            // e.g. if we have a user-defined conversion from int to S? and we have (S)myint, then we need to generate
             // Convert(Convert(myint, typeof(S?), op_implicit), typeof(S))
 
             CType pMethodReturnType = TypeManager.SubstType(method.Meth().RetType,
@@ -732,7 +722,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         return GenerateConversionWithSource(pConversionSource, pCastCall.Type, call.isChecked());
                     }
 
-                    // This can happen if we have a UD conversion from C to, say, int, 
+                    // This can happen if we have a UD conversion from C to, say, int,
                     // and we have an explicit cast to decimal?. The conversion should
                     // then be bound as two chained user-defined conversions.
                     Debug.Assert(pUDConversion is ExprUserDefinedConversion);
@@ -855,7 +845,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private static ExprCall GenerateCall(PREDEFMETH pdm, Expr arg1)
         {
             MethodSymbol method = GetPreDefMethod(pdm);
-            // this should be enforced in an earlier pass and the transform pass should not 
+            // this should be enforced in an earlier pass and the transform pass should not
             // be handling this error
             if (method == null)
                 return null;

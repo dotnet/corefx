@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -197,7 +197,6 @@ namespace System.Runtime.Serialization.Json
 
             childElementIndex += memberCount;
 
-            Type classType = classContract.UnadaptedClassType;
             context.IncrementItemCount(classContract.Members.Count);
             for (int i = 0; i < classContract.Members.Count; i++, memberCount++)
             {
@@ -256,7 +255,7 @@ namespace System.Runtime.Serialization.Json
                         ReflectionWriteEndElement(xmlWriter);
                     }
 
-                    if(classContract.HasExtensionData)
+                    if (classContract.HasExtensionData)
                     {
                         context.WriteExtensionData(xmlWriter, ((IExtensibleDataObject)obj).ExtensionData, memberCount);
                     }
@@ -264,7 +263,7 @@ namespace System.Runtime.Serialization.Json
             }
 
             return memberCount;
-        }        
+        }
 
         public void ReflectionWriteStartElement(XmlWriterDelegator xmlWriter, XmlDictionaryString name)
         {
@@ -279,6 +278,6 @@ namespace System.Runtime.Serialization.Json
         public void ReflectionWriteEndElement(XmlWriterDelegator xmlWriter)
         {
             xmlWriter.WriteEndElement();
-        }        
+        }
     }
 }

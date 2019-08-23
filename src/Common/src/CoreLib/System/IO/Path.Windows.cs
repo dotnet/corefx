@@ -148,7 +148,7 @@ namespace System.IO
 
         private static void GetTempPath(ref ValueStringBuilder builder)
         {
-            uint result = 0;
+            uint result;
             while ((result = Interop.Kernel32.GetTempPathW(builder.Capacity, ref builder.GetPinnableReference())) > builder.Capacity)
             {
                 // Reported size is greater than the buffer size. Increase the capacity.
@@ -236,7 +236,7 @@ namespace System.IO
         }
 
         /// <summary>Gets whether the system is case-sensitive.</summary>
-        internal static bool IsCaseSensitive { get { return false; } }
+        internal static bool IsCaseSensitive => false;
 
         /// <summary>
         /// Returns the volume name for dos, UNC and device paths.
@@ -276,7 +276,7 @@ namespace System.IO
         {
             bool isDevice = PathInternal.IsDevice(path);
 
-            if (!isDevice && path.Slice(0, 2).EqualsOrdinal(@"\\".AsSpan()) )
+            if (!isDevice && path.Slice(0, 2).EqualsOrdinal(@"\\".AsSpan()))
                 return 2;
             else if (isDevice && path.Length >= 8
                 && (path.Slice(0, 8).EqualsOrdinal(PathInternal.UncExtendedPathPrefix.AsSpan())

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
@@ -375,7 +375,7 @@ namespace System.IO.Pipelines.Tests
                 readResult = await reader.ReadAsync();
                 buffer = readResult.Buffer;
                 Assert.Equal(options.BufferSize * 2, buffer.Length);
-                // We end up allocating a 3rd block here since we don't know ahead of time that 
+                // We end up allocating a 3rd block here since we don't know ahead of time that
                 // it's the last one
                 Assert.Equal(3, pool.CurrentlyRentedBlocks);
 
@@ -486,7 +486,9 @@ namespace System.IO.Pipelines.Tests
         {
             bool fired = false;
             PipeReader reader = PipeReader.Create(Stream.Null);
+#pragma warning disable CS0618 // Type or member is obsolete
             reader.OnWriterCompleted((_, __) => { fired = true; }, null);
+#pragma warning restore CS0618 // Type or member is obsolete
             reader.Complete();
             Assert.False(fired);
         }
@@ -509,7 +511,7 @@ namespace System.IO.Pipelines.Tests
 
             reader.Complete();
         }
-        
+
         [Fact]
         public void NullStreamThrows()
         {

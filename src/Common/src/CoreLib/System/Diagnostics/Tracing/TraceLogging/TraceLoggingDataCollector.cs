@@ -2,8 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if ES_BUILD_STANDALONE
 using System;
-using System.Security;
+#endif
 
 #if ES_BUILD_STANDALONE
 namespace Microsoft.Diagnostics.Tracing
@@ -62,7 +63,7 @@ namespace System.Diagnostics.Tracing
 
         public void AddScalar(PropertyValue value)
         {
-            var scalar = value.ScalarValue;
+            PropertyValue.Scalar scalar = value.ScalarValue;
             DataCollector.ThreadInstance.AddScalar(&scalar, value.ScalarLength);
         }
 

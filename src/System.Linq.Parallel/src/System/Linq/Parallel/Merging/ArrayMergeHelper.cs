@@ -28,8 +28,8 @@ namespace System.Linq.Parallel
     /// <typeparam name="TInputOutput"></typeparam>
     internal class ArrayMergeHelper<TInputOutput> : IMergeHelper<TInputOutput>
     {
-        private QueryResults<TInputOutput> _queryResults; // Indexable query results
-        private TInputOutput[] _outputArray; // The output array.
+        private readonly QueryResults<TInputOutput> _queryResults; // Indexable query results
+        private readonly TInputOutput[] _outputArray; // The output array.
         private QuerySettings _settings; // Settings for the query.
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace System.Linq.Parallel
 
         /// <summary>
         /// Gets the enumerator over the results.
-        /// 
+        ///
         /// We never expect this method to be called. ArrayMergeHelper is intended to be used when we want
         /// to consume the results using GetResultsAsArray().
         /// </summary>

@@ -35,8 +35,6 @@ namespace System.IO.Ports
         private const int MinDataBits = 5;
         private const string DefaultNewLine = "\n";
 
-        private const string SERIAL_NAME = @"\Device\Serial";
-
         // --------- members supporting exposed properties ------------*
         private int _baudRate = DefaultBaudRate;
         private int _dataBits = DefaultDataBits;
@@ -63,14 +61,14 @@ namespace System.IO.Ports
         private byte[] _inBuffer = new byte[DefaultBufferSize];
         private int _readPos = 0;    // position of next byte to read in the read buffer.  readPos <= readLen
         private int _readLen = 0;    // position of first unreadable byte => CachedBytesToRead is the number of readable bytes left.
-        private char[] _oneChar = new char[1];
+        private readonly char[] _oneChar = new char[1];
         private char[] _singleCharBuffer = null;
 
         public event SerialErrorReceivedEventHandler ErrorReceived;
         public event SerialPinChangedEventHandler PinChanged;
 
         // handler for the underlying stream
-        private SerialDataReceivedEventHandler _dataReceivedHandler;
+        private readonly SerialDataReceivedEventHandler _dataReceivedHandler;
 
         private SerialDataReceivedEventHandler _dataReceived;
         public event SerialDataReceivedEventHandler DataReceived
@@ -1056,7 +1054,7 @@ namespace System.IO.Ports
                     if (numCharsRead > 1)
                     {
                         for (int i = 0; i < numCharsRead; i++)
-                            Debug.Assert((Char.IsSurrogate(_singleCharBuffer[i])), "number of chars read should be more than one only for surrogate characters!");
+                            Debug.Assert((char.IsSurrogate(_singleCharBuffer[i])), "number of chars read should be more than one only for surrogate characters!");
                     }
 #endif
                     Debug.Assert((numCharsRead > 0), "possible bug in ReadBufferIntoChars, reading surrogate char?");

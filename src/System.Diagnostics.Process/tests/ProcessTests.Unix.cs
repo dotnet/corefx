@@ -109,7 +109,7 @@ namespace System.Diagnostics.Tests
         [OuterLoop]
         public void ProcessStart_UseShellExecute_OnUnix_OpenMissingFile_DoesNotThrow()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && 
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) &&
                 s_allowedProgramsToRun.FirstOrDefault(program => IsProgramInstalled(program)) == null)
             {
                 return;
@@ -221,7 +221,7 @@ namespace System.Diagnostics.Tests
         [PlatformSpecific(TestPlatforms.Linux)] // test relies on xdg-open
         public void ProcessStart_UseShellExecute_OnUnix_DocumentFile_IgnoresArguments()
         {
-            Assert.Equal(s_allowedProgramsToRun[0], "xdg-open");
+            Assert.Equal("xdg-open", s_allowedProgramsToRun[0]);
 
             if (!IsProgramInstalled("xdg-open"))
             {
@@ -428,15 +428,15 @@ namespace System.Diagnostics.Tests
             ProcessPriorityClass priorityClass = _process.PriorityClass;
 
             _process.PriorityClass = ProcessPriorityClass.Idle;
-            Assert.Equal(_process.PriorityClass, ProcessPriorityClass.Idle);
+            Assert.Equal(ProcessPriorityClass.Idle, _process.PriorityClass);
 
             try
             {
                 _process.PriorityClass = ProcessPriorityClass.High;
-                Assert.Equal(_process.PriorityClass, ProcessPriorityClass.High);
+                Assert.Equal(ProcessPriorityClass.High, _process.PriorityClass);
 
                 _process.PriorityClass = ProcessPriorityClass.Normal;
-                Assert.Equal(_process.PriorityClass, ProcessPriorityClass.Normal);
+                Assert.Equal(ProcessPriorityClass.Normal, _process.PriorityClass);
 
                 _process.PriorityClass = priorityClass;
             }
@@ -909,9 +909,9 @@ namespace System.Diagnostics.Tests
         private static extern uint getgid();
 
         [DllImport("libc", SetLastError = true)]
-        private unsafe static extern int getgroups(int size, uint* list);
+        private static extern unsafe int getgroups(int size, uint* list);
 
-        private unsafe static HashSet<uint> GetGroups()
+        private static unsafe HashSet<uint> GetGroups()
         {
             int maxSize = 128;
             Span<uint> groups = stackalloc uint[maxSize];
@@ -933,7 +933,7 @@ namespace System.Diagnostics.Tests
         private static extern int seteuid(uint euid);
 
         [DllImport("libc")]
-        private static unsafe extern int setgroups(int length, uint* groups);
+        private static extern unsafe int setgroups(int length, uint* groups);
 
         private const int SIGKILL = 9;
 

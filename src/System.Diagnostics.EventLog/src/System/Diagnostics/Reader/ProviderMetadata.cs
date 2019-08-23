@@ -20,15 +20,15 @@ namespace System.Diagnostics.Eventing.Reader
         // access to the data member reference is safe, while
         // invoking methods on it is marked SecurityCritical as appropriate.
         //
-        private EventLogHandle _handle = EventLogHandle.Zero;
+        private readonly EventLogHandle _handle = EventLogHandle.Zero;
 
         private EventLogHandle _defaultProviderHandle = EventLogHandle.Zero;
 
-        private EventLogSession _session = null;
+        private readonly EventLogSession _session = null;
 
-        private string _providerName;
-        private CultureInfo _cultureInfo;
-        private string _logFilePath;
+        private readonly string _providerName;
+        private readonly CultureInfo _cultureInfo;
+        private readonly string _logFilePath;
 
         // caching of the IEnumerable<EventLevel>, <EventTask>, <EventKeyword>, <EventOpcode> on the ProviderMetadata
         // they do not change with every call.
@@ -42,7 +42,7 @@ namespace System.Diagnostics.Eventing.Reader
         private IList<EventKeyword> _standardKeywords = null;
         private IList<EventLogLink> _channelReferences = null;
 
-        private object _syncObject;
+        private readonly object _syncObject;
 
         public ProviderMetadata(string providerName)
             : this(providerName, null, null, null)
@@ -196,11 +196,11 @@ namespace System.Diagnostics.Eventing.Reader
 
                             if (channelRefDisplayName == null && isImported)
                             {
-                                if (String.Compare(channelName, "Application", StringComparison.OrdinalIgnoreCase) == 0)
+                                if (string.Compare(channelName, "Application", StringComparison.OrdinalIgnoreCase) == 0)
                                     channelRefMessageId = 256;
-                                else if (String.Compare(channelName, "System", StringComparison.OrdinalIgnoreCase) == 0)
+                                else if (string.Compare(channelName, "System", StringComparison.OrdinalIgnoreCase) == 0)
                                     channelRefMessageId = 258;
-                                else if (String.Compare(channelName, "Security", StringComparison.OrdinalIgnoreCase) == 0)
+                                else if (string.Compare(channelName, "Security", StringComparison.OrdinalIgnoreCase) == 0)
                                     channelRefMessageId = 257;
                                 else
                                     channelRefMessageId = -1;
@@ -369,24 +369,14 @@ namespace System.Diagnostics.Eventing.Reader
                                 _defaultProviderHandle = NativeWrapper.EvtOpenProviderMetadata(_session.Handle, null, null, 0, 0);
                             }
 
-                            switch (objectTypeName)
+                            generalDisplayName = objectTypeName switch
                             {
-                                case ObjectTypeName.Level:
-                                    generalDisplayName = FindStandardLevelDisplayName(generalName, generalValue);
-                                    break;
-                                case ObjectTypeName.Opcode:
-                                    generalDisplayName = FindStandardOpcodeDisplayName(generalName, generalValue >> 16);
-                                    break;
-                                case ObjectTypeName.Keyword:
-                                    generalDisplayName = FindStandardKeywordDisplayName(generalName, generalValueKeyword);
-                                    break;
-                                case ObjectTypeName.Task:
-                                    generalDisplayName = FindStandardTaskDisplayName(generalName, generalValue);
-                                    break;
-                                default:
-                                    generalDisplayName = null;
-                                    break;
-                            }
+                                ObjectTypeName.Level => FindStandardLevelDisplayName(generalName, generalValue),
+                                ObjectTypeName.Opcode => FindStandardOpcodeDisplayName(generalName, generalValue >> 16),
+                                ObjectTypeName.Keyword => FindStandardKeywordDisplayName(generalName, generalValueKeyword),
+                                ObjectTypeName.Task => FindStandardTaskDisplayName(generalName, generalValue),
+                                _ => null,
+                            };
                         }
                     }
                     else
@@ -414,18 +404,14 @@ namespace System.Diagnostics.Eventing.Reader
                     }
                 }
 
-                switch (objectTypeName)
+                return objectTypeName switch
                 {
-                    case ObjectTypeName.Level:
-                        return levelList;
-                    case ObjectTypeName.Opcode:
-                        return opcodeList;
-                    case ObjectTypeName.Keyword:
-                        return keywordList;
-                    case ObjectTypeName.Task:
-                        return taskList;
-                }
-                return null;
+                    ObjectTypeName.Level => levelList,
+                    ObjectTypeName.Opcode => opcodeList,
+                    ObjectTypeName.Keyword => keywordList,
+                    ObjectTypeName.Task => taskList,
+                    _ => null,
+                };
             }
             finally
             {

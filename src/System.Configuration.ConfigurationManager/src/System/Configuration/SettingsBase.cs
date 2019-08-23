@@ -10,7 +10,7 @@ namespace System.Configuration
     {
         private SettingsPropertyCollection _properties = null;
         private SettingsProviderCollection _providers = null;
-        private SettingsPropertyValueCollection _propertyValues = null;
+        private readonly SettingsPropertyValueCollection _propertyValues = null;
         private SettingsContext _context = null;
         private bool _isSynchronized = false;
 
@@ -145,10 +145,10 @@ namespace System.Configuration
                 pp.IsDirty = false;
         }
 
-        virtual public SettingsPropertyCollection Properties { get { return _properties; } }
-        virtual public SettingsProviderCollection Providers { get { return _providers; } }
-        virtual public SettingsPropertyValueCollection PropertyValues { get { return _propertyValues; } }
-        virtual public SettingsContext Context { get { return _context; } }
+        public virtual SettingsPropertyCollection Properties { get { return _properties; } }
+        public virtual SettingsProviderCollection Providers { get { return _providers; } }
+        public virtual SettingsPropertyValueCollection PropertyValues { get { return _propertyValues; } }
+        public virtual SettingsContext Context { get { return _context; } }
 
         private void GetPropertiesFromProvider(SettingsProvider provider)
         {

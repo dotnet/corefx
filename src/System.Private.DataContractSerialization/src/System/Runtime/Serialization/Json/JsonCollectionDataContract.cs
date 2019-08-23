@@ -11,7 +11,7 @@ namespace System.Runtime.Serialization.Json
 {
     internal class JsonCollectionDataContract : JsonDataContract
     {
-        private JsonCollectionDataContractCriticalHelper _helper;
+        private readonly JsonCollectionDataContractCriticalHelper _helper;
 
         public JsonCollectionDataContract(CollectionDataContract traditionalDataContract)
             : base(new JsonCollectionDataContractCriticalHelper(traditionalDataContract))
@@ -39,7 +39,7 @@ namespace System.Runtime.Serialization.Json
                             {
                                 tempDelegate = CreateJsonFormatReaderDelegate();
                             }
-                            else 
+                            else
                             {
                                 tempDelegate = new JsonFormatReaderGenerator().GenerateCollectionReader(TraditionalCollectionDataContract);
                             }
@@ -136,7 +136,7 @@ namespace System.Runtime.Serialization.Json
             object o = null;
             if (context.IsGetOnlyCollection)
             {
-                // IsGetOnlyCollection value has already been used to create current collectiondatacontract, value can now be reset. 
+                // IsGetOnlyCollection value has already been used to create current collectiondatacontract, value can now be reset.
                 context.IsGetOnlyCollection = false;
                 JsonFormatGetOnlyReaderDelegate(jsonReader, context, XmlDictionaryString.Empty, JsonGlobals.itemDictionaryString, TraditionalCollectionDataContract);
             }
@@ -150,7 +150,7 @@ namespace System.Runtime.Serialization.Json
 
         public override void WriteJsonValueCore(XmlWriterDelegator jsonWriter, object obj, XmlObjectSerializerWriteContextComplexJson context, RuntimeTypeHandle declaredTypeHandle)
         {
-            // IsGetOnlyCollection value has already been used to create current collectiondatacontract, value can now be reset. 
+            // IsGetOnlyCollection value has already been used to create current collectiondatacontract, value can now be reset.
             context.IsGetOnlyCollection = false;
             JsonFormatWriterDelegate(jsonWriter, obj, context, TraditionalCollectionDataContract);
         }
@@ -160,7 +160,7 @@ namespace System.Runtime.Serialization.Json
             private JsonFormatCollectionReaderDelegate _jsonFormatReaderDelegate;
             private JsonFormatGetOnlyCollectionReaderDelegate _jsonFormatGetOnlyReaderDelegate;
             private JsonFormatCollectionWriterDelegate _jsonFormatWriterDelegate;
-            private CollectionDataContract _traditionalCollectionDataContract;
+            private readonly CollectionDataContract _traditionalCollectionDataContract;
 
             public JsonCollectionDataContractCriticalHelper(CollectionDataContract traditionalDataContract)
                 : base(traditionalDataContract)

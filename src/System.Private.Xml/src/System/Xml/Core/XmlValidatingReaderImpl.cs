@@ -35,7 +35,7 @@ namespace System.Xml
         internal class ValidationEventHandling : IValidationEventHandling
         {
             // Fields
-            private XmlValidatingReaderImpl _reader;
+            private readonly XmlValidatingReaderImpl _reader;
             private ValidationEventHandler _eventHandler;
 
             // Constructor
@@ -80,27 +80,27 @@ namespace System.Xml
         // Fields
         //
         // core text reader
-        private XmlReader _coreReader;
-        private XmlTextReaderImpl _coreReaderImpl;
-        private IXmlNamespaceResolver _coreReaderNSResolver;
+        private readonly XmlReader _coreReader;
+        private readonly XmlTextReaderImpl _coreReaderImpl;
+        private readonly IXmlNamespaceResolver _coreReaderNSResolver;
 
         // validation
         private ValidationType _validationType;
         private BaseValidator _validator;
 
 #pragma warning disable 618
-        private XmlSchemaCollection _schemaCollection;
+        private readonly XmlSchemaCollection _schemaCollection;
 #pragma warning restore 618
-        private bool _processIdentityConstraints;
+        private readonly bool _processIdentityConstraints;
 
         // parsing function (state)
         private ParsingFunction _parsingFunction = ParsingFunction.Init;
 
         // event handling
-        private ValidationEventHandling _eventHandling;
+        private readonly ValidationEventHandling _eventHandling;
 
         // misc
-        private XmlParserContext _parserContext;
+        private readonly XmlParserContext _parserContext;
 
         // helper for Read[Element]ContentAs{Base64,BinHex} methods
         private ReadContentAsBinaryHelper _readBinaryHelper;
@@ -630,7 +630,7 @@ namespace System.Xml
             // call to the helper
             int readCount = _readBinaryHelper.ReadContentAsBase64(buffer, index, count);
 
-            // setup parsingFunction 
+            // setup parsingFunction
             _parsingFunction = ParsingFunction.InReadBinaryContent;
             return readCount;
         }
@@ -654,7 +654,7 @@ namespace System.Xml
             // call to the helper
             int readCount = _readBinaryHelper.ReadContentAsBinHex(buffer, index, count);
 
-            // setup parsingFunction 
+            // setup parsingFunction
             _parsingFunction = ParsingFunction.InReadBinaryContent;
             return readCount;
         }
@@ -678,7 +678,7 @@ namespace System.Xml
             // call to the helper
             int readCount = _readBinaryHelper.ReadElementContentAsBase64(buffer, index, count);
 
-            // setup parsingFunction 
+            // setup parsingFunction
             _parsingFunction = ParsingFunction.InReadBinaryContent;
             return readCount;
         }
@@ -702,7 +702,7 @@ namespace System.Xml
             // call to the helper
             int readCount = _readBinaryHelper.ReadElementContentAsBinHex(buffer, index, count);
 
-            // setup parsingFunction 
+            // setup parsingFunction
             _parsingFunction = ParsingFunction.InReadBinaryContent;
             return readCount;
         }
@@ -1067,7 +1067,7 @@ namespace System.Xml
 
             if (tempResolver == null && !_coreReaderImpl.IsResolverSet)
             {
-                // it is safe to return valid resolver as it'll be used in the schema validation 
+                // it is safe to return valid resolver as it'll be used in the schema validation
                 if (s_tempResolver == null)
                     s_tempResolver = new XmlUrlResolver();
                 return s_tempResolver;
@@ -1184,4 +1184,3 @@ namespace System.Xml
         }
     }
 }
-

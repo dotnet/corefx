@@ -22,8 +22,8 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
             _accessorsCreator = null;
             _memberType = member.MemberType;
-            
-            switch(_memberType)
+
+            switch (_memberType)
             {
                 case MemberTypes.Property:
                     PropertyInfo property = (PropertyInfo)member;
@@ -47,7 +47,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             EnsureSupportedMemberType(memberType, nameof(memberType));
             Requires.NotNull(accessors, nameof(accessors));
-            
+
             string errorMessage;
             if (!LazyMemberInfo.AreAccessorsValid(memberType, accessors, out errorMessage))
             {
@@ -100,7 +100,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             }
             else
             {
-                if(_accessors == null || _accessors[0] == null)
+                if (_accessors == null || _accessors[0] == null)
                 {
                     throw new Exception(SR.Diagnostic_InternalExceptionMessage);
                 }
@@ -125,7 +125,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             }
 
             // we are dealing with explicitly passed accessors in both cases
-            if(_accessors == null || that._accessors == null)
+            if (_accessors == null || that._accessors == null)
             {
                 throw new Exception(SR.Diagnostic_InternalExceptionMessage);
             }
@@ -202,7 +202,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                         errorMessage = SR.Format(SR.LazyMemberInfo_InvalidAccessorOnSimpleMember, memberType);
                         return false;
                     }
-                   
+
                     break;
             }
             return true;

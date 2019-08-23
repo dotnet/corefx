@@ -12,7 +12,7 @@ namespace System.Collections.Tests
     {
         #region Shift Tests
 
-        public static IEnumerable<object> Shift_Data()
+        public static IEnumerable<object[]> Shift_Data()
         {
             foreach (int size in new[] { 0, 1, BitsPerInt32 / 2, BitsPerInt32, BitsPerInt32 + 1, 2 * BitsPerInt32, 2 * BitsPerInt32 + 1 })
             {
@@ -98,7 +98,7 @@ namespace System.Collections.Tests
             Assert.Throws<InvalidOperationException>(() => enumerator.MoveNext());
         }
 
-        public static IEnumerable<object> RightShift_Hidden_Data()
+        public static IEnumerable<object[]> RightShift_Hidden_Data()
         {
             yield return new object[] { "Constructor", Unset_Visible_Bits(new BitArray(BitsPerInt32 / 2, true)) };
             yield return new object[] { "Not", Unset_Visible_Bits(new BitArray(BitsPerInt32 / 2, false).Not()) };
@@ -126,6 +126,8 @@ namespace System.Collections.Tests
         [MemberData(nameof(RightShift_Hidden_Data))]
         public static void RightShift_Hidden(string label, BitArray bits)
         {
+            _ = label;
+
             Assert.All(bits.Cast<bool>(), bit => Assert.False(bit));
             bits.RightShift(1);
             Assert.All(bits.Cast<bool>(), bit => Assert.False(bit));
@@ -141,4 +143,3 @@ namespace System.Collections.Tests
         #endregion
     }
 }
-

@@ -75,7 +75,6 @@ namespace System.Reflection.Tests
         [InlineData(typeof(TI_SubClass), nameof(TI_SubClass.s_field), true, typeof(string), false)]
         [InlineData(typeof(TI_SubClass), nameof(TI_SubClass.s_readonlyField), true, typeof(string), false)]
         [InlineData(typeof(TI_SubClass), nameof(TI_SubClass.s_volatileField), true, typeof(string), false)]
-        [InlineData(typeof(TI_BaseClass), nameof(TI_SubClass.s_arrayField), true,  typeof(string[]), false)]
         public void DeclaredFields(Type type, string name, bool exists, Type fieldType, bool isPrivate)
         {
             IEnumerable<string> fields = type.GetTypeInfo().DeclaredFields.Select(fieldInfo => fieldInfo.Name);
@@ -529,7 +528,7 @@ namespace System.Reflection.Tests
         [InlineData(typeof(IDisposable), typeof(Stream), true)]
         [InlineData(typeof(IList), typeof(ArrayList), true)]
         [InlineData(typeof(object), typeof(int), true)]
-        [InlineData(typeof(object), typeof(string), true)]        
+        [InlineData(typeof(object), typeof(string), true)]
         // Null
         [InlineData(typeof(BaseClassWithInterface1Interface2), null, false)]
         // Lists and arrays
@@ -1214,7 +1213,6 @@ namespace System.Reflection.Tests
         [Theory]
         [InlineData(typeof(TI_BaseClass), true)]
         [InlineData(typeof(TI_SubClass), true)]
-        [InlineData(typeof(TI_BaseClass), true)]
         [InlineData(typeof(TI_NonGenericInterface1), true)]
         [InlineData(typeof(TI_ClassWithInterface1), true)]
         public void IsPublic(Type type, bool expected)
@@ -1264,7 +1262,6 @@ namespace System.Reflection.Tests
         [InlineData(typeof(TI_BaseClass), true)]
         [InlineData(typeof(TI_NonGenericInterface1), true)]
         [InlineData(typeof(PublicEnum), true)]
-        [InlineData(typeof(TI_BaseClass), true)]
         [InlineData(typeof(TI_BaseClass.PublicNestedClass1), true)]
         public void IsVisible(Type type, bool expected)
         {
@@ -1275,7 +1272,6 @@ namespace System.Reflection.Tests
         [InlineData(typeof(TI_BaseClass), "System.Reflection.Tests")]
         [InlineData(typeof(TI_NonGenericInterface1), "System.Reflection.Tests")]
         [InlineData(typeof(PublicEnum), "System.Reflection.Tests")]
-        [InlineData(typeof(TI_BaseClass), "System.Reflection.Tests")]
         [InlineData(typeof(TI_BaseClass.PublicNestedClass1), "System.Reflection.Tests")]
         [InlineData(typeof(int), "System")]
         public void Namespace(Type type, string expected)
@@ -1614,21 +1610,21 @@ namespace System.Reflection.Tests
         public TI_SubClass(string s) { }
         public TI_SubClass(short i2) { }
 
-        public new event EventHandler EventPublic; // Overrides event				
+        public new event EventHandler EventPublic; // Overrides event
         public event EventHandler EventPublicNew; // New event
 
-        public new static string[] s_arrayField = new string[10];
+        public static new string[] s_arrayField = new string[10];
         public new string _field2 = "";
         public new readonly string _readonlyField = "";
         public new volatile string _volatileField = "";
-        public new static string s_field = "";
-        public new static readonly string s_readonlyField = "";
-        public new static volatile string s_volatileField = "";
+        public static new string s_field = "";
+        public static new readonly string s_readonlyField = "";
+        public static new volatile string s_volatileField = "";
 
         public new void VoidMethodReturningVoid2() { }
         public new virtual void VirtualVoidMethodReturningVoid1() { }
         public override void VirtualVoidMethodReturningVoid2() { }
-        public new static void StaticVoidMethodReturningVoid() { }
+        public static new void StaticVoidMethodReturningVoid() { }
 
         public new class PublicNestedClass1 { }
         public class NestPublic3 { }
@@ -1637,7 +1633,7 @@ namespace System.Reflection.Tests
 
         public new string StringProperty1 { get { return ""; } set { } }
         public new virtual string VirtualStringProperty { get { return ""; } set { } }
-        public new static string StaticStringProperty { get { return ""; } set { } }
+        public static new string StaticStringProperty { get { return ""; } set { } }
     }
 
     public interface TI_NonGenericInterface1 { }

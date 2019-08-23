@@ -11,8 +11,8 @@ using System.Diagnostics.CodeAnalysis;
 namespace System
 {
     // A Version object contains four hierarchical numeric components: major, minor,
-    // build and revision.  Build and revision may be unspecified, which is represented 
-    // internally as a -1.  By definition, an unspecified component matches anything 
+    // build and revision.  Build and revision may be unspecified, which is represented
+    // internally as a -1.  By definition, an unspecified component matches anything
     // (both unspecified and specified), and an unspecified component is "less than" any
     // specified component.
 
@@ -110,35 +110,17 @@ namespace System
         }
 
         // Properties for setting and getting version numbers
-        public int Major
-        {
-            get { return _Major; }
-        }
+        public int Major => _Major;
 
-        public int Minor
-        {
-            get { return _Minor; }
-        }
+        public int Minor => _Minor;
 
-        public int Build
-        {
-            get { return _Build; }
-        }
+        public int Build => _Build;
 
-        public int Revision
-        {
-            get { return _Revision; }
-        }
+        public int Revision => _Revision;
 
-        public short MajorRevision
-        {
-            get { return (short)(_Revision >> 16); }
-        }
+        public short MajorRevision => (short)(_Revision >> 16);
 
-        public short MinorRevision
-        {
-            get { return (short)(_Revision & 0xFFFF); }
-        }
+        public short MinorRevision => (short)(_Revision & 0xFFFF);
 
         public int CompareTo(object? version)
         {

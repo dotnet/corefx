@@ -248,7 +248,7 @@ namespace System.Xml.XmlDiff
             {
                 XmlDiffAttribute current1 = elem1.FirstAttribute;
                 XmlDiffAttribute current2 = elem2.FirstAttribute;
-                //			NodePosition result = 0;
+                // NodePosition result = 0;
                 int nCompare = 0;
                 while (current1 != null && current2 != null && nCompare == 0)
                 {
@@ -1620,4 +1620,3 @@ namespace System.Xml.XmlDiff
         public override void WriteContentTo(XmlWriter w) { }
     }
 }
-

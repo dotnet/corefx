@@ -24,12 +24,14 @@ namespace Microsoft.VisualBasic.FileIO.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Supported on netfx")]
         public static void AllUsersApplicationDataFolderTest()
         {
             Assert.Throws<PlatformNotSupportedException>(() => SpecialDirectories.AllUsersApplicationData);
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Supported on netfx")]
         public static void CurrentUserApplicationDataFolderTest()
         {
             Assert.Throws<PlatformNotSupportedException>(() => SpecialDirectories.CurrentUserApplicationData);
@@ -81,7 +83,8 @@ namespace Microsoft.VisualBasic.FileIO.Tests
         [Fact]
         public static void TempFolderTest()
         {
-            Assert.Equal(TrimSeparators(System.IO.Path.GetTempPath()), TrimSeparators(SpecialDirectories.Temp));
+            // On Nano Server >=1809 the temp path's case is changed during the normalization.
+            Assert.Equal(TrimSeparators(System.IO.Path.GetTempPath()), TrimSeparators(SpecialDirectories.Temp), ignoreCase: PlatformDetection.IsWindowsNanoServer);
         }
 
         private static string TrimSeparators(string s)

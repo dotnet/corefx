@@ -70,7 +70,6 @@
 #cmakedefine01 HAVE_CLOCK_MONOTONIC
 #cmakedefine01 HAVE_CLOCK_REALTIME
 #cmakedefine01 HAVE_MACH_ABSOLUTE_TIME
-#cmakedefine01 HAVE_MACH_TIMEBASE_INFO
 #cmakedefine01 HAVE_CURLM_ADDED_ALREADY
 #cmakedefine01 HAVE_CURL_HTTP_VERSION_2TLS
 #cmakedefine01 HAVE_CURLPIPE_MULTIPLEX
@@ -96,6 +95,7 @@
 #cmakedefine01 HAVE_IN_EXCL_UNLINK
 #cmakedefine01 HAVE_TCP_H_TCP_KEEPALIVE
 #cmakedefine01 HAVE_BUILTIN_MUL_OVERFLOW
+#cmakedefine01 HAVE_DISCONNECTX
 
 // Mac OS X has stat64, but it is deprecated since plain stat now
 // provides the same 64-bit aware struct when targeting OS X > 10.5

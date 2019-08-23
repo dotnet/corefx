@@ -31,7 +31,7 @@ namespace System.Data.Common
             internal DbProviderFactory FactoryInstance { get; }
         }
 
-        private static ConcurrentDictionary<string, ProviderRegistration> _registeredFactories = new ConcurrentDictionary<string, ProviderRegistration>();
+        private static readonly ConcurrentDictionary<string, ProviderRegistration> _registeredFactories = new ConcurrentDictionary<string, ProviderRegistration>();
         private const string AssemblyQualifiedNameColumnName = "AssemblyQualifiedName";
         private const string InvariantNameColumnName = "InvariantName";
         private const string NameColumnName = "Name";
@@ -87,7 +87,7 @@ namespace System.Data.Common
             DataTable toReturn = new DataTable(ProviderGroupColumnName) { Locale = CultureInfo.InvariantCulture };
             toReturn.Columns.AddRange(new[] { nameColumn, descriptionColumn, invariantNameColumn, assemblyQualifiedNameColumn });
             toReturn.PrimaryKey = new[] { invariantNameColumn };
-            foreach(var kvp in _registeredFactories)
+            foreach (var kvp in _registeredFactories)
             {
                 DataRow newRow = toReturn.NewRow();
                 newRow[InvariantNameColumnName] = kvp.Key;
@@ -108,11 +108,11 @@ namespace System.Data.Common
         {
             ADP.CheckArgumentLength(providerInvariantName, nameof(providerInvariantName));
             ADP.CheckArgumentLength(factoryTypeAssemblyQualifiedName, nameof(factoryTypeAssemblyQualifiedName));
-            
-            // this method performs a deferred registration: the type name specified is checked when the factory is requested for the first time. 
+
+            // this method performs a deferred registration: the type name specified is checked when the factory is requested for the first time.
             _registeredFactories[providerInvariantName] = new ProviderRegistration(factoryTypeAssemblyQualifiedName, null);
         }
-        
+
         public static void RegisterFactory(string providerInvariantName, Type providerFactoryClass)
         {
             RegisterFactory(providerInvariantName, GetFactoryInstance(providerFactoryClass));
@@ -125,12 +125,12 @@ namespace System.Data.Common
 
             _registeredFactories[providerInvariantName] = new ProviderRegistration(factory.GetType().AssemblyQualifiedName, factory);
         }
-        
+
         public static bool UnregisterFactory(string providerInvariantName)
         {
             return !string.IsNullOrWhiteSpace(providerInvariantName) && _registeredFactories.TryRemove(providerInvariantName, out _);
         }
-        
+
         private static DbProviderFactory GetFactory(string providerInvariantName, bool throwOnError)
         {
             if (throwOnError)
@@ -153,14 +153,14 @@ namespace System.Data.Common
             if (toReturn == null)
             {
                 // Deferred registration, do checks now on the type specified and register instance in storage.
-                // Even in the case of throwOnError being false, this will throw when an exception occurs checking the registered type as the user has to be notified the 
+                // Even in the case of throwOnError being false, this will throw when an exception occurs checking the registered type as the user has to be notified the
                 // registration is invalid, even though the registration is there.
                 toReturn = GetFactoryInstance(GetProviderTypeFromTypeName(registration.FactoryTypeAssemblyQualifiedName));
                 RegisterFactory(providerInvariantName, toReturn);
             }
             return toReturn;
         }
-       
+
         private static DbProviderFactory GetFactoryInstance(Type providerFactoryClass)
         {
             ADP.CheckArgumentNull(providerFactoryClass, nameof(providerFactoryClass));

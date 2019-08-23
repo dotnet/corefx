@@ -23,7 +23,7 @@ namespace System.Linq.Parallel
         private Slot[] slots;
         private int count;
         private int freeList;
-        private IEqualityComparer<TKey> comparer;
+        private readonly IEqualityComparer<TKey> comparer;
 
         private const int HashCodeMask = 0x7fffffff;
 
@@ -123,7 +123,7 @@ namespace System.Linq.Parallel
             return false;
         }
 
-        void Resize()
+        private void Resize()
         {
             int newSize = checked(count * 2 + 1);
             int[] newBuckets = new int[newSize];

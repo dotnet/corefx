@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Diagnostics;
 
 namespace System.Text.Json.Serialization.Converters
 {
@@ -30,8 +31,8 @@ namespace System.Text.Json.Serialization.Converters
             Type constructingType = underlyingType.Assembly.GetType(constructingTypeName);
 
             // Create a delegate which will point to the CreateRange method.
-            object createRangeDelegate;
-            createRangeDelegate = options.MemberAccessorStrategy.ImmutableDictionaryCreateRange(constructingType, elementType);
+            ImmutableCollectionCreator createRangeDelegate;
+            createRangeDelegate = options.MemberAccessorStrategy.ImmutableDictionaryCreateRange(constructingType, immutableCollectionType, elementType);
 
             // Cache the delegate
             options.TryAddCreateRangeDelegate(delegateKey, createRangeDelegate);
@@ -62,8 +63,7 @@ namespace System.Text.Json.Serialization.Converters
 
             string delegateKey = DefaultImmutableEnumerableConverter.GetDelegateKey(immutableCollectionType, elementType, out _, out _);
 
-            JsonClassInfo elementClassInfo = state.Current.JsonPropertyInfo.ElementClassInfo;
-            JsonPropertyInfo propertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);
+            JsonPropertyInfo propertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementType, options);
             return propertyInfo.CreateImmutableDictionaryInstance(immutableCollectionType, delegateKey, sourceDictionary, state.JsonPath, options);
         }
     }

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -95,7 +95,7 @@ namespace System.Security.AccessControl.Tests
         [MemberData(nameof(DiscretionaryACL_Constructor3))]
         public static void Constructor3(bool isContainer, bool isDS, string initialRaqAclStr, string verifierRawAclStr, bool wasCanonicalInitially)
         {
-            RawAcl rawAcl = Utils.CreateRawAclFromString(verifierRawAclStr);
+            RawAcl rawAcl = Utils.CreateRawAclFromString(initialRaqAclStr);
             DiscretionaryAcl discretionaryAcl = new DiscretionaryAcl(isContainer, isDS, rawAcl);
             rawAcl = Utils.CreateRawAclFromString(verifierRawAclStr);
 
@@ -253,7 +253,7 @@ namespace System.Security.AccessControl.Tests
             Assert.True(VerifyACL(discretionaryAcl, isContainer, isDS, true, rawAcl));
 
 
-            //case 8, all Aces from case 1, and 3 to 6 
+            //case 8, all Aces from case 1, and 3 to 6
             revision = 127;
             capacity = 5;
             sid = new SecurityIdentifier(Utils.TranslateStringConstFormatSidToStandardFormatSid("BG")).ToString();
@@ -287,7 +287,7 @@ namespace System.Security.AccessControl.Tests
             gAce = new CustomAce(aceType, aceFlag, opaque);
             rawAcl.InsertAce(rawAcl.Count, gAce);
 
-            // CompoundAce					
+            // CompoundAce
             aceFlag = (AceFlags)2;
             accessMask = 1;
             compoundAceType = CompoundAceType.Impersonation;

@@ -472,7 +472,7 @@ namespace System.Numerics.Tests
             actual = Vector4.Transform(v, m);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
-            // 
+            //
             v.W = 1.0f;
 
             expected = new Vector4(12.19198728f, 21.53349376f, 32.61602545f, 1.0f);
@@ -655,7 +655,7 @@ namespace System.Numerics.Tests
             actual = Vector4.Transform(v, q);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
-            // 
+            //
             v.W = 1.0f;
             expected.W = 1.0f;
             actual = Vector4.Transform(v, q);
@@ -1036,10 +1036,10 @@ namespace System.Numerics.Tests
         {
             Vector4 a = new Vector4();
 
-            Assert.Equal(a.X, 0.0f);
-            Assert.Equal(a.Y, 0.0f);
-            Assert.Equal(a.Z, 0.0f);
-            Assert.Equal(a.W, 0.0f);
+            Assert.Equal(0.0f, a.X);
+            Assert.Equal(0.0f, a.Y);
+            Assert.Equal(0.0f, a.Z);
+            Assert.Equal(0.0f, a.W);
         }
 
         // A test for Vector4f ()

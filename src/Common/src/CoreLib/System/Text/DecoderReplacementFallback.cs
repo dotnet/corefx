@@ -9,7 +9,7 @@ namespace System.Text
     public sealed class DecoderReplacementFallback : DecoderFallback
     {
         // Our variables
-        private string _strDefault;
+        private readonly string _strDefault;
 
         // Construction.  Default replacement fallback uses no best fit and ? replacement string
         public DecoderReplacementFallback() : this("?")
@@ -60,49 +60,25 @@ namespace System.Text
             _strDefault = replacement;
         }
 
-        public string DefaultString
-        {
-            get
-            {
-                return _strDefault;
-            }
-        }
+        public string DefaultString => _strDefault;
 
-        public override DecoderFallbackBuffer CreateFallbackBuffer()
-        {
-            return new DecoderReplacementFallbackBuffer(this);
-        }
+        public override DecoderFallbackBuffer CreateFallbackBuffer() =>
+            new DecoderReplacementFallbackBuffer(this);
 
         // Maximum number of characters that this instance of this fallback could return
-        public override int MaxCharCount
-        {
-            get
-            {
-                return _strDefault.Length;
-            }
-        }
+        public override int MaxCharCount => _strDefault.Length;
 
-        public override bool Equals(object? value)
-        {
-            if (value is DecoderReplacementFallback that)
-            {
-                return _strDefault == that._strDefault;
-            }
-            return false;
-        }
+        public override bool Equals(object? value) =>
+            value is DecoderReplacementFallback that &&
+            _strDefault == that._strDefault;
 
-        public override int GetHashCode()
-        {
-            return _strDefault.GetHashCode();
-        }
+        public override int GetHashCode() => _strDefault.GetHashCode();
     }
-
-
 
     public sealed class DecoderReplacementFallbackBuffer : DecoderFallbackBuffer
     {
         // Store our default string
-        private string _strDefault;
+        private readonly string _strDefault;
         private int _fallbackCount = -1;
         private int _fallbackIndex = -1;
 
@@ -173,14 +149,9 @@ namespace System.Text
         }
 
         // How many characters left to output?
-        public override int Remaining
-        {
-            get
-            {
-                // Our count is 0 for 1 character left.
-                return (_fallbackCount < 0) ? 0 : _fallbackCount;
-            }
-        }
+        public override int Remaining =>
+            // Our count is 0 for 1 character left.
+            (_fallbackCount < 0) ? 0 : _fallbackCount;
 
         // Clear the buffer
         public override unsafe void Reset()
@@ -191,13 +162,10 @@ namespace System.Text
         }
 
         // This version just counts the fallback and doesn't actually copy anything.
-        internal unsafe override int InternalFallback(byte[] bytes, byte* pBytes)
-        // Right now this has both bytes and bytes[], since we might have extra bytes, hence the
-        // array, and we might need the index, hence the byte*
-        {
-            // return our replacement string Length
-            return _strDefault.Length;
-        }
+        internal override unsafe int InternalFallback(byte[] bytes, byte* pBytes) =>
+            // Right now this has both bytes and bytes[], since we might have extra bytes,
+            // hence the array, and we might need the index, hence the byte*.
+            // Return our replacement string Length
+            _strDefault.Length;
     }
 }
-

@@ -140,6 +140,8 @@ namespace System.Collections.Tests
         [MemberData(nameof(Ctor_BitArray_TestData))]
         public static void Ctor_BitArray(string label, BitArray bits)
         {
+            _ = label;
+
             BitArray bitArray = new BitArray(bits);
             Assert.Equal(bits.Length, bitArray.Length);
             for (int i = 0; i < bitArray.Length; i++)
@@ -254,7 +256,7 @@ namespace System.Collections.Tests
             BitArray bitArray = new BitArray(int.MaxValue - 30);
             BitArray clone = (BitArray)bitArray.Clone();
 
-            Assert.Equal(bitArray.Length, clone.Length);  
+            Assert.Equal(bitArray.Length, clone.Length);
         }
     }
 }

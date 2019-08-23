@@ -58,7 +58,7 @@ namespace System.Data.Tests
 
             // AcceptChanges
             ds.AcceptChanges();
-            Assert.Equal(null, dtP.GetChanges());
+            Assert.Null(dtP.GetChanges());
 
             //read only exception
             dtP.Columns[0].ReadOnly = true;
@@ -76,17 +76,17 @@ namespace System.Data.Tests
             DataTable dt = new DataTable();
 
             // CaseSensitive - default value (false)
-            Assert.Equal(false, ds.CaseSensitive);
+            Assert.False(ds.CaseSensitive);
 
             ds.CaseSensitive = true;
 
             // CaseSensitive - get
-            Assert.Equal(true, ds.CaseSensitive);
+            Assert.True(ds.CaseSensitive);
 
             //add a datatable to a dataset
             ds.Tables.Add(dt);
             // DataTable CaseSensitive from DataSet - true
-            Assert.Equal(true, dt.CaseSensitive);
+            Assert.True(dt.CaseSensitive);
 
             ds.Tables.Clear();
             ds.CaseSensitive = false;
@@ -94,7 +94,7 @@ namespace System.Data.Tests
             ds.Tables.Add(dt);
 
             // DataTable CaseSensitive from DataSet - false
-            Assert.Equal(false, dt.CaseSensitive);
+            Assert.False(dt.CaseSensitive);
 
             //change DataSet CaseSensitive and check DataTables in it
             ds.Tables.Clear();
@@ -104,11 +104,11 @@ namespace System.Data.Tests
 
             // Change DataSet CaseSensitive - check Table - true
             ds.CaseSensitive = true;
-            Assert.Equal(true, dt.CaseSensitive);
+            Assert.True(dt.CaseSensitive);
 
             // Change DataSet CaseSensitive - check Table - false
             ds.CaseSensitive = false;
-            Assert.Equal(false, dt.CaseSensitive);
+            Assert.False(dt.CaseSensitive);
 
             //Add new table to DataSet with CaseSensitive,check the table case after adding it to DataSet
             ds.Tables.Clear();
@@ -118,7 +118,7 @@ namespace System.Data.Tests
             ds.Tables.Add(dt);
 
             // DataTable get case sensitive from DataSet - false
-            Assert.Equal(false, dt.CaseSensitive);
+            Assert.False(dt.CaseSensitive);
 
             ds.Tables.Clear();
             ds.CaseSensitive = false;
@@ -127,7 +127,7 @@ namespace System.Data.Tests
             ds.Tables.Add(dt);
 
             // DataTable get case sensitive from DataSet - true
-            Assert.Equal(true, dt.CaseSensitive);
+            Assert.True(dt.CaseSensitive);
 
             //Add new table to DataSet and change the DataTable CaseSensitive
             ds.Tables.Clear();
@@ -137,7 +137,7 @@ namespace System.Data.Tests
 
             // Add new table to DataSet and change the DataTable CaseSensitive - false
             dt.CaseSensitive = false;
-            Assert.Equal(false, dt.CaseSensitive);
+            Assert.False(dt.CaseSensitive);
 
             ds.Tables.Clear();
             ds.CaseSensitive = false;
@@ -146,7 +146,7 @@ namespace System.Data.Tests
 
             // Add new table to DataSet and change the DataTable CaseSensitive - true
             dt.CaseSensitive = true;
-            Assert.Equal(true, dt.CaseSensitive);
+            Assert.True(dt.CaseSensitive);
 
             //Add DataTable to Dataset, Change DataSet CaseSensitive, check DataTable
             ds.Tables.Clear();
@@ -157,7 +157,7 @@ namespace System.Data.Tests
 
             // Add DataTable to Dataset, Change DataSet CaseSensitive, check DataTable - true
             ds.CaseSensitive = false;
-            Assert.Equal(true, dt.CaseSensitive);
+            Assert.True(dt.CaseSensitive);
         }
 
         [Fact]
@@ -206,7 +206,7 @@ namespace System.Data.Tests
             Assert.Equal(DataProvider.GetDSSchema(ds), DataProvider.GetDSSchema(dsTarget));
 
             // Clone 2
-            Assert.Equal(false, dsTarget.GetXml() == ds.GetXml());
+            Assert.False(dsTarget.GetXml() == ds.GetXml());
         }
 
         [Fact]
@@ -229,7 +229,7 @@ namespace System.Data.Tests
             Assert.Equal(DataProvider.GetDSSchema(ds), DataProvider.GetDSSchema(dsTarget));
 
             // Copy 2
-            Assert.Equal(true, dsTarget.GetXml() == ds.GetXml());
+            Assert.True(dsTarget.GetXml() == ds.GetXml());
         }
 
         [Fact]
@@ -252,12 +252,12 @@ namespace System.Data.Tests
             var ds = new DataSet();
 
             // EnforceConstraints - default value (true)
-            Assert.Equal(true, ds.EnforceConstraints);
+            Assert.True(ds.EnforceConstraints);
 
             ds.EnforceConstraints = false;
 
             // EnforceConstraints - get
-            Assert.Equal(false, ds.EnforceConstraints);
+            Assert.False(ds.EnforceConstraints);
         }
 
         [Fact]
@@ -277,8 +277,8 @@ namespace System.Data.Tests
             catch (ConstraintException e)
             {
                 // Never premise English.
-                //Assert.Equal ("Failed to enable constraints. One or more rows contain values " + 
-                //		"violating non-null, unique, or foreign-key constraints.", e.Message, "#2");
+                //Assert.Equal ("Failed to enable constraints. One or more rows contain values " +
+                //        "violating non-null, unique, or foreign-key constraints.", e.Message, "#2");
             }
         }
 
@@ -300,8 +300,8 @@ namespace System.Data.Tests
             catch (ConstraintException e)
             {
                 // Never premise English.
-                //Assert.Equal ("Failed to enable constraints. One or more rows contain values " + 
-                //		"violating non-null, unique, or foreign-key constraints.", e.Message, "#2");
+                //Assert.Equal ("Failed to enable constraints. One or more rows contain values " +
+                //        "violating non-null, unique, or foreign-key constraints.", e.Message, "#2");
             }
         }
 
@@ -312,14 +312,14 @@ namespace System.Data.Tests
             ds.Tables.Add(DataProvider.CreateParentDataTable());
 
             // GetChanges 1
-            Assert.Equal(null, ds.GetChanges());
+            Assert.Null(ds.GetChanges());
 
             DataRow dr = ds.Tables[0].NewRow();
             dr[0] = 9;
             ds.Tables[0].Rows.Add(dr);
 
             // GetChanges 2
-            Assert.Equal(true, ds.GetChanges() != null);
+            Assert.True(ds.GetChanges() != null);
 
             // GetChanges 3
             Assert.Equal(dr.ItemArray, ds.GetChanges().Tables[0].Rows[0].ItemArray);
@@ -336,15 +336,15 @@ namespace System.Data.Tests
             ds.Tables.Add(DataProvider.CreateParentDataTable());
 
             // GetChanges 1
-            Assert.Equal(null, ds.GetChanges());
+            Assert.Null(ds.GetChanges());
 
             //make some changes
 
             // can't check detached
-            //		dr = ds.Tables[0].Rows[0];
-            //		arrDetached = dr.ItemArray;
-            //		dr.Delete();
-            //		ds.Tables[0].AcceptChanges();
+            //        dr = ds.Tables[0].Rows[0];
+            //        arrDetached = dr.ItemArray;
+            //        dr.Delete();
+            //        ds.Tables[0].AcceptChanges();
 
             dr = ds.Tables[0].Rows[1];
             arrDeleted = dr.ItemArray;
@@ -370,11 +370,11 @@ namespace System.Data.Tests
             object[] tmp = new object[] { dr[0, DataRowVersion.Original], dr[1, DataRowVersion.Original], dr[2, DataRowVersion.Original], dr[3, DataRowVersion.Original], dr[4, DataRowVersion.Original], dr[5, DataRowVersion.Original] };
             Assert.Equal(arrDeleted, tmp);
 
-            //	can't check it	
-            //		// GetChanges Detached
-            //		dr = ds.GetChanges(DataRowState.Detached).Tables[0].Rows[0];
-            //		object[] tmp = new object[] {dr[0,DataRowVersion.Original],dr[1,DataRowVersion.Original],dr[2,DataRowVersion.Original]};
-            //		Assert.Equal(arrDetached, tmp);
+            //    can't check it
+            //        // GetChanges Detached
+            //        dr = ds.GetChanges(DataRowState.Detached).Tables[0].Rows[0];
+            //        object[] tmp = new object[] {dr[0,DataRowVersion.Original],dr[1,DataRowVersion.Original],dr[2,DataRowVersion.Original]};
+            //        Assert.Equal(arrDetached, tmp);
 
             // GetChanges Modified
             Assert.Equal(arrModified, ds.GetChanges(DataRowState.Modified).Tables[0].Rows[0].ItemArray);
@@ -424,7 +424,7 @@ namespace System.Data.Tests
             Assert.Equal(1, ds.Tables[0].Constraints.Count);
             Assert.Equal(1, ds.Tables[1].Constraints.Count);
 
-            // Table shud still be in BeginInit .. 
+            // Table shud still be in BeginInit ..
             DataColumn col3 = new DataColumn("col2");
             UniqueConstraint uc = new UniqueConstraint("uc", new string[] { "col2" }, false);
 
@@ -492,14 +492,14 @@ namespace System.Data.Tests
             ds.Tables.Add(DataProvider.CreateParentDataTable());
 
             // HasChanges 1
-            Assert.Equal(false, ds.HasChanges());
+            Assert.False(ds.HasChanges());
 
             DataRow dr = ds.Tables[0].NewRow();
             dr[0] = 9;
             ds.Tables[0].Rows.Add(dr);
 
             // HasChanges 2
-            Assert.Equal(true, ds.HasChanges());
+            Assert.True(ds.HasChanges());
         }
 
         [Fact]
@@ -511,7 +511,7 @@ namespace System.Data.Tests
             ds.Tables.Add(DataProvider.CreateParentDataTable());
 
             // HasChanges 1
-            Assert.Equal(false, ds.HasChanges());
+            Assert.False(ds.HasChanges());
 
             //make some changes
 
@@ -528,16 +528,16 @@ namespace System.Data.Tests
             ds.Tables[0].Rows.Add(dr);
 
             // HasChanges Added
-            Assert.Equal(true, ds.HasChanges(DataRowState.Added));
+            Assert.True(ds.HasChanges(DataRowState.Added));
 
             // HasChanges Deleted
-            Assert.Equal(true, ds.HasChanges(DataRowState.Deleted));
+            Assert.True(ds.HasChanges(DataRowState.Deleted));
 
             // HasChanges Modified
-            Assert.Equal(true, ds.HasChanges(DataRowState.Modified));
+            Assert.True(ds.HasChanges(DataRowState.Modified));
 
             // HasChanges Unchanged
-            Assert.Equal(true, ds.HasChanges(DataRowState.Unchanged));
+            Assert.True(ds.HasChanges(DataRowState.Unchanged));
         }
 
         [Fact]
@@ -547,12 +547,12 @@ namespace System.Data.Tests
             ds.Tables.Add(DataProvider.CreateParentDataTable());
 
             // HasErrors - default
-            Assert.Equal(false, ds.HasErrors);
+            Assert.False(ds.HasErrors);
 
             ds.Tables[0].Rows[0].RowError = "ErrDesc";
 
             // HasErrors
-            Assert.Equal(true, ds.HasErrors);
+            Assert.True(ds.HasErrors);
         }
 
         #region test namespaces
@@ -577,7 +577,7 @@ namespace System.Data.Tests
             MemoryStream myStream = new MemoryStream(new ASCIIEncoding().GetBytes(sb.ToString()));
 
             var ds = new DataSet();
-            //	ds.ReadXml(myStream);
+            //    ds.ReadXml(myStream);
             ds.InferXmlSchema(myStream, new string[] { "urn:schemas-microsoft-com:officedata" });
             Assert.Equal(2, ds.Tables.Count);
             Assert.Equal("CategoryID", ds.Tables[0].Columns[0].ColumnName);
@@ -634,7 +634,7 @@ namespace System.Data.Tests
             MemoryStream myStream = new MemoryStream(new ASCIIEncoding().GetBytes(sb.ToString()));
 
             var ds = new DataSet();
-            //	ds.ReadXml(myStream);
+            //    ds.ReadXml(myStream);
             ds.InferXmlSchema(myStream, new string[] { "urn:schemas-microsoft-com:officedata" });
             Assert.Equal(3, ds.Tables.Count);
 
@@ -675,8 +675,8 @@ namespace System.Data.Tests
             ds.InferXmlSchema(myStream, new string[] { "http://www.xml.com/books", "http://www.w3.org/HTML/1998/html4" });
             //Assert.Equal(8, ds.Tables.Count);
 
-            //			string str1 = tempDs.GetXmlSchema(); //DataProvider.GetDSSchema(tempDs);
-            //			string str2 = ds.GetXmlSchema(); //DataProvider.GetDSSchema(ds);
+            //            string str1 = tempDs.GetXmlSchema(); //DataProvider.GetDSSchema(tempDs);
+            //            string str2 = ds.GetXmlSchema(); //DataProvider.GetDSSchema(ds);
             Assert.Equal(3, ds.Tables.Count);
             Assert.Equal("bookreview", ds.Tables[2].TableName);
             Assert.Equal(2, ds.Tables[2].Columns.Count);
@@ -914,7 +914,7 @@ namespace System.Data.Tests
             Assert.Equal("Element1_Id", ds.Relations["Element1_ChildElement1"].ParentColumns[0].ColumnName);
             Assert.Equal("ChildElement1", ds.Relations["Element1_ChildElement1"].ChildTable.TableName);
             Assert.Equal("Element1_Id", ds.Relations["Element1_ChildElement1"].ChildColumns[0].ColumnName);
-            Assert.Equal(true, ds.Relations["Element1_ChildElement1"].Nested);
+            Assert.True(ds.Relations["Element1_ChildElement1"].Nested);
 
             //Checking ForeignKeyConstraint
 
@@ -1051,7 +1051,7 @@ namespace System.Data.Tests
             ds2.Merge(ds1); //will raise MergeFailed event
 
             // MergeFailed event
-            Assert.Equal(true, _eventRaised);
+            Assert.True(_eventRaised);
         }
         private void Merge_Failed(object sender, MergeFailedEventArgs e)
         {
@@ -1129,7 +1129,7 @@ namespace System.Data.Tests
             dsTarget1 = dsTarget.Copy();
             dsTarget1.Merge(drArr, true, MissingSchemaAction.Ignore);
             // Merge true,Ignore - Column
-            Assert.Equal(false, dsTarget1.Tables["Table1"].Columns.Contains("NewColumn"));
+            Assert.False(dsTarget1.Tables["Table1"].Columns.Contains("NewColumn"));
 
             // Merge true,Ignore - changed values
             Assert.Equal(OldValue, dsTarget1.Tables["Table1"].Select("ParentId=1")[0][1]);
@@ -1138,14 +1138,14 @@ namespace System.Data.Tests
             Assert.Equal(1, dsTarget1.Tables["Table1"].Select("ParentId=99").Length);
 
             // Merge true,Ignore - deleted row
-            Assert.Equal(true, dsTarget1.Tables["Table1"].Select("ParentId=2").Length > 0);
+            Assert.True(dsTarget1.Tables["Table1"].Select("ParentId=2").Length > 0);
             #endregion
 
             #region "Merge(drArr,false,MissingSchemaAction.Ignore )"
             dsTarget1 = dsTarget.Copy();
             dsTarget1.Merge(drArr, false, MissingSchemaAction.Ignore);
             // Merge true,Ignore - Column
-            Assert.Equal(false, dsTarget1.Tables["Table1"].Columns.Contains("NewColumn"));
+            Assert.False(dsTarget1.Tables["Table1"].Columns.Contains("NewColumn"));
 
             // Merge true,Ignore - changed values
             Assert.Equal("NewValue", dsTarget1.Tables["Table1"].Select("ParentId=1")[0][1]);
@@ -1161,7 +1161,7 @@ namespace System.Data.Tests
             dsTarget1 = dsTarget.Copy();
             dsTarget1.Merge(drArr, true, MissingSchemaAction.Add);
             // Merge true,Ignore - Column
-            Assert.Equal(true, dsTarget1.Tables["Table1"].Columns.Contains("NewColumn"));
+            Assert.True(dsTarget1.Tables["Table1"].Columns.Contains("NewColumn"));
 
             // Merge true,Ignore - changed values
             Assert.Equal(OldValue, dsTarget1.Tables["Table1"].Select("ParentId=1")[0][1]);
@@ -1170,14 +1170,14 @@ namespace System.Data.Tests
             Assert.Equal(1, dsTarget1.Tables["Table1"].Select("ParentId=99").Length);
 
             // Merge true,Ignore - deleted row
-            Assert.Equal(true, dsTarget1.Tables["Table1"].Select("ParentId=2").Length > 0);
+            Assert.True(dsTarget1.Tables["Table1"].Select("ParentId=2").Length > 0);
             #endregion
 
             #region "Merge(drArr,false,MissingSchemaAction.Add )"
             dsTarget1 = dsTarget.Copy();
             dsTarget1.Merge(drArr, false, MissingSchemaAction.Add);
             // Merge true,Ignore - Column
-            Assert.Equal(true, dsTarget1.Tables["Table1"].Columns.Contains("NewColumn"));
+            Assert.True(dsTarget1.Tables["Table1"].Columns.Contains("NewColumn"));
 
             // Merge true,Ignore - changed values
             Assert.Equal("NewValue", dsTarget1.Tables["Table1"].Select("ParentId=1")[0][1]);
@@ -1248,7 +1248,7 @@ namespace System.Data.Tests
 
             //SomeTable - new table
             // Merge - new table
-            Assert.Equal(true, dsTarget.Tables["SomeTable"] != null);
+            Assert.True(dsTarget.Tables["SomeTable"] != null);
         }
 
         [Fact]
@@ -1345,39 +1345,39 @@ namespace System.Data.Tests
             DataSet dsTarget1 = dsTarget.Copy();
             dsTarget1.Merge(ds, false, MissingSchemaAction.Add);
             // Merge MissingSchemaAction.Add - Column
-            Assert.Equal(true, dsTarget1.Tables["Table1"].Columns.Contains("NewColumn"));
+            Assert.True(dsTarget1.Tables["Table1"].Columns.Contains("NewColumn"));
 
             // Merge MissingSchemaAction.Add - Table
-            Assert.Equal(true, dsTarget1.Tables.Contains("NewTable"));
+            Assert.True(dsTarget1.Tables.Contains("NewTable"));
 
             //failed, should be success by MSDN Library documentation
-            //		// Merge MissingSchemaAction.Add - PrimaryKey
-            //		Assert.Equal(0, dsTarget1.Tables["NewTable"].PrimaryKey.Length);
+            //        // Merge MissingSchemaAction.Add - PrimaryKey
+            //        Assert.Equal(0, dsTarget1.Tables["NewTable"].PrimaryKey.Length);
             #endregion
 
             #region "ds,false,MissingSchemaAction.AddWithKey)"
             //MissingSchemaAction.Add,MissingSchemaAction.AddWithKey - behave the same, checked only Add
 
-            //		DataSet dsTarget2 = dsTarget.Copy();
-            //		dsTarget2.Merge(ds,false,MissingSchemaAction.AddWithKey);
-            //		// Merge MissingSchemaAction.AddWithKey - Column
-            //		Assert.Equal(true, dsTarget2.Tables["Table1"].Columns.Contains("NewColumn"));
+            //        DataSet dsTarget2 = dsTarget.Copy();
+            //        dsTarget2.Merge(ds,false,MissingSchemaAction.AddWithKey);
+            //        // Merge MissingSchemaAction.AddWithKey - Column
+            //        Assert.True(dsTarget2.Tables["Table1"].Columns.Contains("NewColumn"));
             //
-            //		// Merge MissingSchemaAction.AddWithKey - Table
-            //		Assert.Equal(true, dsTarget2.Tables.Contains("NewTable"));
+            //        // Merge MissingSchemaAction.AddWithKey - Table
+            //        Assert.True(dsTarget2.Tables.Contains("NewTable"));
             //
-            //		// Merge MissingSchemaAction.AddWithKey - PrimaryKey
-            //		Assert.Equal(dsTarget2.Tables["NewTable"].Columns["NewColumn1"], dsTarget2.Tables["NewTable"].PrimaryKey[0]);
+            //        // Merge MissingSchemaAction.AddWithKey - PrimaryKey
+            //        Assert.Equal(dsTarget2.Tables["NewTable"].Columns["NewColumn1"], dsTarget2.Tables["NewTable"].PrimaryKey[0]);
             #endregion
 
             #region "ds,false,MissingSchemaAction.Ignore )"
             DataSet dsTarget4 = dsTarget.Copy();
             dsTarget4.Merge(ds, false, MissingSchemaAction.Ignore);
             // Merge MissingSchemaAction.Ignore - Column
-            Assert.Equal(false, dsTarget4.Tables["Table1"].Columns.Contains("NewColumn"));
+            Assert.False(dsTarget4.Tables["Table1"].Columns.Contains("NewColumn"));
 
             // Merge MissingSchemaAction.Ignore - Table
-            Assert.Equal(false, dsTarget4.Tables.Contains("NewTable"));
+            Assert.False(dsTarget4.Tables.Contains("NewTable"));
             #endregion
         }
 
@@ -1440,21 +1440,15 @@ namespace System.Data.Tests
             //-------------------- begin to check ----------------------------------------------
             // merge 1 - make sure the merge method invoked without exceptions
             dsTarget.Merge(ds);
-            Assert.Equal("Success", "Success");
-
             CompareResults_1("merge 1", ds, dsTarget);
 
             //merge again,
             // merge 2 - make sure the merge method invoked without exceptions
             dsTarget.Merge(ds);
-            Assert.Equal("Success", "Success");
-
             CompareResults_1("merge 2", ds, dsTarget);
 
             // merge second dataset - make sure the merge method invoked without exceptions
             dsTarget1.Merge(ds);
-            Assert.Equal("Success", "Success");
-
             CompareResults_2("merge 3", ds, dsTarget1);
         }
 
@@ -1764,11 +1758,11 @@ namespace System.Data.Tests
             // check dataset relation - Parent column
             Assert.Equal(dsTarget.Relations[0].ParentColumns[0].ColumnName, ds.Relations[0].ParentColumns[0].ColumnName);
 
-            // check dataset relation - Child column 
+            // check dataset relation - Child column
             Assert.Equal(dsTarget.Relations[0].ChildColumns[0].ColumnName, ds.Relations[0].ChildColumns[0].ColumnName);
 
             // check allow null constraint
-            Assert.Equal(true, dsTarget.Tables["Parent"].Columns["ParentBool"].AllowDBNull);
+            Assert.True(dsTarget.Tables["Parent"].Columns["ParentBool"].AllowDBNull);
 
             // check Indentity column
             Assert.Equal(dsTarget.Tables["Parent"].Columns.Contains("Indentity"), ds.Tables["Parent"].Columns.Contains("Indentity"));
@@ -1780,10 +1774,10 @@ namespace System.Data.Tests
             Assert.Equal(dsTarget.Tables["Parent"].Columns["Indentity"].AutoIncrement, ds.Tables["Parent"].Columns["Indentity"].AutoIncrement);
 
             // check Indentity column - DefaultValue
-            Assert.Equal(true, dsTarget.Tables["Child"].Columns["String1"].DefaultValue == DBNull.Value);
+            Assert.True(dsTarget.Tables["Child"].Columns["String1"].DefaultValue == DBNull.Value);
 
             // check remove colum
-            Assert.Equal(true, dsTarget.Tables["Child"].Columns.Contains("String2"));
+            Assert.True(dsTarget.Tables["Child"].Columns.Contains("String2"));
         }
 
         private void CompareResults_2(string Msg, DataSet ds, DataSet dsTarget)
@@ -1815,11 +1809,11 @@ namespace System.Data.Tests
             // check dataset relation - Parent column
             Assert.Equal(dsTarget.Relations[0].ParentColumns[0].ColumnName, ds.Relations[0].ParentColumns[0].ColumnName);
 
-            // check dataset relation - Child column 
+            // check dataset relation - Child column
             Assert.Equal(dsTarget.Relations[0].ChildColumns[0].ColumnName, ds.Relations[0].ChildColumns[0].ColumnName);
 
             // check allow null constraint
-            Assert.Equal(true, dsTarget.Tables["Parent"].Columns["ParentBool"].AllowDBNull);
+            Assert.True(dsTarget.Tables["Parent"].Columns["ParentBool"].AllowDBNull);
 
             // check Indentity column
             Assert.Equal(dsTarget.Tables["Parent"].Columns.Contains("Indentity"), ds.Tables["Parent"].Columns.Contains("Indentity"));
@@ -1831,10 +1825,10 @@ namespace System.Data.Tests
             Assert.Equal(dsTarget.Tables["Parent"].Columns["Indentity"].AutoIncrement, ds.Tables["Parent"].Columns["Indentity"].AutoIncrement);
 
             // check Indentity column - DefaultValue
-            Assert.Equal(true, dsTarget.Tables["Child"].Columns["String1"].DefaultValue == DBNull.Value);
+            Assert.True(dsTarget.Tables["Child"].Columns["String1"].DefaultValue == DBNull.Value);
 
             // check remove colum
-            Assert.Equal(true, dsTarget.Tables["Child"].Columns.Contains("String2"));
+            Assert.True(dsTarget.Tables["Child"].Columns.Contains("String2"));
             // Check Relation.Nested value
             DataSet orig = new DataSet();
 
@@ -1940,7 +1934,7 @@ namespace System.Data.Tests
             DataSet dsTarget1 = dsTarget.Copy();
             dsTarget1.Merge(dt, true, MissingSchemaAction.Ignore);
             // Merge true,Ignore - Column
-            Assert.Equal(false, dsTarget1.Tables["Table1"].Columns.Contains("NewColumn"));
+            Assert.False(dsTarget1.Tables["Table1"].Columns.Contains("NewColumn"));
 
             // Merge true,Ignore - changed values
             Assert.Equal(OldValue, dsTarget1.Tables["Table1"].Select("ParentId=1")[0][1]);
@@ -1949,7 +1943,7 @@ namespace System.Data.Tests
             Assert.Equal(arrAddedRow, dsTarget1.Tables["Table1"].Select("ParentId=99")[0].ItemArray);
 
             // Merge true,Ignore - deleted row
-            Assert.Equal(true, dsTarget1.Tables["Table1"].Select("ParentId=2").Length > 0);
+            Assert.True(dsTarget1.Tables["Table1"].Select("ParentId=2").Length > 0);
             #endregion
 
             #region "Merge(dt,false,MissingSchemaAction.Ignore )"
@@ -1957,7 +1951,7 @@ namespace System.Data.Tests
             dsTarget1 = dsTarget.Copy();
             dsTarget1.Merge(dt, false, MissingSchemaAction.Ignore);
             // Merge true,Ignore - Column
-            Assert.Equal(false, dsTarget1.Tables["Table1"].Columns.Contains("NewColumn"));
+            Assert.False(dsTarget1.Tables["Table1"].Columns.Contains("NewColumn"));
 
             // Merge true,Ignore - changed values
             Assert.Equal("NewValue", dsTarget1.Tables["Table1"].Select("ParentId=1")[0][1]);
@@ -1973,7 +1967,7 @@ namespace System.Data.Tests
             dsTarget1 = dsTarget.Copy();
             dsTarget1.Merge(dt, true, MissingSchemaAction.Add);
             // Merge true,Add - Column
-            Assert.Equal(true, dsTarget1.Tables["Table1"].Columns.Contains("NewColumn"));
+            Assert.True(dsTarget1.Tables["Table1"].Columns.Contains("NewColumn"));
 
             // Merge true,Add - changed values
             Assert.Equal(OldValue, dsTarget1.Tables["Table1"].Select("ParentId=1")[0][1]);
@@ -1982,14 +1976,14 @@ namespace System.Data.Tests
             Assert.Equal(1, dsTarget1.Tables["Table1"].Select("ParentId=99").Length);
 
             // Merge true,Add - deleted row
-            Assert.Equal(true, dsTarget1.Tables["Table1"].Select("ParentId=2").Length > 0);
+            Assert.True(dsTarget1.Tables["Table1"].Select("ParentId=2").Length > 0);
             #endregion
 
             #region "Merge(dt,false,MissingSchemaAction.Add  )"
             dsTarget1 = dsTarget.Copy();
             dsTarget1.Merge(dt, false, MissingSchemaAction.Add);
             // Merge true,Add - Column
-            Assert.Equal(true, dsTarget1.Tables["Table1"].Columns.Contains("NewColumn"));
+            Assert.True(dsTarget1.Tables["Table1"].Columns.Contains("NewColumn"));
 
             // Merge true,Add - changed values
             Assert.Equal("NewValue", dsTarget1.Tables["Table1"].Select("ParentId=1")[0][1]);
@@ -2212,19 +2206,19 @@ namespace System.Data.Tests
 
             input += "<?xml version=\"1.0\"?>";
             input += "<Stock name=\"MSFT\">";
-            input += "		<Company name=\"Microsoft Corp.\"/>";
-            input += "		<Price type=\"high\">";
-            input += "			<Value>10.0</Value>";
-            input += "			<Date>01/20/2000</Date>";
-            input += "		</Price>";
-            input += "		<Price type=\"low\">";
-            input += "			<Value>1.0</Value>";
-            input += "			<Date>03/21/2002</Date>";
-            input += "		</Price>";
-            input += "		<Price type=\"current\">";
-            input += "			<Value>3.0</Value>";
-            input += "			<Date>TODAY</Date>";
-            input += "		</Price>";
+            input += "        <Company name=\"Microsoft Corp.\"/>";
+            input += "        <Price type=\"high\">";
+            input += "            <Value>10.0</Value>";
+            input += "            <Date>01/20/2000</Date>";
+            input += "        </Price>";
+            input += "        <Price type=\"low\">";
+            input += "            <Value>1.0</Value>";
+            input += "            <Date>03/21/2002</Date>";
+            input += "        </Price>";
+            input += "        <Price type=\"current\">";
+            input += "            <Value>3.0</Value>";
+            input += "            <Date>TODAY</Date>";
+            input += "        </Price>";
             input += "</Stock>";
 
             sr = new StringReader(input);
@@ -2311,69 +2305,69 @@ namespace System.Data.Tests
 
             input += "<?xml version=\"1.0\"?>";
             input += "<Stocks>";
-            input += "		<Stock name=\"MSFT\">";
-            input += "			<Company name=\"Microsoft Corp.\" />";
-            input += "			<Company name=\"General Electric\"/>";
-            input += "			<Price type=\"high\">";
-            input += "				<Value>10.0</Value>";
-            input += "				<Date>01/20/2000</Date>";
-            input += "			</Price>";
-            input += "			<Price type=\"low\">";
-            input += "				<Value>1.0</Value>";
-            input += "				<Date>03/21/2002</Date>";
-            input += "			</Price>";
-            input += "			<Price type=\"current\">";
-            input += "				<Value>3.0</Value>";
-            input += "				<Date>TODAY</Date>";
-            input += "			</Price>";
-            input += "		</Stock>";
-            input += "		<Stock name=\"GE\">";
-            input += "			<Company name=\"GE company\"/>";
-            input += "			<Price type=\"high\">";
-            input += "				<Value>22.23</Value>";
-            input += "				<Date>02/12/2001</Date>";
-            input += "			</Price>";
-            input += "			<Price type=\"low\">";
-            input += "				<Value>1.97</Value>";
-            input += "				<Date>04/20/2003</Date>";
-            input += "			</Price>";
-            input += "			<Price type=\"current\">";
-            input += "				<Value>3.0</Value>";
-            input += "				<Date>TODAY</Date>";
-            input += "			</Price>";
-            input += "		</Stock>";
-            input += "		<Stock name=\"Intel\">";
-            input += "			<Company name=\"Intel Corp.\"/>";
-            input += "			<Company name=\"Test1\" />";
-            input += "			<Company name=\"Test2\"/>";
-            input += "			<Price type=\"high\">";
-            input += "				<Value>15.0</Value>";
-            input += "				<Date>01/25/2000</Date>";
-            input += "			</Price>";
-            input += "			<Price type=\"low\">";
-            input += "				<Value>1.0</Value>";
-            input += "				<Date>03/23/2002</Date>";
-            input += "			</Price>";
-            input += "			<Price type=\"current\">";
-            input += "				<Value>3.0</Value>";
-            input += "				<Date>TODAY</Date>";
-            input += "			</Price>";
-            input += "		</Stock>";
-            input += "		<Stock name=\"Mainsoft\">";
-            input += "			<Company name=\"Mainsoft Corp.\"/>";
-            input += "			<Price type=\"high\">";
-            input += "				<Value>30.0</Value>";
-            input += "				<Date>01/26/2000</Date>";
-            input += "			</Price>";
-            input += "			<Price type=\"low\">";
-            input += "				<Value>1.0</Value>";
-            input += "				<Date>03/26/2002</Date>";
-            input += "			</Price>";
-            input += "			<Price type=\"current\">";
-            input += "				<Value>27.0</Value>";
-            input += "				<Date>TODAY</Date>";
-            input += "			</Price>";
-            input += "		</Stock>";
+            input += "        <Stock name=\"MSFT\">";
+            input += "            <Company name=\"Microsoft Corp.\" />";
+            input += "            <Company name=\"General Electric\"/>";
+            input += "            <Price type=\"high\">";
+            input += "                <Value>10.0</Value>";
+            input += "                <Date>01/20/2000</Date>";
+            input += "            </Price>";
+            input += "            <Price type=\"low\">";
+            input += "                <Value>1.0</Value>";
+            input += "                <Date>03/21/2002</Date>";
+            input += "            </Price>";
+            input += "            <Price type=\"current\">";
+            input += "                <Value>3.0</Value>";
+            input += "                <Date>TODAY</Date>";
+            input += "            </Price>";
+            input += "        </Stock>";
+            input += "        <Stock name=\"GE\">";
+            input += "            <Company name=\"GE company\"/>";
+            input += "            <Price type=\"high\">";
+            input += "                <Value>22.23</Value>";
+            input += "                <Date>02/12/2001</Date>";
+            input += "            </Price>";
+            input += "            <Price type=\"low\">";
+            input += "                <Value>1.97</Value>";
+            input += "                <Date>04/20/2003</Date>";
+            input += "            </Price>";
+            input += "            <Price type=\"current\">";
+            input += "                <Value>3.0</Value>";
+            input += "                <Date>TODAY</Date>";
+            input += "            </Price>";
+            input += "        </Stock>";
+            input += "        <Stock name=\"Intel\">";
+            input += "            <Company name=\"Intel Corp.\"/>";
+            input += "            <Company name=\"Test1\" />";
+            input += "            <Company name=\"Test2\"/>";
+            input += "            <Price type=\"high\">";
+            input += "                <Value>15.0</Value>";
+            input += "                <Date>01/25/2000</Date>";
+            input += "            </Price>";
+            input += "            <Price type=\"low\">";
+            input += "                <Value>1.0</Value>";
+            input += "                <Date>03/23/2002</Date>";
+            input += "            </Price>";
+            input += "            <Price type=\"current\">";
+            input += "                <Value>3.0</Value>";
+            input += "                <Date>TODAY</Date>";
+            input += "            </Price>";
+            input += "        </Stock>";
+            input += "        <Stock name=\"Mainsoft\">";
+            input += "            <Company name=\"Mainsoft Corp.\"/>";
+            input += "            <Price type=\"high\">";
+            input += "                <Value>30.0</Value>";
+            input += "                <Date>01/26/2000</Date>";
+            input += "            </Price>";
+            input += "            <Price type=\"low\">";
+            input += "                <Value>1.0</Value>";
+            input += "                <Date>03/26/2002</Date>";
+            input += "            </Price>";
+            input += "            <Price type=\"current\">";
+            input += "                <Value>27.0</Value>";
+            input += "                <Date>TODAY</Date>";
+            input += "            </Price>";
+            input += "        </Stock>";
             input += "</Stocks>";
 
             sr = new StringReader(input);
@@ -2886,7 +2880,7 @@ namespace System.Data.Tests
             // DataSet ShouldSerializeRelations
             newDataSet ds = new newDataSet();
 
-            Assert.Equal(true, ds.testMethod());
+            Assert.True(ds.testMethod());
         }
 
         private class newDataSet : DataSet
@@ -2902,7 +2896,7 @@ namespace System.Data.Tests
             // DataSet ShouldSerializeTables
             newDataSet1 ds = new newDataSet1();
 
-            Assert.Equal(true, ds.testMethod());
+            Assert.True(ds.testMethod());
         }
 
         private class newDataSet1 : DataSet
@@ -2997,7 +2991,7 @@ namespace System.Data.Tests
 
             // ctor
             ds = new DataSet();
-            Assert.Equal(true, ds != null);
+            Assert.True(ds != null);
         }
 
         [Fact]
@@ -3007,7 +3001,7 @@ namespace System.Data.Tests
 
             // ctor
             ds = new DataSet("NewDataSet");
-            Assert.Equal(true, ds != null);
+            Assert.True(ds != null);
 
             // ctor - name
             Assert.Equal("NewDataSet", ds.DataSetName);
@@ -3022,7 +3016,7 @@ namespace System.Data.Tests
             pc = ds.ExtendedProperties;
 
             // Checking ExtendedProperties default
-            Assert.Equal(true, pc != null);
+            Assert.True(pc != null);
 
             // Checking ExtendedProperties count
             Assert.Equal(0, pc.Count);
@@ -3040,30 +3034,30 @@ namespace System.Data.Tests
             }
             catch (InvalidOperationException e)
             {
-                //ok 	
+                //ok
             }
         }
 
         ///<?xml version="1.0" encoding="utf-16"?>
         ///<xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-        ///	<xs:element name="NewDataSet" msdata:IsDataSet="true">
-        ///		<xs:complexType>
-        ///			<xs:choice maxOccurs="unbounded">
-        ///				<xs:element name="Parent">
-        ///					<xs:complexType>
-        ///						<xs:sequence>
-        ///							<xs:element name="ParentId" type="xs:int" minOccurs="0"/>
-        ///							<xs:element name="String1" type="xs:string" minOccurs="0"/>
-        ///							<xs:element name="String2" type="xs:string" minOccurs="0"/>
-        ///							<xs:element name="ParentDateTime" type="xs:dateTime" minOccurs="0"/>
-        ///							<xs:element name="ParentDouble" type="xs:double" minOccurs="0"/>
-        ///							<xs:element name="ParentBool" type="xs:boolean" minOccurs="0"/>
-        ///						</xs:sequence>
-        ///					</xs:complexType>
-        ///				</xs:element>
-        ///			</xs:choice>
-        ///		</xs:complexType>
-        ///	</xs:element>
+        ///    <xs:element name="NewDataSet" msdata:IsDataSet="true">
+        ///        <xs:complexType>
+        ///            <xs:choice maxOccurs="unbounded">
+        ///                <xs:element name="Parent">
+        ///                    <xs:complexType>
+        ///                        <xs:sequence>
+        ///                            <xs:element name="ParentId" type="xs:int" minOccurs="0"/>
+        ///                            <xs:element name="String1" type="xs:string" minOccurs="0"/>
+        ///                            <xs:element name="String2" type="xs:string" minOccurs="0"/>
+        ///                            <xs:element name="ParentDateTime" type="xs:dateTime" minOccurs="0"/>
+        ///                            <xs:element name="ParentDouble" type="xs:double" minOccurs="0"/>
+        ///                            <xs:element name="ParentBool" type="xs:boolean" minOccurs="0"/>
+        ///                        </xs:sequence>
+        ///                    </xs:complexType>
+        ///                </xs:element>
+        ///            </xs:choice>
+        ///        </xs:complexType>
+        ///    </xs:element>
         ///</xs:schema>
 
         [Fact]
@@ -3233,7 +3227,7 @@ namespace System.Data.Tests
             DataSet ds1 = new DataSet();
             ds1.ReadXmlSchema(new MemoryStream(ms.GetBuffer()));
 
-            // no new relation, and <table>_Id columns, should get created when 
+            // no new relation, and <table>_Id columns, should get created when
             // Relation.Nested = true
             Assert.Equal(1, ds1.Relations.Count);
             Assert.Equal(1, ds1.Tables[0].Columns.Count);

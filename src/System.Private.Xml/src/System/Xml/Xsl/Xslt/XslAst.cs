@@ -144,16 +144,15 @@ namespace System.Xml.Xsl.Xslt
             {
 #if DEBUG
                 System.Text.StringBuilder sb = new System.Text.StringBuilder();
-                string nodeTypeName;
-                switch (NodeType)
+                string nodeTypeName = NodeType switch
                 {
-                    case XslNodeType.AttributeSet: nodeTypeName = "attribute-set"; break;
-                    case XslNodeType.Template: nodeTypeName = "template"; break;
-                    case XslNodeType.Param: nodeTypeName = "param"; break;
-                    case XslNodeType.Variable: nodeTypeName = "variable"; break;
-                    case XslNodeType.WithParam: nodeTypeName = "with-param"; break;
-                    default: nodeTypeName = NodeType.ToString(); break;
-                }
+                    XslNodeType.AttributeSet => "attribute-set",
+                    XslNodeType.Template => "template",
+                    XslNodeType.Param => "param",
+                    XslNodeType.Variable => "variable",
+                    XslNodeType.WithParam => "with-param",
+                    _ => NodeType.ToString(),
+                };
                 sb.Append(nodeTypeName);
                 if (Name != null)
                 {
@@ -584,7 +583,7 @@ namespace System.Xml.Xsl.Xslt
             return VarPar(XslNodeType.WithParam, name, /*select*/null, XslVersion.Current);
         }
 
-        private static QilFactory s_f = new QilFactory();
+        private static readonly QilFactory s_f = new QilFactory();
 
         public static QilName QName(string local, string uri, string prefix)
         {

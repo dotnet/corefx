@@ -32,17 +32,14 @@
 using System.Collections;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Security;
 
 namespace System.Drawing
 {
-
     internal static class MacSupport
     {
-        internal static Hashtable contextReference = new Hashtable();
-        internal static object lockobj = new object();
-
-        internal static Delegate hwnd_delegate;
+        internal static readonly Hashtable contextReference = new Hashtable();
+        internal static readonly object lockobj = new object();
+        internal static readonly Delegate hwnd_delegate = GetHwndDelegate();
 
 #if DEBUG_CLIPPING
         internal static float red = 1.0f;
@@ -51,7 +48,7 @@ namespace System.Drawing
         internal static int debug_threshold = 1;
 #endif
 
-        static MacSupport()
+        private static Delegate GetHwndDelegate()
         {
 #if !NETSTANDARD1_6
             foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
@@ -61,11 +58,12 @@ namespace System.Drawing
                     Type driver_type = asm.GetType("System.Windows.Forms.XplatUICarbon");
                     if (driver_type != null)
                     {
-                        hwnd_delegate = (Delegate)driver_type.GetTypeInfo().GetField("HwndDelegate", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
+                        return (Delegate)driver_type.GetTypeInfo().GetField("HwndDelegate", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
                     }
                 }
             }
 #endif
+            return null;
         }
 
         internal static CocoaContext GetCGContextForNSView(IntPtr handle)
@@ -152,9 +150,9 @@ namespace System.Drawing
                     CGContextFillRect (context, rc_clip);
                     CGContextFlush (context);
                     System.Threading.Thread.Sleep (500);
-                    if (red == 1.0f) { red = 0.0f; blue = 1.0f; } 
-                    else if (blue == 1.0f) { blue = 0.0f; green = 1.0f; } 
-                    else if (green == 1.0f) { green = 0.0f; red = 1.0f; } 
+                    if (red == 1.0f) { red = 0.0f; blue = 1.0f; }
+                    else if (blue == 1.0f) { blue = 0.0f; green = 1.0f; }
+                    else if (green == 1.0f) { green = 0.0f; red = 1.0f; }
                 }
 #endif
             }
@@ -197,7 +195,7 @@ namespace System.Drawing
             lock (lockobj)
             {
 #if FALSE
-                if (contextReference [port] != null && context == (IntPtr) contextReference [port]) { 
+                if (contextReference [port] != null && context == (IntPtr) contextReference [port]) {
                     QDEndCGContext (port, ref context);
                     contextReference [port] = null;
                 } else {

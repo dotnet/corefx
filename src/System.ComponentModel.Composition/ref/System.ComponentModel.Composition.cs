@@ -534,13 +534,13 @@ namespace System.ComponentModel.Composition.Primitives
     public partial class ComposablePartException : System.Exception
     {
         public ComposablePartException() { }
-        protected ComposablePartException(Runtime.Serialization.SerializationInfo info, Runtime.Serialization.StreamingContext context) { }
+        protected ComposablePartException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public ComposablePartException(string message) { }
         public ComposablePartException(string message, System.ComponentModel.Composition.Primitives.ICompositionElement element) { }
         public ComposablePartException(string message, System.ComponentModel.Composition.Primitives.ICompositionElement element, System.Exception innerException) { }
         public ComposablePartException(string message, System.Exception innerException) { }
-        public override void GetObjectData(Runtime.Serialization.SerializationInfo info, Runtime.Serialization.StreamingContext context) { }
         public System.ComponentModel.Composition.Primitives.ICompositionElement Element { get { throw null; } }
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
     public partial class ContractBasedImportDefinition : System.ComponentModel.Composition.Primitives.ImportDefinition
     {
@@ -610,6 +610,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
     public partial struct LazyMemberInfo
     {
         private object _dummy;
+        private int _dummyPrimitive;
         public LazyMemberInfo(System.Reflection.MemberInfo member) { throw null; }
         public LazyMemberInfo(System.Reflection.MemberTypes memberType, System.Func<System.Reflection.MemberInfo[]> accessorsCreator) { throw null; }
         public LazyMemberInfo(System.Reflection.MemberTypes memberType, params System.Reflection.MemberInfo[] accessors) { throw null; }

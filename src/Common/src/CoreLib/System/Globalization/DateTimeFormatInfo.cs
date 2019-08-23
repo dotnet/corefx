@@ -51,10 +51,10 @@ namespace System.Globalization
     {
         // cache for the invariant culture.
         // invariantInfo is constant irrespective of your current culture.
-        private static volatile DateTimeFormatInfo s_invariantInfo;
+        private static volatile DateTimeFormatInfo? s_invariantInfo;
 
         // an index which points to a record in Culture Data Table.
-        private CultureData _cultureData;
+        private readonly CultureData _cultureData;
 
         // The culture name used to create this DTFI.
         private string? _name = null;
@@ -1306,11 +1306,7 @@ namespace System.Globalization
             }
         }
 
-        // Whitespaces that we allow in the month names.
-        // U+00a0 is non-breaking space.
-        private static readonly char[] s_monthSpaces = { ' ', '\u00a0' };
-
-        internal bool HasSpacesInMonthNames =>(FormatFlags & DateTimeFormatFlags.UseSpacesInMonthNames) != 0;
+        internal bool HasSpacesInMonthNames => (FormatFlags & DateTimeFormatFlags.UseSpacesInMonthNames) != 0;
 
         internal bool HasSpacesInDayNames => (FormatFlags & DateTimeFormatFlags.UseSpacesInDayNames) != 0;
 
@@ -1320,19 +1316,12 @@ namespace System.Globalization
         /// </summary>
         internal string InternalGetMonthName(int month, MonthNameStyles style, bool abbreviated)
         {
-            string[] monthNamesArray;
-            switch (style)
+            string[] monthNamesArray = style switch
             {
-                case MonthNameStyles.Genitive:
-                    monthNamesArray = InternalGetGenitiveMonthNames(abbreviated);
-                    break;
-                case MonthNameStyles.LeapYear:
-                    monthNamesArray = InternalGetLeapYearMonthNames();
-                    break;
-                default:
-                    monthNamesArray = (abbreviated ? InternalGetAbbreviatedMonthNames() : InternalGetMonthNames());
-                    break;
-            }
+                MonthNameStyles.Genitive => InternalGetGenitiveMonthNames(abbreviated),
+                MonthNameStyles.LeapYear => InternalGetLeapYearMonthNames(),
+                _ => (abbreviated ? InternalGetAbbreviatedMonthNames() : InternalGetMonthNames()),
+            };
 
             // The month range is from 1 ~ m_monthNames.Length
             // (actually is 13 right now for all cases)
@@ -1779,13 +1768,7 @@ namespace System.Globalization
         /// DateTimeFormatInfo dtfi = new CultureInfo("ja-JP", false).DateTimeFormat.Calendar = new GregorianCalendar(GregorianCalendarTypes.Localized);
         /// String nativeName = dtfi.NativeCalendarName; // Get the Japanese name for the Gregorian calendar.
         /// </summary>
-        public string NativeCalendarName
-        {
-            get
-            {
-                return _cultureData.CalendarName(Calendar.ID);
-            }
-        }
+        public string NativeCalendarName => _cultureData.CalendarName(Calendar.ID);
 
         /// <summary>
         /// Used by custom cultures and others to set the list of available formats. Note that none of them are
@@ -2040,10 +2023,7 @@ namespace System.Globalization
         /// <summary>
         /// Returns whether the YearMonthAdjustment function has any fix-up work to do for this culture/calendar.
         /// </summary>
-        internal bool HasYearMonthAdjustment
-        {
-            get => (FormatFlags & DateTimeFormatFlags.UseHebrewRule) != 0;
-        }
+        internal bool HasYearMonthAdjustment => (FormatFlags & DateTimeFormatFlags.UseHebrewRule) != 0;
 
         /// <summary>
         /// This is a callback that the parser can make back into the DTFI to let it fiddle with special
@@ -2135,8 +2115,8 @@ namespace System.Globalization
         internal const string JapaneseLangName = "ja";
         internal const string EnglishLangName = "en";
 
-        private static volatile DateTimeFormatInfo s_jajpDTFI;
-        private static volatile DateTimeFormatInfo s_zhtwDTFI;
+        private static volatile DateTimeFormatInfo? s_jajpDTFI;
+        private static volatile DateTimeFormatInfo? s_zhtwDTFI;
 
         /// <summary>
         /// Create a Japanese DTFI which uses JapaneseCalendar.  This is used to parse
@@ -2146,7 +2126,7 @@ namespace System.Globalization
         /// </summary>
         internal static DateTimeFormatInfo GetJapaneseCalendarDTFI()
         {
-            DateTimeFormatInfo temp = s_jajpDTFI;
+            DateTimeFormatInfo? temp = s_jajpDTFI;
             if (temp == null)
             {
                 temp = new CultureInfo("ja-JP", false).DateTimeFormat;
@@ -2164,7 +2144,7 @@ namespace System.Globalization
         /// </summary>
         internal static DateTimeFormatInfo GetTaiwanCalendarDTFI()
         {
-            DateTimeFormatInfo temp = s_zhtwDTFI;
+            DateTimeFormatInfo? temp = s_zhtwDTFI;
             if (temp == null)
             {
                 temp = new CultureInfo("zh-TW", false).DateTimeFormat;
@@ -2261,8 +2241,9 @@ namespace System.Globalization
                 // We need to rescan the date words since we're always synthetic
                 DateTimeFormatInfoScanner scanner = new DateTimeFormatInfoScanner();
                 string[]? dateWords = scanner.GetDateWordsOfDTFI(this);
+
                 // Ensure the formatflags is initialized.
-                DateTimeFormatFlags flag = FormatFlags;
+                _ = FormatFlags;
 
                 // For some cultures, the date separator works more like a comma, being allowed before or after any date part.
                 // In these cultures, we do not use normal date separator since we disallow date separator after a date terminal state.
@@ -2343,7 +2324,6 @@ namespace System.Globalization
 
                 for (int i = 0; i < 7; i++)
                 {
-                    //String str = GetDayOfWeekNames()[i];
                     // We have to call public methods here to work with inherited DTFI.
                     string str = GetDayName((DayOfWeek)i);
                     InsertHash(temp, str, TokenType.DayOfWeekToken, i);
@@ -2442,7 +2422,6 @@ namespace System.Globalization
         {
             for (int i = 1; i <= 13; i++)
             {
-                //str = internalGetMonthName(i, MonthNameStyles.Regular, false);
                 // We have to call public methods here to work with inherited DTFI.
                 // Insert the month name first, so that they are at the front of abbreviated
                 // month names.
@@ -2656,7 +2635,7 @@ namespace System.Globalization
             TokenHashValue previousNode = hashTable[hashcode];
 
             // Insert the new node into the current slot.
-            hashTable[hashcode] = new TokenHashValue(str, tokenType, tokenValue); ;
+            hashTable[hashcode] = new TokenHashValue(str, tokenType, tokenValue);
 
             while (++pos < TOKEN_HASH_SIZE)
             {
@@ -2677,7 +2656,7 @@ namespace System.Globalization
                     return;
                 }
                 previousNode = temp;
-            };
+            }
             Debug.Fail("The hashtable is full.  This should not happen.");
         }
 
@@ -2692,7 +2671,7 @@ namespace System.Globalization
             int i = 0;
             // If there is whitespace characters in the beginning and end of the string, trim them since whitespaces are skipped by
             // DateTime.Parse().
-            if (char.IsWhiteSpace(str[0]) || char.IsWhiteSpace(str[str.Length - 1]))
+            if (char.IsWhiteSpace(str[0]) || char.IsWhiteSpace(str[^1]))
             {
                 str = str.Trim(null);   // Trim white space characters.
                 // Could have space for separators

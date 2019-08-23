@@ -61,8 +61,8 @@ namespace System.Threading
                 if (value == InvalidHandle)
                 {
                     // This line leaks a handle.  However, it's currently
-                    // not perfectly clear what the right behavior is here 
-                    // anyways.  This preserves Everett behavior.  We should 
+                    // not perfectly clear what the right behavior is here
+                    // anyways.  This preserves Everett behavior.  We should
                     // ideally do these things:
                     // *) Expose a settable SafeHandle property on WaitHandle.
                     // *) Expose a settable OwnsHandle property on SafeHandle.
@@ -98,7 +98,7 @@ namespace System.Threading
 
         internal static int ToTimeoutMilliseconds(TimeSpan timeout)
         {
-            var timeoutMilliseconds = (long)timeout.TotalMilliseconds;
+            long timeoutMilliseconds = (long)timeout.TotalMilliseconds;
             if (timeoutMilliseconds < -1)
             {
                 throw new ArgumentOutOfRangeException(nameof(timeout), SR.ArgumentOutOfRange_NeedNonNegOrNegative1);

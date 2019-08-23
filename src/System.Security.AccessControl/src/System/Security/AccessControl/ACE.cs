@@ -1353,21 +1353,21 @@ nameof(opaque),
     //     ULONG SidStart;
     //     // Opaque resouce manager specific data
     // } ACCESS_ALLOWED_CALLBACK_ACE, *PACCESS_ALLOWED_CALLBACK_ACE;
-    // 
+    //
     // typedef struct _ACCESS_DENIED_CALLBACK_ACE {
     //     ACE_HEADER Header;
     //     ACCESS_MASK Mask;
     //     ULONG SidStart;
     //     // Opaque resouce manager specific data
     // } ACCESS_DENIED_CALLBACK_ACE, *PACCESS_DENIED_CALLBACK_ACE;
-    // 
+    //
     // typedef struct _SYSTEM_AUDIT_CALLBACK_ACE {
     //     ACE_HEADER Header;
     //     ACCESS_MASK Mask;
     //     ULONG SidStart;
     //     // Opaque resouce manager specific data
     // } SYSTEM_AUDIT_CALLBACK_ACE, *PSYSTEM_AUDIT_CALLBACK_ACE;
-    // 
+    //
     // typedef struct _SYSTEM_ALARM_CALLBACK_ACE {
     //     ACE_HEADER Header;
     //     ACCESS_MASK Mask;
@@ -1400,33 +1400,18 @@ nameof(opaque),
         // computes the numerical type of the ACE
         //
 
-        private static AceType TypeFromQualifier(bool isCallback, AceQualifier qualifier)
-        {
+        private static AceType TypeFromQualifier(bool isCallback, AceQualifier qualifier) =>
             //
             // Might benefit from replacing this with a static hard-coded table
             //
-
-            switch (qualifier)
+            qualifier switch
             {
-                case AceQualifier.AccessAllowed:
-                    return isCallback ? AceType.AccessAllowedCallback : AceType.AccessAllowed;
-
-                case AceQualifier.AccessDenied:
-                    return isCallback ? AceType.AccessDeniedCallback : AceType.AccessDenied;
-
-                case AceQualifier.SystemAudit:
-                    return isCallback ? AceType.SystemAuditCallback : AceType.SystemAudit;
-
-                case AceQualifier.SystemAlarm:
-                    return isCallback ? AceType.SystemAlarmCallback : AceType.SystemAlarm;
-
-                default:
-
-                    throw new ArgumentOutOfRangeException(
-nameof(qualifier),
-                        SR.ArgumentOutOfRange_Enum);
-            }
-        }
+                AceQualifier.AccessAllowed => isCallback ? AceType.AccessAllowedCallback : AceType.AccessAllowed,
+                AceQualifier.AccessDenied => isCallback ? AceType.AccessDeniedCallback : AceType.AccessDenied,
+                AceQualifier.SystemAudit => isCallback ? AceType.SystemAuditCallback : AceType.SystemAudit,
+                AceQualifier.SystemAlarm => isCallback ? AceType.SystemAlarmCallback : AceType.SystemAlarm,
+                _ => throw new ArgumentOutOfRangeException(nameof(qualifier), SR.ArgumentOutOfRange_Enum),
+            };
 
         #endregion
 
@@ -1778,42 +1763,28 @@ nameof(qualifier),
 
         #region Private Methods
 
-        //  
+        //
         // The following access mask bits in object aces may refer to an objectType that
         // identifies the property set, property, extended right, or type of child object to which the ACE applies
         //
-        //    ADS_RIGHT_DS_CREATE_CHILD = 0x1, 
-        //    ADS_RIGHT_DS_DELETE_CHILD = 0x2, 
+        //    ADS_RIGHT_DS_CREATE_CHILD = 0x1,
+        //    ADS_RIGHT_DS_DELETE_CHILD = 0x2,
         //    ADS_RIGHT_DS_SELF = 0x8,
-        //    ADS_RIGHT_DS_READ_PROP = 0x10, 
-        //    ADS_RIGHT_DS_WRITE_PROP = 0x20, 
+        //    ADS_RIGHT_DS_READ_PROP = 0x10,
+        //    ADS_RIGHT_DS_WRITE_PROP = 0x20,
         //    ADS_RIGHT_DS_CONTROL_ACCESS = 0x100
         //
-        internal static readonly int AccessMaskWithObjectType = 0x1 | 0x2 | 0x8 | 0x10 | 0x20 | 0x100;
+        internal const int AccessMaskWithObjectType = 0x1 | 0x2 | 0x8 | 0x10 | 0x20 | 0x100;
 
-        private static AceType TypeFromQualifier(bool isCallback, AceQualifier qualifier)
-        {
-            switch (qualifier)
+        private static AceType TypeFromQualifier(bool isCallback, AceQualifier qualifier) =>
+            qualifier switch
             {
-                case AceQualifier.AccessAllowed:
-                    return isCallback ? AceType.AccessAllowedCallbackObject : AceType.AccessAllowedObject;
-
-                case AceQualifier.AccessDenied:
-                    return isCallback ? AceType.AccessDeniedCallbackObject : AceType.AccessDeniedObject;
-
-                case AceQualifier.SystemAudit:
-                    return isCallback ? AceType.SystemAuditCallbackObject : AceType.SystemAuditObject;
-
-                case AceQualifier.SystemAlarm:
-                    return isCallback ? AceType.SystemAlarmCallbackObject : AceType.SystemAlarmObject;
-
-                default:
-
-                    throw new ArgumentOutOfRangeException(
-nameof(qualifier),
-                        SR.ArgumentOutOfRange_Enum);
-            }
-        }
+                AceQualifier.AccessAllowed => isCallback ? AceType.AccessAllowedCallbackObject : AceType.AccessAllowedObject,
+                AceQualifier.AccessDenied => isCallback ? AceType.AccessDeniedCallbackObject : AceType.AccessDeniedObject,
+                AceQualifier.SystemAudit => isCallback ? AceType.SystemAuditCallbackObject : AceType.SystemAuditObject,
+                AceQualifier.SystemAlarm => isCallback ? AceType.SystemAlarmCallbackObject : AceType.SystemAlarmObject,
+                _ => throw new ArgumentOutOfRangeException(nameof(qualifier), SR.ArgumentOutOfRange_Enum),
+            };
 
         //
         // This method checks if the objectType matches with the specified object type

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
 
 namespace System.Text
@@ -453,13 +452,7 @@ namespace System.Text
         }
 
         // True if and only if the encoding only uses single byte code points.  (Ie, ASCII, 1252, etc)
-        public override bool IsSingleByte
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool IsSingleByte => true;
 
         public override bool IsAlwaysNormalized(NormalizationForm form)
         {

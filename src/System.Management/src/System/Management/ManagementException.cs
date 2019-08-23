@@ -16,55 +16,55 @@ namespace System.Management
         /// <summary>
         ///    The operation was successful.
         /// </summary>
-        NoError							= 0,
+        NoError                         = 0,
         /// <summary>
-        ///    <para> This value is returned when no more objects 
+        ///    <para> This value is returned when no more objects
         ///       are available, the number of objects returned is less than the number requested,
         ///       or at the end of an enumeration. It is also returned when the method is called
         ///       with a value of 0 for the "uCount" parameter.</para>
         /// </summary>
-        False							= 1,
+        False                           = 1,
         /// <summary>
         ///    <para>An overridden property was deleted. This value is
         ///       returned to signal that the original, non-overridden value has been restored as a
         ///       result of the deletion.</para>
         /// </summary>
-        ResetToDefault					= 0x40002,
+        ResetToDefault                  = 0x40002,
         /// <summary>
         ///    <para> The compared items (such as objects and classes)
         ///       are not identical.</para>
         /// </summary>
-        Different		                = 0x40003,
+        Different                       = 0x40003,
         /// <summary>
         ///    <para> A call timed out. This is not an
         ///       error condition; therefore, some results may have been returned.</para>
         /// </summary>
-        Timedout						= 0x40004,
+        Timedout                        = 0x40004,
         /// <summary>
-        ///    <para> No more data is available from the enumeration; the 
+        ///    <para> No more data is available from the enumeration; the
         ///       user should terminate the enumeration. </para>
         /// </summary>
-        NoMoreData						= 0x40005,
+        NoMoreData                      = 0x40005,
         /// <summary>
         ///    <para> The operation was
         ///       canceled.</para>
         /// </summary>
-        OperationCanceled				= 0x40006,
+        OperationCanceled               = 0x40006,
         /// <summary>
         ///    <para>A request is still in progress; however, the results are not
         ///       yet available.</para>
         /// </summary>
-        Pending			                = 0x40007,
+        Pending                         = 0x40007,
         /// <summary>
-        ///    <para> More than one copy of the same object was detected in 
+        ///    <para> More than one copy of the same object was detected in
         ///       the result set of an enumeration. </para>
         /// </summary>
-        DuplicateObjects				= 0x40008,
+        DuplicateObjects                = 0x40008,
         /// <summary>
         ///    <para>The user did not receive all of the requested objects
         ///       because of inaccessible resources (other than security violations).</para>
         /// </summary>
-        PartialResults					= 0x40010,
+        PartialResults                  = 0x40010,
         /// <summary>
         ///    <para>The call failed.</para>
         /// </summary>
@@ -79,7 +79,7 @@ namespace System.Management
         /// </summary>
         AccessDenied                    = unchecked((int)0x80041003),
         /// <summary>
-        ///    <para> The provider failed after 
+        ///    <para> The provider failed after
         ///       initialization. </para>
         /// </summary>
         ProviderFailure                 = unchecked((int)0x80041004),
@@ -96,17 +96,17 @@ namespace System.Management
         /// </summary>
         InvalidContext                  = unchecked((int)0x80041007),
         /// <summary>
-        ///    <para> One of the parameters to the call is not correct. 
+        ///    <para> One of the parameters to the call is not correct.
         ///    </para>
         /// </summary>
         InvalidParameter                = unchecked((int)0x80041008),
         /// <summary>
-        ///    <para> The resource, typically a remote server, is not 
+        ///    <para> The resource, typically a remote server, is not
         ///       currently available. </para>
         /// </summary>
         NotAvailable                    = unchecked((int)0x80041009),
         /// <summary>
-        ///    <para>An internal, critical, and unexpected error occurred. 
+        ///    <para>An internal, critical, and unexpected error occurred.
         ///       Report this error to Microsoft Product Support Services.</para>
         /// </summary>
         CriticalError                   = unchecked((int)0x8004100A),
@@ -138,18 +138,18 @@ namespace System.Management
         ///    A provider referenced in the schema does not have a
         ///    corresponding registration.
         /// </summary>
-        ProviderNotFound				= unchecked((int)0x80041011),
+        ProviderNotFound                = unchecked((int)0x80041011),
         /// <summary>
         ///    A provider referenced in the schema has an incorrect or
         ///    incomplete registration.
         /// </summary>
-        InvalidProviderRegistration		= unchecked((int)0x80041012),
+        InvalidProviderRegistration     = unchecked((int)0x80041012),
         /// <summary>
         ///    COM cannot locate a provider referenced in the schema.
         /// </summary>
-        ProviderLoadFailure				= unchecked((int)0x80041013),
+        ProviderLoadFailure             = unchecked((int)0x80041013),
         /// <summary>
-        ///  A component, such as a provider, failed to initialize for internal reasons. 
+        ///  A component, such as a provider, failed to initialize for internal reasons.
         /// </summary>
         InitializationFailure           = unchecked((int)0x80041014),
         /// <summary>
@@ -158,7 +158,7 @@ namespace System.Management
         /// </summary>
         TransportFailure                = unchecked((int)0x80041015),
         /// <summary>
-        ///    <para> The requested operation is not valid. This error usually 
+        ///    <para> The requested operation is not valid. This error usually
         ///       applies to invalid attempts to delete classes or properties. </para>
         /// </summary>
         InvalidOperation                = unchecked((int)0x80041016),
@@ -169,24 +169,24 @@ namespace System.Management
         /// <summary>
         ///    <para>The requested query language is not supported.</para>
         /// </summary>
-        InvalidQueryType				= unchecked((int)0x80041018),
+        InvalidQueryType                = unchecked((int)0x80041018),
         /// <summary>
         /// <para>In a put operation, the <see langword='wbemChangeFlagCreateOnly'/>
         /// flag was specified, but the instance already exists.</para>
         /// </summary>
         AlreadyExists                   = unchecked((int)0x80041019),
         /// <summary>
-        ///    <para>The add operation cannot be performed on the qualifier 
+        ///    <para>The add operation cannot be performed on the qualifier
         ///       because the owning object does not permit overrides.</para>
         /// </summary>
-        OverrideNotAllowed				= unchecked((int)0x8004101A),
+        OverrideNotAllowed               = unchecked((int)0x8004101A),
         /// <summary>
-        ///    <para> The user attempted to delete a qualifier that was not 
+        ///    <para> The user attempted to delete a qualifier that was not
         ///       owned. The qualifier was inherited from a parent class. </para>
         /// </summary>
         PropagatedQualifier             = unchecked((int)0x8004101B),
         /// <summary>
-        ///    <para> The user attempted to delete a property that was not 
+        ///    <para> The user attempted to delete a property that was not
         ///       owned. The property was inherited from a parent class. </para>
         /// </summary>
         PropagatedProperty              = unchecked((int)0x8004101C),
@@ -196,16 +196,16 @@ namespace System.Management
         /// </summary>
         Unexpected                      = unchecked((int)0x8004101D),
         /// <summary>
-        ///    <para>The user requested an illegal operation, such as 
+        ///    <para>The user requested an illegal operation, such as
         ///       spawning a class from an instance.</para>
         /// </summary>
         IllegalOperation                = unchecked((int)0x8004101E),
         /// <summary>
-        ///    <para> There was an illegal attempt to specify a key qualifier 
+        ///    <para> There was an illegal attempt to specify a key qualifier
         ///       on a property that cannot be a key. The keys are specified in the class
         ///       definition for an object and cannot be altered on a per-instance basis.</para>
         /// </summary>
-        CannotBeKey						= unchecked((int)0x8004101F),
+        CannotBeKey                     = unchecked((int)0x8004101F),
         /// <summary>
         ///    <para>The current object is not a valid class definition.
         ///       Either it is incomplete, or it has not been registered with WMI using
@@ -225,25 +225,25 @@ namespace System.Management
         /// </summary>
         ReadOnly                        = unchecked((int)0x80041023),
         /// <summary>
-        ///    <para> The provider cannot perform the requested operation, such 
+        ///    <para> The provider cannot perform the requested operation, such
         ///       as requesting a query that is too complex, retrieving an instance, creating or
         ///       updating a class, deleting a class, or enumerating a class. </para>
         /// </summary>
-        ProviderNotCapable				= unchecked((int)0x80041024),
+        ProviderNotCapable               = unchecked((int)0x80041024),
         /// <summary>
         ///    <para>An attempt was made to make a change that would
         ///       invalidate a derived class.</para>
         /// </summary>
-        ClassHasChildren				= unchecked((int)0x80041025),
+        ClassHasChildren                 = unchecked((int)0x80041025),
         /// <summary>
-        ///    <para> An attempt has been made to delete or modify a class that 
+        ///    <para> An attempt has been made to delete or modify a class that
         ///       has instances. </para>
         /// </summary>
-        ClassHasInstances				= unchecked((int)0x80041026),
+        ClassHasInstances                = unchecked((int)0x80041026),
         /// <summary>
         ///    Reserved for future use.
         /// </summary>
-        QueryNotImplemented				= unchecked((int)0x80041027),
+        QueryNotImplemented              = unchecked((int)0x80041027),
         /// <summary>
         ///    <para> A value of null was specified for a property that may
         ///       not be null, such as one that is marked by a <see langword='Key'/>, <see langword='Indexed'/>, or
@@ -251,37 +251,37 @@ namespace System.Management
         /// </summary>
         IllegalNull                     = unchecked((int)0x80041028),
         /// <summary>
-        ///    <para> The value provided for a qualifier was not a 
+        ///    <para> The value provided for a qualifier was not a
         ///       legal qualifier type.</para>
         /// </summary>
-        InvalidQualifierType			= unchecked((int)0x80041029),
+        InvalidQualifierType             = unchecked((int)0x80041029),
         /// <summary>
         ///    The CIM type specified for a property is not valid.
         /// </summary>
-        InvalidPropertyType				= unchecked((int)0x8004102A),
+        InvalidPropertyType              = unchecked((int)0x8004102A),
         /// <summary>
-        ///    <para> The request was made with an out-of-range value, or is 
+        ///    <para> The request was made with an out-of-range value, or is
         ///       incompatible with the type. </para>
         /// </summary>
-        ValueOutOfRange					= unchecked((int)0x8004102B),
+        ValueOutOfRange                  = unchecked((int)0x8004102B),
         /// <summary>
-        ///    <para>An illegal attempt was made to make a class singleton, 
+        ///    <para>An illegal attempt was made to make a class singleton,
         ///       such as when the class is derived from a non-singleton class.</para>
         /// </summary>
-        CannotBeSingleton				= unchecked((int)0x8004102C),
+        CannotBeSingleton                = unchecked((int)0x8004102C),
         /// <summary>
         ///    The CIM type specified is not valid.
         /// </summary>
-        InvalidCimType					= unchecked((int)0x8004102D),
+        InvalidCimType                   = unchecked((int)0x8004102D),
         /// <summary>
         ///    The requested method is not available.
         /// </summary>
         InvalidMethod                   = unchecked((int)0x8004102E),
         /// <summary>
-        ///    <para> The parameters provided for the method are not valid. 
+        ///    <para> The parameters provided for the method are not valid.
         ///    </para>
         /// </summary>
-        InvalidMethodParameters			= unchecked((int)0x8004102F),
+        InvalidMethodParameters          = unchecked((int)0x8004102F),
         /// <summary>
         ///    There was an attempt to get qualifiers on a system
         ///    property.
@@ -292,23 +292,23 @@ namespace System.Management
         /// </summary>
         InvalidProperty                 = unchecked((int)0x80041031),
         /// <summary>
-        ///    <para> An asynchronous process has been canceled internally or 
+        ///    <para> An asynchronous process has been canceled internally or
         ///       by the user. Note that because of the timing and nature of the asynchronous
         ///       operation, the operation may not have been truly canceled. </para>
         /// </summary>
         CallCanceled                   = unchecked((int)0x80041032),
         /// <summary>
-        ///    <para>The user has requested an operation while WMI is in the 
+        ///    <para>The user has requested an operation while WMI is in the
         ///       process of quitting.</para>
         /// </summary>
         ShuttingDown                    = unchecked((int)0x80041033),
         /// <summary>
-        ///    <para> An attempt was made to reuse an existing method name from 
+        ///    <para> An attempt was made to reuse an existing method name from
         ///       a base class, and the signatures did not match. </para>
         /// </summary>
         PropagatedMethod                = unchecked((int)0x80041034),
         /// <summary>
-        ///    <para> One or more parameter values, such as a query text, is 
+        ///    <para> One or more parameter values, such as a query text, is
         ///       too complex or unsupported. WMI is requested to retry the operation
         ///       with simpler parameters. </para>
         /// </summary>
@@ -316,133 +316,133 @@ namespace System.Management
         /// <summary>
         ///    A parameter was missing from the method call.
         /// </summary>
-        MissingParameterID		        = unchecked((int)0x80041036),
+        MissingParameterID              = unchecked((int)0x80041036),
         /// <summary>
         ///    A method parameter has an invalid <see langword='ID'/> qualifier.
         /// </summary>
-        InvalidParameterID				= unchecked((int)0x80041037),
+        InvalidParameterID              = unchecked((int)0x80041037),
         /// <summary>
-        /// <para> One or more of the method parameters have <see langword='ID'/> 
+        /// <para> One or more of the method parameters have <see langword='ID'/>
         /// qualifiers that are out of sequence. </para>
         /// </summary>
-        NonconsecutiveParameterIDs		= unchecked((int)0x80041038),
+        NonconsecutiveParameterIDs      = unchecked((int)0x80041038),
         /// <summary>
-        /// <para> The return value for a method has an <see langword='ID'/> qualifier. 
+        /// <para> The return value for a method has an <see langword='ID'/> qualifier.
         /// </para>
         /// </summary>
-        ParameterIDOnRetval				= unchecked((int)0x80041039),
+        ParameterIDOnRetval             = unchecked((int)0x80041039),
         /// <summary>
         ///    The specified object path was invalid.
         /// </summary>
-        InvalidObjectPath				= unchecked((int)0x8004103A),
+        InvalidObjectPath               = unchecked((int)0x8004103A),
         /// <summary>
-        ///    <para> There is not enough free disk space to continue the 
+        ///    <para> There is not enough free disk space to continue the
         ///       operation. </para>
         /// </summary>
-        OutOfDiskSpace					= unchecked((int)0x8004103B),
+        OutOfDiskSpace                  = unchecked((int)0x8004103B),
         /// <summary>
-        ///    <para> The supplied buffer was too small to hold all the objects 
+        ///    <para> The supplied buffer was too small to hold all the objects
         ///       in the enumerator or to read a string property. </para>
         /// </summary>
-        BufferTooSmall					= unchecked((int)0x8004103C),
+        BufferTooSmall                  = unchecked((int)0x8004103C),
         /// <summary>
         ///    The provider does not support the requested put
         ///    operation.
         /// </summary>
-        UnsupportedPutExtension			= unchecked((int)0x8004103D),
+        UnsupportedPutExtension         = unchecked((int)0x8004103D),
         /// <summary>
-        ///    <para> An object with an incorrect type or version was 
+        ///    <para> An object with an incorrect type or version was
         ///       encountered during marshaling. </para>
         /// </summary>
-        UnknownObjectType				= unchecked((int)0x8004103E),
+        UnknownObjectType               = unchecked((int)0x8004103E),
         /// <summary>
-        ///    <para> A packet with an incorrect type or version was 
+        ///    <para> A packet with an incorrect type or version was
         ///       encountered during marshaling. </para>
         /// </summary>
-        UnknownPacketType				= unchecked((int)0x8004103F),
+        UnknownPacketType               = unchecked((int)0x8004103F),
         /// <summary>
         ///    The packet has an unsupported version.
         /// </summary>
-        MarshalVersionMismatch			= unchecked((int)0x80041040),
+        MarshalVersionMismatch          = unchecked((int)0x80041040),
         /// <summary>
         ///    <para>The packet is corrupted.</para>
         /// </summary>
-        MarshalInvalidSignature			= unchecked((int)0x80041041),
+        MarshalInvalidSignature         = unchecked((int)0x80041041),
         /// <summary>
         ///    An attempt has been made to mismatch qualifiers, such as
         ///    putting [key] on an object instead of a property.
         /// </summary>
-        InvalidQualifier				= unchecked((int)0x80041042),
+        InvalidQualifier                = unchecked((int)0x80041042),
         /// <summary>
         ///    A duplicate parameter has been declared in a CIM method.
         /// </summary>
-        InvalidDuplicateParameter		= unchecked((int)0x80041043),
+        InvalidDuplicateParameter       = unchecked((int)0x80041043),
         /// <summary>
         ///    <para> Reserved for future use. </para>
         /// </summary>
-        TooMuchData						= unchecked((int)0x80041044),
+        TooMuchData                     = unchecked((int)0x80041044),
         /// <summary>
-        ///    <para>The delivery of an event has failed. The provider may 
+        ///    <para>The delivery of an event has failed. The provider may
         ///       choose to re-raise the event.</para>
         /// </summary>
-        ServerTooBusy					= unchecked((int)0x80041045),
+        ServerTooBusy                   = unchecked((int)0x80041045),
         /// <summary>
         ///    The specified flavor was invalid.
         /// </summary>
-        InvalidFlavor					= unchecked((int)0x80041046),
+        InvalidFlavor                   = unchecked((int)0x80041046),
         /// <summary>
-        ///    <para> An attempt has been made to create a reference that is 
+        ///    <para> An attempt has been made to create a reference that is
         ///       circular (for example, deriving a class from itself). </para>
         /// </summary>
-        CircularReference				= unchecked((int)0x80041047),
+        CircularReference               = unchecked((int)0x80041047),
         /// <summary>
         ///    The specified class is not supported.
         /// </summary>
-        UnsupportedClassUpdate			= unchecked((int)0x80041048),
+        UnsupportedClassUpdate          = unchecked((int)0x80041048),
         /// <summary>
-        ///    <para> An attempt was made to change a key when instances or derived 
+        ///    <para> An attempt was made to change a key when instances or derived
         ///       classes are already using the key. </para>
         /// </summary>
-        CannotChangeKeyInheritance		= unchecked((int)0x80041049),
+        CannotChangeKeyInheritance      = unchecked((int)0x80041049),
         /// <summary>
-        ///    <para> An attempt was made to change an index when instances or derived 
+        ///    <para> An attempt was made to change an index when instances or derived
         ///       classes are already using the index. </para>
         /// </summary>
-        CannotChangeIndexInheritance	= unchecked((int)0x80041050),
+        CannotChangeIndexInheritance    = unchecked((int)0x80041050),
         /// <summary>
-        ///    <para> An attempt was made to create more properties than the 
+        ///    <para> An attempt was made to create more properties than the
         ///       current version of the class supports. </para>
         /// </summary>
-        TooManyProperties				= unchecked((int)0x80041051),
+        TooManyProperties               = unchecked((int)0x80041051),
         /// <summary>
-        ///    <para> A property was redefined with a conflicting type in a 
+        ///    <para> A property was redefined with a conflicting type in a
         ///       derived class. </para>
         /// </summary>
-        UpdateTypeMismatch				= unchecked((int)0x80041052),
+        UpdateTypeMismatch              = unchecked((int)0x80041052),
         /// <summary>
-        ///    <para> An attempt was made in a derived class to override a 
+        ///    <para> An attempt was made in a derived class to override a
         ///       non-overrideable qualifier. </para>
         /// </summary>
-        UpdateOverrideNotAllowed		= unchecked((int)0x80041053),
+        UpdateOverrideNotAllowed        = unchecked((int)0x80041053),
         /// <summary>
-        ///    <para> A method was redeclared with a conflicting signature in a 
+        ///    <para> A method was redeclared with a conflicting signature in a
         ///       derived class. </para>
         /// </summary>
-        UpdatePropagatedMethod			= unchecked((int)0x80041054),
+        UpdatePropagatedMethod          = unchecked((int)0x80041054),
         /// <summary>
         ///    An attempt was made to execute a method not marked with
         ///    [implemented] in any relevant class.
         /// </summary>
-        MethodNotImplemented			= unchecked((int)0x80041055),
+        MethodNotImplemented            = unchecked((int)0x80041055),
         /// <summary>
-        ///    <para> An attempt was made to execute a method marked with 
+        ///    <para> An attempt was made to execute a method marked with
         ///       [disabled]. </para>
         /// </summary>
-        MethodDisabled      			= unchecked((int)0x80041056),
+        MethodDisabled                  = unchecked((int)0x80041056),
         /// <summary>
         ///    <para> The refresher is busy with another operation. </para>
         /// </summary>
-        RefresherBusy					= unchecked((int)0x80041057),
+        RefresherBusy                   = unchecked((int)0x80041057),
         /// <summary>
         ///    <para> The filtering query is syntactically invalid. </para>
         /// </summary>
@@ -451,40 +451,40 @@ namespace System.Management
         ///    The FROM clause of a filtering query references a class
         ///    that is not an event class.
         /// </summary>
-        NotEventClass					= unchecked((int)0x80041059),
+        NotEventClass                   = unchecked((int)0x80041059),
         /// <summary>
         ///    A GROUP BY clause was used without the corresponding
         ///    GROUP WITHIN clause.
         /// </summary>
-        MissingGroupWithin				= unchecked((int)0x8004105A),
+        MissingGroupWithin              = unchecked((int)0x8004105A),
         /// <summary>
         ///    A GROUP BY clause was used. Aggregation on all properties
         ///    is not supported.
         /// </summary>
-        MissingAggregationList			= unchecked((int)0x8004105B),
+        MissingAggregationList          = unchecked((int)0x8004105B),
         /// <summary>
-        ///    <para> Dot notation was used on a property that is not an 
+        ///    <para> Dot notation was used on a property that is not an
         ///       embedded object. </para>
         /// </summary>
-        PropertyNotAnObject				= unchecked((int)0x8004105C),
+        PropertyNotAnObject             = unchecked((int)0x8004105C),
         /// <summary>
         ///    A GROUP BY clause references a property that is an
         ///    embedded object without using dot notation.
         /// </summary>
-        AggregatingByObject				= unchecked((int)0x8004105D),
+        AggregatingByObject             = unchecked((int)0x8004105D),
         /// <summary>
         ///    An event provider registration query
         ///    (<see langword='__EventProviderRegistration'/>) did not specify the classes for which
         ///    events were provided.
         /// </summary>
-        UninterpretableProviderQuery	= unchecked((int)0x8004105F),
+        UninterpretableProviderQuery    = unchecked((int)0x8004105F),
         /// <summary>
-        ///    <para> An request was made to back up or restore the repository 
+        ///    <para> An request was made to back up or restore the repository
         ///       while WinMgmt.exe was using it. </para>
         /// </summary>
-        BackupRestoreWinmgmtRunning		= unchecked((int)0x80041060),
+        BackupRestoreWinmgmtRunning     = unchecked((int)0x80041060),
         /// <summary>
-        ///    <para> The asynchronous delivery queue overflowed from the 
+        ///    <para> The asynchronous delivery queue overflowed from the
         ///       event consumer being too slow. </para>
         /// </summary>
         QueueOverflow                   = unchecked((int)0x80041061),
@@ -492,42 +492,42 @@ namespace System.Management
         ///    The operation failed because the client did not have the
         ///    necessary security privilege.
         /// </summary>
-        PrivilegeNotHeld				= unchecked((int)0x80041062),
+        PrivilegeNotHeld                = unchecked((int)0x80041062),
         /// <summary>
         ///    <para>The operator is not valid for this property type.</para>
         /// </summary>
         InvalidOperator                 = unchecked((int)0x80041063),
         /// <summary>
-        ///    <para> The user specified a username, password, or authority on a 
+        ///    <para> The user specified a username, password, or authority on a
         ///       local connection. The user must use an empty user name and password and rely on
         ///       default security. </para>
         /// </summary>
         LocalCredentials                = unchecked((int)0x80041064),
         /// <summary>
-        ///    <para> The class was made abstract when its base class is not 
+        ///    <para> The class was made abstract when its base class is not
         ///       abstract. </para>
         /// </summary>
-        CannotBeAbstract				= unchecked((int)0x80041065),
+        CannotBeAbstract                = unchecked((int)0x80041065),
         /// <summary>
-        ///    <para> An amended object was used in a put operation without the 
+        ///    <para> An amended object was used in a put operation without the
         ///       WBEM_FLAG_USE_AMENDED_QUALIFIERS flag being specified. </para>
         /// </summary>
-        AmendedObject					= unchecked((int)0x80041066),
+        AmendedObject                   = unchecked((int)0x80041066),
         /// <summary>
         ///    The client was not retrieving objects quickly enough from
         ///    an enumeration.
         /// </summary>
-        ClientTooSlow					= unchecked((int)0x80041067),
+        ClientTooSlow                   = unchecked((int)0x80041067),
 
         /// <summary>
-        ///    <para> The provider registration overlaps with the system event 
+        ///    <para> The provider registration overlaps with the system event
         ///       domain. </para>
         /// </summary>
-        RegistrationTooBroad			= unchecked((int)0x80042001),
+        RegistrationTooBroad            = unchecked((int)0x80042001),
         /// <summary>
         ///    <para> A WITHIN clause was not used in this query. </para>
         /// </summary>
-        RegistrationTooPrecise			= unchecked((int)0x80042002)
+        RegistrationTooPrecise          = unchecked((int)0x80042002)
     }
 
     /// <summary>
@@ -536,7 +536,7 @@ namespace System.Management
     /// <example>
     ///    <code lang='C#'>using System;
     /// using System.Management;
-    /// 
+    ///
     /// // This sample demonstrates how to display error
     /// // information stored in a ManagementException object.
     /// class Sample_ManagementException
@@ -564,7 +564,7 @@ namespace System.Management
     ///    </code>
     ///    <code lang='VB'>Imports System
     /// Imports System.Management
-    /// 
+    ///
     /// ' This sample demonstrates how to display error
     /// ' information stored in a ManagementException object.
     /// Class Sample_ManagementException
@@ -587,10 +587,10 @@ namespace System.Management
     ///    </code>
     /// </example>
     [Serializable]
-    public class ManagementException : SystemException 
+    public class ManagementException : SystemException
     {
-        private ManagementBaseObject	errorObject = null;
-        private ManagementStatus		errorCode = 0;
+        private readonly ManagementBaseObject errorObject = null;
+        private readonly ManagementStatus     errorCode = 0;
 
         internal static void ThrowWithExtendedInfo(ManagementStatus errorCode)
         {
@@ -605,15 +605,15 @@ namespace System.Management
             //If the error code is not a WMI one and there's an extended error object available, stick the message
             //from the extended error object in.
             if (((msg = GetMessage(errorCode)) == null) && (errObj != null))
-                try 
+                try
                 {
                     msg = (string)errObj["Description"];
-                } 
+                }
                 catch {}
 
             throw new ManagementException(errorCode, msg, errObj);
         }
-        
+
 
         internal static void ThrowWithExtendedInfo(Exception e)
         {
@@ -628,10 +628,10 @@ namespace System.Management
             //If the error code is not a WMI one and there's an extended error object available, stick the message
             //from the extended error object in.
             if (((msg = GetMessage(e)) == null) && (errObj != null))
-                try 
+                try
                 {
                     msg = (string)errObj["Description"];
-                } 
+                }
                 catch {}
 
             throw new ManagementException(e, msg, errObj);
@@ -643,10 +643,10 @@ namespace System.Management
             this.errorCode = errorCode;
             this.errorObject = errObj;
         }
-    
+
         internal ManagementException(Exception e, string msg, ManagementBaseObject errObj) : base (msg, e)
         {
-            try 
+            try
             {
                 if (e is ManagementException)
                 {
@@ -682,42 +682,42 @@ namespace System.Management
         /// </summary>
         public ManagementException():this(ManagementStatus.Failed, "", null)
         {
-             
+
         }
 
-        
+
         /// <summary>
-        /// <para>Initializes a new instance of the <see cref='System.Management.ManagementException'/> 
+        /// <para>Initializes a new instance of the <see cref='System.Management.ManagementException'/>
         /// class with a specified error message.</para>
         /// <param name='message'>The message that describes the error.</param>
         /// </summary>
         public ManagementException(string message):this(ManagementStatus.Failed, message, null)
         {
-            
+
         }
 
         /// <summary>
         /// <para>Initializes a empty new instance of the <see cref='System.Management.ManagementException'/> class </para>
         /// <param name='message'>The message that describes the error.</param>
-        /// <param name='innerException'>The exception that is the cause of the current exception. If the innerException 
-        /// parameter is not a null reference (Nothing in Visual Basic), the current exception is raised in a catch 
+        /// <param name='innerException'>The exception that is the cause of the current exception. If the innerException
+        /// parameter is not a null reference (Nothing in Visual Basic), the current exception is raised in a catch
         /// block that handles the inner exception.</param>
         /// </summary>
         public ManagementException(string message,Exception innerException):this(innerException, message, null)
-        {	
+        {
             // if the exception passed is not a ManagementException, then initialize the ErrorCode to Failed
             if (!(innerException is ManagementException))
                 errorCode = ManagementStatus.Failed;
         }
 
         /// <summary>
-        /// <para>Populates the <see cref='System.Runtime.Serialization.SerializationInfo'/> object with the data needed to 
+        /// <para>Populates the <see cref='System.Runtime.Serialization.SerializationInfo'/> object with the data needed to
         ///    serialize the <see cref='System.Management.ManagementException'/>
         ///    object.</para>
         /// </summary>
         /// <param name='info'>The <see cref='System.Runtime.Serialization.SerializationInfo'/> to populate with data.</param>
         /// <param name='context'>The destination (see <see cref='System.Runtime.Serialization.StreamingContext'/> ) for this serialization.</param>
- 
+
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
@@ -731,7 +731,7 @@ namespace System.Management
 
             if (e is COMException)
             {
-                // Try and get WMI error message. If not use the one in 
+                // Try and get WMI error message. If not use the one in
                 // the exception
                 msg = GetMessage ((ManagementStatus)((COMException)e).ErrorCode);
             }
@@ -769,13 +769,13 @@ namespace System.Management
         ///    <para>Gets the extended error object provided by WMI.</para>
         /// </summary>
         /// <value>
-        /// <para>A <see cref='System.Management.ManagementBaseObject'/> representing the 
+        /// <para>A <see cref='System.Management.ManagementBaseObject'/> representing the
         ///    extended error object provided by WMI, if available; <see langword='null'/>
         ///    otherwise.</para>
         /// </value>
-        public ManagementBaseObject ErrorInformation 
+        public ManagementBaseObject ErrorInformation
         {
-            get 
+            get
             { return errorObject; }
         }
 
@@ -786,9 +786,9 @@ namespace System.Management
         ///    A <see cref='System.Management.ManagementStatus'/> value representing the error code returned by
         ///    the WMI operation.
         /// </value>
-        public ManagementStatus ErrorCode 
+        public ManagementStatus ErrorCode
         {
-            get 
+            get
             { return errorCode; }
         }
 

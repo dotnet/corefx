@@ -12,13 +12,13 @@ namespace System.Reflection
     {
         protected Module() { }
 
-        public virtual Assembly Assembly { get { throw NotImplemented.ByDesign; } }
-        public virtual string FullyQualifiedName { get { throw NotImplemented.ByDesign; } }
-        public virtual string Name { get { throw NotImplemented.ByDesign; } }
+        public virtual Assembly Assembly => throw NotImplemented.ByDesign;
+        public virtual string FullyQualifiedName => throw NotImplemented.ByDesign;
+        public virtual string Name => throw NotImplemented.ByDesign;
 
-        public virtual int MDStreamVersion { get { throw NotImplemented.ByDesign; } }
-        public virtual Guid ModuleVersionId { get { throw NotImplemented.ByDesign; } }
-        public virtual string ScopeName { get { throw NotImplemented.ByDesign; } }
+        public virtual int MDStreamVersion => throw NotImplemented.ByDesign;
+        public virtual Guid ModuleVersionId => throw NotImplemented.ByDesign;
+        public virtual string ScopeName => throw NotImplemented.ByDesign;
         public ModuleHandle ModuleHandle => GetModuleHandleImpl();
         protected virtual ModuleHandle GetModuleHandleImpl() => ModuleHandle.EmptyHandle; // Not an api but declared protected because of Reflection.Core/Corelib divide (when built by CoreRt)
         public virtual void GetPEKind(out PortableExecutableKinds peKind, out ImageFileMachine machine) { throw NotImplemented.ByDesign; }
@@ -94,7 +94,7 @@ namespace System.Reflection
             return ret;
         }
 
-        public virtual int MetadataToken { get { throw NotImplemented.ByDesign; } }
+        public virtual int MetadataToken => throw NotImplemented.ByDesign;
 
         public FieldInfo? ResolveField(int metadataToken) => ResolveField(metadataToken, null, null);
         public virtual FieldInfo? ResolveField(int metadataToken, Type[]? genericTypeArguments, Type[]? genericMethodArguments) { throw NotImplemented.ByDesign; }
@@ -115,7 +115,7 @@ namespace System.Reflection
 
         public override bool Equals(object? o) => base.Equals(o);
         public override int GetHashCode() => base.GetHashCode();
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Module? left, Module? right)
         {
@@ -145,7 +145,7 @@ namespace System.Reflection
 
         private const BindingFlags DefaultLookup = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public;
 
-        // FilterTypeName 
+        // FilterTypeName
         // This method will filter the class based upon the name.  It supports
         //    a trailing wild card.
         private static bool FilterTypeNameImpl(Type cls, object filterCriteria, StringComparison comparison)
@@ -156,7 +156,7 @@ namespace System.Reflection
                 throw new InvalidFilterCriteriaException(SR.InvalidFilterCriteriaException_CritString);
             }
             // Check to see if this is a prefix or exact match requirement
-            if (str.Length > 0 && str[str.Length - 1] == '*')
+            if (str.Length > 0 && str[^1] == '*')
             {
                 ReadOnlySpan<char> slice = str.AsSpan(0, str.Length - 1);
                 return cls.Name.AsSpan().StartsWith(slice, comparison);

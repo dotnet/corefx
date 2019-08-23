@@ -7,13 +7,11 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Security;
-using System.Text;
 using System.Threading;
 
 using Microsoft.Win32.SafeHandles;
 
 using Internal.Win32;
-using Internal.Runtime.CompilerServices;
 
 using REG_TZI_FORMAT = Interop.Kernel32.REG_TZI_FORMAT;
 using TIME_ZONE_INFORMATION = Interop.Kernel32.TIME_ZONE_INFORMATION;
@@ -58,7 +56,7 @@ namespace System
                 if (oneYearLocFromUtc == null || oneYearLocFromUtc.Year != year)
                 {
                     TimeZoneInfo currentYear = GetCurrentOneYearLocal();
-                    AdjustmentRule? rule = currentYear._adjustmentRules == null ? null : currentYear._adjustmentRules[0];
+                    AdjustmentRule? rule = currentYear._adjustmentRules?[0];
                     oneYearLocFromUtc = new OffsetAndRule(year, currentYear.BaseUtcOffset, rule);
                     _oneYearLocalFromUtc = oneYearLocFromUtc;
                 }
@@ -243,8 +241,8 @@ namespace System
             //
             // Try using the "kernel32!GetDynamicTimeZoneInformation" API to get the "id"
             //
-            var dynamicTimeZoneInformation = new TIME_DYNAMIC_ZONE_INFORMATION();
 
+            TIME_DYNAMIC_ZONE_INFORMATION dynamicTimeZoneInformation;
             // call kernel32!GetDynamicTimeZoneInformation...
             uint result = Interop.Kernel32.GetDynamicTimeZoneInformation(out dynamicTimeZoneInformation);
             if (result == Interop.Kernel32.TIME_ZONE_ID_INVALID)
@@ -371,23 +369,22 @@ namespace System
         // DateTime.Now fast path that avoids allocating an historically accurate TimeZoneInfo.Local and just creates a 1-year (current year) accurate time zone
         internal static TimeSpan GetDateTimeNowUtcOffsetFromUtc(DateTime time, out bool isAmbiguousLocalDst)
         {
-            bool isDaylightSavings = false;
             isAmbiguousLocalDst = false;
-            TimeSpan baseOffset;
             int timeYear = time.Year;
 
             OffsetAndRule match = s_cachedData.GetOneYearLocalFromUtc(timeYear);
-            baseOffset = match.Offset;
+            TimeSpan baseOffset = match.Offset;
 
             if (match.Rule != null)
             {
-                baseOffset = baseOffset + match.Rule.BaseUtcOffsetDelta;
+                baseOffset += match.Rule.BaseUtcOffsetDelta;
                 if (match.Rule.HasDaylightSaving)
                 {
-                    isDaylightSavings = GetIsDaylightSavingsFromUtc(time, timeYear, match.Offset, match.Rule, null, out isAmbiguousLocalDst, Local);
+                    bool isDaylightSavings = GetIsDaylightSavingsFromUtc(time, timeYear, match.Offset, match.Rule, null, out isAmbiguousLocalDst, Local);
                     baseOffset += (isDaylightSavings ? match.Rule.DaylightDelta : TimeSpan.Zero /* FUTURE: rule.StandardDelta */);
                 }
             }
+
             return baseOffset;
         }
 
@@ -563,8 +560,8 @@ namespace System
                     // read LastEntry   {(yearN, 1, 1) - MaxValue       }
 
                     // read the FirstEntry and LastEntry key values (ex: "1980", "2038")
-                    int first = (int)dynamicKey.GetValue(FirstEntryValue, -1)!; // TODO-NULLABLE: Remove ! when [NotNullIfNotNull] respected
-                    int last = (int)dynamicKey.GetValue(LastEntryValue, -1)!; // TODO-NULLABLE: Remove ! when [NotNullIfNotNull] respected
+                    int first = (int)dynamicKey.GetValue(FirstEntryValue, -1);
+                    int last = (int)dynamicKey.GetValue(LastEntryValue, -1);
 
                     if (first == -1 || last == -1 || first > last)
                     {
@@ -672,8 +669,8 @@ namespace System
                 dtzi = default;
                 return false;
             }
-            fixed (byte * pBytes = &regValue[0])
-                dtzi = *(REG_TZI_FORMAT *)pBytes;
+            fixed (byte* pBytes = &regValue[0])
+                dtzi = *(REG_TZI_FORMAT*)pBytes;
             return true;
         }
 

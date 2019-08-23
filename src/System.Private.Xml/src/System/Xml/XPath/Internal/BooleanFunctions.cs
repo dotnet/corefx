@@ -13,8 +13,8 @@ namespace MS.Internal.Xml.XPath
 {
     internal sealed class BooleanFunctions : ValueQuery
     {
-        private Query _arg;
-        private FT _funcType;
+        private readonly Query _arg;
+        private readonly FT _funcType;
 
         public BooleanFunctions(FT funcType, Query arg)
         {
@@ -35,18 +35,16 @@ namespace MS.Internal.Xml.XPath
             }
         }
 
-        public override object Evaluate(XPathNodeIterator nodeIterator)
-        {
-            switch (_funcType)
+        public override object Evaluate(XPathNodeIterator nodeIterator) =>
+            _funcType switch
             {
-                case FT.FuncBoolean: return toBoolean(nodeIterator);
-                case FT.FuncNot: return Not(nodeIterator);
-                case FT.FuncTrue: return true;
-                case FT.FuncFalse: return false;
-                case FT.FuncLang: return Lang(nodeIterator);
-            }
-            return false;
-        }
+                FT.FuncBoolean => toBoolean(nodeIterator),
+                FT.FuncNot => Not(nodeIterator),
+                FT.FuncTrue => true,
+                FT.FuncFalse => false,
+                FT.FuncLang => Lang(nodeIterator),
+                _ => false,
+            };
 
         internal static bool toBoolean(double number)
         {

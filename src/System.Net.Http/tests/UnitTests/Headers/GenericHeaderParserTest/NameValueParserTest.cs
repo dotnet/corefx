@@ -45,12 +45,12 @@ namespace System.Net.Http.Tests
         {
             CheckInvalidParsedValue("name[value", 0);
             CheckInvalidParsedValue("name=value=", 0);
-            CheckInvalidParsedValue("name=会", 0);
+            CheckInvalidParsedValue("name=\u4F1A", 0);
             CheckInvalidParsedValue("name==value", 0);
             CheckInvalidParsedValue("=value", 0);
             CheckInvalidParsedValue("name value", 0);
             CheckInvalidParsedValue("name=,value", 0);
-            CheckInvalidParsedValue("会", 0);
+            CheckInvalidParsedValue("\u4F1A", 0);
         }
 
         #region Helper methods
@@ -73,7 +73,7 @@ namespace System.Net.Http.Tests
             int newIndex = startIndex;
             Assert.False(parser.TryParseValue(input, null, ref newIndex, out result),
                 string.Format("TryParse returned true: {0}", input));
-            Assert.Equal(null, result);
+            Assert.Null(result);
             Assert.Equal(startIndex, newIndex);
         }
         #endregion

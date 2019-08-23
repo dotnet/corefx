@@ -41,7 +41,7 @@ namespace System.Xml.Xsl.XsltOld
         public bool NameParent { get { return _nameParent; } }
 
 
-        private static Hashtable s_table = CreatePropsTable();
+        private static readonly Hashtable s_table = CreatePropsTable();
         //        private static HtmlElementProps  s_otherElements = Create(false, false, false, false, false, false, false);
 
         public static HtmlElementProps GetProps(string name)
@@ -49,7 +49,7 @@ namespace System.Xml.Xsl.XsltOld
             HtmlElementProps result = (HtmlElementProps)s_table[name];
             return result;
             // We can do this but in case of Xml/Html mixed output this doesn't have big sence.
-            //            return result != null ?  result : s_otherElements;            
+            //            return result != null ?  result : s_otherElements;
         }
 
         private static Hashtable CreatePropsTable()
@@ -152,7 +152,7 @@ namespace System.Xml.Xsl.XsltOld
         public bool Uri { get { return _uri; } }
         public bool Name { get { return _name; } }
 
-        private static Hashtable s_table = CreatePropsTable();
+        private static readonly Hashtable s_table = CreatePropsTable();
         //      private static HtmlElementProps  s_otherAttributes = Create(false, false, false);
 
         public static HtmlAttributeProps GetProps(string name)
@@ -160,7 +160,7 @@ namespace System.Xml.Xsl.XsltOld
             HtmlAttributeProps result = (HtmlAttributeProps)s_table[name];
             return result;
             // We can do this but in case of Xml/Html mixed output this doesn't have big sence.
-            //          return result != null ?  result : s_otherElements;            
+            //          return result != null ?  result : s_otherElements;
         }
 
         private static Hashtable CreatePropsTable()
@@ -168,7 +168,7 @@ namespace System.Xml.Xsl.XsltOld
             bool o = false, X = true;
             Hashtable table = new Hashtable(26, StringComparer.OrdinalIgnoreCase);
             {
-                //                               ABR     URI    NAME 
+                //                               ABR     URI    NAME
                 table.Add("action", Create(o, X, o));
                 table.Add("checked", Create(X, o, o));
                 table.Add("cite", Create(o, X, o));

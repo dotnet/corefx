@@ -179,7 +179,7 @@ namespace System.Net.Http
 
         internal static bool ContainsInvalidNewLine(string value, int startIndex)
         {
-            // Search for newlines followed by non-whitespace: This is not allowed in any header (be it a known or 
+            // Search for newlines followed by non-whitespace: This is not allowed in any header (be it a known or
             // custom header). E.g. "value\r\nbadformat: header" is invalid. However "value\r\n goodformat: header"
             // is valid: newlines followed by whitespace are allowed in header values.
             int current = startIndex;
@@ -265,8 +265,8 @@ namespace System.Net.Http
                 return 0;
             }
 
-            // A 'host' is either a token (if 'allowToken' == true) or a valid host name as defined by the URI RFC. 
-            // So we first iterate through the string and search for path delimiters and whitespace. When found, stop 
+            // A 'host' is either a token (if 'allowToken' == true) or a valid host name as defined by the URI RFC.
+            // So we first iterate through the string and search for path delimiters and whitespace. When found, stop
             // and try to use the substring as token or URI host name. If it works, we have a host name, otherwise not.
             int current = startIndex;
             bool isToken = true;
@@ -275,7 +275,7 @@ namespace System.Net.Http
                 char c = input[current];
                 if (c == '/')
                 {
-                    return 0; // Host header must not contain paths. 
+                    return 0; // Host header must not contain paths.
                 }
 
                 if ((c == ' ') || (c == '\t') || (c == '\r') || (c == ','))
@@ -374,7 +374,7 @@ namespace System.Net.Http
                     (GetQuotedPairLength(input, current, out quotedPairLength) == HttpParseResult.Parsed))
                 {
                     // We ignore invalid quoted-pairs. Invalid quoted-pairs may mean that it looked like a quoted pair,
-                    // but we actually have a quoted-string: e.g. "\ü" ('\' followed by a char >127 - quoted-pair only
+                    // but we actually have a quoted-string: e.g. "\\u00FC" ('\' followed by a char >127 - quoted-pair only
                     // allows ASCII chars after '\'; qdtext allows both '\' and >127 chars).
                     current = current + quotedPairLength;
                     continue;

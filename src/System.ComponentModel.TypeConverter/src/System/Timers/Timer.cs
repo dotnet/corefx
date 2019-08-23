@@ -23,7 +23,7 @@ namespace System.Timers
         private ISynchronizeInvoke _synchronizingObject;
         private bool _disposed;
         private Threading.Timer _timer;
-        private TimerCallback _callback;
+        private readonly TimerCallback _callback;
         private object _cookie;
 
         /// <summary>
@@ -182,7 +182,7 @@ namespace System.Timers
 
         /// <summary>
         /// Sets the enable property in design mode to true by default.
-        /// </summary>                              
+        /// </summary>
         public override ISite Site
         {
             get => base.Site;

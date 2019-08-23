@@ -26,7 +26,7 @@ namespace System
     {
         None = 1,
         NoThrowOnInvalidTime = 2
-    };
+    }
 
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Core, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
@@ -42,7 +42,7 @@ namespace System
             TimeZoneNotFoundException = 1,
             InvalidTimeZoneException = 2,
             SecurityException = 3
-        };
+        }
 
         private readonly string _id;
         private readonly string? _displayName;
@@ -142,7 +142,7 @@ namespace System
             public Dictionary<string, TimeZoneInfo>? _systemTimeZones;
             public ReadOnlyCollection<TimeZoneInfo>? _readOnlySystemTimeZones;
             public bool _allSystemTimeZonesRead;
-        };
+        }
 
         // used by GetUtcOffsetFromUtc (DateTime.Now, DateTime.ToLocalTime) for max/min whole-day range checks
         private static readonly DateTime s_maxDateOnly = new DateTime(9999, 12, 31);
@@ -380,7 +380,7 @@ namespace System
                 }
             }
 
-            return GetUtcOffset(dateTime, this, flags);
+            return GetUtcOffset(dateTime, this);
         }
 
         /// <summary>
@@ -513,7 +513,7 @@ namespace System
             if (rule != null && rule.HasDaylightSaving)
             {
                 DaylightTimeStruct daylightTime = GetDaylightTime(adjustedTime.Year, rule, ruleIndex);
-                return GetIsDaylightSavings(adjustedTime, rule, daylightTime, flags);
+                return GetIsDaylightSavings(adjustedTime, rule, daylightTime);
             }
             else
             {
@@ -682,7 +682,7 @@ namespace System
 
             if (sourceRule != null)
             {
-                sourceOffset = sourceOffset + sourceRule.BaseUtcOffsetDelta;
+                sourceOffset += sourceRule.BaseUtcOffsetDelta;
                 if (sourceRule.HasDaylightSaving)
                 {
                     bool sourceIsDaylightSavings = false;
@@ -694,7 +694,7 @@ namespace System
                     {
                         throw new ArgumentException(SR.Argument_DateTimeIsInvalid, nameof(dateTime));
                     }
-                    sourceIsDaylightSavings = GetIsDaylightSavings(dateTime, sourceRule, sourceDaylightTime, flags);
+                    sourceIsDaylightSavings = GetIsDaylightSavings(dateTime, sourceRule, sourceDaylightTime);
 
                     // adjust the sourceOffset according to the Adjustment Rule / Daylight Saving Rule
                     sourceOffset += (sourceIsDaylightSavings ? sourceRule.DaylightDelta : TimeSpan.Zero /*FUTURE: sourceRule.StandardDelta*/);
@@ -1252,7 +1252,7 @@ namespace System
         /// Helper function that checks if a given dateTime is in Daylight Saving Time (DST).
         /// This function assumes the dateTime and AdjustmentRule are both in the same time zone.
         /// </summary>
-        private static bool GetIsDaylightSavings(DateTime time, AdjustmentRule rule, DaylightTimeStruct daylightTime, TimeZoneInfoOptions flags)
+        private static bool GetIsDaylightSavings(DateTime time, AdjustmentRule rule, DaylightTimeStruct daylightTime)
         {
             if (rule == null)
             {
@@ -1677,7 +1677,7 @@ namespace System
         /// Helper function that calculates the UTC offset for a dateTime in a timeZone.
         /// This function assumes that the dateTime is already converted into the timeZone.
         /// </summary>
-        private static TimeSpan GetUtcOffset(DateTime time, TimeZoneInfo zone, TimeZoneInfoOptions flags)
+        private static TimeSpan GetUtcOffset(DateTime time, TimeZoneInfo zone)
         {
             TimeSpan baseOffset = zone.BaseUtcOffset;
             int? ruleIndex;
@@ -1685,11 +1685,11 @@ namespace System
 
             if (rule != null)
             {
-                baseOffset = baseOffset + rule.BaseUtcOffsetDelta;
+                baseOffset += rule.BaseUtcOffsetDelta;
                 if (rule.HasDaylightSaving)
                 {
                     DaylightTimeStruct daylightTime = zone.GetDaylightTime(time.Year, rule, ruleIndex);
-                    bool isDaylightSavings = GetIsDaylightSavings(time, rule, daylightTime, flags);
+                    bool isDaylightSavings = GetIsDaylightSavings(time, rule, daylightTime);
                     baseOffset += (isDaylightSavings ? rule.DaylightDelta : TimeSpan.Zero /* FUTURE: rule.StandardDelta */);
                 }
             }
@@ -1701,21 +1701,15 @@ namespace System
         /// Helper function that calculates the UTC offset for a UTC-dateTime in a timeZone.
         /// This function assumes that the dateTime is represented in UTC and has *not* already been converted into the timeZone.
         /// </summary>
-        private static TimeSpan GetUtcOffsetFromUtc(DateTime time, TimeZoneInfo zone)
-        {
-            bool isDaylightSavings;
-            return GetUtcOffsetFromUtc(time, zone, out isDaylightSavings);
-        }
+        private static TimeSpan GetUtcOffsetFromUtc(DateTime time, TimeZoneInfo zone) =>
+            GetUtcOffsetFromUtc(time, zone, out _);
 
         /// <summary>
         /// Helper function that calculates the UTC offset for a UTC-dateTime in a timeZone.
         /// This function assumes that the dateTime is represented in UTC and has *not* already been converted into the timeZone.
         /// </summary>
-        private static TimeSpan GetUtcOffsetFromUtc(DateTime time, TimeZoneInfo zone, out bool isDaylightSavings)
-        {
-            bool isAmbiguousLocalDst;
-            return GetUtcOffsetFromUtc(time, zone, out isDaylightSavings, out isAmbiguousLocalDst);
-        }
+        private static TimeSpan GetUtcOffsetFromUtc(DateTime time, TimeZoneInfo zone, out bool isDaylightSavings) =>
+            GetUtcOffsetFromUtc(time, zone, out isDaylightSavings, out _);
 
         /// <summary>
         /// Helper function that calculates the UTC offset for a UTC-dateTime in a timeZone.
@@ -1756,7 +1750,7 @@ namespace System
 
             if (rule != null)
             {
-                baseOffset = baseOffset + rule.BaseUtcOffsetDelta;
+                baseOffset += rule.BaseUtcOffsetDelta;
                 if (rule.HasDaylightSaving)
                 {
                     isDaylightSavings = GetIsDaylightSavingsFromUtc(time, year, zone._baseUtcOffset, rule, ruleIndex, out isAmbiguousLocalDst, zone);
@@ -1847,12 +1841,11 @@ namespace System
 
             TimeZoneInfoResult result = TimeZoneInfoResult.Success;
             e = null;
-            TimeZoneInfo? match = null;
 
             // check the cache
             if (cachedData._systemTimeZones != null)
             {
-                if (cachedData._systemTimeZones.TryGetValue(id, out match))
+                if (cachedData._systemTimeZones.TryGetValue(id, out TimeZoneInfo? match))
                 {
                     if (dstDisabled && match._supportsDaylightSavingTime)
                     {
@@ -1864,6 +1857,7 @@ namespace System
                         value = new TimeZoneInfo(match._id, match._baseUtcOffset, match._displayName, match._standardDisplayName,
                                               match._daylightDisplayName, match._adjustmentRules, disableDaylightSavingTime: false);
                     }
+
                     return result;
                 }
             }
@@ -1897,15 +1891,14 @@ namespace System
 
             if (result == TimeZoneInfoResult.Success)
             {
-                if (cachedData._systemTimeZones == null)
+                cachedData._systemTimeZones ??= new Dictionary<string, TimeZoneInfo>(StringComparer.OrdinalIgnoreCase)
                 {
-                    cachedData._systemTimeZones = new Dictionary<string, TimeZoneInfo>(StringComparer.OrdinalIgnoreCase);
-                    cachedData._systemTimeZones.Add(UtcId, s_utcTimeZone);
-                }
+                    { UtcId, s_utcTimeZone }
+                };
 
                 // Avoid using multiple Utc objects to ensure consistency and correctness as we have some code
                 // uses reference equality with the Utc object.
-                if (!id.Equals(UtcId,  StringComparison.OrdinalIgnoreCase))
+                if (!id.Equals(UtcId, StringComparison.OrdinalIgnoreCase))
                 {
                     cachedData._systemTimeZones.Add(id, match!);
                 }

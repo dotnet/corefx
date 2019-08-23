@@ -181,7 +181,7 @@ namespace System.Security.Cryptography
 
                 unsafe
                 {
-                    int blobSize = 
+                    int blobSize =
                         sizeof(BCRYPT_DSA_KEY_BLOB) +
                         cbKey +
                         cbKey +
@@ -272,32 +272,20 @@ namespace System.Security.Cryptography
                         pBcryptBlob->Magic = includePrivateParameters ? KeyBlobMagicNumber.BCRYPT_DSA_PRIVATE_MAGIC_V2 : KeyBlobMagicNumber.BCRYPT_DSA_PUBLIC_MAGIC_V2;
                         pBcryptBlob->cbKey = cbKey;
 
-                        // For some reason, Windows bakes the hash algorithm into the key itself. Furthermore, it demands that the Q length match the 
-                        // length of the named hash algorithm's output - otherwise, the Import fails. So we have to give it the hash algorithm that matches 
+                        // For some reason, Windows bakes the hash algorithm into the key itself. Furthermore, it demands that the Q length match the
+                        // length of the named hash algorithm's output - otherwise, the Import fails. So we have to give it the hash algorithm that matches
                         // the Q length - and if there is no matching hash algorithm, we throw up our hands and throw a PlatformNotSupported.
                         //
-                        // Note that this has no bearing on the hash algorithm you pass to SignData(). The class library (not Windows) hashes that according 
-                        // to the hash algorithm passed to SignData() and presents the hash result to NCryptSignHash(), truncating the hash to the Q length 
-                        // if necessary (and as demanded by the NIST spec.) Windows will be no wiser and we'll get the result we want. 
-                        HASHALGORITHM_ENUM hashAlgorithm;
-                        switch (parameters.Q.Length)
+                        // Note that this has no bearing on the hash algorithm you pass to SignData(). The class library (not Windows) hashes that according
+                        // to the hash algorithm passed to SignData() and presents the hash result to NCryptSignHash(), truncating the hash to the Q length
+                        // if necessary (and as demanded by the NIST spec.) Windows will be no wiser and we'll get the result we want.
+                        pBcryptBlob->hashAlgorithm = parameters.Q.Length switch
                         {
-                            case Sha1HashOutputSize:
-                                hashAlgorithm = HASHALGORITHM_ENUM.DSA_HASH_ALGORITHM_SHA1;
-                                break;
-
-                            case Sha256HashOutputSize:
-                                hashAlgorithm = HASHALGORITHM_ENUM.DSA_HASH_ALGORITHM_SHA256;
-                                break;
-
-                            case Sha512HashOutputSize:
-                                hashAlgorithm = HASHALGORITHM_ENUM.DSA_HASH_ALGORITHM_SHA512;
-                                break;
-
-                            default:
-                                throw new PlatformNotSupportedException(SR.Cryptography_InvalidDsaParameters_QRestriction_LargeKey);
-                        }
-                        pBcryptBlob->hashAlgorithm = hashAlgorithm;
+                            Sha1HashOutputSize => HASHALGORITHM_ENUM.DSA_HASH_ALGORITHM_SHA1,
+                            Sha256HashOutputSize => HASHALGORITHM_ENUM.DSA_HASH_ALGORITHM_SHA256,
+                            Sha512HashOutputSize => HASHALGORITHM_ENUM.DSA_HASH_ALGORITHM_SHA512,
+                            _ => throw new PlatformNotSupportedException(SR.Cryptography_InvalidDsaParameters_QRestriction_LargeKey),
+                        };
                         pBcryptBlob->standardVersion = DSAFIPSVERSION_ENUM.DSA_FIPS186_3;
 
                         int offset = sizeof(BCRYPT_DSA_KEY_BLOB_V2) - 4; //skip to Count[4]

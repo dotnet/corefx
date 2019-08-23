@@ -22,10 +22,9 @@ namespace System.Xml.Serialization
     {
         private readonly Dictionary<string, string> _idNames = new Dictionary<string, string>();
         // Mapping name->id_XXXNN field
-        private Dictionary<string, FieldBuilder> _idNameFields = new Dictionary<string, FieldBuilder>();
+        private readonly Dictionary<string, FieldBuilder> _idNameFields = new Dictionary<string, FieldBuilder>();
         private Dictionary<string, EnumMapping> _enums;
         private int _nextIdNumber = 0;
-        private int _nextWhileLoopIndex = 0;
 
         internal Dictionary<string, EnumMapping> Enums
         {
@@ -41,15 +40,15 @@ namespace System.Xml.Serialization
 
         private class Member
         {
-            private string _source;
-            private string _arrayName;
-            private string _arraySource;
-            private string _choiceArrayName;
-            private string _choiceSource;
-            private string _choiceArraySource;
-            private MemberMapping _mapping;
-            private bool _isArray;
-            private bool _isList;
+            private readonly string _source;
+            private readonly string _arrayName;
+            private readonly string _arraySource;
+            private readonly string _choiceArrayName;
+            private readonly string _choiceSource;
+            private readonly string _choiceArraySource;
+            private readonly MemberMapping _mapping;
+            private readonly bool _isArray;
+            private readonly bool _isList;
             private bool _isNullable;
             private int _fixupIndex = -1;
             private string _paramsReadSource;
@@ -812,7 +811,7 @@ namespace System.Xml.Serialization
                             "CollapseWhitespace",
                             CodeGenerator.InstanceBindingFlags,
                             null,
-                            new Type[] { typeof(String) },
+                            new Type[] { typeof(string) },
                             null
                             );
                         ilg.Call(XmlSerializationReader_CollapseWhitespace);
@@ -1929,7 +1928,7 @@ namespace System.Xml.Serialization
                     CodeGenerator.InstanceBindingFlags,
                     new Type[] { typeof(string), typeof(string) }
                     );
-                MethodInfo String_get_Length = typeof(String).GetMethod(
+                MethodInfo String_get_Length = typeof(string).GetMethod(
                     "get_Length",
                     CodeGenerator.InstanceBindingFlags,
                     Array.Empty<Type>()
@@ -2088,7 +2087,7 @@ namespace System.Xml.Serialization
                 {
                     LocalBuilder locListValues = ilg.DeclareOrGetLocal(typeof(string), "listValues");
                     LocalBuilder locVals = ilg.DeclareOrGetLocal(typeof(string[]), "vals");
-                    MethodInfo String_Split = typeof(String).GetMethod(
+                    MethodInfo String_Split = typeof(string).GetMethod(
                         "Split",
                         CodeGenerator.InstanceBindingFlags,
                         new Type[] { typeof(char[]) }
@@ -3094,7 +3093,7 @@ namespace System.Xml.Serialization
                     ConstructorInfo TimeSpan_ctor = typeof(TimeSpan).GetConstructor(
                         CodeGenerator.InstanceBindingFlags,
                         null,
-                        new Type[] { typeof(Int64) },
+                        new Type[] { typeof(long) },
                         null
                         );
                     ilg.Ldc(default(TimeSpan).Ticks);

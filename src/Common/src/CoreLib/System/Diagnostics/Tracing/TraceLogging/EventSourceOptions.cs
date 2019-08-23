@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if ES_BUILD_STANDALONE
 using System;
+#endif
 
 #if ES_BUILD_STANDALONE
 namespace Microsoft.Diagnostics.Tracing
@@ -66,13 +68,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        internal bool IsOpcodeSet
-        {
-            get
-            {
-                return (this.valuesSet & opcodeSet) != 0;
-            }
-        }
+        internal bool IsOpcodeSet => (this.valuesSet & opcodeSet) != 0;
 
         /// <summary>
         /// Gets or sets the keywords to use for the specified event. If this

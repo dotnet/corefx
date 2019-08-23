@@ -31,12 +31,12 @@ namespace System.Runtime.Caching
         private DateTime _lastTrimTime;
         private int _pollingInterval;
         private GCHandleRef<Timer> _timerHandleRef;
-        private object _timerLock;
+        private readonly object _timerLock;
         private long _totalCountBeforeTrim;
 
         private CacheMemoryMonitor _cacheMemoryMonitor;
-        private MemoryCache _memoryCache;
-        private PhysicalMemoryMonitor _physicalMemoryMonitor;
+        private readonly MemoryCache _memoryCache;
+        private readonly PhysicalMemoryMonitor _physicalMemoryMonitor;
 
         // private
 
@@ -268,7 +268,7 @@ namespace System.Runtime.Caching
                     return 0;
                 }
                 Dbg.Trace("MemoryCacheStats", "**BEG** CacheManagerThread " + DateTime.Now.ToString("T", CultureInfo.InvariantCulture));
-      
+
                 // The timer thread must always call Update so that the CacheManager
                 // knows the size of the cache.
                 Update();
@@ -388,4 +388,3 @@ namespace System.Runtime.Caching
         }
     }
 }
-

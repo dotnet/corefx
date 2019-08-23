@@ -117,7 +117,7 @@ namespace System.Reflection.TypeLoading
             if (foundSigType)
                 return this.MakeSignatureGenericType(typeArguments);
 
-            // We are intentionally not validating constraints as constraint validation is an execution-time issue that does not block our 
+            // We are intentionally not validating constraints as constraint validation is an execution-time issue that does not block our
             // library and should not block a metadata inspection tool.
             return this.GetUniqueConstructedGenericType(runtimeTypeArguments);
         }
@@ -153,30 +153,25 @@ namespace System.Reflection.TypeLoading
                     return null;
 
                 TypeAttributes attributes = Attributes;
-
-                LayoutKind layoutKind;
-                switch (attributes & TypeAttributes.LayoutMask)
+                LayoutKind layoutKind = (attributes & TypeAttributes.LayoutMask) switch
                 {
-                    case TypeAttributes.ExplicitLayout: layoutKind = LayoutKind.Explicit; break;
-                    case TypeAttributes.AutoLayout: layoutKind = LayoutKind.Auto; break;
-                    case TypeAttributes.SequentialLayout: layoutKind = LayoutKind.Sequential; break;
-                    default: layoutKind = LayoutKind.Auto; break;
-                }
-
-                CharSet charSet;
-                switch (attributes & TypeAttributes.StringFormatMask)
+                    TypeAttributes.ExplicitLayout => LayoutKind.Explicit,
+                    TypeAttributes.AutoLayout => LayoutKind.Auto,
+                    TypeAttributes.SequentialLayout => LayoutKind.Sequential,
+                    _ => LayoutKind.Auto,
+                };
+                CharSet charSet = (attributes & TypeAttributes.StringFormatMask) switch
                 {
-                    case TypeAttributes.AnsiClass: charSet = CharSet.Ansi; break;
-                    case TypeAttributes.AutoClass: charSet = CharSet.Auto; break;
-                    case TypeAttributes.UnicodeClass: charSet = CharSet.Unicode; break;
-                    default: charSet = CharSet.None; break;
-                }
-
+                    TypeAttributes.AnsiClass => CharSet.Ansi,
+                    TypeAttributes.AutoClass => CharSet.Auto,
+                    TypeAttributes.UnicodeClass => CharSet.Unicode,
+                    _ => CharSet.None,
+                };
                 GetPackSizeAndSize(out int pack, out int size);
 
                 // Metadata parameter checking should not have allowed 0 for packing size.
                 // The runtime later converts a packing size of 0 to 8 so do the same here
-                // because it's more useful from a user perspective. 
+                // because it's more useful from a user perspective.
                 if (pack == 0)
                     pack = DefaultPackingSize;
 
@@ -245,7 +240,7 @@ namespace System.Reflection.TypeLoading
         internal sealed override IEnumerable<FieldInfo> GetFieldsCore(NameFilter filter, Type reflectedType) => SpecializeFields(filter, reflectedType, this);
         internal sealed override IEnumerable<PropertyInfo> GetPropertiesCore(NameFilter filter, Type reflectedType) => SpecializeProperties(filter, reflectedType, this);
 
-        // Like CoreGetDeclared but allows specifying an alternate declaringType (which must be a generic instantiation of the true declaring type) 
+        // Like CoreGetDeclared but allows specifying an alternate declaringType (which must be a generic instantiation of the true declaring type)
         internal abstract IEnumerable<ConstructorInfo> SpecializeConstructors(NameFilter filter, RoInstantiationProviderType declaringType);
         internal abstract IEnumerable<MethodInfo> SpecializeMethods(NameFilter filter, Type reflectedType, RoInstantiationProviderType declaringType);
         internal abstract IEnumerable<EventInfo> SpecializeEvents(NameFilter filter, Type reflectedType, RoInstantiationProviderType declaringType);

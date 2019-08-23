@@ -21,9 +21,9 @@ namespace System.Xml.Linq
         private static WeakReference s_refXml;
         private static WeakReference s_refXmlns;
 
-        private string _namespaceName;
-        private int _hashCode;
-        private XHashtable<XName> _names;
+        private readonly string _namespaceName;
+        private readonly int _hashCode;
+        private readonly XHashtable<XName> _names;
 
         private const int NamesCapacity = 8;           // Starting capacity of XName table, which must be power of 2
         private const int NamespacesCapacity = 32;     // Starting capacity of XNamespace table, which must be power of 2
@@ -134,7 +134,7 @@ namespace System.Xml.Linq
         /// </summary>
         /// <param name="ns">The namespace for the expanded name.</param>
         /// <param name="localName">The local name for the expanded name.</param>
-        /// <returns>The new XName constructed from the namespace and local name.</returns>        
+        /// <returns>The new XName constructed from the namespace and local name.</returns>
         [SuppressMessage("Microsoft.Usage", "CA2225:OperatorOverloadsHaveNamedAlternates", Justification = "Functionality available via XNamespace.Get().")]
         public static XName operator +(XNamespace ns, string localName)
         {
@@ -150,7 +150,7 @@ namespace System.Xml.Linq
         /// true if the specified <see cref="XNamespace"/> is equal to the current <see cref="XNamespace"/>; otherwise false.
         /// </returns>
         /// <remarks>
-        /// For two <see cref="XNamespace"/> objects to be equal they must have the same 
+        /// For two <see cref="XNamespace"/> objects to be equal they must have the same
         /// namespace name.
         /// </remarks>
         public override bool Equals(object obj)
@@ -159,8 +159,8 @@ namespace System.Xml.Linq
         }
 
         /// <summary>
-        /// Serves as a hash function for <see cref="XNamespace"/>. GetHashCode is suitable 
-        /// for use in hashing algorithms and data structures like a hash table.  
+        /// Serves as a hash function for <see cref="XNamespace"/>. GetHashCode is suitable
+        /// for use in hashing algorithms and data structures like a hash table.
         /// </summary>
         public override int GetHashCode()
         {

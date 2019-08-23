@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 //
 // Copyright (C) 2004,2006-2008 Novell, Inc (http://www.novell.com)
@@ -10,10 +10,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -239,7 +239,7 @@ namespace System.Drawing.Tests
                 Assert.Equal(expectedSize.Width, icon.Width);
                 Assert.Equal(expectedSize.Height, icon.Height);
                 Assert.Equal(expectedSize, icon.Size);
-                Assert.NotSame(sourceIcon.Handle, icon.Handle);
+                Assert.NotEqual(sourceIcon.Handle, icon.Handle);
             }
         }
 
@@ -254,7 +254,7 @@ namespace System.Drawing.Tests
                 Assert.Equal(expectedSize.Width, icon.Width);
                 Assert.Equal(expectedSize.Height, icon.Height);
                 Assert.Equal(expectedSize, icon.Size);
-                Assert.NotSame(sourceIcon.Handle, icon.Handle);
+                Assert.NotEqual(sourceIcon.Handle, icon.Handle);
             }
         }
 
@@ -319,7 +319,7 @@ namespace System.Drawing.Tests
             using (Icon clone = Assert.IsType<Icon>(icon.Clone()))
             {
                 Assert.NotSame(icon, clone);
-                Assert.NotSame(icon.Handle, clone.Handle);
+                Assert.NotEqual(icon.Handle, clone.Handle);
                 Assert.Equal(32, clone.Width);
                 Assert.Equal(32, clone.Height);
                 Assert.Equal(new Size(32, 32), clone.Size);
@@ -333,7 +333,7 @@ namespace System.Drawing.Tests
             using (Icon clone = Assert.IsType<Icon>(icon.Clone()))
             {
                 Assert.NotSame(icon, clone);
-                Assert.NotSame(icon.Handle, clone.Handle);
+                Assert.NotEqual(icon.Handle, clone.Handle);
                 Assert.Equal(SystemIcons.Hand.Width, clone.Width);
                 Assert.Equal(SystemIcons.Hand.Height, clone.Height);
                 Assert.Equal(SystemIcons.Hand.Size, clone.Size);
@@ -414,7 +414,7 @@ namespace System.Drawing.Tests
             {
                 File.Open(bitmapUncPath, FileMode.Open, FileAccess.Read, FileShare.Read).Dispose();
             }
-            catch(IOException)
+            catch (IOException)
             {
                 return;
             }

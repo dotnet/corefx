@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
+using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json
@@ -126,7 +127,12 @@ namespace System.Text.Json
             SortedListTypeName,
         };
 
-        public static Type GetImplementedCollectionType(Type queryType)
+        public static Type GetImplementedCollectionType(
+            Type parentClassType,
+            Type queryType,
+            PropertyInfo propertyInfo,
+            out JsonConverter converter,
+            JsonSerializerOptions options)
         {
             Debug.Assert(queryType != null);
 
@@ -136,6 +142,14 @@ namespace System.Text.Json
                 queryType.IsInterface ||
                 queryType.IsArray ||
                 IsNativelySupportedCollection(queryType))
+            {
+                converter = null;
+                return queryType;
+            }
+
+            // If a converter was provided, we should not detect implemented types and instead use the converter later.
+            converter = options.DetermineConverterForProperty(parentClassType, queryType, propertyInfo);
+            if (converter != null)
             {
                 return queryType;
             }
@@ -310,7 +324,7 @@ namespace System.Text.Json
             // - If multiple different generic instantiations exists, we want the most derived one.
             // - If that doesn't break the tie, then we sort alphabetically so that it's deterministic.
             //
-            // We do this by looking at interfaces on the type, and recursing to the base type 
+            // We do this by looking at interfaces on the type, and recursing to the base type
             // if we don't find any matches.
             return GetGenericInstantiation(queryType, interfaceType);
         }

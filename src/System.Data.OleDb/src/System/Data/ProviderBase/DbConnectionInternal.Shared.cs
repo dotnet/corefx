@@ -133,11 +133,11 @@ namespace System.Data.ProviderBase
                         // native resources and GC may not happen soon enough.
                         // don't dispose if still holding reference in _enlistedTransaction
                         if (null != previousTransactionClone &&
-                                !Object.ReferenceEquals(previousTransactionClone, _enlistedTransaction))
+                                !object.ReferenceEquals(previousTransactionClone, _enlistedTransaction))
                         {
                             previousTransactionClone.Dispose();
                         }
-                        if (null != valueClone && !Object.ReferenceEquals(valueClone, _enlistedTransaction))
+                        if (null != valueClone && !object.ReferenceEquals(valueClone, _enlistedTransaction))
                         {
                             valueClone.Dispose();
                         }
@@ -161,13 +161,13 @@ namespace System.Data.ProviderBase
         }
 
         /// <summary>
-        /// Get boolean that specifies whether an enlisted transaction can be unbound from 
+        /// Get boolean that specifies whether an enlisted transaction can be unbound from
         /// the connection when that transaction completes.
         /// </summary>
         /// <value>
         /// True if the enlisted transaction can be unbound on transaction completion; otherwise false.
         /// </value>
-        virtual protected bool UnbindOnTransactionCompletion
+        protected virtual bool UnbindOnTransactionCompletion
         {
             get
             {
@@ -176,7 +176,7 @@ namespace System.Data.ProviderBase
         }
 
         // Is this a connection that must be put in stasis (or is already in stasis) pending the end of it's transaction?
-        virtual protected internal bool IsNonPoolableTransactionRoot
+        protected internal virtual bool IsNonPoolableTransactionRoot
         {
             get
             {
@@ -184,7 +184,7 @@ namespace System.Data.ProviderBase
             }
         }
 
-        virtual internal bool IsTransactionRoot
+        internal virtual bool IsTransactionRoot
         {
             get
             {
@@ -265,7 +265,7 @@ namespace System.Data.ProviderBase
             }
         }
 
-        abstract public string ServerVersion
+        public abstract string ServerVersion
         {
             get;
         }
@@ -286,7 +286,7 @@ namespace System.Data.ProviderBase
             }
         }
 
-        abstract protected void Activate(SysTx.Transaction transaction);
+        protected abstract void Activate(SysTx.Transaction transaction);
 
         internal void AddWeakReference(object value, int tag)
         {
@@ -301,34 +301,34 @@ namespace System.Data.ProviderBase
             _referenceCollection.Add(value, tag);
         }
 
-        abstract public DbTransaction BeginTransaction(IsolationLevel il);
+        public abstract DbTransaction BeginTransaction(IsolationLevel il);
 
-        virtual internal void PrepareForReplaceConnection()
+        internal virtual void PrepareForReplaceConnection()
         {
             // By default, there is no preperation required
         }
 
-        virtual protected void PrepareForCloseConnection()
+        protected virtual void PrepareForCloseConnection()
         {
             // By default, there is no preperation required
         }
 
-        virtual protected object ObtainAdditionalLocksForClose()
+        protected virtual object ObtainAdditionalLocksForClose()
         {
             return null; // no additional locks in default implementation
         }
 
-        virtual protected void ReleaseAdditionalLocksForClose(object lockToken)
+        protected virtual void ReleaseAdditionalLocksForClose(object lockToken)
         {
             // no additional locks in default implementation
         }
 
-        virtual protected DbReferenceCollection CreateReferenceCollection()
+        protected virtual DbReferenceCollection CreateReferenceCollection()
         {
             throw ADP.InternalError(ADP.InternalErrorCode.AttemptingToConstructReferenceCollectionOnStaticObject);
         }
 
-        abstract protected void Deactivate();
+        protected abstract void Deactivate();
 
         internal void DeactivateConnection()
         {
@@ -340,7 +340,7 @@ namespace System.Data.ProviderBase
 #endif // DEBUG
 
             if (PerformanceCounters != null)
-            { // Pool.Clear will DestroyObject that will clean performanceCounters before going here 
+            { // Pool.Clear will DestroyObject that will clean performanceCounters before going here
                 PerformanceCounters.NumberOfActiveConnections.Decrement();
             }
 
@@ -358,7 +358,7 @@ namespace System.Data.ProviderBase
             Deactivate();
         }
 
-        virtual internal void DelegatedTransactionEnded()
+        internal virtual void DelegatedTransactionEnded()
         {
             // Called by System.Transactions when the delegated transaction has
             // completed.  We need to make closed connections that are in stasis
@@ -389,7 +389,7 @@ namespace System.Data.ProviderBase
             else if (-1 == _pooledCount && !_owningObject.IsAlive)
             {
                 // When _pooledCount is -1 and the owning object no longer exists,
-                // it indicates a closed (or leaked), non-pooled connection so 
+                // it indicates a closed (or leaked), non-pooled connection so
                 // it is safe to dispose.
 
                 TerminateStasis(false);
@@ -398,14 +398,14 @@ namespace System.Data.ProviderBase
 
                 // it's a non-pooled connection, we need to dispose of it
                 // once and for all, or the server will have fits about us
-                // leaving connections open until the client-side GC kicks 
+                // leaving connections open until the client-side GC kicks
                 // in.
                 PerformanceCounters.NumberOfNonPooledConnections.Decrement();
                 Dispose();
             }
             // When _pooledCount is 0, the connection is a pooled connection
             // that is either open (if the owning object is alive) or leaked (if
-            // the owning object is not alive)  In either case, we can't muck 
+            // the owning object is not alive)  In either case, we can't muck
             // with the connection here.
         }
 
@@ -420,9 +420,9 @@ namespace System.Data.ProviderBase
             _connectionIsDoomed = true;
         }
 
-        abstract public void EnlistTransaction(SysTx.Transaction transaction);
+        public abstract void EnlistTransaction(SysTx.Transaction transaction);
 
-        virtual protected internal DataTable GetSchema(DbConnectionFactory factory, DbConnectionPoolGroup poolGroup, DbConnection outerConnection, string collectionName, string[] restrictions)
+        protected internal virtual DataTable GetSchema(DbConnectionFactory factory, DbConnectionPoolGroup poolGroup, DbConnection outerConnection, string collectionName, string[] restrictions)
         {
             Debug.Assert(outerConnection != null, "outerConnection may not be null.");
 
@@ -549,10 +549,10 @@ namespace System.Data.ProviderBase
 
             Debug.Assert(!IsEmancipated, "pooled object not in pool");
 
-            // When another thread is clearing this pool, it 
-            // will doom all connections in this pool without prejudice which 
-            // causes the following assert to fire, which really mucks up stress 
-            // against checked bits.  The assert is benign, so we're commenting 
+            // When another thread is clearing this pool, it
+            // will doom all connections in this pool without prejudice which
+            // causes the following assert to fire, which really mucks up stress
+            // against checked bits.  The assert is benign, so we're commenting
             // it out.
             //Debug.Assert(CanBePooled,   "pooled object is not poolable");
 

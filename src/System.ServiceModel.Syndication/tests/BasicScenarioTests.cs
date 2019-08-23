@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -313,7 +313,7 @@ namespace System.ServiceModel.Syndication.Tests
             SyndicationItem[] items = res.Items.ToArray();
             DateTimeOffset dateTimeOffset;
             Assert.Throws<XmlException>(() => dateTimeOffset = items[2].PublishDate);
-        }    
+        }
 
         [Fact]
         public static void AtomEntryPositiveTest()
@@ -408,7 +408,7 @@ namespace System.ServiceModel.Syndication.Tests
             string file = "TestFeeds/FailureFeeds/diff_atom_ns.xml";
             using (XmlReader reader = XmlReader.Create(file))
             {
-                Assert.Throws(typeof(XmlException), () => { SyndicationItem.Load(reader); });
+                Assert.Throws<XmlException>(() => { SyndicationItem.Load(reader); });
             }
         }
 
@@ -418,7 +418,7 @@ namespace System.ServiceModel.Syndication.Tests
             string file = "TestFeeds/FailureFeeds/diff_rss_ns.xml";
             using (XmlReader reader = XmlReader.Create(file))
             {
-                Assert.Throws(typeof(XmlException), () => { SyndicationItem.Load(reader); });
+                Assert.Throws<XmlException>(() => { SyndicationItem.Load(reader); });
             }
         }
 
@@ -428,7 +428,7 @@ namespace System.ServiceModel.Syndication.Tests
             string file = "TestFeeds/FailureFeeds/diff_rss_version.xml";
             using (XmlReader reader = XmlReader.Create(file))
             {
-                Assert.Throws(typeof(XmlException), () => { SyndicationItem.Load(reader); });
+                Assert.Throws<XmlException>(() => { SyndicationItem.Load(reader); });
             }
         }
 
@@ -438,7 +438,7 @@ namespace System.ServiceModel.Syndication.Tests
             string file = "TestFeeds/FailureFeeds/no_rss_version.xml";
             using (XmlReader reader = XmlReader.Create(file))
             {
-                Assert.Throws(typeof(XmlException), () => { SyndicationItem.Load(reader); });
+                Assert.Throws<XmlException>(() => { SyndicationItem.Load(reader); });
             }
         }
 

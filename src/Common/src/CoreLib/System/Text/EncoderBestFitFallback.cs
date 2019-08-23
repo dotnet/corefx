@@ -24,40 +24,24 @@ namespace System.Text
             _encoding = encoding;
         }
 
-        public override EncoderFallbackBuffer CreateFallbackBuffer()
-        {
-            return new InternalEncoderBestFitFallbackBuffer(this);
-        }
+        public override EncoderFallbackBuffer CreateFallbackBuffer() =>
+            new InternalEncoderBestFitFallbackBuffer(this);
 
         // Maximum number of characters that this instance of this fallback could return
-        public override int MaxCharCount
-        {
-            get
-            {
-                return 1;
-            }
-        }
+        public override int MaxCharCount => 1;
 
-        public override bool Equals(object? value)
-        {
-            if (value is InternalEncoderBestFitFallback that)
-            {
-                return _encoding.CodePage == that._encoding.CodePage;
-            }
-            return false;
-        }
+        public override bool Equals(object? value) =>
+            value is InternalEncoderBestFitFallback that &&
+            _encoding.CodePage == that._encoding.CodePage;
 
-        public override int GetHashCode()
-        {
-            return _encoding.CodePage;
-        }
+        public override int GetHashCode() => _encoding.CodePage;
     }
 
     internal sealed class InternalEncoderBestFitFallbackBuffer : EncoderFallbackBuffer
     {
         // Our variables
         private char _cBestFit = '\0';
-        private InternalEncoderBestFitFallback _oFallback;
+        private readonly InternalEncoderBestFitFallback _oFallback;
         private int _iCount = -1;
         private int _iSize;
 
@@ -72,7 +56,7 @@ namespace System.Text
                     object o = new object();
                     Interlocked.CompareExchange<object?>(ref s_InternalSyncObject, o, null);
                 }
-                return s_InternalSyncObject!; // TODO-NULLABLE: Remove ! when compiler specially-recognizes CompareExchange for nullability
+                return s_InternalSyncObject;
             }
         }
 
@@ -169,13 +153,7 @@ namespace System.Text
 
 
         // How many characters left to output?
-        public override int Remaining
-        {
-            get
-            {
-                return (_iCount > 0) ? _iCount : 0;
-            }
-        }
+        public override int Remaining => (_iCount > 0) ? _iCount : 0;
 
         // Clear the buffer
         public override unsafe void Reset()
@@ -239,4 +217,3 @@ namespace System.Text
         }
     }
 }
-

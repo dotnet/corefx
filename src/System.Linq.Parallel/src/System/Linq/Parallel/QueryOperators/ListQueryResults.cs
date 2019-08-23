@@ -13,14 +13,14 @@ using System.Collections.Generic;
 namespace System.Linq.Parallel
 {
     /// <summary>
-    /// Class to represent an IList{T} as QueryResults{T} 
+    /// Class to represent an IList{T} as QueryResults{T}
     /// </summary>
     /// <typeparam name="T"></typeparam>
     internal class ListQueryResults<T> : QueryResults<T>
     {
-        private IList<T> _source;
-        private int _partitionCount;
-        private bool _useStriping;
+        private readonly IList<T> _source;
+        private readonly int _partitionCount;
+        private readonly bool _useStriping;
 
         internal ListQueryResults(IList<T> source, int partitionCount, bool useStriping)
         {

@@ -2,25 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+using System.Text;
+using System.Globalization;
+using System.Collections;
+using System.Collections.Generic;
+using System.Xml.XPath;
+using System.Xml.Xsl.Runtime;
+
 namespace System.Xml.Xsl.XsltOld
 {
-    using System.Diagnostics;
-    using System.Text;
-    using System.Globalization;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Xml.XPath;
-    using System.Xml.Xsl.Runtime;
-
     internal class NumberAction : ContainerAction
     {
-        private const long msofnfcNil = 0x00000000;     // no flags
-        private const long msofnfcTraditional = 0x00000001;     // use traditional numbering
-        private const long msofnfcAlwaysFormat = 0x00000002;     // if requested format is not supported, use Arabic (Western) style
-
-        private const int cchMaxFormat = 63;     // max size of formatted result
-        private const int cchMaxFormatDecimal = 11;    // max size of formatted decimal result (doesn't handle the case of a very large pwszSeparator or minlen)
-
         internal class FormatInfo
         {
             public bool isSeparator;      // False for alphanumeric strings of chars
@@ -37,8 +30,8 @@ namespace System.Xml.Xsl.XsltOld
             public FormatInfo() { }
         }
 
-        private static FormatInfo s_defaultFormat = new FormatInfo(false, "0");
-        private static FormatInfo s_defaultSeparator = new FormatInfo(true, ".");
+        private static readonly FormatInfo s_defaultFormat = new FormatInfo(false, "0");
+        private static readonly FormatInfo s_defaultSeparator = new FormatInfo(true, ".");
 
         private class NumberingFormat : NumberFormatterBase
         {

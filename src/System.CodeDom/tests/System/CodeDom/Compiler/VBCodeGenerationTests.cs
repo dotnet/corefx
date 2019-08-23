@@ -188,7 +188,7 @@ namespace System.CodeDom.Compiler.Tests
                 new CodeVariableReferenceExpression("b"))));
             cd.Members.Add(cmm);
 
-            // call method with no parameters, call a method with multiple parameters, 
+            // call method with no parameters, call a method with multiple parameters,
             // and call a method from a method call
             cmm = new CodeMemberMethod();
             cmm.Name = "CallParamsMethods";
@@ -218,7 +218,7 @@ namespace System.CodeDom.Compiler.Tests
                 methodinvoke2, CodeBinaryOperatorType.Subtract, methodinvoke)));
             cd.Members.Add(cmm);
 
-            // first declare a class with a virtual method in it 
+            // first declare a class with a virtual method in it
             cd = new CodeTypeDeclaration("ClassWVirtualMethod");
             cd.IsClass = true;
             ns.Types.Add(cd);
@@ -1818,7 +1818,7 @@ namespace System.CodeDom.Compiler.Tests
         [Fact]
         public void Params()
         {
-            Func<string, int, CodeStatement> createStatement = (objName, iNum) =>
+            static CodeStatement CreateStatement(string objName, int iNum)
             {
                 CodeAssignStatement statement = new CodeAssignStatement(new CodeVariableReferenceExpression("str"),
                                     new CodeMethodInvokeExpression(
@@ -1830,7 +1830,7 @@ namespace System.CodeDom.Compiler.Tests
                                             new CodeArrayIndexerExpression(new CodeVariableReferenceExpression("array"), new CodePrimitiveExpression(iNum)),
                                             "ToString")}));
                 return statement;
-            };
+            }
 
             CodeNamespace ns = new CodeNamespace("Namespace1");
             ns.Imports.Add(new CodeNamespaceImport("System"));
@@ -1859,9 +1859,9 @@ namespace System.CodeDom.Compiler.Tests
 
             fooMethod1.Statements.Add(new CodeVariableDeclarationStatement(typeof(string), "str"));
 
-            fooMethod1.Statements.Add(createStatement("format", 0));
-            fooMethod1.Statements.Add(createStatement("str", 1));
-            fooMethod1.Statements.Add(createStatement("str", 2));
+            fooMethod1.Statements.Add(CreateStatement("format", 0));
+            fooMethod1.Statements.Add(CreateStatement("str", 1));
+            fooMethod1.Statements.Add(CreateStatement("str", 2));
 
             fooMethod1.Statements.Add(new CodeMethodReturnStatement(new CodeVariableReferenceExpression("str")));
 

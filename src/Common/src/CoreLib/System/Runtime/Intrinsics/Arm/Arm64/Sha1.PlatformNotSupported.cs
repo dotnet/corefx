@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#pragma warning disable IDE0060 // unused parameters
 using System.Runtime.CompilerServices;
-using System.Runtime.Intrinsics;
 
 namespace System.Runtime.Intrinsics.Arm.Arm64
 {
@@ -22,19 +22,19 @@ namespace System.Runtime.Intrinsics.Arm.Arm64
         /// Performs SHA1 hash update choose form.
         /// vsha1cq_u32 (uint32x4_t hash_abcd, uint32_t hash_e, uint32x4_t wk)
         /// </summary>
-        public static Vector128<uint> HashChoose(Vector128<uint> hash_abcd, uint hash_e, Vector128<uint>wk) { throw new PlatformNotSupportedException(); }
+        public static Vector128<uint> HashChoose(Vector128<uint> hash_abcd, uint hash_e, Vector128<uint> wk) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// Performs SHA1 hash update majority form.
         /// vsha1mq_u32 (uint32x4_t hash_abcd, uint32_t hash_e, uint32x4_t wk)
         /// </summary>
-        public static Vector128<uint> HashMajority(Vector128<uint> hash_abcd, uint hash_e, Vector128<uint>wk) { throw new PlatformNotSupportedException(); }
+        public static Vector128<uint> HashMajority(Vector128<uint> hash_abcd, uint hash_e, Vector128<uint> wk) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// Performs SHA1 hash update parity form.
         /// vsha1pq_u32 (uint32x4_t hash_abcd, uint32_t hash_e, uint32x4_t wk)
         /// </summary>
-        public static Vector128<uint> HashParity(Vector128<uint> hash_abcd, uint hash_e, Vector128<uint>wk) { throw new PlatformNotSupportedException(); }
+        public static Vector128<uint> HashParity(Vector128<uint> hash_abcd, uint hash_e, Vector128<uint> wk) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// Performs SHA1 fixed rotate

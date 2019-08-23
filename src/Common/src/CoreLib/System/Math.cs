@@ -2,20 +2,21 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+// ===================================================================================================
+// Portions of the code implemented below are based on the 'Berkeley SoftFloat Release 3e' algorithms.
+// ===================================================================================================
+
 /*============================================================
 **
 **
 **
 ** Purpose: Some floating-point math operations
 **
-** 
+**
 ===========================================================*/
-
-//This class contains only static members and doesn't require serialization.
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
 
@@ -32,7 +33,7 @@ namespace System
         private const double doubleRoundLimit = 1e16d;
 
         // This table is required for the Round function which can specify the number of digits to round to
-        private static double[] roundPower10Double = new double[] {
+        private static readonly double[] roundPower10Double = new double[] {
           1E0, 1E1, 1E2, 1E3, 1E4, 1E5, 1E6, 1E7, 1E8,
           1E9, 1E10, 1E11, 1E12, 1E13, 1E14, 1E15
         };
@@ -114,7 +115,7 @@ namespace System
 
         public static double BitDecrement(double x)
         {
-            var bits = BitConverter.DoubleToInt64Bits(x);
+            long bits = BitConverter.DoubleToInt64Bits(x);
 
             if (((bits >> 32) & 0x7FF00000) >= 0x7FF00000)
             {
@@ -139,7 +140,7 @@ namespace System
 
         public static double BitIncrement(double x)
         {
-            var bits = BitConverter.DoubleToInt64Bits(x);
+            long bits = BitConverter.DoubleToInt64Bits(x);
 
             if (((bits >> 32) & 0x7FF00000) >= 0x7FF00000)
             {
@@ -167,8 +168,8 @@ namespace System
             // This method is required to work for all inputs,
             // including NaN, so we operate on the raw bits.
 
-            var xbits = BitConverter.DoubleToInt64Bits(x);
-            var ybits = BitConverter.DoubleToInt64Bits(y);
+            long xbits = BitConverter.DoubleToInt64Bits(x);
+            long ybits = BitConverter.DoubleToInt64Bits(y);
 
             // If the sign bits of x and y are not the same,
             // flip the sign bit of x and return the new value;
@@ -316,7 +317,7 @@ namespace System
             {
                 return max;
             }
-            
+
             return value;
         }
 
@@ -462,7 +463,7 @@ namespace System
                 return y; // IEEE 754-2008: NaN payload must be preserved
             }
 
-            var regularMod = x % y;
+            double regularMod = x % y;
 
             if (double.IsNaN(regularMod))
             {
@@ -474,12 +475,12 @@ namespace System
                 return double.NegativeZero;
             }
 
-            var alternativeResult = (regularMod - (Abs(y) * Sign(x)));
+            double alternativeResult = (regularMod - (Abs(y) * Sign(x)));
 
             if (Abs(alternativeResult) == Abs(regularMod))
             {
-                var divisionResult = x / y;
-                var roundedResult = Round(divisionResult);
+                double divisionResult = x / y;
+                double roundedResult = Round(divisionResult);
 
                 if (Abs(roundedResult) > Abs(divisionResult))
                 {
@@ -583,7 +584,7 @@ namespace System
         {
             return (val1 >= val2) ? val1 : val2;
         }
-        
+
         public static float Max(float val1, float val2)
         {
             // This matches the IEEE 754:2019 `maximum` function
@@ -802,29 +803,69 @@ namespace System
         public static double Round(double a)
         {
             // ************************************************************************************
-            // IMPORTANT: Do not change this implementation without also updating Math.Round(double),
+            // IMPORTANT: Do not change this implementation without also updating MathF.Round(float),
             //            FloatingPointUtils::round(double), and FloatingPointUtils::round(float)
             // ************************************************************************************
 
-            // If the number has no fractional part do nothing
-            // This shortcut is necessary to workaround precision loss in borderline cases on some platforms
+            // This is based on the 'Berkeley SoftFloat Release 3e' algorithm
 
-            if (a == (double)((long)a))
+            ulong bits = (ulong)BitConverter.DoubleToInt64Bits(a);
+            int exponent = double.ExtractExponentFromBits(bits);
+
+            if (exponent <= 0x03FE)
             {
+                if ((bits << 1) == 0)
+                {
+                    // Exactly +/- zero should return the original value
+                    return a;
+                }
+
+                // Any value less than or equal to 0.5 will always round to exactly zero
+                // and any value greater than 0.5 will always round to exactly one. However,
+                // we need to preserve the original sign for IEEE compliance.
+
+                double result = ((exponent == 0x03FE) && (double.ExtractSignificandFromBits(bits) != 0)) ? 1.0 : 0.0;
+                return CopySign(result, a);
+            }
+
+            if (exponent >= 0x0433)
+            {
+                // Any value greater than or equal to 2^52 cannot have a fractional part,
+                // So it will always round to exactly itself.
+
                 return a;
             }
 
-            // We had a number that was equally close to 2 integers.
-            // We need to return the even one.
+            // The absolute value should be greater than or equal to 1.0 and less than 2^52
+            Debug.Assert((0x03FF <= exponent) && (exponent <= 0x0432));
 
-            double flrTempVal = Floor(a + 0.5);
+            // Determine the last bit that represents the integral portion of the value
+            // and the bits representing the fractional portion
 
-            if ((a == (Floor(a) + 0.5)) && (FMod(flrTempVal, 2.0) != 0))
+            ulong lastBitMask = 1UL << (0x0433 - exponent);
+            ulong roundBitsMask = lastBitMask - 1;
+
+            // Increment the first fractional bit, which represents the midpoint between
+            // two integral values in the current window.
+
+            bits += lastBitMask >> 1;
+
+            if ((bits & roundBitsMask) == 0)
             {
-                flrTempVal -= 1.0;
+                // If that overflowed and the rest of the fractional bits are zero
+                // then we were exactly x.5 and we want to round to the even result
+
+                bits &= ~lastBitMask;
+            }
+            else
+            {
+                // Otherwise, we just want to strip the fractional bits off, truncating
+                // to the current integer value.
+
+                bits &= ~roundBitsMask;
             }
 
-            return CopySign(flrTempVal, a);
+            return BitConverter.Int64BitsToDouble((long)bits);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -853,7 +894,7 @@ namespace System
 
             if (Abs(value) < doubleRoundLimit)
             {
-                var power10 = roundPower10Double[digits];
+                double power10 = roundPower10Double[digits];
 
                 value *= power10;
 
@@ -893,7 +934,7 @@ namespace System
                     }
                     // Directed rounding: Round up to the next value, toward positive infinity
                     case MidpointRounding.ToPositiveInfinity:
-                    {  
+                    {
                         value = Ceiling(value);
                         break;
                     }
@@ -902,7 +943,7 @@ namespace System
                         throw new ArgumentException(SR.Format(SR.Argument_InvalidEnumValue, mode, nameof(MidpointRounding)), nameof(mode));
                     }
                 }
-                
+
                 value /= power10;
             }
 

@@ -6,7 +6,7 @@
 **
 **
 **
-** Purpose: Exception base class for all errors from Interop or Structured 
+** Purpose: Exception base class for all errors from Interop or Structured
 **          Exception Handling code.
 **
 **
@@ -52,13 +52,7 @@ namespace System.Runtime.InteropServices
         {
         }
 
-        public virtual int ErrorCode
-        {
-            get
-            {
-                return HResult;
-            }
-        }
+        public virtual int ErrorCode => HResult;
 
         public override string ToString()
         {

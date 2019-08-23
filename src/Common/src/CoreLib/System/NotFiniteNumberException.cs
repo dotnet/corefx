@@ -10,7 +10,7 @@ namespace System
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class NotFiniteNumberException : ArithmeticException
     {
-        private double _offendingNumber;
+        private readonly double _offendingNumber;
 
         public NotFiniteNumberException()
             : base(SR.Arg_NotFiniteNumberException)
@@ -64,9 +64,6 @@ namespace System
             info.AddValue("OffendingNumber", _offendingNumber, typeof(double)); // Do not rename (binary serialization)
         }
 
-        public double OffendingNumber
-        {
-            get { return _offendingNumber; }
-        }
+        public double OffendingNumber => _offendingNumber;
     }
 }

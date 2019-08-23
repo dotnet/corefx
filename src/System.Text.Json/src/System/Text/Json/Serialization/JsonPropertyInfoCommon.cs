@@ -32,7 +32,11 @@ namespace System.Text.Json
         {
             base.Initialize(parentClassType, declaredPropertyType, runtimePropertyType, implementedPropertyType, propertyInfo, elementType, converter, options);
 
-            if (propertyInfo != null)
+            if (propertyInfo != null &&
+                // We only want to get the getter and setter if we are going to use them.
+                // If the declared type is not the property info type, then we are just
+                // getting metadata on how best to (de)serialize derived types.
+                declaredPropertyType == propertyInfo.PropertyType)
             {
                 if (propertyInfo.GetMethod?.IsPublic == true)
                 {
@@ -123,19 +127,25 @@ namespace System.Text.Json
 
             if (instance is IList instanceOfIList)
             {
-                foreach (object item in sourceList)
+                if (!instanceOfIList.IsReadOnly)
                 {
-                    instanceOfIList.Add(item);
+                    foreach (object item in sourceList)
+                    {
+                        instanceOfIList.Add(item);
+                    }
+                    return instanceOfIList;
                 }
-                return instanceOfIList;
             }
             else if (instance is ICollection<TRuntimeProperty> instanceOfICollection)
             {
-                foreach (TRuntimeProperty item in sourceList)
+                if (!instanceOfICollection.IsReadOnly)
                 {
-                    instanceOfICollection.Add(item);
+                    foreach (TRuntimeProperty item in sourceList)
+                    {
+                        instanceOfICollection.Add(item);
+                    }
+                    return instanceOfICollection;
                 }
-                return instanceOfICollection;
             }
             else if (instance is Stack<TRuntimeProperty> instanceOfStack)
             {
@@ -156,8 +166,10 @@ namespace System.Text.Json
 
             // TODO: Use reflection to support types implementing Stack or Queue.
 
-            ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionPropertyInfo.DeclaredPropertyType, jsonPath);
-            return null;
+            throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                collectionPropertyInfo.DeclaredPropertyType,
+                collectionPropertyInfo.ParentClassType,
+                collectionPropertyInfo.PropertyInfo);
         }
 
         public override object CreateDerivedDictionaryInstance(JsonPropertyInfo collectionPropertyInfo, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options)
@@ -166,26 +178,34 @@ namespace System.Text.Json
 
             if (instance is IDictionary instanceOfIDictionary)
             {
-                foreach (DictionaryEntry entry in sourceDictionary)
+                if (!instanceOfIDictionary.IsReadOnly)
                 {
-                    instanceOfIDictionary.Add((string)entry.Key, entry.Value);
+                    foreach (DictionaryEntry entry in sourceDictionary)
+                    {
+                        instanceOfIDictionary.Add((string)entry.Key, entry.Value);
+                    }
+                    return instanceOfIDictionary;
                 }
-                return instanceOfIDictionary;
             }
             else if (instance is IDictionary<string, TRuntimeProperty> instanceOfGenericIDictionary)
             {
-                foreach (DictionaryEntry entry in sourceDictionary)
+                if (!instanceOfGenericIDictionary.IsReadOnly)
                 {
-                    instanceOfGenericIDictionary.Add((string)entry.Key, (TRuntimeProperty)entry.Value);
+                    foreach (DictionaryEntry entry in sourceDictionary)
+                    {
+                        instanceOfGenericIDictionary.Add((string)entry.Key, (TRuntimeProperty)entry.Value);
+                    }
+                    return instanceOfGenericIDictionary;
                 }
-                return instanceOfGenericIDictionary;
             }
 
             // TODO: Use reflection to support types implementing SortedList and maybe immutable dictionaries.
 
             // Types implementing SortedList and immutable dictionaries will fail here.
-            ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionPropertyInfo.DeclaredPropertyType, jsonPath);
-            return null;
+            throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                collectionPropertyInfo.DeclaredPropertyType,
+                collectionPropertyInfo.ParentClassType,
+                collectionPropertyInfo.PropertyInfo);
         }
 
         public override IEnumerable CreateIEnumerableInstance(Type parentType, IList sourceList, string jsonPath, JsonSerializerOptions options)
@@ -250,15 +270,15 @@ namespace System.Text.Json
         // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
         public override IEnumerable CreateImmutableCollectionInstance(Type collectionType, string delegateKey, IList sourceList, string jsonPath, JsonSerializerOptions options)
         {
-            if (!options.TryGetCreateRangeDelegate(delegateKey, out object createRangeDelegateObj))
+            IEnumerable collection = null;
+
+            if (!options.TryGetCreateRangeDelegate(delegateKey, out ImmutableCollectionCreator creator) ||
+                !creator.CreateImmutableEnumerable(sourceList, out collection))
             {
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, jsonPath);
             }
 
-            JsonSerializerOptions.ImmutableCreateRangeDelegate<TRuntimeProperty> createRangeDelegate = (
-                (JsonSerializerOptions.ImmutableCreateRangeDelegate<TRuntimeProperty>)createRangeDelegateObj);
-
-            return (IEnumerable)createRangeDelegate.Invoke(CreateGenericTRuntimePropertyIEnumerable(sourceList));
+            return collection;
         }
 
         // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
@@ -266,15 +286,15 @@ namespace System.Text.Json
         // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
         public override IDictionary CreateImmutableDictionaryInstance(Type collectionType, string delegateKey, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options)
         {
-            if (!options.TryGetCreateRangeDelegate(delegateKey, out object createRangeDelegateObj))
+            IDictionary collection = null;
+
+            if (!options.TryGetCreateRangeDelegate(delegateKey, out ImmutableCollectionCreator creator) ||
+                !creator.CreateImmutableDictionary(sourceDictionary, out collection))
             {
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, jsonPath);
             }
 
-            JsonSerializerOptions.ImmutableDictCreateRangeDelegate<string, TRuntimeProperty> createRangeDelegate = (
-                (JsonSerializerOptions.ImmutableDictCreateRangeDelegate<string, TRuntimeProperty>)createRangeDelegateObj);
-
-            return (IDictionary)createRangeDelegate.Invoke(CreateGenericIEnumerableFromDictionary(sourceDictionary));
+            return collection;
         }
 
         private IEnumerable<TRuntimeProperty> CreateGenericTRuntimePropertyIEnumerable(IList sourceList)

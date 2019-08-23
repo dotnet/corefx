@@ -5,7 +5,7 @@
 // for System.Configuration.ConnectionStringSettings
 //
 // Author:
-//	Chris Toshok  <toshok@ximian.com>
+//  Chris Toshok  <toshok@ximian.com>
 //
 // Copyright (C) 2005 Novell, Inc (http://www.novell.com)
 //
@@ -16,10 +16,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -43,7 +43,7 @@ namespace MonoTests.System.Configuration
 
             s = new ConnectionStringSettings();
 
-            Assert.Equal(null, s.Name);
+            Assert.Null(s.Name);
             Assert.Equal("", s.ProviderName);
             Assert.Equal("", s.ConnectionString);
 
@@ -122,4 +122,3 @@ namespace MonoTests.System.Configuration
         }
     }
 }
-

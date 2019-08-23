@@ -40,7 +40,7 @@ namespace System.IO.Ports
 
         // members supporting properties exposed to SerialPort
         private byte _parityReplace = (byte)'?';
-        private bool _isAsync = true;
+        private readonly bool _isAsync = true;
         private bool _rtsEnable = false;
 
         // The internal C# representations of Win32 structures necessary for communication
@@ -50,14 +50,14 @@ namespace System.IO.Ports
         private Interop.Kernel32.COMSTAT _comStat;
         private Interop.Kernel32.COMMPROP _commProp;
 
-        private ThreadPoolBoundHandle _threadPoolBinding = null;
-        private EventLoopRunner _eventRunner;
-        private Task _waitForComEventTask = null;
+        private readonly ThreadPoolBoundHandle _threadPoolBinding = null;
+        private readonly EventLoopRunner _eventRunner;
+        private readonly Task _waitForComEventTask = null;
 
-        private byte[] _tempBuf;                 // used to avoid multiple array allocations in ReadByte()
+        private readonly byte[] _tempBuf;                 // used to avoid multiple array allocations in ReadByte()
 
         // called whenever any async i/o operation completes.
-        private unsafe static readonly IOCompletionCallback s_IOCallback = new IOCompletionCallback(AsyncFSCallback);
+        private static readonly unsafe IOCompletionCallback s_IOCallback = new IOCompletionCallback(AsyncFSCallback);
 
         // ----- new get-set properties -----------------*
 
@@ -1306,7 +1306,7 @@ namespace System.IO.Ports
 
         // ----SUBSECTION: internal methods supporting public read/write methods-------*
 
-        unsafe private SerialStreamAsyncResult BeginReadCore(byte[] array, int offset, int numBytes, AsyncCallback userCallback, object stateObject)
+        private unsafe SerialStreamAsyncResult BeginReadCore(byte[] array, int offset, int numBytes, AsyncCallback userCallback, object stateObject)
         {
             // Create and store async stream class library specific data in the
             // async result
@@ -1353,7 +1353,7 @@ namespace System.IO.Ports
             return asyncResult;
         }
 
-        unsafe private SerialStreamAsyncResult BeginWriteCore(byte[] array, int offset, int numBytes, AsyncCallback userCallback, object stateObject)
+        private unsafe SerialStreamAsyncResult BeginWriteCore(byte[] array, int offset, int numBytes, AsyncCallback userCallback, object stateObject)
         {
             // Create and store async stream class library specific data in the
             // async result
@@ -1501,7 +1501,7 @@ namespace System.IO.Ports
         // ----SUBSECTION: internal methods supporting events/async operation------*
 
         // This is a the callback prompted when a thread completes any async I/O operation.
-        unsafe private static void AsyncFSCallback(uint errorCode, uint numBytes, NativeOverlapped* pOverlapped)
+        private static unsafe void AsyncFSCallback(uint errorCode, uint numBytes, NativeOverlapped* pOverlapped)
         {
             // Extract async the result from overlapped structure
             SerialStreamAsyncResult asyncResult =
@@ -1536,18 +1536,18 @@ namespace System.IO.Ports
 
         internal sealed class EventLoopRunner
         {
-            private WeakReference streamWeakReference;
+            private readonly WeakReference streamWeakReference;
             internal ManualResetEvent waitCommEventWaitHandle = new ManualResetEvent(false);
-            private SafeFileHandle handle = null;
-            private ThreadPoolBoundHandle threadPoolBinding = null;
-            private bool isAsync;
+            private readonly SafeFileHandle handle = null;
+            private readonly ThreadPoolBoundHandle threadPoolBinding = null;
+            private readonly bool isAsync;
             internal bool endEventLoop;
-            private int eventsOccurred;
+            private readonly int eventsOccurred;
 
-            WaitCallback callErrorEvents;
-            WaitCallback callReceiveEvents;
-            WaitCallback callPinEvents;
-            IOCompletionCallback freeNativeOverlappedCallback;
+            private readonly WaitCallback callErrorEvents;
+            private readonly WaitCallback callReceiveEvents;
+            private readonly WaitCallback callPinEvents;
+            private readonly IOCompletionCallback freeNativeOverlappedCallback;
 
 #if DEBUG
             private readonly string portName;
@@ -1814,7 +1814,7 @@ namespace System.IO.Ports
         // This is an internal object implementing IAsyncResult with fields
         // for all of the relevant data necessary to complete the IO operation.
         // This is used by AsyncFSCallback and all async methods.
-        unsafe internal sealed class SerialStreamAsyncResult : IAsyncResult
+        internal unsafe sealed class SerialStreamAsyncResult : IAsyncResult
         {
             // User code callback
             internal AsyncCallback _userCallback;

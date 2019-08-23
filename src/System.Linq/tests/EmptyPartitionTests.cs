@@ -27,7 +27,7 @@ namespace System.Linq.Tests
         {
             // .NET Core returns the instance as an optimization.
             // see https://github.com/dotnet/corefx/pull/2401.
-            Assert.Equal(true, ReferenceEquals(GetEmptyPartition<int>(), GetEmptyPartition<int>()));
+            Assert.True(ReferenceEquals(GetEmptyPartition<int>(), GetEmptyPartition<int>()));
         }
 
         [Fact]
@@ -56,7 +56,7 @@ namespace System.Linq.Tests
         public void ElementAtOrDefaultIsDefault()
         {
             Assert.Equal(0, GetEmptyPartition<int>().ElementAtOrDefault(0));
-            Assert.Equal(null, GetEmptyPartition<string>().ElementAtOrDefault(0));
+            Assert.Null(GetEmptyPartition<string>().ElementAtOrDefault(0));
         }
 
         [Fact]
@@ -69,7 +69,7 @@ namespace System.Linq.Tests
         public void FirstOrDefaultIsDefault()
         {
             Assert.Equal(0, GetEmptyPartition<int>().FirstOrDefault());
-            Assert.Equal(null, GetEmptyPartition<string>().FirstOrDefault());
+            Assert.Null(GetEmptyPartition<string>().FirstOrDefault());
         }
 
         [Fact]
@@ -82,7 +82,7 @@ namespace System.Linq.Tests
         public void LastOrDefaultIsDefault()
         {
             Assert.Equal(0, GetEmptyPartition<int>().LastOrDefault());
-            Assert.Equal(null, GetEmptyPartition<string>().LastOrDefault());
+            Assert.Null(GetEmptyPartition<string>().LastOrDefault());
         }
 
         [Fact]

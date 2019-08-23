@@ -198,7 +198,7 @@ namespace System.Data.SqlClient
 
         // Volatile bool used to synchronize with cancel thread the state change of an executing
         // command going from pre-processing to obtaining a stateObject.  The cancel synchronization
-        // we require in the command is only from entering an Execute* API to obtaining a 
+        // we require in the command is only from entering an Execute* API to obtaining a
         // stateObj.  Once a stateObj is successfully obtained, cancel synchronization is handled
         // by the stateObject.
         private volatile bool _pendingCancel;
@@ -250,7 +250,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        new public SqlConnection Connection
+        public new SqlConnection Connection
         {
             get
             {
@@ -287,7 +287,7 @@ namespace System.Data.SqlClient
                         }
                         catch (Exception)
                         {
-                            // we do not really care about errors in unprepare (may be the old connection went bad)                                        
+                            // we do not really care about errors in unprepare (may be the old connection went bad)
                         }
                         finally
                         {
@@ -302,7 +302,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override protected DbConnection DbConnection
+        protected override DbConnection DbConnection
         {
             get
             {
@@ -351,7 +351,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        new public SqlTransaction Transaction
+        public new SqlTransaction Transaction
         {
             get
             {
@@ -377,7 +377,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override protected DbTransaction DbTransaction
+        protected override DbTransaction DbTransaction
         {
             get
             {
@@ -389,12 +389,12 @@ namespace System.Data.SqlClient
             }
         }
 
-        override public string CommandText
+        public override string CommandText
         {
             get
             {
                 string value = _commandText;
-                return ((null != value) ? value : ADP.StrEmpty);
+                return ((null != value) ? value : string.Empty);
             }
             set
             {
@@ -406,7 +406,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override public int CommandTimeout
+        public override int CommandTimeout
         {
             get
             {
@@ -435,7 +435,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override public CommandType CommandType
+        public override CommandType CommandType
         {
             get
             {
@@ -478,7 +478,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        new public SqlParameterCollection Parameters
+        public new SqlParameterCollection Parameters
         {
             get
             {
@@ -492,7 +492,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override protected DbParameterCollection DbParameterCollection
+        protected override DbParameterCollection DbParameterCollection
         {
             get
             {
@@ -500,7 +500,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override public UpdateRowSource UpdatedRowSource
+        public override UpdateRowSource UpdatedRowSource
         {
             get
             {
@@ -561,7 +561,7 @@ namespace System.Data.SqlClient
             this.IsDirty = true;
         }
 
-        override public void Prepare()
+        public override void Prepare()
         {
             // Reset _pendingCancel upon entry into any Execute - used to synchronize state
             // between entry into Execute* API and the thread obtaining the stateObject.
@@ -687,7 +687,7 @@ namespace System.Data.SqlClient
         // It doesn't make sense to verify the connection exists or that it is open during cancel
         // because immediately after checkin the connection can be closed or removed via another thread.
         //
-        override public void Cancel()
+        public override void Cancel()
         {
             SqlStatistics statistics = null;
             try
@@ -720,7 +720,7 @@ namespace System.Data.SqlClient
                 }
 
                 // The lock here is to protect against the command.cancel / connection.close race condition
-                // The SqlInternalConnectionTds is set to OpenBusy during close, once this happens the cast below will fail and 
+                // The SqlInternalConnectionTds is set to OpenBusy during close, once this happens the cast below will fail and
                 // the command will no longer be cancelable.  It might be desirable to be able to cancel the close operation, but this is
                 // outside of the scope of Whidbey RTM.  See (SqlConnection::Close) for other lock.
                 lock (connection)
@@ -742,7 +742,7 @@ namespace System.Data.SqlClient
                       // Before attempting actual cancel, set the _pendingCancel flag to false.
                       // This denotes to other thread before obtaining stateObject from the
                       // session pool that there is another thread wishing to cancel.
-                      // The period in question is between entering the ExecuteAPI and obtaining 
+                      // The period in question is between entering the ExecuteAPI and obtaining
                       // a stateObject.
                         _pendingCancel = true;
 
@@ -768,17 +768,17 @@ namespace System.Data.SqlClient
             }
         }
 
-        new public SqlParameter CreateParameter()
+        public new SqlParameter CreateParameter()
         {
             return new SqlParameter();
         }
 
-        override protected DbParameter CreateDbParameter()
+        protected override DbParameter CreateDbParameter()
         {
             return CreateParameter();
         }
 
-        override protected void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             if (disposing)
             { // release managed objects
@@ -788,7 +788,7 @@ namespace System.Data.SqlClient
             base.Dispose(disposing);
         }
 
-        override public object ExecuteScalar()
+        public override object ExecuteScalar()
         {
             // Reset _pendingCancel upon entry into any Execute - used to synchronize state
             // between entry into Execute* API and the thread obtaining the stateObject.
@@ -856,7 +856,7 @@ namespace System.Data.SqlClient
             return retResult;
         }
 
-        override public int ExecuteNonQuery()
+        public override int ExecuteNonQuery()
         {
             // Reset _pendingCancel upon entry into any Execute - used to synchronize state
             // between entry into Execute* API and the thread obtaining the stateObject.
@@ -952,9 +952,11 @@ namespace System.Data.SqlClient
                 if (callback != null)
                 {
                     completion.Task.ContinueWith(
-                        (task,state) => ((AsyncCallback)state)(task),
-                        state: callback
-                    );
+                        (task, state) => ((AsyncCallback)state)(task),
+                        state: callback,
+                        CancellationToken.None,
+                        TaskContinuationOptions.DenyChildAttach,
+                        TaskScheduler.Default);
                 }
 
                 return completion.Task;
@@ -1024,7 +1026,6 @@ namespace System.Data.SqlClient
 
         private void WaitForAsyncResults(IAsyncResult asyncResult)
         {
-            Task completionTask = (Task)asyncResult;
             if (!asyncResult.IsCompleted)
             {
                 asyncResult.AsyncWaitHandle.WaitOne();
@@ -1184,7 +1185,7 @@ namespace System.Data.SqlClient
                     if (task != null)
                     {
                         task = AsyncHelper.CreateContinuationTaskWithState(task,
-                            state: reader, 
+                            state: reader,
                             onSuccess: state => ((SqlDataReader)state).Close()
                         );
                     }
@@ -1298,9 +1299,11 @@ namespace System.Data.SqlClient
                 if (callback != null)
                 {
                     completion.Task.ContinueWith(
-                        (task,state) => ((AsyncCallback)state)(task),
-                        state: callback
-                    );
+                        (task, state) => ((AsyncCallback)state)(task),
+                        state: callback,
+                        CancellationToken.None,
+                        TaskContinuationOptions.DenyChildAttach,
+                        TaskScheduler.Default);
                 }
                 return completion.Task;
             }
@@ -1410,12 +1413,12 @@ namespace System.Data.SqlClient
         }
 
 
-        override protected DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
+        protected override DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
         {
             return ExecuteReader(behavior);
         }
 
-        new public SqlDataReader ExecuteReader()
+        public new SqlDataReader ExecuteReader()
         {
             SqlStatistics statistics = null;
             try
@@ -1429,7 +1432,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        new public SqlDataReader ExecuteReader(CommandBehavior behavior)
+        public new SqlDataReader ExecuteReader(CommandBehavior behavior)
         {
             // Reset _pendingCancel upon entry into any Execute - used to synchronize state
             // between entry into Execute* API and the thread obtaining the stateObject.
@@ -1585,9 +1588,11 @@ namespace System.Data.SqlClient
                 if (callback != null)
                 {
                     completion.Task.ContinueWith(
-                        (task,state) => ((AsyncCallback)state)(task),
-                        state: callback
-                    );
+                        (task, state) => ((AsyncCallback)state)(task),
+                        state: callback,
+                        CancellationToken.None,
+                        TaskContinuationOptions.DenyChildAttach,
+                        TaskScheduler.Default);
                 }
                 return completion.Task;
             }
@@ -1696,22 +1701,22 @@ namespace System.Data.SqlClient
             }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.NotOnCanceled, TaskScheduler.Default);
         }
 
-        new public Task<SqlDataReader> ExecuteReaderAsync()
+        public new Task<SqlDataReader> ExecuteReaderAsync()
         {
             return ExecuteReaderAsync(CommandBehavior.Default, CancellationToken.None);
         }
 
-        new public Task<SqlDataReader> ExecuteReaderAsync(CommandBehavior behavior)
+        public new Task<SqlDataReader> ExecuteReaderAsync(CommandBehavior behavior)
         {
             return ExecuteReaderAsync(behavior, CancellationToken.None);
         }
 
-        new public Task<SqlDataReader> ExecuteReaderAsync(CancellationToken cancellationToken)
+        public new Task<SqlDataReader> ExecuteReaderAsync(CancellationToken cancellationToken)
         {
             return ExecuteReaderAsync(CommandBehavior.Default, cancellationToken);
         }
 
-        new public Task<SqlDataReader> ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+        public new Task<SqlDataReader> ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
         {
             Guid operationId = default(Guid);
             if (!_parentOperationStarted)
@@ -2162,7 +2167,7 @@ namespace System.Data.SqlClient
                     {
                         p.SqlDbType = MetaType.GetSqlDbTypeFromOleDbType((short)r[colNames[(int)ProcParamsColIndex.DataType]],
                             ADP.IsNull(r[colNames[(int)ProcParamsColIndex.TypeName]]) ?
-                                ADP.StrEmpty :
+                                string.Empty :
                                 (string)r[colNames[(int)ProcParamsColIndex.TypeName]]);
                     }
 
@@ -2224,7 +2229,7 @@ namespace System.Data.SqlClient
                             r[colNames[(int)ProcParamsColIndex.TypeName]];
 
                         // the constructed type name above is incorrectly formatted, it should be a 2 part name not 3
-                        // for compatibility we can't change this because the bug has existed for a long time and been 
+                        // for compatibility we can't change this because the bug has existed for a long time and been
                         // worked around by users, so identify that it is present and catch it later in the execution
                         // process once users can no longer interact with the parameter type name
                         p.IsDerivedParameterTypeName = true;
@@ -2291,18 +2296,13 @@ namespace System.Data.SqlClient
         {
             Debug.Assert(oledbDirection >= 1 && oledbDirection <= 4, "invalid parameter direction from params_rowset!");
 
-            switch (oledbDirection)
+            return oledbDirection switch
             {
-                case 2:
-                    return ParameterDirection.InputOutput;
-                case 3:
-                    return ParameterDirection.Output;
-                case 4:
-                    return ParameterDirection.ReturnValue;
-                default:
-                    return ParameterDirection.Input;
-            }
-
+                2 => ParameterDirection.InputOutput,
+                3 => ParameterDirection.Output,
+                4 => ParameterDirection.ReturnValue,
+                _ => ParameterDirection.Input,
+            };
         }
 
         // get cached metadata
@@ -2325,7 +2325,7 @@ namespace System.Data.SqlClient
             // ctor is called.  But, if we are using default queue, then we do not have this data until
             // Start().  Due to this, we always delay setting options until execute.
 
-            // There is a variance in order between Start(), SqlDependency(), and Execute.  This is the 
+            // There is a variance in order between Start(), SqlDependency(), and Execute.  This is the
             // best way to solve that problem.
             if (null != Notification)
             {
@@ -2458,7 +2458,7 @@ namespace System.Data.SqlClient
                     }
                     else
                     {
-                        AsyncHelper.ContinueTaskWithState(subTask, completion, 
+                        AsyncHelper.ContinueTaskWithState(subTask, completion,
                             state: completion,
                             onSuccess: (state) => ((TaskCompletionSource<object>)state).SetResult(null)
                         );
@@ -2469,13 +2469,13 @@ namespace System.Data.SqlClient
 
         internal SqlDataReader RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, bool returnStream, [CallerMemberName] string method = "")
         {
-            Task unused; // sync execution 
+            Task unused; // sync execution
             SqlDataReader reader = RunExecuteReader(cmdBehavior, runBehavior, returnStream, completion: null, timeout: CommandTimeout, task: out unused, method: method);
             Debug.Assert(unused == null, "returned task during synchronous execution");
             return reader;
         }
 
-        // task is created in case of pending asynchronous write, returned SqlDataReader should not be utilized until that task is complete 
+        // task is created in case of pending asynchronous write, returned SqlDataReader should not be utilized until that task is complete
         internal SqlDataReader RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, bool returnStream, TaskCompletionSource<object> completion, int timeout, out Task task, bool asyncWrite = false, [CallerMemberName] string method = "")
         {
             bool async = (null != completion);
@@ -2691,7 +2691,7 @@ namespace System.Data.SqlClient
                 {
                     SqlInternalConnectionTds innerConnectionTds = (_activeConnection.InnerConnection as SqlInternalConnectionTds);
                     if (null != innerConnectionTds)
-                    { // it may be closed 
+                    { // it may be closed
                         innerConnectionTds.DecrementAsyncCount();
                     }
                 }
@@ -2710,13 +2710,13 @@ namespace System.Data.SqlClient
             return ds;
         }
 
-        // This is in its own method to avoid always allocating the lambda in RunExecuteReaderTds 
+        // This is in its own method to avoid always allocating the lambda in RunExecuteReaderTds
         private Task RunExecuteReaderTdsSetupContinuation(RunBehavior runBehavior, SqlDataReader ds, string optionSettings, Task writeTask)
         {
-            Task task = AsyncHelper.CreateContinuationTask(writeTask, 
+            Task task = AsyncHelper.CreateContinuationTask(writeTask,
                 onSuccess: () =>
                 {
-                    _activeConnection.GetOpenTdsConnection(); // it will throw if connection is closed 
+                    _activeConnection.GetOpenTdsConnection(); // it will throw if connection is closed
                     cachedAsyncState.SetAsyncReaderState(ds, runBehavior, optionSettings);
                 },
                 onFailure: (exc) =>
@@ -2727,7 +2727,7 @@ namespace System.Data.SqlClient
             return task;
         }
 
-        // This is in its own method to avoid always allocating the lambda in RunExecuteReaderTds 
+        // This is in its own method to avoid always allocating the lambda in RunExecuteReaderTds
         private void RunExecuteReaderTdsSetupReconnectContinuation(CommandBehavior cmdBehavior, RunBehavior runBehavior, bool returnStream, bool async, int timeout, bool asyncWrite, SqlDataReader ds, Task reconnectTask, long reconnectionStart, TaskCompletionSource<object> completion)
         {
             CancellationTokenSource timeoutCTS = new CancellationTokenSource();
@@ -2749,7 +2749,7 @@ namespace System.Data.SqlClient
                     }
                     else
                     {
-                        AsyncHelper.ContinueTaskWithState(subTask, completion, 
+                        AsyncHelper.ContinueTaskWithState(subTask, completion,
                             state: completion,
                             onSuccess: (state) => ((TaskCompletionSource<object>)state).SetResult(null)
                         );
@@ -3709,7 +3709,7 @@ namespace System.Data.SqlClient
 
             // Stitching back together is a little tricky. Assume we want to build a full multi-part name
             //  with all parts except trimming separators for leading empty names (null or empty strings,
-            //  but not whitespace). Separators in the middle should be added, even if the name part is 
+            //  but not whitespace). Separators in the middle should be added, even if the name part is
             //  null/empty, to maintain proper location of the parts.
             for (int i = 0; i < strings.Length; i++)
             {
@@ -4049,5 +4049,3 @@ namespace System.Data.SqlClient
         public SqlCommand Clone() => new SqlCommand(this);
     }
 }
-
-

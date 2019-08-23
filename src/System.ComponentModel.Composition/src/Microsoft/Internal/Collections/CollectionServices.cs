@@ -60,7 +60,7 @@ namespace Microsoft.Internal.Collections
 
         public static ReadOnlyCollection<T> ToReadOnlyCollection<T>(this IEnumerable<T> source)
         {
-            if(source == null)
+            if (source == null)
             {
                 throw new ArgumentNullException(nameof(source));
             }
@@ -171,7 +171,7 @@ namespace Microsoft.Internal.Collections
 
         public static EnumerableCardinality GetCardinality<T>(this IEnumerable<T> source)
         {
-            if(source == null)
+            if (source == null)
             {
                 throw new ArgumentNullException(nameof(source));
             }
@@ -180,15 +180,12 @@ namespace Microsoft.Internal.Collections
             ICollection collection = source as ICollection;
             if (collection != null)
             {
-                switch (collection.Count)
+                return collection.Count switch
                 {
-                    case 0:
-                        return EnumerableCardinality.Zero;
-                    case 1:
-                        return EnumerableCardinality.One;
-                    default:
-                        return EnumerableCardinality.TwoOrMore;
-                }
+                    0 => EnumerableCardinality.Zero,
+                    1 => EnumerableCardinality.One,
+                    _ => EnumerableCardinality.TwoOrMore,
+                };
             }
 
             using (var enumerator = source.GetEnumerator())
@@ -209,10 +206,10 @@ namespace Microsoft.Internal.Collections
 
         public static bool FastAny<T>(this IEnumerable<T> source)
         {
-            // Enumerable.Any<T> underneath doesn't cast to ICollection, 
+            // Enumerable.Any<T> underneath doesn't cast to ICollection,
             // like it does with many of the other LINQ methods.
             // Below is significantly (4x) when mainly working with ICollection
-            // sources and a little slower if working with mainly IEnumerable<T> 
+            // sources and a little slower if working with mainly IEnumerable<T>
             // sources.
 
             // Cast to ICollection instead of ICollection<T> for performance reasons.
@@ -227,14 +224,14 @@ namespace Microsoft.Internal.Collections
 
         public static Stack<T> Copy<T>(this Stack<T> stack)
         {
-            if(stack == null)
+            if (stack == null)
             {
                 throw new ArgumentNullException(nameof(stack));
             }
 
-            // Stack<T>.GetEnumerator walks from top to bottom 
-            // of the stack, whereas Stack<T>(IEnumerable<T>) 
-            // pushes to bottom from top, so we need to reverse 
+            // Stack<T>.GetEnumerator walks from top to bottom
+            // of the stack, whereas Stack<T>(IEnumerable<T>)
+            // pushes to bottom from top, so we need to reverse
             // the stack to get them in the right order.
             return new Stack<T>(stack.Reverse());
         }

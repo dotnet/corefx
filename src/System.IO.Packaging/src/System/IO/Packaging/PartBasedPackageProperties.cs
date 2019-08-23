@@ -143,7 +143,7 @@ namespace System.IO.Packaging
         /// The type of content represented, generally defined by a specific
         /// use and intended audience. Example values include "Whitepaper",
         /// "Security Bulletin", and "Exam". (This property is distinct from
-        /// MIME content types as defined in RFC 2616.) 
+        /// MIME content types as defined in RFC 2616.)
         /// </value>
         public override string ContentType
         {
@@ -301,7 +301,7 @@ namespace System.IO.Packaging
         }
 
         #endregion Public Properties
-        
+
         #region Internal Methods
 
         // Invoked from Package.Flush.
@@ -332,7 +332,7 @@ namespace System.IO.Packaging
         }
 
         #endregion Internal Methods
-        
+
         #region Private Methods
 
         // The property store is implemented as a hash table of objects.
@@ -815,23 +815,23 @@ namespace System.IO.Packaging
         }
 
         #endregion Private Methods
-        
+
         #region Private Fields
 
-        private Package _package;
+        private readonly Package _package;
         private PackagePart _propertyPart;
         private XmlWriter _xmlWriter;
 
         // Table of objects from the closed set of literals defined below.
         // (Uses object comparison rather than string comparison.)
         private const int NumCoreProperties = 16;
-        private Dictionary<PackageXmlEnum, object> _propertyDictionary = new Dictionary<PackageXmlEnum, object>(NumCoreProperties);
+        private readonly Dictionary<PackageXmlEnum, object> _propertyDictionary = new Dictionary<PackageXmlEnum, object>(NumCoreProperties);
         private bool _dirty = false;
 
         // This System.Xml.NameTable makes sure that we use the same references to strings
         // throughout (including when parsing Xml) and so can perform reference comparisons
         // rather than value comparisons.
-        private NameTable _nameTable;
+        private readonly NameTable _nameTable;
 
         // Literals.
         private static readonly ContentType s_coreDocumentPropertiesContentType
@@ -845,7 +845,7 @@ namespace System.IO.Packaging
         private const string DefaultPropertyPartNameExtension = ".psmdcp";
         private const string GuidStorageFormatString = @"N";     // N - simple format without adornments
 
-        private static PackageXmlEnum[] s_validProperties = new PackageXmlEnum[] {
+        private static readonly PackageXmlEnum[] s_validProperties = new PackageXmlEnum[] {
                                                                                 PackageXmlEnum.Creator,
                                                                                 PackageXmlEnum.Identifier,
                                                                                 PackageXmlEnum.Title,
@@ -867,7 +867,7 @@ namespace System.IO.Packaging
         // Array of formats to supply to XmlConvert.ToDateTime or DateTime.ParseExact.
         // xsd:DateTime requires full date time in sortable (ISO 8601) format.
         // It can be expressed in local time, universal time (Z), or relative to universal time (zzz).
-        // Negative years are accepted. 
+        // Negative years are accepted.
         // IMPORTANT: Second fractions are recognized only down to 1 tenth of a microsecond because this is the resolution
         // of the DateTime type. The Xml standard, however, allows any number of decimals; but XmlConvert only offers
         // this very awkward API with an explicit pattern enumeration.

@@ -10,7 +10,7 @@ namespace System.Net.Http.HPack
     {
         // Things we should add:
         // * Huffman encoding
-        //      
+        //
         // Things we should consider adding:
         // * Dynamic table encoding:
         //   This would make the encoder stateful, which complicates things significantly.
@@ -291,6 +291,7 @@ namespace System.Net.Http.HPack
 
                 valueLength = checked((int)(valueLength + (values.Length - 1) * separator.Length));
 
+                destination[0] = 0;
                 if (IntegerEncoder.Encode(valueLength, 7, destination, out int integerLength))
                 {
                     Debug.Assert(integerLength >= 1);

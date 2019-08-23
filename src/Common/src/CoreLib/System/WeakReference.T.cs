@@ -9,7 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace System
 {
     [Serializable]
-    [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")] 
+    [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     // This class is sealed to mitigate security issues caused by Object::MemberwiseClone.
     public sealed partial class WeakReference<T> : ISerializable
         where T : class?
@@ -24,14 +24,14 @@ namespace System
         {
         }
 
-        //Creates a new WeakReference that keeps track of target.
+        // Creates a new WeakReference that keeps track of target.
         //
         public WeakReference(T target, bool trackResurrection)
         {
             Create(target, trackResurrection);
         }
 
-        internal WeakReference(SerializationInfo info, StreamingContext context)
+        private WeakReference(SerializationInfo info, StreamingContext context)
         {
             if (info == null)
             {

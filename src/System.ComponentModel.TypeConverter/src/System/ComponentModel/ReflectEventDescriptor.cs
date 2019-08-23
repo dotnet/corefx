@@ -26,7 +26,7 @@ namespace System.ComponentModel
     /// using delegates easy.
     /// For example, to listen to the click event on a button in class Foo, the
     /// following code will suffice:
-    /// 
+    ///
     /// <code>
     /// class Foo {
     /// Button button1 = new Button();
@@ -160,7 +160,7 @@ namespace System.ComponentModel
                         if (coEx == CheckoutException.Canceled) {
                             return;
                         }
-                        throw coEx;
+                        throw;
                     }
                     changeService.OnComponentChanging(component, this);
                 }
@@ -404,7 +404,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        /// This will remove the delegate value from the event chain so that 
+        /// This will remove the delegate value from the event chain so that
         /// it no longer gets events from this component.
         /// </summary>
         public override void RemoveEventHandler(object component, Delegate value)
@@ -431,7 +431,7 @@ namespace System.ComponentModel
                         if (coEx == CheckoutException.Canceled) {
                             return;
                         }
-                        throw coEx;
+                        throw;
                     }
                     changeService.OnComponentChanging(component, this);
                 }

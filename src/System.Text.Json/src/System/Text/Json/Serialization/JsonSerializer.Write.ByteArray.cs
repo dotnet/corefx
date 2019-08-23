@@ -7,7 +7,7 @@ namespace System.Text.Json
     public static partial class JsonSerializer
     {
         /// <summary>
-        /// Convert the provided value into a <see cref="System.Byte"/> array.
+        /// Convert the provided value into a <see cref="byte"/> array.
         /// </summary>
         /// <returns>A UTF-8 representation of the value.</returns>
         /// <param name="value">The value to convert.</param>
@@ -18,16 +18,16 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Convert the provided value into a <see cref="System.Byte"/> array.
+        /// Convert the provided value into a <see cref="byte"/> array.
         /// </summary>
         /// <returns>A UTF-8 representation of the value.</returns>
         /// <param name="value">The value to convert.</param>
-        /// <param name="type">The type of the <paramref name="value"/> to convert.</param>
+        /// <param name="inputType">The type of the <paramref name="value"/> to convert.</param>
         /// <param name="options">Options to control the conversion behavior.</param>
-        public static byte[] SerializeToUtf8Bytes(object value, Type type, JsonSerializerOptions options = null)
+        public static byte[] SerializeToUtf8Bytes(object value, Type inputType, JsonSerializerOptions options = null)
         {
-            VerifyValueAndType(value, type);
-            return WriteCoreBytes(value, type, options);
+            VerifyValueAndType(value, inputType);
+            return WriteCoreBytes(value, inputType, options);
         }
     }
 }

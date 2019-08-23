@@ -11,7 +11,7 @@ namespace System.Reflection.TypeLoading.Ecma
     /// </summary>
     internal sealed class EcmaGenericTypeParameterType : EcmaGenericParameterType
     {
-        internal EcmaGenericTypeParameterType(GenericParameterHandle handle, EcmaModule module) 
+        internal EcmaGenericTypeParameterType(GenericParameterHandle handle, EcmaModule module)
             : base(handle, module)
         {
         }
@@ -21,7 +21,6 @@ namespace System.Reflection.TypeLoading.Ecma
 
         protected sealed override RoType ComputeDeclaringType()
         {
-            MetadataReader reader = Reader;
             TypeDefinitionHandle declaringTypeHandle = (TypeDefinitionHandle)(GenericParameter.Parent);
             EcmaDefinitionType declaringType = declaringTypeHandle.ResolveTypeDef(GetEcmaModule());
             return declaringType;

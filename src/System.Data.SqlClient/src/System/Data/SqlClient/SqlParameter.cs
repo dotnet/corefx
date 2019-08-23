@@ -165,7 +165,7 @@ namespace System.Data.SqlClient
 
         public SqlParameter(
             string parameterName,
-            SqlDbType dbType, 
+            SqlDbType dbType,
             int size,
             ParameterDirection direction,
             byte precision,
@@ -257,7 +257,7 @@ namespace System.Data.SqlClient
         {
             get
             {
-                return (_xmlSchemaCollection?.Database ?? ADP.StrEmpty);
+                return (_xmlSchemaCollection?.Database ?? string.Empty);
             }
             set
             {
@@ -277,7 +277,7 @@ namespace System.Data.SqlClient
         {
             get
             {
-                return (_xmlSchemaCollection?.OwningSchema ?? ADP.StrEmpty);
+                return (_xmlSchemaCollection?.OwningSchema ?? string.Empty);
             }
             set
             {
@@ -297,7 +297,7 @@ namespace System.Data.SqlClient
         {
             get
             {
-                return (_xmlSchemaCollection?.Name ?? ADP.StrEmpty);
+                return (_xmlSchemaCollection?.Name ?? string.Empty);
             }
             set
             {
@@ -389,7 +389,7 @@ namespace System.Data.SqlClient
             long actualLen = GetActualSize();
             long maxLen = this.Size;
 
-            // GetActualSize returns bytes length, but smi expects char length for 
+            // GetActualSize returns bytes length, but smi expects char length for
             //  character types, so adjust
             if (!mt.IsLong)
             {
@@ -556,7 +556,7 @@ namespace System.Data.SqlClient
             get
             {
                 string parameterName = _parameterName;
-                return (parameterName ?? ADP.StrEmpty);
+                return (parameterName ?? string.Empty);
             }
             set
             {
@@ -765,7 +765,7 @@ namespace System.Data.SqlClient
             get
             {
                 string typeName = _udtTypeName;
-                return (typeName ?? ADP.StrEmpty);
+                return (typeName ?? string.Empty);
             }
             set
             {
@@ -775,7 +775,7 @@ namespace System.Data.SqlClient
 
         public string TypeName
         {
-            get => (_typeName ?? ADP.StrEmpty);
+            get => (_typeName ?? string.Empty);
             set
             {
                 _typeName = value;

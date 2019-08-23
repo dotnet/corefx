@@ -26,8 +26,8 @@ public class Color
         Console.ForegroundColor = Console.ForegroundColor;
 
         // Changing color on Windows doesn't have effect in some testing environments
-        // when there is no associated console, such as when run under a profiler like 
-        // our code coverage tools, so we don't assert that the change took place and 
+        // when there is no associated console, such as when run under a profiler like
+        // our code coverage tools, so we don't assert that the change took place and
         // simple ensure that getting/setting doesn't throw.
     }
 
@@ -36,7 +36,7 @@ public class Color
     {
         // Make sure that redirecting to a memory stream causes Console not to write out the ANSI sequences
 
-        Helpers.RunInRedirectedOutput((data) => 
+        Helpers.RunInRedirectedOutput((data) =>
         {
             Console.Write('1');
             Console.ForegroundColor = ConsoleColor.Blue;
@@ -49,23 +49,6 @@ public class Color
             const char Esc = (char)0x1B;
             Assert.Equal(0, Encoding.UTF8.GetString(data.ToArray()).ToCharArray().Count(c => c == Esc));
             Assert.Equal("1234", Encoding.UTF8.GetString(data.ToArray()));
-        });
-    }
-
-    [Fact]
-    [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // the CI system redirects stdout, so we can't easily test non-redirected behavior
-    [PlatformSpecific(TestPlatforms.AnyUnix)]
-    public static void NonRedirectedOutputDoesUseAnsiSequences()
-    {
-        // Make sure that when writing out to a UnixConsoleStream, the ANSI escape sequences are properly
-        // written out.
-        Helpers.RunInNonRedirectedOutput((data) =>
-        {
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.BackgroundColor = ConsoleColor.Red;
-            Console.ResetColor();
-            const char Esc = (char)0x1B;
-            Assert.Equal(3, Encoding.UTF8.GetString(data.ToArray()).ToCharArray().Count(c => c == Esc));
         });
     }
 }

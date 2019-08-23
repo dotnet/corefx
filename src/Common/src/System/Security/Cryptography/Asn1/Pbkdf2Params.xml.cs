@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#pragma warning disable SA1028 // ignore whitespace warnings for generated code
 using System;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -12,14 +13,14 @@ namespace System.Security.Cryptography.Asn1
     [StructLayout(LayoutKind.Sequential)]
     internal partial struct Pbkdf2Params
     {
-        private static byte[] s_defaultPrf = { 0x30, 0x0C, 0x06, 0x08, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x02, 0x07, 0x05, 0x00 };
+        private static readonly byte[] s_defaultPrf = { 0x30, 0x0C, 0x06, 0x08, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x02, 0x07, 0x05, 0x00 };
   
         internal System.Security.Cryptography.Asn1.Pbkdf2SaltChoice Salt;
         internal int IterationCount;
         internal byte? KeyLength;
         internal System.Security.Cryptography.Asn1.AlgorithmIdentifierAsn Prf;
       
-#if DEBUG  
+#if DEBUG
         static Pbkdf2Params()
         {
             Pbkdf2Params decoded = default;

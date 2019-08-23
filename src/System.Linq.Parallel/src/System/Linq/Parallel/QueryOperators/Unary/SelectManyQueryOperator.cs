@@ -25,7 +25,7 @@ namespace System.Linq.Parallel
     ///     Although select many takes two enumerable objects as input, it appears to the
     ///     query analysis infrastructure as a unary operator. That's because it works a
     ///     little differently than the other binary operators: it has to re-open the right
-    ///     child every time an outer element is walked. The right child is NOT partitioned. 
+    ///     child every time an outer element is walked. The right child is NOT partitioned.
     /// </summary>
     /// <typeparam name="TLeftInput"></typeparam>
     /// <typeparam name="TRightInput"></typeparam>
@@ -125,7 +125,7 @@ namespace System.Linq.Parallel
             }
 
             //
-            // 
+            //
             if (_prematureMerge)
             {
                 PartitionedStream<TLeftInput, int> inputStreamInt =
@@ -141,7 +141,7 @@ namespace System.Linq.Parallel
 
         /// <summary>
         /// A helper method for WrapPartitionedStream. We use the helper to reuse a block of code twice, but with
-        /// a different order key type. (If premature merge occurred, the order key type will be "int". Otherwise, 
+        /// a different order key type. (If premature merge occurred, the order key type will be "int". Otherwise,
         /// it will be the same type as "TLeftKey" in WrapPartitionedStream.)
         /// </summary>
         private void WrapPartitionedStreamNotIndexed<TLeftKey>(
@@ -230,7 +230,7 @@ namespace System.Linq.Parallel
         // The enumerator type responsible for executing the SelectMany logic.
         //
 
-        class IndexedSelectManyQueryOperatorEnumerator : QueryOperatorEnumerator<TOutput, Pair<int, int>>
+        private class IndexedSelectManyQueryOperatorEnumerator : QueryOperatorEnumerator<TOutput, Pair<int, int>>
         {
             private readonly QueryOperatorEnumerator<TLeftInput, int> _leftSource; // The left data source to enumerate.
             private readonly SelectManyQueryOperator<TLeftInput, TRightInput, TOutput> _selectManyOperator; // The select many operator to use.
@@ -244,7 +244,7 @@ namespace System.Linq.Parallel
                 internal int _currentRightSourceIndex = -1; // The index for the right data source.
                 internal TLeftInput _currentLeftElement; // The current element in the left data source.
                 internal int _currentLeftSourceIndex; // The current key in the left data source.
-                internal int _lhsCount; //counts the number of lhs elements enumerated. used for cancellation testing. 
+                internal int _lhsCount; //counts the number of lhs elements enumerated. used for cancellation testing.
             }
 
 
@@ -360,7 +360,7 @@ namespace System.Linq.Parallel
         // The enumerator type responsible for executing the SelectMany logic.
         //
 
-        class SelectManyQueryOperatorEnumerator<TLeftKey> : QueryOperatorEnumerator<TOutput, Pair<TLeftKey, int>>
+        private class SelectManyQueryOperatorEnumerator<TLeftKey> : QueryOperatorEnumerator<TOutput, Pair<TLeftKey, int>>
         {
             private readonly QueryOperatorEnumerator<TLeftInput, TLeftKey> _leftSource; // The left data source to enumerate.
             private readonly SelectManyQueryOperator<TLeftInput, TRightInput, TOutput> _selectManyOperator; // The select many operator to use.
@@ -374,7 +374,7 @@ namespace System.Linq.Parallel
                 internal int _currentRightSourceIndex = -1; // The index for the right data source.
                 internal TLeftInput _currentLeftElement; // The current element in the left data source.
                 internal TLeftKey _currentLeftKey; // The current key in the left data source.
-                internal int _lhsCount; // Counts the number of lhs elements enumerated. used for cancellation testing. 
+                internal int _lhsCount; // Counts the number of lhs elements enumerated. used for cancellation testing.
             }
 
 

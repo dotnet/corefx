@@ -146,7 +146,7 @@ namespace System.Net.Test.Common
         {
             List<string> lines = null;
 
-            // Note, we assume there's no request body.  
+            // Note, we assume there's no request body.
             // We'll close the connection after reading the request header and sending the response.
             await AcceptConnectionAsync(async connection =>
             {
@@ -160,7 +160,7 @@ namespace System.Net.Test.Common
         {
             List<string> lines = null;
 
-            // Note, we assume there's no request body.  
+            // Note, we assume there's no request body.
             // We'll close the connection after reading the request header and sending the response.
             await AcceptConnectionAsync(async connection =>
             {

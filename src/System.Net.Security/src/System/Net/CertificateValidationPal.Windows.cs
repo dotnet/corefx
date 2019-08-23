@@ -81,7 +81,15 @@ namespace System.Net
         //
         // Extracts a remote certificate upon request.
         //
-        internal static X509Certificate2 GetRemoteCertificate(SafeDeleteContext securityContext, out X509Certificate2Collection remoteCertificateCollection)
+
+        internal static X509Certificate2 GetRemoteCertificate(SafeDeleteContext securityContext) =>
+            GetRemoteCertificate(securityContext, retrieveCollection: false, out _);
+
+        internal static X509Certificate2 GetRemoteCertificate(SafeDeleteContext securityContext, out X509Certificate2Collection remoteCertificateCollection) =>
+            GetRemoteCertificate(securityContext, retrieveCollection: true, out remoteCertificateCollection);
+
+        private static X509Certificate2 GetRemoteCertificate(
+            SafeDeleteContext securityContext, bool retrieveCollection, out X509Certificate2Collection remoteCertificateCollection)
         {
             remoteCertificateCollection = null;
 
@@ -106,7 +114,10 @@ namespace System.Net
             {
                 if (remoteContext != null && !remoteContext.IsInvalid)
                 {
-                    remoteCertificateCollection = UnmanagedCertificateContext.GetRemoteCertificatesFromStoreContext(remoteContext);
+                    if (retrieveCollection)
+                    {
+                        remoteCertificateCollection = UnmanagedCertificateContext.GetRemoteCertificatesFromStoreContext(remoteContext);
+                    }
 
                     remoteContext.Dispose();
                 }
@@ -148,7 +159,7 @@ namespace System.Net
                                 byte[] x = new Span<byte>((byte*)elements[i].pCertContext, checked((int)elements[i].cbSize)).ToArray();
                                 var x500DistinguishedName = new X500DistinguishedName(x);
                                 issuers[i] = x500DistinguishedName.Name;
-                                if (NetEventSource.IsEnabled) NetEventSource.Info(securityContext, "IssuerListEx[{issuers[i]}]");
+                                if (NetEventSource.IsEnabled) NetEventSource.Info(securityContext, $"IssuerListEx[{issuers[i]}]");
                             }
                         }
                     }

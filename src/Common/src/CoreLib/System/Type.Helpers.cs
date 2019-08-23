@@ -150,7 +150,7 @@ namespace System
             EventInfo?[]? e = null;
             Type?[]? t = null;
 
-            int i = 0;
+            int i;
             int cnt = 0;            // Total Matchs
 
             // Check the methods
@@ -339,7 +339,7 @@ namespace System
                 return true;
 
             // For backward-compatibility, we need to special case for the types
-            // whose UnderlyingSystemType are runtime implemented. 
+            // whose UnderlyingSystemType are runtime implemented.
             Type toType = this.UnderlyingSystemType;
             if (toType?.IsRuntimeImplemented() == true)
                 return toType.IsAssignableFrom(c);
@@ -500,4 +500,3 @@ namespace System
         }
     }
 }
-

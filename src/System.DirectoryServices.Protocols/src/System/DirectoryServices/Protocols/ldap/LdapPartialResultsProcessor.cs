@@ -11,8 +11,8 @@ namespace System.DirectoryServices.Protocols
 {
     internal class LdapPartialResultsProcessor
     {
-        private ArrayList _resultList = new ArrayList();
-        private ManualResetEvent _workThreadWaitHandle = null;
+        private readonly ArrayList _resultList = new ArrayList();
+        private readonly ManualResetEvent _workThreadWaitHandle = null;
         private bool _workToDo = false;
         private int _currentIndex = 0;
 
@@ -81,7 +81,7 @@ namespace System.DirectoryServices.Protocols
                     asyncResult = (LdapPartialAsyncResult)_resultList[_currentIndex];
                     i++;
                     _currentIndex++;
-                    
+
                     // Have work to do.
                     if (asyncResult._resultStatus != ResultsStatus.Done)
                     {
@@ -99,7 +99,7 @@ namespace System.DirectoryServices.Protocols
 
                 // Try to get the results availabe for this asynchronous operation  .
                 GetResultsHelper(asyncResult);
-                
+
                 // If we are done with the asynchronous search, we need to fire callback and signal the waitable object.
                 if (asyncResult._resultStatus == ResultsStatus.Done)
                 {
@@ -136,7 +136,7 @@ namespace System.DirectoryServices.Protocols
             try
             {
                 SearchResponse response = (SearchResponse)connection.ConstructResponse(asyncResult._messageID, LdapOperation.LdapSearch, resultType, asyncResult._requestTimeout, false);
-               
+
                 // This should only happen in the polling thread case.
                 if (response == null)
                 {
@@ -187,8 +187,6 @@ namespace System.DirectoryServices.Protocols
                 }
                 else if (exception is LdapException ldapException)
                 {
-                    LdapError errorCode = (LdapError)ldapException.ErrorCode;
-
                     if (asyncResult._response != null)
                     {
                         // add previous retrieved entries if available
@@ -210,7 +208,7 @@ namespace System.DirectoryServices.Protocols
                         }
                     }
                 }
-                
+
                 // Exception occurs, this operation is done.
                 asyncResult._exception = exception;
                 asyncResult._resultStatus = ResultsStatus.Done;
@@ -334,8 +332,8 @@ namespace System.DirectoryServices.Protocols
 
     internal class PartialResultsRetriever
     {
-        private ManualResetEvent _workThreadWaitHandle = null;
-        private LdapPartialResultsProcessor _processor = null;
+        private readonly ManualResetEvent _workThreadWaitHandle = null;
+        private readonly LdapPartialResultsProcessor _processor = null;
 
         internal PartialResultsRetriever(ManualResetEvent eventHandle, LdapPartialResultsProcessor processor)
         {

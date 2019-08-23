@@ -20,7 +20,7 @@ namespace System
             Assert.True(span.SequenceEqual(expected));
         }
 
-        public static void ValidateReferenceType<T>(this Span<T> span, params T[] expected)
+        public static void ValidateReferenceType<T>(this Span<T> span, params T[] expected) where T : class
         {
             Assert.Equal(span.Length, expected.Length);
             for (int i = 0; i < expected.Length; i++)
@@ -60,18 +60,18 @@ namespace System
             }
         }
 
-        // 
+        //
         // The innocent looking construct:
         //
         //    Assert.Throws<E>( () => new Span() );
         //
-        // generates a hidden box of the Span as the return value of the lambda. This makes the IL illegal and unloadable on 
+        // generates a hidden box of the Span as the return value of the lambda. This makes the IL illegal and unloadable on
         // runtimes that enforce the actual Span rules (never mind that we expect never to reach the box instruction...)
         //
         // The workaround is to code it like this:
         //
         //    Assert.Throws<E>( () => new Span().DontBox() );
-        // 
+        //
         // which turns the lambda return type back to "void" and eliminates the troublesome box instruction.
         //
         public static void DontBox<T>(this Span<T> span)
@@ -84,7 +84,7 @@ namespace System
             Assert.True(span.SequenceEqual(expected));
         }
 
-        public static void ValidateReferenceType<T>(this ReadOnlySpan<T> span, params T[] expected)
+        public static void ValidateReferenceType<T>(this ReadOnlySpan<T> span, params T[] expected) where T : class
         {
             Assert.Equal(span.Length, expected.Length);
             for (int i = 0; i < expected.Length; i++)
@@ -124,18 +124,18 @@ namespace System
             }
         }
 
-        // 
+        //
         // The innocent looking construct:
         //
         //    Assert.Throws<E>( () => new Span() );
         //
-        // generates a hidden box of the Span as the return value of the lambda. This makes the IL illegal and unloadable on 
+        // generates a hidden box of the Span as the return value of the lambda. This makes the IL illegal and unloadable on
         // runtimes that enforce the actual Span rules (never mind that we expect never to reach the box instruction...)
         //
         // The workaround is to code it like this:
         //
         //    Assert.Throws<E>( () => new Span().DontBox() );
-        // 
+        //
         // which turns the lambda return type back to "void" and eliminates the troublesome box instruction.
         //
         public static void DontBox<T>(this ReadOnlySpan<T> span)
@@ -148,7 +148,7 @@ namespace System
             Assert.True(memory.Span.SequenceEqual(expected));
         }
 
-        public static void ValidateReferenceType<T>(this Memory<T> memory, params T[] expected)
+        public static void ValidateReferenceType<T>(this Memory<T> memory, params T[] expected) where T : class
         {
             T[] bufferArray = memory.ToArray();
             Assert.Equal(memory.Length, expected.Length);
@@ -164,7 +164,7 @@ namespace System
             Assert.True(memory.Span.SequenceEqual(expected));
         }
 
-        public static void ValidateReferenceType<T>(this ReadOnlyMemory<T> memory, params T[] expected)
+        public static void ValidateReferenceType<T>(this ReadOnlyMemory<T> memory, params T[] expected) where T : class
         {
             T[] bufferArray = memory.ToArray();
             Assert.Equal(memory.Length, expected.Length);

@@ -12,14 +12,14 @@ namespace System.Text.Json.Serialization.Tests
     public static partial class StreamTests
     {
         [Fact]
-        public async static Task VerifyValueFail()
+        public static async Task VerifyValueFail()
         {
             MemoryStream stream = new MemoryStream();
             await Assert.ThrowsAsync<ArgumentNullException>(async () => await JsonSerializer.SerializeAsync(stream, "", (Type)null));
         }
 
         [Fact]
-        public async static Task VerifyTypeFail()
+        public static async Task VerifyTypeFail()
         {
             MemoryStream stream = new MemoryStream();
             await Assert.ThrowsAsync<ArgumentException>(async () => await JsonSerializer.SerializeAsync(stream, 1, typeof(string)));
@@ -202,8 +202,8 @@ namespace System.Text.Json.Serialization.Tests
                     Id = i,
                     Abstract = new string('A', i * 2),
                     Title = new string('T', i),
-                    StartTime = new DateTime(i),
-                    EndTime = new DateTime(i * 10000),
+                    StartTime = new DateTime(i, DateTimeKind.Utc),
+                    EndTime = new DateTime(i * 10000, DateTimeKind.Utc),
                     TrackId = i,
                     Track = new Track()
                     {

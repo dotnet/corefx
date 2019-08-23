@@ -107,17 +107,13 @@ namespace Internal.Cryptography.Pal.AnyOS
                 CmsRecipient recipient = recipients[i];
                 bool v0Recipient;
 
-                switch (recipient.Certificate.GetKeyAlgorithm())
+                envelopedData.RecipientInfos[i].Ktri = recipient.Certificate.GetKeyAlgorithm() switch
                 {
-                    case Oids.Rsa:
-                        envelopedData.RecipientInfos[i].Ktri = MakeKtri(cek, recipient, out v0Recipient);
-                        break;
-                    default:
-                        throw new CryptographicException(
+                    Oids.Rsa => MakeKtri(cek, recipient, out v0Recipient),
+                    _ => throw new CryptographicException(
                             SR.Cryptography_Cms_UnknownAlgorithm,
-                            recipient.Certificate.GetKeyAlgorithm());
-                }
-
+                            recipient.Certificate.GetKeyAlgorithm()),
+                };
                 allRecipientsVersion0 = allRecipientsVersion0 && v0Recipient;
             }
 
@@ -175,7 +171,7 @@ namespace Internal.Cryptography.Pal.AnyOS
                 }
                 else
                 {
-                    parameterBytes = EncodeOctetString(alg.IV);
+                    parameterBytes = PkcsHelpers.EncodeOctetString(alg.IV);
                 }
 
                 byte[] toEncrypt = contentInfo.Content;

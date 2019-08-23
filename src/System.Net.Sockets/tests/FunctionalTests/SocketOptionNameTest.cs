@@ -191,7 +191,7 @@ namespace System.Net.Sockets.Tests
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // Skip on Nano: dotnet/corefx #29929
         [PlatformSpecific(TestPlatforms.Windows)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // UWP Apps are normally blocked to send network traffic on loopback.
-        public async void MulticastInterface_Set_IPv6_Loopback_Succeeds()
+        public async Task MulticastInterface_Set_IPv6_Loopback_Succeeds()
         {
             // On Windows, we can apparently assume interface 1 is "loopback." On other platforms, this is not a
             // valid assumption. We could maybe use NetworkInterface.LoopbackInterfaceIndex to get the index, but
@@ -391,7 +391,7 @@ namespace System.Net.Sockets.Tests
             using (Socket a = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
             {
                 Assert.Equal(1, (int)a.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ExclusiveAddressUse));
-                Assert.Equal(true, a.ExclusiveAddressUse);
+                Assert.True(a.ExclusiveAddressUse);
                 Assert.Equal(0, (int)a.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress));
             }
         }

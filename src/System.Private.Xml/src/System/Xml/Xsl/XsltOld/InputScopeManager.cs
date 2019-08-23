@@ -13,7 +13,7 @@ namespace System.Xml.Xsl.XsltOld
     {
         private InputScope _scopeStack;
         private string _defaultNS = string.Empty;
-        private XPathNavigator _navigator;    // We need this nsvigator for document() function implementation
+        private readonly XPathNavigator _navigator;    // We need this nsvigator for document() function implementation
 
         public InputScopeManager(XPathNavigator navigator, InputScope rootScope)
         {
@@ -182,4 +182,3 @@ namespace System.Xml.Xsl.XsltOld
         }
     }
 }
-

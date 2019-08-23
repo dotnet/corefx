@@ -2,21 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Globalization;
+using System.Diagnostics;
+using System.IO;
+using System.Text;
+using System.Collections;
+
 namespace System.Xml.Xsl.XsltOld
 {
-    using System;
-    using System.Globalization;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Text;
-    using System.Xml;
-    using System.Xml.XPath;
-    using System.Collections;
-
-    internal class ReaderOutput : XmlReader, RecordOutput
+    internal sealed class ReaderOutput : XmlReader, IRecordOutput
     {
         private Processor _processor;
-        private XmlNameTable _nameTable;
+        private readonly XmlNameTable _nameTable;
 
         // Main node + Fields Collection
         private RecordBuilder _builder;
@@ -37,9 +34,9 @@ namespace System.Xml.Xsl.XsltOld
         private bool _haveRecord;
 
         // Static default record
-        private static BuilderInfo s_DefaultInfo = new BuilderInfo();
+        private static readonly BuilderInfo s_DefaultInfo = new BuilderInfo();
 
-        private XmlEncoder _encoder = new XmlEncoder();
+        private readonly XmlEncoder _encoder = new XmlEncoder();
         private XmlCharType _xmlCharType = XmlCharType.Instance;
 
         internal ReaderOutput(Processor processor)

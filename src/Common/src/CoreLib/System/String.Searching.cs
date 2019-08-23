@@ -18,7 +18,7 @@ namespace System
             return SpanHelpers.IndexOf(
                 ref _firstChar,
                 Length,
-                ref value!._firstChar, // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+                ref value._firstChar,
                 value.Length) >= 0;
         }
 
@@ -107,7 +107,7 @@ namespace System
             if (anyOf.Length > 0 && anyOf.Length <= 5)
             {
                 // The ReadOnlySpan.IndexOfAny extension is vectorized for values of 1 - 5 in length
-                var result = new ReadOnlySpan<char>(ref Unsafe.Add(ref _firstChar, startIndex), count).IndexOfAny(anyOf);
+                int result = new ReadOnlySpan<char>(ref Unsafe.Add(ref _firstChar, startIndex), count).IndexOfAny(anyOf);
                 return result == -1 ? result : result + startIndex;
             }
             else if (anyOf.Length > 5)
@@ -165,7 +165,7 @@ namespace System
         // The character map is an array of 8 integers acting as map blocks. The 3 lsb
         // in each byte in the character is used to index into this map to get the
         // right block, the value of the remaining 5 msb are used as the bit position
-        // inside this block. 
+        // inside this block.
         private static unsafe void InitializeProbabilisticMap(uint* charMap, ReadOnlySpan<char> anyOf)
         {
             bool hasAscii = false;
@@ -268,7 +268,7 @@ namespace System
 
             if (comparisonType == StringComparison.Ordinal)
             {
-                var result = SpanHelpers.IndexOf(
+                int result = SpanHelpers.IndexOf(
                     ref Unsafe.Add(ref this._firstChar, startIndex),
                     count,
                     ref value._firstChar,

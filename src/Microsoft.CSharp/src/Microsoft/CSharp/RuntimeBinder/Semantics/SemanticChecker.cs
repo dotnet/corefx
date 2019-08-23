@@ -99,7 +99,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 ats = ats.OuterType;
-            } while(ats != null);
+            } while (ats != null);
 
             TypeArray typeArgs = ((AggregateType)type).TypeArgsAll;
             for (int i = 0; i < typeArgs.Count; i++)
@@ -240,7 +240,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
 
-            // the CType in which the method is being called has no relationship with the 
+            // the CType in which the method is being called has no relationship with the
             // CType on which the method is defined surely this is NOACCESS and not NOACCESSTHRU
             return found ? ACCESSERROR.ACCESSERROR_NOACCESSTHRU : ACCESSERROR.ACCESSERROR_NOACCESS;
         }

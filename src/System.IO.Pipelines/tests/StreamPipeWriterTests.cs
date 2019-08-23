@@ -62,6 +62,25 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
+        public async Task CompleteAsyncDoesNotThrowObjectDisposedException()
+        {
+            byte[] bytes = Encoding.ASCII.GetBytes("Hello World");
+            var stream = new MemoryStream();
+            PipeWriter writer = PipeWriter.Create(stream, new StreamPipeWriterOptions(leaveOpen: true));
+
+            await writer.FlushAsync();
+            bytes.AsSpan().CopyTo(writer.GetSpan(bytes.Length));
+            writer.Advance(bytes.Length);
+
+            Assert.Equal(0, stream.Length);
+
+            await writer.CompleteAsync();
+
+            Assert.Equal(bytes.Length, stream.Length);
+            Assert.Equal("Hello World", Encoding.ASCII.GetString(stream.ToArray()));
+        }
+
+        [Fact]
         public async Task DataWrittenOnFlushAsync()
         {
             byte[] bytes = Encoding.ASCII.GetBytes("Hello World");
@@ -413,7 +432,7 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void GetMemoryBiggerThanPoolSizeAllocatesUnpooledArray()
+        public void GetMemoryBiggerThanPoolSizeAllocatesArrayPoolArray()
         {
             using (var pool = new DisposeTrackingBufferPool())
             {
@@ -421,8 +440,7 @@ namespace System.IO.Pipelines.Tests
                 var options = new StreamPipeWriterOptions(pool);
                 PipeWriter writer = PipeWriter.Create(stream, options);
                 Memory<byte> memory = writer.GetMemory(pool.MaxBufferSize + 1);
-
-                Assert.Equal(pool.MaxBufferSize + 1, memory.Length);
+                Assert.True(memory.Length > pool.MaxBufferSize + 1);
                 Assert.Equal(0, pool.CurrentlyRentedBlocks);
                 Assert.Equal(0, pool.DisposedBlocks);
 
@@ -511,7 +529,9 @@ namespace System.IO.Pipelines.Tests
         {
             bool fired = false;
             PipeWriter writer = PipeWriter.Create(Stream.Null);
+#pragma warning disable CS0618 // Type or member is obsolete
             writer.OnReaderCompleted((_, __) => { fired = true; }, null);
+#pragma warning restore CS0618 // Type or member is obsolete
             writer.Complete();
             Assert.False(fired);
         }

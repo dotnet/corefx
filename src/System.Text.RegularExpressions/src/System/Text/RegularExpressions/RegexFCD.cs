@@ -148,7 +148,7 @@ namespace System.Text.RegularExpressions
         }
 
         /// <summary>
-        /// Yet another related computation: it takes a RegexTree and computes 
+        /// Yet another related computation: it takes a RegexTree and computes
         /// the leading anchors that it encounters.
         /// </summary>
         public static int Anchors(RegexTree tree)
@@ -207,21 +207,19 @@ namespace System.Text.RegularExpressions
         /// <summary>
         /// Convert anchor type to anchor bit.
         /// </summary>
-        private static int AnchorFromType(int type)
-        {
-            switch (type)
+        private static int AnchorFromType(int type) =>
+            type switch
             {
-                case RegexNode.Bol: return Bol;
-                case RegexNode.Eol: return Eol;
-                case RegexNode.Boundary: return Boundary;
-                case RegexNode.ECMABoundary: return ECMABoundary;
-                case RegexNode.Beginning: return Beginning;
-                case RegexNode.Start: return Start;
-                case RegexNode.EndZ: return EndZ;
-                case RegexNode.End: return End;
-                default: return 0;
-            }
-        }
+                RegexNode.Bol => Bol,
+                RegexNode.Eol => Eol,
+                RegexNode.Boundary => Boundary,
+                RegexNode.ECMABoundary => ECMABoundary,
+                RegexNode.Beginning => Beginning,
+                RegexNode.Start => Start,
+                RegexNode.EndZ => EndZ,
+                RegexNode.End => End,
+                _ => 0,
+            };
 
 #if DEBUG
         public static string AnchorDescription(int anchors)
@@ -523,7 +521,7 @@ namespace System.Text.RegularExpressions
 
     internal sealed class RegexFC
     {
-        private RegexCharClass _cc;
+        private readonly RegexCharClass _cc;
         public bool _nullable;
 
         public RegexFC(bool nullable)

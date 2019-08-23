@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -97,7 +98,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             // No way to populate this collection.
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<GenericIEnumerableWrapper<StringIEnumerableWrapper>>(@"[[""1"",""2""],[""3"",""4""]]"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<GenericIEnumerableWrapper<StringIEnumerableWrapper>>(@"[[""1"",""2""],[""3"",""4""]]"));
         }
 
         [Fact]
@@ -115,7 +116,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             // No way to populate this collection.
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<GenericIEnumerableWrapper<int[]>>(@"[[1,2],[3, 4]]"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<GenericIEnumerableWrapper<int[]>>(@"[[1,2],[3, 4]]"));
         }
 
         [Fact]
@@ -133,7 +134,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             // No way to populate this collection.
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringIEnumerableWrapper[]>(@"[[""1"",""2""],[""3"",""4""]]"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<StringIEnumerableWrapper[]>(@"[[""1"",""2""],[""3"",""4""]]"));
         }
 
         [Fact]
@@ -151,8 +152,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(0, result.Count());
 
             // There is no way to populate this collection.
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringIEnumerableWrapper>(@"[""1"",""2""]"));
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringIEnumerableWrapper>(@"[]"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<StringIEnumerableWrapper>(@"[""1"",""2""]"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<StringIEnumerableWrapper>(@"[]"));
         }
 
         [Fact]
@@ -367,7 +368,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             // There's no way to populate this collection.
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<GenericIReadOnlyCollectionWrapper<StringIReadOnlyCollectionWrapper>>(@"[[""1"",""2""],[""3"",""4""]]"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<GenericIReadOnlyCollectionWrapper<StringIReadOnlyCollectionWrapper>>(@"[[""1"",""2""],[""3"",""4""]]"));
         }
 
         [Fact]
@@ -384,7 +385,7 @@ namespace System.Text.Json.Serialization.Tests
                 }
             }
 
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<GenericIReadOnlyCollectionWrapper<int[]>>(@"[[1,2],[3,4]]"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<GenericIReadOnlyCollectionWrapper<int[]>>(@"[[1,2],[3,4]]"));
         }
 
         [Fact]
@@ -402,7 +403,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             // No way to populate this collection.
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringIReadOnlyCollectionWrapper[]>(@"[[""1"",""2""],[""3"",""4""]]"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<StringIReadOnlyCollectionWrapper[]>(@"[[""1"",""2""],[""3"",""4""]]"));
         }
 
         [Fact]
@@ -420,7 +421,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(0, result.Count());
 
             // No way to populate this collection.
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringIReadOnlyCollectionWrapper>(@"[""1"",""2""]"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<StringIReadOnlyCollectionWrapper>(@"[""1"",""2""]"));
         }
 
         [Fact]
@@ -437,7 +438,7 @@ namespace System.Text.Json.Serialization.Tests
                 }
             }
 
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<GenericIReadOnlyListWrapper<StringIReadOnlyListWrapper>>(@"[[""1"",""2""],[""3"",""4""]]"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<GenericIReadOnlyListWrapper<StringIReadOnlyListWrapper>>(@"[[""1"",""2""],[""3"",""4""]]"));
         }
 
         [Fact]
@@ -455,7 +456,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             // No way to populate this collection.
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<GenericIReadOnlyListWrapper<string[]>>(@"[[""1"",""2""],[""3"",""4""]]"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<GenericIReadOnlyListWrapper<string[]>>(@"[[""1"",""2""],[""3"",""4""]]"));
         }
 
         [Fact]
@@ -473,7 +474,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             // No way to populate this collection.
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringIReadOnlyListWrapper[]>(@"[[""1"",""2""],[""3"",""4""]]"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<StringIReadOnlyListWrapper[]>(@"[[""1"",""2""],[""3"",""4""]]"));
         }
 
         [Fact]
@@ -491,7 +492,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(0, result.Count());
 
             // No way to populate this collection.
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringIReadOnlyListWrapper>(@"[""1"",""2""]"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<StringIReadOnlyListWrapper>(@"[""1"",""2""]"));
         }
 
         [Fact]
@@ -1023,6 +1024,108 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void ReadKeyValuePairWithNullValues()
+        {
+            {
+                KeyValuePair<string, string> kvp = JsonSerializer.Deserialize<KeyValuePair<string, string>>(@"{""Key"":""key"",""Value"":null}");
+                Assert.Equal("key", kvp.Key);
+                Assert.Null(kvp.Value);
+            }
+
+            {
+                KeyValuePair<string, object> kvp = JsonSerializer.Deserialize<KeyValuePair<string, object>>(@"{""Key"":""key"",""Value"":null}");
+                Assert.Equal("key", kvp.Key);
+                Assert.Null(kvp.Value);
+            }
+
+            {
+                KeyValuePair<string, SimpleClassWithKeyValuePairs> kvp = JsonSerializer.Deserialize<KeyValuePair<string, SimpleClassWithKeyValuePairs>>(@"{""Key"":""key"",""Value"":null}");
+                Assert.Equal("key", kvp.Key);
+                Assert.Null(kvp.Value);
+            }
+
+            {
+                KeyValuePair<string, KeyValuePair<string, string>> kvp = JsonSerializer.Deserialize<KeyValuePair<string, KeyValuePair<string, string>>>(@"{""Key"":""key"",""Value"":{""Key"":""key"",""Value"":null}}");
+                Assert.Equal("key", kvp.Key);
+                Assert.Equal("key", kvp.Value.Key);
+                Assert.Null(kvp.Value.Value);
+            }
+
+            {
+                KeyValuePair<string, KeyValuePair<string, object>> kvp = JsonSerializer.Deserialize<KeyValuePair<string, KeyValuePair<string, object>>>(@"{""Key"":""key"",""Value"":{""Key"":""key"",""Value"":null}}");
+                Assert.Equal("key", kvp.Key);
+                Assert.Equal("key", kvp.Value.Key);
+                Assert.Null(kvp.Value.Value);
+            }
+
+            {
+                KeyValuePair<string, KeyValuePair<string, SimpleClassWithKeyValuePairs>> kvp = JsonSerializer.Deserialize<KeyValuePair<string, KeyValuePair<string, SimpleClassWithKeyValuePairs>>>(@"{""Key"":""key"",""Value"":{""Key"":""key"",""Value"":null}}");
+                Assert.Equal("key", kvp.Key);
+                Assert.Equal("key", kvp.Value.Key);
+                Assert.Null(kvp.Value.Value);
+            }
+        }
+
+        [Fact]
+        public static void ReadClassWithNullKeyValuePairValues()
+        {
+            string json =
+                    @"{" +
+                        @"""KvpWStrVal"":{" +
+                            @"""Key"":""key""," +
+                            @"""Value"":null" +
+                        @"}," +
+                        @"""KvpWObjVal"":{" +
+                            @"""Key"":""key""," +
+                            @"""Value"":null" +
+                        @"}," +
+                        @"""KvpWClassVal"":{" +
+                            @"""Key"":""key""," +
+                            @"""Value"":null" +
+                        @"}," +
+                        @"""KvpWStrKvpVal"":{" +
+                            @"""Key"":""key""," +
+                            @"""Value"":{" +
+                                @"""Key"":""key""," +
+                                @"""Value"":null" +
+                            @"}" +
+                        @"}," +
+                        @"""KvpWObjKvpVal"":{" +
+                            @"""Key"":""key""," +
+                            @"""Value"":{" +
+                                @"""Key"":""key""," +
+                                @"""Value"":null" +
+                            @"}" +
+                        @"}," +
+                        @"""KvpWClassKvpVal"":{" +
+                            @"""Key"":""key""," +
+                            @"""Value"":{" +
+                                @"""Key"":""key""," +
+                                @"""Value"":null" +
+                            @"}" +
+                        @"}" +
+                    @"}";
+            SimpleClassWithKeyValuePairs obj = JsonSerializer.Deserialize<SimpleClassWithKeyValuePairs>(json);
+
+            Assert.Equal("key", obj.KvpWStrVal.Key);
+            Assert.Equal("key", obj.KvpWObjVal.Key);
+            Assert.Equal("key", obj.KvpWClassVal.Key);
+            Assert.Equal("key", obj.KvpWStrKvpVal.Key);
+            Assert.Equal("key", obj.KvpWObjKvpVal.Key);
+            Assert.Equal("key", obj.KvpWClassKvpVal.Key);
+            Assert.Equal("key", obj.KvpWStrKvpVal.Value.Key);
+            Assert.Equal("key", obj.KvpWObjKvpVal.Value.Key);
+            Assert.Equal("key", obj.KvpWClassKvpVal.Value.Key);
+
+            Assert.Null(obj.KvpWStrVal.Value);
+            Assert.Null(obj.KvpWObjVal.Value);
+            Assert.Null(obj.KvpWClassVal.Value);
+            Assert.Null(obj.KvpWStrKvpVal.Value.Value);
+            Assert.Null(obj.KvpWObjKvpVal.Value.Value);
+            Assert.Null(obj.KvpWClassKvpVal.Value.Value);
+        }
+
+        [Fact]
         public static void ReadSimpleTestClass_GenericCollectionWrappers()
         {
             SimpleTestClassWithGenericCollectionWrappers obj = JsonSerializer.Deserialize<SimpleTestClassWithGenericCollectionWrappers>(SimpleTestClassWithGenericCollectionWrappers.s_json);
@@ -1032,16 +1135,24 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadSimpleTestClass_GenericWrappers_NoAddMethod_Throws()
         {
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<SimpleTestClassWithStringIEnumerableWrapper>(SimpleTestClassWithStringIEnumerableWrapper.s_json));
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<SimpleTestClassWithStringIReadOnlyCollectionWrapper>(SimpleTestClassWithStringIReadOnlyCollectionWrapper.s_json));
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<SimpleTestClassWithStringIReadOnlyListWrapper>(SimpleTestClassWithStringIReadOnlyListWrapper.s_json));
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<SimpleTestClassWithStringToStringIReadOnlyDictionaryWrapper>(SimpleTestClassWithStringToStringIReadOnlyDictionaryWrapper.s_json));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<SimpleTestClassWithStringIEnumerableWrapper>(SimpleTestClassWithStringIEnumerableWrapper.s_json));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<SimpleTestClassWithStringIReadOnlyCollectionWrapper>(SimpleTestClassWithStringIReadOnlyCollectionWrapper.s_json));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<SimpleTestClassWithStringIReadOnlyListWrapper>(SimpleTestClassWithStringIReadOnlyListWrapper.s_json));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<SimpleTestClassWithStringToStringIReadOnlyDictionaryWrapper>(SimpleTestClassWithStringToStringIReadOnlyDictionaryWrapper.s_json));
         }
 
         [Fact]
         public static void ReadPrimitiveStringCollection_Throws()
         {
             Assert.Throws<InvalidCastException>(() => JsonSerializer.Deserialize<StringCollection>(@"[""1"", ""2""]"));
+        }
+
+        [Fact]
+        public static void ReadReadOnlyCollections_Throws()
+        {
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyStringIListWrapper>(@"[""1"", ""2""]"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyStringICollectionWrapper>(@"[""1"", ""2""]"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyStringToStringIDictionaryWrapper>(@"{""Key"":""key"",""Value"":""value""}"));
         }
     }
 }

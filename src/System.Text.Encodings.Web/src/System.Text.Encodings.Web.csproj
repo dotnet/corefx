@@ -11,6 +11,7 @@
     <Compile Include="System\Text\Encodings\Web\JavaScriptEncoder.cs" />
     <Compile Include="System\Text\Encodings\Web\TextEncoder.cs" />
     <Compile Include="System\Text\Encodings\Web\TextEncoderSettings.cs" />
+    <Compile Include="System\Text\Encodings\Web\UnsafeRelaxedJavaScriptEncoder.cs" />
     <Compile Include="System\Text\Encodings\Web\UrlEncoder.cs" />
     <Compile Include="System\Text\Internal\AllowedCharactersBitmap.cs" />
     <Compile Include="System\Text\Unicode\UnicodeHelpers.cs" />
@@ -29,6 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Memory" />
+    <Reference Include="System.Resources.ResourceManager" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true' OR '$(TargetsUap)' == 'true'">
     <Reference Include="System.Diagnostics.Debug" />

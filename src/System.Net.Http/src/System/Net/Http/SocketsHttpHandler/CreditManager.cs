@@ -4,12 +4,13 @@
 
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.Net.Http
 {
-    internal sealed class CreditManager : IDisposable
+    internal sealed class CreditManager
     {
         private readonly IHttpTrace _owner;
         private readonly string _name;

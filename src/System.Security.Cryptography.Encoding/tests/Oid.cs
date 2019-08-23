@@ -119,7 +119,7 @@ namespace System.Security.Cryptography.Encoding.Tests
             Assert.Equal("BOGUS", oid.Value);
 
             oid.Value = null;
-            Assert.Equal(null, oid.Value);
+            Assert.Null(oid.Value);
         }
 
         [Fact]
@@ -157,7 +157,7 @@ namespace System.Security.Cryptography.Encoding.Tests
             Assert.Equal(SHA256_Name, oid.FriendlyName);
             Assert.Equal(SHA256_Oid, oid.Value);
         }
-        
+
         [Theory]
         [MemberData(nameof(ValidOidFriendlyNameHashAlgorithmPairs))]
         public static void LookupOidByValue_Method_HashAlgorithm(string oidValue, string friendlyName)
@@ -184,6 +184,7 @@ namespace System.Security.Cryptography.Encoding.Tests
         public static void LookupOidByValue_Method_WrongGroup(string oidValue, string friendlyName)
         {
             // Oid group is implemented strictly - no fallback to OidGroup.All as with many other parts of Crypto.
+            _ = friendlyName;
             Assert.Throws<CryptographicException>(() => Oid.FromOidValue(oidValue, OidGroup.EncryptionAlgorithm));
         }
 
@@ -240,6 +241,7 @@ namespace System.Security.Cryptography.Encoding.Tests
         public static void LookupOidByFriendlyName_Method_WrongGroup(string oidValue, string friendlyName)
         {
             // Oid group is implemented strictly - no fallback to OidGroup.All as with many other parts of Crypto.
+            _ = oidValue;
             Assert.Throws<CryptographicException>(() => Oid.FromFriendlyName(friendlyName, OidGroup.EncryptionAlgorithm));
         }
 
@@ -324,18 +326,18 @@ namespace System.Security.Cryptography.Encoding.Tests
             Assert.Equal(ObsoleteSmime3desWrap_Name, oid.FriendlyName);
         }
 
-        public static IEnumerable<string[]> ValidOidFriendlyNamePairs
+        public static IEnumerable<object[]> ValidOidFriendlyNamePairs
         {
             get
             {
-                List<string[]> data = new List<string[]>(ValidOidFriendlyNameHashAlgorithmPairs);
+                List<object[]> data = new List<object[]>(ValidOidFriendlyNameHashAlgorithmPairs);
                 data.AddRange(ValidOidFriendlyNameEncryptionAlgorithmPairs);
 
                 return data;
             }
         }
 
-        public static IEnumerable<string[]> ValidOidFriendlyNameHashAlgorithmPairs
+        public static IEnumerable<object[]> ValidOidFriendlyNameHashAlgorithmPairs
         {
             get
             {
@@ -350,7 +352,7 @@ namespace System.Security.Cryptography.Encoding.Tests
             }
         }
 
-        public static IEnumerable<string[]> ValidOidFriendlyNameEncryptionAlgorithmPairs
+        public static IEnumerable<object[]> ValidOidFriendlyNameEncryptionAlgorithmPairs
         {
             get
             {

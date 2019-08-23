@@ -806,7 +806,7 @@ namespace System.Data.Odbc
         private static readonly TypeMap s_date = new TypeMap(OdbcType.Date, DbType.Date, typeof(DateTime), ODBC32.SQL_TYPE.TYPE_DATE, ODBC32.SQL_C.TYPE_DATE, ODBC32.SQL_C.TYPE_DATE, 6, 10, false);
         private static readonly TypeMap s_time = new TypeMap(OdbcType.Time, DbType.Time, typeof(TimeSpan), ODBC32.SQL_TYPE.TYPE_TIME, ODBC32.SQL_C.TYPE_TIME, ODBC32.SQL_C.TYPE_TIME, 6, 12, false);
         private static readonly TypeMap s_decimal = new TypeMap(OdbcType.Decimal, DbType.Decimal, typeof(decimal), ODBC32.SQL_TYPE.DECIMAL, ODBC32.SQL_C.NUMERIC, ODBC32.SQL_C.NUMERIC, 19, ADP.DecimalMaxPrecision28, false);
-        //        static private  readonly TypeMap _Currency   = new TypeMap(OdbcType.Decimal,          DbType.Currency,              typeof(Decimal),  ODBC32.SQL_TYPE.DECIMAL,        ODBC32.SQL_C.NUMERIC,        ODBC32.SQL_C.NUMERIC,        19, ADP.DecimalMaxPrecision28, false);
+        //        private static  readonly TypeMap _Currency   = new TypeMap(OdbcType.Decimal,          DbType.Currency,              typeof(Decimal),  ODBC32.SQL_TYPE.DECIMAL,        ODBC32.SQL_C.NUMERIC,        ODBC32.SQL_C.NUMERIC,        19, ADP.DecimalMaxPrecision28, false);
         private static readonly TypeMap s_double = new TypeMap(OdbcType.Double, DbType.Double, typeof(double), ODBC32.SQL_TYPE.DOUBLE, ODBC32.SQL_C.DOUBLE, ODBC32.SQL_C.DOUBLE, 8, 15, false);
         internal static readonly TypeMap _Image = new TypeMap(OdbcType.Image, DbType.Binary, typeof(byte[]), ODBC32.SQL_TYPE.LONGVARBINARY, ODBC32.SQL_C.BINARY, ODBC32.SQL_C.BINARY, -1, -1, false);
         private static readonly TypeMap s_int = new TypeMap(OdbcType.Int, DbType.Int32, typeof(int), ODBC32.SQL_TYPE.INTEGER, ODBC32.SQL_C.SLONG, ODBC32.SQL_C.SLONG, 4, 10, true);
@@ -855,37 +855,35 @@ namespace System.Data.Odbc
             _signType = signType;
         }
 
-        internal static TypeMap FromOdbcType(OdbcType odbcType)
-        {
-            switch (odbcType)
+        internal static TypeMap FromOdbcType(OdbcType odbcType) =>
+            odbcType switch
             {
-                case OdbcType.BigInt: return s_bigInt;
-                case OdbcType.Binary: return s_binary;
-                case OdbcType.Bit: return s_bit;
-                case OdbcType.Char: return _Char;
-                case OdbcType.DateTime: return s_dateTime;
-                case OdbcType.Date: return s_date;
-                case OdbcType.Time: return s_time;
-                case OdbcType.Double: return s_double;
-                case OdbcType.Decimal: return s_decimal;
-                case OdbcType.Image: return _Image;
-                case OdbcType.Int: return s_int;
-                case OdbcType.NChar: return s_NChar;
-                case OdbcType.NText: return _NText;
-                case OdbcType.Numeric: return s_numeric;
-                case OdbcType.NVarChar: return _NVarChar;
-                case OdbcType.Real: return s_real;
-                case OdbcType.UniqueIdentifier: return s_uniqueId;
-                case OdbcType.SmallDateTime: return s_smallDT;
-                case OdbcType.SmallInt: return s_smallInt;
-                case OdbcType.Text: return _Text;
-                case OdbcType.Timestamp: return s_timestamp;
-                case OdbcType.TinyInt: return s_tinyInt;
-                case OdbcType.VarBinary: return s_varBinary;
-                case OdbcType.VarChar: return _VarChar;
-                default: throw ODBC.UnknownOdbcType(odbcType);
-            }
-        }
+                OdbcType.BigInt => s_bigInt,
+                OdbcType.Binary => s_binary,
+                OdbcType.Bit => s_bit,
+                OdbcType.Char => _Char,
+                OdbcType.DateTime => s_dateTime,
+                OdbcType.Date => s_date,
+                OdbcType.Time => s_time,
+                OdbcType.Double => s_double,
+                OdbcType.Decimal => s_decimal,
+                OdbcType.Image => _Image,
+                OdbcType.Int => s_int,
+                OdbcType.NChar => s_NChar,
+                OdbcType.NText => _NText,
+                OdbcType.Numeric => s_numeric,
+                OdbcType.NVarChar => _NVarChar,
+                OdbcType.Real => s_real,
+                OdbcType.UniqueIdentifier => s_uniqueId,
+                OdbcType.SmallDateTime => s_smallDT,
+                OdbcType.SmallInt => s_smallInt,
+                OdbcType.Text => _Text,
+                OdbcType.Timestamp => s_timestamp,
+                OdbcType.TinyInt => s_tinyInt,
+                OdbcType.VarBinary => s_varBinary,
+                OdbcType.VarChar => _VarChar,
+                _ => throw ODBC.UnknownOdbcType(odbcType),
+            };
 
         internal static TypeMap FromDbType(DbType dbType)
         {
@@ -1018,27 +1016,21 @@ namespace System.Data.Odbc
             //
             if (unsigned == true)
             {
-                switch (typeMap._dbType)
+                return typeMap._dbType switch
                 {
-                    case DbType.Int64:
-                        return s_decimal;        // upgrade to decimal
-                    case DbType.Int32:
-                        return s_bigInt;         // upgrade to 64 bit
-                    case DbType.Int16:
-                        return s_int;            // upgrade to 32 bit
-                    default:
-                        return typeMap;
-                } // end switch
+                    DbType.Int64 => s_decimal,        // upgrade to decimal
+                    DbType.Int32 => s_bigInt,         // upgrade to 64 bit
+                    DbType.Int16 => s_int,            // upgrade to 32 bit
+                    _ => typeMap,
+                };
             }
             else
             {
-                switch (typeMap._dbType)
+                return typeMap._dbType switch
                 {
-                    case DbType.Byte:
-                        return s_smallInt;       // upgrade to 16 bit
-                    default:
-                        return typeMap;
-                } // end switch
+                    DbType.Byte => s_smallInt,       // upgrade to 16 bit
+                    _ => typeMap,
+                };
             }
         } // end UpgradeSignedType
     }

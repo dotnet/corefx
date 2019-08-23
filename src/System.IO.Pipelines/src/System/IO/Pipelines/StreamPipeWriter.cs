@@ -21,14 +21,14 @@ namespace System.IO.Pipelines
         private int _tailBytesBuffered;
         private int _bytesBuffered;
 
-        private MemoryPool<byte> _pool;
+        private readonly MemoryPool<byte> _pool;
 
         private CancellationTokenSource _internalTokenSource;
         private bool _isCompleted;
-        private object _lockObject = new object();
+        private readonly object _lockObject = new object();
 
         private BufferSegmentStack _bufferSegmentPool;
-        private bool _leaveOpen;
+        private readonly bool _leaveOpen;
 
         private CancellationTokenSource InternalTokenSource
         {
@@ -150,20 +150,16 @@ namespace System.IO.Pipelines
         {
             BufferSegment newSegment = CreateSegmentUnsynchronized();
 
-            if (_pool is null)
+            if (_pool is null || sizeHint > _pool.MaxBufferSize)
             {
                 // Use the array pool
-                newSegment.SetOwnedMemory(ArrayPool<byte>.Shared.Rent(GetSegmentSize(sizeHint)));
-            }
-            else if (sizeHint <= _pool.MaxBufferSize)
-            {
-                // Use the specified pool if it fits
-                newSegment.SetOwnedMemory(_pool.Rent(GetSegmentSize(sizeHint, _pool.MaxBufferSize)));
+                int sizeToRequest = GetSegmentSize(sizeHint);
+                newSegment.SetOwnedMemory(ArrayPool<byte>.Shared.Rent(sizeToRequest));
             }
             else
             {
-                // We can't use the pool so allocate an array
-                newSegment.SetUnownedMemory(new byte[sizeHint]);
+                // Use the specified pool as it fits
+                newSegment.SetOwnedMemory(_pool.Rent(GetSegmentSize(sizeHint, _pool.MaxBufferSize)));
             }
 
             _tailMemory = newSegment.AvailableMemory;
@@ -214,9 +210,9 @@ namespace System.IO.Pipelines
 
             _isCompleted = true;
 
-            _internalTokenSource?.Dispose();
-
             FlushInternal();
+
+            _internalTokenSource?.Dispose();
 
             if (!_leaveOpen)
             {
@@ -233,9 +229,9 @@ namespace System.IO.Pipelines
 
             _isCompleted = true;
 
-            _internalTokenSource?.Dispose();
-
             await FlushAsyncInternal().ConfigureAwait(false);
+
+            _internalTokenSource?.Dispose();
 
             if (!_leaveOpen)
             {
@@ -245,11 +241,6 @@ namespace System.IO.Pipelines
                 InnerStream.Dispose();
 #endif
             }
-        }
-
-        /// <inheritdoc />
-        public override void OnReaderCompleted(Action<Exception, object> callback, object state)
-        {
         }
 
         /// <inheritdoc />

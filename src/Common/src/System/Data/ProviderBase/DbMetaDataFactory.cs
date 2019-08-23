@@ -11,7 +11,6 @@ namespace System.Data.ProviderBase
 {
     internal class DbMetaDataFactory
     {
-
         private DataSet _metaDataCollectionsDataSet;
         private string _normalizedServerVersion;
         private string _serverVersionString;
@@ -23,7 +22,6 @@ namespace System.Data.ProviderBase
         private const string _minimumVersion = "MinimumVersion";
         private const string _dataSourceProductVersionNormalized = "DataSourceProductVersionNormalized";
         private const string _dataSourceProductVersion = "DataSourceProductVersion";
-        private const string _restrictionDefault = "RestrictionDefault";
         private const string _restrictionNumber = "RestrictionNumber";
         private const string _numberOfRestrictions = "NumberOfRestrictions";
         private const string _restrictionName = "RestrictionName";
@@ -173,7 +171,7 @@ namespace System.Data.ProviderBase
                 schemaTable = reader.GetSchemaTable();
                 foreach (DataRow row in schemaTable.Rows)
                 {
-                    resultTable.Columns.Add(row["ColumnName"] as string, (Type)row["DataType"] as Type);
+                    resultTable.Columns.Add(row["ColumnName"] as string, (Type)row["DataType"]);
                 }
                 object[] values = new object[resultTable.Columns.Count];
                 while (reader.Read())

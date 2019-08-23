@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -20,7 +20,7 @@ namespace System.Xml.Serialization
         private static TypeDesc StringTypeDesc { get; set; } = (new TypeScope()).GetTypeDesc(typeof(string));
         private static TypeDesc QnameTypeDesc { get; set; } = (new TypeScope()).GetTypeDesc(typeof(XmlQualifiedName));
 
-        private XmlMapping _mapping;
+        private readonly XmlMapping _mapping;
 
         public ReflectionXmlSerializationReader(XmlMapping mapping, XmlReader xmlReader, XmlDeserializationEvents events, string encodingStyle)
         {
@@ -225,7 +225,7 @@ namespace System.Xml.Serialization
                 {
                     membersList.Add(anyMember);
                 }
-                else if (mapping.TypeDesc.IsArrayLike 
+                else if (mapping.TypeDesc.IsArrayLike
                     && !(mapping.Elements.Length == 1 && mapping.Elements[0].Mapping is ArrayMapping))
                 {
                     anyMember.Collection = new CollectionMember();
@@ -461,7 +461,7 @@ namespace System.Xml.Serialization
             var memberMapping = new MemberMapping();
             memberMapping.TypeDesc = mapping.TypeDesc;
             memberMapping.Elements = new ElementAccessor[] { element };
-                       
+
             object o = null;
             var holder = new ObjectHolder();
             var member = new Member(memberMapping);
@@ -603,7 +603,7 @@ namespace System.Xml.Serialization
             }
         }
 
-        private static ConcurrentDictionary<Tuple<Type, string>, ReflectionXmlSerializationReaderHelper.SetMemberValueDelegate> s_setMemberValueDelegateCache = new ConcurrentDictionary<Tuple<Type, string>, ReflectionXmlSerializationReaderHelper.SetMemberValueDelegate>();
+        private static readonly ConcurrentDictionary<Tuple<Type, string>, ReflectionXmlSerializationReaderHelper.SetMemberValueDelegate> s_setMemberValueDelegateCache = new ConcurrentDictionary<Tuple<Type, string>, ReflectionXmlSerializationReaderHelper.SetMemberValueDelegate>();
 
         private static ReflectionXmlSerializationReaderHelper.SetMemberValueDelegate GetSetMemberValueDelegate(object o, string memberName)
         {
@@ -708,8 +708,8 @@ namespace System.Xml.Serialization
 
         private bool IsSequence(Member[] members)
         {
-            // #10586: Currently the reflection based method treat this kind of type as normal types. 
-            // But potentially we can do some optimization for types that have ordered properties. 
+            // #10586: Currently the reflection based method treat this kind of type as normal types.
+            // But potentially we can do some optimization for types that have ordered properties.
             return false;
         }
 
@@ -849,10 +849,10 @@ namespace System.Xml.Serialization
                 {
                     Reader.Skip();
                 }
-                else if(element.Mapping.TypeDesc.Type == typeof(TimeSpan) && Reader.IsEmptyElement)
-                {                   
+                else if (element.Mapping.TypeDesc.Type == typeof(TimeSpan) && Reader.IsEmptyElement)
+                {
                     Reader.Skip();
-                    value = default(TimeSpan);                   
+                    value = default(TimeSpan);
                 }
                 else
                 {
@@ -1069,7 +1069,7 @@ namespace System.Xml.Serialization
                     {
                         WriteAddCollectionFixup(member.GetSource, member.Source, rre, td, readOnly);
 
-                        // member.Source has been set at this point. 
+                        // member.Source has been set at this point.
                         // Setting the source to no-op to avoid setting the
                         // source again.
                         member.Source = NoopAction;
@@ -1082,7 +1082,7 @@ namespace System.Xml.Serialization
                         }
 
                         member.Source(rre);
-                    }                    
+                    }
                 }
 
                 o = rre;
@@ -1163,58 +1163,25 @@ namespace System.Xml.Serialization
                 if (!mapping.TypeDesc.HasCustomFormatter)
                 {
                     string value = readFunc(funcState);
-                    object retObj;
-                    switch (mapping.TypeDesc.FormatterName)
+                    object retObj = mapping.TypeDesc.FormatterName switch
                     {
-                        case "Boolean":
-                            retObj = XmlConvert.ToBoolean(value);
-                            break;
-                        case "Int32":
-                            retObj = XmlConvert.ToInt32(value);
-                            break;
-                        case "Int16":
-                            retObj = XmlConvert.ToInt16(value);
-                            break;
-                        case "Int64":
-                            retObj = XmlConvert.ToInt64(value);
-                            break;
-                        case "Single":
-                            retObj = XmlConvert.ToSingle(value);
-                            break;
-                        case "Double":
-                            retObj = XmlConvert.ToDouble(value);
-                            break;
-                        case "Decimal":
-                            retObj = XmlConvert.ToDecimal(value);
-                            break;
-                        case "Byte":
-                            retObj = XmlConvert.ToByte(value);
-                            break;
-                        case "SByte":
-                            retObj = XmlConvert.ToSByte(value);
-                            break;
-                        case "UInt16":
-                            retObj = XmlConvert.ToUInt16(value);
-                            break;
-                        case "UInt32":
-                            retObj = XmlConvert.ToUInt32(value);
-                            break;
-                        case "UInt64":
-                            retObj = XmlConvert.ToUInt64(value);
-                            break;
-                        case "Guid":
-                            retObj = XmlConvert.ToGuid(value);
-                            break;
-                        case "Char":
-                            retObj = XmlConvert.ToChar(value);
-                            break;
-                        case "TimeSpan":
-                            retObj = XmlConvert.ToTimeSpan(value);
-                            break;
-                        default:
-                            throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, $"unknown FormatterName: {mapping.TypeDesc.FormatterName}"));
-                    }
-
+                        "Boolean" => XmlConvert.ToBoolean(value),
+                        "Int32" => XmlConvert.ToInt32(value),
+                        "Int16" => XmlConvert.ToInt16(value),
+                        "Int64" => XmlConvert.ToInt64(value),
+                        "Single" => XmlConvert.ToSingle(value),
+                        "Double" => XmlConvert.ToDouble(value),
+                        "Decimal" => XmlConvert.ToDecimal(value),
+                        "Byte" => XmlConvert.ToByte(value),
+                        "SByte" => XmlConvert.ToSByte(value),
+                        "UInt16" => XmlConvert.ToUInt16(value),
+                        "UInt32" => XmlConvert.ToUInt32(value),
+                        "UInt64" => XmlConvert.ToUInt64(value),
+                        "Guid" => XmlConvert.ToGuid(value),
+                        "Char" => XmlConvert.ToChar(value),
+                        "TimeSpan" => XmlConvert.ToTimeSpan(value),
+                        _ => throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, $"unknown FormatterName: {mapping.TypeDesc.FormatterName}")),
+                    };
                     return retObj;
                 }
                 else

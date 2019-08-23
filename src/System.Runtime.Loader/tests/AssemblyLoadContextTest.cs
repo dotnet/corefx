@@ -34,21 +34,19 @@ namespace System.Runtime.Loader.Tests
 
         [Fact]
         public static void GetAssemblyNameTest_AssemblyNotFound()
-        {            
-            Assert.Throws(typeof(FileNotFoundException), 
-                () => AssemblyLoadContext.GetAssemblyName("Non.Existing.Assembly.dll"));
+        {
+            Assert.Throws<FileNotFoundException>(() => AssemblyLoadContext.GetAssemblyName("Non.Existing.Assembly.dll"));
         }
 
         [Fact]
         public static void GetAssemblyNameTest_NullParameter()
-        {               
-            Assert.Throws(typeof(ArgumentNullException), 
-                () => AssemblyLoadContext.GetAssemblyName(null));
+        {
+            Assert.Throws<ArgumentNullException>(() => AssemblyLoadContext.GetAssemblyName(null));
         }
 
         [Fact]
         public static void LoadAssemblyByPath_ValidUserAssembly()
-        {            
+        {
             var asmName = new AssemblyName(TestAssembly);
             var loadContext = new ResourceAssemblyLoadContext();
             loadContext.LoadBy = LoadBy.Path;
@@ -56,8 +54,8 @@ namespace System.Runtime.Loader.Tests
             var asm = loadContext.LoadFromAssemblyName(asmName);
 
             Assert.NotNull(asm);
-            Assert.True(asm.DefinedTypes.Any(t => t.Name == "TestClass"));
-        }       
+            Assert.Contains(asm.DefinedTypes, t => t.Name == "TestClass");
+        }
 
         [Fact]
         public static void LoadAssemblyByStream_ValidUserAssembly()
@@ -69,7 +67,7 @@ namespace System.Runtime.Loader.Tests
             var asm = loadContext.LoadFromAssemblyName(asmName);
 
             Assert.NotNull(asm);
-            Assert.True(asm.DefinedTypes.Any(t => t.Name == "TestClass"));
+            Assert.Contains(asm.DefinedTypes, t => t.Name == "TestClass");
         }
 
         [Fact]
@@ -79,8 +77,7 @@ namespace System.Runtime.Loader.Tests
             var loadContext = new ResourceAssemblyLoadContext();
             loadContext.LoadBy = LoadBy.Path;
 
-            Assert.Throws(typeof(FileNotFoundException), 
-                () => loadContext.LoadFromAssemblyName(asmName));
+            Assert.Throws<FileNotFoundException>(() => loadContext.LoadFromAssemblyName(asmName));
         }
 
         [Fact]

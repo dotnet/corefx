@@ -14,9 +14,9 @@ namespace System.DirectoryServices.AccountManagement
         private System.Guid _objectGuid;
 
         // For ADStoreKeys corresponding to well-known SIDs
-        private bool _wellKnownSid;
-        private string _domainName;
-        private byte[] _sid;
+        private readonly bool _wellKnownSid;
+        private readonly string _domainName;
+        private readonly byte[] _sid;
 
         public ADStoreKey(Guid guid)
         {
@@ -52,7 +52,7 @@ namespace System.DirectoryServices.AccountManagement
                             Utils.ByteArrayToString(sid));
         }
 
-        override public bool Equals(object o)
+        public override bool Equals(object o)
         {
             if (!(o is ADStoreKey))
                 return false;
@@ -77,7 +77,7 @@ namespace System.DirectoryServices.AccountManagement
             return false;
         }
 
-        override public int GetHashCode()
+        public override int GetHashCode()
         {
             return (_wellKnownSid == false) ?
                         _objectGuid.GetHashCode() :

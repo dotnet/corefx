@@ -13,6 +13,7 @@ using System.Runtime.InteropServices;
 
 using Internal.Runtime.CompilerServices;
 
+#pragma warning disable SA1121 // explicitly using type aliases instead of built-in types
 #if BIT64
 using nint = System.Int64;
 using nuint = System.UInt64;
@@ -85,7 +86,7 @@ namespace System
             SpanHelpers.ClearWithoutReferences(ref *dest, len);
         }
 
-        // The attributes on this method are chosen for best JIT performance. 
+        // The attributes on this method are chosen for best JIT performance.
         // Please do not edit unless intentional.
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [CLSCompliant(false)]
@@ -98,7 +99,7 @@ namespace System
             Memmove((byte*)destination, (byte*)source, checked((nuint)sourceBytesToCopy));
         }
 
-        // The attributes on this method are chosen for best JIT performance. 
+        // The attributes on this method are chosen for best JIT performance.
         // Please do not edit unless intentional.
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [CLSCompliant(false)]
@@ -115,7 +116,7 @@ namespace System
         {
             Debug.Assert((srcIndex >= 0) && (destIndex >= 0) && (len >= 0), "Index and length must be non-negative!");
             Debug.Assert(dest.Length - destIndex >= len, "not enough bytes in dest");
-            // If dest has 0 elements, the fixed statement will throw an 
+            // If dest has 0 elements, the fixed statement will throw an
             // IndexOutOfRangeException.  Special-case 0-byte copies.
             if (len == 0)
                 return;
@@ -129,7 +130,7 @@ namespace System
         {
             Debug.Assert((srcIndex >= 0) && (destIndex >= 0) && (len >= 0), "Index and length must be non-negative!");
             Debug.Assert(src.Length - srcIndex >= len, "not enough bytes in src");
-            // If dest has 0 elements, the fixed statement will throw an 
+            // If dest has 0 elements, the fixed statement will throw an
             // IndexOutOfRangeException.  Special-case 0-byte copies.
             if (len == 0)
                 return;
