@@ -158,10 +158,6 @@
       "BaselineVersion": "5.0.0",
       "InboxOn": {}
     },
-    "Microsoft.NETCore.Platforms.Future": {
-      "BaselineVersion": "5.0.0",
-      "InboxOn": {}
-    },
     "Microsoft.NETCore.Targets": {
       "StableVersions": [
         "1.0.0",
@@ -203,22 +199,6 @@
       "InboxOn": {
         "wp8": "8.0.0.0"
       }
-    },
-    "Microsoft.Private.CoreFx.NETCoreApp": {
-      "BaselineVersion": "5.0.0",
-      "InboxOn": {}
-    },
-    "Microsoft.Private.CoreFx.OOB": {
-      "BaselineVersion": "5.0.0",
-      "InboxOn": {}
-    },
-    "Microsoft.Private.CoreFx.UAP": {
-      "BaselineVersion": "5.0.0",
-      "InboxOn": {}
-    },
-    "Microsoft.Private.PackageBaseline": {
-      "BaselineVersion": "5.0.0",
-      "InboxOn": {}
     },
     "Microsoft.VisualBasic": {
       "StableVersions": [
@@ -347,15 +327,6 @@
         "4.0.0.0": "4.5.0",
         "4.0.1.0": "4.6.0"
       }
-    },
-    "Microsoft.Windows.Compatibility": {
-      "StableVersions": [
-        "2.0.0",
-        "2.0.1",
-        "2.1.0"
-      ],
-      "BaselineVersion": "5.0.0",
-      "InboxOn": {}
     },
     "Microsoft.Windows.Compatibility.Shims": {
       "StableVersions": [
@@ -535,30 +506,6 @@
       "InboxOn": {}
     },
     "runtime.native.System.IO.Ports": {
-      "BaselineVersion": "5.0.0",
-      "InboxOn": {}
-    },
-    "runtime.win10-x64.Microsoft.Private.CoreFx.UAP": {
-      "BaselineVersion": "5.0.0",
-      "InboxOn": {}
-    },
-    "runtime.win7-x64.runtime.native.System.Data.SqlClient.sni": {
-      "StableVersions": [
-        "4.0.1",
-        "4.3.0"
-      ],
-      "BaselineVersion": "4.3.0",
-      "InboxOn": {}
-    },
-    "runtime.win7-x86.runtime.native.System.Data.SqlClient.sni": {
-      "StableVersions": [
-        "4.0.1",
-        "4.3.0"
-      ],
-      "BaselineVersion": "4.3.0",
-      "InboxOn": {}
-    },
-    "runtime.win-x64.Microsoft.Private.CoreFx.NETCoreApp": {
       "BaselineVersion": "5.0.0",
       "InboxOn": {}
     },
