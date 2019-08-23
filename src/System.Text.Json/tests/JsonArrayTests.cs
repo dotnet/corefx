@@ -16,38 +16,40 @@ namespace System.Text.Json.Tests
             var value1Casted = value1 as dynamic;
             var value2Casted = value2 as dynamic;
 
+            JsonNode value1Node = nodeCtor(value1);
+            JsonNode value2Node = nodeCtor(value2);
+
             var list = new List<T>() { value1 };
             JsonArray jsonArray = new JsonArray(list as dynamic);
             Assert.Equal(1, jsonArray.Count);
 
-            Assert.True(jsonArray.Contains(value1Casted));
+            Assert.True(jsonArray.Contains(value1Node));
             Assert.Equal(value1, getter(jsonArray));
 
             jsonArray.Insert(0, value2 as dynamic);
             Assert.Equal(2, jsonArray.Count);
-            Assert.True(jsonArray.Contains(value2Casted));
+            Assert.True(jsonArray.Contains(value2Node));
             Assert.Equal(value2, getter(jsonArray));
 
-            JsonNode value1Node = nodeCtor(value1);
             Assert.Equal(1, jsonArray.IndexOf(value1Node));
             Assert.Equal(1, jsonArray.LastIndexOf(value1Node));
 
             jsonArray.RemoveAt(0);
-            Assert.False(jsonArray.Contains(value2Casted));
+            Assert.False(jsonArray.Contains(value2Node));
 
             jsonArray.Remove(value1Node);
-            Assert.False(jsonArray.Contains(value1Casted));
+            Assert.False(jsonArray.Contains(value1Node));
 
             Assert.Equal(0, jsonArray.Count);
 
             jsonArray.Add(value2Casted);
             Assert.Equal(1, jsonArray.Count);
-            Assert.True(jsonArray.Contains(value2Casted));
+            Assert.True(jsonArray.Contains(value2Node));
             Assert.Equal(value2, getter(jsonArray));
 
             jsonArray[0] = value1Node;
             Assert.Equal(1, jsonArray.Count);
-            Assert.True(jsonArray.Contains(value1Casted));
+            Assert.True(jsonArray.Contains(value1Node));
             Assert.Equal(value1, getter(jsonArray));
         }
 

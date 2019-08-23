@@ -9,12 +9,16 @@ namespace System.Text.Json
     public struct JsonObjectEnumerator : IEnumerator<KeyValuePair<string, JsonNode>>
     {
         private Dictionary<string, JsonNode>.Enumerator _enumerator;
+        //   private IEnumerator<KeyValuePair<string, JsonNode>> _enumerator;
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="JsonObjectEnumerator"/> class supporting an interation over provided JSON object.
         /// </summary>
         /// <param name="jsonObject">JSON object to iterate over.</param>
-        public JsonObjectEnumerator(JsonObject jsonObject) => _enumerator = jsonObject._dictionary.GetEnumerator();
+        public JsonObjectEnumerator(JsonObject jsonObject)
+        {
+            _enumerator = jsonObject._dictionary.GetEnumerator();
+        }
 
         /// <summary>
         ///   Gets the property in the JSON object at the current position of the enumerator.
@@ -35,8 +39,11 @@ namespace System.Text.Json
         ///   Advances the enumerator to the next property of the JSON object.
         /// </summary>
         /// <returns></returns>
-        public bool MoveNext() => enumerator.MoveNext();
-        
+        public bool MoveNext()
+        {
+            return _enumerator.MoveNext();
+        }
+
         /// <summary>
         ///   Sets the enumerator to its initial position, which is before the first element in the JSON object.
         /// </summary>

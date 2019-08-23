@@ -19,7 +19,7 @@ namespace System.Text.Json
             private readonly JsonElement _target;
             private int _curIdx;
             private readonly int _endIdx;
-            private JsonObjectEnumerator? _jsonObjectEnumerator;
+            private JsonObjectEnumerator _jsonObjectEnumerator;
 
             internal ObjectEnumerator(JsonElement target)
             {
@@ -31,7 +31,7 @@ namespace System.Text.Json
                     Debug.Assert(target.TokenType == JsonTokenType.StartObject);
 
                     _endIdx = document.GetEndIndex(_target._idx, includeEndElement: false);
-                    _jsonObjectEnumerator = null;
+                    _jsonObjectEnumerator = default;
                 }
                 else
                 {
@@ -47,9 +47,9 @@ namespace System.Text.Json
             {
                 get
                 {
-                    if (_jsonObjectEnumerator.HasValue)
+                    if (!_target.IsImmutable)
                     {
-                        KeyValuePair<string, JsonNode> propertyPair = _jsonObjectEnumerator.Value.Current;
+                        KeyValuePair<string, JsonNode> propertyPair = _jsonObjectEnumerator.Current;
 
                         if (propertyPair.Value == null)
                         {
@@ -101,9 +101,9 @@ namespace System.Text.Json
             public void Dispose()
             {
                 _curIdx = _endIdx;
-                if (_jsonObjectEnumerator.HasValue)
+                if (!_target.IsImmutable)
                 {
-                    _jsonObjectEnumerator.Value.Dispose();
+                    _jsonObjectEnumerator.Dispose();
                 }
             }
 
@@ -111,9 +111,9 @@ namespace System.Text.Json
             public void Reset()
             {
                 _curIdx = -1;
-                if (_jsonObjectEnumerator.HasValue)
+                if (!_target.IsImmutable)
                 {
-                    ((IEnumerator)_jsonObjectEnumerator.Value).Reset();
+                    ((IEnumerator)_jsonObjectEnumerator).Reset();
                 }
             }
 
@@ -123,9 +123,10 @@ namespace System.Text.Json
             /// <inheritdoc />
             public bool MoveNext()
             {
-                if (_jsonObjectEnumerator.HasValue)
+                if (!_target.IsImmutable)
                 {
-                    return _jsonObjectEnumerator.Value.MoveNext();
+                    bool result = _jsonObjectEnumerator.MoveNext();
+                    return result;
                 }
 
                 var document = _target._parent as JsonDocument;
