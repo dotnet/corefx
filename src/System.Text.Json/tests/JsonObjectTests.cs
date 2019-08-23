@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Xunit;
 
 namespace System.Text.Json.Tests
@@ -302,6 +303,104 @@ namespace System.Text.Json.Tests
             employees.AddRange(EmployeesDatabase.GetTenBestEmployees());
 
             CheckEmployeesAreDifferent(employees);
+        }
+
+        [Fact]
+        public static void TestAddingJsonArrayFromJsonNumberArray()
+        {
+            var preferences = new JsonObject()
+            {
+                { "prime numbers", new JsonNumber[] { 19, 37 } }
+            };
+
+            var primeNumbers = (JsonArray)preferences["prime numbers"];
+            Assert.Equal(2, primeNumbers.Count);
+
+            int[] expected = { 19, 37 };
+
+            for (int i = 0; i < primeNumbers.Count; i++)
+            {
+                Assert.IsType<JsonNumber>(primeNumbers[i]);
+                Assert.Equal(expected[i], primeNumbers[i] as JsonNumber);
+            }
+        }
+
+        [Fact]
+        public static void TestAddingJsonArray()
+        {
+            var preferences = new JsonObject()
+            {
+                { "colours", (JsonNode) new JsonArray{ "red", "green", "blue" } }
+            };
+
+            var colours = (JsonArray)preferences["colours"];
+            Assert.Equal(3, colours.Count);
+
+            string[] expected = { "red", "green", "blue" };
+
+            for (int i = 0; i < colours.Count; i++)
+            {
+                Assert.IsType<JsonString>(colours[i]);
+                Assert.Equal(expected[i], colours[i] as JsonString);
+            }
+        }
+
+        [Fact]
+        public static void TestAddingJsonArrayFromIEnumerableOfStrings()
+        {
+            var sportsExperienceYears = new JsonObject()
+            {
+                { "skiing", 5 },
+                { "cycling", 8 },
+                { "hiking", 6 },
+                { "chess", 2 },
+                { "skating", 1 },
+            };
+
+            // choose only sports with > 2 experience years
+            IEnumerable<string> sports = sportsExperienceYears.Where(sport => ((JsonNumber)sport.Value).GetInt32() > 2).Select(sport => sport.Key);
+
+            var preferences = new JsonObject()
+            {
+                { "sports", (JsonNode) new JsonArray(sports) }
+            };
+
+            var sportsJsonArray = (JsonArray)preferences["sports"];
+            Assert.Equal(3, sportsJsonArray.Count);
+
+            for (int i = 0; i < sportsJsonArray.Count; i++)
+            {
+                Assert.IsType<JsonString>(sportsJsonArray[i]);
+                Assert.Equal(sports.ElementAt(i), sportsJsonArray[i] as JsonString);
+            }
+        }
+
+        [Fact]
+        public static void TestAddingJsonArrayFromIEnumerableOfJsonNodes()
+        {
+            var strangeWords = new JsonArray()
+            {
+                "supercalifragilisticexpialidocious",
+                "gladiolus",
+                "albumen",
+                "smaragdine"
+            };
+
+            var preferences = new JsonObject()
+            {
+                { "strange words", strangeWords.Where(word => ((JsonString)word).Value.Length < 10) }
+            };
+
+            var strangeWordsJsonArray = (JsonArray)preferences["strange words"];
+            Assert.Equal(2, strangeWordsJsonArray.Count);
+
+            string[] expected = { "gladiolus", "albumen" };
+
+            for (int i = 0; i < strangeWordsJsonArray.Count; i++)
+            {
+                Assert.IsType<JsonString>(strangeWordsJsonArray[i]);
+                Assert.Equal(expected[i], strangeWordsJsonArray[i] as JsonString);
+            }
         }
 
         [Fact]

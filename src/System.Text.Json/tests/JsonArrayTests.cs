@@ -184,127 +184,17 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void TestAddingJsonArray()
-        {
-            var preferences = new JsonObject()
-            {
-                { "colours", (JsonNode) new JsonArray{ "red", "green", "blue" } }
-            };
-
-            Assert.IsType<JsonArray>(preferences["colours"]);
-            var colours = preferences["colours"] as JsonArray;
-            Assert.Equal(3, colours.Count);
-
-            string[] expected = { "red", "green", "blue" };
-
-            for (int i = 0; i < colours.Count; i++)
-            {
-                Assert.IsType<JsonString>(colours[i]);
-                Assert.Equal(expected[i], colours[i] as JsonString);
-            }
-        }
-
-        [Fact]
-        public static void TestCretingJsonArrayFromStringArray()
+        public static void TestCreatingJsonArrayFromStringArray()
         {
             string[] expected = { "sushi", "pasta", "cucumber soup" };
-            var preferences = new JsonObject()
+
+            var dishesJsonArray = new JsonArray(expected);
+            Assert.Equal(3, dishesJsonArray.Count);
+
+            for (int i = 0; i < dishesJsonArray.Count; i++)
             {
-                { "dishes", (JsonNode) new JsonArray(expected) }
-            };
-
-            Assert.IsType<JsonArray>(preferences["dishes"]);
-            var dishesJson = preferences["dishes"] as JsonArray;
-            Assert.Equal(3, dishesJson.Count);
-
-            for (int i = 0; i < dishesJson.Count; i++)
-            {
-                Assert.IsType<JsonString>(dishesJson[i]);
-                Assert.Equal(expected[i], dishesJson[i] as JsonString);
-            }
-        }
-
-        /// <summary>
-        /// Adding JsonArray to JsonObject by passing JsonNumber array
-        /// </summary>
-        [Fact]
-        public static void TestAddingJsonArrayFromJsonNumberArray()
-        {
-            var preferences = new JsonObject()
-            {
-                { "prime numbers", new JsonNumber[] { 19, 37 } }
-            };
-
-            Assert.IsType<JsonArray>(preferences["prime numbers"]);
-            var primeNumbers = preferences["prime numbers"] as JsonArray;
-            Assert.Equal(2, primeNumbers.Count);
-
-            int[] expected = { 19, 37 };
-
-            for (int i = 0; i < primeNumbers.Count; i++)
-            {
-                Assert.IsType<JsonNumber>(primeNumbers[i]);
-                Assert.Equal(expected[i], primeNumbers[i] as JsonNumber);
-            }
-        }
-
-        [Fact]
-        public static void TestAddingJsonArrayFromIEnumerableOfStrings()
-        {
-            var sportsExperienceYears = new JsonObject()
-            {
-                { "skiing", 5 },
-                { "cycling", 8 },
-                { "hiking", 6 },
-                { "chess", 2 },
-                { "skating", 1 },
-            };
-
-            // choose only sports with > 2 experience years
-            IEnumerable<string> sports = sportsExperienceYears.Where(sport => ((JsonNumber)sport.Value).GetInt32() > 2).Select(sport => sport.Key);
-
-            var preferences = new JsonObject()
-            {
-                { "sports", (JsonNode) new JsonArray(sports) }
-            };
-
-            Assert.IsType<JsonArray>(preferences["sports"]);
-            var sportsJsonArray = preferences["sports"] as JsonArray;
-            Assert.Equal(3, sportsJsonArray.Count);
-
-            for (int i = 0; i < sportsJsonArray.Count; i++)
-            {
-                Assert.IsType<JsonString>(sportsJsonArray[i]);
-                Assert.Equal(sports.ElementAt(i), sportsJsonArray[i] as JsonString);
-            }
-        }
-
-        [Fact]
-        public static void TestAddingJsonArrayFromIEnumerableOfJsonNodes()
-        {
-            var strangeWords = new JsonArray()
-            {
-                "supercalifragilisticexpialidocious",
-                "gladiolus",
-                "albumen",
-                "smaragdine"
-            };
-
-            var preferences = new JsonObject()
-            {
-                { "strange words", strangeWords.Where(word => ((JsonString)word).Value.Length < 10) }
-            };
-
-            Assert.IsType<JsonArray>(preferences["strange words"]);
-            var strangeWordsJsonArray = preferences["strange words"] as JsonArray;
-            Assert.Equal(2, strangeWordsJsonArray.Count);
-
-            string[] expected = { "gladiolus", "albumen" };
-
-            for (int i = 0; i < strangeWordsJsonArray.Count; i++)
-            {
-                Assert.IsType<JsonString>(strangeWordsJsonArray[i]);
-                Assert.Equal(expected[i], strangeWordsJsonArray[i] as JsonString);
+                Assert.IsType<JsonString>(dishesJsonArray[i]);
+                Assert.Equal(expected[i], dishesJsonArray[i] as JsonString);
             }
         }
 
@@ -341,10 +231,8 @@ namespace System.Text.Json.Tests
                 },
             };
 
-            Assert.IsType<JsonArray>(vertices[0]);
-            var innerJsonArray = vertices[0] as JsonArray;
-            Assert.IsType<JsonArray>(innerJsonArray[0]);
-            innerJsonArray = innerJsonArray[0] as JsonArray;
+            var innerJsonArray = (JsonArray)vertices[0];
+            innerJsonArray = (JsonArray)innerJsonArray[0];
             Assert.IsType<JsonArray>(innerJsonArray[0]);
         }
 
@@ -356,8 +244,7 @@ namespace System.Text.Json.Tests
             JsonString prevId = new JsonString();
             foreach (JsonNode employeeId in employeesIds)
             {
-                Assert.IsType<JsonString>(employeeId);
-                var employeeIdString = employeeId as JsonString;
+                var employeeIdString = (JsonString)employeeId;
                 Assert.NotEqual(prevId, employeeIdString);
                 prevId = employeeIdString;
             }
@@ -371,8 +258,7 @@ namespace System.Text.Json.Tests
             JsonString prevId = new JsonString();
             foreach (JsonNode employeeId in employeesIds)
             {
-                Assert.IsType<JsonString>(employeeId);
-                var employeeIdString = employeeId as JsonString;
+                var employeeIdString = (JsonString)employeeId;
                 Assert.NotEqual(prevId, employeeIdString);
                 prevId = employeeIdString;
             }
@@ -391,8 +277,7 @@ namespace System.Text.Json.Tests
             JsonString prevId = new JsonString();
             foreach (JsonNode employeeId in employeesIds)
             {
-                Assert.IsType<JsonString>(employeeId);
-                var employeeIdString = employeeId as JsonString;
+                var employeeIdString = (JsonString)employeeId;
                 Assert.NotEqual(prevId, employeeIdString);
                 prevId = employeeIdString;
             }
@@ -476,8 +361,6 @@ namespace System.Text.Json.Tests
 
             Assert.Equal(1, jsonArray.Count);
             Assert.Equal((JsonNumber)3, jsonArray[0]);
-        }
-
-       
+        }       
     }
 }

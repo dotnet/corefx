@@ -34,7 +34,7 @@ namespace System.Text.Json.Tests
         /// Returns following JsonObject:
         /// {
         ///     { "name" : "John" }
-        ///     { "phone numbers" : { "work" :  "123-456-7890", "home": "123-456-7890"  } }
+        ///     { "phone numbers" : { "work" :  "425-555-0123", "home": "425-555-0134"  } }
         ///     { 
         ///         "reporting employees" : 
         ///         {
@@ -56,7 +56,7 @@ namespace System.Text.Json.Tests
                 "phone numbers",
                 new JsonObject()
                 {
-                    { "work", "123-456-7890" }, { "home", "123-456-7890" }
+                    { "work", "425-555-0123" }, { "home", "425-555-0134" }
                 }
             );
 
