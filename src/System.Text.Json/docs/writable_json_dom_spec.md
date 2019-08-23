@@ -262,18 +262,12 @@ Mailbox.SendAllEmployeesData(employees.AsJsonElement());
 * Should `ToString` on `JsonBoolean` and `JsonString` return the .NET or JSON representation?
 * Do we want to keep implicit cast operators (even though for `JsonNumber` it would mean throwing in some cases, which is against FDG)?
 * Do we want overloads that take a `StringComparison` enum for methods retrieving properties? It would make API easier to use where case is not important.
-* Where do we want to enable user to set handling properties manner? Do we want to support it as `JsonElement` does not? (and currently `JsonNode.Parse` implementation uses `JsonDocument.Parse`)
+* Where do we want to enable user to set handling properties manner? Do we want to support it as `JsonElement` does not?
 * Do we want to support transforming `JsonObject` into JSON string? Should `ToString` behave this way or do we want an additional method - e.g. `GetJsonString` (it might be confusing as we have a type `JsonString`) or `GetJsonRepresenation`?
 * `AsJsonElement` function on `JsonNode` currently does not work for `null` node. Do we want to support null case somehow?
-* Do we want separate `JsonElement` implementations for `JsonNode` and `JsonDocument` or can the implementation be mixed as it is now (with a lot of ifs in each method)?
-* Do we want separate `JsonElement.ArrayEnumerator` and `JsonElement.ObjectEnumerator` implementations for `JsonNode` and `JsonDocument`? Do we want separate methods in `JsonElement` returning strongly typed different implementations?
-* Is it OK that `JsonElement.GetRawText` does not return the raw text for `JsonNode` parent?
-* Should we support `JsonElement.WriteTo` for `JsonNode` parent?
-* Private property `JsonElement.TokenType` is currently throwing an `InvalidCast` exception for `JsonNode` parent in debugger. Is it OK?
 * Do we want both `Clone` and `DeepCopy` methods for `JsonNode`? 
 * Are we OK with needing to cast `JsonArray` to `JsonNode` in order to add it to `JsonObject`? (there's an ambiguous call between `JsonArray` and `IEnumerable<JsonNode>` right now)
 * Do we want `IsImmutable` property for `JsonElement`?
-* Is `DateTime` for `JsonString` handled correctly?
 
 ## Useful links
 
