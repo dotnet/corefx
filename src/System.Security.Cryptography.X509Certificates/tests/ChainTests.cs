@@ -226,9 +226,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
-        // Linux and Windows do not search the default system stores with CustomRootTrust is enabled
         [Fact]
-        [PlatformSpecific(TestPlatforms.Linux | TestPlatforms.Windows)]
         public static void SystemTrustCertificateWithCustomTrustStore()
         {
             using (var microsoftDotCom = new X509Certificate2(TestData.MicrosoftDotComSslCertBytes))
@@ -242,28 +240,18 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 chain.ChainPolicy.CustomTrustStore.Add(testCert);
 
                 Assert.False(chain.Build(microsoftDotCom));
-                Assert.Equal(2, chain.ChainElements.Count);
-                Assert.Equal(X509ChainStatusFlags.PartialChain, chain.AllStatusFlags());
-            }
-        }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.OSX)]
-        public static void SystemTrustCertificateWithCustomTrustStoreOSX()
-        {
-            using (var microsoftDotCom = new X509Certificate2(TestData.MicrosoftDotComSslCertBytes))
-            using (var testCert = new X509Certificate2(Path.Combine("TestData", "test.pfx"), TestData.ChainPfxPassword))
-            using (var chainHolder = new ChainHolder())
-            {
-                X509Chain chain = chainHolder.Chain;
-                chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
-                chain.ChainPolicy.VerificationTime = microsoftDotCom.NotBefore.AddSeconds(1);
-                chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
-                chain.ChainPolicy.CustomTrustStore.Add(testCert);
-
-                Assert.False(chain.Build(microsoftDotCom));
-                Assert.Equal(3, chain.ChainElements.Count);
-                Assert.Equal(X509ChainStatusFlags.UntrustedRoot, chain.AllStatusFlags());
+                // Linux and Windows do not search the default system stores with CustomRootTrust is enabled
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    Assert.Equal(3, chain.ChainElements.Count);
+                    Assert.Equal(X509ChainStatusFlags.UntrustedRoot, chain.AllStatusFlags());
+                }
+                else
+                {
+                    Assert.Equal(2, chain.ChainElements.Count);
+                    Assert.Equal(X509ChainStatusFlags.PartialChain, chain.AllStatusFlags());
+                }
             }
         }
 
@@ -289,76 +277,85 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             X509Certificate2 intermediateCert = null;
 
             using (var microsoftDotCom = new X509Certificate2(TestData.MicrosoftDotComSslCertBytes))
-            using (var testCert = new X509Certificate2(Path.Combine("TestData", "test.pfx"), TestData.ChainPfxPassword))
-            using (var chainHolder = new ChainHolder())
+            using (var chainHolderPrep = new ChainHolder())
             {
-                X509Chain chain = chainHolder.Chain;
-                chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
-                chain.ChainPolicy.VerificationTime = microsoftDotCom.NotBefore.AddSeconds(1);
+                X509Chain chainPrep = chainHolderPrep.Chain;
+                chainPrep.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                chainPrep.ChainPolicy.VerificationTime = microsoftDotCom.NotBefore.AddSeconds(1);
 
-                chain.Build(microsoftDotCom);
-                rootCert = chain.ChainElements[2].Certificate;
-                intermediateCert = chain.ChainElements[1].Certificate;
-                chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
+                chainPrep.Build(microsoftDotCom);
+                rootCert = chainPrep.ChainElements[2].Certificate;
+                intermediateCert = chainPrep.ChainElements[1].Certificate;
 
-                switch (testArguments)
+                using (var chainHolderTest = new ChainHolder())
                 {
-                    case BuildChainCustomTrustStoreTestArguments.TrustedIntermediateUntrustedRoot:
-                        chain.ChainPolicy.ExtraStore.Add(rootCert);
-                        chain.ChainPolicy.CustomTrustStore.Add(intermediateCert);
-                        break;
-                    case BuildChainCustomTrustStoreTestArguments.UntrustedIntermediateTrustedRoot:
-                        chain.ChainPolicy.ExtraStore.Add(intermediateCert);
-                        chain.ChainPolicy.CustomTrustStore.Add(rootCert);
-                        break;
-                    case BuildChainCustomTrustStoreTestArguments.TrustedIntermediateTrustedRoot:
-                        chain.ChainPolicy.CustomTrustStore.Add(intermediateCert);
-                        chain.ChainPolicy.CustomTrustStore.Add(rootCert);
-                        break;
-                    case BuildChainCustomTrustStoreTestArguments.MultipleCalls:
-                        chain.ChainPolicy.CustomTrustStore.Add(intermediateCert);
-                        chain.ChainPolicy.CustomTrustStore.Add(rootCert);
-                        chain.Build(microsoftDotCom);
-                        chain.ChainPolicy.CustomTrustStore.Remove(intermediateCert);
-                        chain.ChainPolicy.CustomTrustStore.Remove(rootCert);
-                        chain.ChainPolicy.TrustMode = X509ChainTrustMode.System;
-                        break;
-                    default:
-                        throw new InvalidDataException();
-                }
+                    X509Chain chainTest = chainHolderTest.Chain;
+                    chainTest.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                    chainTest.ChainPolicy.VerificationTime = microsoftDotCom.NotBefore.AddSeconds(1);
+                    chainTest.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
 
-                Assert.Equal(chainBuildsSuccessfully, chain.Build(microsoftDotCom));
-                Assert.Equal(3, chain.ChainElements.Count);
-                Assert.Equal(chainFlags, chain.AllStatusFlags());
+                    switch (testArguments)
+                    {
+                        case BuildChainCustomTrustStoreTestArguments.TrustedIntermediateUntrustedRoot:
+                            chainTest.ChainPolicy.ExtraStore.Add(rootCert);
+                            chainTest.ChainPolicy.CustomTrustStore.Add(intermediateCert);
+                            break;
+                        case BuildChainCustomTrustStoreTestArguments.UntrustedIntermediateTrustedRoot:
+                            chainTest.ChainPolicy.ExtraStore.Add(intermediateCert);
+                            chainTest.ChainPolicy.CustomTrustStore.Add(rootCert);
+                            break;
+                        case BuildChainCustomTrustStoreTestArguments.TrustedIntermediateTrustedRoot:
+                            chainTest.ChainPolicy.CustomTrustStore.Add(intermediateCert);
+                            chainTest.ChainPolicy.CustomTrustStore.Add(rootCert);
+                            break;
+                        case BuildChainCustomTrustStoreTestArguments.MultipleCalls:
+                            chainTest.ChainPolicy.CustomTrustStore.Add(intermediateCert);
+                            chainTest.ChainPolicy.CustomTrustStore.Add(rootCert);
+                            chainTest.Build(microsoftDotCom);
+                            chainHolderTest.DisposeChainElements();
+                            chainTest.ChainPolicy.CustomTrustStore.Remove(intermediateCert);
+                            chainTest.ChainPolicy.CustomTrustStore.Remove(rootCert);
+                            chainTest.ChainPolicy.TrustMode = X509ChainTrustMode.System;
+                            break;
+                        default:
+                            throw new InvalidDataException();
+                    }
+
+                    Assert.Equal(chainBuildsSuccessfully, chainTest.Build(microsoftDotCom));
+                    Assert.Equal(3, chainTest.ChainElements.Count);
+                    Assert.Equal(chainFlags, chainTest.AllStatusFlags());
+                }
             }
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public static void BuildChainCustomTrustStoreWithExceptions(bool systemTrustMode)
+        [Fact]
+        public static void BuildChainWithSystemTrustAndCustomTrustCertificates()
         {
             using (var testCert = new X509Certificate2(Path.Combine("TestData", "test.pfx"), TestData.ChainPfxPassword))
-            using (ImportedCollection ic = Cert.Import(Path.Combine("TestData", "test.pfx"), TestData.ChainPfxPassword, X509KeyStorageFlags.DefaultKeySet))
             using (var chainHolder = new ChainHolder())
             {
                 X509Chain chain = chainHolder.Chain;
                 chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
                 chain.ChainPolicy.VerificationTime = testCert.NotBefore.AddSeconds(1);
-                if (systemTrustMode)
-                {
-                    X509Certificate2Collection collection = ic.Collection;
-                    chain.ChainPolicy.CustomTrustStore.AddRange(collection);
+                chain.ChainPolicy.CustomTrustStore.Add(new X509Certificate2());
 
-                    Assert.Throws<CryptographicException>(() => chain.Build(testCert));
-                }
-                else
-                {
-                    chain.ChainPolicy.CustomTrustStore.Add(new X509Certificate2());
-                    chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
+                Assert.Throws<CryptographicException>(() => chain.Build(testCert));
+            }
+        }
 
-                    Assert.Throws<ArgumentException>("CustomTrustStore", () => chain.Build(testCert));
-                }
+        [Fact]
+        public static void BuildChainWithCustomRootTrustAndInvalidCustomCertificates()
+        {
+            using (var testCert = new X509Certificate2(Path.Combine("TestData", "test.pfx"), TestData.ChainPfxPassword))
+            using (var chainHolder = new ChainHolder())
+            {
+                X509Chain chain = chainHolder.Chain;
+                chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                chain.ChainPolicy.VerificationTime = testCert.NotBefore.AddSeconds(1);
+                chain.ChainPolicy.CustomTrustStore.Add(new X509Certificate2());
+                chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
+
+                Assert.Throws<ArgumentException>("CustomTrustStore", () => chain.Build(testCert));
             }
         }
 

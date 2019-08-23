@@ -272,11 +272,11 @@ int32_t AppleCryptoNative_X509ChainSetTrustAnchorCertificates(SecTrustRef chain,
 {
     if (chain == NULL)
     {
-        return errSecNotAvailable;
+        return -1;
     }
     if (anchorCertificates == NULL)
     {
-        return errSecNoCertificateModule;
+        return -1;
     }
 
     return SecTrustSetAnchorCertificates(chain, anchorCertificates);

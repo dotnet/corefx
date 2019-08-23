@@ -39,10 +39,10 @@ namespace Internal.Cryptography.Pal
             TimeSpan timeout)
         {
             CertificatePal certificatePal = (CertificatePal)cert;
-            SafeChainEngineHandle storeHandle = GetChainEngine(trustMode, customTrustStore, useMachineContext);
 
             unsafe
             {
+                using (SafeChainEngineHandle storeHandle = GetChainEngine(trustMode, customTrustStore, useMachineContext))
                 using (SafeCertStoreHandle extraStoreHandle = ConvertStoreToSafeHandle(extraStore))
                 {
                     CERT_CHAIN_PARA chainPara = new CERT_CHAIN_PARA();
@@ -87,8 +87,7 @@ namespace Internal.Cryptography.Pal
             X509Certificate2Collection customTrustStore,
             bool useMachineContext)
         {
-            IntPtr chainEngine;
-            bool releaseChainEngine = false;
+            SafeChainEngineHandle chainEngineHandle;
             if (trustMode == X509ChainTrustMode.CustomRootTrust)
             {
                 // CustomTrustStore needs an empty SafeCertStoreHandle or creating the certificate chain will fail
@@ -102,17 +101,13 @@ namespace Internal.Cryptography.Pal
                         customChainEngine.hExclusiveRoot = customTrustStoreHandle.DangerousGetHandle();
                     }
 
-                    chainEngine = Interop.crypt32.CertCreateCertificateChainEngine(ref customChainEngine);
-                    releaseChainEngine = true;
+                    chainEngineHandle = Interop.crypt32.CertCreateCertificateChainEngine(ref customChainEngine);
                 }
             }
             else
             {
-                chainEngine = useMachineContext ? (IntPtr)ChainEngine.HCCE_LOCAL_MACHINE : (IntPtr)ChainEngine.HCCE_CURRENT_USER;
+                chainEngineHandle = useMachineContext ? SafeChainEngineHandle.MachineChainEngine : SafeChainEngineHandle.UserChainEngine;
             }
-
-            SafeChainEngineHandle chainEngineHandle = new SafeChainEngineHandle(releaseChainEngine);
-            chainEngineHandle.SetHandleExtended(chainEngine);
 
             return chainEngineHandle;
         }

@@ -296,6 +296,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 chain.ChainPolicy.VerificationTime = endEntityCert.NotBefore.AddSeconds(1);
                 chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
                 chain.ChainPolicy.CustomTrustStore.Add(intermediateCert);
+
                 if(saveAllInCustomTrustStore)
                 {
                     chain.ChainPolicy.CustomTrustStore.Add(rootCert);
@@ -308,8 +309,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Equal(saveAllInCustomTrustStore, chain.Build(endEntityCert));
                 Assert.Equal(3, chain.ChainElements.Count);
                 Assert.Equal(chainFlags, chain.AllStatusFlags());
-
-                chainHolder.DisposeChainElements();
             }
         }
 

@@ -237,19 +237,19 @@ internal static partial class Interop
             return encoded;
         }
 
-        internal static IntPtr CertCreateCertificateChainEngine(ref CERT_CHAIN_ENGINE_CONFIG config)
+        internal static SafeChainEngineHandle CertCreateCertificateChainEngine(ref CERT_CHAIN_ENGINE_CONFIG config)
         {
-            if (!CertCreateCertificateChainEngine(ref config, out IntPtr chainEngine))
+            if (!CertCreateCertificateChainEngine(ref config, out SafeChainEngineHandle chainEngineHandle))
             {
                 int errorCode = Marshal.GetLastWin32Error();
                 throw errorCode.ToCryptographicException();
             }
 
-            return chainEngine;
+            return chainEngineHandle;
         }
 
         [DllImport(Libraries.Crypt32, CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern unsafe bool CertCreateCertificateChainEngine(ref CERT_CHAIN_ENGINE_CONFIG pConfig, out IntPtr hChainEngine);
+        private static extern unsafe bool CertCreateCertificateChainEngine(ref CERT_CHAIN_ENGINE_CONFIG pConfig, out SafeChainEngineHandle hChainEngine);
 
         [DllImport(Libraries.Crypt32, CharSet = CharSet.Unicode)]
         public static extern unsafe void CertFreeCertificateChainEngine(IntPtr hChainEngine);

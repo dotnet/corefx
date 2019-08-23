@@ -19,6 +19,8 @@ namespace Internal.Cryptography.Pal
             X509ChainStatusFlags.Revoked |
             X509ChainStatusFlags.OfflineRevocation;
 
+        private static readonly SafeCreateHandle s_emptyArray = Interop.CoreFoundation.CFArrayCreate(Array.Empty<IntPtr>(), 0);
+
         private Stack<SafeHandle> _extraHandles;
         private SafeX509ChainHandle _chainHandle;
         public X509ChainElement[] ChainElements { get; private set; }
@@ -53,26 +55,33 @@ namespace Internal.Cryptography.Pal
                 out chain,
                 out osStatus);
 
-            if (trustMode == X509ChainTrustMode.CustomRootTrust)
-            {
-                SafeCreateHandle customCertsArray = SafeCreateHandle.Instance;
-                if (customTrustStore != null && customTrustStore.Count > 0)
-                {
-                    customCertsArray = PrepareCustomCertsArray(customTrustStore);
-                }
-
-                int error = Interop.AppleCrypto.X509ChainSetTrustAnchorCertificates(chain, customCertsArray);
-                if (error != 0)
-                    throw Interop.AppleCrypto.CreateExceptionForOSStatus(osStatus);
-
-                if (customTrustStore != null && customTrustStore.Count > 0)
-                {
-                    customCertsArray.Dispose();
-                }
-            }
-
             if (ret == 1)
             {
+                if (trustMode == X509ChainTrustMode.CustomRootTrust)
+                {
+                    SafeCreateHandle customCertsArray = s_emptyArray;
+                    if (customTrustStore != null && customTrustStore.Count > 0)
+                    {
+                        customCertsArray = PrepareCustomCertsArray(customTrustStore);
+                    }
+
+                    try
+                    {
+                        int error = Interop.AppleCrypto.X509ChainSetTrustAnchorCertificates(chain, customCertsArray);
+                        if (error != 0)
+                        {
+                            throw Interop.AppleCrypto.CreateExceptionForOSStatus(error);
+                        }
+                    }
+                    finally
+                    {
+                        if (customCertsArray != s_emptyArray)
+                        {
+                            customCertsArray.Dispose();
+                        }
+                    }
+                }
+
                 _chainHandle = chain;
                 return;
             }
@@ -163,8 +172,13 @@ namespace Internal.Cryptography.Pal
             {
                 for (int i = 0; i < customTrustStore.Count; i++)
                 {
-                    AppleCertificatePal customCertPal = (AppleCertificatePal)customTrustStore[i].Pal;
-                    safeHandles.Add(customCertPal.CertificateHandle);
+                    // Only adds non self issued certs to the untrusted certs array. Trusted self signed
+                    // certs will be added to the custom certs array.
+                    if (!cert.SubjectName.RawData.ContentsEqual(cert.IssuerName.RawData))
+                    {
+                        AppleCertificatePal customCertPal = (AppleCertificatePal)customTrustStore[i].Pal;
+                        safeHandles.Add(customCertPal.CertificateHandle);
+                    }
                 }
             }
 

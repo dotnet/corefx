@@ -239,32 +239,38 @@ namespace Internal.Cryptography.Pal.Native
         }
     }
 
-    internal sealed class SafeChainEngineHandle : SafePointerHandle<SafeChainEngineHandle>
+    internal sealed class SafeChainEngineHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
-        private bool releaseHandle = true;
-
         public SafeChainEngineHandle()
-            : base()
+            : base(true)
         {
         }
 
-        public SafeChainEngineHandle(bool releaseHandle)
-            : base()
+        private SafeChainEngineHandle(IntPtr handle)
+            : base(true)
         {
-            this.releaseHandle = releaseHandle;
+            SetHandle(handle);
         }
 
-        public void SetHandleExtended(IntPtr handle)
-        {
-            this.SetHandle(handle);
-        }
+        public static SafeChainEngineHandle MachineChainEngine =>
+            SafeHandleCache<SafeChainEngineHandle>.GetInvalidHandle(() => new SafeChainEngineHandle((IntPtr)ChainEngine.HCCE_LOCAL_MACHINE));
+
+        public static SafeChainEngineHandle UserChainEngine =>
+            SafeHandleCache<SafeChainEngineHandle>.GetInvalidHandle(() => new SafeChainEngineHandle((IntPtr)ChainEngine.HCCE_CURRENT_USER));
 
         protected sealed override bool ReleaseHandle()
         {
-            bool success = true;
-            if (releaseHandle)
-                Interop.crypt32.CertFreeCertificateChainEngine(handle);
-            return success;
+            Interop.crypt32.CertFreeCertificateChainEngine(handle);
+            return true;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            //if (!SafeHandleCache<SafeChainEngineHandle>.IsCachedInvalidHandle(this))
+            if (this == MachineChainEngine || this == UserChainEngine)
+            {
+                base.Dispose(disposing);
+            }
         }
     }
 }
