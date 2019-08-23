@@ -19,7 +19,6 @@ namespace System.Net.Mail
         private SmtpConnection _connection;
         private readonly SmtpClient _client;
         private ICredentialsByHost _credentials;
-        private int _timeout = 100000; // seconds
         private readonly List<SmtpFailedRecipientException> _failedRecipientExceptions = new List<SmtpFailedRecipientException>();
         private bool _identityRequired;
         private bool _aborted;
