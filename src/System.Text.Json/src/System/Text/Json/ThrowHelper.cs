@@ -306,7 +306,7 @@ namespace System.Text.Json
                     message = SR.Format(SR.ExpectedEndAfterSingleJson, character);
                     break;
                 case ExceptionResource.ExpectedEndOfDigitNotFound:
-                    message = SR.Format(SR.ExpectedEndOfDigitNotFound, character);
+                    message = SR.Format(nextByte >= '0' && nextByte <= '9'? SR.InvalidLeadingZeroInNumber : SR.ExpectedEndOfDigitNotFound, character);
                     break;
                 case ExceptionResource.ExpectedNextDigitEValueNotFound:
                     message = SR.Format(SR.ExpectedNextDigitEValueNotFound, character);
@@ -379,9 +379,6 @@ namespace System.Text.Json
                     break;
                 case ExceptionResource.UnexpectedEndOfLineSeparator:
                     message = SR.Format(SR.UnexpectedEndOfLineSeparator);
-                    break;
-                case ExceptionResource.InvalidLeadingZerosInNumber:
-                    message = SR.Format(SR.InvalidLeadingZerosInNumber, character);
                     break;
                 default:
                     Debug.Fail($"The ExceptionResource enum value: {resource} is not part of the switch. Add the appropriate case and exception message.");
@@ -636,7 +633,6 @@ namespace System.Text.Json
         UnexpectedEndOfLineSeparator,
         ExpectedOneCompleteToken,
         NotEnoughData,
-        InvalidLeadingZerosInNumber,
     }
 
     internal enum NumericType
