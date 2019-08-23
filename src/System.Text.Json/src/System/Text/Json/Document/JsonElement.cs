@@ -388,7 +388,7 @@ namespace System.Text.Json
 
             if (jsonNode is JsonObject jsonObject)
             {
-                if (jsonObject.TryGetPropertyValue(Encoding.UTF8.GetString(utf8PropertyName), out JsonNode nodeValue))
+                if (jsonObject.TryGetPropertyValue(JsonHelpers.Utf8GetString(utf8PropertyName), out JsonNode nodeValue))
                 {
                     value = nodeValue.AsJsonElement();
                     return true;
