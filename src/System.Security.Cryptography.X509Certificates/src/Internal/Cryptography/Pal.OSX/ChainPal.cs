@@ -20,7 +20,6 @@ namespace Internal.Cryptography.Pal
             X509ChainStatusFlags.OfflineRevocation;
 
         private static readonly SafeCreateHandle s_emptyArray = Interop.CoreFoundation.CFArrayCreate(Array.Empty<IntPtr>(), 0);
-
         private Stack<SafeHandle> _extraHandles;
         private SafeX509ChainHandle _chainHandle;
         public X509ChainElement[] ChainElements { get; private set; }

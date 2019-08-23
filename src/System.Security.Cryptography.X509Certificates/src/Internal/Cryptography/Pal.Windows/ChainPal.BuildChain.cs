@@ -74,7 +74,10 @@ namespace Internal.Cryptography.Pal
                             CertChainFlags flags = MapRevocationFlags(revocationMode, revocationFlag);
                             SafeX509ChainHandle chain;
                             if (!Interop.crypt32.CertGetCertificateChain(storeHandle.DangerousGetHandle(), certificatePal.CertContext, &ft, extraStoreHandle, ref chainPara, flags, IntPtr.Zero, out chain))
+                            {
                                 return null;
+                            }
+
                             return new ChainPal(chain);
                         }
                     }

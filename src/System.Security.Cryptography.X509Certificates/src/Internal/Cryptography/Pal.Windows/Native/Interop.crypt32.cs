@@ -249,7 +249,7 @@ internal static partial class Interop
         }
 
         [DllImport(Libraries.Crypt32, CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern unsafe bool CertCreateCertificateChainEngine(ref CERT_CHAIN_ENGINE_CONFIG pConfig, out SafeChainEngineHandle hChainEngine);
+        private static extern unsafe bool CertCreateCertificateChainEngine(ref CERT_CHAIN_ENGINE_CONFIG pConfig, out SafeChainEngineHandle hChainEngineHandle);
 
         [DllImport(Libraries.Crypt32, CharSet = CharSet.Unicode)]
         public static extern unsafe void CertFreeCertificateChainEngine(IntPtr hChainEngine);

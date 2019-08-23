@@ -266,8 +266,7 @@ namespace Internal.Cryptography.Pal.Native
 
         protected override void Dispose(bool disposing)
         {
-            //if (!SafeHandleCache<SafeChainEngineHandle>.IsCachedInvalidHandle(this))
-            if (this == MachineChainEngine || this == UserChainEngine)
+            if (!SafeHandleCache<SafeChainEngineHandle>.IsCachedInvalidHandle(this))
             {
                 base.Dispose(disposing);
             }
