@@ -21,14 +21,14 @@
       }
     },
     "Microsoft.Bcl.AsyncInterfaces": {
-      "BaselineVersion": "1.1.0",
+      "BaselineVersion": "1.2.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "1.0.0.0": "1.0.0"
       }
     },
     "Microsoft.Bcl.HashCode": {
-      "BaselineVersion": "1.1.0",
+      "BaselineVersion": "1.2.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "1.0.0.0": "1.0.0"
@@ -117,11 +117,11 @@
       }
     },
     "Microsoft.Diagnostics.Tracing.EventSource.Redist": {
-      "BaselineVersion": "2.2.0",
       "StableVersions": [
         "2.0.0",
         "2.0.1"
       ],
+      "BaselineVersion": "2.3.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "2.0.0.0": "2.0.0",
@@ -155,6 +155,10 @@
         "2.1.4",
         "2.2.0"
       ],
+      "BaselineVersion": "5.0.0",
+      "InboxOn": {}
+    },
+    "Microsoft.NETCore.Platforms.Future": {
       "BaselineVersion": "5.0.0",
       "InboxOn": {}
     },
@@ -201,12 +205,19 @@
       }
     },
     "Microsoft.Private.CoreFx.NETCoreApp": {
+      "BaselineVersion": "5.0.0",
       "InboxOn": {}
     },
     "Microsoft.Private.CoreFx.OOB": {
+      "BaselineVersion": "5.0.0",
+      "InboxOn": {}
+    },
+    "Microsoft.Private.CoreFx.UAP": {
+      "BaselineVersion": "5.0.0",
       "InboxOn": {}
     },
     "Microsoft.Private.PackageBaseline": {
+      "BaselineVersion": "5.0.0",
       "InboxOn": {}
     },
     "Microsoft.VisualBasic": {
@@ -343,6 +354,7 @@
         "2.0.1",
         "2.1.0"
       ],
+      "BaselineVersion": "5.0.0",
       "InboxOn": {}
     },
     "Microsoft.Windows.Compatibility.Shims": {
@@ -357,7 +369,7 @@
         "1.0.0",
         "2.0.0"
       ],
-      "BaselineVersion": "2.2.0",
+      "BaselineVersion": "2.3.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "1.0.0.0": "1.0.0",
@@ -526,6 +538,10 @@
       "BaselineVersion": "5.0.0",
       "InboxOn": {}
     },
+    "runtime.win10-x64.Microsoft.Private.CoreFx.UAP": {
+      "BaselineVersion": "5.0.0",
+      "InboxOn": {}
+    },
     "runtime.win7-x64.runtime.native.System.Data.SqlClient.sni": {
       "StableVersions": [
         "4.0.1",
@@ -540,6 +556,10 @@
         "4.3.0"
       ],
       "BaselineVersion": "4.3.0",
+      "InboxOn": {}
+    },
+    "runtime.win-x64.Microsoft.Private.CoreFx.NETCoreApp": {
+      "BaselineVersion": "5.0.0",
       "InboxOn": {}
     },
     "SMDiagnostics": {
@@ -763,7 +783,7 @@
         "1.4.0",
         "1.5.0"
       ],
-      "BaselineVersion": "1.7.0",
+      "BaselineVersion": "1.8.0",
       "InboxOn": {
         "netcoreapp2.0": "1.2.2.0",
         "netcoreapp2.1": "1.2.3.0",
@@ -1055,7 +1075,7 @@
         "1.1.0",
         "1.2.0"
       ],
-      "BaselineVersion": "1.4.0",
+      "BaselineVersion": "1.5.0",
       "InboxOn": {}
     },
     "System.Composition.AttributedModel": {
@@ -1064,7 +1084,7 @@
         "1.1.0",
         "1.2.0"
       ],
-      "BaselineVersion": "1.4.0",
+      "BaselineVersion": "1.5.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "1.0.31.0": "1.0.31",
@@ -1079,7 +1099,7 @@
         "1.1.0",
         "1.2.0"
       ],
-      "BaselineVersion": "1.3.0",
+      "BaselineVersion": "1.5.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "1.0.31.0": "1.0.31",
@@ -1094,7 +1114,7 @@
         "1.1.0",
         "1.2.0"
       ],
-      "BaselineVersion": "1.4.0",
+      "BaselineVersion": "1.5.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "1.0.31.0": "1.0.31",
@@ -1109,7 +1129,7 @@
         "1.1.0",
         "1.2.0"
       ],
-      "BaselineVersion": "1.4.0",
+      "BaselineVersion": "1.5.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "1.0.31.0": "1.0.31",
@@ -1124,7 +1144,7 @@
         "1.1.0",
         "1.2.0"
       ],
-      "BaselineVersion": "1.4.0",
+      "BaselineVersion": "1.5.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "1.0.31.0": "1.0.31",
@@ -3173,7 +3193,7 @@
       "StableVersions": [
         "0.1.0"
       ],
-      "BaselineVersion": "0.3.0",
+      "BaselineVersion": "0.4.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "0.1.0.0": "0.1.0",
@@ -3436,7 +3456,7 @@
         "4.0.1",
         "4.3.0"
       ],
-      "BaselineVersion": "4.3.0",
+      "BaselineVersion": "5.0.0",
       "InboxOn": {
         "netcoreapp2.0": "4.0.3.0",
         "netcoreapp3.0": "4.1.0.0",
@@ -3463,7 +3483,7 @@
         "4.0.1",
         "4.3.0"
       ],
-      "BaselineVersion": "4.3.0",
+      "BaselineVersion": "5.0.0",
       "InboxOn": {
         "netcoreapp2.0": "4.0.3.0",
         "netcoreapp3.0": "4.1.0.0",
@@ -3534,7 +3554,7 @@
         "1.5.0",
         "1.6.0"
       ],
-      "BaselineVersion": "1.8.0",
+      "BaselineVersion": "1.9.0",
       "InboxOn": {
         "netcoreapp2.0": "1.4.2.0",
         "netcoreapp2.1": "1.4.3.0",
@@ -4954,9 +4974,9 @@
       ],
       "BaselineVersion": "5.0.0",
       "InboxOn": {
+        "netcoreapp3.0": "4.1.2.0",
         "monoandroid10": "Any",
         "monotouch10": "Any",
-        "netcoreapp3.0": "4.1.2.0",
         "uap10.0.16299": "4.1.1.0",
         "uap10.0.16300": "4.1.2.0",
         "xamarinios10": "Any",
@@ -5156,7 +5176,7 @@
       ],
       "BaselineVersion": "5.0.0",
         "InboxOn": {
-          "netcoreapp3.0":  "4.0.1.0"
+        "netcoreapp3.0": "4.0.1.0"
         },
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.5.0",
