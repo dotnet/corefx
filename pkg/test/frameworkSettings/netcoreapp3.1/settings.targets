@@ -1,0 +1,33 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <NETCoreAppMaximumVersion>3.1</NETCoreAppMaximumVersion>
+    <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Since we don't have an SDK that knows about 3.1 framework, we should specify it manually. -->
+    <KnownFrameworkReference Update="Microsoft.NETCore.App"
+                            TargetFramework="$(TargetFramework)"
+                            RuntimeFrameworkName="Microsoft.NETCore.App"
+                            DefaultRuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
+                            LatestRuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
+                            TargetingPackName="Microsoft.NETCore.App.Ref"
+                            TargetingPackVersion="$(RuntimeFrameworkVersion)"
+                            RuntimePackNamePatterns="Microsoft.NETCore.App.Runtime.**RID**"
+                            RuntimePackRuntimeIdentifiers="win7-x86;win7-x64;centos.7-x64;debian.8-x64;linuxmint.17-x64;rhel.7.2-x64;ubuntu.14.04-x64;ubuntu.16.04-x64;osx.10.12-x64;fedora.24-x64;opensuse.42.1-x64;rhel.7-x64"
+                            PackagesToReference="Microsoft.NETCore.App/$(RuntimeFrameworkVersion)"
+                            IsTrimmable="true"
+                            />
+
+    <KnownAppHostPack Update="Microsoft.NETCore.App"
+                      TargetFramework="$(TargetFramework)"
+                      AppHostPackNamePattern="Microsoft.NETCore.App.Host.**RID**"
+                      AppHostPackVersion="$(RuntimeFrameworkVersion)"
+                      AppHostRuntimeIdentifiers="win7-x86;win7-x64;centos.7-x64;debian.8-x64;linuxmint.17-x64;rhel.7.2-x64;ubuntu.14.04-x64;ubuntu.16.04-x64;osx.10.12-x64;fedora.24-x64;opensuse.42.1-x64;rhel.7-x64"
+                      />
+
+    <KnownFrameworkReference Remove="Microsoft.AspNetCore.App" />
+    <KnownFrameworkReference Remove="Microsoft.WindowsDesktop.App" />
+  </ItemGroup>
+</Project>
