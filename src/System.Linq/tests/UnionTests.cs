@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections;
 using Xunit;
 
 namespace System.Linq.Tests
@@ -412,6 +413,35 @@ namespace System.Linq.Tests
             Assert.Equal(new[] { "A", "a" }, input2.Union(input1, null));
             Assert.Equal(new[] { "A", "a" }, input2.Union(input1, EqualityComparer<string>.Default));
             Assert.Equal(new[] { "A" }, input2.Union(input1, StringComparer.OrdinalIgnoreCase));
+        }
+
+
+        private class MyEnumerable : IEnumerable<long>
+        {
+            private MyEnumerator _enumerator;
+            public bool DisposeCalledOnEnumerator => _enumerator.DisposeCalled;
+            public IEnumerator<long> GetEnumerator() => (_enumerator =  new MyEnumerator());
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        }
+
+        private class MyEnumerator : IEnumerator<long>
+        {
+            public bool DisposeCalled { get; private set; }
+            public long Current => 0;
+            object IEnumerator.Current => Current;
+            public bool MoveNext() => false;
+            public void Reset() { }
+            public void Dispose() { DisposeCalled = true; }
+        }
+
+        [Fact]
+        public void UnionFollowedBySelectOnEmptyEnumerableInvokesDispose()
+        {
+            var enum1 = new MyEnumerable();
+            var enum2 = new MyEnumerable();
+            enum1.Union(enum2).Select(x => x).ToList();
+            Assert.True(enum1.DisposeCalledOnEnumerator);
+            Assert.True(enum2.DisposeCalledOnEnumerator);
         }
     }
 }

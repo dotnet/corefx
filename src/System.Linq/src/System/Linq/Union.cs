@@ -100,9 +100,11 @@ namespace System.Linq
                     {
                         IEnumerator<TSource> enumerator = enumerable.GetEnumerator();
                         ++_state;
-                        if (enumerator.MoveNext())
+
+                        var canMoveNext = enumerator.MoveNext();
+                        SetEnumerator(enumerator);
+                        if (canMoveNext)
                         {
-                            SetEnumerator(enumerator);
                             StoreFirst();
                             return true;
                         }
