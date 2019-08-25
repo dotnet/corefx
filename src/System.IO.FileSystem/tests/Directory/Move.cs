@@ -212,6 +212,16 @@ namespace System.IO.Tests
             });
         }
 
+        [Fact]
+        public void Directory_MoveToNewDirectoryWithSameNameWithDifferentCasing()
+        {
+            Environment.CurrentDirectory = TestDirectory;
+            Directory.CreateDirectory("foo");
+            Directory.Move("foo", "FOO");
+            var directoriesInCurrentDirectory = Directory.GetDirectories(Directory.GetCurrentDirectory());
+            Assert.True(directoriesInCurrentDirectory[0].Contains("FOO", StringComparison.Ordinal));
+        }
+
         #endregion
 
         #region PlatformSpecific

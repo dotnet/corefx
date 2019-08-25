@@ -268,7 +268,9 @@ namespace System.IO
             string fulldestDirName = Path.GetFullPath(destDirName);
             string destPath = PathInternal.EnsureTrailingSeparator(fulldestDirName);
 
-            StringComparison pathComparison = PathInternal.StringComparison;
+            // As we're moving a directory, case sensitivty should be ordinal
+            // even on a case-sensitive/case-preserving file system moving foo to FOO should still work.
+            StringComparison pathComparison = StringComparison.Ordinal;
 
             if (string.Equals(sourcePath, destPath, pathComparison))
                 throw new IOException(SR.IO_SourceDestMustBeDifferent);
@@ -282,9 +284,6 @@ namespace System.IO
             // to make sure our cross platform behavior matches NetFX behavior.
             if (!FileSystem.DirectoryExists(fullsourceDirName) && !FileSystem.FileExists(fullsourceDirName))
                 throw new DirectoryNotFoundException(SR.Format(SR.IO_PathNotFound_Path, fullsourceDirName));
-
-            if (FileSystem.DirectoryExists(fulldestDirName))
-                throw new IOException(SR.Format(SR.IO_AlreadyExists_Name, fulldestDirName));
 
             FileSystem.MoveDirectory(fullsourceDirName, fulldestDirName);
         }
