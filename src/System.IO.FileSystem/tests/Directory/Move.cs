@@ -250,7 +250,7 @@ namespace System.IO.Tests
             var otherDirectoryName = "bar";
             Directory.CreateDirectory(otherDirectoryName);
             Directory.CreateDirectory(Path.Combine(otherDirectoryName, "FoO"));
-            Assert.Throws<IOException>(() => Directory.Move("foo", Path.Combine(otherDirectoryName, "foo"));
+            Assert.Throws<IOException>(() => Directory.Move("foo", Path.Combine(otherDirectoryName, "foo")));
         }
 
         #endregion
