@@ -13,6 +13,8 @@ namespace System.IO.Tests
 {
     public abstract partial class FileSystemWatcherTest : FileCleanupTestBase
     {
+        private const string DangerousTestEnvName = "COREFX_IO_RUNDANGEROUSTESTS";
+
         // Events are reported asynchronously by the OS, so allow an amount of time for
         // them to arrive before testing an assertion.  If we expect an event to occur,
         // we can wait for it for a relatively long time, as if it doesn't arrive, we're
@@ -413,6 +415,15 @@ namespace System.IO.Tests
                 try { Directory.Delete(linkPath); } catch { }
 
                 return success;
+            }
+        }
+
+        public static bool RunDangerousTests {
+            get
+            {
+                string envValue = Environment.GetEnvironmentVariable(DangerousTestEnvName);
+
+                return !string.IsNullOrWhiteSpace(envValue) && (envValue.Equals("true", StringComparison.OrdinalIgnoreCase) || envValue.Equals("1", StringComparison.Ordinal));
             }
         }
 

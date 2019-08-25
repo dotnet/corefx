@@ -17,8 +17,6 @@ namespace System.IO.Tests
 {
     public class FileSystemWatcherTests : FileSystemWatcherTest
     {
-        private const string DangerousTestEnvName = "COREFX_IO_RUNDANGEROUSTESTS";
-
         private static void ValidateDefaults(FileSystemWatcher watcher, string path, string filter)
         {
             Assert.False(watcher.EnableRaisingEvents);
@@ -555,18 +553,11 @@ namespace System.IO.Tests
             }
         }
 
-        [ConditionalFact]
+        [ConditionalFact(nameof(RunDangerousTests))]
         [PlatformSpecific(TestPlatforms.Linux)]  // Reads MaxUsersWatches from Linux OS files
         [OuterLoop("This test has high system resource demands and may cause failures in other concurrent tests")]
         public void FileSystemWatcher_CreateManyConcurrentWatches()
         {
-            string envValue = Environment.GetEnvironmentVariable(DangerousTestEnvName);
-
-            if (string.IsNullOrWhiteSpace(envValue) || (!envValue.Equals("true", StringComparison.OrdinalIgnoreCase) && !envValue.Equals("1", StringComparison.Ordinal)))
-            {
-                throw new SkipTestException($"Refusing to run without {DangerousTestEnvName} set.");
-            }
-
             int maxUserWatches = int.Parse(File.ReadAllText("/proc/sys/fs/inotify/max_user_watches"));
 
             using (var dir = new TempDirectory(GetTestFilePath()))
