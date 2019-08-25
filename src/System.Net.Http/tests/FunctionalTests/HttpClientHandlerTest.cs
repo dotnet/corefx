@@ -1459,7 +1459,6 @@ namespace System.Net.Http.Functional.Tests
                     {
                         case true:
                             await connection.SendResponseAsync(HttpStatusCode.OK, headers: new HttpHeaderData[] { new HttpHeaderData("Transfer-Encoding", "chunked") }, isFinal: false);
-                            //await connection.SendResponseAsync(body: "3\r\nhel\r\n8\r\nlo world\r\n0\r\n\r\n");
                             await connection.SendResponseBodyAsync("3\r\nhel\r\n8\r\nlo world\r\n0\r\n\r\n");
                             break;
 
@@ -1471,7 +1470,6 @@ namespace System.Net.Http.Functional.Tests
                             // This inject Content-Length header with null value to hint Loopback code to not include one automatically.
                             await connection.SendResponseAsync(HttpStatusCode.OK, headers: new HttpHeaderData[] { new HttpHeaderData("Content-Length", null)}, isFinal: false);
                             await connection.SendResponseBodyAsync("hello world");
-                            //await connection.SendResponseAsync(body: "hello world");
                             break;
                     }
                 });
@@ -2105,7 +2103,7 @@ namespace System.Net.Http.Functional.Tests
                 {
                     await connection.ReadRequestDataAsync(readBody: false);
                     // Send multiple 100-Continue responses.
-                    for (int count=0 ; count < 4; count++)
+                    for (int count = 0 ; count < 4; count++)
                     {
                         await connection.SendResponseAsync(HttpStatusCode.Continue, isFinal: false);
                     }
