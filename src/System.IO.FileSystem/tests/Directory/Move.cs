@@ -213,13 +213,44 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public void Directory_MoveToNewDirectoryWithSameNameWithDifferentCasing()
+        public void MoveToNewDirectoryWithSameNameWithDifferentCasing()
         {
             Environment.CurrentDirectory = TestDirectory;
             Directory.CreateDirectory("foo");
             Directory.Move("foo", "FOO");
             var directoriesInCurrentDirectory = Directory.GetDirectories(Directory.GetCurrentDirectory());
             Assert.True(directoriesInCurrentDirectory[0].Contains("FOO", StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public void ThrowIOExceptionWhenDirectoryExists()
+        {
+            Environment.CurrentDirectory = TestDirectory;
+            Directory.CreateDirectory("foo");
+            Assert.Throws<IOException>(() => Directory.Move("foo", "foo"));
+        }
+
+        [Fact]
+        public void MoveDirectoryToNewDirectoryButWithDifferentCasing()
+        {
+            Environment.CurrentDirectory = TestDirectory;
+            Directory.CreateDirectory("foo");
+            var otherDirectoryName = "bar";
+            Directory.CreateDirectory(otherDirectoryName);
+            Directory.Move("foo", Path.Combine(otherDirectoryName, "FOO"));
+            Assert.True(Directory.Exists(Path.Combine(otherDirectoryName, "FOO")));
+            Assert.False(Directory.Exists("foo"));
+        }
+
+        [Fact]
+        public void MoveDirectoryToNewDirectoryWithExistingDirectoryOfTheSameNameWithDifferentCasing()
+        {
+            Environment.CurrentDirectory = TestDirectory;
+            Directory.CreateDirectory("foo");
+            var otherDirectoryName = "bar";
+            Directory.CreateDirectory(otherDirectoryName);
+            Directory.CreateDirectory(Path.Combine(otherDirectoryName, "FoO"));
+            Assert.Throws<IOException>(() => Directory.Move("foo", Path.Combine(otherDirectoryName, "foo"));
         }
 
         #endregion
