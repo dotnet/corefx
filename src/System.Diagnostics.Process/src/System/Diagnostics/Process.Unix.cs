@@ -398,7 +398,9 @@ namespace System.Diagnostics
             // Unix applications expect the terminal to be in an echoing state by default.
             // To support processes that interact with the terminal (e.g. 'vi'), we need to configure the
             // terminal to echo. We keep this configuration as long as there are children possibly using the terminal.
-            bool usesTerminal = !startInfo.RedirectStandardInput || !startInfo.RedirectStandardOutput;
+            bool usesTerminal = !(startInfo.RedirectStandardInput &&
+                                  startInfo.RedirectStandardOutput &&
+                                  startInfo.RedirectStandardError);
 
             if (startInfo.UseShellExecute)
             {
