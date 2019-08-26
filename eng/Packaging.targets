@@ -1,5 +1,6 @@
 <Project>
-  <!-- Add validation for netcoreapp3.1 to package build and testing -->
+  <!-- Add validation for netcoreapp3.1 to package build and testing 
+      This would get moved to arcade with other validate frameworks and should get removed from here. -->
   <ItemGroup>
     <DefaultValidateFramework Include="netcoreapp3.1">
       <RuntimeIDs>@(NETCoreApp30RIDs)</RuntimeIDs>

@@ -29,8 +29,8 @@
     <PlatformPackageVersion>$(ProductVersion)</PlatformPackageVersion>
     <SkipValidatePackageTargetFramework>true</SkipValidatePackageTargetFramework>
     <SkipGenerationCheck>true</SkipGenerationCheck>
-    <!-- This is currently set to avoid errors that would result from having the 3.0 release packages not yet stable. 
-          Once 3.0 ships we can add those packages to the index and re-enable this-->
+    <!-- The index check here is used to determine if the assembly is containted in a stable package version.
+         Currently we dont have a stable package for 3.0 releases so we are temporarily opting out of it. -->
     <SkipIndexCheck>true</SkipIndexCheck>
   </PropertyGroup>
   
