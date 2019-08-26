@@ -42,7 +42,7 @@ namespace System.Xml.Tests
         //[Variation("13", Desc = "Test multiple config files with fully qualified path inside the files and command line", Pri = 1, Params = new object[] { @"@$(CurrentWorkingDirectory)\infft13.txt", "fft13.dll", "yes", "fft13", "fft13.pdb", "no", "fft13.txt" })]
         //[InlineData(@"@$(CurrentWorkingDirectory)\infft13.txt", "fft13.dll", "yes", "fft13", "fft13.pdb", "no", "fft13.txt")] //Skipping this, it tries to load System.dll
         //[Variation("14", Desc = "Test multiple config files with circular reference and fully qualified path inside the files", Pri = 1, Params = new object[] { "@infft14.txt", "fft14.dll", "no", "fft14", "fft14.pdb", "no", "fft14.txt" })]
-        [InlineData("@infft14.txt", "fft14.dll", "no", "fft14", "fft14.pdb", "no", "fft14.txt")]
+        [InlineData("@infft14.txt", "fft14.dll", "no", "fft14", "fft14.pdb", "no", "fft14.txt", true)]
         //[Variation("15", Desc = "Test multiple config files with circular reference and case sensitive file names specified", Pri = 1, Params = new object[] { "@infft15.txt", "fft15.dll", "no", "fft15", "fft15.pdb", "no", "fft15.txt" })]
         //[InlineData("@infft15.txt", "fft15.dll", "no", "fft15", "fft15.pdb", "no", "fft15.txt")] //Skipping this, it tries to load System.dll
         //[Variation("17", Desc = "Exercise comments(\u0091#\u0092) within file", Pri = 1, Params = new object[] { "@infft17.txt", "fft17.dll", "yes", "fft17", "fft17.pdb", "no", "fft17.txt" })]
@@ -52,9 +52,9 @@ namespace System.Xml.Tests
         //[Variation("19", Desc = "Exercise wildcards with @", Pri = 1, Params = new object[] { "@*.txt", "fft19.dll", "no", "fft19", "fft19.pdb", "no", "fft19.txt", "EnglishOnly" })]
         [InlineData("@*.txt", "fft19.dll", "no", "fft19", "fft19.pdb", "no", "fft19.txt", true)]
         //[Variation("20", Desc = "Exercise @ without filename", Pri = 1, Params = new object[] { "@", "fft20.dll", "no", "fft20", "fft20.pdb", "no", "fft20.txt" })]
-        [InlineData("@", "fft20.dll", "no", "fft20", "fft20.pdb", "no", "fft20.txt")]
+        [InlineData("@", "fft20.dll", "no", "fft20", "fft20.pdb", "no", "fft20.txt", true)]
         //[Variation("21", Desc = "Exercise @ with not existing filename", Pri = 1, Params = new object[] { "@IDontExist", "fft21.dll", "no", "fft21", "fft21.pdb", "no", "fft21.txt" })]
-        [InlineData("@IDontExist", "fft21.dll", "no", "fft21", "fft21.pdb", "no", "fft21.txt")]
+        [InlineData("@IDontExist", "fft21.dll", "no", "fft21", "fft21.pdb", "no", "fft21.txt", true)]
         [Trait("category", "XsltcExeRequired")]
         [ConditionalTheory(nameof(xsltcExeFound))]
         public void Var1(object param0, object param1, object param2, object param3, object param4, object param5, object param6, bool englishOnly = false)

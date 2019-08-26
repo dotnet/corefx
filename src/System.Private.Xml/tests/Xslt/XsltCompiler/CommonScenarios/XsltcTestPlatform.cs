@@ -39,17 +39,22 @@ namespace System.Xml.Tests
         }
 
         //[Variation("2", Desc = "Exercise basic use case, no option value", Pri = 1, Params = new object[] { "/platform: pft2.xsl", "pft2.txt" })]
-        [InlineData("/platform: pft2.xsl", "pft2.txt")]
+        [InlineData("/platform: pft2.xsl", "pft2.txt", true)]
         //[Variation("4", Desc = "Exercise basic use case, an unsupported option value", Pri = 1, Params = new object[] { "/platform:foo pft4.xsl", "pft4.txt" })]
-        [InlineData("/platform:foo pft4.xsl", "pft4.txt")]
+        [InlineData("/platform:foo pft4.xsl", "pft4.txt", true)]
         //[Variation("12", Desc = "Exercise basic use case, an unsupported option value -2", Pri = 1, Params = new object[] { "/platform: pft12.xsl", "pft12.txt" })]
-        [InlineData("/platform: pft12.xsl", "pft12.txt")]
+        [InlineData("/platform: pft12.xsl", "pft12.txt", true)]
         //[Variation("16", Desc = "Exercise basic use case, an unsupported option value -6", Pri = 1, Params = new object[] { "/platform:x86;x64 pft16.xsl", "pft16.txt" })]
-        [InlineData("/platform:x86;x64 pft16.xsl", "pft16.txt")]
+        [InlineData("/platform:x86;x64 pft16.xsl", "pft16.txt", true)]
         [Trait("category", "XsltcExeRequired")]
         [ConditionalTheory(nameof(xsltcExeFound))]
-        public void Var2(object param0, object param1)
+        public void Var2(object param0, object param1, bool englishOnly = false)
         {
+            if (ShouldSkip(englishOnly))
+            {
+                return; //TEST_SKIPPED;
+            }
+
             string cmdLine = param0.ToString();
             string baselineFile = param1.ToString();
 
