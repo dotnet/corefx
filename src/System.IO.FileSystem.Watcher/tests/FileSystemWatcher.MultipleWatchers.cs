@@ -18,7 +18,7 @@ namespace System.IO.Tests
         private void OnError(object source, ErrorEventArgs e)
         {
             _output.WriteLine($"Watcher failed: {e.GetException()} source={source} {source.GetHashCode()}");
-            // Repeat on Console so it easier to triage in Pipelines.
+            // Repeat on Console so it easier to triage in CI.
             Console.WriteLine($"Watcher failed: {e.GetException()} source={source} {source.GetHashCode()}");
         }
 

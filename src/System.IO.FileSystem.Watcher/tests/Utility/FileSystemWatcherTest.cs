@@ -418,7 +418,8 @@ namespace System.IO.Tests
             }
         }
 
-        public static bool RunDangerousTests {
+        public static bool RunDangerousTests
+        {
             get
             {
                 string envValue = Environment.GetEnvironmentVariable(DangerousTestEnvName);
