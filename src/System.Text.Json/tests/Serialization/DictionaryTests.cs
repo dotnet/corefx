@@ -938,39 +938,81 @@ namespace System.Text.Json.Serialization.Tests
 
         public class ClassWithNoSetter
         {
-            public Dictionary<string, int> SkippedChild { get; }
-            public Dictionary<string, int> ParsedChild { get; set; }
-            public IDictionary<string, int> AnotherSkippedChild { get; }
-            public IDictionary<string, int> AnotherParsedChild { get; set; }
+            public Dictionary<string, int> SkippedChild1 { get; }
+            public Dictionary<string, int> ParsedChild1 { get; set; }
+            public IDictionary<string, int> SkippedChild2 { get; }
+            public IDictionary<string, int> ParsedChild2 { get; set; }
+            [JsonIgnore] public IDictionary<string, int> SkippedChild3 { get; set; } // Note this has a setter.
+            public IDictionary<string, int> ParsedChild3 { get; set; }
+            public ImmutableDictionary<string, int> SkippedChild4 { get; }
+            public ImmutableDictionary<string, int> ParsedChild4 { get; set; }
+            public IDictionary<string, IDictionary<string, int>> SkippedChild5 { get; }
+            public Dictionary<string, Dictionary<string, int>> ParsedChild5 { get; set; }
+            public Dictionary<string, Dictionary<string, int>> ParsedChild6 { get; set; }
         }
 
         [Fact]
-        public static void ClassWithNoSetterAndValidProperty()
+        public static void ClassWithNoSetterAndThenValidProperty()
         {
             // Tests that the parser picks back up after skipping/draining ignored elements.
             string json = @"{
-                ""SkippedChild"": {},
-                ""ParsedChild"": {""Key1"":18},
+                ""SkippedChild1"": {},
+                ""ParsedChild1"": {""Key1"":1},
                 ""UnmatchedProp"": null,
-                ""AnotherSkippedChild"": {""DrainProp1"":{}, ""DrainProp2"":{""SubProp"":0}},
-                ""AnotherSkippedChild"": {},
-                ""AnotherParsedChild"": {""Key1"":18, ""Key2"":20}
+                ""SkippedChild12"": {""DrainProp1"":{}, ""DrainProp2"":{""SubProp"":0}},
+                ""SkippedChild1"": {},
+                ""ParsedChild2"": {""Key1"":2, ""Key2"":2},
+                ""SkippedChild3"": {},
+                ""ParsedChild3"": {""Key1"":3, ""Key2"":3},
+                ""SkippedChild4"": {},
+                ""ParsedChild4"": {""Key1"":4, ""Key2"":4},
+                ""SkippedChild5"": {},
+                ""ParsedChild5"": {""Key0"":{""Key1"":5, ""Key2"":5}},
+                ""ParsedChild6"": {""Key0"":{""Key1"":6, ""Key2"":6}}
             }";
 
             ClassWithNoSetter parsedObject = JsonSerializer.Deserialize<ClassWithNoSetter>(json);
 
-            Assert.Null(parsedObject.SkippedChild);
+            Assert.Null(parsedObject.SkippedChild1);
 
-            Assert.NotNull(parsedObject.ParsedChild);
-            Assert.Equal(1, parsedObject.ParsedChild.Count);
-            Assert.Equal(18, parsedObject.ParsedChild["Key1"]);
+            Assert.NotNull(parsedObject.ParsedChild1);
+            Assert.Equal(1, parsedObject.ParsedChild1.Count);
+            Assert.Equal(1, parsedObject.ParsedChild1["Key1"]);
 
-            Assert.Null(parsedObject.AnotherSkippedChild);
+            Assert.Null(parsedObject.SkippedChild2);
 
-            Assert.NotNull(parsedObject.AnotherParsedChild);
-            Assert.Equal(2, parsedObject.AnotherParsedChild.Count);
-            Assert.Equal(18, parsedObject.AnotherParsedChild["Key1"]);
-            Assert.Equal(20, parsedObject.AnotherParsedChild["Key2"]);
+            Assert.NotNull(parsedObject.ParsedChild2);
+            Assert.Equal(2, parsedObject.ParsedChild2.Count);
+            Assert.Equal(2, parsedObject.ParsedChild2["Key1"]);
+            Assert.Equal(2, parsedObject.ParsedChild2["Key2"]);
+
+            Assert.Null(parsedObject.SkippedChild3);
+
+            Assert.NotNull(parsedObject.ParsedChild3);
+            Assert.Equal(2, parsedObject.ParsedChild3.Count);
+            Assert.Equal(3, parsedObject.ParsedChild3["Key1"]);
+            Assert.Equal(3, parsedObject.ParsedChild3["Key2"]);
+
+            Assert.Null(parsedObject.SkippedChild4);
+
+            Assert.NotNull(parsedObject.ParsedChild4);
+            Assert.Equal(2, parsedObject.ParsedChild4.Count);
+            Assert.Equal(4, parsedObject.ParsedChild4["Key1"]);
+            Assert.Equal(4, parsedObject.ParsedChild4["Key2"]);
+
+            Assert.Null(parsedObject.SkippedChild5);
+
+            Assert.NotNull(parsedObject.ParsedChild5);
+            Assert.Equal(1, parsedObject.ParsedChild5.Count);
+            Assert.Equal(2, parsedObject.ParsedChild5["Key0"].Count);
+            Assert.Equal(5, parsedObject.ParsedChild5["Key0"]["Key1"]);
+            Assert.Equal(5, parsedObject.ParsedChild5["Key0"]["Key2"]);
+
+            Assert.NotNull(parsedObject.ParsedChild6);
+            Assert.Equal(1, parsedObject.ParsedChild6.Count);
+            Assert.Equal(2, parsedObject.ParsedChild6["Key0"].Count);
+            Assert.Equal(6, parsedObject.ParsedChild6["Key0"]["Key1"]);
+            Assert.Equal(6, parsedObject.ParsedChild6["Key0"]["Key2"]);
         }
 
         public class ClassWithPopulatedDictionaryAndSetter
