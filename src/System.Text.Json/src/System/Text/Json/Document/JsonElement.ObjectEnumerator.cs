@@ -51,22 +51,27 @@ namespace System.Text.Json
                     {
                         KeyValuePair<string, JsonNode> propertyPair = _jsonObjectEnumerator.Current;
 
+                        // propertyPair.Key is null before first after last call of MoveNext
+                        if (propertyPair.Key == null)
+                        {
+                            return default;
+                        }
+
+                        // null JsonNode case
                         if (propertyPair.Value == null)
                         {
                             return new JsonProperty(new JsonElement(null), propertyPair.Key);
                         }
-                        else
-                        {
-                            return new JsonProperty(propertyPair.Value.AsJsonElement(), propertyPair.Key);
-                        }
-                    }
 
-                    var document = (JsonDocument)_target._parent;
+                        return new JsonProperty(propertyPair.Value.AsJsonElement(), propertyPair.Key);
+                    }
 
                     if (_curIdx < 0)
                     {
                         return default;
                     }
+
+                    var document = (JsonDocument)_target._parent;
                     return new JsonProperty(new JsonElement(document, _curIdx));
                 }
             }
@@ -125,11 +130,8 @@ namespace System.Text.Json
             {
                 if (!_target.IsImmutable)
                 {
-                    bool result = _jsonObjectEnumerator.MoveNext();
-                    return result;
+                    return _jsonObjectEnumerator.MoveNext();
                 }
-
-                var document = _target._parent as JsonDocument;
 
                 if (_curIdx >= _endIdx)
                 {
@@ -142,6 +144,7 @@ namespace System.Text.Json
                 }
                 else
                 {
+                    var document = (JsonDocument)_target._parent;
                     _curIdx = document.GetEndIndex(_curIdx, includeEndElement: true);
                 }
 

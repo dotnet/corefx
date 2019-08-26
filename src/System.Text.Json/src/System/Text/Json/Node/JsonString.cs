@@ -137,7 +137,7 @@ namespace System.Text.Json
         /// <exception cref="FormatException">
         ///   Text value of this instance is not in a GUID recognized format.
         /// </exception>
-        public bool TryGetGuid(out Guid value) => Guid.TryParse(_value, out value);
+        public bool TryGetGuid(out Guid value) => Guid.TryParseExact(_value, "D", out value);
 
         /// <summary>
         ///   Converts a <see cref="string"/> to a <see cref="JsonString"/>.

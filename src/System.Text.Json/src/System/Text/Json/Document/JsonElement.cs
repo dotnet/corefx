@@ -67,8 +67,8 @@ namespace System.Text.Json
                 if (jsonNode == null)
                 {
                     return JsonValueKind.Null;
-
                 }
+
                 return jsonNode.ValueKind;
             }
         }
@@ -477,7 +477,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="value">Receives the value.</param>
         /// <remarks>
-        ///  This method does not create a byte[] representation of values other than bsae 64 encoded JSON strings.
+        ///  This method does not create a byte[] representation of values other than base 64 encoded JSON strings.
         /// </remarks>
         /// <returns>
         ///   <see langword="true"/> if the entire token value is encoded as valid Base64 text and can be successfully decoded to bytes.
@@ -493,8 +493,19 @@ namespace System.Text.Json
         {
             CheckValidInstance();
 
-            JsonDocument document = (JsonDocument)_parent;
-            return document.TryGetValue(_idx, out value);
+            if (_parent is JsonDocument document)
+            {
+                return document.TryGetValue(_idx, out value);
+            }
+
+            var jsonNode = (JsonNode)_parent;
+
+            if (jsonNode is JsonString)
+            {
+                throw new NotSupportedException();
+            }
+
+            throw ThrowHelper.GetJsonElementWrongTypeException(JsonValueKind.String, jsonNode.ValueKind);
         }
 
         /// <summary>

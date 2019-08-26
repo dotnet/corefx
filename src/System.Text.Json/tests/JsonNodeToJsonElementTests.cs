@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using Xunit;
 
 namespace System.Text.Json.Tests
@@ -58,13 +59,26 @@ namespace System.Text.Json.Tests
             Assert.Equal(JsonValueKind.String, innerEnumerator.Current.ValueKind);
             Assert.Equal("value2", innerEnumerator.Current.GetString());
 
+            Assert.False(innerEnumerator.MoveNext());
             innerEnumerator.Dispose();
+
+            Assert.False(enumerator.MoveNext());
             enumerator.Dispose();
 
             // Modifying JsonObject will change JsonElement:
 
             jsonObject["text"] = new JsonNumber("123");
             Assert.Equal(123, jsonElement.GetProperty("text").GetInt32());
+        }
+
+        [Fact]
+        public static void TestArrayIterator()
+        {
+            JsonArray array = new JsonArray { 1, 2, 3 };
+            JsonElement jsonNodeElement = array.AsJsonElement();
+            IEnumerator enumerator = jsonNodeElement.EnumerateArray();
+            array.Add(4);
+            Assert.Throws<InvalidOperationException>(() => enumerator.MoveNext());
         }
 
         [Fact]
