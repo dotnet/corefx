@@ -1,8 +1,6 @@
-﻿<Project InitialTargets="AddPackageReferences" Sdk="Microsoft.NET.Sdk">
+﻿<Project InitialTargets="AddPackageDownload" Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <!-- Baselining errors regarding net461 assets getting picked when targeting netstandard20 -->
-    <NoWarn>$(NoWarn);NU1701</NoWarn>
   </PropertyGroup>
 
   <Import Project="$(RepoRoot)pkg/baseline/baseline.props" />
@@ -12,7 +10,7 @@
        for harvesting binaries & support. -->
   <Target Name="Build" DependsOnTargets="RestorePackages" />
 
-  <Target Name="AddPackageReferences">
+  <Target Name="AddPackageDownload">
     <ItemGroup>
       <_AllPkgProjs Include="$(RepoRoot)src/**/*.pkgproj" />
     </ItemGroup>
@@ -25,17 +23,21 @@
         LatestPackages="@(_AllPkgProjsToPackageIdentity)"
         PackageIndexes="$(PackageIndexFile)"
         DoNotAllowVersionsFromSameRelease="true">
-        <Output TaskParameter="LastStablePackages" ItemName="_PackageReference" />
+        <Output TaskParameter="LastStablePackages" ItemName="_PackageDownload" />
     </GetLastStablePackage>
 
-    <!-- Allow to override package reference and versions in case there is already a PackageReference set -->
+    <!-- Allow to override package download and versions in case there is already a PackageDownload set -->
     <ItemGroup>
-      <_OverridenPackageReferences Include="@(_PackageReference)" Condition="'@(PackageReference)' == '@(_PackageReference)' and %(Identity) != ''" />
-      <_PackageReference Remove="@(_OverridenPackageReferences)" />
-      <_PackageReference Include="@(PackageReference)" />
+      <_OverridenPackageDownloads Include="@(_PackageDownload)" Condition="'@(PackageDownload)' == '@(_PackageDownload)' and %(Identity) != ''" />
+      <_PackageDownload Remove="@(_OverridenPackageDownloads)" />
+      <_PackageDownload Include="@(PackageDownload)" />
 
-      <PackageReference Remove="@(PackageReference)" />
-      <PackageReference Include="@(_PackageReference)" />
+      <PackageDownload Remove="@(PackageDownload)" />
+      <PackageDownload Include="@(_PackageDownload)" Condition="'%(_PackageDownload.IsImplicitlyDefined)' != 'true'" />
+      <!-- Add exact version to PackageDownload -->
+      <PackageDownload>
+        <Version>[%(Version)]</Version>
+      </PackageDownload>
     </ItemGroup>
   </Target>
 
