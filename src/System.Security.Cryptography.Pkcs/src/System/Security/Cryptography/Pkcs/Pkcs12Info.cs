@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Security.Cryptography.Asn1;
+using System.Security.Cryptography.Asn1.Pkcs12;
+using System.Security.Cryptography.Asn1.Pkcs7;
 using System.Security.Cryptography.Pkcs.Asn1;
 using Internal.Cryptography;
 

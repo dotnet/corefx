@@ -8,13 +8,13 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Asn1;
 
-namespace System.Security.Cryptography.Pkcs.Asn1
+namespace System.Security.Cryptography.Asn1.Pkcs7
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal partial struct DigestInfoAsn
+    internal partial struct ContentInfoAsn
     {
-        internal System.Security.Cryptography.Asn1.AlgorithmIdentifierAsn DigestAlgorithm;
-        internal ReadOnlyMemory<byte> Digest;
+        internal string ContentType;
+        internal ReadOnlyMemory<byte> Content;
       
         internal void Encode(AsnWriter writer)
         {
@@ -25,26 +25,28 @@ namespace System.Security.Cryptography.Pkcs.Asn1
         {
             writer.PushSequence(tag);
             
-            DigestAlgorithm.Encode(writer);
-            writer.WriteOctetString(Digest.Span);
+            writer.WriteObjectIdentifier(ContentType);
+            writer.PushSequence(new Asn1Tag(TagClass.ContextSpecific, 0));
+            writer.WriteEncodedValue(Content.Span);
+            writer.PopSequence(new Asn1Tag(TagClass.ContextSpecific, 0));
             writer.PopSequence(tag);
         }
 
-        internal static DigestInfoAsn Decode(ReadOnlyMemory<byte> encoded, AsnEncodingRules ruleSet)
+        internal static ContentInfoAsn Decode(ReadOnlyMemory<byte> encoded, AsnEncodingRules ruleSet)
         {
             return Decode(Asn1Tag.Sequence, encoded, ruleSet);
         }
         
-        internal static DigestInfoAsn Decode(Asn1Tag expectedTag, ReadOnlyMemory<byte> encoded, AsnEncodingRules ruleSet)
+        internal static ContentInfoAsn Decode(Asn1Tag expectedTag, ReadOnlyMemory<byte> encoded, AsnEncodingRules ruleSet)
         {
             AsnReader reader = new AsnReader(encoded, ruleSet);
             
-            Decode(reader, expectedTag, out DigestInfoAsn decoded);
+            Decode(reader, expectedTag, out ContentInfoAsn decoded);
             reader.ThrowIfNotEmpty();
             return decoded;
         }
 
-        internal static void Decode(AsnReader reader, out DigestInfoAsn decoded)
+        internal static void Decode(AsnReader reader, out ContentInfoAsn decoded)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));
@@ -52,24 +54,20 @@ namespace System.Security.Cryptography.Pkcs.Asn1
             Decode(reader, Asn1Tag.Sequence, out decoded);
         }
 
-        internal static void Decode(AsnReader reader, Asn1Tag expectedTag, out DigestInfoAsn decoded)
+        internal static void Decode(AsnReader reader, Asn1Tag expectedTag, out ContentInfoAsn decoded)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));
 
             decoded = default;
             AsnReader sequenceReader = reader.ReadSequence(expectedTag);
+            AsnReader explicitReader;
             
-            System.Security.Cryptography.Asn1.AlgorithmIdentifierAsn.Decode(sequenceReader, out decoded.DigestAlgorithm);
+            decoded.ContentType = sequenceReader.ReadObjectIdentifierAsString();
 
-            if (sequenceReader.TryReadPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> tmpDigest))
-            {
-                decoded.Digest = tmpDigest;
-            }
-            else
-            {
-                decoded.Digest = sequenceReader.ReadOctetString();
-            }
+            explicitReader = sequenceReader.ReadSequence(new Asn1Tag(TagClass.ContextSpecific, 0));
+            decoded.Content = explicitReader.ReadEncodedValue();
+            explicitReader.ThrowIfNotEmpty();
 
 
             sequenceReader.ThrowIfNotEmpty();

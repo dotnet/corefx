@@ -59,6 +59,13 @@
   </ItemGroup>
   <!-- Internal types (platform: AnyOS) -->
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
+    <AsnXml Include="$(CommonPath)\System\Security\Cryptography\Asn1\Pkcs7\ContentInfoAsn.xml">
+      <Link>Common\System\Security\Cryptography\Asn1\Pkcs7\ContentInfoAsn.xml</Link>
+    </AsnXml>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\Pkcs7\ContentInfoAsn.xml.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\Pkcs7\ContentInfoAsn.xml.cs</Link>
+      <DependentUpon>Common\System\Security\Cryptography\Asn1\Pkcs7\ContentInfoAsn.xml</DependentUpon>
+    </Compile>
     <Compile Include="Internal\Cryptography\Pal\AnyOS\AsnHelpers.cs" />
     <Compile Include="Internal\Cryptography\Pal\AnyOS\ManagedPal.cs" />
     <Compile Include="Internal\Cryptography\Pal\AnyOS\ManagedPal.Asn.cs" />
@@ -556,10 +563,6 @@
     <Compile Include="System\Security\Cryptography\Pkcs\Asn1\CertificateChoiceAsn.xml.cs">
       <DependentUpon>System\Security\Cryptography\Pkcs\Asn1\CertificateChoiceAsn.xml</DependentUpon>
     </Compile>
-    <AsnXml Include="System\Security\Cryptography\Pkcs\Asn1\ContentInfoAsn.xml" />
-    <Compile Include="System\Security\Cryptography\Pkcs\Asn1\ContentInfoAsn.xml.cs">
-      <DependentUpon>System\Security\Cryptography\Pkcs\Asn1\ContentInfoAsn.xml</DependentUpon>
-    </Compile>
     <AsnXml Include="System\Security\Cryptography\Pkcs\Asn1\EncapsulatedContentInfoAsn.xml" />
     <Compile Include="System\Security\Cryptography\Pkcs\Asn1\EncapsulatedContentInfoAsn.xml.cs">
       <DependentUpon>System\Security\Cryptography\Pkcs\Asn1\EncapsulatedContentInfoAsn.xml</DependentUpon>
@@ -649,35 +652,50 @@
     <Compile Include="$(CommonPath)\System\Security\Cryptography\KeyFormatHelper.cs">
       <Link>Common\System\Security\Cryptography\KeyFormatHelper.cs</Link>
     </Compile>
+    <AsnXml Include="$(CommonPath)\System\Security\Cryptography\Asn1\DigestInfoAsn.xml">
+      <Link>Common\System\Security\Cryptography\Asn1\DigestInfoAsn.xml</Link>
+    </AsnXml>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\DigestInfoAsn.xml.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\DigestInfoAsn.xml.cs</Link>
+      <DependentUpon>Common\System\Security\Cryptography\Asn1\DigestInfoAsn.xml</DependentUpon>
+    </Compile>
+    <AsnXml Include="$(CommonPath)\System\Security\Cryptography\Asn1\Pkcs12\CertBagAsn.xml">
+      <Link>Common\System\Security\Cryptography\Asn1\Pkcs12\CertBagAsn.xml</Link>
+    </AsnXml>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\Pkcs12\CertBagAsn.xml.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\Pkcs12\CertBagAsn.xml.cs</Link>
+      <DependentUpon>Common\System\Security\Cryptography\Asn1\Pkcs12\CertBagAsn.xml</DependentUpon>
+    </Compile>
+    <AsnXml Include="$(CommonPath)\System\Security\Cryptography\Asn1\Pkcs12\MacData.xml">
+      <Link>Common\System\Security\Cryptography\Asn1\Pkcs12\MacData.xml</Link>
+    </AsnXml>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\Pkcs12\MacData.xml.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\Pkcs12\MacData.xml.cs</Link>
+      <DependentUpon>Common\System\Security\Cryptography\Asn1\Pkcs12\MacData.xml</DependentUpon>
+    </Compile>
+    <AsnXml Include="$(CommonPath)\System\Security\Cryptography\Asn1\Pkcs12\PfxAsn.xml">
+      <Link>Common\System\Security\Cryptography\Asn1\Pkcs12\PfxAsn.xml</Link>
+    </AsnXml>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\Pkcs12\PfxAsn.xml.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\Pkcs12\PfxAsn.xml.cs</Link>
+      <DependentUpon>Common\System\Security\Cryptography\Asn1\Pkcs12\PfxAsn.xml</DependentUpon>
+    </Compile>
+    <AsnXml Include="$(CommonPath)\System\Security\Cryptography\Asn1\Pkcs12\SafeBagAsn.xml">
+      <Link>Common\System\Security\Cryptography\Asn1\Pkcs12\SafeBagAsn.xml</Link>
+    </AsnXml>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\Pkcs12\SafeBagAsn.xml.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\Pkcs12\SafeBagAsn.xml.cs</Link>
+      <DependentUpon>Common\System\Security\Cryptography\Asn1\Pkcs12\SafeBagAsn.xml</DependentUpon>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\PasswordBasedEncryption.cs">
       <Link>Common\System\Security\Cryptography\PasswordBasedEncryption.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\Pkcs12Kdf.cs">
       <Link>Common\System\Security\Cryptography\Pkcs12Kdf.cs</Link>
     </Compile>
-    <AsnXml Include="System\Security\Cryptography\Pkcs\Asn1\CertBagAsn.xml" />
-    <Compile Include="System\Security\Cryptography\Pkcs\Asn1\CertBagAsn.xml.cs">
-      <DependentUpon>System\Security\Cryptography\Pkcs\Asn1\CertBagAsn.xml</DependentUpon>
-    </Compile>
-    <AsnXml Include="System\Security\Cryptography\Pkcs\Asn1\DigestInfoAsn.xml" />
-    <Compile Include="System\Security\Cryptography\Pkcs\Asn1\DigestInfoAsn.xml.cs">
-      <DependentUpon>System\Security\Cryptography\Pkcs\Asn1\DigestInfoAsn.xml</DependentUpon>
-    </Compile>
     <AsnXml Include="System\Security\Cryptography\Pkcs\Asn1\EncryptedDataAsn.xml" />
     <Compile Include="System\Security\Cryptography\Pkcs\Asn1\EncryptedDataAsn.xml.cs">
       <DependentUpon>System\Security\Cryptography\Pkcs\Asn1\EncryptedDataAsn.xml</DependentUpon>
-    </Compile>
-    <AsnXml Include="System\Security\Cryptography\Pkcs\Asn1\MacData.xml" />
-    <Compile Include="System\Security\Cryptography\Pkcs\Asn1\MacData.xml.cs">
-      <DependentUpon>System\Security\Cryptography\Pkcs\Asn1\MacData.xml</DependentUpon>
-    </Compile>
-    <AsnXml Include="System\Security\Cryptography\Pkcs\Asn1\PfxAsn.xml" />
-    <Compile Include="System\Security\Cryptography\Pkcs\Asn1\PfxAsn.xml.cs">
-      <DependentUpon>System\Security\Cryptography\Pkcs\Asn1\PfxAsn.xml</DependentUpon>
-    </Compile>
-    <AsnXml Include="System\Security\Cryptography\Pkcs\Asn1\SafeBagAsn.xml" />
-    <Compile Include="System\Security\Cryptography\Pkcs\Asn1\SafeBagAsn.xml.cs">
-      <DependentUpon>System\Security\Cryptography\Pkcs\Asn1\SafeBagAsn.xml</DependentUpon>
     </Compile>
     <AsnXml Include="System\Security\Cryptography\Pkcs\Asn1\SecretBagAsn.xml" />
     <Compile Include="System\Security\Cryptography\Pkcs\Asn1\SecretBagAsn.xml.cs">
