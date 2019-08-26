@@ -3,7 +3,6 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <NETCoreAppMaximumVersion>3.1</NETCoreAppMaximumVersion>
     <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
-    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,11 +11,8 @@
         TargetFramework="netcoreapp3.1" />
     <KnownFrameworkReference Include="@(KnownFrameworkReference->WithMetadataValue('TargetFramework', 'netcoreapp3.0'))"
         TargetFramework="netcoreapp3.1" />
-    
-    <!-- Reference base shared framework at incoming dependency flow version, not bundled sdk version. -->
-    <FrameworkReference Update="Microsoft.NETCore.App"
-        Condition="'$(TargetFramework)' == 'netcoreapp3.1'"
-        RuntimeFrameworkVersion="$(MicrosoftNETCoreAppRuntimeVersion)"
-        TargetingPackVersion="$(MicrosoftNETCoreAppRefPackageVersion)" />
+
+    <KnownFrameworkReference Remove="Microsoft.AspNetCore.App" />
+    <KnownFrameworkReference Remove="Microsoft.WindowsDesktop.App" />
   </ItemGroup>
 </Project>
