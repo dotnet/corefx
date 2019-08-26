@@ -21,7 +21,8 @@ namespace System.Text.Encodings.Tests
         public void Decode(byte[] bytes, int index, int count, string expected) =>
             EncodingHelpers.Decode(new CustomEncoding(), bytes, index, count, expected);
 
-        public class CustomEncoding : Encoding
+        // Explicitly not overriding virtual methods to test their base implementations
+        private sealed class CustomEncoding : Encoding
         {
             private readonly Encoding _encoding = Encoding.UTF8;
 
