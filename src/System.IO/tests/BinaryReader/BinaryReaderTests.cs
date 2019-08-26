@@ -189,7 +189,7 @@ namespace System.IO.Tests
         }
 
         // ChunkingStream returns less than requested
-        class ChunkingStream : MemoryStream
+        private sealed class ChunkingStream : MemoryStream
         {
             public override int Read(byte[] buffer, int offset, int count)
             {
