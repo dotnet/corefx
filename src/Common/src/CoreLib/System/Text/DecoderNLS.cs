@@ -227,7 +227,7 @@ namespace System.Text
         {
             get
             {
-                return false;
+                return _leftoverByteCount != 0;
             }
         }
 
