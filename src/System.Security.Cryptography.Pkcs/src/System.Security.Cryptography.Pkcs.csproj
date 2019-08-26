@@ -676,6 +676,10 @@
     <AsnXml Include="$(CommonPath)\System\Security\Cryptography\Asn1\Pkcs12\PfxAsn.xml">
       <Link>Common\System\Security\Cryptography\Asn1\Pkcs12\PfxAsn.xml</Link>
     </AsnXml>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\Pkcs12\PfxAsn.manual.cs">
+      <Link>Common\System\Security\Cryptography\Asn1\Pkcs12\PfxAsn.manual.cs</Link>
+      <DependentUpon>Common\System\Security\Cryptography\Asn1\Pkcs12\PfxAsn.xml</DependentUpon>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1\Pkcs12\PfxAsn.xml.cs">
       <Link>Common\System\Security\Cryptography\Asn1\Pkcs12\PfxAsn.xml.cs</Link>
       <DependentUpon>Common\System\Security\Cryptography\Asn1\Pkcs12\PfxAsn.xml</DependentUpon>
