@@ -12,32 +12,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
     <ComponentModel.EditorBrowsableAttribute(ComponentModel.EditorBrowsableState.Never)>
     Friend NotInheritable Class NativeTypes
 
-        <StructLayout(LayoutKind.Sequential)>
-        Friend NotInheritable Class SECURITY_ATTRIBUTES
-            Implements IDisposable
-
-            Friend Sub New()
-                nLength = System.Runtime.InteropServices.Marshal.SizeOf(GetType(SECURITY_ATTRIBUTES))
-            End Sub
-
-            Public nLength As Integer
-            Public lpSecurityDescriptor As IntPtr
-            Public bInheritHandle As Boolean
-
-            Public Overloads Sub Dispose() Implements IDisposable.Dispose
-                If lpSecurityDescriptor <> IntPtr.Zero Then
-                    UnsafeNativeMethods.LocalFree(lpSecurityDescriptor)
-                    lpSecurityDescriptor = IntPtr.Zero
-                End If
-                GC.SuppressFinalize(Me)
-            End Sub
-
-            Protected Overrides Sub Finalize()
-                Dispose()
-                MyBase.Finalize()
-            End Sub
-        End Class
-
         <StructLayout(LayoutKind.Sequential)> Friend NotInheritable Class SystemTime
             Public wYear As Short
             Public wMonth As Short
