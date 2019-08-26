@@ -3,21 +3,14 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <NETCoreAppMaximumVersion>3.1</NETCoreAppMaximumVersion>
     <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
   </PropertyGroup>
 
   <ItemGroup>
     <!-- Since we don't have an SDK that knows about 3.1 framework, we should specify it manually. -->
-    <KnownFrameworkReference Update="Microsoft.NETCore.App"
-                            DefaultRuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
-                            LatestRuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
-                            TargetingPackVersion="$(RuntimeFrameworkVersion)"
-                            />
-
-    <KnownAppHostPack Update="Microsoft.NETCore.App"
-                      AppHostPackVersion="$(RuntimeFrameworkVersion)"
-                      />
-
-    <KnownFrameworkReference Remove="Microsoft.AspNetCore.App" />
-    <KnownFrameworkReference Remove="Microsoft.WindowsDesktop.App" />
+    <KnownAppHostPack Include="@(KnownAppHostPack->WithMetadataValue('TargetFramework', 'netcoreapp3.0'))"
+        TargetFramework="netcoreapp3.1" />
+    <KnownFrameworkReference Include="@(KnownFrameworkReference->WithMetadataValue('TargetFramework', 'netcoreapp3.0'))"
+        TargetFramework="netcoreapp3.1" />
   </ItemGroup>
 </Project>
