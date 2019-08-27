@@ -60,8 +60,7 @@ namespace System.Net.Http
             }
 
             // Renew time reached, we can remove the proxy from the collection.
-            var collection = (ICollection<KeyValuePair<Uri, long>>)_failedProxies;
-            if (collection.Remove(new KeyValuePair<Uri, long>(uri, renewTicks)))
+            if (TryRenewProxy(uri, renewTicks))
             {
                 return Immediate;
             }
@@ -79,6 +78,17 @@ namespace System.Net.Http
         {
             _failedProxies[uri] = Environment.TickCount64 + FailureTimeoutInMilliseconds;
             Cleanup();
+        }
+
+        /// <summary>
+        /// Renews a proxy prior to its period expiring. Used when all proxies are failed to renew the proxy closest to being renewed.
+        /// </summary>
+        /// <param name="uri">The <paramref name="uri"/> of the proxy to renew.</param>
+        /// <param name="renewTicks">The current renewal time for the proxy. If the value has changed from this, the proxy will not be renewed.</param>
+        public bool TryRenewProxy(Uri uri, long renewTicks)
+        {
+            var collection = (ICollection<KeyValuePair<Uri, long>>)_failedProxies;
+            return collection.Remove(new KeyValuePair<Uri, long>(uri, renewTicks));
         }
 
         /// <summary>

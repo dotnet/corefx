@@ -6,6 +6,9 @@ using System.Diagnostics;
 
 namespace System.Net.Http
 {
+    /// <summary>
+    /// A collection of proxies.
+    /// </summary>
     internal struct MultiProxy
     {
         private static readonly char[] s_proxyDelimiters = { ';', ' ', '\n', '\r', '\t' };
@@ -45,6 +48,8 @@ namespace System.Net.Http
         /// <param name="secure">If true, return proxies suitable for use with a secure connection. If false, return proxies suitable for an insecure connection.</param>
         public static MultiProxy Parse(FailedProxyCollection failedProxyCollection, string proxyConfig, bool secure)
         {
+            Debug.Assert(failedProxyCollection != null);
+
             Uri[] uris = Array.Empty<Uri>();
 
             ReadOnlySpan<char> span = proxyConfig;
@@ -71,6 +76,8 @@ namespace System.Net.Http
         /// <param name="secure">If true, return proxies suitable for use with a secure connection. If false, return proxies suitable for an insecure connection.</param>
         public static MultiProxy CreateLazy(FailedProxyCollection failedProxyCollection, string proxyConfig, bool secure)
         {
+            Debug.Assert(failedProxyCollection != null);
+
             return string.IsNullOrEmpty(proxyConfig) == false ?
                 new MultiProxy(failedProxyCollection, proxyConfig, secure) :
                 MultiProxy.Empty;
@@ -120,17 +127,25 @@ namespace System.Net.Http
             }
             while (ReadNextImpl(out uri, out isFinalProxy));
 
-            // All the proxies in the config have failed; in this case, return the oldest failing proxy.
+            // All the proxies in the config have failed; in this case, return the proxy that will become usable the soonest.
             if (_currentUri == null)
             {
                 uri = oldestFailedProxyUri;
                 _currentUri = oldestFailedProxyUri;
-                return oldestFailedProxyUri != null;
+
+                if (oldestFailedProxyUri != null)
+                {
+                    _failedProxyCollection.TryRenewProxy(uri, oldestFailedProxyTicks);
+                    return true;
+                }
             }
 
             return false;
         }
 
+        /// <summary>
+        /// Reads the next proxy URI from the MultiProxy, either via parsing a config string or from an array.
+        /// </summary>
         private bool ReadNextImpl(out Uri uri, out bool isFinalProxy)
         {
             Debug.Assert(_uris != null || _proxyConfig != null, $"{nameof(ReadNext)} must not be called on a default-initialized {nameof(MultiProxy)}.");
@@ -188,12 +203,13 @@ namespace System.Net.Http
                 {
                     ++iter;
                 }
-                proxyString = proxyString.Slice(iter);
 
-                if (proxyString.Length == 0)
+                if (iter == proxyString.Length)
                 {
                     break;
                 }
+
+                proxyString = proxyString.Slice(iter);
 
                 // Determine which scheme this part is for.
                 // If no schema is defined, use both.
@@ -222,13 +238,13 @@ namespace System.Net.Http
                 }
 
                 // Find the next delimiter, or end of string.
-                iter = 0;
-                while (iter < proxyString.Length && Array.IndexOf(s_proxyDelimiters, proxyString[iter]) == -1)
+                iter = proxyString.IndexOfAny(s_proxyDelimiters);
+                if (iter == -1)
                 {
-                    ++iter;
+                    iter = proxyString.Length;
                 }
 
-                // return URI if it's a match to what we want.
+                // Return URI if it's a match to what we want.
                 if ((proxyType & wantedFlag) != 0 && Uri.TryCreate(string.Concat("http://", proxyString.Slice(0, iter)), UriKind.Absolute, out uri))
                 {
                     charactersConsumed = originalLength - proxyString.Length + iter;

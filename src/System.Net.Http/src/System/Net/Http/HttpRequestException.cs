@@ -37,11 +37,4 @@ namespace System.Net.Http
             AllowRetry = allowRetry;
         }
     }
-
-    internal enum RequestRetryType
-    {
-        NoRetry,
-        RetryOnSameOrNextProxy,
-        RetryOnNextProxy
-    }
 }
