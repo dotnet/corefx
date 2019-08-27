@@ -138,7 +138,7 @@ Namespace Microsoft.VisualBasic
         End Function
 
         Private Function InvokeMethod(methodName As String, ParamArray args As Object()) As Object
-            Dim type As Type = type.GetType("Microsoft.VisualBasic._Interaction, Microsoft.VisualBasic, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", throwOnError:=False)
+            Dim type As Type = type.GetType("Microsoft.VisualBasic._Interaction, Microsoft.VisualBasic.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", throwOnError:=False)
             Dim method As MethodInfo = type?.GetMethod(methodName)
             If method Is Nothing Then
                 Throw New PlatformNotSupportedException()
