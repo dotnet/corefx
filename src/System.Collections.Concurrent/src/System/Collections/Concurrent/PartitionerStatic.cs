@@ -553,20 +553,20 @@ namespace System.Collections.Concurrent
             {
                 //reader through which we access the source data
                 private readonly IEnumerator<TSource> _sharedReader;
-                private readonly SharedLong _sharedIndex;//initial value -1
+                private readonly SharedLong _sharedIndex; //initial value -1
 
-                private volatile KeyValuePair<long, TSource>[]? _fillBuffer;  // intermediate buffer to reduce locking
-                private volatile int _fillBufferSize;               // actual number of elements in _FillBuffer. Will start
-                                                                     // at _FillBuffer.Length, and might be reduced during the last refill
-                private volatile int _fillBufferCurrentPosition;    //shared value to be accessed by Interlock.Increment only
-                private volatile int _activeCopiers;               //number of active copiers
+                private volatile KeyValuePair<long, TSource>[]? _fillBuffer; // intermediate buffer to reduce locking
+                private volatile int _fillBufferSize;            // actual number of elements in _FillBuffer. Will start
+                                                                 // at _FillBuffer.Length, and might be reduced during the last refill
+                private volatile int _fillBufferCurrentPosition; //shared value to be accessed by Interlock.Increment only
+                private volatile int _activeCopiers;             //number of active copiers
 
                 //fields shared by all partitions that this Enumerable owns, their allocation is deferred
                 private readonly SharedBool _hasNoElementsLeft; // no elements left at all.
                 private readonly SharedBool _sourceDepleted;    // no elements left in the enumerator, but there may be elements in the Fill Buffer
 
                 //shared synchronization lock, created by this Enumerable
-                private readonly object _sharedLock;//deferring allocation by enumerator
+                private readonly object _sharedLock; //deferring allocation by enumerator
 
                 private bool _disposed;
 

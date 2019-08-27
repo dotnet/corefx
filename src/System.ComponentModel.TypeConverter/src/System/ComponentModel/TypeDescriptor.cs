@@ -565,7 +565,7 @@ namespace System.ComponentModel
             {
                 // Check our association table for a match.
                 Hashtable assocTable = AssociationTable;
-                IList associations = (IList) assocTable?[primary];
+                IList associations = (IList)assocTable?[primary];
                 if (associations != null)
                 {
                     lock (associations)
@@ -2401,7 +2401,7 @@ namespace System.ComponentModel
             }
 
             Hashtable assocTable = AssociationTable;
-            IList associations = (IList) assocTable?[primary];
+            IList associations = (IList)assocTable?[primary];
             if (associations != null)
             {
                 lock (associations)
@@ -2604,7 +2604,7 @@ namespace System.ComponentModel
 
                 if (!objectType.IsInstanceOfType(instance))
                 {
-                    throw new ArgumentException(SR.Format(SR.ConvertToException, nameof(objectType), instance.GetType()) , nameof(instance));
+                    throw new ArgumentException(SR.Format(SR.ConvertToException, nameof(objectType), instance.GetType()), nameof(instance));
                 }
 
                 return new ComNativeTypeDescriptor(Handler, instance);

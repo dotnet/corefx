@@ -490,7 +490,7 @@ namespace System.Text.RegularExpressions
         {
             _concatenation = new RegexNode(RegexNode.Concatenate, _options);
 
-            for (; ;)
+            while (true)
             {
                 int c = CharsRight();
                 if (c == 0)
@@ -716,7 +716,7 @@ namespace System.Text.RegularExpressions
 
             MoveRight();
 
-            for (; ;)
+            while (true)
             {
                 if (CharsRight() == 0)
                     break;
@@ -958,7 +958,7 @@ namespace System.Text.RegularExpressions
         {
             if (UseOptionX())
             {
-                for (; ;)
+                while (true)
                 {
                     while (CharsRight() > 0 && IsSpace(RightChar()))
                         MoveRight();
@@ -986,7 +986,7 @@ namespace System.Text.RegularExpressions
             }
             else
             {
-                for (; ;)
+                while (true)
                 {
                     if (CharsRight() < 3 || RightChar(2) != '#' ||
                         RightChar(1) != '?' || RightChar() != '(')
@@ -1949,14 +1949,14 @@ namespace System.Text.RegularExpressions
          * For categorizing ASCII characters.
         */
         private static readonly byte[] s_category = new byte[] {
-            // 0 1 2 3 4 5 6 7 8 9 A B C D E F 0 1 2 3 4 5 6 7 8 9 A B C D E F
-               0,0,0,0,0,0,0,0,0,X,X,0,X,X,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-            //   ! " # $ % & ' ( ) * + , - . / 0 1 2 3 4 5 6 7 8 9 : ; < = > ?
-               X,0,0,Z,S,0,0,0,S,S,Q,Q,0,0,S,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,Q,
-            // @ A B C D E F G H I J K L M N O P Q R S T U V W X Y Z [ \ ] ^ _
-               0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,S,S,0,S,0,
-            // ' a b c d e f g h i j k l m n o p q r s t u v w x y z { | } ~
-               0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,Q,S,0,0,0};
+            // 0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
+               0, 0, 0, 0, 0, 0, 0, 0, 0, X, X, 0, X, X, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            //    !  "  #  $  %  &  '  (  )  *  +  ,  -  .  /  0  1  2  3  4  5  6  7  8  9  :  ;  <  =  >  ?
+               X, 0, 0, Z, S, 0, 0, 0, S, S, Q, Q, 0, 0, S, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, Q,
+            // @  A  B  C  D  E  F  G  H  I  J  K  L  M  N  O  P  Q  R  S  T  U  V  W  X  Y  Z  [  \  ]  ^  _
+               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, S, S, 0, S, 0,
+            // '  a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t  u  v  w  x  y  z  {  |  }  ~
+               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, Q, S, 0, 0, 0};
 
         /*
          * Returns true for those characters that terminate a string of ordinary chars.
@@ -1993,7 +1993,7 @@ namespace System.Text.RegularExpressions
 
             int pos = startpos;
             int nChars = CharsRight();
-            while (--nChars > 0 && (ch = CharAt(++pos)) >= '0' && ch <= '9') ;
+            while (--nChars > 0 && (ch = CharAt(++pos)) >= '0' && ch <= '9');
 
             if (nChars == 0 || pos - startpos == 1)
                 return false;
@@ -2004,7 +2004,7 @@ namespace System.Text.RegularExpressions
             if (ch != ',')
                 return false;
 
-            while (--nChars > 0 && (ch = CharAt(++pos)) >= '0' && ch <= '9') ;
+            while (--nChars > 0 && (ch = CharAt(++pos)) >= '0' && ch <= '9');
 
             return nChars > 0 && ch == '}';
         }

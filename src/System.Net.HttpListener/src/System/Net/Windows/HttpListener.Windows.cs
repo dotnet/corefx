@@ -451,6 +451,7 @@ namespace System.Net
             {
                 if (NetEventSource.IsEnabled) NetEventSource.Info($"Dispose ThreadPoolBoundHandle: {_requestQueueBoundHandle}");
                 _requestQueueBoundHandle?.Dispose();
+                _requestQueueBoundHandle = null;
                 _requestQueueHandle.Dispose();
             }
         }
@@ -577,9 +578,9 @@ namespace System.Net
                 uint size = 4096;
                 ulong requestId = 0;
                 memoryBlob = new SyncRequestContext((int)size);
-                for (;;)
+                while (true)
                 {
-                    for (;;)
+                    while (true)
                     {
                         if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"Calling Interop.HttpApi.HttpReceiveHttpRequest RequestId: {requestId}");
                         uint bytesTransferred = 0;
