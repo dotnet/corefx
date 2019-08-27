@@ -24,7 +24,7 @@
 * Provide capabilities to support data from both streams and pipelines.
   - Some work/boilerplate code required by the caller is acceptable
 * No unnecessary levels of abstraction that would make writing higher level
-  concepts on top of the Reader/Writer APIs untenable.
+  concepts on top of the Reader/Writer APIs untenabl.
 
 ## Components
 
