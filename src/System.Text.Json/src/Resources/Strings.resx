@@ -444,4 +444,7 @@
   <data name="InvalidLeadingZeroInNumber" xml:space="preserve">
     <value>Invalid leading zero before '{0}'.</value>
   </data>
+  <data name="ArrayModifiedDuringIteration" xml:space="preserve">
+    <value>The JSON array was modified during iteration.</value>
+  </data>
 </root>
