@@ -1349,7 +1349,7 @@ namespace System.Globalization
 
         /// <summary>
         /// Retrieve the array which contains the month names in genitive form.
-        /// If this culture does not use the gentive form, the normal month name is returned.
+        /// If this culture does not use the genitive form, the normal month name is returned.
         /// </summary>
         private string[] InternalGetGenitiveMonthNames(bool abbreviated)
         {
@@ -2320,14 +2320,15 @@ namespace System.Globalization
                     InsertHash(temp, GetAbbreviatedMonthName(i), TokenType.MonthToken, i);
                 }
 
-
                 if ((FormatFlags & DateTimeFormatFlags.UseGenitiveMonth) != 0)
                 {
+                    string [] genitiveMonthNames = InternalGetGenitiveMonthNames(abbreviated: false);
+                    string [] abbreviatedGenitiveMonthNames = InternalGetGenitiveMonthNames(abbreviated: true);
+
                     for (int i = 1; i <= 13; i++)
                     {
-                        string str;
-                        str = InternalGetMonthName(i, MonthNameStyles.Genitive, false);
-                        InsertHash(temp, str, TokenType.MonthToken, i);
+                        InsertHash(temp, genitiveMonthNames[i - 1], TokenType.MonthToken, i);
+                        InsertHash(temp, abbreviatedGenitiveMonthNames[i - 1], TokenType.MonthToken, i);
                     }
                 }
 
