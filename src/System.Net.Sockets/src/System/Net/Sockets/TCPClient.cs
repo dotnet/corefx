@@ -261,6 +261,10 @@ namespace System.Net.Sockets
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this, remoteEP);
 
+            if (CleanedUp)
+            {
+                throw new ObjectDisposedException(GetType().FullName);
+            }
             if (remoteEP == null)
             {
                 throw new ArgumentNullException(nameof(remoteEP));
