@@ -1026,6 +1026,41 @@ namespace System.Text.Json.Serialization.Tests
 
         private static void VerifyIgnore<T>(bool skip1, bool skip2, bool skip3, bool addMissing = false)
         {
+            static IDictionary<string, int> GetProperty(T objectToVerify, string propertyName)
+            {
+                return (IDictionary<string, int>)objectToVerify.GetType().GetProperty(propertyName).GetValue(objectToVerify);
+            }
+
+            void Verify(T objectToVerify)
+            {
+                if (skip1)
+                {
+                    Assert.Null(GetProperty(objectToVerify, "Skipped1"));
+                }
+                else
+                {
+                    Assert.Equal(1, GetProperty(objectToVerify, "Parsed1")["Key"]);
+                }
+
+                if (skip2)
+                {
+                    Assert.Null(GetProperty(objectToVerify, "Skipped2"));
+                }
+                else
+                {
+                    Assert.Equal(2, GetProperty(objectToVerify, "Parsed2")["Key"]);
+                }
+
+                if (skip3)
+                {
+                    Assert.Null(GetProperty(objectToVerify, "Skipped3"));
+                }
+                else
+                {
+                    Assert.Equal(3, GetProperty(objectToVerify, "Parsed3")["Key"]);
+                }
+            }
+
             // Tests that the parser picks back up after skipping/draining ignored elements.
             StringBuilder json = new StringBuilder(@"{");
 
@@ -1072,40 +1107,15 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             // Deserialize and verify.
+            string jsonString = json.ToString();
+            T obj = JsonSerializer.Deserialize<T>(jsonString);
+            Verify(obj);
 
-            T obj = JsonSerializer.Deserialize<T>(json.ToString());
-
-            IDictionary<string, int> GetProperty(string propertyName)
-            {
-                return (IDictionary<string, int>)obj.GetType().GetProperty(propertyName).GetValue(obj);
-            }
-
-            if (skip1)
-            {
-                Assert.Null(GetProperty("Skipped1"));
-            }
-            else
-            {
-                Assert.Equal(1, GetProperty("Parsed1")["Key"]);
-            }
-
-            if (skip2)
-            {
-                Assert.Null(GetProperty("Skipped2"));
-            }
-            else
-            {
-                Assert.Equal(2, GetProperty("Parsed2")["Key"]);
-            }
-
-            if (skip3)
-            {
-                Assert.Null(GetProperty("Skipped3"));
-            }
-            else
-            {
-                Assert.Equal(3, GetProperty("Parsed3")["Key"]);
-            }
+            // Round-trip and verify.
+            // Any skipped properties due to lack of a setter will now be "null" when serialized instead of "{}".
+            string jsonStringRoundTripped = JsonSerializer.Serialize(obj);
+            T objRoundTripped = JsonSerializer.Deserialize<T>(jsonStringRoundTripped);
+            Verify(objRoundTripped);
         }
 
         public class ClassWithPopulatedDictionaryAndSetter
