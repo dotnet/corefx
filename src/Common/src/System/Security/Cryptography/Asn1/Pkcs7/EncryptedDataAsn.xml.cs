@@ -9,13 +9,13 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Asn1;
 
-namespace System.Security.Cryptography.Pkcs.Asn1
+namespace System.Security.Cryptography.Asn1.Pkcs7
 {
     [StructLayout(LayoutKind.Sequential)]
     internal partial struct EncryptedDataAsn
     {
         internal int Version;
-        internal System.Security.Cryptography.Pkcs.Asn1.EncryptedContentInfoAsn EncryptedContentInfo;
+        internal System.Security.Cryptography.Asn1.Pkcs7.EncryptedContentInfoAsn EncryptedContentInfo;
         internal System.Security.Cryptography.Asn1.AttributeAsn[] UnprotectedAttributes;
       
         internal void Encode(AsnWriter writer)
@@ -82,7 +82,7 @@ namespace System.Security.Cryptography.Pkcs.Asn1
                 sequenceReader.ThrowIfNotEmpty();
             }
 
-            System.Security.Cryptography.Pkcs.Asn1.EncryptedContentInfoAsn.Decode(sequenceReader, out decoded.EncryptedContentInfo);
+            System.Security.Cryptography.Asn1.Pkcs7.EncryptedContentInfoAsn.Decode(sequenceReader, out decoded.EncryptedContentInfo);
 
             if (sequenceReader.HasData && sequenceReader.PeekTag().HasSameClassAndValue(new Asn1Tag(TagClass.ContextSpecific, 1)))
             {
