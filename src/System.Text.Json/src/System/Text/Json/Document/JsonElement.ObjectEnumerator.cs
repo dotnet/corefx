@@ -19,26 +19,22 @@ namespace System.Text.Json
             private readonly JsonElement _target;
             private int _curIdx;
             private readonly int _endIdx;
-            private JsonObjectEnumerator _jsonObjectEnumerator;
+            private JsonObjectProperty _current;
 
             internal ObjectEnumerator(JsonElement target)
             {
                 _target = target;
                 _curIdx = -1;
+                _current = null;
 
                 if (target._parent is JsonDocument document)
                 {
                     Debug.Assert(target.TokenType == JsonTokenType.StartObject);
-
                     _endIdx = document.GetEndIndex(_target._idx, includeEndElement: false);
-                    _jsonObjectEnumerator = default;
                 }
                 else
                 {
                     _endIdx = -1;
-
-                    var jsonObject = (JsonObject)target._parent;
-                    _jsonObjectEnumerator = new JsonObjectEnumerator(jsonObject);
                 }
             }
 
@@ -47,23 +43,14 @@ namespace System.Text.Json
             {
                 get
                 {
-                    if (!_target.IsImmutable)
+                    if (_target._parent is JsonNode)
                     {
-                        KeyValuePair<string, JsonNode> propertyPair = _jsonObjectEnumerator.Current;
-
-                        // propertyPair.Key is null before first after last call of MoveNext
-                        if (propertyPair.Key == null)
+                        if (_current == null)
                         {
                             return default;
                         }
 
-                        // null JsonNode case
-                        if (propertyPair.Value == null)
-                        {
-                            return new JsonProperty(new JsonElement(null), propertyPair.Key);
-                        }
-
-                        return new JsonProperty(propertyPair.Value.AsJsonElement(), propertyPair.Key);
+                        return new JsonProperty(_current._value.AsJsonElement(), _current._name);
                     }
 
                     if (_curIdx < 0)
@@ -106,9 +93,9 @@ namespace System.Text.Json
             public void Dispose()
             {
                 _curIdx = _endIdx;
-                if (!_target.IsImmutable)
+                if (_target._parent is JsonNode)
                 {
-                    _jsonObjectEnumerator.Dispose();
+                    _current = null;
                 }
             }
 
@@ -116,9 +103,9 @@ namespace System.Text.Json
             public void Reset()
             {
                 _curIdx = -1;
-                if (!_target.IsImmutable)
+                if (_target._parent is JsonNode)
                 {
-                    ((IEnumerator)_jsonObjectEnumerator).Reset();
+                    _current = null;
                 }
             }
 
@@ -128,9 +115,21 @@ namespace System.Text.Json
             /// <inheritdoc />
             public bool MoveNext()
             {
-                if (!_target.IsImmutable)
+                if (_target._parent is JsonObject jsonObject)
                 {
-                    return _jsonObjectEnumerator.MoveNext();
+                    if (_current == null)
+                    {
+                        _current = jsonObject._first;
+                        return true;
+                    }
+
+                    if (_current._next != null)
+                    {
+                        _current = _current._next;
+                        return true;
+                    }
+
+                    return false;
                 }
 
                 if (_curIdx >= _endIdx)

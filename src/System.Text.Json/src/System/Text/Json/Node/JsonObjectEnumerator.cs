@@ -60,6 +60,6 @@ namespace System.Text.Json
         /// <summary>
         ///   Sets the enumerator to its initial position, which is before the first element in the JSON object.
         /// </summary>
-        void IEnumerator.Reset() => _current = _first;
+        void IEnumerator.Reset() => _current = null;
     }
 }

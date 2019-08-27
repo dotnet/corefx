@@ -64,11 +64,6 @@ namespace System.Text.Json
 
                 var jsonNode = (JsonNode)_parent;
 
-                if (jsonNode == null)
-                {
-                    return JsonValueKind.Null;
-                }
-
                 return jsonNode.ValueKind;
             }
         }
