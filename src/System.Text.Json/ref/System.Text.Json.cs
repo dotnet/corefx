@@ -347,8 +347,8 @@ namespace System.Text.Json
     }
     public sealed partial class JsonObject : System.Text.Json.JsonNode, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>>, System.Collections.IEnumerable
     {
-        public JsonObject(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>> jsonProperties, System.Text.Json.DuplicatePropertyNameHandling duplicatePropertyNameHandling = System.Text.Json.DuplicatePropertyNameHandling.Replace) { }
-        public JsonObject(System.Text.Json.DuplicatePropertyNameHandling duplicatePropertyNameHandling = System.Text.Json.DuplicatePropertyNameHandling.Replace) { }
+        public JsonObject() { }
+        public JsonObject(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>> jsonProperties) { }
         public System.Text.Json.JsonNode this[string propertyName] { get { throw null; } set { } }
         public System.Collections.Generic.ICollection<string> PropertyNames { get { throw null; } }
         public System.Collections.Generic.ICollection<System.Text.Json.JsonNode> PropertyValues { get { throw null; } }

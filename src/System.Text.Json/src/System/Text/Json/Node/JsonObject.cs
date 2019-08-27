@@ -5,6 +5,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace System.Text.Json
 {
@@ -13,39 +14,25 @@ namespace System.Text.Json
     /// </summary>
     public sealed class JsonObject : JsonNode, IEnumerable<KeyValuePair<string, JsonNode>>
     {
-        internal readonly Dictionary<string, JsonNode> _dictionary;
-        private readonly DuplicatePropertyNameHandling _duplicatePropertyNameHandling;
+        internal readonly Dictionary<string, JsonObjectProperty> _dictionary;
+        internal JsonObjectProperty _first;
+        internal JsonObjectProperty _last;
+        internal int _version;
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="JsonObject"/> class representing the empty object.
         /// </summary>
-        /// <param name="duplicatePropertyNameHandling">Specifies the way of handling duplicate property names.</param>
-        /// <exception cref="ArgumentException">
-        ///   Provided manner of handling duplicates does not exist.
-        /// </exception>
-        public JsonObject(DuplicatePropertyNameHandling duplicatePropertyNameHandling = DuplicatePropertyNameHandling.Replace)
+        public JsonObject()
         {
-            if ((uint)duplicatePropertyNameHandling > (uint)DuplicatePropertyNameHandling.Error)
-            {
-                throw new ArgumentOutOfRangeException(SR.InvalidDuplicatePropertyNameHandling);
-            }
-
-            _dictionary = new Dictionary<string, JsonNode>();
-            _duplicatePropertyNameHandling = duplicatePropertyNameHandling;
+            _dictionary = new Dictionary<string, JsonObjectProperty>();
+            _version = 0;
         }
-
         /// <summary>
         ///   Initializes a new instance of the <see cref="JsonObject"/> class representing provided set of JSON properties.
         /// </summary>
         /// <param name="jsonProperties">>Properties to represent as a JSON object.</param>
-        /// <param name="duplicatePropertyNameHandling">Specifies the way of handling duplicate property names.</param>
-        /// <exception cref="ArgumentException">
-        ///   Provided collection contains duplicates if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
-        /// </exception>
-        public JsonObject(
-            IEnumerable<KeyValuePair<string, JsonNode>> jsonProperties,
-            DuplicatePropertyNameHandling duplicatePropertyNameHandling = DuplicatePropertyNameHandling.Replace)
-            : this(duplicatePropertyNameHandling)
+        public JsonObject(IEnumerable<KeyValuePair<string, JsonNode>> jsonProperties)
+            : this()
             => AddRange(jsonProperties);
 
         /// <summary>
@@ -61,9 +48,20 @@ namespace System.Text.Json
             set
             {
                 if (propertyName == null)
+                {
                     throw new ArgumentNullException(nameof(propertyName));
+                }
 
-                _dictionary[propertyName] = value ?? new JsonNull();
+                if (_dictionary.ContainsKey(propertyName))
+                {
+                    _dictionary[propertyName]._value = value ?? new JsonNull();
+                }
+                else
+                {
+                    Add(propertyName, value);
+                }
+
+                _version++;
             }
         }
 
@@ -85,11 +83,9 @@ namespace System.Text.Json
         ///   Provided property name is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
+        ///   Property name to add already exists.
         /// </exception>
-        /// <remarks>
-        ///   Null property value is allowed and represents a null JSON node.
-        /// </remarks>
+        /// <remarks>Null value is allowed and will be converted to the <see cref="JsonNull"/> instance.</remarks>
         public void Add(string propertyName, JsonNode propertyValue)
         {
             if (propertyName == null)
@@ -99,18 +95,26 @@ namespace System.Text.Json
 
             if (_dictionary.ContainsKey(propertyName))
             {
-                switch (_duplicatePropertyNameHandling)
-                {
-                    case DuplicatePropertyNameHandling.Ignore:
-                        return;
-                    case DuplicatePropertyNameHandling.Error:
-                        throw new ArgumentException(SR.Format(SR.JsonObjectDuplicateKey, propertyName));
-                }
-
-                Debug.Assert(_duplicatePropertyNameHandling == DuplicatePropertyNameHandling.Replace);
+                throw new ArgumentException(SR.Format(SR.JsonObjectDuplicateKey, propertyName));
             }
 
-            _dictionary[propertyName] = propertyValue ?? new JsonNull();
+            // Add property to linked list:
+            if (_last == null)
+            {
+                _last = new JsonObjectProperty(propertyName, propertyValue, null, null);
+                _first = _last;
+            }
+            else
+            {
+                var newJsonObjectProperty = new JsonObjectProperty(propertyName, propertyValue, _last, null);
+                _last._next = newJsonObjectProperty;
+                _last = newJsonObjectProperty;
+            }
+
+            // Add property to dictionary:
+            _dictionary[propertyName] = _last;
+
+            _version++;
         }
 
         /// <summary>
@@ -177,7 +181,46 @@ namespace System.Text.Json
         /// <exception cref="ArgumentNullException">
         ///   Provided property name is null.
         /// </exception>
-        public bool Remove(string propertyName) => propertyName != null ? _dictionary.Remove(propertyName) : throw new ArgumentNullException(nameof(propertyName));
+        public bool Remove(string propertyName)
+        {
+            if (propertyName == null)
+            {
+                throw new ArgumentNullException(nameof(propertyName));
+            }
+
+            if (!_dictionary.ContainsKey(propertyName))
+            {
+                return false;
+            }
+
+            JsonObjectProperty propertyToRemove = _dictionary[propertyName];
+
+            // Adjust linked list pointers:
+
+            if (propertyToRemove._prev == null)
+            {
+                _first = propertyToRemove._next;
+            }
+            else
+            {
+                propertyToRemove._prev._next = propertyToRemove._next;
+            }
+
+            if (propertyToRemove._next == null)
+            {
+                _last = propertyToRemove._prev;
+            }
+            else
+            {
+                propertyToRemove._next._prev = propertyToRemove._prev;
+            }
+
+            // Remove property from dictionary:
+            _dictionary.Remove(propertyName);
+
+            _version++;
+            return true;
+        }
 
         /// <summary>
         ///   Determines whether a property is in a JSON object.
@@ -221,9 +264,18 @@ namespace System.Text.Json
         /// </returns>
         /// <remarks>
         ///   When returns <see langword="false"/>, the value of <paramref name="jsonNode"/> is meaningless.
-        ///   Null <paramref name="jsonNode"/> doesn't mean the property value was "null" unless <see langword="true"/> is returned.
         /// </remarks>
-        public bool TryGetPropertyValue(string propertyName, out JsonNode jsonNode) => _dictionary.TryGetValue(propertyName, out jsonNode);
+        public bool TryGetPropertyValue(string propertyName, out JsonNode jsonNode)
+        {
+            if (_dictionary.TryGetValue(propertyName, out JsonObjectProperty jsonObjectProperty))
+            {
+                jsonNode = jsonObjectProperty._value;
+                return true;
+            }
+
+            jsonNode = null;
+            return false;
+        }
 
         /// <summary>
         ///   Returns the JSON object value of a property with the specified name.
@@ -317,7 +369,7 @@ namespace System.Text.Json
         /// <summary>
         ///  A collection containing the property values of JSON object.
         /// </summary>
-        public ICollection<JsonNode> PropertyValues => _dictionary.Values;
+        public ICollection<JsonNode> PropertyValues => _dictionary.Values.Select(jsonObjectProperty => jsonObjectProperty._value).ToList();
 
         /// <summary>
         ///   Returns an enumerator that iterates through the JSON object properties.
@@ -352,9 +404,9 @@ namespace System.Text.Json
         /// <returns>A new JSON object that is a copy of this instance.</returns>
         public override JsonNode Clone()
         {
-            var jsonObject = new JsonObject(_duplicatePropertyNameHandling);
+            var jsonObject = new JsonObject();
 
-            foreach (KeyValuePair<string, JsonNode> property in _dictionary)
+            foreach (KeyValuePair<string, JsonNode> property in this)
             {
                 jsonObject.Add(property.Key, property.Value.Clone());
             }

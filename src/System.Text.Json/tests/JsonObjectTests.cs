@@ -34,39 +34,21 @@ namespace System.Text.Json.Tests
             Assert.True(((JsonBoolean)jsonObject["boolean"]).Value);
         }
 
-        private static void TestDuplicates(DuplicatePropertyNameHandling duplicatePropertyNameHandling, string previousValue, string newValue, string expectedValue, bool useDefaultCtor = false)
-        {
-            JsonObject jsonObject = useDefaultCtor ? new JsonObject() : new JsonObject(duplicatePropertyNameHandling);
-            jsonObject.Add("property", new JsonString(previousValue));
-
-            Assert.Equal(previousValue, ((JsonString)jsonObject["property"]).Value);
-
-            jsonObject.Add("property", new JsonString(newValue));
-
-            Assert.Equal(expectedValue, ((JsonString) jsonObject["property"]).Value);
-
-            // with indexer, property should change no matter which duplicates handling option is chosen:
-            jsonObject["property"] = "indexer value";
-            Assert.Equal("indexer value", ((JsonString)jsonObject["property"]).Value);
-        }
-
-        [Theory]
-        [InlineData(DuplicatePropertyNameHandling.Replace, "value1", "value2", "value2")]
-        [InlineData(DuplicatePropertyNameHandling.Replace, "value1", "value2", "value2", true)]
-        [InlineData(DuplicatePropertyNameHandling.Ignore, "value1", "value2", "value1")]
-        public static void TestDuplicatesReplaceAndIgnore(DuplicatePropertyNameHandling duplicatePropertyNameHandling, string previousValue, string newValue, string expectedValue, bool useDefaultCtor = false)
-        {
-            TestDuplicates(duplicatePropertyNameHandling, previousValue, newValue, expectedValue, useDefaultCtor);
-        }
-
         [Fact]
-        public static void TestDuplicatesError()
+        public static void TestDuplicates()
         {
-            Assert.Throws<ArgumentException>(() => TestDuplicates(DuplicatePropertyNameHandling.Error, "", "", ""));
+            Assert.Throws<ArgumentException>(() =>
+            {
+                JsonObject jsonObject = new JsonObject();
+                jsonObject.Add("property", "value1");
+                jsonObject.Add("property", "value2");
+            });
 
-            JsonObject jsonObject = new JsonObject(DuplicatePropertyNameHandling.Error) { { "property", "" } };
+            JsonObject jsonObject = new JsonObject() { { "property", "value" } };
+            Assert.Equal("value", jsonObject["property"]);
+            
             jsonObject["property"] = "indexer value";
-            Assert.Equal("indexer value", ((JsonString)jsonObject["property"]).Value);
+            Assert.Equal("indexer value", jsonObject["property"]);
         }
 
         [Fact]
@@ -704,14 +686,6 @@ namespace System.Text.Json.Tests
             });
             Assert.Throws<ArgumentNullException>(() => new JsonObject().Remove(null));
             Assert.Throws<ArgumentNullException>(() => new JsonObject().ContainsProperty(null));
-        }
-
-        [Fact]
-        public static void TestDuplicatesEnumOutOfRange()
-        {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new JsonObject((DuplicatePropertyNameHandling)123));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new JsonObject((DuplicatePropertyNameHandling)(-1)));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new JsonObject((DuplicatePropertyNameHandling)3));
         }
     }
 }
