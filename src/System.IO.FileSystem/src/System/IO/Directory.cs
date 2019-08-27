@@ -285,6 +285,11 @@ namespace System.IO
             if (!FileSystem.DirectoryExists(fullsourceDirName) && !FileSystem.FileExists(fullsourceDirName))
                 throw new DirectoryNotFoundException(SR.Format(SR.IO_PathNotFound_Path, fullsourceDirName));
 
+            // As our Linux x86/x64 builds won't throw an exception for a directory already existing
+            // we do a case sensitive compare here to ensure.
+            if (Directory.Exists(fulldestDirName) && GetDirectories(fulldestDirName, Path.GetFileName(fulldestDirName)).Any())
+                throw new IOException((SR.Format(SR.IO_AlreadyExists_Name, fulldestDirName)));
+
             FileSystem.MoveDirectory(fullsourceDirName, fulldestDirName);
         }
 
