@@ -124,7 +124,15 @@ namespace System.Text.Json
         ///   Converts a <see cref="string"/> to a <see cref="JsonString"/>.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JsonNode(string value) => new JsonString(value);
+        public static implicit operator JsonNode(string value)
+        {
+            if (value == null)
+            {
+                return new JsonNull();
+            }
+
+            return new JsonString(value);
+        }
 
         /// <summary>
         ///   Converts a <see cref="ReadOnlySpan{Char}"/> to a <see cref="JsonString"/>.

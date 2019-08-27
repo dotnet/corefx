@@ -35,7 +35,7 @@ namespace System.Text.Json.Tests
             Assert.Equal("property value", ((JsonString)jsonObject["text"]).Value);
             Assert.True(((JsonBoolean)jsonObject["boolean true"]).Value);
             Assert.False(((JsonBoolean)jsonObject["boolean false"]).Value);
-            Assert.Null(jsonObject["null"]);
+            Assert.IsType<JsonNull>(jsonObject["null"]);
             Assert.Equal(17, ((JsonNumber)jsonObject["int"]).GetInt32());
             Assert.Equal(3.14, ((JsonNumber)jsonObject["double"]).GetDouble());
             Assert.Equal("3e100", ((JsonNumber)jsonObject["scientific"]).ToString());

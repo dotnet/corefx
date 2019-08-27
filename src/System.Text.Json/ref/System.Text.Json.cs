@@ -259,6 +259,18 @@ namespace System.Text.Json
         public static System.Text.Json.JsonNode Parse(string json) { throw null; }
         public static bool TryGetNode(System.Text.Json.JsonElement jsonElement, out System.Text.Json.JsonNode jsonNode) { throw null; }
     }
+    public sealed partial class JsonNull : System.Text.Json.JsonNode, System.IEquatable<System.Text.Json.JsonNull>
+    {
+        public JsonNull() { }
+        public override System.Text.Json.JsonValueKind ValueKind { get { throw null; } }
+        public override System.Text.Json.JsonNode Clone() { throw null; }
+        public override bool Equals(object obj) { throw null; }
+        public bool Equals(System.Text.Json.JsonNull other) { throw null; }
+        public override int GetHashCode() { throw null; }
+        public static bool operator ==(System.Text.Json.JsonNull left, System.Text.Json.JsonNull right) { throw null; }
+        public static bool operator !=(System.Text.Json.JsonNull left, System.Text.Json.JsonNull right) { throw null; }
+        public override string ToString() { throw null; }
+    }
     public sealed partial class JsonNumber : System.Text.Json.JsonNode, System.IEquatable<System.Text.Json.JsonNumber>
     {
         public JsonNumber() { }

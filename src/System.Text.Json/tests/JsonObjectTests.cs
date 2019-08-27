@@ -173,7 +173,7 @@ namespace System.Text.Json.Tests
             Assert.Equal("Kasia", ((JsonString)developer["n\\u0061me"]).Value);
             Assert.Equal(22, ((JsonNumber)developer["age"]).GetInt32());
             Assert.True(((JsonBoolean)developer["is developer"]).Value);
-            Assert.Null(developer["null property"]);
+            Assert.IsType<JsonNull>(developer["null property"]);
         }
 
         [Fact]

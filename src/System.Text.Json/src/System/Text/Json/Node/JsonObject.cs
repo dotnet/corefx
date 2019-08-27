@@ -63,7 +63,7 @@ namespace System.Text.Json
                 if (propertyName == null)
                     throw new ArgumentNullException(nameof(propertyName));
 
-                _dictionary[propertyName] = value;
+                _dictionary[propertyName] = value ?? new JsonNull();
             }
         }
 
@@ -110,7 +110,7 @@ namespace System.Text.Json
                 Debug.Assert(_duplicatePropertyNameHandling == DuplicatePropertyNameHandling.Replace);
             }
 
-            _dictionary[propertyName] = propertyValue;
+            _dictionary[propertyName] = propertyValue ?? new JsonNull();
         }
 
         /// <summary>
@@ -160,8 +160,9 @@ namespace System.Text.Json
             var jsonArray = new JsonArray();
             foreach (JsonNode value in propertyValues)
             {
-                jsonArray.Add(value);
+                jsonArray.Add(value ?? new JsonNull());
             }
+
             Add(propertyName, (JsonNode)jsonArray);
         }
 
