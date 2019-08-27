@@ -18,7 +18,6 @@ namespace System.Net.Http
         private static readonly TimeSpan s_defaultTimeout = TimeSpan.FromSeconds(100);
         private static readonly TimeSpan s_maxTimeout = TimeSpan.FromMilliseconds(int.MaxValue);
         private static readonly TimeSpan s_infiniteTimeout = Threading.Timeout.InfiniteTimeSpan;
-        private static readonly Func<Exception, bool> NoTimeoutPredicate = _ => false;
         private const HttpCompletionOption defaultCompletionOption = HttpCompletionOption.ResponseContentRead;
 
         private volatile bool _operationStarted;
@@ -481,18 +480,14 @@ namespace System.Net.Http
             bool disposeCts;
             bool hasTimeout = _timeout != s_infiniteTimeout;
             CancellationTokenSource pendingRequestsCts = _pendingRequestsCts;
-            Func<Exception, bool> isTimeout = NoTimeoutPredicate;
+            TimeoutChecker timeoutChecker = default;
             if (hasTimeout || cancellationToken.CanBeCanceled)
             {
                 disposeCts = true;
                 cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, pendingRequestsCts.Token);
                 if (hasTimeout)
                 {
-                    isTimeout = e =>
-                        e is OperationCanceledException
-                        && cts.IsCancellationRequested
-                        && !pendingRequestsCts.IsCancellationRequested
-                        && !cancellationToken.IsCancellationRequested;
+                    timeoutChecker = new TimeoutChecker(cancellationToken, pendingRequestsCts);
                     cts.CancelAfter(_timeout);
                 }
             }
@@ -515,12 +510,12 @@ namespace System.Net.Http
             }
 
             return completionOption == HttpCompletionOption.ResponseContentRead && !string.Equals(request.Method.Method, "HEAD", StringComparison.OrdinalIgnoreCase) ?
-                FinishSendAsyncBuffered(sendTask, request, cts, disposeCts, isTimeout) :
-                FinishSendAsyncUnbuffered(sendTask, request, cts, disposeCts, isTimeout);
+                FinishSendAsyncBuffered(sendTask, request, cts, disposeCts, timeoutChecker) :
+                FinishSendAsyncUnbuffered(sendTask, request, cts, disposeCts, timeoutChecker);
         }
 
         private async Task<HttpResponseMessage> FinishSendAsyncBuffered(
-            Task<HttpResponseMessage> sendTask, HttpRequestMessage request, CancellationTokenSource cts, bool disposeCts, Func<Exception, bool> isTimeout)
+            Task<HttpResponseMessage> sendTask, HttpRequestMessage request, CancellationTokenSource cts, bool disposeCts, TimeoutChecker timeoutChecker)
         {
             HttpResponseMessage response = null;
             try
@@ -541,7 +536,7 @@ namespace System.Net.Http
                 if (NetEventSource.IsEnabled) NetEventSource.ClientSendCompleted(this, response, request);
                 return response;
             }
-            catch (OperationCanceledException e) when (isTimeout(e))
+            catch (OperationCanceledException e) when (timeoutChecker.IsTimeout(e, cts))
             {
                 HandleFinishSendAsyncError(e, cts);
                 throw CreateTimeoutException(e);
@@ -559,7 +554,7 @@ namespace System.Net.Http
         }
 
         private async Task<HttpResponseMessage> FinishSendAsyncUnbuffered(
-            Task<HttpResponseMessage> sendTask, HttpRequestMessage request, CancellationTokenSource cts, bool disposeCts, Func<Exception, bool> isTimeout)
+            Task<HttpResponseMessage> sendTask, HttpRequestMessage request, CancellationTokenSource cts, bool disposeCts, TimeoutChecker timeoutChecker)
         {
             try
             {
@@ -572,7 +567,7 @@ namespace System.Net.Http
                 if (NetEventSource.IsEnabled) NetEventSource.ClientSendCompleted(this, response, request);
                 return response;
             }
-            catch (OperationCanceledException e) when (isTimeout(e))
+            catch (OperationCanceledException e) when (timeoutChecker.IsTimeout(e, cts))
             {
                 HandleFinishSendAsyncError(e, cts);
                 throw CreateTimeoutException(e);
@@ -775,6 +770,27 @@ namespace System.Net.Http
                 SR.net_http_timeout,
                 new TimeoutException(SR.net_http_timeout, innerException),
                 true);
+        }
+
+        private readonly struct TimeoutChecker
+        {
+            private readonly CancellationToken _cancellationToken;
+            private readonly CancellationTokenSource _pendingRequestsCts;
+
+            public TimeoutChecker(CancellationToken cancellationToken, CancellationTokenSource pendingRequestsCts)
+            {
+                _cancellationToken = cancellationToken;
+                _pendingRequestsCts = pendingRequestsCts;
+            }
+
+            public bool IsTimeout(Exception e, CancellationTokenSource cts)
+            {
+                return _pendingRequestsCts != null // null if the struct has its default value
+                        && e is OperationCanceledException
+                        && cts.IsCancellationRequested
+                        && !_pendingRequestsCts.IsCancellationRequested
+                        && !_cancellationToken.IsCancellationRequested;
+            }
         }
 
         #endregion Private Helpers
