@@ -267,6 +267,9 @@
     <Compile Include="..\..\src\System\Net\Http\HttpRequestException.cs">
       <Link>ProductionCode\System\Net\Http\HttpRequestException.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\System\Net\Http\RequestRetryType.cs">
+      <Link>ProductionCode\System\Net\Http\RequestRetryType.cs</Link>
+    </Compile>
     <Compile Include="..\..\src\System\Net\Http\HttpRequestMessage.cs">
       <Link>ProductionCode\System\Net\Http\HttpRequestMessage.cs</Link>
     </Compile>
