@@ -101,7 +101,7 @@ namespace System.Text.Json.Tests
 
             string property = null;
             spanValue = property.AsSpan();
-            jsonObject.Add("span", spanValue);
+            jsonObject["span"] = spanValue;
             Assert.Equal("", ((JsonString)jsonObject["span"]).Value);
         }
 

@@ -101,12 +101,12 @@ namespace System.Text.Json
             // Add property to linked list:
             if (_last == null)
             {
-                _last = new JsonObjectProperty(propertyName, propertyValue, null, null);
+                _last = new JsonObjectProperty(propertyName, propertyValue ?? new JsonNull(), null, null);
                 _first = _last;
             }
             else
             {
-                var newJsonObjectProperty = new JsonObjectProperty(propertyName, propertyValue, _last, null);
+                var newJsonObjectProperty = new JsonObjectProperty(propertyName, propertyValue ?? new JsonNull(), _last, null);
                 _last._next = newJsonObjectProperty;
                 _last = newJsonObjectProperty;
             }

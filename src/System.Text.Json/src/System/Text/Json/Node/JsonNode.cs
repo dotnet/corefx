@@ -113,7 +113,7 @@ namespace System.Text.Json
                 case JsonValueKind.False:
                     return new JsonBoolean(false);
                 case JsonValueKind.Null:
-                    return null;
+                    return new JsonNull();
                 default:
                     Debug.Assert(jsonElement.ValueKind == JsonValueKind.Undefined, "No handler for JsonValueKind.{jsonElement.ValueKind}");
                     throw ThrowHelper.GetJsonElementWrongTypeException(JsonValueKind.Undefined, jsonElement.ValueKind);
