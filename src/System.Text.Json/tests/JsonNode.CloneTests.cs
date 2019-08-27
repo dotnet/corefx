@@ -6,7 +6,7 @@ using Xunit;
 
 namespace System.Text.Json.Tests
 {
-    public static class JsonNodeCloneTests
+    public static partial class JsonNodeTests
     { 
         [Fact]
         public static void TestCloneJsonArray()

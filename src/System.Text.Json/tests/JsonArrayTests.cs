@@ -333,7 +333,7 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void TestClean()
+        public static void TestClear()
         {
             var jsonArray = new JsonArray { 1, 2, 3 };
             

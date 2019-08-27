@@ -6,7 +6,7 @@ using Xunit;
 
 namespace System.Text.Json.Tests
 {
-    public static class JsonNodeParseTests
+    public static partial class JsonNodeTests
     {
         private static string jsonSampleString = @"
             {

@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.Text.Json.Tests
 {
-    public static class JsonNodeToJsonElementTests
+    public static partial class JsonNodeTests
     {
         [Fact]
         public static void TestAsJsonElement()
@@ -30,12 +30,12 @@ namespace System.Text.Json.Tests
             Assert.Equal("text", enumerator.Current.Name);
             Assert.Equal(JsonValueKind.String, enumerator.Current.Value.ValueKind);
             Assert.Equal("property value", enumerator.Current.Value.GetString());
-           
+
             enumerator.MoveNext();
             Assert.Equal("boolean", enumerator.Current.Name);
             Assert.Equal(JsonValueKind.True, enumerator.Current.Value.ValueKind);
             Assert.True(enumerator.Current.Value.GetBoolean());
-            
+
             enumerator.MoveNext();
             Assert.Equal("number", enumerator.Current.Name);
             Assert.Equal(15, enumerator.Current.Value.GetInt32());
@@ -54,7 +54,7 @@ namespace System.Text.Json.Tests
             innerEnumerator.MoveNext();
             Assert.Equal(JsonValueKind.String, innerEnumerator.Current.ValueKind);
             Assert.Equal("value1", innerEnumerator.Current.GetString());
-            
+
             innerEnumerator.MoveNext();
             Assert.Equal(JsonValueKind.String, innerEnumerator.Current.ValueKind);
             Assert.Equal("value2", innerEnumerator.Current.GetString());

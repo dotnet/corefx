@@ -84,10 +84,10 @@ namespace System.Text.Json.Tests
         public static IEnumerable<object[]> DateTimeData =>
            new List<object[]>
            {
-                       new object[] { new DateTime(DateTime.MinValue.Ticks, DateTimeKind.Utc) },
-                       new object[] { new DateTime(2019, 1, 1) },
-                       new object[] { new DateTime(2019, 1, 1, new GregorianCalendar()) },
-                       new object[] { new DateTime(2019, 1, 1, new ChineseLunisolarCalendar()) }
+                new object[] { new DateTime(DateTime.MinValue.Ticks, DateTimeKind.Utc) },
+                new object[] { new DateTime(2019, 1, 1) },
+                new object[] { new DateTime(2019, 1, 1, new GregorianCalendar()) },
+                new object[] { new DateTime(2019, 1, 1, new ChineseLunisolarCalendar()) }
            };
 
         [Theory]
