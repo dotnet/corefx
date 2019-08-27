@@ -285,9 +285,18 @@ namespace System.IO
             if (!FileSystem.DirectoryExists(fullsourceDirName) && !FileSystem.FileExists(fullsourceDirName))
                 throw new DirectoryNotFoundException(SR.Format(SR.IO_PathNotFound_Path, fullsourceDirName));
 
+
+            string destinationDirectoryName = Path.GetFileName(destDirName);
+            // Here we have a bool to check if they're equal, but with different casing
+            // We allowing moving foo to the same directory, but renaming with a different case.
+            bool sameDirectoryWithDifferentCasing =
+                string.Equals(sourcePath, destPath, StringComparison.OrdinalIgnoreCase);
+
             // As our Linux x86/x64 builds won't throw an exception for a directory already existing
             // we do a case sensitive compare here to ensure.
-            if (Directory.Exists(fulldestDirName) && GetDirectories(fulldestDirName, Path.GetFileName(fulldestDirName)).Any())
+            // this is so if we move /foo to bar/fOO it fails.
+            if (!sameDirectoryWithDifferentCasing && FileSystem.DirectoryExists(fulldestDirName)
+                && GetDirectories(Path.GetDirectoryName(fulldestDirName)).Any(dir => dir.Equals(fulldestDirName, StringComparison.OrdinalIgnoreCase)))
                 throw new IOException((SR.Format(SR.IO_AlreadyExists_Name, fulldestDirName)));
 
             FileSystem.MoveDirectory(fullsourceDirName, fulldestDirName);
