@@ -19,7 +19,7 @@ namespace System.Text.Json.Serialization
     ///     should not be read-only or fixed-size (arrays).
     ///   </para>
     ///   <para>
-    ///     <see cref="JsonDeserializeAttribute"/> is ignored when a public set operation is defined.
+    ///     <see cref="JsonDeserializeAttribute"/> is ignored when a public set operation is defined or property is a value type.
     ///   </para>
     /// </remarks>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]

@@ -360,6 +360,9 @@ namespace System.Text.Json.Serialization.Tests
         public class SimpleTestClassUsingJsonDeserialize
         {
             [JsonDeserialize]
+            public int MyValueType { get; } = 18;
+
+            [JsonDeserialize]
             public SimpleTestClass MyClass { get; } = new SimpleTestClass();
 
             [JsonDeserialize]
@@ -369,8 +372,9 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadClassUsingJsonDeserialize()
         {
-            string json = "{\"MyClass\":{\"MyInt32\":18}}";
+            string json = "{\"MyValueType\":20,\"MyClass\":{\"MyInt32\":18}}";
             SimpleTestClassUsingJsonDeserialize obj = JsonSerializer.Deserialize<SimpleTestClassUsingJsonDeserialize>(json);
+            Assert.Equal(18, obj.MyValueType);
             Assert.NotNull(obj.MyClass);
             Assert.Equal(18, obj.MyClass.MyInt32);
         }

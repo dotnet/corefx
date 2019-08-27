@@ -127,7 +127,7 @@ namespace System.Text.Json
             ShouldSerialize = HasGetter && (HasSetter || !Options.IgnoreReadOnlyProperties);
 
             // We deserialize if there is a setter or using the getter.
-            ShouldDeserialize = HasSetter || (DeserializeUsingGetter && HasGetter);
+            ShouldDeserialize = HasSetter || (DeserializeUsingGetter && HasGetter && ClassType != ClassType.Value);
 
             if (ShouldDeserialize &&
                 (ClassType == ClassType.Enumerable ||
