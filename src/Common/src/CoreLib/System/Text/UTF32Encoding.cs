@@ -294,7 +294,7 @@ namespace System.Text
             if (byteIndex < 0 || byteCount < 0)
                 throw new ArgumentOutOfRangeException((byteIndex < 0 ? nameof(byteIndex) : nameof(byteCount)), SR.ArgumentOutOfRange_NeedNonNegNum);
 
-            if ( bytes.Length - byteIndex < byteCount)
+            if (bytes.Length - byteIndex < byteCount)
                 throw new ArgumentOutOfRangeException(nameof(bytes), SR.ArgumentOutOfRange_IndexCountBuffer);
 
             if (charIndex < 0 || charIndex > chars.Length)
@@ -766,14 +766,14 @@ namespace System.Text
                     if (_bigEndian)
                     {
                         fallbackBytes = new byte[] {
-                            unchecked((byte)(iChar>>24)), unchecked((byte)(iChar>>16)),
-                            unchecked((byte)(iChar>>8)), unchecked((byte)(iChar)) };
+                            unchecked((byte)(iChar >> 24)), unchecked((byte)(iChar >> 16)),
+                            unchecked((byte)(iChar >> 8)), unchecked((byte)(iChar)) };
                     }
                     else
                     {
                         fallbackBytes = new byte[] {
-                            unchecked((byte)(iChar)), unchecked((byte)(iChar>>8)),
-                            unchecked((byte)(iChar>>16)), unchecked((byte)(iChar>>24)) };
+                            unchecked((byte)(iChar)), unchecked((byte)(iChar >> 8)),
+                            unchecked((byte)(iChar >> 16)), unchecked((byte)(iChar >> 24)) };
                     }
 
                     charCount += fallbackBuffer.InternalFallback(fallbackBytes, bytes);
@@ -915,14 +915,14 @@ namespace System.Text
                     if (_bigEndian)
                     {
                         fallbackBytes = new byte[] {
-                            unchecked((byte)(iChar>>24)), unchecked((byte)(iChar>>16)),
-                            unchecked((byte)(iChar>>8)), unchecked((byte)(iChar)) };
+                            unchecked((byte)(iChar >> 24)), unchecked((byte)(iChar >> 16)),
+                            unchecked((byte)(iChar >> 8)), unchecked((byte)(iChar)) };
                     }
                     else
                     {
                         fallbackBytes = new byte[] {
-                            unchecked((byte)(iChar)), unchecked((byte)(iChar>>8)),
-                            unchecked((byte)(iChar>>16)), unchecked((byte)(iChar>>24)) };
+                            unchecked((byte)(iChar)), unchecked((byte)(iChar >> 8)),
+                            unchecked((byte)(iChar >> 16)), unchecked((byte)(iChar >> 24)) };
                     }
 
                     // Chars won't be updated unless this works.
@@ -940,8 +940,8 @@ namespace System.Text
                         bytes -= 4;                                       // get back to where we were
                         iChar = 0;                                        // Remembering nothing
                         fallbackBuffer.InternalReset();
-                        ThrowCharsOverflow(decoder, chars == charStart);// Might throw, if no chars output
-                        break;                                          // Stop here, didn't throw
+                        ThrowCharsOverflow(decoder, chars == charStart); // Might throw, if no chars output
+                        break;                                           // Stop here, didn't throw
                     }
 
                     // Ignore the illegal character
@@ -963,8 +963,8 @@ namespace System.Text
                             "[UTF32Encoding.GetChars]Expected to have consumed bytes or throw (surrogate)");
                         bytes -= 4;                                       // get back to where we were
                         iChar = 0;                                        // Remembering nothing
-                        ThrowCharsOverflow(decoder, chars == charStart);// Might throw, if no chars output
-                        break;                                          // Stop here, didn't throw
+                        ThrowCharsOverflow(decoder, chars == charStart); // Might throw, if no chars output
+                        break;                                           // Stop here, didn't throw
                     }
 
                     *(chars++) = GetHighSurrogate(iChar);
@@ -980,8 +980,8 @@ namespace System.Text
                         "[UTF32Encoding.GetChars]Expected to have consumed bytes or throw (normal char)");
                     bytes -= 4;                                       // get back to where we were
                     iChar = 0;                                        // Remembering nothing
-                    ThrowCharsOverflow(decoder, chars == charStart);// Might throw, if no chars output
-                    break;                                          // Stop here, didn't throw
+                    ThrowCharsOverflow(decoder, chars == charStart); // Might throw, if no chars output
+                    break;                                           // Stop here, didn't throw
                 }
 
                 // Add the rest of the surrogate or our normal character
@@ -1022,7 +1022,7 @@ namespace System.Text
                 {
                     // Couldn't fallback.
                     fallbackBuffer.InternalReset();
-                    ThrowCharsOverflow(decoder, chars == charStart);// Might throw, if no chars output
+                    ThrowCharsOverflow(decoder, chars == charStart); // Might throw, if no chars output
                     // Stop here, didn't throw, backed up, so still nothing in buffer
                 }
                 else
@@ -1171,7 +1171,7 @@ namespace System.Text
 
         public override int GetHashCode()
         {
-            //Not great distribution, but this is relatively unlikely to be used as the key in a hashtable.
+            // Not great distribution, but this is relatively unlikely to be used as the key in a hashtable.
             return this.EncoderFallback.GetHashCode() + this.DecoderFallback.GetHashCode() +
                    CodePage + (_emitUTF32ByteOrderMark ? 4 : 0) + (_bigEndian ? 8 : 0);
         }

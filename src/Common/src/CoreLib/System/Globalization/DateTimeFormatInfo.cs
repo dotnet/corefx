@@ -1306,7 +1306,7 @@ namespace System.Globalization
             }
         }
 
-        internal bool HasSpacesInMonthNames =>(FormatFlags & DateTimeFormatFlags.UseSpacesInMonthNames) != 0;
+        internal bool HasSpacesInMonthNames => (FormatFlags & DateTimeFormatFlags.UseSpacesInMonthNames) != 0;
 
         internal bool HasSpacesInDayNames => (FormatFlags & DateTimeFormatFlags.UseSpacesInDayNames) != 0;
 
@@ -1338,7 +1338,7 @@ namespace System.Globalization
 
         /// <summary>
         /// Retrieve the array which contains the month names in genitive form.
-        /// If this culture does not use the gentive form, the normal month name is returned.
+        /// If this culture does not use the genitive form, the normal month name is returned.
         /// </summary>
         private string[] InternalGetGenitiveMonthNames(bool abbreviated)
         {
@@ -2301,14 +2301,15 @@ namespace System.Globalization
                     InsertHash(temp, GetAbbreviatedMonthName(i), TokenType.MonthToken, i);
                 }
 
-
                 if ((FormatFlags & DateTimeFormatFlags.UseGenitiveMonth) != 0)
                 {
+                    string [] genitiveMonthNames = InternalGetGenitiveMonthNames(abbreviated: false);
+                    string [] abbreviatedGenitiveMonthNames = InternalGetGenitiveMonthNames(abbreviated: true);
+
                     for (int i = 1; i <= 13; i++)
                     {
-                        string str;
-                        str = InternalGetMonthName(i, MonthNameStyles.Genitive, false);
-                        InsertHash(temp, str, TokenType.MonthToken, i);
+                        InsertHash(temp, genitiveMonthNames[i - 1], TokenType.MonthToken, i);
+                        InsertHash(temp, abbreviatedGenitiveMonthNames[i - 1], TokenType.MonthToken, i);
                     }
                 }
 
@@ -2324,7 +2325,6 @@ namespace System.Globalization
 
                 for (int i = 0; i < 7; i++)
                 {
-                    //String str = GetDayOfWeekNames()[i];
                     // We have to call public methods here to work with inherited DTFI.
                     string str = GetDayName((DayOfWeek)i);
                     InsertHash(temp, str, TokenType.DayOfWeekToken, i);
@@ -2423,7 +2423,6 @@ namespace System.Globalization
         {
             for (int i = 1; i <= 13; i++)
             {
-                //str = internalGetMonthName(i, MonthNameStyles.Regular, false);
                 // We have to call public methods here to work with inherited DTFI.
                 // Insert the month name first, so that they are at the front of abbreviated
                 // month names.
@@ -2637,7 +2636,7 @@ namespace System.Globalization
             TokenHashValue previousNode = hashTable[hashcode];
 
             // Insert the new node into the current slot.
-            hashTable[hashcode] = new TokenHashValue(str, tokenType, tokenValue); ;
+            hashTable[hashcode] = new TokenHashValue(str, tokenType, tokenValue);
 
             while (++pos < TOKEN_HASH_SIZE)
             {
@@ -2658,7 +2657,7 @@ namespace System.Globalization
                     return;
                 }
                 previousNode = temp;
-            };
+            }
             Debug.Fail("The hashtable is full.  This should not happen.");
         }
 

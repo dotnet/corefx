@@ -662,12 +662,12 @@ namespace System.Text
             // since we believe this to be relatively common and we can handle it more efficiently than
             // the base implementation.
 
-            if (((decoder is null) ? this.DecoderFallback: decoder.Fallback) is DecoderReplacementFallback replacementFallback
+            if ((decoder is null ? DecoderFallback : decoder.Fallback) is DecoderReplacementFallback replacementFallback
                 && replacementFallback.MaxCharCount == 1)
             {
                 char replacementChar = replacementFallback.DefaultString[0];
 
-                int numElementsToConvert = Math.Min( bytes.Length, chars.Length);
+                int numElementsToConvert = Math.Min(bytes.Length, chars.Length);
                 int idx = 0;
 
                 fixed (byte* pBytes = &MemoryMarshal.GetReference(bytes))

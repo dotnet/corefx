@@ -59,7 +59,7 @@ namespace System.Net.Http
                 }
             }
 
-            proxy  = new HttpWindowsProxy(proxyHelper, sessionHandle);
+            proxy = new HttpWindowsProxy(proxyHelper, sessionHandle);
             return true;
         }
 
@@ -101,11 +101,11 @@ namespace System.Net.Http
                         if (idx < proxyHelper.ProxyBypass.Length && proxyHelper.ProxyBypass[idx] == '[')
                         {
                             // Strip [] from IPv6 so we can use IdnHost laster for matching.
-                            idx +=1;
+                            idx += 1;
                         }
 
                         start = idx;
-                        while (idx < proxyHelper.ProxyBypass.Length && proxyHelper.ProxyBypass[idx] != ' ' && proxyHelper.ProxyBypass[idx] != ';' && proxyHelper.ProxyBypass[idx] != ']') {idx += 1; };
+                        while (idx < proxyHelper.ProxyBypass.Length && proxyHelper.ProxyBypass[idx] != ' ' && proxyHelper.ProxyBypass[idx] != ';' && proxyHelper.ProxyBypass[idx] != ']') { idx += 1; };
 
                         if (idx == start)
                         {
@@ -119,16 +119,16 @@ namespace System.Net.Http
                         }
                         else
                         {
-                            tmp = proxyHelper.ProxyBypass.Substring(start, idx-start);
+                            tmp = proxyHelper.ProxyBypass.Substring(start, idx - start);
                         }
 
                         // Skip trailing characters if any.
                         if (idx < proxyHelper.ProxyBypass.Length && proxyHelper.ProxyBypass[idx] != ';')
                         {
                             // Got stopped at space or ']'. Strip until next ';' or end.
-                            while (idx < proxyHelper.ProxyBypass.Length && proxyHelper.ProxyBypass[idx] != ';' ) {idx += 1; };
+                            while (idx < proxyHelper.ProxyBypass.Length && proxyHelper.ProxyBypass[idx] != ';') { idx += 1; };
                         }
-                        if  (idx < proxyHelper.ProxyBypass.Length && proxyHelper.ProxyBypass[idx] == ';')
+                        if (idx < proxyHelper.ProxyBypass.Length && proxyHelper.ProxyBypass[idx] == ';')
                         {
                             idx++;
                         }
@@ -161,7 +161,7 @@ namespace System.Net.Http
 
                 if (_bypassLocal)
                 {
-                    _localIp =  new List<IPAddress>();
+                    _localIp = new List<IPAddress>();
                     foreach (NetworkInterface netInterface in NetworkInterface.GetAllNetworkInterfaces())
                     {
                         IPInterfaceProperties ipProps = netInterface.GetIPProperties();

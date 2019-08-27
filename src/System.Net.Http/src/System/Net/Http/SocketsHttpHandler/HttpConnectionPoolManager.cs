@@ -266,14 +266,14 @@ namespace System.Net.Http
 
         public Task<HttpResponseMessage> SendProxyConnectAsync(HttpRequestMessage request, Uri proxyUri, CancellationToken cancellationToken)
         {
-            return SendAsyncCore(request, proxyUri, doRequestAuth:false, isProxyConnect:true, cancellationToken);
+            return SendAsyncCore(request, proxyUri, doRequestAuth: false, isProxyConnect: true, cancellationToken);
         }
 
         public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, bool doRequestAuth, CancellationToken cancellationToken)
         {
             if (_proxy == null)
             {
-                return SendAsyncCore(request, null, doRequestAuth, isProxyConnect:false, cancellationToken);
+                return SendAsyncCore(request, null, doRequestAuth, isProxyConnect: false, cancellationToken);
             }
 
             // Do proxy lookup.
@@ -309,7 +309,7 @@ namespace System.Net.Http
                 throw new NotSupportedException(SR.net_http_invalid_proxy_scheme);
             }
 
-            return SendAsyncCore(request, proxyUri, doRequestAuth, isProxyConnect:false, cancellationToken);
+            return SendAsyncCore(request, proxyUri, doRequestAuth, isProxyConnect: false, cancellationToken);
         }
 
         /// <summary>

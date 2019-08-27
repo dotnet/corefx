@@ -527,7 +527,7 @@ namespace System
                     == (Flags.SchemeNotCanonical | Flags.AuthorityFound))
                 {
                     idx = (ushort)_syntax.SchemeName.Length;
-                    while (str[idx++] != ':') ;
+                    while (str[idx++] != ':');
                     if (idx + 1 >= _string.Length || str[idx] != '/' || str[idx + 1] != '/')
                         return false;
                 }
@@ -970,10 +970,6 @@ namespace System
             if (otherUri.OriginalStringSwitched)
             {
                 _originalUnicodeString = otherUri._originalUnicodeString;
-            }
-            if (otherUri.AllowIdn && (otherUri.InFact(Flags.IdnHost) || otherUri.InFact(Flags.UnicodeHost)))
-            {
-                _dnsSafeHost = otherUri._dnsSafeHost;
             }
         }
     }

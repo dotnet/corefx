@@ -436,7 +436,7 @@ namespace System
 
                 fixed (byte* dirBufferPtr = dirBuffer)
                 {
-                    for (;;)
+                    while (true)
                     {
                         IntPtr dirHandle = Interop.Sys.OpenDir(currentPath);
                         if (dirHandle == IntPtr.Zero)
@@ -1218,7 +1218,7 @@ namespace System
         {
             if (date.IsEmpty)
             {
-                return default(TransitionTime);
+                return default;
             }
 
             if (date[0] == 'M')

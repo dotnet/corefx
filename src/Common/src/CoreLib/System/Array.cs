@@ -236,7 +236,7 @@ namespace System
 
         public long GetLongLength(int dimension)
         {
-            //This method should throw an IndexOufOfRangeException for compat if dimension < 0 or >= Rank
+            // This method should throw an IndexOufOfRangeException for compat if dimension < 0 or >= Rank
             return GetLength(dimension);
         }
 
@@ -770,7 +770,7 @@ namespace System
             int endIndex = startIndex + count;
             for (int i = startIndex; i < endIndex; i++)
             {
-                if (match!(array[i]))
+                if (match(array[i]))
                     return i;
             }
             return -1;

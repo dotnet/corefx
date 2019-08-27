@@ -635,7 +635,6 @@ namespace System.IO
 
                 _charLen += _decoder.GetChars(_byteBuffer, 0, _byteLen, _charBuffer, _charLen);
             } while (_charLen == 0);
-            //Console.WriteLine("ReadBuffer called.  chars: "+charLen);
             return _charLen;
         }
 
@@ -745,7 +744,7 @@ namespace System.IO
                 _charPos = 0;
                 if (readToUserBuffer)
                 {
-                    charsRead += _decoder.GetChars(new ReadOnlySpan<byte>(_byteBuffer, 0, _byteLen), userBuffer.Slice(charsRead), flush:false);
+                    charsRead += _decoder.GetChars(new ReadOnlySpan<byte>(_byteBuffer, 0, _byteLen), userBuffer.Slice(charsRead), flush: false);
                     _charLen = 0;  // StreamReader's buffer is empty.
                 }
                 else
@@ -757,7 +756,6 @@ namespace System.IO
 
             _isBlocked &= charsRead < userBuffer.Length;
 
-            //Console.WriteLine("ReadBuffer: charsRead: "+charsRead+"  readToUserBuffer: "+readToUserBuffer);
             return charsRead;
         }
 

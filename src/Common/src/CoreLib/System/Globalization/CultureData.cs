@@ -63,7 +63,7 @@ namespace System.Globalization
         private string? _sNativeLanguage; // Native name of this language
         private string? _sAbbrevLang; // abbreviated language name (Windows Language Name) ex: ENU
         private string? _sConsoleFallbackName; // The culture name for the console fallback UI culture
-        private int    _iInputLanguageHandle=undef;// input language handle
+        private int _iInputLanguageHandle = undef; // input language handle
 
         // Region
         private string? _sRegionName; // (RegionInfo)
@@ -72,7 +72,7 @@ namespace System.Globalization
         private string? _sNativeCountry; // native country name
         private string? _sISO3166CountryName; // ISO 3166 (RegionInfo), ie: US
         private string? _sISO3166CountryName2; // 3 char ISO 3166 country name 2 2(RegionInfo) ex: USA (ISO)
-        private int    _iGeoId = undef; // GeoId
+        private int _iGeoId = undef; // GeoId
 
         // Numbers
         private string? _sPositiveSign; // (user can override) positive sign
@@ -619,7 +619,7 @@ namespace System.Globalization
                 if (name[i] >= 'A' && name[i] <= 'Z')
                 {
                     // lowercase characters before '-'
-                    normalizedName[i] = (char) (((int)name[i]) + 0x20);
+                    normalizedName[i] = (char)(((int)name[i]) + 0x20);
                     changed = true;
                 }
                 else
@@ -639,7 +639,7 @@ namespace System.Globalization
             {
                 if (name[i] >= 'a' && name[i] <= 'z')
                 {
-                    normalizedName[i] = (char) (((int)name[i]) - 0x20);
+                    normalizedName[i] = (char)(((int)name[i]) - 0x20);
                     changed = true;
                 }
                 else
@@ -2196,7 +2196,7 @@ namespace System.Globalization
         /// </summary>
         private static string GetTimeSeparator(string format)
         {
-            //  Find the time separator so that we can pretend we know TimeSeparator.
+            // Find the time separator so that we can pretend we know TimeSeparator.
             return GetSeparator(format, "Hhms");
         }
 
@@ -2206,7 +2206,7 @@ namespace System.Globalization
         /// </summary>
         private static string GetDateSeparator(string format)
         {
-            //  Find the date separator so that we can pretend we know DateSeparator.
+            // Find the date separator so that we can pretend we know DateSeparator.
             return GetSeparator(format, "dyM");
         }
 
@@ -2265,7 +2265,7 @@ namespace System.Globalization
                                 case '\\':
                                     break;
                                 default:
-                                    --i; //backup since we will move over this next
+                                    --i; // backup since we will move over this next
                                     break;
                             }
                         }

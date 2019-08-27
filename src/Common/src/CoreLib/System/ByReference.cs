@@ -16,8 +16,8 @@ namespace System
         // CS0169: The private field '{blah}' is never used
 #pragma warning disable 169
 #pragma warning disable CA1823
-         private readonly IntPtr _value;
-#pragma warning disable CA1823
+        private readonly IntPtr _value;
+#pragma warning restore CA1823
 #pragma warning restore 169
 
         [Intrinsic]

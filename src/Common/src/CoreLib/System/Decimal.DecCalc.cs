@@ -158,7 +158,7 @@ namespace System
 
             // Used to fill uninitialized stack variables with non-zero pattern in debug builds
             [Conditional("DEBUG")]
-            private static unsafe void DebugPoison<T>(ref T s) where T: unmanaged
+            private static unsafe void DebugPoison<T>(ref T s) where T : unmanaged
             {
                 MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref s, 1)).Fill(0xCD);
             }
@@ -168,11 +168,11 @@ namespace System
             private static unsafe uint GetExponent(float f)
             {
                 // Based on pulling out the exp from this single struct layout
-                //typedef struct {
+                // typedef struct {
                 //    ULONG mant:23;
                 //    ULONG exp:8;
                 //    ULONG sign:1;
-                //} SNGSTRUCT;
+                // } SNGSTRUCT;
 
                 return (byte)(*(uint*)&f >> 23);
             }
@@ -180,7 +180,7 @@ namespace System
             private static unsafe uint GetExponent(double d)
             {
                 // Based on pulling out the exp from this double struct layout
-                //typedef struct {
+                // typedef struct {
                 //   DWORDLONG mant:52;
                 //   DWORDLONG signexp:12;
                 // } DBLSTRUCT;
@@ -477,7 +477,7 @@ namespace System
                     //
                     prod1 = bufDen.Low64;
 
-                    for (;;)
+                    while (true)
                     {
                         quo--;
                         num += prod1;
@@ -593,7 +593,7 @@ PosRem:
                     uint sticky = 0;
                     uint quotient, remainder = 0;
 
-                    for (;;)
+                    while (true)
                     {
                         sticky |= remainder; // record remainder as sticky bit
 
@@ -690,7 +690,7 @@ PosRem:
                         }
 
                         break;
-                    } // for (;;)
+                    } // while (true)
                 }
                 return scale;
 
@@ -1945,7 +1945,7 @@ ReturnZero:
                     bufQuo.U2 = d1.High;
                     uint remainder = Div96By32(ref bufQuo, den);
 
-                    for (;;)
+                    while (true)
                     {
                         if (remainder == 0)
                         {
@@ -2005,7 +2005,7 @@ ReturnZero:
                             scale = OverflowUnscale(ref bufQuo, scale, remainder != 0);
                             break;
                         }
-                    } // for (;;)
+                    } // while (true)
                 }
                 else
                 {
@@ -2042,7 +2042,7 @@ ReturnZero:
                         bufQuo.U1 = Div96By64(ref *(Buf12*)&bufRem.U1, divisor);
                         bufQuo.U0 = Div96By64(ref *(Buf12*)&bufRem, divisor);
 
-                        for (;;)
+                        while (true)
                         {
                             if (bufRem.Low64 == 0)
                             {
@@ -2086,7 +2086,7 @@ ReturnZero:
                                 scale = OverflowUnscale(ref bufQuo, scale, bufRem.Low64 != 0);
                                 break;
                             }
-                        } // for (;;)
+                        } // while (true)
                     }
                     else
                     {
@@ -2106,7 +2106,7 @@ ReturnZero:
                         bufQuo.Low64 = Div128By96(ref bufRem, ref bufDivisor);
                         bufQuo.U2 = 0;
 
-                        for (;;)
+                        while (true)
                         {
                             if ((bufRem.Low64 | bufRem.U2) == 0)
                             {
@@ -2159,7 +2159,7 @@ ReturnZero:
                                 scale = OverflowUnscale(ref bufQuo, scale, (bufRem.Low64 | bufRem.High64) != 0);
                                 break;
                             }
-                        } // for (;;)
+                        } // while (true)
                     }
                 }
 

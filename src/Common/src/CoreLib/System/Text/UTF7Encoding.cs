@@ -15,8 +15,8 @@ namespace System.Text
     {
         private const string base64Chars =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-        //   0123456789111111111122222222223333333333444444444455555555556666
-        //             012345678901234567890123456789012345678901234567890123
+        // 0123456789111111111122222222223333333333444444444455555555556666
+        //              012345678901234567890123456789012345678901234567890123
 
         // These are the characters that can be directly encoded in UTF7.
         private const string directChars =
@@ -52,7 +52,7 @@ namespace System.Text
         }
 
         public UTF7Encoding(bool allowOptionals)
-            : base(UTF7_CODEPAGE) //Set the data item.
+            : base(UTF7_CODEPAGE) // Set the data item.
         {
             // Allowing optionals?
             _allowOptionals = allowOptionals;
@@ -327,7 +327,7 @@ namespace System.Text
             if (byteIndex < 0 || byteCount < 0)
                 throw new ArgumentOutOfRangeException((byteIndex < 0 ? nameof(byteIndex) : nameof(byteCount)), SR.ArgumentOutOfRange_NeedNonNegNum);
 
-            if ( bytes.Length - byteIndex < byteCount)
+            if (bytes.Length - byteIndex < byteCount)
                 throw new ArgumentOutOfRangeException(nameof(bytes), SR.ArgumentOutOfRange_IndexCountBuffer);
 
             if (charIndex < 0 || charIndex > chars.Length)

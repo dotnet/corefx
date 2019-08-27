@@ -699,7 +699,7 @@ namespace System.Diagnostics.Tracing
                 uint eventVersion = m_eventData[i].Descriptor.Version;
                 uint level = m_eventData[i].Descriptor.Level;
 
-                fixed (byte *pMetadata = metadata)
+                fixed (byte* pMetadata = metadata)
                 {
                     IntPtr eventHandle = m_eventPipeProvider.m_eventProvider.DefineEventHandle(
                         eventID,
@@ -1131,8 +1131,8 @@ namespace System.Diagnostics.Tracing
                 this.m_Reserved = reserved; // Mark this descriptor as containing tracelogging-compatible metadata.
             }
 
-            //Important, we pass this structure directly to the Win32 EventWrite API, so this structure must be layed out exactly
-            // the way EventWrite wants it.
+            // Important, we pass this structure directly to the Win32 EventWrite API, so this structure must
+            // be layed out exactly the way EventWrite wants it.
             internal ulong m_Ptr;
             internal int m_Size;
 #pragma warning disable 0649
@@ -1454,7 +1454,7 @@ namespace System.Diagnostics.Tracing
                 m_name = eventSourceName;
                 m_guid = eventSourceGuid;
 
-                //Enable Implicit Activity tracker
+                // Enable Implicit Activity tracker
                 m_activityTracker = ActivityTracker.Instance;
 
 #if FEATURE_MANAGED_ETW || FEATURE_PERFTRACING
@@ -1859,13 +1859,12 @@ namespace System.Diagnostics.Tracing
                     // Everything else is marshaled as a string.
                     // ETW strings are NULL-terminated, so marshal everything up to the first
                     // null in the string.
-                    //return System.Runtime.InteropServices.Marshal.PtrToStringUni(dataPointer);
                     if (dataPointer == IntPtr.Zero)
                     {
                         return null;
                     }
 
-                    return new string((char *)dataPointer);
+                    return new string((char*)dataPointer);
                 }
                 finally
                 {
@@ -1978,7 +1977,7 @@ namespace System.Diagnostics.Tracing
                         }
                     }
 #endif // FEATURE_MANAGED_ETW
-                            if (m_Dispatchers != null && m_eventData[eventId].EnabledForAnyListener)
+                    if (m_Dispatchers != null && m_eventData[eventId].EnabledForAnyListener)
                     {
 #if !ES_BUILD_STANDALONE
                         // Maintain old behavior - object identity is preserved
@@ -2492,7 +2491,7 @@ namespace System.Diagnostics.Tracing
 #if ES_BUILD_PN
             public EventParameterType[] ParameterTypes;
 #endif
-        };
+        }
 
 #if !ES_BUILD_PN
         private int GetParameterCount(EventMetadata eventData)
@@ -3004,7 +3003,7 @@ namespace System.Diagnostics.Tracing
                             {
                                 if (envelope.ChunkNumber == 0 && chunkSize > 256)
                                 {
-                                    chunkSize = chunkSize / 2;
+                                    chunkSize /= 2;
                                     goto TRY_AGAIN_WITH_SMALLER_CHUNK_SIZE;
                                 }
                             }
@@ -3907,7 +3906,7 @@ namespace System.Diagnostics.Tracing
         private bool m_completelyInited;                // The EventSource constructor has returned without exception.
         private Exception? m_constructionException;      // If there was an exception construction, this is it
         private byte m_outOfBandMessageCount;           // The number of out of band messages sent (we throttle them
-        private EventCommandEventArgs? m_deferredCommands;// If we get commands before we are fully we store them here and run the when we are fully inited.
+        private EventCommandEventArgs? m_deferredCommands; // If we get commands before we are fully we store them here and run the when we are fully inited.
 
         private string[]? m_traits;                      // Used to implement GetTraits
 
@@ -4090,7 +4089,7 @@ namespace System.Diagnostics.Tracing
                     {
                         // Find 'this' from the s_Listeners linked list.
                         EventListener prev = s_Listeners;
-                        for (;;)
+                        while (true)
                         {
                             EventListener? cur = prev.m_Next;
                             if (cur == null)
@@ -4360,7 +4359,7 @@ namespace System.Diagnostics.Tracing
                     {
                         // Remove 'listenerToRemove' from the eventSource.m_Dispatchers linked list.
                         EventDispatcher? prev = eventSource.m_Dispatchers;
-                        for (;;)
+                        while (true)
                         {
                             EventDispatcher? cur = prev.m_Next;
                             if (cur == null)
@@ -4432,7 +4431,7 @@ namespace System.Diagnostics.Tracing
                     foreach (EventListener listener in allListeners.Keys)
                     {
                         dispatcher = eventSource.m_Dispatchers;
-                        for (;;)
+                        while (true)
                         {
                             Debug.Assert(dispatcher != null, "Listener is not on all eventSources.");
                             if (dispatcher.m_Listener == listener)
@@ -5190,7 +5189,7 @@ namespace System.Diagnostics.Tracing
         /// Disable event
         /// </summary>
         Disable = -3
-    };
+    }
 
 
 #region private classes
@@ -5780,7 +5779,7 @@ namespace System.Diagnostics.Tracing
                             if (constantValObj is ulong)
                                 hexValue = (ulong)constantValObj;    // This is the only integer type that can't be represented by a long.
                             else
-                                hexValue = (ulong) Convert.ToInt64(constantValObj); // Handles all integer types except ulong.
+                                hexValue = (ulong)Convert.ToInt64(constantValObj); // Handles all integer types except ulong.
 
                             // ETW requires all bitmap values to be powers of 2.  Skip the ones that are not.
                             // TODO: Warn people about the dropping of values.
@@ -6291,7 +6290,7 @@ namespace System.Diagnostics.Tracing
         public ushort TotalChunks;
         public ushort ChunkNumber;
 #endif
-    };
+    }
 
 #endregion
 }
