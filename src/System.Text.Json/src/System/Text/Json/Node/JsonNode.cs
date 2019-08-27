@@ -119,5 +119,133 @@ namespace System.Text.Json
                     throw ThrowHelper.GetJsonElementWrongTypeException(JsonValueKind.Undefined, jsonElement.ValueKind);
             }
         }
+
+        /// <summary>
+        ///   Converts a <see cref="string"/> to a <see cref="JsonString"/>.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        public static implicit operator JsonNode(string value) => new JsonString(value);
+
+        /// <summary>
+        ///   Converts a <see cref="ReadOnlySpan{Char}"/> to a <see cref="JsonString"/>.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        public static implicit operator JsonNode(ReadOnlySpan<char> value) => new JsonString(value);
+
+        /// <summary>
+        ///   Converts a <see cref="DateTime"/> to a <see cref="JsonString"/>.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        public static implicit operator JsonNode(DateTime value) => new JsonString(value);
+
+        /// <summary>
+        ///   Converts a <see cref="DateTimeOffset"/> to a <see cref="JsonString"/>.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        public static implicit operator JsonNode(DateTimeOffset value) => new JsonString(value);
+
+        /// <summary>
+        ///   Converts a <see cref="Guid"/> to a <see cref="JsonString"/>.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        public static implicit operator JsonNode(Guid value) => new JsonString(value);
+
+        /// <summary>
+        ///   Converts a <see cref="bool"/> to a <see cref="JsonBoolean"/>.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        public static implicit operator JsonNode(bool value) => new JsonBoolean(value);
+
+        /// <summary>
+        ///   Converts a <see cref="byte"/> to a JSON number.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        public static implicit operator JsonNode(byte value) => new JsonNumber(value);
+
+        /// <summary>
+        ///   Converts a <see cref="short"/> to a JSON number.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        public static implicit operator JsonNode(short value) => new JsonNumber(value);
+
+        /// <summary>
+        ///   Converts an <see cref="int"/> to a JSON number.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        public static implicit operator JsonNode(int value) => new JsonNumber(value);
+
+        /// <summary>
+        ///   Converts a <see cref="long"/> to a JSON number.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        public static implicit operator JsonNode(long value) => new JsonNumber(value);
+
+        /// <summary>
+        ///    Converts a <see cref="float"/> to a JSON number.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <exception cref="ArgumentException">
+        ///   Provided value is not in a legal JSON number format.
+        /// </exception>
+        public static implicit operator JsonNode(float value)
+        {
+            if (float.IsSubnormal(value))
+            {
+                return new JsonString(value.ToString());
+            }
+
+            return new JsonNumber(value);
+        }
+
+        /// <summary>
+        ///    Converts a <see cref="double"/> to a JSON number.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <exception cref="ArgumentException">
+        ///   Provided value is not in a legal JSON number format.
+        /// </exception>
+        public static implicit operator JsonNode(double value)
+        {
+            if (double.IsSubnormal(value))
+            {
+                return new JsonString(value.ToString());
+            }
+
+            return new JsonNumber(value);
+        }
+
+        /// <summary>
+        ///    Converts a <see cref="sbyte"/> to a JSON number.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        [CLSCompliant(false)]
+        public static implicit operator JsonNode(sbyte value) => new JsonNumber(value);
+
+        /// <summary>
+        ///    Converts a <see cref="ushort"/> to a JSON number.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        [CLSCompliant(false)]
+        public static implicit operator JsonNode(ushort value) => new JsonNumber(value);
+
+        /// <summary>
+        ///    Converts a <see cref="uint"/> to a JSON number.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        [CLSCompliant(false)]
+        public static implicit operator JsonNode(uint value) => new JsonNumber(value);
+
+        /// <summary>
+        ///    Converts a <see cref="ulong"/> to a JSON number.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        [CLSCompliant(false)]
+        public static implicit operator JsonNode(ulong value) => new JsonNumber(value);
+
+        /// <summary>
+        ///    Converts a <see cref="decimal"/> to a JSON number.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        public static implicit operator JsonNode(decimal value) => new JsonNumber(value);
     }
 }

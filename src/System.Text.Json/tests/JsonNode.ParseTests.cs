@@ -32,7 +32,7 @@ namespace System.Text.Json.Tests
             var jsonObject = (JsonObject)node;
             Assert.Equal(9, jsonObject.PropertyNames.Count);
             Assert.Equal(9, jsonObject.PropertyValues.Count);
-            Assert.Equal("property value", (JsonString)jsonObject["text"]);
+            Assert.Equal("property value", ((JsonString)jsonObject["text"]).Value);
             Assert.True(((JsonBoolean)jsonObject["boolean true"]).Value);
             Assert.False(((JsonBoolean)jsonObject["boolean false"]).Value);
             Assert.Null(jsonObject["null"]);
@@ -49,7 +49,7 @@ namespace System.Text.Json.Tests
             var innerObject = (JsonObject)jsonObject["inner object"];
             Assert.Equal(1, innerObject.PropertyNames.Count);
             Assert.Equal(1, innerObject.PropertyValues.Count);
-            Assert.Equal("value", (JsonString)innerObject["inner property"]);
+            Assert.Equal("value", ((JsonString)innerObject["inner property"]).Value);
         }
     }
 }

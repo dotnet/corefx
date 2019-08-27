@@ -28,10 +28,12 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void TestImplicitOperator()
         {
-            JsonBoolean jsonBoolean = true;
+            JsonNode jsonNode = true;
+            JsonBoolean jsonBoolean = (JsonBoolean)jsonNode;
             Assert.True(jsonBoolean.Value);
 
-            jsonBoolean = false;
+            jsonNode = false;
+            jsonBoolean = (JsonBoolean)jsonNode;
             Assert.False(jsonBoolean.Value);
         }
 

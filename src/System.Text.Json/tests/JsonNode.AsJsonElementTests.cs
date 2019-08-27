@@ -18,7 +18,7 @@ namespace System.Text.Json.Tests
                 { "boolean", true },
                 { "number", 15 },
                 { "null node", (JsonNode) null },
-                { "array", new JsonString[] { "value1", "value2"} }
+                { "array", new JsonNode[] { "value1", "value2"} }
             };
 
             JsonElement jsonElement = jsonObject.AsJsonElement();
@@ -90,18 +90,18 @@ namespace System.Text.Json.Tests
                 { "boolean", true },
                 { "number", 15 },
                 { "null node", (JsonNode) null },
-                { "array", new JsonString[] { "value1", "value2"} }
+                { "array", new JsonNode[] { "value1", "value2"} }
             };
 
             JsonElement jsonElement = jsonObject.AsJsonElement();
             JsonObject jsonObjectFromElement = (JsonObject)JsonNode.GetNode(jsonElement);
 
-            Assert.Equal("property value", (JsonString)jsonObjectFromElement["text"]);
+            Assert.Equal("property value", jsonObjectFromElement["text"]);
 
             // Modifying JsonObject will change JsonObjectFromElement:
 
             jsonObject["text"] = new JsonString("something different");
-            Assert.Equal("something different", (JsonString)jsonObjectFromElement["text"]);
+            Assert.Equal("something different", jsonObjectFromElement["text"]);
 
             // Modifying JsonObjectFromElement will change JsonObject:
 

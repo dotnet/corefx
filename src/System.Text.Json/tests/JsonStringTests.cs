@@ -44,7 +44,8 @@ namespace System.Text.Json.Tests
             Assert.Equal(value, new JsonString(value).Value);
 
             // Implicit operator:            
-            JsonString implicitlyInitializiedJsonString = value;
+            JsonNode jsonNode = value;
+            JsonString implicitlyInitializiedJsonString = (JsonString)jsonNode;
             Assert.Equal(value, implicitlyInitializiedJsonString.Value);
 
             // Casted to span:
@@ -78,7 +79,7 @@ namespace System.Text.Json.Tests
             var guidString = "ca761232-ed42-11ce-bacd-00aa0057b223";
             Guid guid = new Guid(guidString);
             var jsonString = new JsonString(guid);
-            Assert.Equal(guidString, jsonString);
+            Assert.Equal(guidString, jsonString.Value);
         }
 
         public static IEnumerable<object[]> DateTimeData =>
@@ -95,7 +96,7 @@ namespace System.Text.Json.Tests
         public static void TestDateTime(DateTime dateTime)
         {
             var jsonString = new JsonString(dateTime);
-            Assert.Equal(dateTime.ToString("s", CultureInfo.InvariantCulture), jsonString);
+            Assert.Equal(dateTime.ToString("s", CultureInfo.InvariantCulture), jsonString.Value);
         }
 
         [Theory]
@@ -103,7 +104,7 @@ namespace System.Text.Json.Tests
         public static void TestDateTimeOffset(DateTimeOffset dateTimeOffset)
         {
             var jsonString = new JsonString(dateTimeOffset);
-            Assert.Equal(dateTimeOffset.ToString("s", CultureInfo.InvariantCulture), jsonString);
+            Assert.Equal(dateTimeOffset.ToString("s", CultureInfo.InvariantCulture), jsonString.Value);
         }
 
         [Fact]

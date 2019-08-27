@@ -38,47 +38,13 @@ namespace System.Text.Json
         public bool IsReadOnly { get { throw null; } }
         public System.Text.Json.JsonNode this[int idx] { get { throw null; } set { } }
         public override System.Text.Json.JsonValueKind ValueKind { get { throw null; } }
-        public void Add(bool value) { }
-        public void Add(byte value) { }
-        public void Add(decimal value) { }
-        public void Add(double value) { }
-        public void Add(short value) { }
-        public void Add(int value) { }
-        public void Add(long value) { }
-        [System.CLSCompliantAttribute(false)]
-        public void Add(sbyte value) { }
-        public void Add(float value) { }
-        public void Add(string value) { }
         public void Add(System.Text.Json.JsonNode value) { }
-        [System.CLSCompliantAttribute(false)]
-        public void Add(ushort value) { }
-        [System.CLSCompliantAttribute(false)]
-        public void Add(uint value) { }
-        [System.CLSCompliantAttribute(false)]
-        public void Add(ulong value) { }
         public void Clear() { }
         public override System.Text.Json.JsonNode Clone() { throw null; }
         public bool Contains(System.Text.Json.JsonNode value) { throw null; }
         public System.Text.Json.JsonArrayEnumerator GetEnumerator() { throw null; }
         public int IndexOf(System.Text.Json.JsonNode item) { throw null; }
-        public void Insert(int index, bool item) { }
-        public void Insert(int index, byte item) { }
-        public void Insert(int index, decimal item) { }
-        public void Insert(int index, double item) { }
-        public void Insert(int index, short item) { }
-        public void Insert(int index, int item) { }
-        public void Insert(int index, long item) { }
-        [System.CLSCompliantAttribute(false)]
-        public void Insert(int index, sbyte item) { }
-        public void Insert(int index, float item) { }
-        public void Insert(int index, string item) { }
         public void Insert(int index, System.Text.Json.JsonNode item) { }
-        [System.CLSCompliantAttribute(false)]
-        public void Insert(int index, ushort item) { }
-        [System.CLSCompliantAttribute(false)]
-        public void Insert(int index, uint item) { }
-        [System.CLSCompliantAttribute(false)]
-        public void Insert(int index, ulong item) { }
         public int LastIndexOf(System.Text.Json.JsonNode item) { throw null; }
         public bool Remove(System.Text.Json.JsonNode item) { throw null; }
         public int RemoveAll(System.Predicate<System.Text.Json.JsonNode> match) { throw null; }
@@ -108,7 +74,6 @@ namespace System.Text.Json
         public bool Equals(System.Text.Json.JsonBoolean other) { throw null; }
         public override int GetHashCode() { throw null; }
         public static bool operator ==(System.Text.Json.JsonBoolean left, System.Text.Json.JsonBoolean right) { throw null; }
-        public static implicit operator System.Text.Json.JsonBoolean (bool value) { throw null; }
         public static bool operator !=(System.Text.Json.JsonBoolean left, System.Text.Json.JsonBoolean right) { throw null; }
         public override string ToString() { throw null; }
     }
@@ -270,6 +235,27 @@ namespace System.Text.Json
         public abstract System.Text.Json.JsonNode Clone();
         public static System.Text.Json.JsonNode DeepCopy(System.Text.Json.JsonElement jsonElement) { throw null; }
         public static System.Text.Json.JsonNode GetNode(System.Text.Json.JsonElement jsonElement) { throw null; }
+        public static implicit operator System.Text.Json.JsonNode (bool value) { throw null; }
+        public static implicit operator System.Text.Json.JsonNode (byte value) { throw null; }
+        public static implicit operator System.Text.Json.JsonNode (System.DateTime value) { throw null; }
+        public static implicit operator System.Text.Json.JsonNode (System.DateTimeOffset value) { throw null; }
+        public static implicit operator System.Text.Json.JsonNode (decimal value) { throw null; }
+        public static implicit operator System.Text.Json.JsonNode (double value) { throw null; }
+        public static implicit operator System.Text.Json.JsonNode (System.Guid value) { throw null; }
+        public static implicit operator System.Text.Json.JsonNode (short value) { throw null; }
+        public static implicit operator System.Text.Json.JsonNode (int value) { throw null; }
+        public static implicit operator System.Text.Json.JsonNode (long value) { throw null; }
+        public static implicit operator System.Text.Json.JsonNode (System.ReadOnlySpan<char> value) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static implicit operator System.Text.Json.JsonNode (sbyte value) { throw null; }
+        public static implicit operator System.Text.Json.JsonNode (float value) { throw null; }
+        public static implicit operator System.Text.Json.JsonNode (string value) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static implicit operator System.Text.Json.JsonNode (ushort value) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static implicit operator System.Text.Json.JsonNode (uint value) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static implicit operator System.Text.Json.JsonNode (ulong value) { throw null; }
         public static System.Text.Json.JsonNode Parse(string json) { throw null; }
         public static bool TryGetNode(System.Text.Json.JsonElement jsonElement, out System.Text.Json.JsonNode jsonNode) { throw null; }
     }
@@ -313,21 +299,6 @@ namespace System.Text.Json
         [System.CLSCompliantAttribute(false)]
         public ulong GetUInt64() { throw null; }
         public static bool operator ==(System.Text.Json.JsonNumber left, System.Text.Json.JsonNumber right) { throw null; }
-        public static implicit operator System.Text.Json.JsonNumber (byte value) { throw null; }
-        public static implicit operator System.Text.Json.JsonNumber (decimal value) { throw null; }
-        public static implicit operator System.Text.Json.JsonNumber (double value) { throw null; }
-        public static implicit operator System.Text.Json.JsonNumber (short value) { throw null; }
-        public static implicit operator System.Text.Json.JsonNumber (int value) { throw null; }
-        public static implicit operator System.Text.Json.JsonNumber (long value) { throw null; }
-        [System.CLSCompliantAttribute(false)]
-        public static implicit operator System.Text.Json.JsonNumber (sbyte value) { throw null; }
-        public static implicit operator System.Text.Json.JsonNumber (float value) { throw null; }
-        [System.CLSCompliantAttribute(false)]
-        public static implicit operator System.Text.Json.JsonNumber (ushort value) { throw null; }
-        [System.CLSCompliantAttribute(false)]
-        public static implicit operator System.Text.Json.JsonNumber (uint value) { throw null; }
-        [System.CLSCompliantAttribute(false)]
-        public static implicit operator System.Text.Json.JsonNumber (ulong value) { throw null; }
         public static bool operator !=(System.Text.Json.JsonNumber left, System.Text.Json.JsonNumber right) { throw null; }
         public void SetByte(byte value) { }
         public void SetDecimal(decimal value) { }
@@ -371,29 +342,9 @@ namespace System.Text.Json
         public System.Collections.Generic.ICollection<System.Text.Json.JsonNode> PropertyValues { get { throw null; } }
         public override System.Text.Json.JsonValueKind ValueKind { get { throw null; } }
         public void Add(System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode> jsonProperty) { }
-        public void Add(string propertyName, bool propertyValue) { }
-        public void Add(string propertyName, byte propertyValue) { }
         public void Add(string propertyName, System.Collections.Generic.IEnumerable<System.Text.Json.JsonNode> propertyValues) { }
-        public void Add(string propertyName, System.DateTime propertyValue) { }
-        public void Add(string propertyName, System.DateTimeOffset propertyValue) { }
-        public void Add(string propertyName, decimal propertyValue) { }
-        public void Add(string propertyName, double propertyValue) { }
-        public void Add(string propertyName, System.Guid propertyValue) { }
-        public void Add(string propertyName, short propertyValue) { }
-        public void Add(string propertyName, int propertyValue) { }
-        public void Add(string propertyName, long propertyValue) { }
-        public void Add(string propertyName, System.ReadOnlySpan<char> propertyValue) { }
-        [System.CLSCompliantAttribute(false)]
-        public void Add(string propertyName, sbyte propertyValue) { }
-        public void Add(string propertyName, float propertyValue) { }
-        public void Add(string propertyName, string propertyValue) { }
+        public void Add(string propertyName, System.Text.Json.JsonArray propertyValue) { }
         public void Add(string propertyName, System.Text.Json.JsonNode propertyValue) { }
-        [System.CLSCompliantAttribute(false)]
-        public void Add(string propertyName, ushort propertyValue) { }
-        [System.CLSCompliantAttribute(false)]
-        public void Add(string propertyName, uint propertyValue) { }
-        [System.CLSCompliantAttribute(false)]
-        public void Add(string propertyName, ulong propertyValue) { }
         public void AddRange(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>> jsonProperties) { }
         public override System.Text.Json.JsonNode Clone() { throw null; }
         public bool ContainsProperty(string propertyName) { throw null; }
@@ -497,7 +448,6 @@ namespace System.Text.Json
         public System.Guid GetGuid() { throw null; }
         public override int GetHashCode() { throw null; }
         public static bool operator ==(System.Text.Json.JsonString left, System.Text.Json.JsonString right) { throw null; }
-        public static implicit operator System.Text.Json.JsonString (string value) { throw null; }
         public static bool operator !=(System.Text.Json.JsonString left, System.Text.Json.JsonString right) { throw null; }
         public override string ToString() { throw null; }
         public bool TryGetDateTime(out System.DateTime value) { throw null; }

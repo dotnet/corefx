@@ -18,7 +18,7 @@ namespace System.Text.Json.Tests
                 Action<JsonNumber, T> setter,
                 Func<JsonNumber, T> getter,
                 TryGetValue<T> tryGetter,
-                Func<T, JsonNumber> implicitCaster)
+                Func<T, JsonNode> implicitCaster)
         {
             // Default constructor:
             JsonNumber number = new JsonNumber();
@@ -41,7 +41,7 @@ namespace System.Text.Json.Tests
             AssertValue(value, number, getter, tryGetter);
             
             // Implicit cast:
-            number = implicitCaster(value);
+            number = (JsonNumber)implicitCaster(value);
             AssertValue(value, number, getter, tryGetter);
         }
 

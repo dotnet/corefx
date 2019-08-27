@@ -37,13 +37,13 @@ namespace System.Text.Json.Tests
                 { "text", "property value" },
                 { "boolean", true },
                 { "number", 15 },
-                { "array", new JsonString[] { "value1", "value2"} }
+                { "array", new JsonNode[] { "value1", "value2"} }
             };
 
             var jsonObjectCopy = (JsonObject)jsonObject.Clone();
 
-            jsonObject["text"] = (JsonString)"something different";
-            Assert.Equal("property value", (JsonString)jsonObjectCopy["text"]);
+            jsonObject["text"] = "something different";
+            Assert.Equal("property value", ((JsonString)jsonObjectCopy["text"]).Value);
 
             ((JsonBoolean)jsonObject["boolean"]).Value = false;
             Assert.True(((JsonBoolean)jsonObjectCopy["boolean"]).Value);

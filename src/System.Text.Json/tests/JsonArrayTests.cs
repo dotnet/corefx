@@ -193,8 +193,7 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < dishesJsonArray.Count; i++)
             {
-                Assert.IsType<JsonString>(dishesJsonArray[i]);
-                Assert.Equal(expected[i], dishesJsonArray[i] as JsonString);
+                Assert.Equal(expected[i], ((JsonString)dishesJsonArray[i]).Value);
             }
         }
 
@@ -288,18 +287,18 @@ namespace System.Text.Json.Tests
         {
             var issues = new JsonObject()
             {
-                { "features", new JsonString [] { "new functionality 1", "new functionality 2" } },
-                { "bugs", new JsonString [] { "bug 123", "bug 4566", "bug 821" } },
-                { "tests", new JsonString [] { "code coverage" } },
+                { "features", new JsonNode [] { "new functionality 1", "new functionality 2" } },
+                { "bugs", new JsonNode [] { "bug 123", "bug 4566", "bug 821" } },
+                { "tests", new JsonNode [] { "code coverage" } },
             };
 
             issues.GetJsonArrayPropertyValue("bugs").Add("bug 12356");
             ((JsonString)issues.GetJsonArrayPropertyValue("features")[0]).Value = "feature 1569";
             ((JsonString)issues.GetJsonArrayPropertyValue("features")[1]).Value = "feature 56134";
 
-            Assert.Equal((JsonString)"bug 12356", ((JsonArray)issues["bugs"])[3]);
-            Assert.Equal("feature 1569", (JsonString)((JsonArray)issues["features"])[0]);
-            Assert.Equal("feature 56134", (JsonString)((JsonArray)issues["features"])[1]);
+            Assert.Equal("bug 12356", ((JsonString)((JsonArray)issues["bugs"])[3]).Value);
+            Assert.Equal("feature 1569", ((JsonString)((JsonArray)issues["features"])[0]).Value);
+            Assert.Equal("feature 56134", ((JsonString)((JsonArray)issues["features"])[1]).Value);
         }
 
         [Fact]
@@ -307,12 +306,12 @@ namespace System.Text.Json.Tests
         {
             var issues = new JsonObject()
             {
-                { "features", new JsonString [] { "new functionality 1", "new functionality 2" } },
+                { "features", new JsonNode [] { "new functionality 1", "new functionality 2" } },
             };
 
             Assert.True(issues.TryGetJsonArrayPropertyValue("features", out JsonArray featuresArray));
-            Assert.Equal("new functionality 1", (JsonString)featuresArray[0]);
-            Assert.Equal("new functionality 2", (JsonString)featuresArray[1]);
+            Assert.Equal("new functionality 1", ((JsonString)featuresArray[0]).Value);
+            Assert.Equal("new functionality 2", ((JsonString)featuresArray[1]).Value);
         }
 
         [Fact]
@@ -338,9 +337,9 @@ namespace System.Text.Json.Tests
             var jsonArray = new JsonArray { 1, 2, 3 };
             
             Assert.Equal(3, jsonArray.Count);
-            Assert.Equal((JsonNumber)1, jsonArray[0]);
-            Assert.Equal((JsonNumber)2, jsonArray[1]);
-            Assert.Equal((JsonNumber)3, jsonArray[2]);
+            Assert.Equal(1, ((JsonNumber)jsonArray[0]).GetInt32());
+            Assert.Equal(2, ((JsonNumber)jsonArray[1]).GetInt32());
+            Assert.Equal(3, ((JsonNumber)jsonArray[2]).GetInt32());
 
             jsonArray.Clear();
             
@@ -353,14 +352,14 @@ namespace System.Text.Json.Tests
             var jsonArray = new JsonArray { 1, 2, 3 };
 
             Assert.Equal(3, jsonArray.Count);
-            Assert.Equal((JsonNumber)1, jsonArray[0]);
-            Assert.Equal((JsonNumber)2, jsonArray[1]);
-            Assert.Equal((JsonNumber)3, jsonArray[2]);
+            Assert.Equal(1, ((JsonNumber)jsonArray[0]).GetInt32());
+            Assert.Equal(2, ((JsonNumber)jsonArray[1]).GetInt32());
+            Assert.Equal(3, ((JsonNumber)jsonArray[2]).GetInt32());
 
             jsonArray.RemoveAll(v => ((JsonNumber)v).GetInt32() <= 2);
 
             Assert.Equal(1, jsonArray.Count);
-            Assert.Equal((JsonNumber)3, jsonArray[0]);
+            Assert.Equal(3, ((JsonNumber)jsonArray[0]).GetInt32());
         }       
     }
 }

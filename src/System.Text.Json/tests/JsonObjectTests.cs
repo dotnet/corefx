@@ -46,10 +46,9 @@ namespace System.Text.Json.Tests
             Assert.Equal(expectedValue, ((JsonString) jsonObject["property"]).Value);
 
             // with indexer, property should change no matter which duplicates handling option is chosen:
-            jsonObject["property"] = (JsonString)"indexer value";
-            Assert.Equal("indexer value", (JsonString)jsonObject["property"]);
+            jsonObject["property"] = "indexer value";
+            Assert.Equal("indexer value", ((JsonString)jsonObject["property"]).Value);
         }
-
 
         [Theory]
         [InlineData(DuplicatePropertyNameHandling.Replace, "value1", "value2", "value2")]
@@ -66,8 +65,8 @@ namespace System.Text.Json.Tests
             Assert.Throws<ArgumentException>(() => TestDuplicates(DuplicatePropertyNameHandling.Error, "", "", ""));
 
             JsonObject jsonObject = new JsonObject(DuplicatePropertyNameHandling.Error) { { "property", "" } };
-            jsonObject["property"] = (JsonString) "indexer value";
-            Assert.Equal("indexer value", (JsonString) jsonObject["property"]);
+            jsonObject["property"] = "indexer value";
+            Assert.Equal("indexer value", ((JsonString)jsonObject["property"]).Value);
         }
 
         [Fact]
@@ -116,12 +115,12 @@ namespace System.Text.Json.Tests
             
             var spanValue = new ReadOnlySpan<char>(new char[] { 's', 'p', 'a', 'n' });
             jsonObject.Add("span", spanValue);
-            Assert.Equal("span", (JsonString)jsonObject["span"]);
+            Assert.Equal("span", ((JsonString)jsonObject["span"]).Value);
 
             string property = null;
             spanValue = property.AsSpan();
             jsonObject.Add("span", spanValue);
-            Assert.Equal("", (JsonString)jsonObject["span"]);
+            Assert.Equal("", ((JsonString)jsonObject["span"]).Value);
         }
 
         [Fact]
@@ -130,7 +129,7 @@ namespace System.Text.Json.Tests
             var guidString = "ca761232-ed42-11ce-bacd-00aa0057b223";
             Guid guid = new Guid(guidString);
             var jsonObject = new JsonObject{ { "guid", guid } };
-            Assert.Equal(guidString, (JsonString)jsonObject["guid"]);
+            Assert.Equal(guidString, ((JsonString)jsonObject["guid"]).Value);
         }
 
         public static IEnumerable<object[]> DateTimeData =>
@@ -147,7 +146,7 @@ namespace System.Text.Json.Tests
         public static void TestDateTime(DateTime dateTime)
         {
             var jsonObject = new JsonObject { { "dateTime", dateTime } };
-            Assert.Equal(dateTime.ToString("s", CultureInfo.InvariantCulture), (JsonString)jsonObject["dateTime"]);
+            Assert.Equal(dateTime.ToString("s", CultureInfo.InvariantCulture), ((JsonString)jsonObject["dateTime"]).Value);
         }
 
         [Theory]
@@ -155,7 +154,7 @@ namespace System.Text.Json.Tests
         public static void TestDateTimeOffset(DateTimeOffset dateTimeOffset)
         {
             var jsonObject = new JsonObject { { "dateTimeOffset", dateTimeOffset } };
-            Assert.Equal(dateTimeOffset.ToString("s", CultureInfo.InvariantCulture), (JsonString)jsonObject["dateTimeOffset"]);
+            Assert.Equal(dateTimeOffset.ToString("s", CultureInfo.InvariantCulture), ((JsonString)jsonObject["dateTimeOffset"]).Value);
         }
 
         [Fact]
@@ -310,7 +309,7 @@ namespace System.Text.Json.Tests
         {
             var preferences = new JsonObject()
             {
-                { "prime numbers", new JsonNumber[] { 19, 37 } }
+                { "prime numbers", new JsonNode[] { 19, 37 } }
             };
 
             var primeNumbers = (JsonArray)preferences["prime numbers"];
@@ -320,8 +319,7 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < primeNumbers.Count; i++)
             {
-                Assert.IsType<JsonNumber>(primeNumbers[i]);
-                Assert.Equal(expected[i], primeNumbers[i] as JsonNumber);
+                Assert.Equal(expected[i], ((JsonNumber)primeNumbers[i]).GetInt32());
             }
         }
 
@@ -340,8 +338,7 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < colours.Count; i++)
             {
-                Assert.IsType<JsonString>(colours[i]);
-                Assert.Equal(expected[i], colours[i] as JsonString);
+                Assert.Equal(expected[i], ((JsonString)colours[i]).Value);
             }
         }
 
@@ -370,8 +367,7 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < sportsJsonArray.Count; i++)
             {
-                Assert.IsType<JsonString>(sportsJsonArray[i]);
-                Assert.Equal(sports.ElementAt(i), sportsJsonArray[i] as JsonString);
+                Assert.Equal(sports.ElementAt(i), ((JsonString)sportsJsonArray[i]).Value);
             }
         }
 
@@ -398,8 +394,7 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < strangeWordsJsonArray.Count; i++)
             {
-                Assert.IsType<JsonString>(strangeWordsJsonArray[i]);
-                Assert.Equal(expected[i], strangeWordsJsonArray[i] as JsonString);
+                Assert.Equal(expected[i], ((JsonString)strangeWordsJsonArray[i]).Value);
             }
         }
 
@@ -413,7 +408,7 @@ namespace System.Text.Json.Tests
             };
 
             Assert.True(person.ContainsProperty("ssn"));
-            Assert.Equal("123456789", (JsonString)person["ssn"]);
+            Assert.Equal("123456789", ((JsonString)person["ssn"]).Value);
             Assert.False(person.ContainsProperty("surname"));
         }
 
@@ -444,13 +439,13 @@ namespace System.Text.Json.Tests
 
 
             person1["name"] = new JsonString("Bob");
-            Assert.Equal("Bob", (JsonString)person1["name"]);
+            Assert.Equal("Bob", ((JsonString)person1["name"]).Value);
 
             person1["age"] = new JsonNumber(55);
-            Assert.Equal(55, (JsonNumber)person1["age"]);
+            Assert.Equal(55, ((JsonNumber)person1["age"]).GetInt32());
 
             person1["is_married"] = new JsonBoolean(false);
-            Assert.Equal(false, (JsonBoolean)person1["is_married"]);
+            Assert.False(((JsonBoolean)person1["is_married"]).Value);
 
             var person2 = new JsonObject
             {
@@ -462,7 +457,7 @@ namespace System.Text.Json.Tests
             // Copy property from another JsonObject
             person1["age"] = person2["age"];
 
-            Assert.Equal(33, (JsonNumber) person1["age"]);
+            Assert.Equal(33, ((JsonNumber)person1["age"]).GetInt32());
 
             // Copy property of different typoe
             person1["name"] = person2["name"];
@@ -608,7 +603,7 @@ namespace System.Text.Json.Tests
             };
 
             Assert.True(jsonObject.TryGetPropertyValue("name", out JsonNode property));
-            Assert.Equal("value", (JsonString)property);
+            Assert.Equal("value", ((JsonString)property).Value);
             Assert.False(jsonObject.TryGetPropertyValue("other", out property));
             Assert.Null(property);
         }
