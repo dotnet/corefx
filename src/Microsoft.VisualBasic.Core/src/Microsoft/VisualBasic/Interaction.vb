@@ -141,7 +141,7 @@ Namespace Microsoft.VisualBasic
             Dim type As Type = type.GetType("Microsoft.VisualBasic._Interaction, Microsoft.VisualBasic.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", throwOnError:=False)
             Dim method As MethodInfo = type?.GetMethod(methodName)
             If method Is Nothing Then
-                Throw New PlatformNotSupportedException()
+                Throw New PlatformNotSupportedException(SR.MethodRequiresSystemWindowsForms)
             End If
             Return method.Invoke(Nothing, BindingFlags.DoNotWrapExceptions, Nothing, args, Nothing)
         End Function
