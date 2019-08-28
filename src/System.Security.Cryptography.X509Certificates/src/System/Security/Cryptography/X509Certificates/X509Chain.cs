@@ -122,7 +122,7 @@ namespace System.Security.Cryptography.X509Certificates
                     {
                         if (customCertificate == null || customCertificate.Handle == IntPtr.Zero)
                         {
-                            throw new ArgumentException(SR.Cryptography_InvalidTrustCertificate, nameof(_chainPolicy.CustomTrustStore));
+                            throw new CryptographicException(SR.Cryptography_InvalidTrustCertificate, nameof(_chainPolicy.CustomTrustStore));
                         }
                     }
                 }

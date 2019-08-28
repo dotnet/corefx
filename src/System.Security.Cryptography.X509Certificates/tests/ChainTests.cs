@@ -355,7 +355,19 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 chain.ChainPolicy.CustomTrustStore.Add(new X509Certificate2());
                 chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
 
-                Assert.Throws<ArgumentException>("CustomTrustStore", () => chain.Build(testCert));
+                Assert.Throws<CryptographicException>(() => chain.Build(testCert));
+            }
+        }
+
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(2)]
+        public static void Invalidx509ChainTrustMode(int trustMode)
+        {
+            using (var chainHolder = new ChainHolder())
+            {
+                X509Chain chain = chainHolder.Chain;
+                Assert.Throws<ArgumentException>(() => chain.ChainPolicy.TrustMode = (X509ChainTrustMode)trustMode);
             }
         }
 

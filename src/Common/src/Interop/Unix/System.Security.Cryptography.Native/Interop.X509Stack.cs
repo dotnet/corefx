@@ -60,7 +60,7 @@ internal static partial class Interop
     }
 }
 
-namespace Microsoft.Win32.SafeHandles
+namespace System.Security.Cryptography.Unix
 {
     internal sealed class SafeX509StackHandle : SafeHandle
     {
