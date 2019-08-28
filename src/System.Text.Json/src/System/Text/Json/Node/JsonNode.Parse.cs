@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 
@@ -267,10 +268,23 @@ namespace System.Text.Json
             return toReturn;
         }
 
+        private struct ReferencequalityComparer : IEqualityComparer<KeyValuePair<string, JsonNode>>
+        {
+            public bool Equals(KeyValuePair<string, JsonNode> left, KeyValuePair<string, JsonNode> right)
+            {
+                return ReferenceEquals(left, right);
+            }
+
+            public int GetHashCode(KeyValuePair<string, JsonNode> obj)
+            {
+                return obj.GetHashCode();
+            }
+        }
+
         internal void WriteTo(Utf8JsonWriter writer)
         {
             var recursionStack = new Stack<KeyValuePair<string, JsonNode>>();
-            var visited = new HashSet<KeyValuePair<string, JsonNode>>();
+            var visited = new Dictionary<KeyValuePair<string, JsonNode>, bool>(new ReferencequalityComparer());
 
             recursionStack.Push(new KeyValuePair<string, JsonNode>(null, this));
 
@@ -279,7 +293,7 @@ namespace System.Text.Json
                 KeyValuePair<string, JsonNode> currentPair = recursionStack.Peek();
                 recursionStack.Pop();
 
-                if (visited.Contains(currentPair))
+                if (visited.ContainsKey(currentPair))
                 {
                     // Current object/array is finished:
                     Debug.Assert(currentPair.Value is JsonArray || currentPair.Value is JsonObject);
@@ -296,7 +310,7 @@ namespace System.Text.Json
                     continue;
                 }
 
-                visited.Add(currentPair);
+                visited.Add(currentPair, true);
 
                 if (currentPair.Key != null)
                 {

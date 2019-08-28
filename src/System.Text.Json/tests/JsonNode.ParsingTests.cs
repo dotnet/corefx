@@ -131,44 +131,43 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void TestToJsonString()
         {
-            var person = new JsonObject
+            var jsonObject = new JsonObject()
             {
-                { "name", "John" },
-                { "surname", "Smith" },
-                {
-                    "phone numbers", new JsonObject()
+                { "text", "property value" },
+                { "boolean true", true },
+                {  "boolean false", false },
+                {  "null", null },
+                {  "int", 17 },
+                {  
+                    "combo array", new JsonArray()
                     {
-                        { "work", "123-456-7890" },
-                        { "home", "123-456-7890" }
-                    }
-                },
-                {
-                    "addresses", new JsonObject()
-                    {
+                        new JsonObject()
                         {
-                            "office", new JsonObject()
-                            {
-                                {  "address line 1", "One Microsoft Way" },
-                                {  "city" , "Redmond" } ,
-                                {  "zip code" , 98052 } ,
-                                {  "state" , (int) AvailableStateCodes.WA }
-                            }
-                        },
-                        {
-                            "home", new JsonObject()
-                            {
-                                {  "address line 1", "Pear Ave" },
-                                {  "address line 2", "1288" },
-                                {  "city" , "Mountain View" } ,
-                                {  "zip code" , 94043 } ,
-                                {  "state" , (int) AvailableStateCodes.CA }
+                            { "inner property", "value" },
+                            { "simple array", new JsonArray() { 0, 2.2, 3.14 } },
+                            { "empty object", new JsonObject() },
+                            { "nested object", new JsonObject
+                                {
+                                    {  "empty array", new JsonArray() },
+                                    {  "nested empty array", new JsonArray() { new JsonArray(), new JsonArray()} }
+                                }
                             }
                         }
+                    }
+                },
+                { "double", 3.14 },
+                { "scientific", new JsonNumber("3e100") },
+                { "simple array", new JsonArray() { 1,2,3 } },
+                { "inner object", new JsonObject()
+                    {
+                        { "inner property", "value" }
                     }
                 }
             };
 
-            string json = person.ToJsonString();
+            string json = jsonObject.ToJsonString();
+            JsonNode node = JsonNode.Parse(json);
+            CheckNode(node);
         }
     }
 }

@@ -42,6 +42,11 @@ namespace System.Text.Json
         /// <returns></returns>
         public bool MoveNext()
         {
+            if (_first == null)
+            {
+                return false;
+            }
+
             if (_current == null)
             {
                 _current = _first;

@@ -15,7 +15,6 @@
     <Compile Include="DebuggerTests.cs" />
     <Compile Include="FixedSizedBufferWriter.cs" />
     <Compile Include="InvalidBufferWriter.cs" />
-    <Compile Include="JsonNullTests.cs" />
     <Compile Include="JsonDateTimeTestData.cs" />
     <Compile Include="JsonDocumentTests.cs" />
     <Compile Include="JsonElementCloneTests.cs" />
@@ -121,7 +120,8 @@
     <Compile Include="JsonNodeTestData.cs" />
     <Compile Include="JsonNode.AsJsonElementTests.cs" />
     <Compile Include="JsonNode.CloneTests.cs" />
-    <Compile Include="JsonNode.CopyAndParseTests.cs" />
+    <Compile Include="JsonNode.ParsingTests.cs" />
+    <Compile Include="JsonNullTests.cs" />
     <Compile Include="JsonNumberTests.cs" />
     <Compile Include="JsonObjectTests.cs" />
     <Compile Include="JsonStringTests.cs" />
