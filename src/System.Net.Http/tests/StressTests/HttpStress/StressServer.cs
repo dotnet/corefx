@@ -164,7 +164,7 @@ namespace HttpStress
 
                 // send back a checksum of all the echoed headers
                 ulong checksum = CRC.CalculateHeaderCrc(headersToEcho);
-                context.Response.Headers.Add("crc32", checksum.ToString());
+                AppendChecksumHeader(context.Response.Headers, checksum);
 
                 await context.Response.WriteAsync("ok");
 
@@ -203,13 +203,34 @@ namespace HttpStress
                 // Post echos back the requested content, first buffering it all server-side, then sending it all back.
                 var s = new MemoryStream();
                 await context.Request.Body.CopyToAsync(s);
+                
+                ulong checksum = CRC.CalculateCRC(s.ToArray());
+                AppendChecksumHeader(context.Response.Headers, checksum);
+
                 s.Position = 0;
                 await s.CopyToAsync(context.Response.Body);
             });
             endpoints.MapPost("/duplex", async context =>
             {
                 // Echos back the requested content in a full duplex manner.
-                await context.Request.Body.CopyToAsync(context.Response.Body);
+                var buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(512);
+                ulong hashAcc = CRC.InitialCrc;
+                int read;
+
+                while ((read = await context.Request.Body.ReadAsync(buffer)) != 0)
+                {
+                    hashAcc = CRC.update_crc(hashAcc, buffer, read);
+                    await context.Response.Body.WriteAsync(buffer, 0, read);
+                }
+
+                hashAcc = CRC.InitialCrc ^ hashAcc;
+
+                System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
+
+                if (context.Response.SupportsTrailers())
+                {
+                    context.Response.AppendTrailer("crc32", hashAcc.ToString());
+                }
             });
             endpoints.MapPost("/duplexSlow", async context =>
             {
@@ -241,6 +262,11 @@ namespace HttpStress
                 // Read the full request but don't send back a response body.
                 await context.Request.Body.CopyToAsync(Stream.Null);
             });
+        }
+
+        private static void AppendChecksumHeader(IHeaderDictionary headers, ulong checksum)
+        {
+            headers.Add("crc32", checksum.ToString());
         }
 
         public void Dispose()
