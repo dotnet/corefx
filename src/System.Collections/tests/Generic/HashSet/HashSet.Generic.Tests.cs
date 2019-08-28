@@ -344,5 +344,19 @@ namespace System.Collections.Tests
             ISet<T> iset = (set as ISet<T>);
             Assert.NotNull(iset);
         }
+
+        [Theory]
+        [MemberData(nameof(ValidCollectionSizes))]
+        public void EnsureCapacity_AfterRemovingOne(int setLength)
+        {
+            if (setLength == 0)
+            {
+                return;
+            }
+
+            HashSet<T> set = (HashSet<T>)GenericISetFactory(setLength);
+            set.Remove(set.ElementAt(0));
+            set.EnsureCapacity(set.Count * 3); // * 3 to ensure we hit the next prime so that a resize happens.
+        }
     }
 }
