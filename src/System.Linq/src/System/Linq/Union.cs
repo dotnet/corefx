@@ -99,10 +99,12 @@ namespace System.Linq
                     for (IEnumerable<TSource> enumerable = GetEnumerable(0); enumerable != null; enumerable = GetEnumerable(_state - 1))
                     {
                         IEnumerator<TSource> enumerator = enumerable.GetEnumerator();
+
+                        bool canMoveNext = enumerator.MoveNext();
+                        SetEnumerator(enumerator);
+
                         ++_state;
 
-                        var canMoveNext = enumerator.MoveNext();
-                        SetEnumerator(enumerator);
                         if (canMoveNext)
                         {
                             StoreFirst();
