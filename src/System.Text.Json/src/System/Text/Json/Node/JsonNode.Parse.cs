@@ -268,41 +268,44 @@ namespace System.Text.Json
             return toReturn;
         }
 
-        private struct ReferencequalityComparer : IEqualityComparer<KeyValuePair<string, JsonNode>>
+        private struct StackFrame
         {
-            public bool Equals(KeyValuePair<string, JsonNode> left, KeyValuePair<string, JsonNode> right)
+            public string PropertyName { get; set; }
+            public JsonNode PropertyValue { get; set; }
+            public JsonValueKind ValueKind { get; set; }
+
+            public StackFrame(string propertyName, JsonNode propertyValue, JsonValueKind valueKind)
             {
-                return ReferenceEquals(left, right);
+                PropertyName = propertyName;
+                PropertyValue = propertyValue;
+                ValueKind = valueKind;
             }
 
-            public int GetHashCode(KeyValuePair<string, JsonNode> obj)
+            public StackFrame(string propertyName, JsonNode propertyValue) : this(propertyName, propertyValue, propertyValue.ValueKind)
             {
-                return obj.GetHashCode();
             }
         }
 
         internal void WriteTo(Utf8JsonWriter writer)
         {
-            var recursionStack = new Stack<KeyValuePair<string, JsonNode>>();
-            var visited = new Dictionary<KeyValuePair<string, JsonNode>, bool>(new ReferencequalityComparer());
-
-            recursionStack.Push(new KeyValuePair<string, JsonNode>(null, this));
+            var recursionStack = new Stack<StackFrame>();
+            recursionStack.Push(new StackFrame(null, this));
 
             while (recursionStack.Any())
             {
-                KeyValuePair<string, JsonNode> currentPair = recursionStack.Peek();
+                StackFrame currentFrame = recursionStack.Peek();
                 recursionStack.Pop();
 
-                if (visited.ContainsKey(currentPair))
+                if (currentFrame.PropertyValue == null)
                 {
                     // Current object/array is finished:
-                    Debug.Assert(currentPair.Value is JsonArray || currentPair.Value is JsonObject);
+                    Debug.Assert(currentFrame.ValueKind == JsonValueKind.Object || currentFrame.ValueKind == JsonValueKind.Array);
 
-                    if (currentPair.Value is JsonObject)
+                    if (currentFrame.ValueKind == JsonValueKind.Object)
                     {
                         writer.WriteEndObject();
                     }
-                    if (currentPair.Value is JsonArray)
+                    if (currentFrame.ValueKind == JsonValueKind.Array)
                     {
                         writer.WriteEndArray();
                     }
@@ -310,35 +313,33 @@ namespace System.Text.Json
                     continue;
                 }
 
-                visited.Add(currentPair, true);
-
-                if (currentPair.Key != null)
+                if (currentFrame.PropertyName != null)
                 {
-                    writer.WritePropertyName(currentPair.Key);
+                    writer.WritePropertyName(currentFrame.PropertyName);
                 }
 
-                switch (currentPair.Value)
+                switch (currentFrame.PropertyValue)
                 {
                     case JsonObject jsonObject:
                         writer.WriteStartObject();
 
                         // Add end of object marker:
-                        recursionStack.Push(currentPair);
+                        recursionStack.Push(new StackFrame(null, null, JsonValueKind.Object));
 
                         foreach (KeyValuePair<string, JsonNode> jsonProperty in jsonObject)
                         {
-                            recursionStack.Push(jsonProperty);
+                            recursionStack.Push(new StackFrame(jsonProperty.Key, jsonProperty.Value));
                         }
                         break;
                     case JsonArray jsonArray:
                         writer.WriteStartArray();
 
                         // Add end of array marker:
-                        recursionStack.Push(currentPair);
+                        recursionStack.Push(new StackFrame(null, null, JsonValueKind.Array));
 
                         foreach (JsonNode item in jsonArray)
                         {
-                            recursionStack.Push(new KeyValuePair<string, JsonNode>(null, item));
+                            recursionStack.Push(new StackFrame(null, item));
                         }
                         break;
                     case JsonString jsonString:
@@ -350,7 +351,7 @@ namespace System.Text.Json
                     case JsonBoolean jsonBoolean:
                         writer.WriteBooleanValue(jsonBoolean.Value);
                         break;
-                    case JsonNull jsonNull:
+                    case JsonNull _:
                         writer.WriteNullValue();
                         break;
                 }
