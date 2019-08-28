@@ -415,33 +415,14 @@ namespace System.Linq.Tests
             Assert.Equal(new[] { "A" }, input2.Union(input1, StringComparer.OrdinalIgnoreCase));
         }
 
-
-        private class MyEnumerable : IEnumerable<long>
-        {
-            private MyEnumerator _enumerator;
-            public bool DisposeCalledOnEnumerator => _enumerator.DisposeCalled;
-            public IEnumerator<long> GetEnumerator() => (_enumerator =  new MyEnumerator());
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-        }
-
-        private class MyEnumerator : IEnumerator<long>
-        {
-            public bool DisposeCalled { get; private set; }
-            public long Current => 0;
-            object IEnumerator.Current => Current;
-            public bool MoveNext() => false;
-            public void Reset() { }
-            public void Dispose() { DisposeCalled = true; }
-        }
-
         [Fact]
         public void UnionFollowedBySelectOnEmptyEnumerableInvokesDispose()
         {
-            var enum1 = new MyEnumerable();
-            var enum2 = new MyEnumerable();
+            var enum1 = new DisposeTrackingEnumerable<int>();
+            var enum2 = new DisposeTrackingEnumerable<int>();
             enum1.Union(enum2).Select(x => x).ToList();
-            Assert.True(enum1.DisposeCalledOnEnumerator);
-            Assert.True(enum2.DisposeCalledOnEnumerator);
+            Assert.True(enum1.EnumeratorDisposed);
+            Assert.True(enum2.EnumeratorDisposed);
         }
     }
 }
