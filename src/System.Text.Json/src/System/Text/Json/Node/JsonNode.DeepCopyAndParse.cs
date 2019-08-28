@@ -13,7 +13,11 @@ namespace System.Text.Json
     /// </summary>
     public abstract partial class JsonNode
     {
-        private static void AddToParent(KeyValuePair<string, JsonNode> nodePair, ref Stack<KeyValuePair<string, JsonNode>> currentNodes, ref JsonNode toReturn)
+        private static void AddToParent(
+            KeyValuePair<string, JsonNode> nodePair,
+            ref Stack<KeyValuePair<string, JsonNode>> currentNodes,
+            ref JsonNode toReturn,
+            DuplicatePropertyNameHandling duplicatePropertyNameHandling = DuplicatePropertyNameHandling.Replace)
         {
             if (currentNodes.Any())
             {
@@ -24,7 +28,23 @@ namespace System.Text.Json
                 if (parentPair.Value is JsonObject jsonObject)
                 {
                     Debug.Assert(nodePair.Key != null);
-                    jsonObject.Add(nodePair);
+                    if (jsonObject._dictionary.ContainsKey(nodePair.Key))
+                    {
+                        switch (duplicatePropertyNameHandling)
+                        {
+                            case DuplicatePropertyNameHandling.Replace:
+                                jsonObject[nodePair.Key] = nodePair.Value;
+                                break;
+                            case DuplicatePropertyNameHandling.Error:
+                                throw new ArgumentException(SR.JsonObjectDuplicateKey);
+                            case DuplicatePropertyNameHandling.Ignore:
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        jsonObject.Add(nodePair);
+                    }
                 }
                 else if (parentPair.Value is JsonArray jsonArray)
                 {
@@ -160,45 +180,71 @@ namespace System.Text.Json
                 JsonTokenType tokenType = reader.TokenType;
                 KeyValuePair<string, JsonNode> currentPair = currentNodes.Peek();
 
-                void AddToCurrentNodes(JsonNode nodeToAdd)
+                void AddNewPair(JsonNode jsonNode, bool keepInCurrentNodes = false)
                 {
+                    KeyValuePair<string, JsonNode> newProperty;
+
                     // If previous token was property name,
                     // it was added to stack with null value
                     if (currentPair.Value == null)
                     {
-                        // Add as property, keep name, replace null with new JsonNode:
+                        // Create as property, keep name, replace null with new JsonNode:
                         currentNodes.Pop();
-                        currentNodes.Push(new KeyValuePair<string, JsonNode>(currentPair.Key, nodeToAdd));
+                        newProperty = new KeyValuePair<string, JsonNode>(currentPair.Key, jsonNode);
                     }
                     else
                     {
-                        // Add as value:
-                        currentNodes.Push(new KeyValuePair<string, JsonNode>(null, nodeToAdd));
+                        // Create as value:
+                        newProperty = new KeyValuePair<string, JsonNode>(null, jsonNode);
+                    }
+
+                    if (keepInCurrentNodes)
+                    {
+                        currentNodes.Push(newProperty);
+                    }
+                    else
+                    {
+                        AddToParent(newProperty, ref currentNodes, ref toReturn, duplicatePropertyNameHandling);
                     }
                 }
 
                 switch (tokenType)
                 {
                     case JsonTokenType.StartObject:
-                        JsonNode nodeToAdd = new JsonObject();
-                        AddToCurrentNodes(nodeToAdd);
+                        AddNewPair(new JsonObject(), true);
                         break;
                     case JsonTokenType.EndObject:
                         Debug.Assert(currentPair.Value is JsonObject);
 
                         currentNodes.Pop();
-                        AddToParent(currentPair, ref currentNodes, ref toReturn);
+                        AddToParent(currentPair, ref currentNodes, ref toReturn, duplicatePropertyNameHandling);
                         break;
                     case JsonTokenType.StartArray:
-                        // Keep property name, replace null JsonNode with new JsonObject:
-                        currentNodes.Pop();
-                        currentNodes.Push(new KeyValuePair<string, JsonNode>(null, new JsonArray()));
+                        AddNewPair(new JsonArray(), true);
                         break;
                     case JsonTokenType.EndArray:
                         Debug.Assert(currentPair.Value is JsonArray);
 
                         currentNodes.Pop();
-                        AddToParent(currentPair, ref currentNodes, ref toReturn);
+                        AddToParent(currentPair, ref currentNodes, ref toReturn, duplicatePropertyNameHandling);
+                        break;
+                    case JsonTokenType.PropertyName:
+                        currentNodes.Push(new KeyValuePair<string, JsonNode>(reader.GetString(), null));
+                        break;
+                    case JsonTokenType.Number:
+                        AddNewPair(new JsonNumber(reader.ValueSpan.ToString()));
+                        break;
+                    case JsonTokenType.String:
+                        AddNewPair(new JsonString(reader.GetString()));
+                        break;
+                    case JsonTokenType.True:
+                        AddNewPair(new JsonBoolean(true));
+                        break;
+                    case JsonTokenType.False:
+                        AddNewPair(new JsonBoolean(false));
+                        break;
+                    case JsonTokenType.Null:
+                        AddNewPair(new JsonNull());
                         break;
                 }
             }
