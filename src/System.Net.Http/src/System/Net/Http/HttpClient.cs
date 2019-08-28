@@ -536,15 +536,15 @@ namespace System.Net.Http
                 if (NetEventSource.IsEnabled) NetEventSource.ClientSendCompleted(this, response, request);
                 return response;
             }
-            catch (OperationCanceledException e) when (timeoutChecker.IsTimeout(e, cts))
-            {
-                HandleFinishSendAsyncError(e, cts);
-                throw CreateTimeoutException(e);
-            }
             catch (Exception e)
             {
                 response?.Dispose();
                 HandleFinishSendAsyncError(e, cts);
+                if (timeoutChecker.IsTimeout(e, cts))
+                {
+                    throw CreateTimeoutException(e);
+                }
+
                 throw;
             }
             finally
@@ -567,14 +567,13 @@ namespace System.Net.Http
                 if (NetEventSource.IsEnabled) NetEventSource.ClientSendCompleted(this, response, request);
                 return response;
             }
-            catch (OperationCanceledException e) when (timeoutChecker.IsTimeout(e, cts))
-            {
-                HandleFinishSendAsyncError(e, cts);
-                throw CreateTimeoutException(e);
-            }
             catch (Exception e)
             {
                 HandleFinishSendAsyncError(e, cts);
+                if (timeoutChecker.IsTimeout(e, cts))
+                {
+                    throw CreateTimeoutException(e);
+                }
                 throw;
             }
             finally
@@ -764,12 +763,12 @@ namespace System.Net.Http
         private HttpRequestMessage CreateRequestMessage(HttpMethod method, Uri uri) =>
             new HttpRequestMessage(method, uri) { Version = _defaultRequestVersion };
 
-        private Exception CreateTimeoutException(Exception innerException)
+        private static Exception CreateTimeoutException(Exception innerException)
         {
             return new HttpRequestException(
                 SR.net_http_timeout,
                 new TimeoutException(SR.net_http_timeout, innerException),
-                true);
+                allowRetry: false);
         }
 
         private readonly struct TimeoutChecker
