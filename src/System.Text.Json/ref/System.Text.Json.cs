@@ -257,6 +257,7 @@ namespace System.Text.Json
         [System.CLSCompliantAttribute(false)]
         public static implicit operator System.Text.Json.JsonNode (ulong value) { throw null; }
         public static System.Text.Json.JsonNode Parse(string json, System.Text.Json.JsonReaderOptions options = default(System.Text.Json.JsonReaderOptions), System.Text.Json.DuplicatePropertyNameHandling duplicatePropertyNameHandling = System.Text.Json.DuplicatePropertyNameHandling.Replace) { throw null; }
+        public string ToJsonString() { throw null; }
         public static bool TryGetNode(System.Text.Json.JsonElement jsonElement, out System.Text.Json.JsonNode jsonNode) { throw null; }
     }
     public sealed partial class JsonNull : System.Text.Json.JsonNode, System.IEquatable<System.Text.Json.JsonNull>

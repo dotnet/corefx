@@ -1596,8 +1596,14 @@ namespace System.Text.Json
 
             CheckValidInstance();
 
-            var document = (JsonDocument)_parent;
-            document.WriteElementTo(_idx, writer);
+            if (_parent is JsonDocument document)
+            {
+                document.WriteElementTo(_idx, writer);
+                return;
+            }
+
+            var jsonNode = (JsonNode)_parent;
+            jsonNode.WriteTo(writer);
         }
 
         /// <summary>

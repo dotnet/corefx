@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 
 namespace System.Text.Json
@@ -264,6 +265,99 @@ namespace System.Text.Json
 
             Debug.Assert(toReturn != null);
             return toReturn;
+        }
+
+        internal void WriteTo(Utf8JsonWriter writer)
+        {
+            var recursionStack = new Stack<KeyValuePair<string, JsonNode>>();
+            var visited = new HashSet<KeyValuePair<string, JsonNode>>();
+
+            recursionStack.Push(new KeyValuePair<string, JsonNode>(null, this));
+
+            while (recursionStack.Any())
+            {
+                KeyValuePair<string, JsonNode> currentPair = recursionStack.Peek();
+                recursionStack.Pop();
+
+                if (visited.Contains(currentPair))
+                {
+                    // Current object/array is finished:
+                    Debug.Assert(currentPair.Value is JsonArray || currentPair.Value is JsonObject);
+
+                    if (currentPair.Value is JsonObject)
+                    {
+                        writer.WriteEndObject();
+                    }
+                    if (currentPair.Value is JsonArray)
+                    {
+                        writer.WriteEndArray();
+                    }
+
+                    continue;
+                }
+
+                visited.Add(currentPair);
+
+                if (currentPair.Key != null)
+                {
+                    writer.WritePropertyName(currentPair.Key);
+                }
+
+                switch (currentPair.Value)
+                {
+                    case JsonObject jsonObject:
+                        writer.WriteStartObject();
+
+                        // Add end of object marker:
+                        recursionStack.Push(currentPair);
+
+                        foreach (KeyValuePair<string, JsonNode> jsonProperty in jsonObject)
+                        {
+                            recursionStack.Push(jsonProperty);
+                        }
+                        break;
+                    case JsonArray jsonArray:
+                        writer.WriteStartArray();
+
+                        // Add end of array marker:
+                        recursionStack.Push(currentPair);
+
+                        foreach (JsonNode item in jsonArray)
+                        {
+                            recursionStack.Push(new KeyValuePair<string, JsonNode>(null, item));
+                        }
+                        break;
+                    case JsonString jsonString:
+                        writer.WriteStringValue(jsonString.Value);
+                        break;
+                    case JsonNumber jsonNumber:
+                        writer.WriteNumberValue(Encoding.UTF8.GetBytes(jsonNumber.ToString()));
+                        break;
+                    case JsonBoolean jsonBoolean:
+                        writer.WriteBooleanValue(jsonBoolean.Value);
+                        break;
+                    case JsonNull jsonNull:
+                        writer.WriteNullValue();
+                        break;
+                }
+            }
+        }
+
+        /// <summary>
+        ///   Converts the current instance to string in JSON format.
+        /// </summary>
+        /// <returns>JSON representation of current instance.</returns>
+        public string ToJsonString()
+        {
+            var stream = new MemoryStream();
+            var writer = new Utf8JsonWriter(stream);
+
+            WriteTo(writer);
+
+            using (var reader = new StreamReader(stream))
+            {
+                return reader.ReadToEnd();
+            }
         }
     }
 }
