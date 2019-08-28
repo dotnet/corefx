@@ -268,36 +268,37 @@ namespace System.IO
             string fulldestDirName = Path.GetFullPath(destDirName);
             string destPath = PathInternal.EnsureTrailingSeparator(fulldestDirName);
 
-            // As we're moving a directory, case sensitivty should be ordinal
-            // even on a case-sensitive/case-preserving file system moving foo to FOO should still work.
-            StringComparison pathComparison = StringComparison.Ordinal;
+            // Here we have a bool to check if they're equal, but with different casing
+            // We allowing moving foo to the same directory, but renaming with a different case.
+            bool sameDirectoryWithDifferentCasing =
+                string.Equals(sourcePath, destPath, StringComparison.OrdinalIgnoreCase);
 
-            if (string.Equals(sourcePath, destPath, pathComparison))
+            StringComparison pathComparison = PathInternal.StringComparison;
+
+            if (!sameDirectoryWithDifferentCasing
+                && string.Equals(sourcePath, destPath, pathComparison))
+            {
                 throw new IOException(SR.IO_SourceDestMustBeDifferent);
+            }
+
 
             string sourceRoot = Path.GetPathRoot(sourcePath);
             string destinationRoot = Path.GetPathRoot(destPath);
             if (!string.Equals(sourceRoot, destinationRoot, pathComparison))
+            {
                 throw new IOException(SR.IO_SourceDestMustHaveSameRoot);
+            }
 
             // Windows will throw if the source file/directory doesn't exist, we preemptively check
             // to make sure our cross platform behavior matches NetFX behavior.
             if (!FileSystem.DirectoryExists(fullsourceDirName) && !FileSystem.FileExists(fullsourceDirName))
                 throw new DirectoryNotFoundException(SR.Format(SR.IO_PathNotFound_Path, fullsourceDirName));
 
-
-            string destinationDirectoryName = Path.GetFileName(destDirName);
-            // Here we have a bool to check if they're equal, but with different casing
-            // We allowing moving foo to the same directory, but renaming with a different case.
-            bool sameDirectoryWithDifferentCasing =
-                string.Equals(sourcePath, destPath, StringComparison.OrdinalIgnoreCase);
-
-            // As our Linux x86/x64 builds won't throw an exception for a directory already existing
-            // we do a case sensitive compare here to ensure.
-            // this is so if we move /foo to bar/fOO it fails.
-            if (!sameDirectoryWithDifferentCasing && FileSystem.DirectoryExists(fulldestDirName)
-                && GetDirectories(Path.GetDirectoryName(fulldestDirName)).Any(dir => dir.Equals(fulldestDirName, StringComparison.OrdinalIgnoreCase)))
-                throw new IOException((SR.Format(SR.IO_AlreadyExists_Name, fulldestDirName)));
+            if (!sameDirectoryWithDifferentCasing
+                && FileSystem.DirectoryExists(fulldestDirName))
+            {
+                throw new IOException(SR.Format(SR.IO_AlreadyExists_Name, fulldestDirName));
+            }
 
             FileSystem.MoveDirectory(fullsourceDirName, fulldestDirName);
         }

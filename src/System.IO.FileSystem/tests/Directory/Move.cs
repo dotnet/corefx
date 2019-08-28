@@ -213,16 +213,6 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public void MoveToNewDirectoryWithSameNameWithDifferentCasing()
-        {
-            Environment.CurrentDirectory = TestDirectory;
-            Directory.CreateDirectory("foo");
-            Directory.Move("foo", "FOO");
-            var directoriesInCurrentDirectory = Directory.GetDirectories(Directory.GetCurrentDirectory());
-            Assert.True(directoriesInCurrentDirectory[0].Contains("FOO", StringComparison.Ordinal));
-        }
-
-        [Fact]
         public void ThrowIOExceptionWhenDirectoryExists()
         {
             Environment.CurrentDirectory = TestDirectory;
@@ -243,15 +233,38 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public void MoveDirectoryToNewDirectoryWithExistingDirectoryOfTheSameNameWithDifferentCasing()
+        public void MoveDirectory_SameDirectoryWithDifferentCasing_WithFileContent()
         {
             Environment.CurrentDirectory = TestDirectory;
             Directory.CreateDirectory("foo");
-            var otherDirectoryName = "bar";
-            Directory.CreateDirectory(otherDirectoryName);
-            Directory.CreateDirectory(Path.Combine(otherDirectoryName, "FoO"));
-            Assert.Throws<IOException>(() => Directory.Move("foo", Path.Combine(otherDirectoryName, "foo")));
+            var fooDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(), "foo");
+            File.WriteAllText(Path.Combine(fooDirectoryPath, "bar.txt"), string.Empty);
+            Directory.Move("foo", "FOO");
+            var firstFile = Directory.GetFiles(fooDirectoryPath);
+            Assert.Equal("bar.txt", Path.GetFileName(firstFile[0]));
         }
+
+        [Fact]
+        public void MoveDirectory_FailToMoveDirectoryWithUpperCaseToOtherDirectoryWithLowerCase()
+        {
+            Environment.CurrentDirectory = TestDirectory;
+            Directory.CreateDirectory("FOO");
+            Directory.CreateDirectory("bar/foo");
+            Assert.Throws<IOException>(() => Directory.Move("FOO", "bar/foo"));
+        }
+
+        [Fact]
+        public void MoveDirectory_SameDirectoryWithDifferentCasing_WithDirectoryContent()
+        {
+            Environment.CurrentDirectory = TestDirectory;
+            Directory.CreateDirectory("foo");
+            var fooDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(), "foo");
+            Directory.CreateDirectory(Path.Combine(fooDirectoryPath, "bar"));
+            Directory.Move("foo", "FOO");
+            var firstFile = Directory.GetDirectories(fooDirectoryPath);
+            Assert.Equal("bar", Path.GetFileName(firstFile[0]));
+        }
+
 
         #endregion
 
