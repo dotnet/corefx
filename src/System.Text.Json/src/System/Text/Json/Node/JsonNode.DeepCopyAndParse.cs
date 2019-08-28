@@ -340,6 +340,8 @@ namespace System.Text.Json
                         writer.WriteNullValue();
                         break;
                 }
+
+                writer.Flush();
             }
         }
 
@@ -350,13 +352,10 @@ namespace System.Text.Json
         public string ToJsonString()
         {
             var stream = new MemoryStream();
-            var writer = new Utf8JsonWriter(stream);
-
-            WriteTo(writer);
-
-            using (var reader = new StreamReader(stream))
+            using (var writer = new Utf8JsonWriter(stream))
             {
-                return reader.ReadToEnd();
+                WriteTo(writer);
+                return JsonHelpers.Utf8GetString(stream.ToArray());
             }
         }
     }

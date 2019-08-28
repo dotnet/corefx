@@ -127,5 +127,48 @@ namespace System.Text.Json.Tests
                 JsonNode node = JsonNode.DeepCopy(dom.RootElement);
             }
         }
+
+        [Fact]
+        public static void TestToJsonString()
+        {
+            var person = new JsonObject
+            {
+                { "name", "John" },
+                { "surname", "Smith" },
+                {
+                    "phone numbers", new JsonObject()
+                    {
+                        { "work", "123-456-7890" },
+                        { "home", "123-456-7890" }
+                    }
+                },
+                {
+                    "addresses", new JsonObject()
+                    {
+                        {
+                            "office", new JsonObject()
+                            {
+                                {  "address line 1", "One Microsoft Way" },
+                                {  "city" , "Redmond" } ,
+                                {  "zip code" , 98052 } ,
+                                {  "state" , (int) AvailableStateCodes.WA }
+                            }
+                        },
+                        {
+                            "home", new JsonObject()
+                            {
+                                {  "address line 1", "Pear Ave" },
+                                {  "address line 2", "1288" },
+                                {  "city" , "Mountain View" } ,
+                                {  "zip code" , 94043 } ,
+                                {  "state" , (int) AvailableStateCodes.CA }
+                            }
+                        }
+                    }
+                }
+            };
+
+            string json = person.ToJsonString();
+        }
     }
 }
