@@ -18,7 +18,7 @@ namespace System.Text.Json
         {
             private readonly JsonElement _target;
             private int _curIdx;
-            private readonly int _endIdx;
+            private readonly int _endIdxOrVersion;
             private JsonObjectProperty _current;
 
             internal ObjectEnumerator(JsonElement target)
@@ -30,11 +30,12 @@ namespace System.Text.Json
                 if (target._parent is JsonDocument document)
                 {
                     Debug.Assert(target.TokenType == JsonTokenType.StartObject);
-                    _endIdx = document.GetEndIndex(_target._idx, includeEndElement: false);
+                    _endIdxOrVersion = document.GetEndIndex(_target._idx, includeEndElement: false);
                 }
                 else
                 {
-                    _endIdx = -1;
+                    var jsonObject = (JsonObject)target._parent;
+                   _endIdxOrVersion = jsonObject._version;
                 }
             }
 
@@ -92,7 +93,7 @@ namespace System.Text.Json
             /// <inheritdoc />
             public void Dispose()
             {
-                _curIdx = _endIdx;
+                _curIdx = _endIdxOrVersion;
                 if (_target._parent is JsonNode)
                 {
                     _current = null;
@@ -117,6 +118,11 @@ namespace System.Text.Json
             {
                 if (_target._parent is JsonObject jsonObject)
                 {
+                    if (jsonObject._version != _endIdxOrVersion)
+                    {
+                        throw new InvalidOperationException(SR.ArrayModifiedDuringIteration);
+                    }
+
                     if (_current == null)
                     {
                         _current = jsonObject._first;
@@ -132,7 +138,7 @@ namespace System.Text.Json
                     return false;
                 }
 
-                if (_curIdx >= _endIdx)
+                if (_curIdx >= _endIdxOrVersion)
                 {
                     return false;
                 }
@@ -150,7 +156,7 @@ namespace System.Text.Json
                 // _curIdx is now pointing at a property name, move one more to get the value
                 _curIdx += JsonDocument.DbRow.Size;
 
-                return _curIdx < _endIdx;
+                return _curIdx < _endIdxOrVersion;
             }
         }
     }
