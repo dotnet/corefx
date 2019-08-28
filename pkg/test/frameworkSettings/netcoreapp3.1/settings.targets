@@ -12,7 +12,17 @@
     <KnownFrameworkReference Include="@(KnownFrameworkReference->WithMetadataValue('TargetFramework', 'netcoreapp3.0'))"
         TargetFramework="netcoreapp3.1" />
 
+    <FrameworkReference Update="Microsoft.NETCore.App" Condition="'$(TargetFramework)' == 'netcoreapp3.1'" RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)" TargetingPackVersion="$(RuntimeFrameworkVersion)" />
+
     <KnownFrameworkReference Remove="Microsoft.AspNetCore.App" />
     <KnownFrameworkReference Remove="Microsoft.WindowsDesktop.App" />
+    <KnownFrameworkReference Remove="Microsoft.WindowsDesktop.App.WPF" />
+    <KnownFrameworkReference Remove="Microsoft.WindowsDesktop.App.WindowsForms" />
   </ItemGroup>
+
+  <Target Name="Patch30PackTo31" BeforeTargets="ResolveTargetingPacks">
+    <ItemGroup>
+      <TargetingPack Update="Microsoft.NETCore.App" Condition="'$(TargetFramework)' == 'netcoreapp3.1'" TargetFramework="netcoreapp3.0" />
+    </ItemGroup>
+  </Target>
 </Project>
