@@ -54,7 +54,6 @@ namespace System.Text.Json
             return (JsonClassInfo.ConstructorDelegate)dynamicMethod.CreateDelegate(typeof(JsonClassInfo.ConstructorDelegate));
         }
 
-
         public override ImmutableCollectionCreator ImmutableCollectionCreateRange(Type constructingType, Type collectionType, Type elementType)
         {
             MethodInfo createRange = ImmutableCollectionCreateRangeMethod(constructingType, elementType);
@@ -93,7 +92,6 @@ namespace System.Text.Json
             creator.RegisterCreatorDelegateFromMethod(createRange);
             return creator;
         }
-
 
         public override ImmutableCollectionCreator ImmutableDictionaryCreateRange(Type constructingType, Type collectionType, Type elementType)
         {

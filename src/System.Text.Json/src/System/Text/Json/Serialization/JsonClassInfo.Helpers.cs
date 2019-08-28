@@ -48,6 +48,7 @@ namespace System.Text.Json
         public const string DictionaryGenericTypeName = "System.Collections.Generic.Dictionary`2";
         public const string DictionaryGenericInterfaceTypeName = "System.Collections.Generic.IDictionary`2";
         public const string ReadOnlyDictionaryGenericInterfaceTypeName = "System.Collections.Generic.IReadOnlyDictionary`2";
+        public const string ReadOnlyDictionaryGenericTypeName = "System.Collections.ObjectModel.ReadOnlyDictionary`2";
         public const string SortedDictionaryGenericTypeName = "System.Collections.Generic.SortedDictionary`2";
         public const string KeyValuePairGenericTypeName = "System.Collections.Generic.KeyValuePair`2";
 
@@ -95,6 +96,7 @@ namespace System.Text.Json
             DictionaryGenericTypeName,
             DictionaryGenericInterfaceTypeName,
             ReadOnlyDictionaryGenericInterfaceTypeName,
+            ReadOnlyDictionaryGenericTypeName,
             SortedDictionaryGenericTypeName,
             KeyValuePairGenericTypeName,
             DefaultImmutableEnumerableConverter.ImmutableArrayGenericTypeName,
@@ -261,6 +263,11 @@ namespace System.Text.Json
 
         public static bool IsDeserializedByConstructingWithIDictionary(Type type)
         {
+            if (type.IsGenericType)
+            {
+                return type.GetGenericTypeDefinition().FullName == ReadOnlyDictionaryGenericTypeName;
+            }
+
             switch (type.FullName)
             {
                 case HashtableTypeName:

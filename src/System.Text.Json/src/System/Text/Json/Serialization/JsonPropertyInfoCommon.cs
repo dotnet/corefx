@@ -123,7 +123,7 @@ namespace System.Text.Json
 
         public override IEnumerable CreateDerivedEnumerableInstance(JsonPropertyInfo collectionPropertyInfo, IList sourceList, string jsonPath, JsonSerializerOptions options)
         {
-            object instance = collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject();
+            object instance = collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject?.Invoke();
 
             if (instance is IList instanceOfIList)
             {
@@ -174,7 +174,7 @@ namespace System.Text.Json
 
         public override object CreateDerivedDictionaryInstance(JsonPropertyInfo collectionPropertyInfo, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options)
         {
-            object instance = collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject();
+            object instance = collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject?.Invoke();
 
             if (instance is IDictionary instanceOfIDictionary)
             {

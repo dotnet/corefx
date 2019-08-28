@@ -5,6 +5,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -1360,6 +1361,23 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Null(obj.ClassVals["key"]);
         }
 
+        [Fact]
+        public static void ReadOnlyDictionaryDeserializes()
+        {
+            ReadOnlyDictionaryClass obj = JsonSerializer.Deserialize<ReadOnlyDictionaryClass>(@"{
+                ""Dictionary1"":{""Key1"":""Value1""},
+                ""Dictionary2"":{""Key2"":""Value2""}
+            }");
+
+            Assert.NotNull(obj.Dictionary1);
+            Assert.Equal(1, obj.Dictionary1.Count);
+            Assert.Equal("Value1", obj.Dictionary1["Key1"]);
+
+            Assert.NotNull(obj.Dictionary2);
+            Assert.Equal(1, obj.Dictionary2.Count);
+            Assert.Equal("Value2", obj.Dictionary2["Key2"]);
+        }
+
         public class ClassWithNotSupportedDictionary
         {
             public Dictionary<int, int> MyDictionary { get; set; }
@@ -1422,6 +1440,12 @@ namespace System.Text.Json.Serialization.Tests
             public Dictionary<string, Dictionary<string, string>> StringDictVals { get; set; }
             public Dictionary<string, Dictionary<string, object>> ObjectDictVals { get; set; }
             public Dictionary<string, SimpleClassWithDictionaries> ClassVals { get; set; }
+        }
+
+        public class ReadOnlyDictionaryClass
+        {
+            public IReadOnlyDictionary<string, string> Dictionary1 { get; set; }
+            public ReadOnlyDictionary<string, string> Dictionary2 { get; set; }
         }
     }
 }
