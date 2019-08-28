@@ -178,19 +178,31 @@ namespace System.Text.Json
             while (reader.Read())
             {
                 JsonTokenType tokenType = reader.TokenType;
-                KeyValuePair<string, JsonNode> currentPair = currentNodes.Peek();
+                KeyValuePair<string, JsonNode> currentPair = new KeyValuePair<string, JsonNode>();
+                if (currentNodes.Any())
+                {
+                    currentPair = currentNodes.Peek();
+                }
 
                 void AddNewPair(JsonNode jsonNode, bool keepInCurrentNodes = false)
                 {
                     KeyValuePair<string, JsonNode> newProperty;
 
-                    // If previous token was property name,
-                    // it was added to stack with null value
                     if (currentPair.Value == null)
                     {
-                        // Create as property, keep name, replace null with new JsonNode:
-                        currentNodes.Pop();
-                        newProperty = new KeyValuePair<string, JsonNode>(currentPair.Key, jsonNode);
+                        // If previous token was property name,
+                        // it was added to stack with not null name and null value,
+                        // otherwise, this is first property added
+                        if (currentPair.Key != null)
+                        {
+                            // Create as property, keep name, replace null with new JsonNode:
+                            currentNodes.Pop();
+                            newProperty = new KeyValuePair<string, JsonNode>(currentPair.Key, jsonNode);
+                        }
+                        else
+                        {
+                            newProperty = new KeyValuePair<string, JsonNode>(null, jsonNode);
+                        }
                     }
                     else
                     {
@@ -232,7 +244,7 @@ namespace System.Text.Json
                         currentNodes.Push(new KeyValuePair<string, JsonNode>(reader.GetString(), null));
                         break;
                     case JsonTokenType.Number:
-                        AddNewPair(new JsonNumber(reader.ValueSpan.ToString()));
+                        AddNewPair(new JsonNumber(JsonHelpers.Utf8GetString(reader.ValueSpan)));
                         break;
                     case JsonTokenType.String:
                         AddNewPair(new JsonString(reader.GetString()));
