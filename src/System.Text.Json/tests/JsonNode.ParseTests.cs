@@ -15,32 +15,59 @@ namespace System.Text.Json.Tests
                 ""boolean false"": false,
                 ""null"": null,
                 ""int"": 17,
+                ""combo array"": 
+                [                
+                    {
+                        ""inner property"" : ""value"",
+                        ""simple array"" : [0, 2.2, 3.14],
+                        ""empty object"": {},
+                        ""nested object"":
+                        {
+                            ""empty array"" : [],
+                            ""nested empty array"" : [[],[]]
+                        }
+                    }
+                ],
                 ""double"": 3.14,
                 ""scientific"": 3e100,
-                ""array"" : [1,2,3],
+                ""simple array"" : [1,2,3],
                 ""inner object"" : 
                 {
                     ""inner property"" : ""value""
                 }
             }";
 
-        [Fact]
+        /*[Fact]
         public static void TestParseStringToJsonNode()
         {
             JsonNode node = JsonNode.Parse(jsonSampleString);
+            CheckNode(node);
+        }*/
 
+        [Fact]
+        public static void TestDeepCopy()
+        {
+            using (JsonDocument document = JsonDocument.Parse(jsonSampleString))
+            {
+                JsonNode node = JsonNode.DeepCopy(document.RootElement);
+                CheckNode(node);
+            }
+        }
+
+        private static void CheckNode(JsonNode node)
+        {
             var jsonObject = (JsonObject)node;
-            Assert.Equal(9, jsonObject.PropertyNames.Count);
-            Assert.Equal(9, jsonObject.PropertyValues.Count);
-            Assert.Equal("property value", ((JsonString)jsonObject["text"]).Value);
+            Assert.Equal(10, jsonObject.PropertyNames.Count);
+            Assert.Equal(10, jsonObject.PropertyValues.Count);
+            Assert.Equal("property value", jsonObject["text"]);
             Assert.True(((JsonBoolean)jsonObject["boolean true"]).Value);
             Assert.False(((JsonBoolean)jsonObject["boolean false"]).Value);
             Assert.IsType<JsonNull>(jsonObject["null"]);
-            Assert.Equal(17, ((JsonNumber)jsonObject["int"]).GetInt32());
-            Assert.Equal(3.14, ((JsonNumber)jsonObject["double"]).GetDouble());
+            Assert.Equal(17, jsonObject["int"]);
+            Assert.Equal(3.14, jsonObject["double"]);
             Assert.Equal("3e100", ((JsonNumber)jsonObject["scientific"]).ToString());
 
-            var innerArray = (JsonArray)jsonObject["array"];
+            var innerArray = (JsonArray)jsonObject["simple array"];
             Assert.Equal(3, innerArray.Count);
             Assert.Equal(1, ((JsonNumber)innerArray[0]).GetInt32());
             Assert.Equal(2, ((JsonNumber)innerArray[1]).GetInt32());
@@ -49,7 +76,17 @@ namespace System.Text.Json.Tests
             var innerObject = (JsonObject)jsonObject["inner object"];
             Assert.Equal(1, innerObject.PropertyNames.Count);
             Assert.Equal(1, innerObject.PropertyValues.Count);
-            Assert.Equal("value", ((JsonString)innerObject["inner property"]).Value);
+            Assert.Equal("value", innerObject["inner property"]);
+
+            var comboObject = (JsonObject)jsonObject.GetJsonArrayPropertyValue("combo array")[0];
+            Assert.Equal(4, comboObject.PropertyNames.Count);
+            Assert.Equal(4, comboObject.PropertyValues.Count);
+            Assert.Equal("value", comboObject["inner property"]);
+            Assert.Equal(0, comboObject.GetJsonObjectPropertyValue("empty object").PropertyNames.Count);
+            Assert.Equal(3, comboObject.GetJsonArrayPropertyValue("simple array").Count);
+            var nestedObject = (JsonObject)comboObject["nested object"];
+            Assert.Equal(0, nestedObject.GetJsonArrayPropertyValue("empty array").Count);
+            Assert.Equal(2, nestedObject.GetJsonArrayPropertyValue("nested empty array").Count);
         }
     }
 }

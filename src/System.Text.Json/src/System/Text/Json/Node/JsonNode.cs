@@ -123,7 +123,7 @@ namespace System.Text.Json
 
             recursionStack.Push(new KeyValuePair<string, JsonElement?>(null, jsonElement));
 
-            while (!recursionStack.Any())
+            while (recursionStack.Any())
             {
                 KeyValuePair<string, JsonElement?> currentPair = recursionStack.Peek();
                 JsonElement? currentJsonElement = currentPair.Value;
@@ -139,6 +139,8 @@ namespace System.Text.Json
                     Debug.Assert(nodePair.Value is JsonArray || nodePair.Value is JsonObject);
 
                     AddToCurrentNodes(nodePair, ref toReturn);
+
+                    continue;
                 }
 
                 switch (currentJsonElement.Value.ValueKind)
@@ -153,7 +155,7 @@ namespace System.Text.Json
                         recursionStack.Push(new KeyValuePair<string, JsonElement?> (null, null));
 
                         // Add properties to recursion stack:
-                        foreach (JsonProperty property in currentJsonElement.Value.EnumerateObject())
+                        foreach (JsonProperty property in currentJsonElement.Value.EnumerateObject().Reverse())
                         {
                             recursionStack.Push(new KeyValuePair<string, JsonElement?>(property.Name, property.Value));
                         }
@@ -168,7 +170,7 @@ namespace System.Text.Json
                         recursionStack.Push(new KeyValuePair<string, JsonElement?>(null, null));
 
                         // Add elements to recursion stack:
-                        foreach (JsonElement element in currentJsonElement.Value.EnumerateArray())
+                        foreach (JsonElement element in currentJsonElement.Value.EnumerateArray().Reverse())
                         {
                             recursionStack.Push(new KeyValuePair<string, JsonElement?>(null, element));
                         }
