@@ -103,7 +103,8 @@ namespace System.Text.Json.Tests
                 builder.Append("]");
             }
 
-            JsonNode jsonNode = JsonNode.Parse(builder.ToString());
+            var options = new JsonReaderOptions { MaxDepth = 5_000 };
+            JsonNode jsonNode = JsonNode.Parse(builder.ToString(), options);
         }
 
         [Fact]

@@ -166,11 +166,12 @@ namespace System.Text.Json
         ///   Parses a string representiong JSON document into <see cref="JsonNode"/>.
         /// </summary>
         /// <param name="json">JSON to parse.</param>
+        /// <param name="options">Options to control the reader behavior during parsing.</param>
         /// <param name="duplicatePropertyNameHandling">Specifies the way of handling duplicate property names.</param>
         /// <returns><see cref="JsonNode"/> representation of <paramref name="json"/>.</returns>
-        public static JsonNode Parse(string json, DuplicatePropertyNameHandling duplicatePropertyNameHandling = DuplicatePropertyNameHandling.Replace)
+        public static JsonNode Parse(string json, JsonReaderOptions options = default, DuplicatePropertyNameHandling duplicatePropertyNameHandling = DuplicatePropertyNameHandling.Replace)
         {
-            Utf8JsonReader reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(json));
+            Utf8JsonReader reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(json), options);
 
             var currentNodes = new Stack<KeyValuePair<string, JsonNode>>(); // nodes currently being created
             JsonNode toReturn = null;
