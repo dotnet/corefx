@@ -37,12 +37,12 @@ namespace System.Text.Json.Tests
                 }
             }";
 
-        /*[Fact]
+        [Fact]
         public static void TestParseStringToJsonNode()
         {
             JsonNode node = JsonNode.Parse(jsonSampleString);
             CheckNode(node);
-        }*/
+        }
 
         [Fact]
         public static void TestDeepCopy()
@@ -87,6 +87,44 @@ namespace System.Text.Json.Tests
             var nestedObject = (JsonObject)comboObject["nested object"];
             Assert.Equal(0, nestedObject.GetJsonArrayPropertyValue("empty array").Count);
             Assert.Equal(2, nestedObject.GetJsonArrayPropertyValue("nested empty array").Count);
+        }
+
+        [Fact]
+        public static void TestParseDoesNotOverflow()
+        {
+            var builder = new StringBuilder();
+            for (int i = 0; i < 2_000; i++)
+            {
+                builder.Append("[");
+            }
+
+            for (int i = 0; i < 2_000; i++)
+            {
+                builder.Append("]");
+            }
+
+            JsonNode jsonNode = JsonNode.Parse(builder.ToString());
+        }
+
+        [Fact]
+        public static void TestDeepCopyDoesNotOverflow()
+        {
+            var builder = new StringBuilder();
+            for (int i = 0; i < 2_000; i++)
+            {
+                builder.Append("[");
+            }
+
+            for (int i = 0; i < 2_000; i++)
+            {
+                builder.Append("]");
+            }
+
+            var options = new JsonDocumentOptions { MaxDepth = 5_000 };
+            using (JsonDocument dom = JsonDocument.Parse(builder.ToString(), options))
+            {
+                JsonNode node = JsonNode.DeepCopy(dom.RootElement);
+            }
         }
     }
 }

@@ -70,7 +70,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="jsonProperty">The property to add.</param>
         /// <exception cref="ArgumentException">
-        ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
+        ///   Property name to set already exists.
         /// </exception>
         public void Add(KeyValuePair<string, JsonNode> jsonProperty) => Add(jsonProperty.Key, jsonProperty.Value);
 
@@ -126,7 +126,7 @@ namespace System.Text.Json
         ///   Provided property name is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
+        ///   Property name to set already exists.
         /// </exception>
         public void Add(string propertyName, JsonArray propertyValue) => Add(propertyName, (JsonNode)propertyValue);
 
@@ -135,7 +135,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="jsonProperties">Properties to add.</param>
         /// <exception cref="ArgumentException">
-        ///   Provided collection contains duplicates if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
+        ///   Provided collection contains duplicates.
         /// </exception>
         /// <exception cref="ArgumentNullException">
         ///   Some of property names are null.
@@ -154,7 +154,7 @@ namespace System.Text.Json
         /// <param name="propertyName">Name of the <see cref="JsonArray"/> property to add.</param>
         /// <param name="propertyValues">Properties to add.</param>
         /// <exception cref="ArgumentException">
-        ///   Provided collection contains duplicates if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
+        ///   Provided collection contains duplicates.
         /// </exception>
         /// <exception cref="ArgumentNullException">
         ///   Some of property names are null.
@@ -376,7 +376,7 @@ namespace System.Text.Json
         /// </summary>
         /// <returns>An enumerator structure for the <see cref="JsonObject"/>.</returns>
         /// <exception cref="ArgumentException">
-        ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
+        ///   Property name to set already exists.
         /// </exception>
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
@@ -385,7 +385,7 @@ namespace System.Text.Json
         /// </summary>
         /// <returns>An enumerator structure for the JSON object.</returns>
         /// <exception cref="ArgumentException">
-        ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
+        ///   Property name to set already exists.
         /// </exception>
         IEnumerator<KeyValuePair<string, JsonNode>> IEnumerable<KeyValuePair<string, JsonNode>>.GetEnumerator() => new JsonObjectEnumerator(this);
 
@@ -394,7 +394,7 @@ namespace System.Text.Json
         /// </summary>
         /// <returns>An enumerator structure for the JSON object.</returns>
         /// <exception cref="ArgumentException">
-        ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
+        ///   Property name to set already exists.
         /// </exception>
         public JsonObjectEnumerator GetEnumerator() => new JsonObjectEnumerator(this);
 
