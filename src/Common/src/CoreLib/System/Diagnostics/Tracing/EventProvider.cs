@@ -459,7 +459,7 @@ namespace System.Diagnostics.Tracing
 #if (PLATFORM_WINDOWS && (ES_SESSION_INFO || !ES_BUILD_STANDALONE))
             int buffSize = 256;     // An initial guess that probably works most of the time.
             byte* buffer;
-            for (; ; )
+            while (true)
             {
                 byte* space = stackalloc byte[buffSize];
                 buffer = space;
@@ -537,7 +537,7 @@ namespace System.Diagnostics.Tracing
                                     {
                                         int startIdx = keywordIdx + 18;
                                         int endIdx = dataAsString.IndexOf('\0', startIdx);
-                                        string keywordBitString = dataAsString.Substring(startIdx, endIdx-startIdx);
+                                        string keywordBitString = dataAsString.Substring(startIdx, endIdx - startIdx);
                                         int keywordBit;
                                         if (0 < endIdx && int.TryParse(keywordBitString, out keywordBit))
                                             action(etwSessionId, 1L << keywordBit, ref sessionList);

@@ -28,28 +28,28 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Arcade dependencies -->
-    <MicrosoftDotNetApiCompatPackageVersion>1.0.0-beta.19422.24</MicrosoftDotNetApiCompatPackageVersion>
-    <MicrosoftDotNetCodeAnalysisPackageVersion>1.0.0-beta.19422.24</MicrosoftDotNetCodeAnalysisPackageVersion>
-    <MicrosoftDotNetGenAPIPackageVersion>1.0.0-beta.19422.24</MicrosoftDotNetGenAPIPackageVersion>
-    <MicrosoftDotNetGenFacadesPackageVersion>1.0.0-beta.19422.24</MicrosoftDotNetGenFacadesPackageVersion>
-    <MicrosoftDotNetXUnitExtensionsPackageVersion>2.4.1-beta.19422.24</MicrosoftDotNetXUnitExtensionsPackageVersion>
-    <MicrosoftDotNetXUnitConsoleRunnerPackageVersion>2.5.1-beta.19422.24</MicrosoftDotNetXUnitConsoleRunnerPackageVersion>
-    <MicrosoftDotNetBuildTasksPackagingPackageVersion>1.0.0-beta.19422.24</MicrosoftDotNetBuildTasksPackagingPackageVersion>
-    <MicrosoftDotNetRemoteExecutorPackageVersion>1.0.0-beta.19422.24</MicrosoftDotNetRemoteExecutorPackageVersion>
-    <MicrosoftDotNetBuildTasksFeedVersion>2.2.0-beta.19422.24</MicrosoftDotNetBuildTasksFeedVersion>
-    <MicrosoftDotNetVersionToolsTasksPackageVersion>1.0.0-beta.19422.24</MicrosoftDotNetVersionToolsTasksPackageVersion>
+    <MicrosoftDotNetApiCompatPackageVersion>1.0.0-beta.19428.9</MicrosoftDotNetApiCompatPackageVersion>
+    <MicrosoftDotNetCodeAnalysisPackageVersion>1.0.0-beta.19428.9</MicrosoftDotNetCodeAnalysisPackageVersion>
+    <MicrosoftDotNetGenAPIPackageVersion>1.0.0-beta.19428.9</MicrosoftDotNetGenAPIPackageVersion>
+    <MicrosoftDotNetGenFacadesPackageVersion>1.0.0-beta.19428.9</MicrosoftDotNetGenFacadesPackageVersion>
+    <MicrosoftDotNetXUnitExtensionsPackageVersion>2.4.1-beta.19428.9</MicrosoftDotNetXUnitExtensionsPackageVersion>
+    <MicrosoftDotNetXUnitConsoleRunnerPackageVersion>2.5.1-beta.19428.9</MicrosoftDotNetXUnitConsoleRunnerPackageVersion>
+    <MicrosoftDotNetBuildTasksPackagingPackageVersion>1.0.0-beta.19428.9</MicrosoftDotNetBuildTasksPackagingPackageVersion>
+    <MicrosoftDotNetRemoteExecutorPackageVersion>1.0.0-beta.19428.9</MicrosoftDotNetRemoteExecutorPackageVersion>
+    <MicrosoftDotNetBuildTasksFeedVersion>2.2.0-beta.19428.9</MicrosoftDotNetBuildTasksFeedVersion>
+    <MicrosoftDotNetVersionToolsTasksPackageVersion>1.0.0-beta.19428.9</MicrosoftDotNetVersionToolsTasksPackageVersion>
     <!-- Core-setup dependencies -->
-    <MicrosoftNETCoreAppPackageVersion>5.0.0-alpha1.19421.21</MicrosoftNETCoreAppPackageVersion>
-    <MicrosoftNETCoreDotNetHostPackageVersion>5.0.0-alpha1.19421.21</MicrosoftNETCoreDotNetHostPackageVersion>
-    <MicrosoftNETCoreDotNetHostPolicyPackageVersion>5.0.0-alpha1.19421.21</MicrosoftNETCoreDotNetHostPolicyPackageVersion>
+    <MicrosoftNETCoreAppPackageVersion>5.0.0-alpha1.19428.13</MicrosoftNETCoreAppPackageVersion>
+    <MicrosoftNETCoreDotNetHostPackageVersion>5.0.0-alpha1.19428.13</MicrosoftNETCoreDotNetHostPackageVersion>
+    <MicrosoftNETCoreDotNetHostPolicyPackageVersion>5.0.0-alpha1.19428.13</MicrosoftNETCoreDotNetHostPolicyPackageVersion>
     <!-- Coreclr dependencies -->
     <MicrosoftNETCoreILAsmPackageVersion>5.0.0-alpha1.19413.7</MicrosoftNETCoreILAsmPackageVersion>
     <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>5.0.0-alpha1.19413.7</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <!-- Corefx dependencies -->
-    <MicrosoftNETCorePlatformsPackageVersion>5.0.0-alpha1.19421.5</MicrosoftNETCorePlatformsPackageVersion>
-    <runtimenativeSystemIOPortsPackageVersion>5.0.0-alpha1.19421.5</runtimenativeSystemIOPortsPackageVersion>
+    <MicrosoftNETCorePlatformsPackageVersion>5.0.0-alpha1.19427.13</MicrosoftNETCorePlatformsPackageVersion>
+    <runtimenativeSystemIOPortsPackageVersion>5.0.0-alpha1.19427.13</runtimenativeSystemIOPortsPackageVersion>
     <!-- Standard dependencies -->
-    <NETStandardLibraryPackageVersion>2.2.0-prerelease.19421.3</NETStandardLibraryPackageVersion>
+    <NETStandardLibraryPackageVersion>2.2.0-prerelease.19427.2</NETStandardLibraryPackageVersion>
     <!-- dotnet-optimization dependencies -->
     <optimizationwindows_ntx64IBCCoreFxPackageVersion>99.99.99-master-20190716.1</optimizationwindows_ntx64IBCCoreFxPackageVersion>
     <!-- sni -->
