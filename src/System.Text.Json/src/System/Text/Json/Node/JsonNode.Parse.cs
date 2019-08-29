@@ -326,7 +326,7 @@ namespace System.Text.Json
                         // Add end of object marker:
                         recursionStack.Push(new StackFrame(null, null, JsonValueKind.Object));
 
-                        foreach (KeyValuePair<string, JsonNode> jsonProperty in jsonObject)
+                        foreach (KeyValuePair<string, JsonNode> jsonProperty in jsonObject.Reverse())
                         {
                             recursionStack.Push(new StackFrame(jsonProperty.Key, jsonProperty.Value));
                         }
@@ -337,7 +337,7 @@ namespace System.Text.Json
                         // Add end of array marker:
                         recursionStack.Push(new StackFrame(null, null, JsonValueKind.Array));
 
-                        foreach (JsonNode item in jsonArray)
+                        foreach (JsonNode item in jsonArray.Reverse())
                         {
                             recursionStack.Push(new StackFrame(null, item));
                         }
@@ -358,6 +358,8 @@ namespace System.Text.Json
 
                 writer.Flush();
             }
+
+            writer.Flush();
         }
 
         /// <summary>
