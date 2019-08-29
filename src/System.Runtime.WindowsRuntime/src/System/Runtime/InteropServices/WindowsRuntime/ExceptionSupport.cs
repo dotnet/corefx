@@ -3,12 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace System.Runtime.InteropServices.WindowsRuntime
 {
     internal static class ExceptionSupport
     {
-        public static System.Exception AttachRestrictedErrorInfo(System.Exception e)
+        public static Exception AttachRestrictedErrorInfo(Exception e)
         {
             // If there is no exception, then the restricted error info doesn't apply to it
             if (e != null)
@@ -62,7 +63,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         }
 
         internal static void AddExceptionDataForRestrictedErrorInfo(
-            this System.Exception ex,
+            this Exception ex,
             string restrictedError,
             string restrictedErrorReference,
             string restrictedCapabilitySid,
@@ -83,9 +84,9 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             }
         }
 
-        public static bool ReportUnhandledError(System.Exception ex)
+        public static bool ReportUnhandledError(Exception ex)
         {
-            return System.Runtime.InteropServices.WindowsRuntime.WindowsRuntimeMarshal.ReportUnhandledError(ex);
+            return WindowsRuntimeMarshal.ReportUnhandledError(ex);
         }
 
         //
