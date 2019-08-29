@@ -29,6 +29,7 @@ namespace System.Text.Json
                     switch (current.JsonClassInfo.ClassType)
                     {
                         case ClassType.Enumerable:
+                        case ClassType.ICollectionConstructible:
                             finishedSerializing = HandleEnumerable(current.JsonClassInfo.ElementClassInfo, options, writer, ref state);
                             break;
                         case ClassType.Value:

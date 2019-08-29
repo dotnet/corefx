@@ -112,5 +112,41 @@ namespace System.Text.Json.Serialization.Converters
             JsonPropertyInfo propertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementType, options);
             return propertyInfo.CreateImmutableCollectionInstance(immutableCollectionType, delegateKey, sourceList, state.JsonPath, options);
         }
+
+        public static bool IsImmutableEnumerable(Type type)
+        {
+            if (!type.IsGenericType)
+            {
+                return false;
+            }
+
+            switch (type.GetGenericTypeDefinition().FullName)
+            {
+                case ImmutableArrayTypeName:
+                case ImmutableArrayGenericTypeName:
+
+                case ImmutableListTypeName:
+                case ImmutableListGenericTypeName:
+                case ImmutableListGenericInterfaceTypeName:
+
+                case ImmutableStackTypeName:
+                case ImmutableStackGenericTypeName:
+                case ImmutableStackGenericInterfaceTypeName:
+
+                case ImmutableQueueTypeName:
+                case ImmutableQueueGenericTypeName:
+                case ImmutableQueueGenericInterfaceTypeName:
+
+                case ImmutableSortedSetTypeName:
+                case ImmutableSortedSetGenericTypeName:
+
+                case ImmutableHashSetTypeName:
+                case ImmutableHashSetGenericTypeName:
+                case ImmutableSetGenericInterfaceTypeName:
+                    return true;
+                default:
+                    return false;
+            }
+        }
     }
 }

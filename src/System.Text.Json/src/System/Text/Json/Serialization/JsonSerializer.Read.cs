@@ -74,7 +74,7 @@ namespace System.Text.Json
                         }
                         else
                         {
-                            HandleStartObject(options, ref reader, ref readStack);
+                            HandleStartObject(options, ref readStack);
                         }
                     }
                     else if (tokenType == JsonTokenType.EndObject)
@@ -93,12 +93,17 @@ namespace System.Text.Json
                         }
                         else
                         {
-                            HandleEndObject(options, ref reader, ref readStack);
+                            HandleEndObject(ref reader, ref readStack);
                         }
                     }
                     else if (tokenType == JsonTokenType.StartArray)
                     {
-                        if (!readStack.Current.IsProcessingValue())
+                        if (readStack.Current.SkipProperty)
+                        {
+                            readStack.Push();
+                            readStack.Current.Drain = true;
+                        }
+                        else if (!readStack.Current.IsProcessingValue())
                         {
                             HandleStartArray(options, ref reader, ref readStack);
                         }
@@ -110,7 +115,14 @@ namespace System.Text.Json
                     }
                     else if (tokenType == JsonTokenType.EndArray)
                     {
-                        HandleEndArray(options, ref reader, ref readStack);
+                        if (readStack.Current.Drain)
+                        {
+                            readStack.Pop();
+                        }
+                        else
+                        {
+                            HandleEndArray(options, ref reader, ref readStack);
+                        }
                     }
                     else if (tokenType == JsonTokenType.Null)
                     {

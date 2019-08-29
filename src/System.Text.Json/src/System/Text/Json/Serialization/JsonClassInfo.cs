@@ -30,6 +30,7 @@ namespace System.Text.Json
 
         public delegate object ConstructorDelegate();
         public ConstructorDelegate CreateObject { get; private set; }
+        public ConstructorDelegate CreateConcreteEnumerable { get; private set; }
         public ConstructorDelegate CreateConcreteDictionary { get; private set; }
 
         public ClassType ClassType { get; private set; }
@@ -53,6 +54,7 @@ namespace System.Text.Json
                 if (_elementClassInfo == null && ElementType != null)
                 {
                     Debug.Assert(ClassType == ClassType.Enumerable ||
+                        ClassType == ClassType.ICollectionConstructible ||
                         ClassType == ClassType.Dictionary ||
                         ClassType == ClassType.IDictionaryConstructible);
 
@@ -189,6 +191,17 @@ namespace System.Text.Json
                         ElementType = GetElementType(type, parentType: null, memberInfo: null, options: options);
                     }
                     break;
+                case ClassType.ICollectionConstructible:
+                    {
+                        // Add a single property that maps to the class type so we can have policies applied.
+                        AddPolicyProperty(type, options);
+
+                        ElementType = GetElementType(type, parentType: null, memberInfo: null, options: options);
+
+                        CreateConcreteEnumerable = options.MemberAccessorStrategy.CreateConstructor(
+                           typeof(List<>).MakeGenericType(ElementType));
+                    }
+                    break;
                 case ClassType.IDictionaryConstructible:
                     {
                         // Add a single property that maps to the class type so we can have policies applied.
@@ -198,8 +211,6 @@ namespace System.Text.Json
 
                         CreateConcreteDictionary = options.MemberAccessorStrategy.CreateConstructor(
                            typeof(Dictionary<,>).MakeGenericType(typeof(string), ElementType));
-
-                        CreateObject = options.MemberAccessorStrategy.CreateConstructor(PolicyProperty.DeclaredPropertyType);
                     }
                     break;
                 case ClassType.Value:
@@ -456,13 +467,16 @@ namespace System.Text.Json
                 ClassType classType = GetClassType(implementedType, options);
 
                 if ((classType == ClassType.Dictionary || classType == ClassType.IDictionaryConstructible) &&
-                    args.Length >= 2 && // It is >= 2 in case there is a IDictionary<TKey, TValue, TSomeExtension>.
-                    args[0].UnderlyingSystemType == typeof(string))
+                    args.Length >= 2) // It is >= 2 in case there is a IDictionary<TKey, TValue, TSomeExtension>.
                 {
-                    return args[1];
+                    if (args[0].UnderlyingSystemType == typeof(string))
+                        return args[1];
+
+                    throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(propertyType, parentType, memberInfo);
                 }
 
-                if (classType == ClassType.Enumerable && args.Length >= 1) // It is >= 1 in case there is an IEnumerable<T, TSomeExtension>.
+                if ((classType == ClassType.Enumerable || classType == ClassType.ICollectionConstructible) &&
+                    args.Length >= 1) // It is >= 1 in case there is an IEnumerable<T, TSomeExtension>.
                 {
                     return args[0];
                 }
@@ -472,6 +486,13 @@ namespace System.Text.Json
                 implementedType.IsAssignableFrom(typeof(IDictionary)) ||
                 IsDeserializedByConstructingWithIList(implementedType) ||
                 IsDeserializedByConstructingWithIDictionary(implementedType))
+            {
+                return typeof(object);
+            }
+
+            // Drive HashTable, SortedList...
+            if (typeof(IList).IsAssignableFrom(implementedType) ||
+                typeof(IDictionary).IsAssignableFrom(implementedType))
             {
                 return typeof(object);
             }
@@ -509,7 +530,7 @@ namespace System.Text.Json
 
             if (typeof(IDictionary).IsAssignableFrom(implementedType) || IsDictionaryClassType(implementedType))
             {
-                // Special case for immutable dictionaries
+                // Special case for derived types
                 if (type != implementedType && !IsNativelySupportedCollection(type))
                 {
                     return ClassType.IDictionaryConstructible;
@@ -518,8 +539,21 @@ namespace System.Text.Json
                 return ClassType.Dictionary;
             }
 
+            if (implementedType.IsArray ||
+                DefaultImmutableEnumerableConverter.IsImmutableEnumerable(implementedType) ||
+                IsDeserializedByConstructingWithIList(implementedType))
+            {
+                return ClassType.ICollectionConstructible;
+            }
+
             if (typeof(IEnumerable).IsAssignableFrom(implementedType))
             {
+                // Special case for derived types
+                if (type != implementedType && !IsNativelySupportedCollection(type))
+                {
+                    return ClassType.ICollectionConstructible;
+                }
+
                 return ClassType.Enumerable;
             }
 

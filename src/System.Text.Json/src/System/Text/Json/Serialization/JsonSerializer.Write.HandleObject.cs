@@ -122,6 +122,21 @@ namespace System.Text.Json
                 return endOfEnumerable;
             }
 
+            // A property that returns a type that is deserialized by passing an
+            // IList to its constructor keeps the same stack frame.
+            if (jsonPropertyInfo.ClassType == ClassType.ICollectionConstructible)
+            {
+                state.Current.IsICollectionConstructibleProperty = true;
+
+                bool endOfEnumerable = HandleEnumerable(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
+                if (endOfEnumerable)
+                {
+                    state.Current.MoveToNextProperty = true;
+                }
+
+                return endOfEnumerable;
+            }
+
             // A property that returns a dictionary keeps the same stack frame.
             if (jsonPropertyInfo.ClassType == ClassType.Dictionary)
             {

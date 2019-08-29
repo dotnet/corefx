@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Xunit;
 
@@ -480,6 +482,88 @@ namespace System.Text.Json.Serialization.Tests
 
             Assert.NotNull(parsedObject.ParsedChild3);
             Assert.True(parsedObject.ParsedChild3.SequenceEqual(new int[] { 3, 3 }));
+        }
+
+        public class ConcreteCollectionClass
+        {
+            public Collection<int> Collection1 { get; set; }
+            public DerivedCollection Collection2 { get; set; }
+            public ObservableCollection<int> Collection3 { get; set; }
+        }
+
+        public class DerivedCollection : Collection<int> { }
+
+        [Fact]
+        public static void ConcreteCollectionDeserializes()
+        {
+            ConcreteCollectionClass obj = JsonSerializer.Deserialize<ConcreteCollectionClass>(@"{
+                ""Collection1"":[1],
+                ""Collection2"":[2],
+                ""Collection3"":[3]
+            }");
+
+            Assert.NotNull(obj.Collection1);
+            Assert.Equal(1, obj.Collection1.Count);
+            Assert.Equal(1, obj.Collection1[0]);
+
+            Assert.NotNull(obj.Collection2);
+            Assert.Equal(1, obj.Collection2.Count);
+            Assert.Equal(2, obj.Collection2[0]);
+
+            Assert.NotNull(obj.Collection3);
+            Assert.Equal(1, obj.Collection3.Count);
+            Assert.Equal(3, obj.Collection3[0]);
+        }
+
+        public class ReadOnlyCollectionClass
+        {
+            public IReadOnlyCollection<int> Collection1 { get; set; }
+            public ReadOnlyCollection<int> Collection2 { get; set; }
+            public DerivedReadOnlyCollection Collection3 { get; set; }
+            public IReadOnlyList<int> List1 { get; set; }
+        }
+
+        public class DerivedReadOnlyCollection : ReadOnlyCollection<int>
+        {
+            public DerivedReadOnlyCollection(IList<int> items) : base(items) { }
+        }
+
+        [Fact]
+        public static void ReadOnlyCollectionDeserializes()
+        {
+            ReadOnlyCollectionClass obj = JsonSerializer.Deserialize<ReadOnlyCollectionClass>(@"{
+                ""Collection1"":[1],
+                ""Collection2"":[2],
+                ""Collection3"":[3],
+                ""List1"":[4]
+            }");
+
+            Assert.NotNull(obj.Collection1);
+            Assert.Equal(1, obj.Collection1.Count);
+            Assert.Equal(1, obj.Collection1.First());
+
+            Assert.NotNull(obj.Collection2);
+            Assert.Equal(1, obj.Collection2.Count);
+            Assert.Equal(2, obj.Collection2.First());
+
+            Assert.NotNull(obj.Collection3);
+            Assert.Equal(1, obj.Collection3.Count);
+            Assert.Equal(3, obj.Collection3.First());
+
+            Assert.NotNull(obj.List1);
+            Assert.Equal(1, obj.List1.Count);
+            Assert.Equal(4, obj.List1[0]);
+        }
+
+        [Fact]
+        public static void InvalidDerivedStackThrowsException()
+        {
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<InvalidDerivedStack>("[1]"));
+        }
+
+        public class InvalidDerivedStack : Stack
+        {
+            // No constructor accepting IList
         }
     }
 }

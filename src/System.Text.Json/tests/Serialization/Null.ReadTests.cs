@@ -97,7 +97,6 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(1, obj.MyIntList[0]);
 
             Assert.Null(obj.MyObjectList[0]);
-            Assert.Null(obj.MyObjectList[0]);
             Assert.Null(obj.MyListList[0][0]);
             Assert.Null(obj.MyDictionaryList[0]["key"]);
             Assert.Null(obj.MyStringDictionary["key"]);

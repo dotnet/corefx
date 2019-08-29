@@ -101,6 +101,7 @@ namespace System.Text.Json
             switch (GetClassType(runtimePropertyType, options))
             {
                 case ClassType.Enumerable:
+                case ClassType.ICollectionConstructible:
                 case ClassType.Dictionary:
                 case ClassType.IDictionaryConstructible:
                 case ClassType.Unknown:

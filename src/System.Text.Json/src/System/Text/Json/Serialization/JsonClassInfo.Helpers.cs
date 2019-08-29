@@ -23,11 +23,13 @@ namespace System.Text.Json
         private const string ListGenericTypeName = "System.Collections.Generic.List`1";
 
         private const string CollectionGenericInterfaceTypeName = "System.Collections.Generic.ICollection`1";
+        private const string CollectionGenericTypeName = "System.Collections.ObjectModel.Collection`1";
         private const string CollectionInterfaceTypeName = "System.Collections.ICollection";
 
         private const string ReadOnlyListGenericInterfaceTypeName = "System.Collections.Generic.IReadOnlyList`1";
 
         private const string ReadOnlyCollectionGenericInterfaceTypeName = "System.Collections.Generic.IReadOnlyCollection`1";
+        internal const string ReadOnlyCollectionGenericTypeName = "System.Collections.ObjectModel.ReadOnlyCollection`1";
 
         public const string HashtableTypeName = "System.Collections.Hashtable";
         public const string SortedListTypeName = "System.Collections.SortedList";
@@ -84,8 +86,10 @@ namespace System.Text.Json
             EnumerableGenericInterfaceTypeName,
             ListGenericInterfaceTypeName,
             CollectionGenericInterfaceTypeName,
+            CollectionGenericTypeName,
             ReadOnlyListGenericInterfaceTypeName,
             ReadOnlyCollectionGenericInterfaceTypeName,
+            ReadOnlyCollectionGenericTypeName,
             SetGenericInterfaceTypeName,
             StackGenericTypeName,
             QueueGenericTypeName,
@@ -218,6 +222,7 @@ namespace System.Text.Json
                     case CollectionGenericInterfaceTypeName:
                     case ReadOnlyListGenericInterfaceTypeName:
                     case ReadOnlyCollectionGenericInterfaceTypeName:
+                    case HashSetGenericTypeName:
                         return true;
                     default:
                         return false;
@@ -250,6 +255,21 @@ namespace System.Text.Json
 
         public static bool IsDeserializedByConstructingWithIList(Type type)
         {
+            if (type.IsGenericType)
+            {
+                switch (type.GetGenericTypeDefinition().FullName)
+                {
+                    case ReadOnlyCollectionGenericTypeName:
+                    case StackGenericTypeName:
+                    case QueueGenericTypeName:
+                    case LinkedListGenericTypeName:
+                    case HashSetGenericTypeName:
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+
             switch (type.FullName)
             {
                 case StackTypeName:
@@ -268,14 +288,7 @@ namespace System.Text.Json
                 return type.GetGenericTypeDefinition().FullName == ReadOnlyDictionaryGenericTypeName;
             }
 
-            switch (type.FullName)
-            {
-                case HashtableTypeName:
-                case SortedListTypeName:
-                    return true;
-                default:
-                    return false;
-            }
+            return false;
         }
 
         public static bool IsNativelySupportedCollection(Type queryType)

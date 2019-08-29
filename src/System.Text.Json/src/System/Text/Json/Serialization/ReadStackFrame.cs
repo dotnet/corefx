@@ -6,7 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json
 {
@@ -44,8 +43,8 @@ namespace System.Text.Json
         // The current JSON data for a property does not match a given POCO, so ignore the property (recursively).
         public bool Drain;
 
-        public bool IsCollectionForClass => IsEnumerable || IsDictionary || IsIDictionaryConstructible;
-        public bool IsCollectionForProperty => IsEnumerableProperty || IsDictionaryProperty || IsIDictionaryConstructibleProperty;
+        public bool IsCollectionForClass => IsEnumerable || IsICollectionConstructible || IsDictionary || IsIDictionaryConstructible;
+        public bool IsCollectionForProperty => IsEnumerableProperty || IsICollectionConstructibleProperty || IsDictionaryProperty || IsIDictionaryConstructibleProperty;
 
         public bool IsIDictionaryConstructible => JsonClassInfo.ClassType == ClassType.IDictionaryConstructible;
         public bool IsDictionary => JsonClassInfo.ClassType == ClassType.Dictionary;
@@ -56,17 +55,21 @@ namespace System.Text.Json
         public bool IsIDictionaryConstructibleProperty => JsonPropertyInfo != null &&
             !JsonPropertyInfo.IsPropertyPolicy && (JsonPropertyInfo.ClassType == ClassType.IDictionaryConstructible);
 
+        public bool IsICollectionConstructible => JsonClassInfo.ClassType == ClassType.ICollectionConstructible;
         public bool IsEnumerable => JsonClassInfo.ClassType == ClassType.Enumerable;
 
         public bool IsEnumerableProperty =>
             JsonPropertyInfo != null &&
             !JsonPropertyInfo.IsPropertyPolicy &&
             JsonPropertyInfo.ClassType == ClassType.Enumerable;
+        public bool IsICollectionConstructibleProperty => JsonPropertyInfo != null &&
+            !JsonPropertyInfo.IsPropertyPolicy && (JsonPropertyInfo.ClassType == ClassType.ICollectionConstructible);
 
-        public bool IsProcessingEnumerableOrDictionary => IsProcessingEnumerable || IsProcessingDictionary || IsProcessingIDictionaryConstructible;
+        public bool IsProcessingEnumerableOrDictionary => IsProcessingEnumerable || IsProcessingICollectionConstructible || IsProcessingDictionary || IsProcessingIDictionaryConstructible;
         public bool IsProcessingDictionary => IsDictionary || IsDictionaryProperty;
         public bool IsProcessingIDictionaryConstructible => IsIDictionaryConstructible || IsIDictionaryConstructibleProperty;
         public bool IsProcessingEnumerable => IsEnumerable || IsEnumerableProperty;
+        public bool IsProcessingICollectionConstructible => IsICollectionConstructible || IsICollectionConstructibleProperty;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         // Determine whether a StartObject or StartArray token should be treated as a value.
@@ -105,6 +108,7 @@ namespace System.Text.Json
         {
             if (JsonClassInfo.ClassType == ClassType.Value ||
                 JsonClassInfo.ClassType == ClassType.Enumerable ||
+                JsonClassInfo.ClassType == ClassType.ICollectionConstructible ||
                 JsonClassInfo.ClassType == ClassType.Dictionary ||
                 JsonClassInfo.ClassType == ClassType.IDictionaryConstructible)
             {
@@ -137,67 +141,6 @@ namespace System.Text.Json
             KeyName = null;
         }
 
-        public static object CreateEnumerableValue(ref Utf8JsonReader reader, ref ReadStack state)
-        {
-            JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
-
-            // If the property has an EnumerableConverter, then we use tempEnumerableValues.
-            if (jsonPropertyInfo.EnumerableConverter != null)
-            {
-                IList converterList;
-                if (jsonPropertyInfo.ElementClassInfo.ClassType == ClassType.Value)
-                {
-                    converterList = jsonPropertyInfo.ElementClassInfo.PolicyProperty.CreateConverterList();
-                }
-                else
-                {
-                    converterList = new List<object>();
-                }
-
-                state.Current.TempEnumerableValues = converterList;
-
-                // Clear the value if present to ensure we don't confuse tempEnumerableValues with the collection.
-                if (!jsonPropertyInfo.IsPropertyPolicy &&
-                    !state.Current.JsonPropertyInfo.RuntimePropertyType.FullName.StartsWith(DefaultImmutableEnumerableConverter.ImmutableArrayGenericTypeName))
-                {
-                    jsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, null);
-                }
-
-                return null;
-            }
-
-            Type propertyType = jsonPropertyInfo.RuntimePropertyType;
-            if (typeof(IList).IsAssignableFrom(propertyType))
-            {
-                // If IList, add the members as we create them.
-                JsonClassInfo collectionClassInfo;
-
-                if (jsonPropertyInfo.DeclaredPropertyType == jsonPropertyInfo.ImplementedPropertyType)
-                {
-                    collectionClassInfo = jsonPropertyInfo.RuntimeClassInfo;
-                }
-                else
-                {
-                    collectionClassInfo = jsonPropertyInfo.DeclaredTypeClassInfo;
-                }
-
-                if (collectionClassInfo.CreateObject() is IList collection)
-                {
-                    return collection;
-                }
-                else
-                {
-                    ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(jsonPropertyInfo.DeclaredPropertyType, reader, state.JsonPath);
-                    return null;
-                }
-            }
-            else
-            {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(propertyType, reader, state.JsonPath);
-                return null;
-            }
-        }
-
         public Type GetElementType()
         {
             if (IsCollectionForProperty)
@@ -211,20 +154,6 @@ namespace System.Text.Json
             }
 
             return JsonPropertyInfo.RuntimePropertyType;
-        }
-
-        public static IEnumerable GetEnumerableValue(ref ReadStackFrame current)
-        {
-            if (current.IsEnumerable)
-            {
-                if (current.ReturnValue != null)
-                {
-                    return (IEnumerable)current.ReturnValue;
-                }
-            }
-
-            // IEnumerable properties are finished (values added inline) unless they are using tempEnumerableValues.
-            return current.TempEnumerableValues;
         }
 
         public void SetReturnValue(object value)

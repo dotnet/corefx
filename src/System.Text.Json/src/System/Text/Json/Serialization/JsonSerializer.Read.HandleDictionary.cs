@@ -96,11 +96,6 @@ namespace System.Text.Json
 
         private static void HandleEndDictionary(JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
         {
-            if (state.Current.SkipProperty)
-            {
-                return;
-            }
-
             if (state.Current.IsDictionaryProperty)
             {
                 // We added the items to the dictionary already.

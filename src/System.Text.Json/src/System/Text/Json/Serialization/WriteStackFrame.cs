@@ -23,6 +23,8 @@ namespace System.Text.Json
         public bool PopStackOnEndCollection;
         public bool IsIDictionaryConstructible;
         public bool IsIDictionaryConstructibleProperty;
+        public bool IsICollectionConstructible;
+        public bool IsICollectionConstructibleProperty;
 
         // The current object.
         public bool PopStackOnEndObject;
@@ -41,6 +43,11 @@ namespace System.Text.Json
             if (JsonClassInfo.ClassType == ClassType.Value || JsonClassInfo.ClassType == ClassType.Enumerable || JsonClassInfo.ClassType == ClassType.Dictionary)
             {
                 JsonPropertyInfo = JsonClassInfo.PolicyProperty;
+            }
+            else if (JsonClassInfo.ClassType == ClassType.ICollectionConstructible)
+            {
+                JsonPropertyInfo = JsonClassInfo.PolicyProperty;
+                IsICollectionConstructible = true;
             }
             else if (JsonClassInfo.ClassType == ClassType.IDictionaryConstructible)
             {
@@ -72,7 +79,7 @@ namespace System.Text.Json
                 }
                 else
                 {
-                    Debug.Assert(classType == ClassType.Enumerable);
+                    Debug.Assert(classType == ClassType.Enumerable || classType == ClassType.ICollectionConstructible);
                     writer.WriteStartArray();
                 }
             }
@@ -93,7 +100,7 @@ namespace System.Text.Json
             }
             else
             {
-                Debug.Assert(classType == ClassType.Enumerable);
+                Debug.Assert(classType == ClassType.Enumerable || classType == ClassType.ICollectionConstructible);
                 writer.WriteStartArray(propertyName);
             }
         }

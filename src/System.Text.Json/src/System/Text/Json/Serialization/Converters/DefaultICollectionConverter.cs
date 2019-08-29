@@ -10,7 +10,11 @@ namespace System.Text.Json.Serialization.Converters
     {
         public override IEnumerable CreateFromList(ref ReadStack state, IList sourceList, JsonSerializerOptions options)
         {
-            Type enumerableType = state.Current.JsonPropertyInfo.RuntimePropertyType;
+            Type enumerableType;
+            if (state.Current.JsonPropertyInfo.DeclaredPropertyType.IsInterface)
+                enumerableType = state.Current.JsonPropertyInfo.RuntimePropertyType;
+            else
+                enumerableType = state.Current.JsonPropertyInfo.DeclaredPropertyType;
             Type elementType = state.Current.JsonPropertyInfo.ElementType;
             JsonPropertyInfo propertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementType, options);
             return propertyInfo.CreateIEnumerableInstance(enumerableType, sourceList, state.JsonPath, options);

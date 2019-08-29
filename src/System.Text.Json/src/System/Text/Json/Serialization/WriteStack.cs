@@ -51,6 +51,13 @@ namespace System.Text.Json
                 Current.PopStackOnEndCollection = true;
                 Current.JsonPropertyInfo = Current.JsonClassInfo.PolicyProperty;
             }
+            else if (classType == ClassType.ICollectionConstructible)
+            {
+                Current.PopStackOnEndCollection = true;
+                Current.JsonPropertyInfo = Current.JsonClassInfo.PolicyProperty;
+
+                Current.IsICollectionConstructible = true;
+            }
             else if (classType == ClassType.IDictionaryConstructible)
             {
                 Current.PopStackOnEndCollection = true;

@@ -48,7 +48,8 @@ namespace System.Text.Json
             }
 
             // We need an initialized array in order to store the values.
-            if (state.Current.IsProcessingEnumerable && state.Current.TempEnumerableValues == null && state.Current.ReturnValue == null)
+            if ((state.Current.IsProcessingEnumerable || state.Current.IsProcessingICollectionConstructible) &&
+                state.Current.TempEnumerableValues == null && state.Current.ReturnValue == null)
             {
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
                 return;

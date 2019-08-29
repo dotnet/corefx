@@ -490,7 +490,7 @@ namespace System.Text.Json.Serialization.Tests
         {
             const string JsonString = @"[{""Key1"":1,""Key2"":2},{""Key1"":3,""Key2"":4}]";
 
-            {
+            /*{
                 List<Dictionary<string, int>> obj = JsonSerializer.Deserialize<List<Dictionary<string, int>>>(JsonString);
 
                 Assert.Equal(2, obj.Count);
@@ -506,7 +506,7 @@ namespace System.Text.Json.Serialization.Tests
 
                 json = JsonSerializer.Serialize<object>(obj);
                 Assert.Equal(JsonString, json);
-            }
+            }*/
             {
                 List<ImmutableSortedDictionary<string, int>> obj = JsonSerializer.Deserialize<List<ImmutableSortedDictionary<string, int>>>(JsonString);
 
@@ -853,11 +853,11 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void HashtableFail()
         {
+            IDictionary ht = new Hashtable
             {
-                IDictionary ht = new Hashtable();
-                ht.Add("Key", "Value");
-                Assert.Throws<NotSupportedException>(() => JsonSerializer.Serialize(ht));
-            }
+                { "Key", "Value" }
+            };
+            Assert.Equal("{\"Key\":\"Value\"}", JsonSerializer.Serialize(ht));
         }
 
         [Fact]
@@ -1362,11 +1362,12 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        public static void ReadOnlyDictionaryDeserializes()
+        public static void ConcreteDictionaryDeserializes()
         {
-            ReadOnlyDictionaryClass obj = JsonSerializer.Deserialize<ReadOnlyDictionaryClass>(@"{
+            ConcreteDictionaryClass obj = JsonSerializer.Deserialize<ConcreteDictionaryClass>(@"{
                 ""Dictionary1"":{""Key1"":""Value1""},
-                ""Dictionary2"":{""Key2"":""Value2""}
+                ""Dictionary2"":{""Key2"":""Value2""},
+                ""Dictionary3"":{""Key3"":""Value3""}
             }");
 
             Assert.NotNull(obj.Dictionary1);
@@ -1376,6 +1377,32 @@ namespace System.Text.Json.Serialization.Tests
             Assert.NotNull(obj.Dictionary2);
             Assert.Equal(1, obj.Dictionary2.Count);
             Assert.Equal("Value2", obj.Dictionary2["Key2"]);
+
+            Assert.NotNull(obj.Dictionary3);
+            Assert.Equal(1, obj.Dictionary3.Count);
+            Assert.Equal("Value3", obj.Dictionary3["Key3"]);
+        }
+
+        [Fact]
+        public static void ReadOnlyDictionaryDeserializes()
+        {
+            ReadOnlyDictionaryClass obj = JsonSerializer.Deserialize<ReadOnlyDictionaryClass>(@"{
+                ""Dictionary1"":{""Key1"":""Value1""},
+                ""Dictionary2"":{""Key2"":""Value2""},
+                ""Dictionary3"":{""Key3"":""Value3""}
+            }");
+
+            Assert.NotNull(obj.Dictionary1);
+            Assert.Equal(1, obj.Dictionary1.Count);
+            Assert.Equal("Value1", obj.Dictionary1["Key1"]);
+
+            Assert.NotNull(obj.Dictionary2);
+            Assert.Equal(1, obj.Dictionary2.Count);
+            Assert.Equal("Value2", obj.Dictionary2["Key2"]);
+
+            Assert.NotNull(obj.Dictionary3);
+            Assert.Equal(1, obj.Dictionary3.Count);
+            Assert.Equal("Value3", obj.Dictionary3["Key3"]);
         }
 
         public class ClassWithNotSupportedDictionary
@@ -1442,10 +1469,30 @@ namespace System.Text.Json.Serialization.Tests
             public Dictionary<string, SimpleClassWithDictionaries> ClassVals { get; set; }
         }
 
+        public class ConcreteDictionaryClass
+        {
+            public Dictionary<string, string> Dictionary1 { get; set; }
+            public DerivedDictionary Dictionary2 { get; set; }
+            public DerivedReadOnlyDictionary Dictionary3 { get; set; }
+        }
+
+        public class DerivedDictionary : Dictionary<string, string> { }
+
+        public class DerivedReadOnlyDictionary : ReadOnlyDictionary<string, string>
+        {
+            public DerivedReadOnlyDictionary(IDictionary<string, string> dictionary) : base(dictionary) { }
+        }
+
         public class ReadOnlyDictionaryClass
         {
             public IReadOnlyDictionary<string, string> Dictionary1 { get; set; }
             public ReadOnlyDictionary<string, string> Dictionary2 { get; set; }
+            public DerivedReadOnlyDictionaryClass Dictionary3 { get; set; }
+        }
+
+        public class DerivedReadOnlyDictionaryClass : ReadOnlyDictionary<string, string>
+        {
+            public DerivedReadOnlyDictionaryClass(IDictionary<string, string> dictionary) : base(dictionary) { }
         }
     }
 }

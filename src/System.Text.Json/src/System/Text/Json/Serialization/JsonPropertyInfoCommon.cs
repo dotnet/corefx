@@ -164,8 +164,6 @@ namespace System.Text.Json
                 return instanceOfQueue;
             }
 
-            // TODO: Use reflection to support types implementing Stack or Queue.
-
             throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
                 collectionPropertyInfo.DeclaredPropertyType,
                 collectionPropertyInfo.ParentClassType,
@@ -199,9 +197,6 @@ namespace System.Text.Json
                 }
             }
 
-            // TODO: Use reflection to support types implementing SortedList and maybe immutable dictionaries.
-
-            // Types implementing SortedList and immutable dictionaries will fail here.
             throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
                 collectionPropertyInfo.DeclaredPropertyType,
                 collectionPropertyInfo.ParentClassType,
@@ -210,58 +205,25 @@ namespace System.Text.Json
 
         public override IEnumerable CreateIEnumerableInstance(Type parentType, IList sourceList, string jsonPath, JsonSerializerOptions options)
         {
-            if (parentType.IsGenericType)
+            try
             {
-                Type genericTypeDefinition = parentType.GetGenericTypeDefinition();
-                IEnumerable<TDeclaredProperty> items = CreateGenericTDeclaredPropertyIEnumerable(sourceList);
-
-                if (genericTypeDefinition == typeof(Stack<>))
-                {
-                    return new Stack<TDeclaredProperty>(items);
-                }
-                else if (genericTypeDefinition == typeof(Queue<>))
-                {
-                    return new Queue<TDeclaredProperty>(items);
-                }
-                else if (genericTypeDefinition == typeof(HashSet<>))
-                {
-                    return new HashSet<TDeclaredProperty>(items);
-                }
-                else if (genericTypeDefinition == typeof(LinkedList<>))
-                {
-                    return new LinkedList<TDeclaredProperty>(items);
-                }
-                else if (genericTypeDefinition == typeof(SortedSet<>))
-                {
-                    return new SortedSet<TDeclaredProperty>(items);
-                }
-
-                return (IEnumerable)Activator.CreateInstance(parentType, items);
+                return (IEnumerable)Activator.CreateInstance(parentType, sourceList);
             }
-            else
+            catch (MissingMethodException)
             {
-                if (parentType == typeof(ArrayList))
-                {
-                    return new ArrayList(sourceList);
-                }
-                // Stack and Queue go into this condition, until we support with reflection.
-                else
-                {
-                    return (IEnumerable)Activator.CreateInstance(parentType, sourceList);
-                }
+                throw ThrowHelper.ThrowNotSupportedException_DeserializeInstanceConstructorNotFound(parentType, sourceList.GetType());
             }
         }
 
         public override IDictionary CreateIDictionaryInstance(Type parentType, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options)
         {
-            if (parentType.FullName == JsonClassInfo.HashtableTypeName)
-            {
-                return new Hashtable(sourceDictionary);
-            }
-            // SortedList goes into this condition, unless we add a ref to System.Collections.NonGeneric.
-            else
+            try
             {
                 return (IDictionary)Activator.CreateInstance(parentType, sourceDictionary);
+            }
+            catch (MissingMethodException)
+            {
+                throw ThrowHelper.ThrowNotSupportedException_DeserializeInstanceConstructorNotFound(parentType, sourceDictionary.GetType());
             }
         }
 
@@ -295,30 +257,6 @@ namespace System.Text.Json
             }
 
             return collection;
-        }
-
-        private IEnumerable<TRuntimeProperty> CreateGenericTRuntimePropertyIEnumerable(IList sourceList)
-        {
-            foreach (object item in sourceList)
-            {
-                yield return (TRuntimeProperty)item;
-            }
-        }
-
-        private IEnumerable<TDeclaredProperty> CreateGenericTDeclaredPropertyIEnumerable(IList sourceList)
-        {
-            foreach (object item in sourceList)
-            {
-                yield return (TDeclaredProperty)item;
-            }
-        }
-
-        private IEnumerable<KeyValuePair<string, TRuntimeProperty>> CreateGenericIEnumerableFromDictionary(IDictionary sourceDictionary)
-        {
-            foreach (DictionaryEntry item in sourceDictionary)
-            {
-                yield return new KeyValuePair<string, TRuntimeProperty>((string)item.Key, (TRuntimeProperty)item.Value);
-            }
         }
     }
 }

@@ -9,11 +9,11 @@ namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
-        private static void HandleStartObject(JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
+        private static void HandleStartObject(JsonSerializerOptions options, ref ReadStack state)
         {
             Debug.Assert(!state.Current.IsProcessingDictionary && !state.Current.IsProcessingIDictionaryConstructible);
 
-            if (state.Current.IsProcessingEnumerable)
+            if (state.Current.IsProcessingEnumerable || state.Current.IsProcessingICollectionConstructible)
             {
                 // A nested object within an enumerable.
                 Type objType = state.Current.GetElementType();
@@ -52,7 +52,7 @@ namespace System.Text.Json
             }
         }
 
-        private static void HandleEndObject(JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
+        private static void HandleEndObject(ref Utf8JsonReader reader, ref ReadStack state)
         {
             Debug.Assert(!state.Current.IsProcessingDictionary && !state.Current.IsProcessingIDictionaryConstructible);
 

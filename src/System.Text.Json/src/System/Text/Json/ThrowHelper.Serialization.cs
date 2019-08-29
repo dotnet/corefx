@@ -28,6 +28,12 @@ namespace System.Text.Json
             return new NotSupportedException(SR.Format(SR.SerializationNotSupportedCollectionType, propertyType));
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static NotSupportedException ThrowNotSupportedException_DeserializeInstanceConstructorNotFound(Type instanceType, Type listType)
+        {
+            return new NotSupportedException(SR.Format(SR.DeserializeInstanceConstructorNotFound, instanceType, listType));
+        }
+
         public static void ThrowInvalidOperationException_SerializerCycleDetected(int maxDepth)
         {
             throw new JsonException(SR.Format(SR.SerializerCycleDetected, maxDepth));
