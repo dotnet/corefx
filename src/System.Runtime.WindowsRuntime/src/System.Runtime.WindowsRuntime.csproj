@@ -19,18 +19,24 @@
     <AssemblyVersion Condition="'$(TargetGroup)' == 'netstandard1.2'">4.0.11.0</AssemblyVersion>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true' or '$(TargetsUap)' == 'true'">
-    <ReferenceFromRuntime Include="System.Private.CoreLib" />
     <Reference Include="mscorlib" />
     <Reference Include="Windows" />
+    <Reference Include="System.Collections" />
+    <Reference Include="System.Runtime" />
     <!-- Needed for the compiler to resolve IObservableMap.MapChanged. -->
-    <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
-    <ProjectReference Include="..\..\System.Runtime.Extensions\src\System.Runtime.Extensions.csproj">
-      <Aliases>System_Runtime_Extensions</Aliases>
-    </ProjectReference>
-    <ProjectReference Include="..\..\System.Diagnostics.Debug\src\System.Diagnostics.Debug.csproj" />
-    <ProjectReference Include="..\..\System.Diagnostics.Tools\src\System.Diagnostics.Tools.csproj" />
-    <ProjectReference Include="..\..\System.Runtime.InteropServices.WindowsRuntime\src\System.Runtime.InteropServices.WindowsRuntime.csproj" />
-    <ProjectReference Include="..\..\System.ObjectModel\src\System.ObjectModel.csproj" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Diagnostics.Contracts" />
+    <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.Diagnostics.Tools" />
+    <Reference Include="System.Threading" />
+    <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Runtime.InteropServices" />
+    <Reference Include="System.Runtime.InteropServices.WindowsRuntime" />
+    <Reference Include="System.ObjectModel" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe" />
+    <Reference Include="System.Threading.Thread" />
+    <Reference Include="System.Threading.ThreadPool" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true' or '$(TargetsUap)' == 'true'">
     <Compile Include="System\InternalHelpers.cs" />
@@ -59,6 +65,7 @@
     <Compile Include="System\Runtime\InteropServices\IAgileObject.cs" />
     <Compile Include="System\Runtime\InteropServices\IMarshal.cs" />
     <Compile Include="System\Runtime\InteropServices\WindowsRuntime\AsyncInfo.cs" />
+    <Compile Include="System\Runtime\InteropServices\WindowsRuntime\ExceptionSupport.cs" />
     <Compile Include="System\Runtime\InteropServices\WindowsRuntime\IBufferByteAccess.cs" />
     <Compile Include="System\Runtime\InteropServices\WindowsRuntime\WindowsRuntimeBuffer.cs" />
     <Compile Include="System\Runtime\InteropServices\WindowsRuntime\WindowsRuntimeBufferExtensions.cs" />
@@ -75,6 +82,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Mincore\Interop.RoGetActivationFactory.cs">
       <Link>Common\Interop\Windows\Mincore\Interop.RoGetActivationFactory.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Runtime\InteropServices\WindowsRuntime\IRestrictedErrorInfo.cs">
+      <Link>Common\System\Runtime\InteropServices\WindowsRuntime\IRestrictedErrorIfno.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Runtime\InteropServices\WindowsRuntime\WindowsRuntimeImportAttribute.cs">
       <Link>Common\System\Runtime\InteropServices\WindowsRuntime\WindowsRuntimeImportAttribute.cs</Link>
     </Compile>
@@ -86,6 +96,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.FormatMessage.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.FormatMessage.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Mincore\Interop.GetRestrictedErrorInfo.cs">
+      <Link>Common\Interop\Windows\Mincore\Interop.GetRestrictedErrorInfo.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Mincore\Interop.RoGetBufferMarshaler.cs">
       <Link>Common\Interop\Windows\Mincore\Interop.RoGetBufferMarshaler.cs</Link>

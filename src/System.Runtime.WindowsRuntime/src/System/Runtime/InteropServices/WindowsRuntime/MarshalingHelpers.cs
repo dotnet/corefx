@@ -11,8 +11,6 @@ using System.Runtime.CompilerServices;
 using System.Security;
 using System.Windows.Input;
 
-using Internal.Runtime.CompilerServices;
-
 namespace System.Runtime.InteropServices.WindowsRuntime
 {
     // Local definition of Windows.UI.Xaml.Interop.INotifyCollectionChangedEventArgs

@@ -28,6 +28,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         public System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken AddEventHandler(T? handler) { throw null; }
         public static System.Runtime.InteropServices.WindowsRuntime.EventRegistrationTokenTable<T> GetOrCreateEventRegistrationTokenTable(ref System.Runtime.InteropServices.WindowsRuntime.EventRegistrationTokenTable<T>? refEventTable) { throw null; }
         public void RemoveEventHandler(System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken token) { }
+        public bool RemoveEventHandler(System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken token, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out T? handler) { throw null; }
         public void RemoveEventHandler(T? handler) { }
     }
     public partial interface IActivationFactory
@@ -58,11 +59,13 @@ namespace System.Runtime.InteropServices.WindowsRuntime
     public static partial class WindowsRuntimeMarshal
     {
         public static void AddEventHandler<T>(System.Func<T, System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken> addMethod, System.Action<System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken> removeMethod, T handler) { }
+        public static object GetUniqueObjectForIUnknownWithoutUnboxing(IntPtr iUnknown) { throw null; }
         public static void FreeHString(System.IntPtr ptr) { }
         public static System.Runtime.InteropServices.WindowsRuntime.IActivationFactory GetActivationFactory(System.Type type) { throw null; }
         public static string PtrToStringHString(System.IntPtr ptr) { throw null; }
         public static void RemoveAllEventHandlers(System.Action<System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken> removeMethod) { }
         public static void RemoveEventHandler<T>(System.Action<System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken> removeMethod, T handler) { }
+        public static bool ReportUnhandledError(System.Exception? e) { throw null; }
         public static System.IntPtr StringToHString(string s) { throw null; }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Parameter, Inherited=false, AllowMultiple=false)]

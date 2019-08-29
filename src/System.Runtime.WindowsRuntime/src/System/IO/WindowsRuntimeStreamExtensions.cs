@@ -2,16 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-extern alias System_Runtime_Extensions;
-
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Storage.Streams;
-using BufferedStream = System_Runtime_Extensions::System.IO.BufferedStream;
+using BufferedStream = System.IO.BufferedStream;
 
 namespace System.IO
 {

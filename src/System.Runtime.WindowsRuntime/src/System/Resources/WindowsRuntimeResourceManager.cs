@@ -23,7 +23,7 @@ namespace System.Resources
 #if FEATURE_APPX
     // Please see the comments regarding thread safety preceding the implementations
     // of Initialize() and GetString() below.
-    internal sealed class WindowsRuntimeResourceManager : WindowsRuntimeResourceManagerBase
+    internal sealed class WindowsRuntimeResourceManager : IWindowsRuntimeResourceManager
     {
         // Setting invariant culture to Windows Runtime doesn't work because Windows Runtime expects language name in the form of BCP-47 tags while
         // invariant name is an empty string. We will use the private invariant culture name x-VL instead.
@@ -143,19 +143,26 @@ namespace System.Resources
 
             for (int i = 0; i < languages.Count; i++)
             {
-                if (WindowsRuntimeResourceManagerBase.IsValidCulture(languages[i]))
+                try
                 {
                     return new CultureInfo(languages[i]);
+                }
+                catch (CultureNotFoundException)
+                {
+                    // Ignore this exception and try the locale name below.
                 }
 
                 int result = Interop.Kernel32.ResolveLocaleName(languages[i], localeNameBuffer, Interop.Kernel32.LOCALE_NAME_MAX_LENGTH);
                 if (result != 0)
                 {
-                    string localeName = new string(localeNameBuffer, 0, result - 1); // result length includes null terminator
-
-                    if (WindowsRuntimeResourceManagerBase.IsValidCulture(localeName))
+                    try
                     {
+                        string localeName = new string(localeNameBuffer, 0, result - 1); // result length includes null terminator
                         return new CultureInfo(localeName);
+                    }
+                    catch (CultureNotFoundException)
+                    {
+                        // Ignore this exception and try the next language.
                     }
                 }
             }
@@ -339,11 +346,12 @@ namespace System.Resources
         // Only returns true if the function succeeded completely.
         // Outputs exceptionInfo since it may be needed for debugging purposes
         // if an exception is thrown by one of Initialize's callees.
-        public override bool Initialize(string libpath, string reswFilename, out PRIExceptionInfo exceptionInfo)
+        public bool Initialize(string libpath, string reswFilename, out string packageSimpleName, out string encodedResWFilename)
         {
             Debug.Assert(libpath != null);
             Debug.Assert(reswFilename != null);
-            exceptionInfo = null;
+            packageSimpleName = null;
+            encodedResWFilename = null;
 
             if (InitializeStatics())
             {
@@ -361,7 +369,7 @@ namespace System.Resources
 
                 if (resourceMapDictionary != null)
                 {
-                    string packageSimpleName = FindPackageSimpleNameForFilename(libpath);
+                    packageSimpleName = FindPackageSimpleNameForFilename(libpath);
 
 #if netstandard
                     // If we have found a simple package name for the assembly, lets make sure it is not *.resource.dll that
@@ -396,9 +404,7 @@ namespace System.Resources
 
                                 if (_resourceMap == null)
                                 {
-                                    exceptionInfo = new PRIExceptionInfo();
-                                    exceptionInfo.PackageSimpleName = packageSimpleName;
-                                    exceptionInfo.ResWFile = reswFilename;
+                                    encodedResWFilename = reswFilename;
                                 }
                                 else
                                 {
@@ -438,7 +444,7 @@ namespace System.Resources
             return string.Join(";", list);
         }
 
-        public override CultureInfo GlobalResourceContextBestFitCultureInfo
+        public CultureInfo GlobalResourceContextBestFitCultureInfo
         {
             get
             {
@@ -449,7 +455,7 @@ namespace System.Resources
 
         // This method will set the culture ci as default language in the default resource context
         // which is global for the whole app
-        public override bool SetGlobalResourceContextDefaultCulture(CultureInfo ci)
+        public bool SetGlobalResourceContextDefaultCulture(CultureInfo ci)
         {
             Debug.Assert(ci != null);
             InitializeStaticGlobalResourceContext(null);
@@ -501,7 +507,7 @@ namespace System.Resources
         // continue to be thread-safe.
 
         // Throws exceptions
-        public override string GetString(string stringName,
+        public string GetString(string stringName,
                  string startingCulture, string neutralResourcesCulture)
         {
             Debug.Assert(stringName != null);
