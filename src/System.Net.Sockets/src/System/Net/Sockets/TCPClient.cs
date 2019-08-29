@@ -187,6 +187,7 @@ namespace System.Net.Sockets
                                 Volatile.Write(ref _clientSocket, socket);
                                 if (CleanedUp)
                                 {
+                                    // Dispose the socket so it throws ObjectDisposedException when we Connect.
                                     socket.Dispose();
                                 }
 
