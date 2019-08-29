@@ -270,12 +270,13 @@ namespace System.IO
 
             // Here we have a bool to check if they're equal, but with different casing
             // We allowing moving foo to the same directory, but renaming with a different case.
-            bool sameDirectoryWithDifferentCasing =
+            bool sameDirectoryIgnoreCase =
                 string.Equals(sourcePath, destPath, StringComparison.OrdinalIgnoreCase);
 
-            StringComparison pathComparison = PathInternal.StringComparison;
+            StringComparison pathComparison = StringComparison.Ordinal;
 
-            if (!sameDirectoryWithDifferentCasing
+            // If the paths are the exact same, fail.
+            if (sameDirectoryIgnoreCase
                 && string.Equals(sourcePath, destPath, pathComparison))
             {
                 throw new IOException(SR.IO_SourceDestMustBeDifferent);
@@ -294,7 +295,7 @@ namespace System.IO
             if (!FileSystem.DirectoryExists(fullsourceDirName) && !FileSystem.FileExists(fullsourceDirName))
                 throw new DirectoryNotFoundException(SR.Format(SR.IO_PathNotFound_Path, fullsourceDirName));
 
-            if (!sameDirectoryWithDifferentCasing
+            if (!sameDirectoryIgnoreCase
                 && FileSystem.DirectoryExists(fulldestDirName))
             {
                 throw new IOException(SR.Format(SR.IO_AlreadyExists_Name, fulldestDirName));
