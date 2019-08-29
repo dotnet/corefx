@@ -361,11 +361,13 @@ namespace System.Text.Json
         public void AddRange(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>> jsonProperties) { }
         public override System.Text.Json.JsonNode Clone() { throw null; }
         public bool ContainsProperty(string propertyName) { throw null; }
+        public bool ContainsProperty(string propertyName, System.StringComparison stringComparison = System.StringComparison.CurrentCulture) { throw null; }
         public System.Text.Json.JsonObjectEnumerator GetEnumerator() { throw null; }
         public System.Text.Json.JsonArray GetJsonArrayPropertyValue(string propertyName) { throw null; }
         public System.Text.Json.JsonObject GetJsonObjectPropertyValue(string propertyName) { throw null; }
         public System.Text.Json.JsonNode GetPropertyValue(string propertyName) { throw null; }
         public bool Remove(string propertyName) { throw null; }
+        public bool Remove(string propertyName, System.StringComparison stringComparison = System.StringComparison.CurrentCulture) { throw null; }
         System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>> System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<System.String,System.Text.Json.JsonNode>>.GetEnumerator() { throw null; }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
         public bool TryGetJsonArrayPropertyValue(string propertyName, out System.Text.Json.JsonArray jsonArray) { throw null; }

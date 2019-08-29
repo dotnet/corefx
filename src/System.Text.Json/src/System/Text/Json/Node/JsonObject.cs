@@ -173,7 +173,7 @@ namespace System.Text.Json
         /// <summary>
         ///   Removes the property with the specified name.
         /// </summary>
-        /// <param name="propertyName"></param>
+        /// <param name="propertyName">>Name of a property to remove.</param>
         /// <returns>
         ///   <see langword="true"/> if the property is successfully found in a JSON object and removed,
         ///   <see langword="false"/> otherwise.
@@ -193,6 +193,54 @@ namespace System.Text.Json
                 return false;
             }
 
+            RemoveProperty(propertyName);
+
+            _version++;
+
+            return true;
+        }
+
+        /// <summary>
+        ///   Removes the property with the specified name.
+        /// </summary>
+        /// <param name="propertyName">>Name of a property to remove.</param>
+        /// <param name="stringComparison">The culture and case to be used when comparing string value.</param>
+        /// <returns>
+        ///   <see langword="true"/> if the property is successfully found in a JSON object and removed,
+        ///   <see langword="false"/> otherwise.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   Provided property name is null.
+        /// </exception>
+        public bool Remove(string propertyName, StringComparison stringComparison = default)
+        {
+            if (propertyName == null)
+            {
+                throw new ArgumentNullException(nameof(propertyName));
+            }
+
+            string nameToRemove = null;
+
+            foreach (KeyValuePair<string, JsonNode> property in this)
+            {
+                if (string.Equals(property.Key, propertyName, stringComparison))
+                {
+                    nameToRemove = property.Key;
+                    break;
+                }
+            }
+
+            if (nameToRemove != null)
+            {
+                RemoveProperty(nameToRemove);
+                return true;
+            }
+
+            return false;
+        }
+
+        private void RemoveProperty(string propertyName)
+        {
             JsonObjectProperty propertyToRemove = _dictionary[propertyName];
 
             // Adjust linked list pointers:
@@ -217,9 +265,6 @@ namespace System.Text.Json
 
             // Remove property from dictionary:
             _dictionary.Remove(propertyName);
-
-            _version++;
-            return true;
         }
 
         /// <summary>
@@ -234,6 +279,32 @@ namespace System.Text.Json
         ///   Provided property name is null.
         /// </exception>
         public bool ContainsProperty(string propertyName) => propertyName != null ? _dictionary.ContainsKey(propertyName) : throw new ArgumentNullException(nameof(propertyName));
+
+        /// <summary>
+        ///   Determines whether a property is in a JSON object.
+        /// </summary>
+        /// <param name="propertyName">Name of the property to check.</param>
+        /// <param name="stringComparison">The culture and case to be used when comparing string value.</param>
+        /// <returns>
+        ///   <see langword="true"/> if the property is successfully found in a JSON object,
+        ///   <see langword="false"/> otherwise.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   Provided property name is null.
+        /// </exception>
+        public bool ContainsProperty(string propertyName, StringComparison stringComparison = default)
+        {
+            foreach (KeyValuePair<string, JsonNode> property in this)
+            {
+                if (string.Equals(property.Key, propertyName, stringComparison))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
 
         /// <summary>
         ///   Returns the value of a property with the specified name.

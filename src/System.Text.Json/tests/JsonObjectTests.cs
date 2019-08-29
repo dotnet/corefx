@@ -46,7 +46,7 @@ namespace System.Text.Json.Tests
 
             JsonObject jsonObject = new JsonObject() { { "property", "value" } };
             Assert.Equal("value", jsonObject["property"]);
-            
+
             jsonObject["property"] = "indexer value";
             Assert.Equal("indexer value", jsonObject["property"]);
         }
@@ -94,7 +94,7 @@ namespace System.Text.Json.Tests
         public static void TestReadonlySpan()
         {
             var jsonObject = new JsonObject();
-            
+
             var spanValue = new ReadOnlySpan<char>(new char[] { 's', 'p', 'a', 'n' });
             jsonObject.Add("span", spanValue);
             Assert.Equal("span", ((JsonString)jsonObject["span"]).Value);
@@ -110,7 +110,7 @@ namespace System.Text.Json.Tests
         {
             var guidString = "ca761232-ed42-11ce-bacd-00aa0057b223";
             Guid guid = new Guid(guidString);
-            var jsonObject = new JsonObject{ { "guid", guid } };
+            var jsonObject = new JsonObject { { "guid", guid } };
             Assert.Equal(guidString, ((JsonString)jsonObject["guid"]).Value);
         }
 
@@ -577,7 +577,7 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void TestTryGetProperty ()
+        public static void TestTryGetProperty()
         {
             var jsonObject = new JsonObject()
             {
@@ -686,6 +686,42 @@ namespace System.Text.Json.Tests
             });
             Assert.Throws<ArgumentNullException>(() => new JsonObject().Remove(null));
             Assert.Throws<ArgumentNullException>(() => new JsonObject().ContainsProperty(null));
+        }
+
+        private static JsonObject GetEncyclopaediaObject()
+        {
+            return new JsonObject()
+            {
+                { "not encyclopaedia", "value1" },
+                { "Encyclopaedia", "value2" },
+                { "NOT encyclopaedia", "value3" },
+                { "encyclopædia", "value4" }
+            };
+        }
+
+        [Fact]
+        public static void TestStringComparisonEnum()
+        {
+            JsonObject jsonObject = GetEncyclopaediaObject();
+            Assert.Equal(4, jsonObject.Count());
+
+            Assert.False(jsonObject.ContainsProperty("ENCYCLOPÆDIA"));
+            jsonObject.Remove("ENCYCLOPÆDIA");
+            Assert.Equal(4, jsonObject.Count());
+
+            Assert.False(jsonObject.ContainsProperty("ENCYCLOPÆDIA", StringComparison.CurrentCulture));
+            jsonObject.Remove("ENCYCLOPÆDIA", StringComparison.CurrentCulture);
+            Assert.Equal(4, jsonObject.Count());
+
+            Assert.True(jsonObject.ContainsProperty("ENCYCLOPÆDIA", StringComparison.InvariantCultureIgnoreCase));
+            jsonObject.Remove("ENCYCLOPÆDIA", StringComparison.InvariantCultureIgnoreCase);
+            Assert.Equal(3, jsonObject.Count());
+
+            ICollection<JsonNode> values = jsonObject.PropertyValues;
+            Assert.False(values.Contains("value2"));
+            Assert.True(values.Contains("value1"));
+            Assert.True(values.Contains("value3"));
+            Assert.True(values.Contains("value4"));
         }
     }
 }
