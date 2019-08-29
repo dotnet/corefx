@@ -65,24 +65,22 @@ namespace System.Text.Json
 
             state.Current.CollectionPropertyInitialized = true;
 
+            JsonClassInfo collectionClassInfo;
+            if (jsonPropertyInfo.DeclaredPropertyType == jsonPropertyInfo.ImplementedPropertyType)
+            {
+                collectionClassInfo = options.GetOrAddClass(jsonPropertyInfo.RuntimePropertyType);
+            }
+            else
+            {
+                collectionClassInfo = options.GetOrAddClass(jsonPropertyInfo.DeclaredPropertyType);
+            }
+
             if (jsonPropertyInfo.EnumerableConverter != null)
             {
-                JsonClassInfo collectionClassInfo;
-                if (jsonPropertyInfo.DeclaredPropertyType == jsonPropertyInfo.ImplementedPropertyType)
-                {
-                    collectionClassInfo = options.GetOrAddClass(jsonPropertyInfo.RuntimePropertyType);
-                }
-                else
-                {
-                    collectionClassInfo = options.GetOrAddClass(jsonPropertyInfo.DeclaredPropertyType);
-                }
-
                 state.Current.TempEnumerableValues = (IList)collectionClassInfo.CreateConcreteEnumerable();
             }
             else
             {
-                // Create the collection.
-                JsonClassInfo collectionClassInfo = jsonPropertyInfo.RuntimeClassInfo;
                 object value = collectionClassInfo.CreateObject();
 
                 if (value != null)

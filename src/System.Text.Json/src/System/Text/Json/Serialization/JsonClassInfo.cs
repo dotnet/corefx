@@ -175,18 +175,21 @@ namespace System.Text.Json
                         AddPolicyProperty(type, options);
 
                         Type objectType;
-                        if (IsNativelySupportedCollection(type))
-                        {
-                            // Use the type from the property policy to get any late-bound concrete types (from an interface like IDictionary).
+                        if (PolicyProperty.DeclaredPropertyType.IsInterface)
                             objectType = PolicyProperty.RuntimePropertyType;
-                        }
                         else
-                        {
-                            // We need to create the declared instance for types implementing natively supported collections.
                             objectType = PolicyProperty.DeclaredPropertyType;
-                        }
 
-                        CreateObject = options.MemberAccessorStrategy.CreateConstructor(objectType);
+                        CreateObject = options.MemberAccessorStrategy.CreateConstructor(objectType)
+                            ?? new ConstructorDelegate(() =>
+                            {
+                                // Implementing types that don't have default constructors are not supported for deserialization.
+                                // This is implemented as a lambda so we don't blow up valid serialization scenarios.
+                                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                                    PolicyProperty.DeclaredPropertyType,
+                                    PolicyProperty.ParentClassType,
+                                    PolicyProperty.PropertyInfo);
+                            });
 
                         ElementType = GetElementType(type, parentType: null, memberInfo: null, options: options);
                     }
@@ -528,15 +531,16 @@ namespace System.Text.Json
                 return ClassType.IDictionaryConstructible;
             }
 
-            if (typeof(IDictionary).IsAssignableFrom(implementedType) || IsDictionaryClassType(implementedType))
+            if (typeof(IDictionary).IsAssignableFrom(implementedType))
             {
-                // Special case for derived types
-                if (type != implementedType && !IsNativelySupportedCollection(type))
-                {
-                    return ClassType.IDictionaryConstructible;
-                }
-
                 return ClassType.Dictionary;
+            }
+
+            if (IsGenericDictionary(implementedType))
+            {
+                return type.IsInterface
+                    ? ClassType.Dictionary // IDictionary<,> we can use a concrete type for that.
+                    : ClassType.IDictionaryConstructible; // A type implementing IDictionary<,> but not IDictionary, have to buffer that.
             }
 
             if (implementedType.IsArray ||
@@ -546,24 +550,25 @@ namespace System.Text.Json
                 return ClassType.ICollectionConstructible;
             }
 
+            if (typeof(IList).IsAssignableFrom(implementedType))
+            {
+                return ClassType.Enumerable;
+            }
+
             if (typeof(IEnumerable).IsAssignableFrom(implementedType))
             {
-                // Special case for derived types
-                if (type != implementedType && !IsNativelySupportedCollection(type))
-                {
-                    return ClassType.ICollectionConstructible;
-                }
-
-                return ClassType.Enumerable;
+                return type.IsInterface
+                    ? ClassType.Enumerable // IEnumerable we can use a concrete type for that.
+                    : ClassType.ICollectionConstructible; // A type implementing IEnumerable but not IList, have to buffer that.
             }
 
             return ClassType.Object;
         }
 
-        public static bool IsDictionaryClassType(Type type)
+        public static bool IsGenericDictionary(Type type)
         {
-            return (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(IDictionary<,>) ||
-                type.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>)));
+            return type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(IDictionary<,>) ||
+                type.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>));
         }
     }
 }

@@ -124,7 +124,9 @@ namespace System.Text.Json
 
         public override IEnumerable CreateDerivedEnumerableInstance(JsonPropertyInfo collectionPropertyInfo, IList sourceList, string jsonPath, JsonSerializerOptions options)
         {
-            object instance = collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject?.Invoke();
+            Debug.Assert(collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject != null);
+
+            object instance = collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject();
 
             if (instance is IList instanceOfIList)
             {
@@ -165,6 +167,7 @@ namespace System.Text.Json
                 return instanceOfQueue;
             }
 
+            // This should technically be unreachable.
             throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
                 collectionPropertyInfo.DeclaredPropertyType,
                 collectionPropertyInfo.ParentClassType,
@@ -173,7 +176,9 @@ namespace System.Text.Json
 
         public override object CreateDerivedDictionaryInstance(JsonPropertyInfo collectionPropertyInfo, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options)
         {
-            object instance = collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject?.Invoke();
+            Debug.Assert(collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject != null);
+
+            object instance = collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject();
 
             if (instance is IDictionary instanceOfIDictionary)
             {
@@ -198,6 +203,7 @@ namespace System.Text.Json
                 }
             }
 
+            // This should technically be unreachable.
             throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
                 collectionPropertyInfo.DeclaredPropertyType,
                 collectionPropertyInfo.ParentClassType,

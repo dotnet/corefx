@@ -59,24 +59,22 @@ namespace System.Text.Json
 
             state.Current.CollectionPropertyInitialized = true;
 
+            JsonClassInfo dictionaryClassInfo;
+            if (jsonPropertyInfo.DeclaredPropertyType == jsonPropertyInfo.ImplementedPropertyType)
+            {
+                dictionaryClassInfo = options.GetOrAddClass(jsonPropertyInfo.RuntimePropertyType);
+            }
+            else
+            {
+                dictionaryClassInfo = options.GetOrAddClass(jsonPropertyInfo.DeclaredPropertyType);
+            }
+
             if (state.Current.IsProcessingIDictionaryConstructible)
             {
-                JsonClassInfo dictionaryClassInfo;
-                if (jsonPropertyInfo.DeclaredPropertyType == jsonPropertyInfo.ImplementedPropertyType)
-                {
-                    dictionaryClassInfo = options.GetOrAddClass(jsonPropertyInfo.RuntimePropertyType);
-                }
-                else
-                {
-                    dictionaryClassInfo = options.GetOrAddClass(jsonPropertyInfo.DeclaredPropertyType);
-                }
-
                 state.Current.TempDictionaryValues = (IDictionary)dictionaryClassInfo.CreateConcreteDictionary();
             }
             else
             {
-                // Create the dictionary.
-                JsonClassInfo dictionaryClassInfo = jsonPropertyInfo.RuntimeClassInfo;
                 IDictionary value = (IDictionary)dictionaryClassInfo.CreateObject();
 
                 if (value != null)
