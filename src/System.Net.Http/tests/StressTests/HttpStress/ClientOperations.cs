@@ -406,6 +406,7 @@ namespace HttpStress
                 async ctx =>
                 {
                     string content = ctx.GetRandomString(0, ctx.MaxContentLength);
+                    ulong checksum = CRC.CalculateCRC(content);
 
                     using var req = new HttpRequestMessage(HttpMethod.Post, "/") { Content = new StringContent(content) };
 
@@ -413,7 +414,8 @@ namespace HttpStress
                     using HttpResponseMessage m = await ctx.SendAsync(req, HttpCompletionOption.ResponseHeadersRead);
 
                     ValidateStatusCode(m);
-                    ValidateContent(content, await m.Content.ReadAsStringAsync());
+                    string checksumMessage = ValidateServerChecksum(m.Headers, checksum) ? "server checksum matches client checksum" : "server checksum mismatch";
+                    ValidateContent(content, await m.Content.ReadAsStringAsync(), checksumMessage);
                 }),
 
                 ("HEAD",
