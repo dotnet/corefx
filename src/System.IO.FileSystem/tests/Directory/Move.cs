@@ -215,53 +215,50 @@ namespace System.IO.Tests
         [Fact]
         public void ThrowIOExceptionWhenDirectoryExists()
         {
-            Environment.CurrentDirectory = TestDirectory;
-            Directory.CreateDirectory("foo");
-            Assert.Throws<IOException>(() => Directory.Move("foo", "foo"));
+            Directory.CreateDirectory($"{TestDirectory}/foo");
+            Assert.Throws<IOException>(() => Directory.Move($"{TestDirectory}/foo", $"{TestDirectory}/foo"));
         }
 
         [Fact]
         public void MoveDirectoryToNewDirectoryButWithDifferentCasing()
         {
-            Environment.CurrentDirectory = TestDirectory;
-            Directory.CreateDirectory("foo");
-            var otherDirectoryName = "bar";
-            Directory.CreateDirectory(otherDirectoryName);
-            Directory.Move("foo", Path.Combine(otherDirectoryName, "FOO"));
-            Assert.True(Directory.Exists(Path.Combine(otherDirectoryName, "FOO")));
-            Assert.False(Directory.Exists("foo"));
+            Directory.CreateDirectory(Path.Combine(TestDirectory, "foo"));
+            var otherDirectory = Path.Combine(TestDirectory, "bar");
+            Directory.CreateDirectory(Path.Combine(otherDirectory));
+            Directory.Move(Path.Combine(TestDirectory, "foo"), Path.Combine(otherDirectory, "FOO"));
+            Assert.True(Directory.Exists(Path.Combine(otherDirectory, "FOO")));
+            Assert.False(Directory.Exists(Path.Combine(TestDirectory, "foo")));
         }
 
         [Fact]
         public void MoveDirectory_SameDirectoryWithDifferentCasing_WithFileContent()
         {
-            Environment.CurrentDirectory = TestDirectory;
-            Directory.CreateDirectory("foo");
-            var fooDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(), "foo");
-            File.WriteAllText(Path.Combine(fooDirectoryPath, "bar.txt"), string.Empty);
-            Directory.Move("foo", "FOO");
-            var firstFile = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "FOO"));
+            var fooDirectory = Path.Combine(TestDirectory, "foo");
+            var fooDirectoryUppercase = Path.Combine(TestDirectory, "FOO");
+            Directory.CreateDirectory(fooDirectory);
+            File.WriteAllText(Path.Combine(fooDirectory, "bar.txt"), string.Empty);
+            Directory.Move(fooDirectory, fooDirectoryUppercase);
+            var firstFile = Directory.GetFiles(fooDirectoryUppercase);
             Assert.Equal("bar.txt", Path.GetFileName(firstFile[0]));
         }
 
         [Fact]
         public void MoveDirectory_FailToMoveDirectoryWithUpperCaseToOtherDirectoryWithLowerCase()
         {
-            Environment.CurrentDirectory = TestDirectory;
-            Directory.CreateDirectory("FOO");
-            Directory.CreateDirectory("bar/foo");
-            Assert.Throws<IOException>(() => Directory.Move("FOO", "bar/foo"));
+            Directory.CreateDirectory($"{TestDirectory}/FOO");
+            Directory.CreateDirectory($"{TestDirectory}/bar/foo");
+            Assert.Throws<IOException>(() => Directory.Move($"{TestDirectory}/FOO", $"{TestDirectory}/bar/foo"));
         }
 
         [Fact]
         public void MoveDirectory_SameDirectoryWithDifferentCasing_WithDirectoryContent()
         {
-            Environment.CurrentDirectory = TestDirectory;
-            Directory.CreateDirectory("foo");
-            var fooDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(), "foo");
+            var fooDirectoryPath = Path.Combine(TestDirectory, "foo");
+            var fooDirectoryPathUpperCase = Path.Combine(TestDirectory, "FOO");
+            Directory.CreateDirectory(fooDirectoryPath);
             Directory.CreateDirectory(Path.Combine(fooDirectoryPath, "bar"));
-            Directory.Move("foo", "FOO");
-            var firstFile = Directory.GetDirectories(Path.Combine(Directory.GetCurrentDirectory(), "FOO"));
+            Directory.Move(fooDirectoryPath, fooDirectoryPathUpperCase);
+            var firstFile = Directory.GetDirectories(fooDirectoryPathUpperCase);
             Assert.Equal("bar", Path.GetFileName(firstFile[0]));
         }
 
