@@ -193,7 +193,7 @@ namespace System.Text.Json.Serialization.Tests
 
             public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
             {
-                string[] enumString = value.ToString().Split(",");
+                string[] enumString = value.ToString().Split(',');
 
                 writer.WriteStartArray();
 
