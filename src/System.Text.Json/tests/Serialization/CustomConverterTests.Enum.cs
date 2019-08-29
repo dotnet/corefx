@@ -199,7 +199,7 @@ namespace System.Text.Json.Serialization.Tests
 
                 foreach (string enumValue in enumString)
                 {
-                    writer.WriteStringValue(enumValue);
+                    writer.WriteStringValue(enumValue.TrimStart());
                 }
 
                 writer.WriteEndArray();
@@ -229,8 +229,20 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData(@"[""Tablet"",""PC""]")]
         public static void EnumValue(string json)
         {
-            eDevice obj = JsonSerializer.Deserialize<eDevice>(json);
-            Assert.Equal(eDevice.PC | eDevice.Tablet, obj);
+            eDevice obj;
+
+            void Verify()
+            {
+                Assert.Equal(eDevice.PC | eDevice.Tablet, obj);
+            }
+
+            obj = JsonSerializer.Deserialize<eDevice>(json);
+            Verify();
+
+            // Round-trip and verify.
+            json = JsonSerializer.Serialize(obj);
+            obj = JsonSerializer.Deserialize<eDevice>(json);
+            Verify();
         }
 
         private class ConnectionList
@@ -244,14 +256,26 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Theory]
-        [InlineData(@"{""Connections"": [{""Device"":[""PC"",""Tablet""]},{""Device"":[""PC"",""Laptop""]}]}")]
-        [InlineData(@"{""Connections"": [{""Device"":[""Tablet"",""PC""]},{""Device"":[""Laptop"",""PC""]}]}")]
+        [InlineData(@"{""Connections"":[{""Device"":[""PC"",""Tablet""]},{""Device"":[""PC"",""Laptop""]}]}")]
+        [InlineData(@"{""Connections"":[{""Device"":[""Tablet"",""PC""]},{""Device"":[""Laptop"",""PC""]}]}")]
         public static void EnumArray(string json)
         {
-            ConnectionList obj = JsonSerializer.Deserialize<ConnectionList>(json);
-            Assert.Equal(2, obj.Connections.Count);
-            Assert.Equal(eDevice.PC | eDevice.Tablet, obj.Connections[0].Device);
-            Assert.Equal(eDevice.PC | eDevice.Laptop, obj.Connections[1].Device);
+            ConnectionList obj;
+
+            void Verify()
+            {
+                Assert.Equal(2, obj.Connections.Count);
+                Assert.Equal(eDevice.PC | eDevice.Tablet, obj.Connections[0].Device);
+                Assert.Equal(eDevice.PC | eDevice.Laptop, obj.Connections[1].Device);
+            }
+
+            obj = JsonSerializer.Deserialize<ConnectionList>(json);
+            Verify();
+
+            // Round-trip and verify.
+            json = JsonSerializer.Serialize(obj);
+            obj = JsonSerializer.Deserialize<ConnectionList>(json);
+            Verify();
         }
     }
 }
