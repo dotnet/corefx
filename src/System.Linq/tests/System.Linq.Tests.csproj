@@ -5,7 +5,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AppendPrependTests.cs" />
-    <Compile Include="DisposeTrackingEnumerable.cs" />
     <Compile Include="SkipLastTests.cs" />
     <Compile Include="TakeLastTests.cs" />
     <Compile Include="OrderByTests.cs" />

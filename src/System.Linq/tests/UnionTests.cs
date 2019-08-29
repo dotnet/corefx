@@ -420,7 +420,11 @@ namespace System.Linq.Tests
         {
             var enum1 = new DisposeTrackingEnumerable<int>();
             var enum2 = new DisposeTrackingEnumerable<int>();
-            enum1.Union(enum2).Select(x => x).ToList();
+            Assert.False(enum1.EnumeratorDisposed);
+            Assert.False(enum2.EnumeratorDisposed);
+
+            foreach (int value in enum1.Union(enum2)) { }
+
             Assert.True(enum1.EnumeratorDisposed);
             Assert.True(enum2.EnumeratorDisposed);
         }
