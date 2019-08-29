@@ -21,7 +21,7 @@ namespace System.Net.Mail
         private ICredentialsByHost _credentials;
         private readonly List<SmtpFailedRecipientException> _failedRecipientExceptions = new List<SmtpFailedRecipientException>();
         private bool _identityRequired;
-        private bool _aborted;
+        private bool _shouldAbort;
 
         private bool _enableSsl = false;
         private X509CertificateCollection _clientCertificates = null;
@@ -111,11 +111,11 @@ namespace System.Net.Mail
                 lock (this)
                 {
                     _connection = new SmtpConnection(this, _client, _credentials, _authenticationModules);
-                    if (_aborted)
+                    if (_shouldAbort)
                     {
                         _connection.Abort();
                     }
-                    _aborted = false;
+                    _shouldAbort = false;
                 }
 
                 if (NetEventSource.IsEnabled) NetEventSource.Associate(this, _connection);
@@ -211,7 +211,7 @@ namespace System.Net.Mail
                 }
                 else
                 {
-                    _aborted = true;
+                    _shouldAbort = true;
                 }
             }
         }

@@ -184,7 +184,8 @@ namespace System.Net.Sockets
                             if ((address.AddressFamily == AddressFamily.InterNetwork && Socket.OSSupportsIPv4) || Socket.OSSupportsIPv6)
                             {
                                 var socket = new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                                Volatile.Write(ref _clientSocket, socket);
+                                // Use of Interlocked.Exchanged ensures _clientSocket is written before CleanedUp is read.
+                                Interlocked.Exchange(ref _clientSocket, socket);
                                 if (CleanedUp)
                                 {
                                     // Dispose the socket so it throws ObjectDisposedException when we Connect.
