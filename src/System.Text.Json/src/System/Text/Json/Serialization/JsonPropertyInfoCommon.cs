@@ -4,6 +4,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -205,8 +206,56 @@ namespace System.Text.Json
 
         public override IEnumerable CreateIEnumerableInstance(Type parentType, IList sourceList, string jsonPath, JsonSerializerOptions options)
         {
+            // Note: Types are defined explicityly here for performance.
             try
             {
+                if (parentType.IsGenericType)
+                {
+                    Type genericTypeDefinition = parentType.GetGenericTypeDefinition();
+
+                    IList<TDeclaredProperty> typedList = (IList<TDeclaredProperty>)sourceList;
+
+                    if (genericTypeDefinition == typeof(Stack<>))
+                    {
+                        return new Stack<TDeclaredProperty>(typedList);
+                    }
+                    else if (genericTypeDefinition == typeof(Queue<>))
+                    {
+                        return new Queue<TDeclaredProperty>(typedList);
+                    }
+                    else if (genericTypeDefinition == typeof(HashSet<>))
+                    {
+                        return new HashSet<TDeclaredProperty>(typedList);
+                    }
+                    else if (genericTypeDefinition == typeof(LinkedList<>))
+                    {
+                        return new LinkedList<TDeclaredProperty>(typedList);
+                    }
+                    else if (genericTypeDefinition == typeof(ReadOnlyCollection<>))
+                    {
+                        return new ReadOnlyCollection<TDeclaredProperty>(typedList);
+                    }
+                    else if (genericTypeDefinition == typeof(ReadOnlyObservableCollection<>))
+                    {
+                        return new ReadOnlyObservableCollection<TDeclaredProperty>(new ObservableCollection<TDeclaredProperty>(typedList));
+                    }
+                }
+                else
+                {
+                    if (parentType == typeof(ArrayList))
+                    {
+                        return new ArrayList(sourceList);
+                    }
+                    else if (parentType == typeof(Queue))
+                    {
+                        return new Queue(sourceList);
+                    }
+                    else if (parentType == typeof(Stack))
+                    {
+                        return new Stack(sourceList);
+                    }
+                }
+
                 return (IEnumerable)Activator.CreateInstance(parentType, sourceList);
             }
             catch (MissingMethodException)
@@ -217,8 +266,28 @@ namespace System.Text.Json
 
         public override IDictionary CreateIDictionaryInstance(Type parentType, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options)
         {
+            // Note: Types are defined explicityly here for performance.
             try
             {
+                if (parentType.IsGenericType)
+                {
+                    Type genericTypeDefinition = parentType.GetGenericTypeDefinition();
+
+                    IDictionary<string, TDeclaredProperty> typedSourceDictionary = (IDictionary<string, TDeclaredProperty>)sourceDictionary;
+
+                    if (genericTypeDefinition == typeof(ReadOnlyDictionary<,>))
+                    {
+                        return new ReadOnlyDictionary<string, TDeclaredProperty>(typedSourceDictionary);
+                    }
+                }
+                else
+                {
+                    if (parentType.FullName == JsonClassInfo.HashtableTypeName)
+                    {
+                        return new Hashtable(sourceDictionary);
+                    }
+                }
+
                 return (IDictionary)Activator.CreateInstance(parentType, sourceDictionary);
             }
             catch (MissingMethodException)

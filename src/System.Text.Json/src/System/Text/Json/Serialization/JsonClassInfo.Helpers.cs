@@ -29,7 +29,8 @@ namespace System.Text.Json
         private const string ReadOnlyListGenericInterfaceTypeName = "System.Collections.Generic.IReadOnlyList`1";
 
         private const string ReadOnlyCollectionGenericInterfaceTypeName = "System.Collections.Generic.IReadOnlyCollection`1";
-        internal const string ReadOnlyCollectionGenericTypeName = "System.Collections.ObjectModel.ReadOnlyCollection`1";
+        private const string ReadOnlyCollectionGenericTypeName = "System.Collections.ObjectModel.ReadOnlyCollection`1";
+        private const string ReadOnlyObservableCollectionGenericTypeName = "System.Collections.ObjectModel.ReadOnlyObservableCollection`1";
 
         public const string HashtableTypeName = "System.Collections.Hashtable";
         public const string SortedListTypeName = "System.Collections.SortedList";
@@ -90,6 +91,7 @@ namespace System.Text.Json
             ReadOnlyListGenericInterfaceTypeName,
             ReadOnlyCollectionGenericInterfaceTypeName,
             ReadOnlyCollectionGenericTypeName,
+            ReadOnlyObservableCollectionGenericTypeName,
             SetGenericInterfaceTypeName,
             StackGenericTypeName,
             QueueGenericTypeName,
@@ -248,6 +250,7 @@ namespace System.Text.Json
                 switch (type.GetGenericTypeDefinition().FullName)
                 {
                     case ReadOnlyCollectionGenericTypeName:
+                    case ReadOnlyObservableCollectionGenericTypeName:
                     case StackGenericTypeName:
                     case QueueGenericTypeName:
                     case LinkedListGenericTypeName:

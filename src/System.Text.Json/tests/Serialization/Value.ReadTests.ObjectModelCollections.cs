@@ -29,15 +29,22 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        public static void Read_ObjectModelCollection_Throws()
+        public static void Read_ObjectModelCollection_CreatedFromIList()
         {
-            // No default constructor.
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyCollection<bool>>("[true,false]"));
-            // No default constructor.
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyObservableCollection<bool>>("[true,false]"));
-            // No default constructor.
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyDictionary<string, bool>>(@"{""true"":false}"));
+            ReadOnlyCollection<bool> c = JsonSerializer.Deserialize<ReadOnlyCollection<bool>>("[true,false]");
+            Assert.Equal(2, c.Count);
+            Assert.True(c[0]);
+            Assert.False(c[1]);
 
+            ReadOnlyObservableCollection<bool> oc = JsonSerializer.Deserialize<ReadOnlyObservableCollection<bool>>("[true,false]");
+            Assert.Equal(2, oc.Count);
+            Assert.True(oc[0]);
+            Assert.False(oc[1]);
+
+            ReadOnlyDictionary<string, bool> d = JsonSerializer.Deserialize<ReadOnlyDictionary<string, bool>>(@"{""true"":false}");
+            Assert.Equal(1, d.Count);
+            Assert.False(d["true"]);
+           
             // Abstract types can't be instantiated. This means there's no default constructor, so the type is not supported for deserialization.
             Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<KeyedCollection<string, bool>>("[true]"));
         }
