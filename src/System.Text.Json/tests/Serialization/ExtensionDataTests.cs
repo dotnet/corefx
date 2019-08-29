@@ -440,7 +440,8 @@ namespace System.Text.Json.Serialization.Tests
             public List<ChildClassWithJsonElement> Children { get; set; } = new List<ChildClassWithJsonElement>();
 
             [JsonExtensionData]
-            public Dictionary<string, JsonElement> ExtensionData { get; set; } = new Dictionary<string, JsonElement>();
+            // Use SortedDictionary as verification of supporting derived dictionaries.
+            public SortedDictionary<string, JsonElement> ExtensionData { get; set; } = new SortedDictionary<string, JsonElement>();
         }
 
         private class ChildClassWithJsonElement
