@@ -240,7 +240,7 @@ namespace System.IO.Tests
             var fooDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(), "foo");
             File.WriteAllText(Path.Combine(fooDirectoryPath, "bar.txt"), string.Empty);
             Directory.Move("foo", "FOO");
-            var firstFile = Directory.GetFiles(fooDirectoryPath);
+            var firstFile = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "FOO"));
             Assert.Equal("bar.txt", Path.GetFileName(firstFile[0]));
         }
 
@@ -261,7 +261,7 @@ namespace System.IO.Tests
             var fooDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(), "foo");
             Directory.CreateDirectory(Path.Combine(fooDirectoryPath, "bar"));
             Directory.Move("foo", "FOO");
-            var firstFile = Directory.GetDirectories(fooDirectoryPath);
+            var firstFile = Directory.GetDirectories(Path.Combine(Directory.GetCurrentDirectory(), "FOO"));
             Assert.Equal("bar", Path.GetFileName(firstFile[0]));
         }
 
