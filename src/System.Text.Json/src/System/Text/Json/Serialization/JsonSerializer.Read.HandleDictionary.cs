@@ -98,13 +98,24 @@ namespace System.Text.Json
         {
             if (state.Current.SkipProperty)
             {
+                // Todo: determine if this is reachable.
                 return;
             }
 
             if (state.Current.IsDictionaryProperty)
             {
-                // We added the items to the dictionary already.
-                state.Current.EndProperty();
+                // Handle special case of DataExtensionProperty where we just added a dictionary element to the extension property.
+                // Since the JSON value is not a dictionary element (it's a normal property in JSON) a JsonTokenType.EndObject
+                // encountered here is from the outer object so forward to HandleEndObject().
+                if (state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo)
+                {
+                    HandleEndObject(ref reader, ref state);
+                }
+                else
+                {
+                    // We added the items to the dictionary already.
+                    state.Current.EndProperty();
+                }
             }
             else if (state.Current.IsIDictionaryConstructibleProperty)
             {
