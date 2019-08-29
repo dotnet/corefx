@@ -261,6 +261,7 @@ namespace Internal.Cryptography.Pal.Native
         protected sealed override bool ReleaseHandle()
         {
             Interop.crypt32.CertFreeCertificateChainEngine(handle);
+            SetHandle(IntPtr.Zero);
             return true;
         }
 

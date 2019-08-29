@@ -297,7 +297,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
                 chain.ChainPolicy.CustomTrustStore.Add(intermediateCert);
 
-                if(saveAllInCustomTrustStore)
+                if (saveAllInCustomTrustStore)
                 {
                     chain.ChainPolicy.CustomTrustStore.Add(rootCert);
                 }
