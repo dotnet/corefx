@@ -4,7 +4,6 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 
@@ -15,51 +14,6 @@ namespace System.Text.Json
     /// </summary>
     public abstract partial class JsonNode
     {
-        private static void AddToParent(
-            KeyValuePair<string, JsonNode> nodePair,
-            ref Stack<KeyValuePair<string, JsonNode>> currentNodes,
-            ref JsonNode toReturn,
-            DuplicatePropertyNameHandling duplicatePropertyNameHandling = DuplicatePropertyNameHandling.Replace)
-        {
-            if (currentNodes.Any())
-            {
-                KeyValuePair<string, JsonNode> parentPair = currentNodes.Peek();
-
-                Debug.Assert(parentPair.Value is JsonArray || parentPair.Value is JsonObject);
-
-                if (parentPair.Value is JsonObject jsonObject)
-                {
-                    Debug.Assert(nodePair.Key != null);
-                    if (jsonObject._dictionary.ContainsKey(nodePair.Key))
-                    {
-                        switch (duplicatePropertyNameHandling)
-                        {
-                            case DuplicatePropertyNameHandling.Replace:
-                                jsonObject[nodePair.Key] = nodePair.Value;
-                                break;
-                            case DuplicatePropertyNameHandling.Error:
-                                throw new ArgumentException(SR.JsonObjectDuplicateKey);
-                            case DuplicatePropertyNameHandling.Ignore:
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        jsonObject.Add(nodePair);
-                    }
-                }
-                else if (parentPair.Value is JsonArray jsonArray)
-                {
-                    Debug.Assert(nodePair.Key == null);
-                    jsonArray.Add(nodePair.Value);
-                }
-            }
-            else
-            {
-                toReturn = nodePair.Value;
-            }
-        }
-
         /// <summary>
         ///   Performs a deep copy operation on <paramref name="jsonElement"/> returning corresponding modifiable tree structure of JSON nodes.
         ///   Operations performed on returned <see cref="JsonNode"/> does not modify <paramref name="jsonElement"/>.
@@ -112,7 +66,7 @@ namespace System.Text.Json
                         // Add end of object marker:
                         recursionStack.Push(new KeyValuePair<string, JsonElement?> (null, null));
 
-                        // Add properties to recursion stack:
+                        // Add properties to recursion stack. Reverse enumerator to keep properties order:
                         foreach (JsonProperty property in currentJsonElement.Value.EnumerateObject().Reverse())
                         {
                             recursionStack.Push(new KeyValuePair<string, JsonElement?>(property.Name, property.Value));
@@ -127,7 +81,7 @@ namespace System.Text.Json
                         // Add end of array marker:
                         recursionStack.Push(new KeyValuePair<string, JsonElement?>(null, null));
 
-                        // Add elements to recursion stack:
+                        // Add elements to recursion stack. Reverse enumerator to keep items order:
                         foreach (JsonElement element in currentJsonElement.Value.EnumerateArray().Reverse())
                         {
                             recursionStack.Push(new KeyValuePair<string, JsonElement?>(null, element));
@@ -165,7 +119,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        ///   Parses a string representiong JSON document into <see cref="JsonNode"/>.
+        ///   Parses a string representing JSON document into <see cref="JsonNode"/>.
         /// </summary>
         /// <param name="json">JSON to parse.</param>
         /// <param name="options">Options to control the reader behavior during parsing.</param>
@@ -195,7 +149,7 @@ namespace System.Text.Json
                     {
                         // If previous token was property name,
                         // it was added to stack with not null name and null value,
-                        // otherwise, this is first property added
+                        // otherwise, this is first JsonNode added
                         if (currentPair.Key != null)
                         {
                             // Create as property, keep name, replace null with new JsonNode:
@@ -204,6 +158,7 @@ namespace System.Text.Json
                         }
                         else
                         {
+                            // Add first JsonNode:
                             newProperty = new KeyValuePair<string, JsonNode>(null, jsonNode);
                         }
                     }
@@ -215,6 +170,9 @@ namespace System.Text.Json
 
                     if (keepInCurrentNodes)
                     {
+                        // If after adding property, it should be kept in currentNodes, it must be JsonObject or JsonArray
+                        Debug.Assert(jsonNode.ValueKind == JsonValueKind.Object || jsonNode.ValueKind == JsonValueKind.Array);
+
                         currentNodes.Push(newProperty);
                     }
                     else
@@ -268,24 +226,6 @@ namespace System.Text.Json
             return toReturn;
         }
 
-        private struct StackFrame
-        {
-            public string PropertyName { get; set; }
-            public JsonNode PropertyValue { get; set; }
-            public JsonValueKind ValueKind { get; set; }
-
-            public StackFrame(string propertyName, JsonNode propertyValue, JsonValueKind valueKind)
-            {
-                PropertyName = propertyName;
-                PropertyValue = propertyValue;
-                ValueKind = valueKind;
-            }
-
-            public StackFrame(string propertyName, JsonNode propertyValue) : this(propertyName, propertyValue, propertyValue.ValueKind)
-            {
-            }
-        }
-
         internal void WriteTo(Utf8JsonWriter writer)
         {
             var recursionStack = new Stack<StackFrame>();
@@ -298,7 +238,9 @@ namespace System.Text.Json
 
                 if (currentFrame.PropertyValue == null)
                 {
-                    // Current object/array is finished:
+                    // Current object/array is finished.
+                    // PropertyValue is null, so we need to check ValueKind:
+
                     Debug.Assert(currentFrame.ValueKind == JsonValueKind.Object || currentFrame.ValueKind == JsonValueKind.Array);
 
                     if (currentFrame.ValueKind == JsonValueKind.Object)
@@ -326,6 +268,7 @@ namespace System.Text.Json
                         // Add end of object marker:
                         recursionStack.Push(new StackFrame(null, null, JsonValueKind.Object));
 
+                        // Add properties to recursion stack. Reverse enumerator to keep properties order:
                         foreach (KeyValuePair<string, JsonNode> jsonProperty in jsonObject.Reverse())
                         {
                             recursionStack.Push(new StackFrame(jsonProperty.Key, jsonProperty.Value));
@@ -337,6 +280,7 @@ namespace System.Text.Json
                         // Add end of array marker:
                         recursionStack.Push(new StackFrame(null, null, JsonValueKind.Array));
 
+                        // Add items to recursion stack. Reverse enumerator to keep items order:
                         foreach (JsonNode item in jsonArray.Reverse())
                         {
                             recursionStack.Push(new StackFrame(null, item));
