@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.DirectoryServices.Protocols;
 using System.Linq;
 using Xunit;
 
@@ -359,29 +360,31 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData(@"{""MyReference"":{""MyNestedClass"":null,""MyInt"":0,""MyIntMissingChild"":3},""MyIntMissing"":2}")]
         public static void NestedClass(string json)
         {
-            ClassWithReference obj = JsonSerializer.Deserialize<ClassWithReference>(json);
-            Assert.IsType<JsonElement>(obj.MyOverflow["MyIntMissing"]);
-            Assert.Equal(1, obj.MyOverflow.Count);
-            Assert.Equal(2, obj.MyOverflow["MyIntMissing"].GetInt32());
+            ClassWithReference obj;
 
-            ClassWithExtensionProperty child = obj.MyReference;
-            Assert.IsType<JsonElement>(child.MyOverflow["MyIntMissingChild"]);
-            Assert.IsType<JsonElement>(child.MyOverflow["MyIntMissingChild"]);
-            Assert.Equal(1, child.MyOverflow.Count);
-            Assert.Equal(3, child.MyOverflow["MyIntMissingChild"].GetInt32());
+            void Verify()
+            {
+                Assert.IsType<JsonElement>(obj.MyOverflow["MyIntMissing"]);
+                Assert.Equal(1, obj.MyOverflow.Count);
+                Assert.Equal(2, obj.MyOverflow["MyIntMissing"].GetInt32());
 
-            // Round-trip the json.
+                ClassWithExtensionProperty child = obj.MyReference;
+
+                Assert.IsType<JsonElement>(child.MyOverflow["MyIntMissingChild"]);
+                Assert.IsType<JsonElement>(child.MyOverflow["MyIntMissingChild"]);
+                Assert.Equal(1, child.MyOverflow.Count);
+                Assert.Equal(3, child.MyOverflow["MyIntMissingChild"].GetInt32());
+                Assert.Null(child.MyNestedClass);
+                Assert.Equal(0, child.MyInt);
+            }
+
+            obj = JsonSerializer.Deserialize<ClassWithReference>(json);
+            Verify();
+
+            // Round-trip the json and verify.
             json = JsonSerializer.Serialize(obj);
             obj = JsonSerializer.Deserialize<ClassWithReference>(json);
-            Assert.IsType<JsonElement>(obj.MyOverflow["MyIntMissing"]);
-            Assert.Equal(1, obj.MyOverflow.Count);
-            Assert.Equal(2, obj.MyOverflow["MyIntMissing"].GetInt32());
-
-            child = obj.MyReference;
-            Assert.IsType<JsonElement>(child.MyOverflow["MyIntMissingChild"]);
-            Assert.IsType<JsonElement>(child.MyOverflow["MyIntMissingChild"]);
-            Assert.Equal(1, child.MyOverflow.Count);
-            Assert.Equal(3, child.MyOverflow["MyIntMissingChild"].GetInt32());
+            Verify();
         }
 
         private class ParentClassWithObject
@@ -411,6 +414,7 @@ namespace System.Text.Json.Serialization.Tests
             parent.ExtensionData.Add("SpecialInformation", "I am parent class");
             parent.Child = child;
 
+            // The extension data is based on the raw strings added above and not JsonElement.
             Assert.Equal("Hello World", parent.Text);
             Assert.IsType<string>(parent.ExtensionData["SpecialInformation"]);
             Assert.Equal("I am parent class", (string)parent.ExtensionData["SpecialInformation"]);
@@ -418,7 +422,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.IsType<string>(parent.Child.ExtensionData["SpecialInformation"]);
             Assert.Equal("I am child class", (string)parent.Child.ExtensionData["SpecialInformation"]);
 
-            // Round-trip and verify.
+            // Round-trip and verify. Extension data is now based on JsonElement.
             string json = JsonSerializer.Serialize(parent);
             parent = JsonSerializer.Deserialize<ParentClassWithObject>(json);
 
