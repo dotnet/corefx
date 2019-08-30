@@ -91,10 +91,13 @@ namespace System.Data.SqlClient.SNI
         {
             int readBytes = 0;
             byte[] packetData = null;
-
+            byte[] readTarget = buffer;
+            int readOffset = offset;
             if (_encapsulate)
             {
                 packetData = ArrayPool<byte>.Shared.Rent(count < TdsEnums.HEADER_LEN ? TdsEnums.HEADER_LEN : count);
+                readTarget = packetData;
+                readOffset = 0;
                 if (_packetBytes == 0)
                 {
                     // Account for split packets
@@ -116,14 +119,13 @@ namespace System.Data.SqlClient.SNI
             }
 
             readBytes = async ?
-                await _stream.ReadAsync(packetData ?? buffer, 0, count, token).ConfigureAwait(false) :
-                _stream.Read(packetData ?? buffer, 0, count);
+                await _stream.ReadAsync(readTarget, readOffset, count, token).ConfigureAwait(false) :
+                _stream.Read(readTarget, readOffset, count);
 
             if (_encapsulate)
             {
                 _packetBytes -= readBytes;
             }
-
             if (packetData != null)
             {
                 Buffer.BlockCopy(packetData, 0, buffer, offset, readBytes);
