@@ -287,9 +287,9 @@ namespace System.Text.Json.Tests
         {
             var issues = new JsonObject()
             {
-                { "features", new JsonNode [] { "new functionality 1", "new functionality 2" } },
-                { "bugs", new JsonNode [] { "bug 123", "bug 4566", "bug 821" } },
-                { "tests", new JsonNode [] { "code coverage" } },
+                { "features", new JsonArray { "new functionality 1", "new functionality 2" } },
+                { "bugs", new JsonArray { "bug 123", "bug 4566", "bug 821" } },
+                { "tests", new JsonArray { "code coverage" } },
             };
 
             issues.GetJsonArrayPropertyValue("bugs").Add("bug 12356");
@@ -306,7 +306,7 @@ namespace System.Text.Json.Tests
         {
             var issues = new JsonObject()
             {
-                { "features", new JsonNode [] { "new functionality 1", "new functionality 2" } },
+                { "features", new JsonArray { "new functionality 1", "new functionality 2" } },
             };
 
             Assert.True(issues.TryGetJsonArrayPropertyValue("features", out JsonArray featuresArray));

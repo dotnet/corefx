@@ -75,12 +75,6 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        ///   Converts a <see cref="ReadOnlySpan{Char}"/> to a <see cref="JsonString"/>.
-        /// </summary>
-        /// <param name="value">The value to convert.</param>
-        public static implicit operator JsonNode(ReadOnlySpan<char> value) => new JsonString(value);
-
-        /// <summary>
         ///   Converts a <see cref="DateTime"/> to a <see cref="JsonString"/>.
         /// </summary>
         /// <param name="value">The value to convert.</param>
@@ -132,9 +126,6 @@ namespace System.Text.Json
         ///    Converts a <see cref="float"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        /// <exception cref="ArgumentException">
-        ///   Provided value is not in a legal JSON number format.
-        /// </exception>
         public static implicit operator JsonNode(float value)
         {
             if (float.IsSubnormal(value))
@@ -149,9 +140,6 @@ namespace System.Text.Json
         ///    Converts a <see cref="double"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        /// <exception cref="ArgumentException">
-        ///   Provided value is not in a legal JSON number format.
-        /// </exception>
         public static implicit operator JsonNode(double value)
         {
             if (double.IsSubnormal(value))

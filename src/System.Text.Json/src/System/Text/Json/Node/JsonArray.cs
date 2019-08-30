@@ -225,7 +225,7 @@ namespace System.Text.Json
         /// <remarks>Null value is allowed and will be converted to the <see cref="JsonNull"/> instance.</remarks>
         public void Add(JsonNode value)
         {
-             _list.Add(value ?? new JsonNull());
+            _list.Add(value ?? new JsonNull());
             _version++;
         }
 

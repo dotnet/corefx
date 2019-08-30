@@ -57,8 +57,8 @@ namespace System.Text.Json.Tests
         private static void CheckNode(JsonNode node)
         {
             var jsonObject = (JsonObject)node;
-            Assert.Equal(10, jsonObject.PropertyNames.Count);
-            Assert.Equal(10, jsonObject.PropertyValues.Count);
+            Assert.Equal(10, jsonObject.GetPropertyNames().Count);
+            Assert.Equal(10, jsonObject.GetPropertyValues().Count);
             Assert.Equal("property value", jsonObject["text"]);
             Assert.True(((JsonBoolean)jsonObject["boolean true"]).Value);
             Assert.False(((JsonBoolean)jsonObject["boolean false"]).Value);
@@ -74,15 +74,15 @@ namespace System.Text.Json.Tests
             Assert.Equal(3, ((JsonNumber)innerArray[2]).GetInt32());
 
             var innerObject = (JsonObject)jsonObject["inner object"];
-            Assert.Equal(1, innerObject.PropertyNames.Count);
-            Assert.Equal(1, innerObject.PropertyValues.Count);
+            Assert.Equal(1, innerObject.GetPropertyNames().Count);
+            Assert.Equal(1, innerObject.GetPropertyValues().Count);
             Assert.Equal("value", innerObject["inner property"]);
 
             var comboObject = (JsonObject)jsonObject.GetJsonArrayPropertyValue("combo array")[0];
-            Assert.Equal(4, comboObject.PropertyNames.Count);
-            Assert.Equal(4, comboObject.PropertyValues.Count);
+            Assert.Equal(4, comboObject.GetPropertyNames().Count);
+            Assert.Equal(4, comboObject.GetPropertyValues().Count);
             Assert.Equal("value", comboObject["inner property"]);
-            Assert.Equal(0, comboObject.GetJsonObjectPropertyValue("empty object").PropertyNames.Count);
+            Assert.Equal(0, comboObject.GetJsonObjectPropertyValue("empty object").GetPropertyNames().Count);
             Assert.Equal(3, comboObject.GetJsonArrayPropertyValue("simple array").Count);
             var nestedObject = (JsonObject)comboObject["nested object"];
             Assert.Equal(0, nestedObject.GetJsonArrayPropertyValue("empty array").Count);

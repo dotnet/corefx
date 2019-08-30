@@ -64,7 +64,7 @@ namespace System.Text.Json
                         currentNodes.Push(new KeyValuePair<string, JsonNode>(currentPair.Key, jsonObject));
 
                         // Add end of object marker:
-                        recursionStack.Push(new KeyValuePair<string, JsonElement?> (null, null));
+                        recursionStack.Push(new KeyValuePair<string, JsonElement?>(null, null));
 
                         // Add properties to recursion stack. Reverse enumerator to keep properties order:
                         foreach (JsonProperty property in currentJsonElement.Value.EnumerateObject().Reverse())
@@ -228,12 +228,12 @@ namespace System.Text.Json
 
         internal void WriteTo(Utf8JsonWriter writer)
         {
-            var recursionStack = new Stack<StackFrame>();
-            recursionStack.Push(new StackFrame(null, this));
+            var recursionStack = new Stack<RecursionStackFrame>();
+            recursionStack.Push(new RecursionStackFrame(null, this));
 
             while (recursionStack.Any())
             {
-                StackFrame currentFrame = recursionStack.Peek();
+                RecursionStackFrame currentFrame = recursionStack.Peek();
                 recursionStack.Pop();
 
                 if (currentFrame.PropertyValue == null)
@@ -266,24 +266,24 @@ namespace System.Text.Json
                         writer.WriteStartObject();
 
                         // Add end of object marker:
-                        recursionStack.Push(new StackFrame(null, null, JsonValueKind.Object));
+                        recursionStack.Push(new RecursionStackFrame(null, null, JsonValueKind.Object));
 
                         // Add properties to recursion stack. Reverse enumerator to keep properties order:
                         foreach (KeyValuePair<string, JsonNode> jsonProperty in jsonObject.Reverse())
                         {
-                            recursionStack.Push(new StackFrame(jsonProperty.Key, jsonProperty.Value));
+                            recursionStack.Push(new RecursionStackFrame(jsonProperty.Key, jsonProperty.Value));
                         }
                         break;
                     case JsonArray jsonArray:
                         writer.WriteStartArray();
 
                         // Add end of array marker:
-                        recursionStack.Push(new StackFrame(null, null, JsonValueKind.Array));
+                        recursionStack.Push(new RecursionStackFrame(null, null, JsonValueKind.Array));
 
                         // Add items to recursion stack. Reverse enumerator to keep items order:
                         foreach (JsonNode item in jsonArray.Reverse())
                         {
-                            recursionStack.Push(new StackFrame(null, item));
+                            recursionStack.Push(new RecursionStackFrame(null, item));
                         }
                         break;
                     case JsonString jsonString:

@@ -31,18 +31,17 @@ namespace System.Text.Json
                     Debug.Assert(nodePair.Key != null);
 
                     // Handle duplicate properties accordingly to duplicatePropertyNameHandling:
-                    if (jsonObject._dictionary.ContainsKey(nodePair.Key))
+
+                    if (duplicatePropertyNameHandling == DuplicatePropertyNameHandling.Replace)
                     {
-                        switch (duplicatePropertyNameHandling)
-                        {
-                            case DuplicatePropertyNameHandling.Replace:
-                                jsonObject[nodePair.Key] = nodePair.Value;
-                                break;
-                            case DuplicatePropertyNameHandling.Error:
-                                throw new ArgumentException(SR.JsonObjectDuplicateKey);
-                            case DuplicatePropertyNameHandling.Ignore:
-                                break;
-                        }
+                        jsonObject[nodePair.Key] = nodePair.Value;
+                    }
+                    else if (jsonObject._dictionary.ContainsKey(nodePair.Key))
+                    {
+                        if (duplicatePropertyNameHandling == DuplicatePropertyNameHandling.Error)
+                            throw new ArgumentException(SR.JsonObjectDuplicateKey);
+
+                        Debug.Assert(duplicatePropertyNameHandling == DuplicatePropertyNameHandling.Ignore);
                     }
                     else
                     {
@@ -61,20 +60,20 @@ namespace System.Text.Json
             }
         }
 
-        private struct StackFrame
+        private struct RecursionStackFrame
         {
             public string PropertyName { get; set; }
             public JsonNode PropertyValue { get; set; }
             public JsonValueKind ValueKind { get; set; } // to retrieve ValueKind when PropertyValue is null
 
-            public StackFrame(string propertyName, JsonNode propertyValue, JsonValueKind valueKind)
+            public RecursionStackFrame(string propertyName, JsonNode propertyValue, JsonValueKind valueKind)
             {
                 PropertyName = propertyName;
                 PropertyValue = propertyValue;
                 ValueKind = valueKind;
             }
 
-            public StackFrame(string propertyName, JsonNode propertyValue) : this(propertyName, propertyValue, propertyValue.ValueKind)
+            public RecursionStackFrame(string propertyName, JsonNode propertyValue) : this(propertyName, propertyValue, propertyValue.ValueKind)
             {
             }
         }

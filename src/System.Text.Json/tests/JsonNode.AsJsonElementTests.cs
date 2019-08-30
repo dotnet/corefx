@@ -18,7 +18,7 @@ namespace System.Text.Json.Tests
                 { "boolean", true },
                 { "number", 15 },
                 { "null node", (JsonNode) null },
-                { "array", new JsonNode[] { "value1", "value2"} }
+                { "array", new JsonArray { "value1", "value2"} }
             };
 
             JsonElement jsonElement = jsonObject.AsJsonElement();
@@ -90,7 +90,7 @@ namespace System.Text.Json.Tests
                 { "boolean", true },
                 { "number", 15 },
                 { "null node", (JsonNode) null },
-                { "array", new JsonNode[] { "value1", "value2"} }
+                { "array", new JsonArray { "value1", "value2"} }
             };
 
             JsonElement jsonElement = jsonObject.AsJsonElement();

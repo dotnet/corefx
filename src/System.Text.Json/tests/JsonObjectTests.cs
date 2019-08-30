@@ -15,8 +15,8 @@ namespace System.Text.Json.Tests
         public static void TestDefaultConstructor()
         {
             var jsonObject = new JsonObject();
-            Assert.Equal(0, jsonObject.PropertyNames.Count);
-            Assert.Equal(0, jsonObject.PropertyValues.Count);
+            Assert.Equal(0, jsonObject.GetPropertyNames().Count);
+            Assert.Equal(0, jsonObject.GetPropertyValues().Count);
         }
 
         [Fact]
@@ -88,21 +88,6 @@ namespace System.Text.Json.Tests
 
             jsonObject.Add("decimal", decimal.One);
             Assert.Equal(decimal.One, ((JsonNumber)jsonObject["decimal"]).GetDecimal());
-        }
-
-        [Fact]
-        public static void TestReadonlySpan()
-        {
-            var jsonObject = new JsonObject();
-
-            var spanValue = new ReadOnlySpan<char>(new char[] { 's', 'p', 'a', 'n' });
-            jsonObject.Add("span", spanValue);
-            Assert.Equal("span", ((JsonString)jsonObject["span"]).Value);
-
-            string property = null;
-            spanValue = property.AsSpan();
-            jsonObject["span"] = spanValue;
-            Assert.Equal("", ((JsonString)jsonObject["span"]).Value);
         }
 
         [Fact]
@@ -291,7 +276,7 @@ namespace System.Text.Json.Tests
         {
             var preferences = new JsonObject()
             {
-                { "prime numbers", new JsonNode[] { 19, 37 } }
+                { "prime numbers", new JsonArray { 19, 37 } }
             };
 
             var primeNumbers = (JsonArray)preferences["prime numbers"];
@@ -366,7 +351,7 @@ namespace System.Text.Json.Tests
 
             var preferences = new JsonObject()
             {
-                { "strange words", strangeWords.Where(word => ((JsonString)word).Value.Length < 10) }
+                { "strange words", new JsonArray(strangeWords.Where(word => ((JsonString)word).Value.Length < 10)) }
             };
 
             var strangeWordsJsonArray = (JsonArray)preferences["strange words"];
@@ -398,10 +383,10 @@ namespace System.Text.Json.Tests
         public static void TestAquiringAllValues()
         {
             var employees = new JsonObject(EmployeesDatabase.GetTenBestEmployees());
-            ICollection<JsonNode> employeesWithoutId = employees.PropertyValues;
+            ICollection<JsonNode> employeesWithoutId = employees.GetPropertyValues();
 
-            Assert.Equal(10, employees.PropertyNames.Count);
-            Assert.Equal(10, employees.PropertyValues.Count);
+            Assert.Equal(10, employees.GetPropertyNames().Count);
+            Assert.Equal(10, employees.GetPropertyValues().Count);
 
             foreach (JsonNode employee in employeesWithoutId)
             {
@@ -722,7 +707,7 @@ namespace System.Text.Json.Tests
             jsonObject.Remove("ENCYCLOPAEDIA", StringComparison.InvariantCultureIgnoreCase);
             Assert.Equal(3, jsonObject.Count());
 
-            ICollection<JsonNode> values = jsonObject.PropertyValues;
+            ICollection<JsonNode> values = jsonObject.GetPropertyValues();
             Assert.False(values.Contains("value2"));
             Assert.True(values.Contains("value1"));
             Assert.True(values.Contains("value3"));
@@ -737,10 +722,10 @@ namespace System.Text.Json.Tests
             };
 
             Assert.Equal(0, jsonObject.GetJsonObjectPropertyValue("OBJECT first",
-                StringComparison.InvariantCultureIgnoreCase).PropertyNames.Count);
+                StringComparison.InvariantCultureIgnoreCase).GetPropertyNames().Count);
             Assert.True(jsonObject.TryGetJsonObjectPropertyValue("OBJECT first", out JsonObject objectProperty,
                 StringComparison.InvariantCultureIgnoreCase));
-            Assert.Equal(0, objectProperty.PropertyNames.Count);
+            Assert.Equal(0, objectProperty.GetPropertyNames().Count);
 
             Assert.Throws<ArgumentException>(() => 
                 jsonObject.GetJsonArrayPropertyValue("OBJECT first", StringComparison.InvariantCultureIgnoreCase));

@@ -37,7 +37,7 @@ namespace System.Text.Json.Tests
                 { "text", "property value" },
                 { "boolean", true },
                 { "number", 15 },
-                { "array", new JsonNode[] { "value1", "value2"} }
+                { "array", new JsonArray { "value1", "value2"} }
             };
 
             var jsonObjectCopy = (JsonObject)jsonObject.Clone();
@@ -53,7 +53,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(2, jsonObjectCopy.GetJsonArrayPropertyValue("array").Count);
 
             jsonObject.Add("new one", 123);
-            Assert.Equal(4, jsonObjectCopy.PropertyNames.Count);
+            Assert.Equal(4, jsonObjectCopy.GetPropertyNames().Count);
         }
     }
 }

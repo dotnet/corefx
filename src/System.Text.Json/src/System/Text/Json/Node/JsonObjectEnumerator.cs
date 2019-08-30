@@ -24,7 +24,18 @@ namespace System.Text.Json
         /// <summary>
         ///   Gets the property in the JSON object at the current position of the enumerator.
         /// </summary>
-        public KeyValuePair<string, JsonNode> Current => new KeyValuePair<string, JsonNode>(_current._name, _current._value);
+        public KeyValuePair<string, JsonNode> Current
+        {
+            get
+            {
+                if (_current == null)
+                {
+                    return default;
+                }
+
+                return new KeyValuePair<string, JsonNode>(_current.Name, _current.Value);
+            }
+        }
 
         /// <summary>
         ///    Gets the property in the JSON object at the current position of the enumerator.
@@ -53,9 +64,9 @@ namespace System.Text.Json
                 return true;
             }
 
-            if (_current._next != null)
+            if (_current.Next != null)
             {
-                _current = _current._next;
+                _current = _current.Next;
                 return true;
             }
 

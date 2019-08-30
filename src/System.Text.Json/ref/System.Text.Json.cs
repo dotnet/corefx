@@ -245,7 +245,6 @@ namespace System.Text.Json
         public static implicit operator System.Text.Json.JsonNode (short value) { throw null; }
         public static implicit operator System.Text.Json.JsonNode (int value) { throw null; }
         public static implicit operator System.Text.Json.JsonNode (long value) { throw null; }
-        public static implicit operator System.Text.Json.JsonNode (System.ReadOnlySpan<char> value) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public static implicit operator System.Text.Json.JsonNode (sbyte value) { throw null; }
         public static implicit operator System.Text.Json.JsonNode (float value) { throw null; }
@@ -351,11 +350,8 @@ namespace System.Text.Json
         public JsonObject() { }
         public JsonObject(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>> jsonProperties) { }
         public System.Text.Json.JsonNode this[string propertyName] { get { throw null; } set { } }
-        public System.Collections.Generic.ICollection<string> PropertyNames { get { throw null; } }
-        public System.Collections.Generic.ICollection<System.Text.Json.JsonNode> PropertyValues { get { throw null; } }
         public override System.Text.Json.JsonValueKind ValueKind { get { throw null; } }
         public void Add(System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode> jsonProperty) { }
-        public void Add(string propertyName, System.Collections.Generic.IEnumerable<System.Text.Json.JsonNode> propertyValues) { }
         public void Add(string propertyName, System.Text.Json.JsonArray propertyValue) { }
         public void Add(string propertyName, System.Text.Json.JsonNode propertyValue) { }
         public void AddRange(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>> jsonProperties) { }
@@ -367,8 +363,10 @@ namespace System.Text.Json
         public System.Text.Json.JsonArray GetJsonArrayPropertyValue(string propertyName, System.StringComparison stringComparison) { throw null; }
         public System.Text.Json.JsonObject GetJsonObjectPropertyValue(string propertyName) { throw null; }
         public System.Text.Json.JsonObject GetJsonObjectPropertyValue(string propertyName, System.StringComparison stringComparison) { throw null; }
+        public System.Collections.Generic.ICollection<string> GetPropertyNames() { throw null; }
         public System.Text.Json.JsonNode GetPropertyValue(string propertyName) { throw null; }
         public System.Text.Json.JsonNode GetPropertyValue(string propertyName, System.StringComparison stringComparison) { throw null; }
+        public System.Collections.Generic.ICollection<System.Text.Json.JsonNode> GetPropertyValues() { throw null; }
         public bool Remove(string propertyName) { throw null; }
         public bool Remove(string propertyName, System.StringComparison stringComparison) { throw null; }
         System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>> System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<System.String,System.Text.Json.JsonNode>>.GetEnumerator() { throw null; }

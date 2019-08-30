@@ -53,7 +53,7 @@ namespace System.Text.Json
 
                 if (_dictionary.ContainsKey(propertyName))
                 {
-                    _dictionary[propertyName]._value = value ?? new JsonNull();
+                    _dictionary[propertyName].Value = value ?? new JsonNull();
                 }
                 else
                 {
@@ -69,7 +69,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="jsonProperty">The property to add.</param>
         /// <exception cref="ArgumentException">
-        ///   Property name to set already exists.
+        ///   Property name to add already exists.
         /// </exception>
         public void Add(KeyValuePair<string, JsonNode> jsonProperty) => Add(jsonProperty.Key, jsonProperty.Value);
 
@@ -106,7 +106,7 @@ namespace System.Text.Json
             else
             {
                 var newJsonObjectProperty = new JsonObjectProperty(propertyName, propertyValue ?? new JsonNull(), _last, null);
-                _last._next = newJsonObjectProperty;
+                _last.Next = newJsonObjectProperty;
                 _last = newJsonObjectProperty;
             }
 
@@ -125,7 +125,7 @@ namespace System.Text.Json
         ///   Provided property name is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///   Property name to set already exists.
+        ///   Property name to add already exists.
         /// </exception>
         public void Add(string propertyName, JsonArray propertyValue) => Add(propertyName, (JsonNode)propertyValue);
 
@@ -148,28 +148,6 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        ///   Adds the property values from the specified collection as a <see cref="JsonArray"/> property to the JSON object.
-        /// </summary>
-        /// <param name="propertyName">Name of the <see cref="JsonArray"/> property to add.</param>
-        /// <param name="propertyValues">Properties to add.</param>
-        /// <exception cref="ArgumentException">
-        ///   Provided collection contains duplicates.
-        /// </exception>
-        /// <exception cref="ArgumentNullException">
-        ///   Some of property names are null.
-        /// </exception>
-        public void Add(string propertyName, IEnumerable<JsonNode> propertyValues)
-        {
-            var jsonArray = new JsonArray();
-            foreach (JsonNode value in propertyValues)
-            {
-                jsonArray.Add(value ?? new JsonNull());
-            }
-
-            Add(propertyName, (JsonNode)jsonArray);
-        }
-
-        /// <summary>
         ///   Removes the property with the specified name.
         /// </summary>
         /// <param name="propertyName">>Name of a property to remove.</param>
@@ -187,16 +165,15 @@ namespace System.Text.Json
                 throw new ArgumentNullException(nameof(propertyName));
             }
 
-            if (!_dictionary.ContainsKey(propertyName))
+            if (_dictionary.Remove(propertyName, out JsonObjectProperty value))
             {
-                return false;
+                AdjustLinkedListPointers(value);
+                _version++;
+
+                return true;
             }
 
-            RemoveProperty(propertyName);
-
-            _version++;
-
-            return true;
+            return false;
         }
 
         /// <summary>
@@ -218,52 +195,44 @@ namespace System.Text.Json
                 throw new ArgumentNullException(nameof(propertyName));
             }
 
-            string nameToRemove = null;
+            JsonObjectProperty _current = _first;
 
-            foreach (KeyValuePair<string, JsonNode> property in this)
+            while (_current != null && !string.Equals(_current.Name, propertyName, stringComparison))
             {
-                if (string.Equals(property.Key, propertyName, stringComparison))
-                {
-                    nameToRemove = property.Key;
-                    break;
-                }
+                _current = _current.Next;
             }
 
-            if (nameToRemove != null)
+            if (_current != null)
             {
-                RemoveProperty(nameToRemove);
+                AdjustLinkedListPointers(_current);
+                _dictionary.Remove(_current.Name);
                 return true;
             }
 
             return false;
         }
 
-        private void RemoveProperty(string propertyName)
+        private void AdjustLinkedListPointers(JsonObjectProperty propertyToRemove)
         {
-            JsonObjectProperty propertyToRemove = _dictionary[propertyName];
-
             // Adjust linked list pointers:
 
-            if (propertyToRemove._prev == null)
+            if (propertyToRemove.Prev == null)
             {
-                _first = propertyToRemove._next;
+                _first = propertyToRemove.Next;
             }
             else
             {
-                propertyToRemove._prev._next = propertyToRemove._next;
+                propertyToRemove.Prev.Next = propertyToRemove.Next;
             }
 
-            if (propertyToRemove._next == null)
+            if (propertyToRemove.Next == null)
             {
-                _last = propertyToRemove._prev;
+                _last = propertyToRemove.Prev;
             }
             else
             {
-                propertyToRemove._next._prev = propertyToRemove._prev;
+                propertyToRemove.Next.Prev = propertyToRemove.Prev;
             }
-
-            // Remove property from dictionary:
-            _dictionary.Remove(propertyName);
         }
 
         /// <summary>
@@ -357,7 +326,7 @@ namespace System.Text.Json
         {
             if (_dictionary.TryGetValue(propertyName, out JsonObjectProperty jsonObjectProperty))
             {
-                jsonNode = jsonObjectProperty._value;
+                jsonNode = jsonObjectProperty.Value;
                 return true;
             }
 
@@ -568,38 +537,29 @@ namespace System.Text.Json
         /// <summary>
         ///   A collection containing the property names of JSON object.
         /// </summary>
-        public ICollection<string> PropertyNames => _dictionary.Keys;
+        public ICollection<string> GetPropertyNames() => _dictionary.Keys;
 
         /// <summary>
         ///  A collection containing the property values of JSON object.
         /// </summary>
-        public ICollection<JsonNode> PropertyValues => _dictionary.Values.Select(jsonObjectProperty => jsonObjectProperty._value).ToList();
+        public ICollection<JsonNode> GetPropertyValues() => _dictionary.Values.Select(jsonObjectProperty => jsonObjectProperty.Value).ToList();
 
         /// <summary>
         ///   Returns an enumerator that iterates through the JSON object properties.
         /// </summary>
         /// <returns>An enumerator structure for the <see cref="JsonObject"/>.</returns>
-        /// <exception cref="ArgumentException">
-        ///   Property name to set already exists.
-        /// </exception>
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
         ///   Returns an enumerator that iterates through the JSON object properties.
         /// </summary>
         /// <returns>An enumerator structure for the JSON object.</returns>
-        /// <exception cref="ArgumentException">
-        ///   Property name to set already exists.
-        /// </exception>
         IEnumerator<KeyValuePair<string, JsonNode>> IEnumerable<KeyValuePair<string, JsonNode>>.GetEnumerator() => new JsonObjectEnumerator(this);
 
         /// <summary>
         ///   Returns an enumerator that iterates through the JSON object properties.
         /// </summary>
         /// <returns>An enumerator structure for the JSON object.</returns>
-        /// <exception cref="ArgumentException">
-        ///   Property name to set already exists.
-        /// </exception>
         public JsonObjectEnumerator GetEnumerator() => new JsonObjectEnumerator(this);
 
         /// <summary>

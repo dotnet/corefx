@@ -6,17 +6,17 @@ namespace System.Text.Json
 {
     internal class JsonObjectProperty
     {
-        internal string _name { get; set; }
-        internal JsonNode _value { get; set; }
-        internal JsonObjectProperty _prev { get; set; }
-        internal JsonObjectProperty _next { get; set; }
+        internal string Name { get; }
+        internal JsonNode Value { get; set;  }
+        internal JsonObjectProperty Prev { get; set; }
+        internal JsonObjectProperty Next { get; set; }
 
         public JsonObjectProperty(string name, JsonNode value, JsonObjectProperty prev, JsonObjectProperty next)
         {
-            _name = name;
-            _value = value;
-            _prev = prev;
-            _next = next;
+            Name = name;
+            Value = value;
+            Prev = prev;
+            Next = next;
         }
     }
 }

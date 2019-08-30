@@ -51,7 +51,7 @@ namespace System.Text.Json
                             return default;
                         }
 
-                        return new JsonProperty(_current._value.AsJsonElement(), _current._name);
+                        return new JsonProperty(_current.Value.AsJsonElement(), _current.Name);
                     }
 
                     if (_curIdx < 0)
@@ -94,20 +94,14 @@ namespace System.Text.Json
             public void Dispose()
             {
                 _curIdx = _endIdxOrVersion;
-                if (_target._parent is JsonNode)
-                {
-                    _current = null;
-                }
+                _current = null;
             }
 
             /// <inheritdoc />
             public void Reset()
             {
                 _curIdx = -1;
-                if (_target._parent is JsonNode)
-                {
-                    _current = null;
-                }
+                _current = null;
             }
 
             /// <inheritdoc />
@@ -129,9 +123,9 @@ namespace System.Text.Json
                         return true;
                     }
 
-                    if (_current._next != null)
+                    if (_current.Next != null)
                     {
-                        _current = _current._next;
+                        _current = _current.Next;
                         return true;
                     }
 
