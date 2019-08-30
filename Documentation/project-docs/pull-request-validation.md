@@ -16,4 +16,6 @@ In case Continuous Integration indicates test failures which are **highly unlike
 
 There are plenty of bugs, e.g. race conditions, where a failure might highlight a real problem and it won't manifest again on a retry. Therefore these steps should be followed for every iteration of the PR build, e.g. before retrying/rebuilding.
 
-In the event that an **infrastructure issue** affects the PR build, @dnceng and/or team members should be contacted. Examples of infrastructure issues are **CI leg timeouts**, repository clone errors, permission denied errors, etc. In addition, the leg should be retried, unless retrying multiple times encounters the same infrastructure issue each time.
+## Infrastructure issues
+
+In the event that an infrastructure issue affects the PR build, @dnceng and/or team members should be contacted. Examples of infrastructure issues are **CI leg timeouts**, repository clone errors, permission denied errors, etc. In addition, the leg should be retried, unless retrying multiple times encounters the same infrastructure issue each time.
