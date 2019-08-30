@@ -94,10 +94,9 @@ var preferences = new JsonObject()
 {
     { "colours", new JsonArray { "red", "green", "purple" } },
     { "numbers", new JsonArray { 4, 123, 88 } },
-    { "prime numbers", new JsonNode[] { 19, 37 } },
+    { "varia", new JsonArray { 1, "value", false } },
     { "dishes", new JsonArray(dishes) },
-    { "sports", new JsonArray(sports) },
-    { "strange words", strangeWords.Where(word => ((JsonString)word).Value.Length < 10) },
+    { "sports", new JsonArray(sports) }
 };
 ```
 
