@@ -154,16 +154,13 @@ namespace Internal.Cryptography.Pal
             X509Certificate2Collection customTrustStore,
             X509ChainTrustMode trustMode)
         {
-            List<SafeHandle> safeHandles = new List<SafeHandle>();
-            AppleCertificatePal applePal = (AppleCertificatePal)cert;
-            safeHandles.Add(applePal.CertificateHandle);
+            List<SafeHandle> safeHandles = new List<SafeHandle> { ((AppleCertificatePal)cert).CertificateHandle };
 
             if (extraStore != null)
             {
                 for (int i = 0; i < extraStore.Count; i++)
                 {
-                    AppleCertificatePal extraCertPal = (AppleCertificatePal)extraStore[i].Pal;
-                    safeHandles.Add(extraCertPal.CertificateHandle);
+                    safeHandles.Add(((AppleCertificatePal)extraStore[i].Pal).CertificateHandle);
                 }
             }
 
@@ -173,10 +170,9 @@ namespace Internal.Cryptography.Pal
                 {
                     // Only adds non self issued certs to the untrusted certs array. Trusted self signed
                     // certs will be added to the custom certs array.
-                    if (!cert.SubjectName.RawData.ContentsEqual(cert.IssuerName.RawData))
+                    if (!customTrustStore[i].SubjectName.RawData.ContentsEqual(customTrustStore[i].IssuerName.RawData))
                     {
-                        AppleCertificatePal customCertPal = (AppleCertificatePal)customTrustStore[i].Pal;
-                        safeHandles.Add(customCertPal.CertificateHandle);
+                        safeHandles.Add(((AppleCertificatePal)customTrustStore[i].Pal).CertificateHandle);
                     }
                 }
             }
@@ -191,8 +187,7 @@ namespace Internal.Cryptography.Pal
             {
                 if (cert.SubjectName.RawData.ContentsEqual(cert.IssuerName.RawData))
                 {
-                    AppleCertificatePal extraCertPal = (AppleCertificatePal)cert.Pal;
-                    rootCertificates.Add(extraCertPal.CertificateHandle);
+                    rootCertificates.Add(((AppleCertificatePal)cert.Pal).CertificateHandle);
                 }
             }
 

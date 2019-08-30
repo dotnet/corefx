@@ -22,13 +22,13 @@ namespace System.Security.Cryptography.X509Certificates
             Reset();
         }
 
-        public OidCollection ApplicationPolicy => _applicationPolicy ?? (_applicationPolicy = new OidCollection());
+        public OidCollection ApplicationPolicy => _applicationPolicy ??= new OidCollection();
 
-        public OidCollection CertificatePolicy => _certificatePolicy ?? (_certificatePolicy = new OidCollection());
+        public OidCollection CertificatePolicy => _certificatePolicy ??= new OidCollection();
 
-        public X509Certificate2Collection ExtraStore => _extraStore ?? (_extraStore = new X509Certificate2Collection());
+        public X509Certificate2Collection ExtraStore => _extraStore ??= new X509Certificate2Collection();
 
-        public X509Certificate2Collection CustomTrustStore => _customTrustStore ?? (_customTrustStore = new X509Certificate2Collection());
+        public X509Certificate2Collection CustomTrustStore => _customTrustStore ??= new X509Certificate2Collection();
 
         public X509RevocationMode RevocationMode
         {

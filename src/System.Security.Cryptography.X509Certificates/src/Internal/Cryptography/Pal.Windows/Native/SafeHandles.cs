@@ -252,10 +252,10 @@ namespace Internal.Cryptography.Pal.Native
             SetHandle(handle);
         }
 
-        public static SafeChainEngineHandle MachineChainEngine =>
+        public static readonly SafeChainEngineHandle MachineChainEngine =
             new SafeChainEngineHandle((IntPtr)ChainEngine.HCCE_LOCAL_MACHINE);
 
-        public static SafeChainEngineHandle UserChainEngine =>
+        public static readonly SafeChainEngineHandle UserChainEngine =
             new SafeChainEngineHandle((IntPtr)ChainEngine.HCCE_CURRENT_USER);
 
         protected sealed override bool ReleaseHandle()
@@ -267,7 +267,7 @@ namespace Internal.Cryptography.Pal.Native
 
         protected override void Dispose(bool disposing)
         {
-            if (this != MachineChainEngine && this != UserChainEngine)
+            if (this != UserChainEngine && this != MachineChainEngine)
             {
                 base.Dispose(disposing);
             }

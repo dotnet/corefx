@@ -136,7 +136,6 @@ namespace Internal.Cryptography.Pal
         {
             if (trustMode == X509ChainTrustMode.CustomRootTrust)
             {
-                SafeX509StoreHandle x509Chain;
                 using (SafeX509StackHandle customTrust = Interop.Crypto.NewX509Stack())
                 {
                     foreach (X509Certificate2 cert in customTrustStore)
@@ -145,10 +144,8 @@ namespace Internal.Cryptography.Pal
                         AddToStackAndUpRef(((OpenSslX509CertificateReader)cert.Pal).SafeHandle, toAdd);
                     }
 
-                    x509Chain = Interop.Crypto.X509ChainNew(customTrust, SafeX509StackHandle.InvalidHandle);
+                    return Interop.Crypto.X509ChainNew(customTrust, SafeX509StackHandle.InvalidHandle);
                 }
-
-                return x509Chain;
             }
 
             return Interop.Crypto.X509ChainNew(systemTrust, s_userRootStore.GetNativeCollection());
