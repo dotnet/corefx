@@ -351,7 +351,6 @@ namespace HttpStress
                 async ctx =>
                 {
                     string content = ctx.GetRandomString(0, ctx.MaxContentLength);
-
                     ulong checksum = CRC.CalculateCRC(content);
 
                     using var req = new HttpRequestMessage(HttpMethod.Post, "/duplex") { Content = new StringDuplexContent(content) };
