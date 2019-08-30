@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Buffers;
 using System.Collections.Specialized;
 using System.Diagnostics.Tracing;
 using System.IO;
@@ -69,6 +70,11 @@ namespace HttpStress
                     ko.Limits.MaxRequestLineSize = Math.Max(ko.Limits.MaxRequestLineSize, configuration.MaxRequestUriSize + 100);
                     ko.Limits.MaxRequestHeaderCount = Math.Max(ko.Limits.MaxRequestHeaderCount, configuration.MaxRequestHeaderCount);
                     ko.Limits.MaxRequestHeadersTotalSize = Math.Max(ko.Limits.MaxRequestHeadersTotalSize, configuration.MaxRequestHeaderTotalSize);
+
+                    ko.Limits.Http2.MaxStreamsPerConnection = configuration.ServerMaxConcurrentStreams ?? ko.Limits.Http2.MaxStreamsPerConnection;
+                    ko.Limits.Http2.MaxFrameSize = configuration.ServerMaxFrameSize ?? ko.Limits.Http2.MaxFrameSize;
+                    ko.Limits.Http2.InitialConnectionWindowSize = configuration.ServerInitialConnectionWindowSize ?? ko.Limits.Http2.InitialConnectionWindowSize;
+                    ko.Limits.Http2.MaxRequestHeaderFieldSize = configuration.ServerMaxRequestHeaderFieldSize ?? ko.Limits.Http2.MaxRequestHeaderFieldSize;
 
                     IPAddress iPAddress = Dns.GetHostAddresses(configuration.ServerUri.Host).First();
 
@@ -213,19 +219,26 @@ namespace HttpStress
             endpoints.MapPost("/duplex", async context =>
             {
                 // Echos back the requested content in a full duplex manner.
-                var buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(512);
+                ArrayPool<byte> bufferPool = ArrayPool<byte>.Shared;
+
+                byte[] buffer = bufferPool.Rent(512);
                 ulong hashAcc = CRC.InitialCrc;
                 int read;
 
-                while ((read = await context.Request.Body.ReadAsync(buffer)) != 0)
+                try
                 {
-                    hashAcc = CRC.update_crc(hashAcc, buffer, read);
-                    await context.Response.Body.WriteAsync(buffer, 0, read);
+                    while ((read = await context.Request.Body.ReadAsync(buffer)) != 0)
+                    {
+                        hashAcc = CRC.update_crc(hashAcc, buffer, read);
+                        await context.Response.Body.WriteAsync(buffer, 0, read);
+                    }
+                }
+                finally
+                {
+                    bufferPool.Return(buffer);
                 }
 
                 hashAcc = CRC.InitialCrc ^ hashAcc;
-
-                System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
 
                 if (context.Response.SupportsTrailers())
                 {
