@@ -3136,6 +3136,17 @@
         "xamarinwatchos10": "Any"
       }
     },
+    "System.Numerics.Colors": {
+      "StableVersions": [],
+      "BaselineVersion": "0.0.1.0",
+      "InboxOn": {
+        "netcoreapp3.0": "0.0.1.0",
+        "uap10.0.16300": "0.0.1.0"
+      },
+      "AssemblyVersionInPackageVersion": {
+        "0.0.1.0": "0.0.1.0"
+      }
+    },
     "System.Numerics.Tensors": {
       "StableVersions": [
         "0.1.0"

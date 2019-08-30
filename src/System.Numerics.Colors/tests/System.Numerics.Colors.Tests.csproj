@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{E81F27AD-AE37-43BF-9F96-EAFE4C50D99C}</ProjectGuid>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
+    <TestRuntime>true</TestRuntime>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(CommonPath)\CoreLib\System\Numerics\ConstantHelper.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ConstantHelper.tt</DependentUpon>
+    </Compile>
+    <Compile Include="ColorTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(CommonPath)\CoreLib\System\Numerics\ConstantHelper.tt">
+      <Link>ConstantHelper.tt</Link>
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ConstantHelper.cs</LastGenOutput>
+    </None>
+    <None Include="$(CommonPath)\CoreLib\System\Numerics\GenerationConfig.ttinclude">
+      <Link>GenerationConfig.ttinclude</Link>
+    </None>
+  </ItemGroup>
+</Project>
