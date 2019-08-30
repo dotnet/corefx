@@ -198,6 +198,52 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
+        public static void TestCreatingJsonArrayFromIEnumerableOfStrings()
+        {
+            var sportsExperienceYears = new JsonObject()
+            {
+                { "skiing", 5 },
+                { "cycling", 8 },
+                { "hiking", 6 },
+                { "chess", 2 },
+                { "skating", 1 },
+            };
+
+            // choose only sports with > 2 experience years
+            IEnumerable<string> sports = sportsExperienceYears.Where(sport => ((JsonNumber)sport.Value).GetInt32() > 2).Select(sport => sport.Key);
+
+            var sportsJsonArray = new JsonArray(sports);
+            Assert.Equal(3, sportsJsonArray.Count);
+
+            for (int i = 0; i < sportsJsonArray.Count; i++)
+            {
+                Assert.Equal(sports.ElementAt(i), ((JsonString)sportsJsonArray[i]).Value);
+            }
+        }
+
+        [Fact]
+        public static void TestCreatingJsonArrayFromIEnumerableOfJsonNodes()
+        {
+            var strangeWords = new JsonArray()
+            {
+                "supercalifragilisticexpialidocious",
+                "gladiolus",
+                "albumen",
+                "smaragdine"
+            };
+
+            var strangeWordsJsonArray = new JsonArray(strangeWords.Where(word => ((JsonString)word).Value.Length < 10));
+            Assert.Equal(2, strangeWordsJsonArray.Count);
+
+            string[] expected = { "gladiolus", "albumen" };
+
+            for (int i = 0; i < strangeWordsJsonArray.Count; i++)
+            {
+                Assert.Equal(expected[i], ((JsonString)strangeWordsJsonArray[i]).Value);
+            }
+        }
+
+        [Fact]
         public static void TestCreatingNestedJsonArray()
         {
             var vertices = new JsonArray()
@@ -229,10 +275,17 @@ namespace System.Text.Json.Tests
                     }
                 },
             };
-
-            var innerJsonArray = (JsonArray)vertices[0];
-            innerJsonArray = (JsonArray)innerJsonArray[0];
-            Assert.IsType<JsonArray>(innerJsonArray[0]);
+            
+            var jsonArray = (JsonArray)vertices[0];
+            Assert.Equal(2, jsonArray.Count());
+            jsonArray = (JsonArray)jsonArray[1];
+            Assert.Equal(2, jsonArray.Count());
+            jsonArray = (JsonArray)jsonArray[0];
+            Assert.Equal(3, jsonArray.Count());
+            
+            Assert.Equal(0, jsonArray[0]);
+            Assert.Equal(1, jsonArray[1]);
+            Assert.Equal(0, jsonArray[2]);
         }
 
         [Fact]

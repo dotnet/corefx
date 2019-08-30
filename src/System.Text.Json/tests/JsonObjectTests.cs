@@ -150,12 +150,31 @@ namespace System.Text.Json.Tests
             {
                 { "name", new JsonString("Kasia") },
                 { "age", new JsonNumber(22) },
-                { "is developer", new JsonBoolean(true) }
+                { "is developer", new JsonBoolean(true) },
+                { "null property", new JsonNull() }
             };
 
             Assert.Equal("Kasia", ((JsonString)developer["name"]).Value);
             Assert.Equal(22, ((JsonNumber)developer["age"]).GetInt32());
             Assert.True(((JsonBoolean)developer["is developer"]).Value);
+            Assert.IsType<JsonNull>(developer["null property"]);
+        }
+
+        [Fact]
+        public static void TestCreatingJsonObjectDictionaryInitializerSyntax()
+        {
+            var developer = new JsonObject
+            {
+                ["name"] = "Kasia",
+                ["age"] = 22,
+                ["is developer"] = true,
+                ["null property"] = null
+            };
+
+            Assert.Equal("Kasia", ((JsonString)developer["name"]).Value);
+            Assert.Equal(22, ((JsonNumber)developer["age"]).GetInt32());
+            Assert.True(((JsonBoolean)developer["is developer"]).Value);
+            Assert.IsType<JsonNull>(developer["null property"]);
         }
 
         [Fact]
@@ -272,7 +291,7 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void TestAddingJsonArrayFromJsonNumberArray()
+        public static void TestAddingJsonArray()
         {
             var preferences = new JsonObject()
             {
@@ -287,81 +306,6 @@ namespace System.Text.Json.Tests
             for (int i = 0; i < primeNumbers.Count; i++)
             {
                 Assert.Equal(expected[i], ((JsonNumber)primeNumbers[i]).GetInt32());
-            }
-        }
-
-        [Fact]
-        public static void TestAddingJsonArray()
-        {
-            var preferences = new JsonObject()
-            {
-                { "colours", (JsonNode) new JsonArray{ "red", "green", "blue" } }
-            };
-
-            var colours = (JsonArray)preferences["colours"];
-            Assert.Equal(3, colours.Count);
-
-            string[] expected = { "red", "green", "blue" };
-
-            for (int i = 0; i < colours.Count; i++)
-            {
-                Assert.Equal(expected[i], ((JsonString)colours[i]).Value);
-            }
-        }
-
-        [Fact]
-        public static void TestAddingJsonArrayFromIEnumerableOfStrings()
-        {
-            var sportsExperienceYears = new JsonObject()
-            {
-                { "skiing", 5 },
-                { "cycling", 8 },
-                { "hiking", 6 },
-                { "chess", 2 },
-                { "skating", 1 },
-            };
-
-            // choose only sports with > 2 experience years
-            IEnumerable<string> sports = sportsExperienceYears.Where(sport => ((JsonNumber)sport.Value).GetInt32() > 2).Select(sport => sport.Key);
-
-            var preferences = new JsonObject()
-            {
-                { "sports", (JsonNode) new JsonArray(sports) }
-            };
-
-            var sportsJsonArray = (JsonArray)preferences["sports"];
-            Assert.Equal(3, sportsJsonArray.Count);
-
-            for (int i = 0; i < sportsJsonArray.Count; i++)
-            {
-                Assert.Equal(sports.ElementAt(i), ((JsonString)sportsJsonArray[i]).Value);
-            }
-        }
-
-        [Fact]
-        public static void TestAddingJsonArrayFromIEnumerableOfJsonNodes()
-        {
-            var strangeWords = new JsonArray()
-            {
-                "supercalifragilisticexpialidocious",
-                "gladiolus",
-                "albumen",
-                "smaragdine"
-            };
-
-            var preferences = new JsonObject()
-            {
-                { "strange words", new JsonArray(strangeWords.Where(word => ((JsonString)word).Value.Length < 10)) }
-            };
-
-            var strangeWordsJsonArray = (JsonArray)preferences["strange words"];
-            Assert.Equal(2, strangeWordsJsonArray.Count);
-
-            string[] expected = { "gladiolus", "albumen" };
-
-            for (int i = 0; i < strangeWordsJsonArray.Count; i++)
-            {
-                Assert.Equal(expected[i], ((JsonString)strangeWordsJsonArray[i]).Value);
             }
         }
 
