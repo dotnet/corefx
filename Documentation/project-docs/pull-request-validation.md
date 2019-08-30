@@ -8,8 +8,8 @@ These rules apply to both community and team members.
 
 ## Unrelated test failure
 In case Continuous Integration indicates test failures which are **highly unlikely** (in doubt, hit retry) to be caused by changes in the Pull Request, the following actions should be taken:
-1. Search for an existing issue in the repository. Usually the test method's name is good search parameter.
-2. If there's an existing issue, a comment should be placed that includes a) the link to the build, b) the affected configuration (ie `netcoreapp-Windows_NT-Release-x64-Windows.81.Amd64.Open`) and c) the Error message and Stack trace. This is necessary as retention policies are in place that recycle _old_ builds. 
+1. Search for an existing issue in the repository. Usually the test method's name is good parameter.
+2. If there's an existing issue, a comment should be placed that includes a) the link to the build, b) the affected configuration (ie `netcoreapp-Windows_NT-Release-x64-Windows.81.Amd64.Open`) and c) the Error message and Stack trace. This is necessary as retention policies are in place that recycle _old_ builds. In case the issue is already closed, it should be reopened and labels should be updated to reflect the current failure state. 
 3. If there's none, an issue should be created with the information mentioned above.
 4. In a follow-up Pull Request the failing test should be disabled with the corresponding issue number, i.e. `[ActiveIssue(x)]` and the tracking issue should be labedeled as `disabled-test`.
 
