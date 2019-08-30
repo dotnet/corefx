@@ -128,7 +128,7 @@ namespace System.Text.Json
         /// <param name="value">The value to convert.</param>
         public static implicit operator JsonNode(float value)
         {
-            if (float.IsSubnormal(value))
+            if (float.IsInfinity(value) || float.IsNaN(value))
             {
                 return new JsonString(value.ToString());
             }
@@ -142,7 +142,7 @@ namespace System.Text.Json
         /// <param name="value">The value to convert.</param>
         public static implicit operator JsonNode(double value)
         {
-            if (double.IsSubnormal(value))
+            if (double.IsInfinity(value) || double.IsNaN(value))
             {
                 return new JsonString(value.ToString());
             }

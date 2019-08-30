@@ -165,6 +165,7 @@ namespace System.Text.Json
                 throw new ArgumentNullException(nameof(propertyName));
             }
 
+#if BUILDING_INBOX_LIBRARY
             if (_dictionary.Remove(propertyName, out JsonObjectProperty value))
             {
                 AdjustLinkedListPointers(value);
@@ -172,6 +173,16 @@ namespace System.Text.Json
 
                 return true;
             }
+#else
+            if (_dictionary.TryGetValue(propertyName, out JsonObjectProperty value))
+            {
+                AdjustLinkedListPointers(value);
+                _dictionary.Remove(propertyName);
+                _version++;
+
+                return true;
+            }
+#endif
 
             return false;
         }
