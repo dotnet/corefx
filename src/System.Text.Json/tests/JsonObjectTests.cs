@@ -687,5 +687,11 @@ namespace System.Text.Json.Tests
             Assert.False(jsonObject.TryGetJsonObjectPropertyValue("ARRAY first", out objectProperty,
                 StringComparison.InvariantCultureIgnoreCase));
         }
+
+        [Fact]
+        public static void TestValueKind()
+        {
+            Assert.Equal(JsonValueKind.Object, new JsonObject().ValueKind);
+        }
     }
 }

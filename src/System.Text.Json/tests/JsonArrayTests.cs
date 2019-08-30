@@ -13,9 +13,6 @@ namespace System.Text.Json.Tests
 
         private static void TestArray<T>(T value1, T value2, Func<JsonArray, T> getter, Func<T, JsonNode> nodeCtor)
         {
-            var value1Casted = value1 as dynamic;
-            var value2Casted = value2 as dynamic;
-
             JsonNode value1Node = nodeCtor(value1);
             JsonNode value2Node = nodeCtor(value2);
 
@@ -42,7 +39,7 @@ namespace System.Text.Json.Tests
 
             Assert.Equal(0, jsonArray.Count);
 
-            jsonArray.Add(value2Casted);
+            jsonArray.Add(value2 as dynamic);
             Assert.Equal(1, jsonArray.Count);
             Assert.True(jsonArray.Contains(value2Node));
             Assert.Equal(value2, getter(jsonArray));
@@ -368,6 +365,53 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
+        public static void TestInsert()
+        {
+            var jsonArray = new JsonArray() { 1 };
+            Assert.Equal(1, jsonArray.Count);
+
+            jsonArray.Insert(0, 0);
+
+            Assert.Equal(2, jsonArray.Count);
+            Assert.Equal(0, jsonArray[0]);
+            Assert.Equal(1, jsonArray[1]);
+
+            jsonArray.Insert(2, 3);
+            
+            Assert.Equal(3, jsonArray.Count);
+            Assert.Equal(0, jsonArray[0]);
+            Assert.Equal(1, jsonArray[1]);
+            Assert.Equal(3, jsonArray[2]);
+        
+            jsonArray.Insert(2, 2);
+
+            Assert.Equal(4, jsonArray.Count);
+            Assert.Equal(0, jsonArray[0]);
+            Assert.Equal(1, jsonArray[1]);
+            Assert.Equal(2, jsonArray[2]);
+            Assert.Equal(3, jsonArray[3]);
+        }
+
+        [Fact]
+        public static void TestHeterogeneousArray()
+        {
+            var mixedTypesArray = new JsonArray { 1, "value", true };
+
+            Assert.Equal(1, mixedTypesArray[0]);
+            Assert.Equal("value", mixedTypesArray[1]);
+            Assert.Equal(true, mixedTypesArray[2]);
+
+            mixedTypesArray.Add(17);
+            mixedTypesArray.Insert(4, "another");
+            mixedTypesArray.Add(new JsonNull());
+
+            Assert.Equal(17, mixedTypesArray[3]);
+            Assert.Equal("another", mixedTypesArray[4]);
+            Assert.IsType<JsonNull>(mixedTypesArray[5]);
+
+        }
+
+        [Fact]
         public static void TestOutOfRangeException()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => new JsonArray()[-1]);
@@ -376,6 +420,16 @@ namespace System.Text.Json.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => new JsonArray()[0] = new JsonString());
             Assert.Throws<ArgumentOutOfRangeException>(() => new JsonArray()[1]);
             Assert.Throws<ArgumentOutOfRangeException>(() => new JsonArray()[1] = new JsonString());
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                var jsonArray = new JsonArray { 1, 2, 3 };
+                jsonArray.Insert(4, 17);
+            });
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                var jsonArray = new JsonArray { 1, 2, 3 };
+                jsonArray.Insert(-1, 17);
+            });
         }
 
         [Fact]
@@ -413,6 +467,12 @@ namespace System.Text.Json.Tests
 
             Assert.Equal(1, jsonArray.Count);
             Assert.Equal(3, ((JsonNumber)jsonArray[0]).GetInt32());
-        }       
+        }
+
+        [Fact]
+        public static void TestValueKind()
+        {
+            Assert.Equal(JsonValueKind.Array, new JsonArray().ValueKind);
+        }
     }
 }

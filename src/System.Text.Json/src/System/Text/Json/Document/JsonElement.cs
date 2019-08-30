@@ -1463,7 +1463,7 @@ namespace System.Text.Json
             }
 
             var jsonNode = (JsonNode)_parent;
-            return jsonNode.ToString();
+            return jsonNode.ToJsonString();
         }
 
         internal string GetPropertyRawText()

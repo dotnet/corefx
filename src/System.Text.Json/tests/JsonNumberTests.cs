@@ -677,5 +677,11 @@ namespace System.Text.Json.Tests
 
             Assert.Equal(new JsonNumber().GetHashCode(), new JsonNumber().GetHashCode());
         }
+
+        [Fact]
+        public static void TestValueKind()
+        {
+            Assert.Equal(JsonValueKind.Number, new JsonNumber().ValueKind);
+        }
     }
 }
