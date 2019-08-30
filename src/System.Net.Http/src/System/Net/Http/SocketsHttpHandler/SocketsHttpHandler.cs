@@ -336,17 +336,38 @@ namespace System.Net.Http
             CheckDisposed();
             HttpMessageHandler handler = _handler ?? SetupHandlerChain();
 
-            Exception error = ValidateAndNormalizeRequest(request);
+            Exception error = ValidateAndNormalizeRequest(request, out bool shouldBufferContent);
             if (error != null)
             {
                 return Task.FromException<HttpResponseMessage>(error);
             }
 
+            if (shouldBufferContent)
+            {
+                return SendWithBufferedContentAsync(handler, request, cancellationToken);
+            }
+
             return handler.SendAsync(request, cancellationToken);
         }
 
-        private Exception ValidateAndNormalizeRequest(HttpRequestMessage request)
+        private async Task<HttpResponseMessage> SendWithBufferedContentAsync(
+            HttpMessageHandler handler, HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            await request.Content.LoadIntoBufferAsync(HttpContent.MaxBufferSize, cancellationToken).ConfigureAwait(false);
+
+            // Forcibly set content length in case caller unset content length.
+            if (request.Content.Headers.ContentLength == null)
+            {
+                request.Content.Headers.ContentLength = request.Content.GetComputedOrBufferLength();
+            }
+
+            return await handler.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        }
+
+        private Exception ValidateAndNormalizeRequest(HttpRequestMessage request, out bool shouldBufferContent)
+        {
+            shouldBufferContent = false;
+
             if (request.Version.Major == 0)
             {
                 return new NotSupportedException(SR.net_http_unsupported_version);
@@ -365,9 +386,14 @@ namespace System.Net.Http
                 // the Content-Length header if present, as sending both is invalid.
                 request.Content.Headers.ContentLength = null;
             }
-            else if (request.Content != null && request.Content.Headers.ContentLength == null)
+            else if (request.Content != null && request.Content.Headers.ContentLength == null && request.Headers.TransferEncodingChunked == false)
             {
-                // We have content, but neither Transfer-Encoding nor Content-Length is set.
+                // We have content, but Content-Length is not set and Transfer-Encoding was explicitly unset.
+                shouldBufferContent = true;
+            }
+            else if (request.Content != null && request.Content.Headers.ContentLength == null && request.Headers.TransferEncodingChunked == null)
+            {
+                // We have content, but Content-Length is not set and Transfer-Encoding was not specified.
                 request.Headers.TransferEncodingChunked = true;
             }
 

@@ -958,6 +958,69 @@ namespace System.Net.Http.Functional.Tests
     {
         public SocketsHttpHandler_HttpClientHandlerTest(ITestOutputHelper output) : base(output) { }
         protected override bool UseSocketsHttpHandler => true;
+
+
+        [Fact]
+        public async Task PostAsync_TransferEncodingChunkedFalse_DoesNotSendChunked()
+        {
+            const string ExpectedContent = "Hello, expecting and continuing world.";
+            var clientCompleted = new TaskCompletionSource<bool>();
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (HttpClient client = CreateHttpClient())
+                {
+                    client.DefaultRequestHeaders.TransferEncodingChunked = false;
+
+                    var stringContent = new StringContent("test");
+                    stringContent.Headers.ContentLength = null;
+
+                    await client.PostAsync(uri, stringContent);
+                    clientCompleted.SetResult(true);
+                }
+            }, async server =>
+            {
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    List<string> headers = await connection.ReadRequestHeaderAsync();
+
+                    if (UseSocketsHttpHandler)
+                    {
+                        Assert.DoesNotContain("Transfer-Encoding: chunked", headers);
+                        Assert.Contains("Content-Length: 4", headers);
+                    }
+
+                    await connection.SendResponseAsync(content: ExpectedContent);
+                    await clientCompleted.Task; // make sure server closing the connection isn't what let the client complete
+                });
+            });
+        }
+
+        [Fact]
+        public async Task PostAsync_Http10_TransferEncodingChunked_Throws()
+        {
+            var clientCompleted = new TaskCompletionSource<bool>();
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (HttpClient client = CreateHttpClient())
+                {
+                    client.DefaultRequestVersion = new Version(1, 0);
+
+                    var stringContent = new StringContent("test");
+                    stringContent.Headers.ContentLength = null;
+
+                    var postTask = client.PostAsync(uri, stringContent);
+                    await Assert.ThrowsAsync<NotSupportedException>(() => postTask);
+
+                    clientCompleted.SetResult(true);
+                }
+            }, async server =>
+            {
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    await clientCompleted.Task; // make sure server closing the connection isn't what let the client complete
+                });
+            });
+        }
     }
 
     public sealed class SocketsHttpHandlerTest_AutoRedirect : HttpClientHandlerTest_AutoRedirect
