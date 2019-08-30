@@ -442,9 +442,21 @@ namespace System.Net.Http
             _winHttpHandler.Properties :
             _socketsHttpHandler.Properties;
 
-        protected internal override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+        protected internal override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request), SR.net_http_handler_norequest);
+            }
+
+            var error = await ValidateAndNormalizeRequestAsync(request).ConfigureAwait(false);
+
+            if (error != null)
+            {
+                throw error;
+            }
+
             if (_winHttpHandler != null)
             {
                 // Get current value of WindowsProxyUsePolicy.  Only call its WinHttpHandler
@@ -477,14 +489,14 @@ namespace System.Net.Http
                 }
 
                 return DiagnosticsHandler.IsEnabled() ?
-                    _diagnosticsHandler.SendAsync(request, cancellationToken) :
-                    _winHttpHandler.SendAsync(request, cancellationToken);
+                    await _diagnosticsHandler.SendAsync(request, cancellationToken).ConfigureAwait(false) :
+                    await _winHttpHandler.SendAsync(request, cancellationToken).ConfigureAwait(false);
             }
             else
             {
                 return DiagnosticsHandler.IsEnabled() ?
-                    _diagnosticsHandler.SendAsync(request, cancellationToken) :
-                    _socketsHttpHandler.SendAsync(request, cancellationToken);
+                    await _diagnosticsHandler.SendAsync(request, cancellationToken).ConfigureAwait(false) :
+                    await _socketsHttpHandler.SendAsync(request, cancellationToken).ConfigureAwait(false);
             }
         }
     }

@@ -1914,6 +1914,36 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [Fact]
+        public async Task PostAsync_TransferEncodingChunkedFalse_DoesNotSendChunked()
+        {
+            const string ExpectedContent = "Hello, expecting and continuing world.";
+            var clientCompleted = new TaskCompletionSource<bool>();
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (HttpClient client = CreateHttpClient())
+                {
+                    client.DefaultRequestHeaders.TransferEncodingChunked = false;
+
+                    var stringContent = new StringContent("test"); 
+                    stringContent.Headers.ContentLength = null;
+
+                    await client.PostAsync(uri, stringContent);
+                    clientCompleted.SetResult(true);
+                }
+            }, async server =>
+            {
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    List<string> headers = await connection.ReadRequestHeaderAsync();
+                    Assert.DoesNotContain("Transfer-Encoding: chunked", headers);
+
+                    await connection.SendResponseAsync(content: ExpectedContent);
+                    await clientCompleted.Task; // make sure server closing the connection isn't what let the client complete
+                });
+            });
+        }
+
         [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
         [Fact]
         public async Task GetAsync_ExpectContinueTrue_NoContent_StillSendsHeader()
