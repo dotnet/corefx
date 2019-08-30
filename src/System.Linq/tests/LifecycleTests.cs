@@ -93,9 +93,6 @@ namespace System.Linq.Tests
             foreach (int size in new[] { 0, 1, 2 })
             {
                 yield return new Source($"Enumerable{size}", NumberRangeGuaranteedNotCollectionType(0, size));
-                yield return new Source($"Collection{size}", new TestCollection<int>(new int[size]));
-                yield return new Source($"ReadOnlyCollection{size}", new TestReadOnlyCollection<int>(new int[size]));
-                yield return new Source($"NonGenericCollection{size}", new TestNonGenericCollection<int>(new int[size]));
             }
         }
 
