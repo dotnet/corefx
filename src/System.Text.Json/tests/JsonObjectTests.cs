@@ -691,49 +691,72 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void TestStringComparisonEnum()
         {
-            JsonObject jsonObjectEncyclopaedia = new JsonObject()
+            var jsonObject = new JsonObject()
             {
                 { "not encyclopaedia", "value1" },
                 { "Encyclopaedia", "value2" },
                 { "NOT encyclopaedia", "value3" },
-                { "encyclopædia", "value4" }
+                { "encyclopaedia", "value4" }
             };
 
-            Assert.Equal(4, jsonObjectEncyclopaedia.Count());
+            Assert.Equal(4, jsonObject.Count());
 
-            Assert.False(jsonObjectEncyclopaedia.ContainsProperty("ENCYCLOPÆDIA"));
-            Assert.False(jsonObjectEncyclopaedia.TryGetPropertyValue("ENCYCLOPÆDIA", out JsonNode jsonNode));
+            Assert.False(jsonObject.ContainsProperty("ENCYCLOPAEDIA"));
+            Assert.False(jsonObject.TryGetPropertyValue("ENCYCLOPAEDIA", out JsonNode jsonNode));
             Assert.Null(jsonNode);
-            Assert.Throws<KeyNotFoundException>(() => jsonObjectEncyclopaedia.GetPropertyValue("ENCYCLOPÆDIA"));
-            jsonObjectEncyclopaedia.Remove("ENCYCLOPÆDIA");
-            Assert.Equal(4, jsonObjectEncyclopaedia.Count());
+            Assert.Throws<KeyNotFoundException>(() => jsonObject.GetPropertyValue("ENCYCLOPAEDIA"));
+            jsonObject.Remove("ENCYCLOPAEDIA");
+            Assert.Equal(4, jsonObject.Count());
 
-            Assert.False(jsonObjectEncyclopaedia.ContainsProperty("ENCYCLOPÆDIA", StringComparison.CurrentCulture));
-            Assert.False(jsonObjectEncyclopaedia.TryGetPropertyValue("ENCYCLOPÆDIA", out jsonNode, StringComparison.CurrentCulture));
+            Assert.False(jsonObject.ContainsProperty("ENCYCLOPAEDIA", StringComparison.CurrentCulture));
+            Assert.False(jsonObject.TryGetPropertyValue("ENCYCLOPAEDIA", out jsonNode, StringComparison.CurrentCulture));
             Assert.Null(jsonNode);
-            Assert.Throws<KeyNotFoundException>(() => jsonObjectEncyclopaedia.GetPropertyValue("ENCYCLOPÆDIA", StringComparison.CurrentCulture));
-            jsonObjectEncyclopaedia.Remove("ENCYCLOPÆDIA", StringComparison.CurrentCulture);
-            Assert.Equal(4, jsonObjectEncyclopaedia.Count());
+            Assert.Throws<KeyNotFoundException>(() => jsonObject.GetPropertyValue("ENCYCLOPAEDIA", StringComparison.CurrentCulture));
+            jsonObject.Remove("ENCYCLOPAEDIA", StringComparison.CurrentCulture);
+            Assert.Equal(4, jsonObject.Count());
 
-            Assert.True(jsonObjectEncyclopaedia.ContainsProperty("ENCYCLOPÆDIA", StringComparison.InvariantCultureIgnoreCase));
-            Assert.True(jsonObjectEncyclopaedia.TryGetPropertyValue("ENCYCLOPÆDIA", out jsonNode, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(jsonObject.ContainsProperty("ENCYCLOPAEDIA", StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(jsonObject.TryGetPropertyValue("ENCYCLOPAEDIA", out jsonNode, StringComparison.InvariantCultureIgnoreCase));
             Assert.Equal("value2", jsonNode);
-            Assert.Equal("value2", jsonObjectEncyclopaedia.GetPropertyValue("ENCYCLOPÆDIA", StringComparison.InvariantCultureIgnoreCase));
-            jsonObjectEncyclopaedia.Remove("ENCYCLOPÆDIA", StringComparison.InvariantCultureIgnoreCase);
-            Assert.Equal(3, jsonObjectEncyclopaedia.Count());
+            Assert.Equal("value2", jsonObject.GetPropertyValue("ENCYCLOPAEDIA", StringComparison.InvariantCultureIgnoreCase));
+            jsonObject.Remove("ENCYCLOPAEDIA", StringComparison.InvariantCultureIgnoreCase);
+            Assert.Equal(3, jsonObject.Count());
 
-            ICollection<JsonNode> values = jsonObjectEncyclopaedia.PropertyValues;
+            ICollection<JsonNode> values = jsonObject.PropertyValues;
             Assert.False(values.Contains("value2"));
             Assert.True(values.Contains("value1"));
             Assert.True(values.Contains("value3"));
             Assert.True(values.Contains("value4"));
 
-            JsonObject jsonObjectArchaeology = new JsonObject()
+            jsonObject = new JsonObject()
             {
-                { "Archæology", new JsonObject() },
-                { "ARCHÆOLOGY ", new JsonArray() }
+                { "object first", new JsonObject() },
+                { "object FIRST", new JsonArray() },
+                { "array first", new JsonArray() },
+                { "array FIRST", new JsonObject() }
             };
 
+            Assert.Equal(0, jsonObject.GetJsonObjectPropertyValue("OBJECT first",
+                StringComparison.InvariantCultureIgnoreCase).PropertyNames.Count);
+            Assert.True(jsonObject.TryGetJsonObjectPropertyValue("OBJECT first", out JsonObject objectProperty,
+                StringComparison.InvariantCultureIgnoreCase));
+            Assert.Equal(0, objectProperty.PropertyNames.Count);
+
+            Assert.Throws<ArgumentException>(() => 
+                jsonObject.GetJsonArrayPropertyValue("OBJECT first", StringComparison.InvariantCultureIgnoreCase));
+            Assert.False(jsonObject.TryGetJsonArrayPropertyValue("OBJECT first", out JsonArray arrayProperty,
+                StringComparison.InvariantCultureIgnoreCase));
+
+            Assert.Equal(0, jsonObject.GetJsonArrayPropertyValue("ARRAY first",
+                StringComparison.InvariantCultureIgnoreCase).Count);
+            Assert.True(jsonObject.TryGetJsonArrayPropertyValue("ARRAY first", out arrayProperty,
+                StringComparison.InvariantCultureIgnoreCase));
+            Assert.Equal(0, arrayProperty.Count);
+
+            Assert.Throws<ArgumentException>(() => 
+                jsonObject.GetJsonObjectPropertyValue("ARRAY first", StringComparison.InvariantCultureIgnoreCase));
+            Assert.False(jsonObject.TryGetJsonObjectPropertyValue("ARRAY first", out objectProperty,
+                StringComparison.InvariantCultureIgnoreCase));
 
         }
     }
