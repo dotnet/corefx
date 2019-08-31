@@ -280,7 +280,7 @@ namespace System.IO
 
             string sourceRoot = Path.GetPathRoot(sourcePath);
             string destinationRoot = Path.GetPathRoot(destPath);
-            if (!string.Equals(sourceRoot, destinationRoot, PathInternal.StringComparison))
+            if (!string.Equals(sourceRoot, destinationRoot, StringComparison.OrdinalIgnoreCase))
                 throw new IOException(SR.IO_SourceDestMustHaveSameRoot);
 
             // Windows will throw if the source file/directory doesn't exist, we preemptively check

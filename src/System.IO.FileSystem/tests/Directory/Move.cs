@@ -262,7 +262,8 @@ namespace System.IO.Tests
         public void MoveDirectory_WithDifferentRootCase()
         {
             Directory.CreateDirectory($"{TestDirectory}/bar");
-            Directory.Move($"{TestDirectory}/bar".ToLower(), $"{TestDirectory}/foo");
+            var root = Path.GetPathRoot(TestDirectory);
+            Directory.Move($"{TestDirectory}/bar".Replace(root, root.ToLower()), $"{TestDirectory}/foo");
             Assert.True(Directory.Exists($"{TestDirectory}/foo"));
             Assert.False(Directory.Exists($"{TestDirectory}/bar"));
         }
