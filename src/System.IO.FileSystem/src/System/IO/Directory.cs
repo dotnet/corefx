@@ -268,38 +268,29 @@ namespace System.IO
             string fulldestDirName = Path.GetFullPath(destDirName);
             string destPath = PathInternal.EnsureTrailingSeparator(fulldestDirName);
 
-            // Here we have a bool to check if they're equal, but with different casing
-            // We allowing moving foo to the same directory, but renaming with a different case.
             bool sameDirectoryIgnoreCase =
                 string.Equals(sourcePath, destPath, StringComparison.OrdinalIgnoreCase);
 
-            StringComparison pathComparison = StringComparison.Ordinal;
 
             // If the paths are the exact same, fail.
             if (sameDirectoryIgnoreCase
-                && string.Equals(sourcePath, destPath, pathComparison))
-            {
+                && string.Equals(sourcePath, destPath, StringComparison.Ordinal))
                 throw new IOException(SR.IO_SourceDestMustBeDifferent);
-            }
 
 
             string sourceRoot = Path.GetPathRoot(sourcePath);
             string destinationRoot = Path.GetPathRoot(destPath);
-            if (!string.Equals(sourceRoot, destinationRoot, pathComparison))
-            {
+            if (!string.Equals(sourceRoot, destinationRoot, PathInternal.StringComparison))
                 throw new IOException(SR.IO_SourceDestMustHaveSameRoot);
-            }
 
             // Windows will throw if the source file/directory doesn't exist, we preemptively check
             // to make sure our cross platform behavior matches NetFX behavior.
             if (!FileSystem.DirectoryExists(fullsourceDirName) && !FileSystem.FileExists(fullsourceDirName))
                 throw new DirectoryNotFoundException(SR.Format(SR.IO_PathNotFound_Path, fullsourceDirName));
 
-            if (!sameDirectoryIgnoreCase
+            if (!sameDirectoryIgnoreCase // This check is to allowing renaming of directories
                 && FileSystem.DirectoryExists(fulldestDirName))
-            {
                 throw new IOException(SR.Format(SR.IO_AlreadyExists_Name, fulldestDirName));
-            }
 
             FileSystem.MoveDirectory(fullsourceDirName, fulldestDirName);
         }

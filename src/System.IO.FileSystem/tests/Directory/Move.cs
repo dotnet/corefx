@@ -213,14 +213,14 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public void ThrowIOExceptionWhenDirectoryExists()
+        public void MoveDirectory_ThrowIOExceptionWhenDirectoryExists()
         {
             Directory.CreateDirectory($"{TestDirectory}/foo");
             Assert.Throws<IOException>(() => Directory.Move($"{TestDirectory}/foo", $"{TestDirectory}/foo"));
         }
 
         [Fact]
-        public void MoveDirectoryToNewDirectoryButWithDifferentCasing()
+        public void MoveDirectory_ToNewDirectoryButWithDifferentCasing()
         {
             Directory.CreateDirectory(Path.Combine(TestDirectory, "foo"));
             var otherDirectory = Path.Combine(TestDirectory, "bar");
@@ -248,6 +248,23 @@ namespace System.IO.Tests
             Directory.CreateDirectory($"{TestDirectory}/FOO");
             Directory.CreateDirectory($"{TestDirectory}/bar/foo");
             Assert.Throws<IOException>(() => Directory.Move($"{TestDirectory}/FOO", $"{TestDirectory}/bar/foo"));
+        }
+
+        [Fact]
+        public void MoveDirectory_FailToMoveLowerCaseDirectoryWhenUpperCaseDirectoryExists()
+        {
+            Directory.CreateDirectory($"{TestDirectory}/bar/FOO");
+            Directory.CreateDirectory($"{TestDirectory}/foo");
+            Assert.Throws<IOException>(() => Directory.Move($"{TestDirectory}/foo", $"{TestDirectory}/bar/foo"));
+        }
+
+        [Fact]
+        public void MoveDirectory_WithDifferentRootCase()
+        {
+            Directory.CreateDirectory($"{TestDirectory}/bar");
+            Directory.Move($"{TestDirectory}/bar".ToLower(), $"{TestDirectory}/foo");
+            Assert.True(Directory.Exists($"{TestDirectory}/foo"));
+            Assert.False(Directory.Exists($"{TestDirectory}/bar"));
         }
 
         [Fact]
