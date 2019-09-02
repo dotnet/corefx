@@ -22,6 +22,7 @@ namespace System.Text.Json
         public JsonConverter<TConverter> Converter { get; internal set; }
 
         public override void Initialize(
+            ClassType propertyClassType,
             Type parentClassType,
             Type declaredPropertyType,
             Type runtimePropertyType,
@@ -31,7 +32,7 @@ namespace System.Text.Json
             JsonConverter converter,
             JsonSerializerOptions options)
         {
-            base.Initialize(parentClassType, declaredPropertyType, runtimePropertyType, implementedPropertyType, propertyInfo, elementType, converter, options);
+            base.Initialize(propertyClassType, parentClassType, declaredPropertyType, runtimePropertyType, implementedPropertyType, propertyInfo, elementType, converter, options);
 
             if (propertyInfo != null &&
                 // We only want to get the getter and setter if we are going to use them.
@@ -300,38 +301,6 @@ namespace System.Text.Json
             {
                 throw ThrowHelper.ThrowNotSupportedException_DeserializeInstanceConstructorNotFound(parentType, sourceDictionary.GetType());
             }
-        }
-
-        // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
-        // sourceList argument then uses the delegateKey argument to identify the appropriate cached
-        // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
-        public override IEnumerable CreateImmutableCollectionInstance(Type collectionType, string delegateKey, IList sourceList, string jsonPath, JsonSerializerOptions options)
-        {
-            IEnumerable collection = null;
-
-            if (!options.TryGetCreateRangeDelegate(delegateKey, out ImmutableCollectionCreator creator) ||
-                !creator.CreateImmutableEnumerable(sourceList, out collection))
-            {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, jsonPath);
-            }
-
-            return collection;
-        }
-
-        // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
-        // sourceList argument then uses the delegateKey argument to identify the appropriate cached
-        // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
-        public override IDictionary CreateImmutableDictionaryInstance(Type collectionType, string delegateKey, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options)
-        {
-            IDictionary collection = null;
-
-            if (!options.TryGetCreateRangeDelegate(delegateKey, out ImmutableCollectionCreator creator) ||
-                !creator.CreateImmutableDictionary(sourceDictionary, out collection))
-            {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, jsonPath);
-            }
-
-            return collection;
         }
     }
 }

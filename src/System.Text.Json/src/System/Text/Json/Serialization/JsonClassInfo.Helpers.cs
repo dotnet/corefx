@@ -144,7 +144,7 @@ namespace System.Text.Json
         {
             Debug.Assert(queryType != null);
 
-            if (!(typeof(IEnumerable).IsAssignableFrom(queryType)) ||
+            if (!typeof(IEnumerable).IsAssignableFrom(queryType) ||
                 queryType == typeof(string) ||
                 queryType.IsInterface ||
                 queryType.IsArray ||
@@ -237,12 +237,6 @@ namespace System.Text.Json
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ISet<>);
         }
 
-        public static bool HasConstructorThatTakesGenericIEnumerable(Type type, JsonSerializerOptions options)
-        {
-            Type elementType = GetElementType(type, parentType: null, memberInfo: null, options);
-            return type.GetConstructor(new Type[] { typeof(List<>).MakeGenericType(elementType) }) != null;
-        }
-
         public static bool IsDeserializedByConstructingWithIList(Type type)
         {
             if (type.IsGenericType)
@@ -292,6 +286,12 @@ namespace System.Text.Json
             }
 
             return s_nativelySupportedNonGenericCollections.Contains(queryType.FullName);
+        }
+
+        public static bool IsGenericDictionary(Type type)
+        {
+            return type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(IDictionary<,>) ||
+                type.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>));
         }
 
         // The following methods were copied verbatim from AspNetCore:

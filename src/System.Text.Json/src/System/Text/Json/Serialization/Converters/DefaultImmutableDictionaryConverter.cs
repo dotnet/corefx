@@ -63,8 +63,23 @@ namespace System.Text.Json.Serialization.Converters
 
             string delegateKey = DefaultImmutableEnumerableConverter.GetDelegateKey(immutableCollectionType, elementType, out _, out _);
 
-            JsonPropertyInfo propertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementType, options);
-            return propertyInfo.CreateImmutableDictionaryInstance(immutableCollectionType, delegateKey, sourceDictionary, state.JsonPath, options);
+            return CreateImmutableDictionaryInstance(immutableCollectionType, delegateKey, sourceDictionary, state.JsonPath, options);
+        }
+
+        // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
+        // sourceList argument then uses the delegateKey argument to identify the appropriate cached
+        // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
+        public static IDictionary CreateImmutableDictionaryInstance(Type collectionType, string delegateKey, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options)
+        {
+            IDictionary collection = null;
+
+            if (!options.TryGetCreateRangeDelegate(delegateKey, out ImmutableCollectionCreator creator) ||
+                !creator.CreateImmutableDictionary(sourceDictionary, out collection))
+            {
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, jsonPath);
+            }
+
+            return collection;
         }
     }
 }

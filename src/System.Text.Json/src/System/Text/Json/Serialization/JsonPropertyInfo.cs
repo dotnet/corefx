@@ -53,10 +53,6 @@ namespace System.Text.Json
 
         public abstract IDictionary CreateIDictionaryInstance(Type parentType, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options);
 
-        public abstract IEnumerable CreateImmutableCollectionInstance(Type collectionType, string delegateKey, IList sourceList, string propertyPath, JsonSerializerOptions options);
-
-        public abstract IDictionary CreateImmutableDictionaryInstance(Type collectionType, string delegateKey, IDictionary sourceDictionary, string propertyPath, JsonSerializerOptions options);
-
         // Create a property that is ignored at run-time. It uses the same type (typeof(sbyte)) to help
         // prevent issues with unsupported types and helps ensure we don't accidently (de)serialize it.
         public static JsonPropertyInfo CreateIgnoredPropertyPlaceholder(PropertyInfo propertyInfo, JsonSerializerOptions options)
@@ -158,8 +154,7 @@ namespace System.Text.Json
                         {
                             if (RuntimePropertyType.FullName.StartsWith(JsonClassInfo.ImmutableNamespaceName))
                             {
-                                DefaultImmutableDictionaryConverter.RegisterImmutableDictionary(
-                                    RuntimePropertyType, JsonClassInfo.GetElementType(RuntimePropertyType, ParentClassType, PropertyInfo, Options), Options);
+                                DefaultImmutableDictionaryConverter.RegisterImmutableDictionary(RuntimePropertyType, ElementType, Options);
 
                                 DictionaryConverter = s_jsonImmutableDictionaryConverter;
                             }
@@ -176,8 +171,7 @@ namespace System.Text.Json
                         {
                             if (RuntimePropertyType.FullName.StartsWith(JsonClassInfo.ImmutableNamespaceName))
                             {
-                                DefaultImmutableEnumerableConverter.RegisterImmutableCollection(RuntimePropertyType,
-                                    JsonClassInfo.GetElementType(RuntimePropertyType, ParentClassType, PropertyInfo, Options), Options);
+                                DefaultImmutableEnumerableConverter.RegisterImmutableCollection(RuntimePropertyType, ElementType, Options);
 
                                 EnumerableConverter = s_jsonImmutableEnumerableConverter;
                             }
@@ -250,6 +244,7 @@ namespace System.Text.Json
         public bool HasSetter { get; set; }
 
         public virtual void Initialize(
+            ClassType propertyClassType,
             Type parentClassType,
             Type declaredPropertyType,
             Type runtimePropertyType,
@@ -259,6 +254,7 @@ namespace System.Text.Json
             JsonConverter converter,
             JsonSerializerOptions options)
         {
+            ClassType = propertyClassType;
             ParentClassType = parentClassType;
             DeclaredPropertyType = declaredPropertyType;
             RuntimePropertyType = runtimePropertyType;
@@ -272,25 +268,6 @@ namespace System.Text.Json
             if (converter != null)
             {
                 ConverterBase = converter;
-
-                // Avoid calling GetClassType since it will re-ask if there is a converter which is slow.
-                if (runtimePropertyType == typeof(object))
-                {
-                    ClassType = ClassType.Unknown;
-                }
-                else
-                {
-                    ClassType = ClassType.Value;
-                }
-            }
-            // Special case for immutable collections.
-            else if (declaredPropertyType != implementedPropertyType && !JsonClassInfo.IsNativelySupportedCollection(declaredPropertyType))
-            {
-                ClassType = JsonClassInfo.GetClassType(declaredPropertyType, options);
-            }
-            else
-            {
-                ClassType = JsonClassInfo.GetClassType(runtimePropertyType, options);
             }
         }
 
