@@ -300,7 +300,7 @@ namespace System.IO
             // If the directory names are the same ignoring case
             // See if the source dest folder contains any directory with that name.
             if (sameDirectoryNameIgnoreCase
-                && GetDirectories(Path.GetDirectoryName(destPath)).Any(dir => dir.Equals(destDirectoryName, StringComparison.OrdinalIgnoreCase)))
+                && GetDirectories(destPath).Any(dir => Path.GetFileName(dir).Equals(destDirectoryName, StringComparison.OrdinalIgnoreCase)))
                 throw new IOException(SR.Format(SR.IO_AlreadyExists_Name, fulldestDirName));
 
             FileSystem.MoveDirectory(fullsourceDirName, fulldestDirName);
