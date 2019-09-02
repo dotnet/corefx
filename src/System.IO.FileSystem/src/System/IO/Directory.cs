@@ -297,13 +297,33 @@ namespace System.IO
                 && FileSystem.DirectoryExists(fulldestDirName))
                 throw new IOException(SR.Format(SR.IO_AlreadyExists_Name, fulldestDirName));
 
-            // If the directory names are the same ignoring case
-            // See if the source dest folder contains any directory with that name.
-            if (sameDirectoryNameIgnoreCase
-                && GetDirectories(destPath).Any(dir => Path.GetFileName(dir).Equals(destDirectoryName, StringComparison.OrdinalIgnoreCase)))
+            if (!sameDirectoryIgnoreCase
+                && sameDirectoryNameIgnoreCase
+                && ContainsDirectory(Path.GetDirectoryName(fulldestDirName), destDirectoryName))
                 throw new IOException(SR.Format(SR.IO_AlreadyExists_Name, fulldestDirName));
 
             FileSystem.MoveDirectory(fullsourceDirName, fulldestDirName);
+        }
+
+        private static bool ContainsDirectory(string fullPath, string directoryName) => ContainsDirectory(fullPath, directoryName, StringComparison.OrdinalIgnoreCase);
+
+        private static bool ContainsDirectory(string fullPath, string directoryName, StringComparison stringComparison)
+        {
+            string[] directories = GetDirectories(fullPath);
+            if (directories.Length == 0)
+            {
+                return false;
+            }
+
+            foreach (string directory in directories)
+            {
+                if (Path.GetFileName(directory).Equals(directoryName, stringComparison))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public static void Delete(string path)
