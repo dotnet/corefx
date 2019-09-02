@@ -264,7 +264,7 @@ namespace System.IO
 
             string fullsourceDirName = Path.GetFullPath(sourceDirName);
             string sourcePath = PathInternal.EnsureTrailingSeparator(fullsourceDirName);
-            string sourceDirectoryName = Path.GetFileName(sourcePath);
+            string sourceDirectoryName = Path.GetFileName(fullsourceDirName);
 
             string fulldestDirName = Path.GetFullPath(destDirName);
             string destPath = PathInternal.EnsureTrailingSeparator(fulldestDirName);
