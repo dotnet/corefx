@@ -317,7 +317,7 @@ namespace System.IO
 
             foreach (string directory in directories)
             {
-                if (Path.GetFileName(directory).Equals(directoryName, stringComparison))
+                if (Path.GetFileName(Path.GetFullPath(directory)).Equals(directoryName, stringComparison))
                 {
                     return true;
                 }
