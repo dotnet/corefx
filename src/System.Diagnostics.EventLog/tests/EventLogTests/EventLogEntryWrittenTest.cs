@@ -48,7 +48,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                Helpers.RetryOnWin7(() => EventLog.Delete(log));
+                Helpers.RetryOnAllPlatforms(() => EventLog.Delete(log));
             }
         }
 
