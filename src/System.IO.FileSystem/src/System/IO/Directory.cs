@@ -273,7 +273,7 @@ namespace System.IO
             bool sameDirectoryIgnoreCase =
                 string.Equals(sourcePath, destPath, StringComparison.OrdinalIgnoreCase);
             bool sameDirectoryNameIgnoreCase
-                = string.Equals(sourceDirectoryName, destDirectoryName, StringComparison.OrdinalIgnoreCase);
+                = !string.IsNullOrEmpty(sourceDirectoryName) && string.Equals(sourceDirectoryName, destDirectoryName, StringComparison.OrdinalIgnoreCase);
 
             // If the paths are the exact same, fail.
             if (sameDirectoryIgnoreCase

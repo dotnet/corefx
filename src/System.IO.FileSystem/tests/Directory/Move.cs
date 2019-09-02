@@ -180,7 +180,7 @@ namespace System.IO.Tests
             string testDirDest = Path.Combine(TestDirectory, GetTestFileName());
 
             Directory.CreateDirectory(testDirSource);
-            Move(testDirSource + Path.DirectorySeparatorChar, testDirDest + Path.DirectorySeparatorChar);
+            Directory.Move(testDirSource + Path.DirectorySeparatorChar, testDirDest + Path.DirectorySeparatorChar);
             Assert.True(Directory.Exists(testDirDest));
         }
 
