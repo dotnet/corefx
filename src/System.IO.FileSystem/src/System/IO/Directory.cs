@@ -264,13 +264,16 @@ namespace System.IO
 
             string fullsourceDirName = Path.GetFullPath(sourceDirName);
             string sourcePath = PathInternal.EnsureTrailingSeparator(fullsourceDirName);
+            string sourceDirectoryName = Path.GetFileName(sourcePath);
 
             string fulldestDirName = Path.GetFullPath(destDirName);
             string destPath = PathInternal.EnsureTrailingSeparator(fulldestDirName);
+            string destDirectoryName = Path.GetFileName(fulldestDirName);
 
             bool sameDirectoryIgnoreCase =
                 string.Equals(sourcePath, destPath, StringComparison.OrdinalIgnoreCase);
-
+            bool sameDirectoryNameIgnoreCase
+                = string.Equals(sourceDirectoryName, destDirectoryName, StringComparison.OrdinalIgnoreCase);
 
             // If the paths are the exact same, fail.
             if (sameDirectoryIgnoreCase
@@ -280,7 +283,9 @@ namespace System.IO
 
             string sourceRoot = Path.GetPathRoot(sourcePath);
             string destinationRoot = Path.GetPathRoot(destPath);
-            if (!string.Equals(sourceRoot, destinationRoot, StringComparison.OrdinalIgnoreCase))
+            // Don't check the paths if we already determined the paths are identical.
+            if (!sameDirectoryIgnoreCase &&
+                !string.Equals(sourceRoot, destinationRoot, StringComparison.OrdinalIgnoreCase))
                 throw new IOException(SR.IO_SourceDestMustHaveSameRoot);
 
             // Windows will throw if the source file/directory doesn't exist, we preemptively check
@@ -290,6 +295,12 @@ namespace System.IO
 
             if (!sameDirectoryIgnoreCase // This check is to allowing renaming of directories
                 && FileSystem.DirectoryExists(fulldestDirName))
+                throw new IOException(SR.Format(SR.IO_AlreadyExists_Name, fulldestDirName));
+
+            // If the directory names are the same ignoring case
+            // See if the source dest folder contains any directory with that name.
+            if (sameDirectoryNameIgnoreCase
+                && GetDirectories(Path.GetDirectoryName(fulldestDirName)).Any(dir => dir.Equals(destDirectoryName, StringComparison.OrdinalIgnoreCase)))
                 throw new IOException(SR.Format(SR.IO_AlreadyExists_Name, fulldestDirName));
 
             FileSystem.MoveDirectory(fullsourceDirName, fulldestDirName);
