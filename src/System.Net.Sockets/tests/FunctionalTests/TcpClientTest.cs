@@ -172,6 +172,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [ActiveIssue(40765)]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(0)]
@@ -233,6 +234,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [ActiveIssue(40765)]
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void ConnectedAvailable_NullClient()
@@ -246,6 +248,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [ActiveIssue(40765)]
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void ExclusiveAddressUse_NullClient()
@@ -404,6 +407,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [ActiveIssue(40765)]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(false)]
