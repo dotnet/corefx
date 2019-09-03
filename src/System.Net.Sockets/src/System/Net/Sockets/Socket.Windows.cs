@@ -109,6 +109,8 @@ namespace System.Net.Sockets
                     return;
             }
 
+            if (NetEventSource.IsEnabled) NetEventSource.Info(this, address);
+
             var endPoint = new IPEndPoint(address, 0);
             DoBind(endPoint, IPEndPointExtensions.Serialize(endPoint));
         }
