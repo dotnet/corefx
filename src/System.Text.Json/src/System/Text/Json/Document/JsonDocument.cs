@@ -856,6 +856,23 @@ namespace System.Text.Json
                         continue;
                     case JsonTokenType.PropertyName:
                         {
+                            // This string requires unescaping
+                            if (row.HasComplexChildren)
+                            {
+                                ArraySegment<byte> rented = default;
+
+                                try
+                                {
+                                    writer.WritePropertyName(UnescapeString(row, out rented));
+                                }
+                                finally
+                                {
+                                    ClearAndReturn(rented);
+                                }
+
+                                continue;
+                            }
+
                             DbRow propertyValue = _parsedData.Get(i + DbRow.Size);
 
                             ReadOnlySpan<byte> propertyName =
@@ -902,7 +919,7 @@ namespace System.Text.Json
 
         private ReadOnlySpan<byte> UnescapeString(in DbRow row, out ArraySegment<byte> rented)
         {
-            Debug.Assert(row.TokenType == JsonTokenType.String);
+            Debug.Assert(row.TokenType == JsonTokenType.String || row.TokenType == JsonTokenType.PropertyName);
             int loc = row.Location;
             int length = row.SizeOrLength;
             ReadOnlySpan<byte> text = _utf8Json.Slice(loc, length).Span;
