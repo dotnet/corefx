@@ -11,6 +11,8 @@ namespace System.IO.Ports
 {
     public partial class SerialPort : Component
     {
+        const string GUID_DEVINTERFACE_COMPORT = "86e0d1e0-8089-11d0-9ce4-08003e301f73"; // SerialPort GUID Class ID
+
         public static string[] GetPortNames()
         {
             // Hitting the registry for this isn't the only way to get the ports.
@@ -33,18 +35,18 @@ namespace System.IO.Ports
             // If running on Windows IoT, search and add the Serial Devices from QueryDosDevice
             // If this is allowed to happen on Windows devices where port detection happens normally, duplicate Serial Port names are added.
             // This causes issues with System.IO.Ports.Tests
-            // Port detection broken on Windows IoT (Does not initialise regitry with COM port names), so use QueryDosDevice
-            //
-            // ToDO: Be good to Limit this to Win10IoT only, not just check for ARM arch!!
-            if (RuntimeInformation.OSArchitecture == Architecture.Arm || RuntimeInformation.OSArchitecture == Architecture.Arm64) 
+            // Port detection broken on Windows IoT (Does not initialise registry with COM port names), so use QueryDosDevice            
+            if (RuntimeInformation.OSArchitecture == Architecture.Arm || RuntimeInformation.OSArchitecture == Architecture.Arm64)
             {
                 // Query Interop QueryDosDevice()
                 //            
                 // Is GUID class ID for COM ports https://docs.microsoft.com/en-us/windows-hardware/drivers/install/guid-devinterface-comport
                 // Typical DosDevice serial port name 'USB#VID_1B4F&PID_214F&MI_00#6&381731fd&0&0000#{86e0d1e0-8089-11d0-9ce4-08003e301f73}'
                 //
-                foreach (string dosName in QueryDosDeviceComPorts("86e0d1e0-8089-11d0-9ce4-08003e301f73"))
+                foreach (string dosName in QueryDosDeviceComPorts(GUID_DEVINTERFACE_COMPORT))
+                {
                     resultPortNames.Add(dosName.ToLower());
+                }
             }
             else
             {
@@ -70,7 +72,7 @@ namespace System.IO.Ports
             return result;
         }
 
-        private static string[] QueryDosDeviceComPorts(string guid)
+        private static string[] QueryDosDeviceComPorts(string filterGuid)
         {
             // Build a list of all system Com Port device names.
             // memBuff starts with a small arbitary size and dynamically expands until there is enough room for data returned from Kernal32.QueryDosDevice().
@@ -115,7 +117,7 @@ namespace System.IO.Ports
             // Build devices matching guid for serial ports
             foreach (string name in allDevicesArray)
             {
-                if (name.ToLower().Contains(guid))
+                if (name.ToLower().Contains(filterGuid))
                     returnList.Add(name);
             }
 

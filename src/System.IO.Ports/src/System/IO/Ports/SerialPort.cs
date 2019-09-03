@@ -649,13 +649,17 @@ namespace System.IO.Ports
                 if (bytesReadToBuffer == count)
                 {
                     if (_readPos == _readLen)
+                    {
                         _readPos = _readLen = 0;  // just a check to see if we can reset buffer
+                    }
                     return count;
                 }
 
                 // if we have read some bytes but there's none immediately available, return.
                 if (BytesToRead == 0)
+                {
                     return bytesReadToBuffer;
+                }
             }
 
             Debug.Assert(CachedBytesToRead == 0, "there should be nothing left in our internal buffer");

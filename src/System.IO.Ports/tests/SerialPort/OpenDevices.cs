@@ -18,27 +18,28 @@ namespace System.IO.Ports.Tests
         {
             DosDevices dosDevices = new DosDevices();
             Regex comPortNameRegex = new Regex(@"com\d{1,3}", RegexOptions.IgnoreCase);
+            const string GUID_DEVINTERFACE_COMPORT = "86e0d1e0-8089-11d0-9ce4-08003e301f73"; // SerialPort GUID Class ID
 
             // This test enumerates all DosDevices and attempts to open them, expecting an exception.
             // However, some non true Serial devices can successfully open!
             // Added check in SerialPort.Open() to throw exception if not a valid PortName & Also added condition check for valid ports below
             foreach (KeyValuePair<string, string> keyValuePair in dosDevices)
             {
-                if (!string.IsNullOrEmpty(keyValuePair.Key) && !comPortNameRegex.IsMatch(keyValuePair.Key) && !keyValuePair.Key.Contains("86e0d1e0-8089-11d0-9ce4-08003e301f73"))
+                if (!string.IsNullOrEmpty(keyValuePair.Key) && !comPortNameRegex.IsMatch(keyValuePair.Key) && !keyValuePair.Key.Contains(GUID_DEVINTERFACE_COMPORT))
                 {
-                    using (SerialPort com1 = new SerialPort(keyValuePair.Key))
+                    using (SerialPort testPort = new SerialPort(keyValuePair.Key))
                     {
                         Debug.WriteLine($"Checking exception thrown with Key {keyValuePair.Key}");
-                        Assert.ThrowsAny<Exception>(() => com1.Open());
+                        Assert.ThrowsAny<Exception>(() => testPort.Open());
                     }
                 }
 
-                if (!string.IsNullOrEmpty(keyValuePair.Value) && !comPortNameRegex.IsMatch(keyValuePair.Key) && !keyValuePair.Key.Contains("86e0d1e0-8089-11d0-9ce4-08003e301f73"))
+                if (!string.IsNullOrEmpty(keyValuePair.Value) && !comPortNameRegex.IsMatch(keyValuePair.Key) && !keyValuePair.Key.Contains(GUID_DEVINTERFACE_COMPORT))
                 {
-                    using (SerialPort com1 = new SerialPort(keyValuePair.Value))
+                    using (SerialPort testPort = new SerialPort(keyValuePair.Value))
                     {
                         Debug.WriteLine($"Checking exception thrown with Value {keyValuePair.Value}");
-                        Assert.ThrowsAny<Exception>(() => com1.Open());
+                        Assert.ThrowsAny<Exception>(() => testPort.Open());
                     }
                 }
             }
